@@ -1,0 +1,6 @@
+Run the following test in this directory whenever a change is made to
+check_obsysrc.py in the parent directory:
+
+> test.csh
+
+All errors or failures should be investigated.

@@ -1,0 +1,55 @@
+#!/bin/csh -f
+
+set STATSDIR = corcmp
+cd $STATSDIR
+
+set fields  = `echo slp uwnd vwnd tmpu hght sphu chi psi`
+set regions = `echo GLO NHE TRO SHE NWQ NEQ SWQ SEQ NAM EUR`
+
+foreach field  ($fields)
+foreach region ($regions)
+
+# Determine Levels for each Field and Region
+# ------------------------------------------
+   set   files1  = `/bin/ls -1 stats_${field}_rmscmp_${region}_*_*.gif | grep -v montage`
+   set   files2  = `/bin/ls -1 stats_${field}_rmscmp_BIAS_${region}_*_*.gif | grep -v montage`
+   set   files3  = `/bin/ls -1 stats_${field}_rmscmp_AMPLITUDE_${region}_*_*.gif | grep -v montage`
+   set   files4  = `/bin/ls -1 stats_${field}_rmscmp_PHASE_${region}_*_*.gif | grep -v montage`
+
+   if( $#files1 != 0        & \
+       $#files1 == $#files2 & \
+       $#files1 == $#files3 & \
+       $#files1 == $#files4 ) then
+
+      set  levels = `echo abcd | grep 1234`
+      @ numlevs = 0
+      foreach file ($files1)
+      set level  = `echo $file | cut -d_ -f5`
+      if( $numlevs == 0 ) then
+          set levels = "$levels $level"
+          @ numlevs = $numlevs + 1
+      else
+          if( $level != $levels[$numlevs] ) then
+               set levels = `echo $levels $level`
+               @ numlevs = $numlevs + 1
+          endif
+      endif
+      end
+      echo Field: $field  Region: $region Levels: $levels
+
+      set SEASON = `echo $files1[1] | cut -d_ -f6 | cut -d. -f1`
+
+      foreach level ($levels)
+      montage stats_${field}_rmscmp_${region}_${level}_${SEASON}.gif                             \
+              stats_${field}_rmscmp_BIAS_${region}_${level}_${SEASON}.gif                        \
+              stats_${field}_rmscmp_AMPLITUDE_${region}_${level}_${SEASON}.gif                   \
+              stats_${field}_rmscmp_PHASE_${region}_${level}_${SEASON}.gif                       \
+        -tile 2x2 -geometry +0+0 stats_${field}_rmsdcmp_${region}_${level}_${SEASON}_montage.gif &
+      end
+
+   endif
+
+end
+end
+wait
+

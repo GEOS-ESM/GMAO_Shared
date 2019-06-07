@@ -1,0 +1,11 @@
+
+# MODIS L2 Data, version 6
+#-------------------------
+BEGIN mod04_006_flk => MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20170401_00z-20170424_03z 000500 archive/input/dao_ops/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20170424_20z-20170507_05z 000500 archive/input/dao_ops/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20170507_07z-20170522_05z 000500 archive/input/dao_ops/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20170522_08z-20170531_23z 000500 archive/input/dao_ops/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+# 00000000_00z-00000000_00z 040000 archive/input/pzsst/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+# 00000000_00z-00000000_00z 120000 archive/input/dmdyst/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+END

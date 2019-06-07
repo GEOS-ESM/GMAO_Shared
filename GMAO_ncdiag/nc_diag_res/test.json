@@ -1,0 +1,20 @@
+{
+  "info" : {
+    "author" : "Albert Huang",
+    "description" : "This is a test resource file for bla bla bla.",
+    "timestamp" : "Wednesday, August 12th, 10:00 AM",
+    "organization" : "NASA"
+  },
+  "variables" : {
+    "myvar1" : true,
+    "myvar2" : false,
+    "myvar3" : true
+  },
+  "variable_attributes" : {
+    "myvar1" : {
+      "attr1" : 123,
+      "attr2" : 123.45,
+      "attr3" : "string here"
+    }
+  }
+} 

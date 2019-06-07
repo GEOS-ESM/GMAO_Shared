@@ -1,0 +1,11 @@
+This directory contains a simple test based on the diag.f of original
+LANSO distribution.
+
+type
+
+make diag
+
+to generate the executable 'diag'.
+
+K. Wu, July, 1997
+

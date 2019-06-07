@@ -1,0 +1,25 @@
+{
+  "info" : {
+    "author" : "Albert Huang",
+    "description" : "This is a test resource file for bla bla bla.",
+    "timestamp" : "Wednesday, August 12th, 10:00 AM",
+    "organization" : "NASA"
+  },
+  "variables" : {
+    "myvar1" : true,
+    "myvar2" : false,
+    "myvar3" : true
+  },
+  "global_attributes" : {
+    "attr1" : 123,
+    "attr2" : 123.45,
+    "attr3" : "string here"
+  },
+  "variable_attributes" : {
+    "chaninfosimple_ibyte" : {
+      "hello_from_python" : "yay!",
+      "python_data" : 123,
+      "python_data_float" : 123.456
+    }
+  }
+}

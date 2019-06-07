@@ -1,0 +1,20 @@
+This directory contains files for two parallel Lanczos method.
+
+(1) plandr, planso --
+
+Straightforward extension of the original LANSO code.  Seeking
+eigenvalues within a specified range.
+
+(2) plandr2, planso2 --
+
+Modified version of LANSO to computed a few extreme eigenvalues
+of a given operator (OP, OPM).  This make the Lanczos iteration easier
+to compare with other existing packages, e.g., ARPACK (PARPACK).
+
+Both Lanczos methods use the same partial reorthogonalization scheme as
+in the original LANSO.
+
+
+
+A more detailed document about the package is available at
+<http://crd.lbl.gov/~kewu/ps/planso.ps>

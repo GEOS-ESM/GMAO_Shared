@@ -1,0 +1,6 @@
+
+# Nimbus-07 TOMS
+#---------------
+BEGIN nim07_tomseff_nc => tomseff.%y4%m2%d2.t%h2z.nc
+# 00000000_00z-00000000_00z 060000 /archive/u/kwargan/data/TOMS/NETCDF/Y%y4/M%m2/TOMSeff.%y4%m2%d2_%h2z.nc
+END

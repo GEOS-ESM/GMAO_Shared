@@ -1,0 +1,48 @@
+#            NCCS Specific Version
+#
+# This observation system resource file database will track the whereabout of GAAS
+# observation files. It will be used by scripts require_obsys (hard check existence
+# of observation files) and acquire_obsys (will call acquire to get files).
+#
+# Syntax:
+# -------
+# BEGIN observation_file_class => StandardName
+#   startYYYYMMDD_HHz-endYYYYMMDD_HHz incrementHHMMSS remote_file_name_template
+# END
+#
+# Note: set "endYYYYMMDD_HHz" as "present" if new files added to system daily.
+# Note: replacing "present" (see note above) with future date
+#=======================================================================
+
+# AVHRR ascending and descending Synoptic npz files
+#--------------------------------------------------
+BEGIN patmosx_asc => patmosx_v05r02.asc.%y4%m2%d2_%h2z.npz
+  20020701_00z-20020825_21z 240000 archive/input/dao_ops/obs/reanalysis/patmosx/Level2/Synoptic/Y%y4/M%m2/D%d2/patmosx_v05r02.asc.%y4%m2%d2_%h2z.npz
+END
+BEGIN patmosx_des => patmosx_v05r02.des.%y4%m2%d2_%h2z.npz
+  20020701_00z-20020825_21z 240000 archive/input/dao_ops/obs/reanalysis/patmosx/Level2/Synoptic/Y%y4/M%m2/D%d2/patmosx_v05r02.des.%y4%m2%d2_%h2z.npz
+END
+
+# MISR over land
+#---------------
+BEGIN misr_F12_bright => misr_F12_0022.bright_tc8.obs.%y4%m2%d2.ods
+  20000301_00z-20000331_00z 240000 archive/input/dao_ops/obs/reanalysis/misr/Level2/ODS_Bright/Y%y4/M%m2/misr_F12_0022.bright_tc8.obs.%y4%m2%d2.ods
+END
+
+# MODIS L2 Data, version 6
+#-------------------------
+BEGIN mod04_006_flk => MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20130526_00z-20130601_21z 040000 archive/input/pzsst/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20170401_00z-20170531_21z 240000 archive/input/dao_ops/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20180228_00z-20180326_21z 120000 archive/input/dmdyst/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+END
+
+BEGIN merra_satwnd18_pre-qc_bufr => satwnd.%y4%m2%d2.t18z.pre-qc.ublk
+  19770101_00z-19770131_18z 240000 archive/input/dao_ops/obs/merra/conv/prepbufr/satwnd/Y%y4/M%m2/MERG_SATWND_prepbufr_%y4%m2%d218
+END
+
+# Nimbus-07 TOMS
+#---------------
+BEGIN nim07_tomseff_nc => tomseff.%y4%m2%d2.t%h2z.nc
+  19790101_00z-19930531_18z 060000 /archive/u/kwargan/data/TOMS/NETCDF/Y%y4/M%m2/TOMSeff.%y4%m2%d2_%h2z.nc
+END

@@ -1,0 +1,103 @@
+# NetCDF Diag Reader
+# GNUmakefile library configuration for building with nc_diag_read
+# --------------------------------------------------------------------
+# Do NOT modify this file. Everything has been set up automatically
+# for you! Modifying this file may break things!
+# --------------------------------------------------------------------
+# Usage:
+#     To use this file, simply include it within your GNUmakefile:
+#         include /path/to/nc_diag_read/GNUmakefile.config
+#     
+#     Then use the nc_diag_read specific build variables:
+#         $(F90) [your stuff here] $(NC_DIAG_READ_FLAGS)
+#     Note that $(NC_DIAG_READ_FLAGS) MUST go after your source files
+#     (and/or your own build flags). Failure to do so will cause build
+#     problems.
+#     
+#     Finally, you must include the NetCDF libraries and includes. The
+#     NetCDF flags should go AFTER the nc_diag_read flags (as well as
+#     any other libraries that use NetCDF). This is due to the
+#     dependency order, where libraries that need to use NetCDF need to
+#     be added first so that the compiler knows to search and link
+#     NetCDF libraries.
+#     
+#     Your final build command should look something like this:
+#         $(F90) [...] $(NC_DIAG_READ_FLAGS) $(NETCDF_FLAGS)
+# --------------------------------------------------------------------
+# Integration:
+#     If you would also like to integrate nc_diag_read building with
+#     your source, you can do the following:
+#     
+#     First, add the nc_diag_read library to your dependencies. We
+#     already figured out the path for you, so all you have to do is
+#     just add it! Use NCDR_LIB_PATH to get that path:
+#         mytarget: srcfiles ... $(NCDR_LIB_PATH)
+#             [your build commands here]
+#     
+#     Alternatively, if you want to use your specific dependencies, you
+#     can simply add this to your "all" target, making this MUCH
+#     cleaner:
+#         all: $(NCDR_LIB_PATH) myexecs ...
+#     Note that this only works as long as you build with "all".
+#     Building with specific targets will forgo this dependency.
+#     
+#     Of course, you really want to also be able to build said library
+#     as well! Simply add the following target and build command, and
+#     everything should work:
+#         $(NCDR_LIB_PATH): $(NCDR_LIB_DEPS)
+#             $(NCDR_BUILD_CMD)
+#     
+#     Now, if nc_diag_read gets updated, or it hasn't been built yet,
+#     the library will automatically get (re-)built when you build
+#     your program!
+# --------------------------------------------------------------------
+# That's it - everything else is stuff on our end!
+# 
+# As a friendly reminder, do *NOT* change or touch anything below!
+# We've set up everything so that you can just include this file and
+# start using nc_diag_read! Changing anything below WILL cause
+# problems!
+# 
+# If you're really stuck, try looking at the GNUmakefile in tests/ - we
+# include this GNUmakefile.libconfig and set things up according to the
+# steps above!
+# --------------------------------------------------------------------
+# 
+
+# First, use a trick to get the included (GNUmakefile.libconfig) path:
+# Check if we are using an absolute path - aka we have a slash.
+# If we don't, process with relative path...
+
+NCDR_MKFILE_TMP := $(strip $(word 1, $(subst /,/ ,$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))))
+
+ifeq ($(NCDR_MKFILE_TMP),/)
+    # We're using absolute paths here!
+    NCDR_MAKEFILE := $(abspath $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+    # Then, get the directory for this file:
+    NCDR_PATH := $(patsubst %/,%,$(dir $(NCDR_MAKEFILE)))
+else
+    # We're using relative paths here!
+    NCDR_MAKEFILE := $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+    # Then, get the directory for this file.
+    # We yank out the directory to get a relative path.
+    NCDR_PATH := $(patsubst $(CURDIR)/%,%,$(patsubst %/,%,$(dir $(NCDR_MAKEFILE))))
+endif
+
+# Define the nc_diag_read library name and filename:
+NCDR_LIB_NAME=nc_diag_read
+NCDR_LIB_FILE=lib$(NCDR_LIB_NAME).a
+
+# Combine everything to make a path for developers to use
+# (for dependencies and targeting):
+NCDR_LIB_PATH=$(NCDR_PATH)/$(NCDR_LIB_FILE)
+
+# Define nc_diag_read library dependencies, so that any changes
+# can prompt a re-build:
+NCDR_LIB_DEPS=$(NCDR_PATH)/*.f90 $(NCDR_PATH)/*.F90 \
+    $(NCDR_PATH)/GNUmakefile $(NCDR_PATH)/GNUmakefile.config
+
+# Define the build command necessary to build this library:
+NCDR_BUILD_CMD=make -C $(NCDR_PATH) $(NCDR_LIB_FILE)
+
+# Define the necessary build flags to link with nc_diag_read:
+NC_DIAG_READ_FLAGS=-I$(NCDR_PATH) -L$(NCDR_PATH) -lnc_diag_read

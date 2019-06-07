@@ -1,0 +1,103 @@
+# NetCDF Diag Writing Layer
+# GNUmakefile library configuration for building with nc_diag
+# --------------------------------------------------------------------
+# Do NOT modify this file. Everything has been set up automatically
+# for you! Modifying this file may break things!
+# --------------------------------------------------------------------
+# Usage:
+#     To use this file, simply include it within your GNUmakefile:
+#         include /path/to/nc_diag/GNUmakefile.config
+#     
+#     Then use the nc_diag specific build variables:
+#         $(F90) [your stuff here] $(NCDW_FLAGS)
+#     Note that $(NCDW_FLAGS) MUST go after your source files
+#     (and/or your own build flags). Failure to do so will cause build
+#     problems.
+#     
+#     Finally, you must include the NetCDF libraries and includes. The
+#     NetCDF flags should go AFTER the nc_diag flags (as well as
+#     any other libraries that use NetCDF). This is due to the
+#     dependency order, where libraries that need to use NetCDF need to
+#     be added first so that the compiler knows to search and link
+#     NetCDF libraries.
+#     
+#     Your final build command should look something like this:
+#         $(F90) [...] $(NCDW_FLAGS) $(NETCDF_FLAGS)
+# --------------------------------------------------------------------
+# Integration:
+#     If you would also like to integrate nc_diag building with
+#     your source, you can do the following:
+#     
+#     First, add the nc_diag library to your dependencies. We
+#     already figured out the path for you, so all you have to do is
+#     just add it! Use NCDW_LIB_PATH to get that path:
+#         mytarget: srcfiles ... $(NCDW_LIB_PATH)
+#             [your build commands here]
+#     
+#     Alternatively, if you want to use your specific dependencies, you
+#     can simply add this to your "all" target, making this MUCH
+#     cleaner:
+#         all: $(NCDW_LIB_PATH) myexecs ...
+#     Note that this only works as long as you build with "all".
+#     Building with specific targets will forgo this dependency.
+#     
+#     Of course, you really want to also be able to build said library
+#     as well! Simply add the following target and build command, and
+#     everything should work:
+#         $(NCDW_LIB_PATH): $(NCDW_LIB_DEPS)
+#             $(NCDW_BUILD_CMD)
+#     
+#     Now, if nc_diag gets updated, or it hasn't been built yet,
+#     the library will automatically get (re-)built when you build
+#     your program!
+# --------------------------------------------------------------------
+# That's it - everything else is stuff on our end!
+# 
+# As a friendly reminder, do *NOT* change or touch anything below!
+# We've set up everything so that you can just include this file and
+# start using nc_diag! Changing anything below WILL cause
+# problems!
+# 
+# If you're really stuck, try looking at the GNUmakefile in tests/ - we
+# include this GNUmakefile.libconfig and set things up according to the
+# steps above!
+# --------------------------------------------------------------------
+# 
+
+# First, use a trick to get the included (GNUmakefile.libconfig) path:
+# Check if we are using an absolute path - aka we have a slash.
+# If we don't, process with relative path...
+
+NCDW_MKFILE_TMP := $(strip $(word 1, $(subst /,/ ,$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))))
+
+ifeq ($(NCDW_MKFILE_TMP),/)
+    # We're using absolute paths here!
+    NCDW_MAKEFILE := $(abspath $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+    # Then, get the directory for this file:
+    NCDW_PATH := $(patsubst %/,%,$(dir $(NCDW_MAKEFILE)))
+else
+    # We're using relative paths here!
+    NCDW_MAKEFILE := $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+    # Then, get the directory for this file.
+    # We yank out the directory to get a relative path.
+    NCDW_PATH := $(patsubst $(CURDIR)/%,%,$(patsubst %/,%,$(dir $(NCDW_MAKEFILE))))
+endif
+
+# Define the nc_diag library name and filename:
+NCDW_LIB_NAME=nc_diag_write
+NCDW_LIB_FILE=lib$(NCDW_LIB_NAME).a
+
+# Combine everything to make a path for developers to use
+# (for dependencies and targeting):
+NCDW_LIB_PATH=$(NCDW_PATH)/$(NCDW_LIB_FILE)
+
+# Define nc_diag library dependencies, so that any changes
+# can prompt a re-build:
+NCDW_LIB_DEPS=$(NCDW_PATH)/*.f90 $(NCDW_PATH)/*.F90 \
+    $(NCDW_PATH)/GNUmakefile $(NCDW_PATH)/GNUmakefile.config
+
+# Define the build command necessary to build this library:
+NCDW_BUILD_CMD=make -C $(NCDW_PATH) $(NCDW_LIB_FILE)
+
+# Define the necessary build flags to link with nc_diag:
+NCDW_FLAGS=-I$(NCDW_PATH) -L$(NCDW_PATH) -l$(NCDW_LIB_NAME)

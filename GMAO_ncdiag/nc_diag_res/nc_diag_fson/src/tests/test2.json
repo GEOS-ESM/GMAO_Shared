@@ -1,0 +1,17 @@
+{
+    "dict1": {"int": -3,
+	      "real": 2.718281828459,
+	      "logical": true,
+	      "string": "Hello world"
+	     },
+    "array_real": [-3.0, -2.1, -1.2, 0.0, 1.9, 1.0E-01, 1.0E+01],
+    "array_int": [7, 1, -2 , 4, -10],
+    "array_logical": [true, false, true, false],
+    "array_int_2d": [[1, 2], [3, 4], [5, 6]],
+    "array_real_2d": [[2., -1., 5.], [-2.718, 3.142, 1.618]],
+    "array_logical_2d": [[true, false, true], [false, true, false], [true, false, true]],
+    "empty_string": "",
+    "escape_string": "\\",
+    "integer_mantissa_positive_exponent": 2e3,
+    "integer_mantissa_negative_exponent": 2e-3
+}

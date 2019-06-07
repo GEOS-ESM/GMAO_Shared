@@ -1,0 +1,37 @@
+#!/bin/csh
+#
+#  Removes configuration file for Makefile.
+#
+#   ./unconfigure
+#
+#  !REVISION HISTORY
+#
+#  03Mar99   Todling    Initial code.
+#  25Jan00   Todling    Modified to work with ARPACK.
+#
+#.....................................................................
+
+
+# First try a site specific Makefile.conf
+# ---------------------------------------
+  set makeconf = ARmake.inc
+
+# Just make the symlink()
+# -----------------------
+  if ( -e $makeconf ) then
+        /bin/rm -f $makeconf
+        echo " "
+        echo "configure: successful removed configuration - ARmake.inc"
+        echo " "
+
+  else
+        echo " "
+        echo error: cannot find site or arch dependent ARmake.inc
+        echo " "
+        exit 1
+
+  endif
+
+# All done
+# --------
+  exit 0

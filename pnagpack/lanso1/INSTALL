@@ -1,0 +1,42 @@
+Here is the procedure for testing LANSO out on a UN*X system.
+
+  1. Edit `Makefile'.  If you are using any form of System V, you may
+     need to make a couple of changes described in comments at the
+     beginning of the file.  If your FORTRAN 77 compiler uses a
+     different convention to turn on optimization, change "-O3 -dalign"
+     to suit your compiler's taste.  If a fast BLAS (level 1) library
+     is available on your system, re-define the macro `BLASOBJ' to
+     nothing and specify how to access the library using the macro
+     `LIBS'.
+
+  2. To generate the four test modules, simply type `make'.  The
+     following four executable modules should appear:
+
+	"std":	Driver program is "std.f" (STanDard evp).
+	"sni":	Driver programs are "main.f", "op.f" (Shift-aNd-Invert).
+	"hs":	Driver programs are "decomp.f", "opsimon.f" (courtesy of
+		Dr. Horst Simon, input data is part of Boeing-Harwell
+		sparse matrix collection)
+	"diag":	Driver program is "diag.f".
+
+     Note that
+
+	"std"	needs "std201.5" as input channel 5 and will generate
+		output through output channel 11.
+	"sni"	needs "sni207.1" and "sni207.5" as input channels 1 and 5
+		respectively and will generate output through output channel
+		11.
+	"hs"	needs "hs.5" as input channel 5 and will generate outputs
+		through output channels 9 and 11.
+	"diag"	needs "diag100.5" as input channel 5 and will generate
+		outputs through output channels 11.
+
+     If your FORTRAN compiler generates output for output channel 11
+     not under the name of one of "FOR011.DAT", "for011.dat" or "fort.11",
+     the csh script "doit" must be modified.
+
+  3. Execute "./doit".  It took about 58 CPU seconds on a SPARCstation 1+
+     with a Weitek-3170 FPU to complete the four runs.
+
+  4. Compare results with the corresponding output files under the
+     subdirectory sun4c/.  They should substantially agree.

@@ -1,0 +1,13 @@
+This directory contains an example of using PLANSO with BLOCKSOLVE95 to
+compute eigenvalues of the Laplacian operator descretized on a 3-D
+domain.  The matirx is generated using BLOCKSOLVE and the matrix-vector
+multiplication is done with BLOCKSOLVE as well.  This example used
+BLOCKSOLVE to distribute the matrix based on subcubes.  The example in
+aztec directory is functionally the same but it distributed the matrix
+as consecutive row blocks.
+
+BlockSolve95 can be found at
+<http://www-unix.mcs.anl.gov/sumaa3d/BlockSolve/index.html>.
+
+More information about PLANSO can be found at
+<http://www.nersc.gov/research/SIMON/planso.html>.

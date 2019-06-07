@@ -1,0 +1,212 @@
+# TODO LIST
+This is a general TODO list that should be fixed for better code and
+speed! (Also, consider this a list of the number of times I've pulled my
+hair out while documenting my code...)
+
+Note that the TODO list may be redundant and repetitive. This list was
+created while I was documenting my code, so problems that I see are
+added to this list, regardless of whether it already exists or not.
+
+# TODO FOR nc_diag_write
+### nc_diag_write_mod.F90
+ -> initialize EVERYTHING - some vars are not initialized, and things
+    can get a little strange... initialize to 0 or -1 (maybe 1 as well,
+    but don't know if there's anything that should EVER be initialized
+    to 1...) this especially applies to derived types!
+    
+ -> get rid of the NLAYER type and fill constants - the NF90_* ones work
+    just as well!
+    
+ -> rip out the silly allocation multiplier stuff - get rid of the type
+    and subroutines, and just reallocate like this:
+    
+    new_size = old_size * 2
+    
+ -> move the actual nf90 def locking (nf90_enddef) to our lockdef, and
+    have our nc_diag_write call our own def lock
+    
+ -> private/public for funcs and subs - you really, really, really don't
+    want people to call functions that are private!
+    
+ -> clarify naming schemes for write/finish - finish is super tempting
+    to call...
+     -> make nc_diag_write just write + lock data, and maybe make
+        nc_diag_finish public? so we can have a solely data/def lock
+        mode, with the ability to still do varattr fun
+    
+### ncdw_chaninfo.F90
+ -> chaninfo (and maybe metadata + data2d) load_def - make sure that
+    init_done is actually true, otherwise bad things will happen...
+    (maybe this is already checked within nc_diag_write.F90?)
+    
+ -> optimize chaninfo def_loading - we can just check for the nchans
+    dim ID inside the var dim ids (instead of comparing names in a loop,
+    which is slower)
+    
+    a la: if (any(var dim ids) == nchan_dim_id) do nchan var handling
+    
+ -> shockingly, varattr is not called at all during load_def! Thinking
+    it over, it may be that varattr triggers some define stuff that
+    doesn't work in append mode... which might be sorta silly. If that's
+    the case, a simple nf90_redef and nf90_enddef would fix that! If
+    not... well, just put varattr calls back in!
+    
+    this call needs to be made to register with varattr:
+    nc_diag_varattr_add_var(var_name, var_type, var_id)
+    
+    var_type is the NLAYER type (and NOT the NF90 type, like it should
+    be... see? nlayer was a seriously bad idea...)
+    
+ -> on that note, diag_varattr_store%types is not used at all, so get
+    rid of it! ([grep diag_varattr_store%types *] within nc_diag_write
+    directory yield no use outside of varattr source, and even within
+    varattr it's just stored and allocated, not used at all...)
+    
+ -> on a super random note, looking back at old code is like looking
+    back at your old high school freshman year... everything you did
+    seemed good at the time, but looking back, you can only feel
+    shame and terror...
+    
+ -> use better preallocs - current preallocs are really messy, and
+    tends to waste memory...
+    
+ -> remove redundant code within write_def - checking append_only
+    shouldn't be needed (though maybe it's good for sanity?) since
+    append_only already calls load_def, and load_def sets the lock... so
+    locking would never load the check in the first place - therefore,
+    we can assume that append_only is false! (but again, maybe for
+    sanity's sake, keep it?)
+    
+ -> sanity checking - for chaninfo's write_def, perhaps do a check to
+    ensure that the type is valid? this probably isn't necessary if
+    private/public is implemented correctly, since none of the variable
+    storage subroutines will ever store the type incorrectly...
+    
+ -> another nitpick (but might not be a problem) - should we set the
+    def_lock even when there are no variables? the answer may be yes
+    assuming we strictly want the write_def to only be called once - but
+    that also depends on the usage scenario. what if a dev/user wanted
+    to do metadata variables, write, and then later add chaninfo
+    variables? setting the def_lock flag would prevent that!
+    
+    actually, I take that back... this should probably be locked.
+    writing definitions should ALWAYS lock the definitions... at least
+    for now. changing this behavior would require changes in how
+    nc_diag_write handles buffering, which enforces a definition lock
+    in the first place. to prevent confusion in the future, this
+    behavior should probably not be changed!
+    
+    (in fact, this actually may be a bug in itself - if I write just a
+    metadata variable, lock definitions, and then call flush_buffer,
+    the call may actually fail since we don't lock for chaninfo! same
+    for other variables - we may not lock at all!)
+    
+ -> write_def check for nchans - again, just sanity-ness, but:
+    
+        if (diag_chaninfo_store%nchans /= -1) then
+    
+    ...should be changed to:
+    
+        if (diag_chaninfo_store%nchans > 0) then
+    
+    this may not be necessary assuming things are private, since
+    set_nchans_dim enforces the nchans > 0 rule, but just in case...
+    
+ -> another sanity check thing - make sure def_lock is set before
+    writing data (write_data)! this probably won't ever happen
+    (assuming private), but you never know...
+    
+ -> when creating data_dim_name, maybe it would be better to do that
+    under the append_only portion? (then again, that might not matter -
+    since we may not need append_only check anyways - see above!)
+    
+    probably just not liking the placement, should probably go after
+    finding the maxstrlen!
+    
+ -> don't assume 10000 to be the max - be safe and use NF90_MAX_NAME
+    instead! (for finding maxstrlen within chaninfo, and probably
+    others...)
+    
+ -> optimization: only allocate temp string_arr and set string_arr if
+    enable_trim is enabled - don't allocate/assign/deallocate outside
+    of the enable_trim check!
+    
+ -> potentially combine conditions (depending on how much we can assume
+    and how much specificity is needed with errors) to avoid super-
+    tabbing our conditional statements!
+    
+    if specificity is still desired, we could try something like this:
+    
+    old:
+        if (cond1) then
+            if (cond2) then
+                if (cond3) then
+                    ...
+                else
+                    ERROR cond 3
+                end if
+            else
+                ERROR cond 2
+            end if
+        else
+            ERROR cond 1
+        end if
+    
+    new:
+        if (cond1 .AND. cond2 .AND. cond3) then
+            ...
+        else
+            if (.NOT. cond1) &
+                ERROR cond 1
+            
+            if (.NOT. cond2) &
+                ERROR cond 2
+            
+            if (.NOT. cond3) &
+                ERROR cond 3
+            
+            ERROR bug - strange things are happening if we reach here!
+        end if
+    
+ -> nc_diag_chaninfo_prealloc_vars_storage doesn't check for init or
+    if diag_chaninfo_store is allocated - that's bad! this should be 
+    fixed ASAP!
+    
+ -> nc_diag_chaninfo_prealloc_vars_storage should re-init after alloc!
+    (Maybe... might break preallocation after data add! maybe this
+    should have a lock to only call before any data adding occurs?
+    
+ -> sanity checks for prealloc (maybe not necessary): ensure that
+    preallocated amount > 0. (maybe do the same for ciresize
+    subroutines?)
+    
+ -> potential bug: if someone purposely added an empty fill value to
+    a chaninfo variable, the append will probably ignore the empty value
+    and overwrite it, since it treats empty values as blanks.
+    HOWEVER, if someone wrote a non-empty value afterwards, it would
+    continue after that non-empty value. there will only be an issue if
+    the last value is a fill value.
+    
+ -> nc_diag_chaninfo (and the nc_diag_chaninfo_* type specific calls)
+    don't check for file open + initialization...
+    
+ -> nc_diag_chaninfo (_*) doesn't check for type changes. that is, if
+    I put in an integer, and suddenly switch to a float, it doesn't
+    complain... not good!
+    
+ -> in chaninfo prealloc_vars: diag_chaninfo_store%total by itself
+    doesn't make much sense - should be the total + num_addl_vars.
+    (does total even belong to a prealloc subroutine?)
+    
+### ncdw_ciresize.F90
+ -> sanity check - ciresize should check file open + init for all
+    subroutines!
+    
+### ncdw_climsg.F90
+ -> either make every debug statement use nclayer_debug, or remove it
+    completely!
+    
+### 
+#
+- need to eliminate redundancy all around - code repetition (kinds, others)
+  this code needs to rely on a base util library

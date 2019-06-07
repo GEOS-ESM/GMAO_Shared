@@ -1,0 +1,30 @@
+C
+C @(#)store.f	3.3 (BNP) 3/16/89; from store.f 2.2 10/13/87
+C
+      SUBROUTINE STORE(N,astore,ISW,J,S)
+      INTEGER N,ISW,J
+      DOUBLE PRECISION S(N)
+      DOUBLE PRECISION astore(*)
+C
+      INTEGER MAXLL
+      PARAMETER (MAXLL = 2)
+C
+      INTEGER STORQ,RETRQ,STORP,RETRP
+      PARAMETER (STORQ = 1,RETRQ = 2,STORP = 3,RETRP = 4)
+C
+C_JKIM      DOUBLE PRECISION A
+C_JKIM      COMMON/GETPUT/A(125000)
+C
+      IF (ISW.EQ.STORQ) THEN
+         CALL DCOPY(N,S,1,Astore((J+MAXLL-1)*N+1),1)
+      ELSE IF (ISW.EQ.RETRQ) THEN
+         CALL DCOPY(N,Astore((J+MAXLL-1)*N+1),1,S,1)
+      ELSE IF (ISW.EQ.STORP) THEN
+         IF (J.GT.MAXLL) STOP 'STORE: (STORP) J.GT.MAXLL'
+         CALL DCOPY(N,S,1,Astore((J-1)*N+1),1)
+      ELSE IF (ISW.EQ.RETRP) THEN
+         IF (J.GT.MAXLL) STOP 'STORE: (RETRP) J.GT.MAXLL'
+         CALL DCOPY(N,Astore((J-1)*N+1),1,S,1)
+      ENDIF
+      RETURN
+      END

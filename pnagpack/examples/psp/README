@@ -1,0 +1,114 @@
+This directory contains a few examples of using the parallel Lanczos
+recurrence to solve eigenvalue of matrices in Harwell-Boeing format.
+Reading of matrix and parallel matrix-vector multiplications are done
+using SPARSKIT and P_SPARSLIB.
+
+***
+You have to have SPARSKIT and P_SPARSLIB in order to run this set of
+examples.  Both packages can be found at
+<http://www-users.cs.umn.edu/~saad/software.html>.
+***
+
+(1) simphb
+
+This example is setup to use 20Megawords to store the Lanczos vectors.
+After the memory has been filled up, the Ritz values are computed.
+Those with relatively small error estimates are printed.  The input
+matrix is read on one process first before distribution.  (See the
+header of simphb.f for more informaiton.)
+
+To compile:
+
+make simphb
+
+To run:
+
+mpirun -np #_of_PE simphb HB_file_name
+
+
+(2) shbooc
+
+This example is a Out-of-Core (ooc) parallel Lanczos method.  The
+Lanczos vectors are written to files with each processor performs its
+own I/O.  The current setup in this example is to find two smallest
+eigenvalue of a given matrix.  The Lanczos vectors are written to files
+named _LANVEC_???? where ???? is the PE number filled with leading 0.
+
+The Harwell-Boeing matrix is read in the same fashion as simphb.f
+(see the header of shbooc.f for more information)
+
+To compile:
+
+make shbooc
+
+To run:
+
+mpirun -np #_of_PE shbooc HB_file_name
+
+
+(3) shbhi
+
+This example can read a larger matrix because it reads the matrix one
+piece at a time and disctributes the piece to it final destination
+right-away.  However, because of this, it also requires the input matrix
+be symmetric and stored as RUA type.  This example is setup to compute 5
+largest eigenvalues of the given matrix.
+
+(see shbhi.f for more information)
+
+
+(4) shbcg
+
+This example reads a Harwell-Boeing matrix as in simphb.f.  However it
+tries to compute the eigenvalues > delta (a command line argument) using
+the shift-and-invert scheme.  The linear systems are solved using the
+proconditioned CG method with block Jacobi preconiditioner.  The
+diagonal blocks are solved using SuperLU.  The command line arguments
+are
+
+mpirun -np #_of_PE shbcg HB_file_name delta kjac
+
+where
+
+detla == the shift.  The PLANDR2 is called to compute five largest
+         eigenvalues of (A - delta I)^{-1}, i.e., the five eigenvalues
+         closest to delta but larger than delta are computed.
+
+kjac  == number of block Jacobi iterations used per preconditioning
+         step.
+
+(see shbcg.f)
+
+
+(5) grid
+
+This example computes some extreme eigenvalues of the Laplacian operator
+descretized on a 3-D grid.  Functionally, this example is equivalent to
+the examples in aztec and blocksolve directories.  The differences is
+that this example uses PSPARSLIB to perform the sparse matrix-vector
+multiplications.
+
+(see grid.f)
+
+
+(6) shbstd
+
+This example reads two Harwell-Boeing matrices.  One processor is used
+to perfor the IO operations.  If the first matrix is RSA, it expanded
+before distribution.  If it is RUA, only the symmetrix part is used.
+Only the diagonal part of the second matrix is used.  This is to avoid
+have to use a sparse direct solve to invert the second matrix.  The two
+matrices are used to form a generalized eigenvalue problem.  The
+standard form is used by PLANDR to solve the eigenvalue problem, i.e.,
+the operator is M^{-1}K.
+
+(see shbstd.f)
+
+
+(7) stdhi
+
+This example is very similar to shbstd.  The difference is that this one
+compute the five largest eigenvalues instead of trying to compute as
+many eigenvalue as memory allows.
+
+(see stdhi.f)

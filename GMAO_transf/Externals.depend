@@ -1,0 +1,5 @@
+m_ioutil.o: $(LIBmpeu)
+m_die.o: $(LIBmpeu)
+m_stdio.o: $(LIBmpeu)
+m_dyn.o: $(LIBhermes)
+m_dynp.o: $(LIBhermes)

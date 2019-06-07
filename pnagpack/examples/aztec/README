@@ -1,0 +1,18 @@
+This directory contains one example of using PLANSO and AZTEC together
+to compute some eigenvalues of the Laplacian operator descretized on a
+uniform 3-D grid.  The main program in azl.c generates the matrix and
+setup AZTEC to perform matrix-vector multiplications.  The file azlan.c
+contains the code to call PLANDR.  This program uses MAX_MEM (bytes)
+amount of memory to store the Lanczos vectors and other workspace
+required by PLANSO.
+
+This examples calls Fortran programs from C.
+
+Functionally, this example is the same as the one in blocksolve
+directory.  The difference is that the matrix is distributed as
+consecutive row blocks here and it is distributed based subcubes in
+blocksolve example.
+
+AZTEC can be found at <http://www.cs.sandia.gov/CRF/aztec1.html>
+More information on PLANSO can be found at
+<http://www.nersc.gov/researhc/SIMON/planso.html>

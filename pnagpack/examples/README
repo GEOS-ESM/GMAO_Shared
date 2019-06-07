@@ -1,0 +1,54 @@
+This directory contains a number of examples of using PLANSO.
+
+aztec      example using matrix-vector multiplication routine of Aztec
+blocksolve example using matrix-vector multiplication routine of blocksolve
+diag       some simple examples using diagonal matrices
+psp        examples using PSPARSLIB to perform matrix-vector multiplications
+
+For more detials about the examples read the README files in the
+directories.   For more information how to use the PLANSO read
+<http://www.nersc.gov/~kewu/ps/planso.ps>
+
+NOTE: programs in this directory used getarg to obtain the command line
+      arguments.  The function getarg is available on more UNIX
+      machines.  On SGI/Cray machines, the function pxfgetarg can be
+      used in place of getarg.  If neither one works, seek help from
+      your local system administrators.
+
+
+Here is a brief outline of what to do.
+
+To use PLANSO (call PLANDR), you need to provide
+
+subroutine OP(n, p, q, r, mpicom)
+subroutine OPM(n, q, p, mpicom)
+integer n, mpicom
+double precision (real*8) p(n), q(n), r(n)
+
+Where OP and OPM are defined in README of lanso1 directory.
+
+
+subroutine STORE(n, isw, j, s)
+integer n, isw, j
+double precision (real*8) s(n)
+
+This routine provides a means for PLANSO to access the Lanczos vectors
+previously computed.  Example 'diag' uses the store.f of original lanso1
+which uses a common block named 'A'.  Example 'simphb' in psp directory
+use shbstore.f to access the Lanczos vectors.  In this case the Lanczos
+vectors are store in a common block called GETPUT.  By modifying this
+function, it should be easy to generate an out-of-core of the Lanczos
+method.
+
+
+PPURGE
+
+The file ppurge.f in plan directory implements this subroutine using the
+modified Gram-Schmidt orthogonalization procedure.  For parallel
+efficiency, the user might want to modify this as well.  Example
+'simphb' uses the classic Gram-schmidt procedure, see file shbpurge.f.
+You are not required to provide ppurge subroutine of your own.  However,
+if you provide your own function ppurge, consult your compiler manual to
+find out how to tell the loader to resolve multiply defined entries.
+
+

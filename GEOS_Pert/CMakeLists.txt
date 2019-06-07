@@ -1,0 +1,3 @@
+add_subdirectory(GEOS_PertShared)
+add_subdirectory(GEOS_PertSvecs)
+add_subdirectory(Tapenade)
