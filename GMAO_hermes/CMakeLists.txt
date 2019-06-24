@@ -30,17 +30,12 @@ endif ()
 set_source_files_properties (GFIO_Shave.f90 PROPERTIES COMPILE_FLAGS ${PP})
 set_source_files_properties (GFIO_remap.f90 PROPERTIES COMPILE_FLAGS ${PP})
 
-add_executable (dyndims.x dyndims.f)
-add_executable (GFIO_remap.x GFIO_remap.f90)
-add_executable (GFIO_Shave.x GFIO_Shave.f90)
-add_executable (echorc.x echorc.f90)
-add_executable (fvsubset.x fvsubset.F90)
+ecbuild_add_executable (TARGET dyndims.x SOURCES dyndims.f LIBS ${this})
+ecbuild_add_executable (TARGET GFIO_remap.x SOURCES GFIO_remap.f90 LIBS ${this} MAPL_cfio_r8)
+ecbuild_add_executable (TARGET GFIO_Shave.x SOURCES GFIO_Shave.f90 LIBS ${this} MAPL_cfio_r8)
+ecbuild_add_executable (TARGET echorc.x SOURCES echorc.f90 LIBS ${this})
+ecbuild_add_executable (TARGET fvsubset.x SOURCES fvsubset.F90 LIBS ${this} MAPL_cfio_r8)
 
-target_link_libraries (dyndims.x ${this})
-target_link_libraries (GFIO_remap.x GMAO_gfio_r8 ${this} MAPL_cfio_r8)
-target_link_libraries (GFIO_Shave.x GMAO_gfio_r8 ${this} MAPL_cfio_r8)
-target_link_libraries (echorc.x ${this})
-target_link_libraries (fvsubset.x ${this} GMAO_gfio_r8)
 
 
 

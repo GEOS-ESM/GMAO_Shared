@@ -22,22 +22,22 @@ foreach (basename
     time_ave convert_eta rs2hdf
     ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta
     merra2scm rsg3_vinterp era5_prs2eta)
-  add_executable (${basename}.x ${basename}.F)
+  ecbuild_add_executable (TARGET ${basename}.x SOURCES ${basename}.F)
 endforeach ()
-add_executable (binarytile.x binarytile.F90)
-add_executable (rs_numtiles.x rs_numtiles.F90)
-add_executable (rs_vinterp.x rs_vinterp.F90)
-add_executable (rs_vinterp_scm.x rs_vinterp_scm.F90)
-add_executable (stats.x stats.F90)
+ecbuild_add_executable (TARGET binarytile.x SOURCES binarytile.F90)
+ecbuild_add_executable (TARGET rs_numtiles.x SOURCES rs_numtiles.F90)
+ecbuild_add_executable (TARGET rs_vinterp.x SOURCES rs_vinterp.F90)
+ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
+ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
   set_target_properties (stats.x PROPERTIES COMPILE_FLAGS ${DISABLE_FIELD_WIDTH_WARNING})
 endif ()
-add_executable (convert_aerosols.x convert_aerosols.F)
+ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 
-install(
-  TARGETS rs_numtiles.x binarytile.x time_ave.x
-  DESTINATION ${CMAKE_BINARY_DIR}/bin
-  )
+#install(
+#  TARGETS rs_numtiles.x binarytile.x time_ave.x
+#  DESTINATION ${CMAKE_BINARY_DIR}/bin
+#  )
 
 
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${EXTENDED_SOURCE}")

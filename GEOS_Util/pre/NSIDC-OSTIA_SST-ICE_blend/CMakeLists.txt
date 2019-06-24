@@ -17,11 +17,17 @@ esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
 target_link_libraries (${this} PUBLIC ${NETCDF_LIBRARIES})
 target_include_directories (${this} PUBLIC ${INC_NETCDF})
 
-add_executable (regrid_forcing.x   regrid_forcing.F90)
-target_link_libraries (regrid_forcing.x ${this})
+ecbuild_add_executable (
+  TARGET regrid_forcing.x
+  SOURCES regrid_forcing.F90
+  LIBS ${this})
 
-add_executable (sst_sic_EIGTHdeg.x proc_SST_FRACI.F90)
-target_link_libraries (sst_sic_EIGTHdeg.x ${this})
+ecbuild_add_executable (
+  TARGET sst_sic_EIGTHdeg.x
+  SOURCES proc_SST_FRACI.F90
+  LIBS ${this})
 
-add_executable (sst_sic_QUARTdeg.x proc_SST_FRACI_ostia_quart.F90)
-target_link_libraries (sst_sic_QUARTdeg.x ${this})
+ecbuild_add_executable (
+  TARGET sst_sic_QUARTdeg.x
+  SOURCES proc_SST_FRACI_ostia_quart.F90
+  LIBS ${this})
