@@ -238,7 +238,7 @@ add_custom_command (OUTPUT m_mvcorF_nsep_bmop___.F90
 
 esma_add_library (${this}
   SRCS ${SRCS}
-  DEPENDENCIES GMAO_mpeu lapack blas
+  DEPENDENCIES GMAO_mpeu ${MKL_LIBRARIES}
   )
 
 target_compile_definitions (${this} PUBLIC NDEBUG LANGUAGE_FORTRAN TUNE_COSTS USE_MPI_1 _DLAPACK_)
