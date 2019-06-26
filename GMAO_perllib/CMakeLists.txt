@@ -7,6 +7,7 @@ set(perldirs
    )
 
 foreach(perldir ${perldirs})
-   file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/${perldir} DESTINATION ${CMAKE_BINARY_DIR}/bin/
-         PATTERN "CVS" EXCLUDE)
+   install (DIRECTORY ${perldirs}
+      DESTINATION bin
+      )
 endforeach()

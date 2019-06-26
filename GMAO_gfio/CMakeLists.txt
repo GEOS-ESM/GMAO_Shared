@@ -65,7 +65,4 @@ if (precision STREQUAL "r4")
   add_dependencies(GFIO_ ${this})
 endif ()
 
-
-
-  
-
+ecbuild_add_executable(TARGET GFIO_mean_${precision}.x SOURCES GFIO_mean.f90 LIBS GMAO_gfio_${precision} )
