@@ -27,7 +27,7 @@ endforeach ()
 set (lib GFDL_fms_${precision})
 
 esma_add_library (${lib} SRCS ${srcs})
-target_link_libraries (${lib} ${NETCDF_LIBRARIES})
+target_link_libraries (${lib} ${NETCDF_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 
 target_include_directories (${lib} PUBLIC shared/include shared/mpp/include shared/fft)
 target_include_directories (${lib} PUBLIC ${INC_NETCDF})
