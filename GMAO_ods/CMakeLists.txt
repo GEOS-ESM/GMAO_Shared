@@ -31,17 +31,28 @@ set (ODSSRC
   ods_julhr.f     ods_ncp_itoi2.f  ods_resetp.f     odsnxtime.f
   ods_eget.f      ods_dcget.f      ods_dconv.f      ods_dcscan.f
   ods_drad.f      ods_dsbuv.f      ods_dpcp.f       ods_rmdupl.f
-  ods_do3lev.f
+  ods_do3lev.f 
   )
 
 esma_add_library (${this}
   SRCS ${MODSRC} ${ODSSRC}
-  DEPENDENCIES GMAO_mpeu
+  DEPENDENCIES GMAO_mpeu GMAO_pilgrim
   INCLUDES ${INC_NETCDF}
   )
 
+ecbuild_add_executable (TARGET ods_scan.x SOURCES ods_scan.f LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET dconv2ods.x SOURCES dconv2ods.f LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET ods_blank.x SOURCES ods_blank.f90 LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET ods_maker.x SOURCES ods_maker.f90 LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET ods_sample.x SOURCES ods_sample.f LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET ods_synX2Y.x SOURCES ods_synX2Y.f90 LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET ods_tally.x SOURCES ods_tally.f90 LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET saber2ods.x SOURCES saber2ods.f LIBS ${this} ${NETCDF_LIBRARIES})
+
 if (EXTENDED_SOURCE)
   set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
+  set_target_properties (saber2ods.x PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
+  set_target_properties (dconv2ods.x PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif()
 
-
+install(FILES unique_instruments.csh DESTINATION bin)
