@@ -229,6 +229,10 @@ set (SRCS
   mp_assign_to_cpu.c
   )
 
+if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+   set( CMAKE_Fortran_FLAGS_RELEASE "${FOPT3} ${BIG_ENDIAN} ${EXTENDED_SOURCE} ${ALIGNCOM}")
+endif ()
+
 set (M4 m4)
 
 add_custom_command (OUTPUT m_mvcorF_nsep_bmop___.F90
