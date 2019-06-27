@@ -82,6 +82,13 @@ set (srcs
    gmap.F
    )
 
+#ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this})
+#ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this})
+#ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this})
+#ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this})
+#ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this})
+#ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS ${this})
+
 esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_w3_r4i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 

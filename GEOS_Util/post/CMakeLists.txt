@@ -39,6 +39,10 @@ ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 #  DESTINATION ${CMAKE_BINARY_DIR}/bin
 #  )
 
+file(GLOB perlscripts *.pl)
+install(
+   FILES ${perlscripts} ec2grd.csh
+   DESTINATION bin)
 
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${EXTENDED_SOURCE}")
 set_property(SOURCE rs_vinterp.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8}")

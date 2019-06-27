@@ -254,8 +254,7 @@ endforeach()
 
 
 
-add_executable (solve.x solve.F90)
-target_link_libraries (solve.x PUBLIC ${this})
+ecbuild_add_executable (TARGET solve.x SOURCES solve.F90 LIBS ${this})
 
 string(REPLACE " " ";" tmp ${FREAL8})
 foreach(flag ${tmp})

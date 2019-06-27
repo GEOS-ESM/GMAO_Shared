@@ -31,3 +31,7 @@ ecbuild_add_executable (
   TARGET sst_sic_QUARTdeg.x
   SOURCES proc_SST_FRACI_ostia_quart.F90
   LIBS ${this})
+
+file(GLOB cshscripts *.csh)
+file(GLOB perlscripts *.pl)
+install(FILES ${cshscripts} ${perlscripts} DESTINATION bin)
