@@ -13,11 +13,12 @@ esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
 target_include_directories(${this} PUBLIC ${INC_ESMF} ${INC_NETCDF})
 
 # special cases
-set_property(SOURCE PWSSSP.F APPEND_STRING PROPERTY COMPILE_FLAGS ${FREAL8})
-set_property(SOURCE sphere.F APPEND_STRING PROPERTY COMPILE_FLAGS ${FREAL8})
+set_source_files_properties(sphere.F PROPERTIES COMPILE_FLAGS "${FREAL8}")
 
 if (EXTENDED_SOURCE)
-   set_source_files_properties (PWSSSP.F PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
+   set_source_files_properties (PWSSSP.F PROPERTIES COMPILE_FLAGS "${FREAL8} ${EXTENDED_SOURCE}")
+else ()
+   set_source_files_properties (PWSSSP.F PROPERTIES COMPILE_FLAGS "${FREAL8}")
 endif ()
 
 
