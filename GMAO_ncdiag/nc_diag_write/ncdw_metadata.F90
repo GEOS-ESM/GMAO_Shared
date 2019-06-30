@@ -980,8 +980,8 @@ module ncdw_metadata
             end if
             
             ! We just need to add one entry...
-            call nc_diag_metadata_resize_iarr(var_index, 1)
-            call nc_diag_metadata_resize_byte(1)
+            call nc_diag_metadata_resize_iarr(var_index, 1_i_llong)
+            call nc_diag_metadata_resize_byte(1_i_llong)
             
             ! Now add the actual entry!
             diag_metadata_store%m_byte(diag_metadata_store%acount(1)) = metadata_value
@@ -1029,8 +1029,8 @@ module ncdw_metadata
             end if
             
             ! We just need to add one entry...
-            call nc_diag_metadata_resize_iarr(var_index, 1)
-            call nc_diag_metadata_resize_short(1)
+            call nc_diag_metadata_resize_iarr(var_index, 1_i_llong)
+            call nc_diag_metadata_resize_short(1_i_llong)
             
             ! Now add the actual entry!
             diag_metadata_store%m_short(diag_metadata_store%acount(2)) = metadata_value
@@ -1083,8 +1083,8 @@ module ncdw_metadata
 #endif
             
             ! We just need to add one entry...
-            call nc_diag_metadata_resize_iarr(var_index, 1)
-            call nc_diag_metadata_resize_long(1)
+            call nc_diag_metadata_resize_iarr(var_index, 1_i_llong)
+            call nc_diag_metadata_resize_long(1_i_llong)
             
             ! Now add the actual entry!
             diag_metadata_store%m_long(diag_metadata_store%acount(3)) = metadata_value
@@ -1134,8 +1134,8 @@ module ncdw_metadata
             end if
             
             ! We just need to add one entry...
-            call nc_diag_metadata_resize_iarr(var_index, 1)
-            call nc_diag_metadata_resize_rsingle(1)
+            call nc_diag_metadata_resize_iarr(var_index, 1_i_llong)
+            call nc_diag_metadata_resize_rsingle(1_i_llong)
             
             ! Now add the actual entry!
             diag_metadata_store%m_rsingle(diag_metadata_store%acount(4)) = metadata_value
@@ -1183,8 +1183,8 @@ module ncdw_metadata
             end if
             
             ! We just need to add one entry...
-            call nc_diag_metadata_resize_iarr(var_index, 1)
-            call nc_diag_metadata_resize_rdouble(1)
+            call nc_diag_metadata_resize_iarr(var_index, 1_i_llong)
+            call nc_diag_metadata_resize_rdouble(1_i_llong)
             
             ! Now add the actual entry!
             diag_metadata_store%m_rdouble(diag_metadata_store%acount(5)) = metadata_value
@@ -1243,8 +1243,8 @@ module ncdw_metadata
             ! We just need to add one entry...
             ! Strings can't be vectored (at least for attributes), so no 2nd argument
             ! here.
-            call nc_diag_metadata_resize_iarr(var_index, 1)
-            call nc_diag_metadata_resize_string(1)
+            call nc_diag_metadata_resize_iarr(var_index, 1_i_llong)
+            call nc_diag_metadata_resize_string(1_i_llong)
             
             ! If trim isn't enabled, set our maximum string length here!
             if (.NOT. enable_trim) then

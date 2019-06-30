@@ -121,7 +121,7 @@ module ncdw_varattr
 #ifdef _DEBUG_MEM_
                 print *, "adding var!"
 #endif
-                call nc_diag_varattr_expand(1)
+                call nc_diag_varattr_expand(1_i_llong)
                 diag_varattr_store%total = diag_varattr_store%total + 1
                 diag_varattr_store%names(diag_varattr_store%total) = var_name
                 diag_varattr_store%types(diag_varattr_store%total) = var_type

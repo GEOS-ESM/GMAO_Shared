@@ -335,7 +335,7 @@
      .                 'mls30           ', 'mls55           ', 'ompslp          ',
      .                 'tmi             ', 'gmi             ', 'acos            ',
      .                 'mopitt          ', 'cris-fsr        ', 'ompslpuv        ', 
-     .                 'ompslpvis       ', 'ompsnm          ', 'ompsnp'  /)
+     .                 'ompslpvis       ', 'ompsnm          ', 'ompsnp          '  /)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will
