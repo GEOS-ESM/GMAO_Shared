@@ -92,7 +92,7 @@ set(otherbin
    )
 
 install (
-   FILES ${perl_files} ${perl_packages} ${python_files} ${perlscripts} ${otherbin}
+   PROGRAMS ${perl_files} ${perl_packages} ${python_files} ${perlscripts} ${otherbin}
    DESTINATION bin
    )
 

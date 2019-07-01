@@ -34,14 +34,9 @@ if (DISABLE_FIELD_WIDTH_WARNING)
 endif ()
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 
-#install(
-#  TARGETS rs_numtiles.x binarytile.x time_ave.x
-#  DESTINATION ${CMAKE_BINARY_DIR}/bin
-#  )
-
 file(GLOB perlscripts *.pl)
 install(
-   FILES ${perlscripts} ec2grd.csh
+   PROGRAMS ${perlscripts} ec2grd.csh
    DESTINATION bin)
 
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${EXTENDED_SOURCE}")
@@ -119,13 +114,28 @@ include_directories (${include_GMAO_hermes})
 include_directories (${include_GEOS_Shared})
 include_directories (${include_GMAO_pFIO})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/plot.rc ${CMAKE_CURRENT_BINARY_DIR}/plot.rc COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/post.rc ${CMAKE_CURRENT_BINARY_DIR}/post.rc COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/stats.rc ${CMAKE_CURRENT_BINARY_DIR}/stats.rc COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gcmpost.script ${CMAKE_CURRENT_BINARY_DIR}/gcmpost.script COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tick ${CMAKE_CURRENT_BINARY_DIR}/tick COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/get_streams ${CMAKE_CURRENT_BINARY_DIR}/get_streams COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/get_archive ${CMAKE_CURRENT_BINARY_DIR}/get_archive COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/getdates ${CMAKE_CURRENT_BINARY_DIR}/getdates COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/time_ave.rc ${CMAKE_CURRENT_BINARY_DIR}/time_ave.rc COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gcmclim.script ${CMAKE_CURRENT_BINARY_DIR}/gcmclim.script COPYONLY)
+set (post_progs
+   gcmpost.script
+   tick
+   get_streams
+   get_archive
+   getdates
+   gcmclim.script
+   )
+
+install (
+   PROGRAMS ${post_progs}
+   DESTINATION post
+   )
+
+set (post_rc
+   plot.rc
+   post.rc
+   stats.rc
+   time_ave.rc
+   )
+
+install (
+   FILES ${post_rc}
+   DESTINATION post
+   )

@@ -72,7 +72,7 @@ ecbuild_add_executable (TARGET dyn_efsens.x     SOURCES dyn_efsens.f90     LIBS 
 ecbuild_add_executable (TARGET eta_echo.x       SOURCES eta_echo.f90       LIBS ${this})
 ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
 
-install(FILES cnv2prs.pl DESTINATION bin)
+install(PROGRAMS cnv2prs.pl DESTINATION bin)
 
 file(GLOB resource_files *.rc)
 install(FILES ${resource_files} DESTINATION etc)
