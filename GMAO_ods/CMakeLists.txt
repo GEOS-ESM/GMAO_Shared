@@ -62,4 +62,13 @@ if (EXTENDED_SOURCE)
   set_target_properties (dconv2ods.x PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif()
 
-install(FILES unique_instruments.csh DESTINATION bin)
+install(
+   PROGRAMS unique_instruments.csh obimp_summary.pl diag2ods
+   DESTINATION bin
+   )
+
+file (GLOB rc_files *.rc)
+install (
+   FILES ${rc_files} odslist.odt
+   DESTINATION etc
+   )

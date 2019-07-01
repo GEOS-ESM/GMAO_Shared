@@ -34,4 +34,4 @@ ecbuild_add_executable (
 
 file(GLOB cshscripts *.csh)
 file(GLOB perlscripts *.pl)
-install(FILES ${cshscripts} ${perlscripts} DESTINATION bin)
+install(PROGRAMS ${cshscripts} ${perlscripts} DESTINATION bin)

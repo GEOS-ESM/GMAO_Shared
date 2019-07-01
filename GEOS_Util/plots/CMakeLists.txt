@@ -1,9 +1,24 @@
-ecbuild_add_executable (TARGET zonal.x SOURCES zonal.f LIBS MAPL_Base)
+set (zonal_prog_name
+   zonal_${CMAKE_SYSTEM_NAME}.x
+   )
+
+ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL_Base)
 if (EXTENDED_SOURCE)
   set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif ()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/quickplot ${CMAKE_CURRENT_BINARY_DIR}/quickplot COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure ${CMAKE_CURRENT_BINARY_DIR}/configure COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/landscape.script ${CMAKE_CURRENT_BINARY_DIR}/landscape.script COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/portrait.script ${CMAKE_CURRENT_BINARY_DIR}/portrait.script COPYONLY)
+set (plots_progs
+   quickplot
+   quickstat
+   configure
+   landscape.script
+   portrait.script
+   moveplot
+   movestat
+   get_exports
+   )
+
+install (
+   PROGRAMS ${plots_progs}
+   DESTINATION plots
+   )
