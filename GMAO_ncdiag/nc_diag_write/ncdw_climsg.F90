@@ -97,12 +97,13 @@ module ncdw_climsg
             character(len=*), intent(in) :: err
 #ifdef ERROR_TRACEBACK
             integer(i_long)              :: div0
+            integer :: zero = 0
 #endif
             write(*, "(A)") " **   ERROR: " // err
 #ifdef ERROR_TRACEBACK
             write(*, "(A)") " ** Failed to process data/write NetCDF4."
             write(*, "(A)") "    (Traceback requested, triggering div0 error...)"
-            div0 = 1 / 0
+            div0 = 1 / zero
 #else
             stop " ** Failed to process data/write NetCDF4."
 #endif

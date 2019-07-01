@@ -88,22 +88,23 @@ module GEOS_PertSharedMod
 
   !GCM TRAJECTORY, RANK 3 VARIABLES
   character(len=NameSize), parameter :: GCM3Dvars(11) = &
-       (/'U ','V ','PT','DP','QV','QI','QL','O3','QLS','QCN','CFCN'/)
+       [ character(NameSize) :: 'U ','V ','PT','DP','QV','QI','QL','O3','QLS','QCN','CFCN' ]
 
   !Variables that will be read when dry
   character(len=NameSize), parameter :: GCM3DvarsRead(NUM_GCM3DvarsRead) = &
-       (/'U ','V ','PT',     'QV','QI','QL','O3'/)
+       [ character(NameSize) :: 'U ','V ','PT',     'QV','QI','QL','O3' ]
   !Varaibles that will be read when doing moist physics.
   character(len=NameSize), parameter :: GCM3DvarsReadMoist(NUM_GCM3DvarsReadMoist) = &
-       (/'U ','V ','PT',     'QV',          'O3','QLS','QCN','CFCN'/)
+       [ character(NameSize) :: 'U ','V ','PT',     'QV',          'O3','QLS','QCN','CFCN' ]
 
   !GCM TRAJECTORY, RANK 2 VARIABLES
   !KEEP PHIS AND PS IN 1ST AND 2ND POSITION.
   character(len=NameSize), parameter :: GCM2Dvars(24) =                  &
-       (/'PHIS','PS','FRLAND','HS_STDV','FROCEAN',                       &  !Dynamics
+       [ character(NameSize) ::                                          &
+         'PHIS','PS','FRLAND','HS_STDV','FROCEAN',                       &  !Dynamics
          'VARFLT','USTAR','BSTAR','ZPBL','CM','CT','CQ',                 &  !Turbulence/BL
          'KCBL','TS','KHL','KHU',                                        &  !Moist Physics
-         'DELTIRD','SLR','EMIS','COSZ','RGBUV','RGFUV','RGBIR','RGFIR'  /)  !Radiation
+         'DELTIRD','SLR','EMIS','COSZ','RGBUV','RGFUV','RGBIR','RGFIR'  ]   !Radiation
   
   type T_1DVar
      character(len=NameSize) :: Name

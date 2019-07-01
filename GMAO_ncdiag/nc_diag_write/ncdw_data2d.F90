@@ -1418,7 +1418,7 @@ module ncdw_data2d
             end if
             
             ! We just need to add one entry...
-            call nc_diag_data2d_resize_iarr(var_index, 1)
+            call nc_diag_data2d_resize_iarr(var_index, 1_i_llong)
             call nc_diag_data2d_resize_byte(input_size)
             
             ! Now add the actual entry!
@@ -1489,7 +1489,7 @@ module ncdw_data2d
             end if
             
             ! We just need to add one entry...
-            call nc_diag_data2d_resize_iarr(var_index, 1)
+            call nc_diag_data2d_resize_iarr(var_index, 1_i_llong)
             call nc_diag_data2d_resize_short(input_size)
             
             ! Now add the actual entry!
@@ -1565,7 +1565,7 @@ module ncdw_data2d
             end if
             
             ! We just need to add one entry...
-            call nc_diag_data2d_resize_iarr(var_index, 1)
+            call nc_diag_data2d_resize_iarr(var_index, 1_i_llong)
             call nc_diag_data2d_resize_long(input_size)
             
             ! Now add the actual entry!
@@ -1638,7 +1638,7 @@ module ncdw_data2d
             end if
             
             ! We just need to add one entry...
-            call nc_diag_data2d_resize_iarr(var_index, 1)
+            call nc_diag_data2d_resize_iarr(var_index, 1_i_llong)
             call nc_diag_data2d_resize_rsingle(input_size)
             
             ! Now add the actual entry!
@@ -1709,7 +1709,7 @@ module ncdw_data2d
             end if
             
             ! We just need to add one entry...
-            call nc_diag_data2d_resize_iarr(var_index, 1)
+            call nc_diag_data2d_resize_iarr(var_index, 1_i_llong)
             call nc_diag_data2d_resize_rdouble(input_size)
             
             ! Now add the actual entry!
@@ -1799,7 +1799,7 @@ module ncdw_data2d
             end if
             
             ! We just need to add one entry...
-            call nc_diag_data2d_resize_iarr(var_index, 1)
+            call nc_diag_data2d_resize_iarr(var_index, 1_i_llong)
             call nc_diag_data2d_resize_string(input_size)
             
             ! If trim isn't enabled, set our maximum string length here!
