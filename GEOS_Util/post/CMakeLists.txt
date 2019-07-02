@@ -22,7 +22,7 @@ foreach (basename
     time_ave convert_eta rs2hdf
     ec_prs2fv flat2hdf fvrst gg2eta ec_prs2eta
     merra2scm rsg3_vinterp era5_prs2eta)
-  ecbuild_add_executable (TARGET ${basename}.x SOURCES ${basename}.F)
+ ecbuild_add_executable (TARGET ${basename}.x SOURCES ${basename}.F DEFINITIONS mpi)
 endforeach ()
 ecbuild_add_executable (TARGET binarytile.x SOURCES binarytile.F90)
 ecbuild_add_executable (TARGET rs_numtiles.x SOURCES rs_numtiles.F90)
