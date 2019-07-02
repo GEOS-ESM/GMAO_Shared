@@ -91,7 +91,7 @@ ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this})
 ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this})
 ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this})
 
-install (FILES ec2fv.csh DESTINATION bin)
+install (PROGRAMS ec2fv.csh DESTINATION bin)
 
 #This needs to be worked on
 #ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS ${this})
