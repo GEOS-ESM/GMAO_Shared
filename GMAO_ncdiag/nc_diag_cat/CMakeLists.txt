@@ -14,10 +14,10 @@ esma_add_library (${this}
   )
 target_compile_definitions (${this} PRIVATE _REAL8_ ERROR_TRACEBACK QUIET)
 
-add_executable (test_nc_unlimdims.x test_nc_unlimdims.F90)
+ecbuild_add_executable (TARGET test_nc_unlimdims.x SOURCES test_nc_unlimdims.F90)
 target_link_libraries (test_nc_unlimdims.x PUBLIC ${this} ${ESMF_LIBRARIES})
 
-add_executable (nc_diag_cat.x nc_diag_cat.F90)
+ecbuild_add_executable (TARGET nc_diag_cat.x SOURCES nc_diag_cat.F90)
 target_link_libraries (nc_diag_cat.x PUBLIC ${this} ${ESMF_LIBRARIES})
 
 
