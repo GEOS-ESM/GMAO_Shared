@@ -2,10 +2,12 @@ module ncdw_realloc
     use kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
         r_double
     use ncdw_climsg, only: &
-#ifdef _DEBUG_MEM_
-        nclayer_debug, &
-#endif
         nclayer_error
+#ifdef _DEBUG_MEM_
+    use ncdw_climsg, only: &
+        nclayer_debug
+#endif
+
     
     implicit none
     
