@@ -31,10 +31,6 @@ esma_add_subdirectories(
   pnagpack
   )
 
-if (PFUNIT)
-  add_subdirectory (MAPL_pFUnit EXCLUDE_FROM_ALL)
-endif ()
-
 # Special cases - GMAO_gfio, and GFDL_fms are built twice with two
 # different precisions.
 add_subdirectory (GMAO_gfio GMAO_gfio_r4)
