@@ -17,6 +17,7 @@ add_f2py_module(binObs_
    DESTINATION lib/Python/pyobs
    INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${include_${this}}
    )
+add_dependencies(binObs_ ${this})
 
 add_f2py_module(IGBP_
    SOURCES IGBP_py.F90
@@ -24,6 +25,7 @@ add_f2py_module(IGBP_
    ONLY getsimpleveg getdetailedveg
    INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${include_${this}}
    )
+add_dependencies(IGBP_ ${this})
 
 file (GLOB python_files pyobs/*.py)
 install (FILES ${python_files} DESTINATION lib/Python/pyobs)

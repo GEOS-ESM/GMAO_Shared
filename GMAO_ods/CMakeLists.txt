@@ -97,6 +97,7 @@ add_f2py_module(pyods_
    INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
    DESTINATION lib/Python/pyods
    )
+add_dependencies(pyods_ ${this})
 
 separate_arguments(ODSMETA_ARGS NATIVE_COMMAND "sed -e 's/integer, parameter//g' -e 's/:://g' -e 's/\!/   #/g' -e 's/^[ ]*//g'")
 add_custom_command (
