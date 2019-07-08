@@ -54,3 +54,4 @@ if (CMAKE_SYSTEM_NAME MATCHES Linux)
    target_compile_definitions(${this} PRIVATE LINUX)
 endif ()
 
+ecbuild_add_executable(TARGET makdep SOURCES bld/makdep.c)

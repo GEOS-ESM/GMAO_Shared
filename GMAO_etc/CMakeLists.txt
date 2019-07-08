@@ -51,17 +51,20 @@ ecbuild_add_executable (
 ## bin ##
 
 file(GLOB perl_files *.pl)
+# We must remove two files because of DASPERL
+list(REMOVE_ITEM perl_files
+   ${CMAKE_CURRENT_SOURCE_DIR}/Err_Log.pl 
+   ${CMAKE_CURRENT_SOURCE_DIR}/fndate.pl
+   )
+
 file(GLOB perl_packages *.pm)
 file(GLOB python_files *.py)
 
 set(perlscripts
    acquire
    acquire_obsys
-   bacon
    esma_mpirun
-   fvgetf
    g5_modules_perl_wrapper
-   grads2grib
    jobIDfilter
    lsfpL
    mkdir_remote
@@ -73,11 +76,7 @@ set(perlscripts
    prund.pl
    r_dist
    require_obsys
-   rget
    rndasfiles
-   rput
-   rst2rcyc
-   rst4ncepf
    tick
    token_resolve
    vED
@@ -89,12 +88,31 @@ set(otherbin
    pyrob
    RmShmKeys_sshmpi.csh
    rmshmkeyhere.sh
+   protex
    )
 
 install (
    PROGRAMS ${perl_files} ${perl_packages} ${python_files} ${perlscripts} ${otherbin}
    DESTINATION bin
    )
+
+set(perlscripts_with_dasperl
+   Err_Log.pl
+   bacon
+   fvgetf
+   fndate.pl
+   grads2grib
+   rget
+   rst4ncepf
+   rst2rcyc
+   rput
+   )
+
+set (DASPERL /usr/bin/perl)
+foreach (script ${perlscripts_with_dasperl})
+   configure_file(${script} ${script} @ONLY)
+   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script} DESTINATION bin)
+endforeach ()
 
 ## etc ##
 

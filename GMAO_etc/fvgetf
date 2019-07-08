@@ -1,4 +1,4 @@
-#!@DASPERL -w
+#!@DASPERL@ -w
 #
 # Script for retriving fvDAS files from mass-storage w/ conversion and collocation
 # See usage() for more info.

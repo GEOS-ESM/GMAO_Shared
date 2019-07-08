@@ -82,19 +82,19 @@ set (srcs
    gmap.F
    )
 
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${ALIGNCOM} ${FREAL8}")
-set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG} ${EXTENDED_SOURCE} ${FREAL8}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${ALIGNCOM}")
+set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG} ${EXTENDED_SOURCE}")
 
-ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this})
-ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this})
-ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this})
-ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this})
-ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this})
+ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} FFLAGS "${FREAL8}")
 
 install (PROGRAMS ec2fv.csh DESTINATION bin)
 
 #This needs to be worked on
-#ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS ${this})
+ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
 
 esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r8i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
@@ -103,14 +103,3 @@ string (REPLACE " " ";" flags ${FREAL8})
 foreach (flag ${flags})
   target_compile_options (${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${flag}>)
 endforeach ()
-
-
-#set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${ALIGNCOM}")
-#set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG} ${EXTENDED_SOURCE}")
-
-#if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-#set_source_files_properties (m_elliptic.f PROPERTIES COMPILE_FLAGS "-vec-report0   -ftz   -align all   -fno-alias   -fpe0   -fp-model source -fp-model source")
-#endif ()
-
-
-
