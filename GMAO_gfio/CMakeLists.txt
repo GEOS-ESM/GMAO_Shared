@@ -55,7 +55,7 @@ include (UseF2Py)
 
 if (precision STREQUAL "r4")
   add_f2py_module(GFIO_ SOURCES GFIO_py.F90
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+    DESTINATION lib/Python
     ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
     gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
     gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
@@ -66,3 +66,8 @@ if (precision STREQUAL "r4")
 endif ()
 
 ecbuild_add_executable(TARGET GFIO_mean_${precision}.x SOURCES GFIO_mean.f90 LIBS GMAO_gfio_${precision} )
+
+install(
+   PROGRAMS gfio.py
+   DESTINATION lib/Python
+   )

@@ -139,3 +139,8 @@ install (
    FILES ${post_rc}
    DESTINATION post
    )
+
+install (
+   FILES stats.rc time_ave.rc
+   DESTINATION etc
+   )

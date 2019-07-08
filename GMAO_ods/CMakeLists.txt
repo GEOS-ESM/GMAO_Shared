@@ -84,3 +84,32 @@ install (
    FILES ${rc_files} odslist.odt
    DESTINATION etc
    )
+
+install (
+   PROGRAMS pyods/__init__.py
+   DESTINATION lib/Python/pyods
+   )
+
+include(UseF2Py)
+add_f2py_module(pyods_
+   SOURCES pyods_.F90
+   LIBRARIES GMAO_mpeu ${NETCDF_LIBRARIES}
+   INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
+   DESTINATION lib/Python/pyods
+   )
+
+separate_arguments(ODSMETA_ARGS NATIVE_COMMAND "sed -e 's/integer, parameter//g' -e 's/:://g' -e 's/\!/   #/g' -e 's/^[ ]*//g'")
+add_custom_command (
+   OUTPUT odsmeta.py
+   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+   SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h
+   COMMAND grep 'integer, parameter' ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h | ${ODSMETA_ARGS} | grep -v idsats > odsmeta.py
+   )
+
+add_custom_target(make_odsmeta ALL DEPENDS odsmeta.py)
+
+install(
+   PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/odsmeta.py
+   DESTINATION lib/Python/pyods
+   )
+

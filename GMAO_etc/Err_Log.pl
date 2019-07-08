@@ -1,4 +1,4 @@
-#!@DASPERL
+#!@DASPERL@
 
 ####################################################################
 # This is a wrapper script for the error routine, which takes 

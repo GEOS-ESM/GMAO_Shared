@@ -7,7 +7,9 @@ set(perldirs
    )
 
 foreach(perldir ${perldirs})
-   install (DIRECTORY ${perldirs}
+   install (
+      DIRECTORY ${perldirs}
       DESTINATION bin
+      USE_SOURCE_PERMISSIONS
       )
 endforeach()
