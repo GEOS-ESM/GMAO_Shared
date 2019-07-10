@@ -61,6 +61,7 @@ if (precision STREQUAL "r4")
     gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
     LIBRARIES GMAO_gfio_r4 ${NETCDF_LIBRARIES}
     INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
+    USE_MPI
     )
   add_dependencies(GFIO_ ${this})
 endif ()

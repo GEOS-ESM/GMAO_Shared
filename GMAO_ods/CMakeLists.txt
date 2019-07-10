@@ -93,9 +93,10 @@ install (
 include(UseF2Py)
 add_f2py_module(pyods_
    SOURCES pyods_.F90
-   LIBRARIES GMAO_mpeu ${NETCDF_LIBRARIES}
+   LIBRARIES GMAO_ods GMAO_mpeu ${NETCDF_LIBRARIES}
    INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
    DESTINATION lib/Python/pyods
+   USE_MPI
    )
 add_dependencies(pyods_ ${this})
 

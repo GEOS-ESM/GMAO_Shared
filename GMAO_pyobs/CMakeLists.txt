@@ -15,7 +15,7 @@ include(UseF2Py)
 add_f2py_module(binObs_
    SOURCES binObs_py.F
    DESTINATION lib/Python/pyobs
-   INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${include_${this}}
+   INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
    )
 add_dependencies(binObs_ ${this})
 
@@ -23,7 +23,8 @@ add_f2py_module(IGBP_
    SOURCES IGBP_py.F90
    DESTINATION lib/Python/pyobs
    ONLY getsimpleveg getdetailedveg
-   INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${include_${this}}
+   LIBRARIES GMAO_pyobs
+   INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
    )
 add_dependencies(IGBP_ ${this})
 
