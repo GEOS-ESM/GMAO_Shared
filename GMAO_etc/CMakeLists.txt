@@ -132,6 +132,6 @@ set (grads_files
    info.gs
    )
 
-install (FILES ${grads_files}
+install (PROGRAMS ${grads_files}
    DESTINATION lib/grads
    )
