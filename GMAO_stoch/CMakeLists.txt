@@ -58,5 +58,5 @@ foreach (flag ${flags})
   target_compile_options (${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${flag}>)
 endforeach ()
 
-set (CMAKE_Fortran_FLAGS_RELEASE "-O1 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${TRACEBACK} ${ALIGNCOM}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O1 ${BIG_ENDIAN} ${common_Fortran_flags} ${EXTENDED_SOURCE} ${TRACEBACK} ${ALIGNCOM}")
 
