@@ -7,7 +7,12 @@
 
 from ffnet                    import *
 from sklearn.base             import BaseEstimator
-from sklearn.cross_validation import cross_val_score
+
+# sklearn changed where cross_val_score exists
+try:
+    from sklearn.model_selection  import cross_val_score
+except ImportError:
+    from sklearn.cross_validation import cross_val_score
 
 class SKNET(ffnet,BaseEstimator):
 
