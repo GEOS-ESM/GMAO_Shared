@@ -1,0 +1,27 @@
+#!/bin/csh
+
+@anadir/clim/sst.py @expid
+@anadir/clim/sst_tp.py @expid
+@anadir/clim/sss.py @expid
+@anadir/clim/temp.py @expid
+@anadir/clim/salt.py @expid
+@anadir/clim/amoc.py @expid
+@anadir/clim/stress.py @expid
+@anadir/clim/precip.py @expid
+@anadir/clim/seaice.py @expid
+@anadir/clim/mld.py @expid
+@anadir/clim/eq_undercurrent.py @expid
+@anadir/clim/surf_current.py @expid
+@anadir/clim/sea_lev.py @expid
+@anadir/clim/psi.py @expid
+@anadir/tseries/hov_tp.py @expid
+@anadir/tseries/sst_gm.py @expid
+@anadir/tseries/temp_gm.py @expid
+@anadir/tseries/temp_gvm.py @expid
+@anadir/tseries/seaice.py @expid
+@anadir/tseries/ssh_gm.py @expid
+@anadir/tseries/nino3.py @expid
+@anadir/clim/shflx.py @expid
+@anadir/clim/lhflx.py @expid
+@anadir/clim/lwflx.py @expid
+@anadir/clim/swflx.py @expid
