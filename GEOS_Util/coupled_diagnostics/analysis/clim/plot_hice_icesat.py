@@ -187,6 +187,25 @@ if os.path.isfile(fname):
    lat = LAT
    tmask=ncfile.variables['TMASK'][0]
    ncfile.close()
+else:
+   files = glob.glob(EXPDIR+'/'+COLLECTION+'/*monthly.????'+SEASON[-2:]+'.nc4')
+   files.sort() 
+   ncfile = Dataset(files[0], 'r', format='NETCDF4')
+   LON=ncfile.variables['LON'][:]
+   LAT=ncfile.variables['LAT'][:]
+   lon = LON
+   lat = LAT
+   tmask=ncfile.variables['TMASK'][0]
+   ncfile.close()
+   hi03=np.zeros(tmask.shape)
+   for f in files:
+      ncfile = Dataset(f, 'r', format='NETCDF4')
+      hi=ncfile.variables['HICE'][0]
+      ncfile.close()
+      hi03 += hi
+   hi03 /= float(len(files))
+       
+
 
 SEASON='M10'
 fname=EXPDIR+'/'+COLLECTION+'/'+EXPID+'.'+COLLECTION+'.monthly.clim.'+SEASON+'.nc4' 
@@ -195,6 +214,16 @@ if os.path.isfile(fname):
    ncfile = Dataset(fname, 'r', format='NETCDF4')
    hi10=ncfile.variables['HICE'][0]
    ncfile.close()
+else:
+   files = glob.glob(EXPDIR+'/'+COLLECTION+'/*monthly.????'+SEASON[-2:]+'.nc4')
+   files.sort() 
+   hi10=np.zeros(tmask.shape)
+   for f in files:
+      ncfile = Dataset(f, 'r', format='NETCDF4')
+      hi=ncfile.variables['HICE'][0]
+      ncfile.close()
+      hi10 += hi
+   hi10 /= float(len(files))
 
 SEASON='M11'
 fname=EXPDIR+'/'+COLLECTION+'/'+EXPID+'.'+COLLECTION+'.monthly.clim.'+SEASON+'.nc4' 
@@ -203,6 +232,16 @@ if os.path.isfile(fname):
    ncfile = Dataset(fname, 'r', format='NETCDF4')
    hi11=ncfile.variables['HICE'][0]
    ncfile.close()
+else:
+   files = glob.glob(EXPDIR+'/'+COLLECTION+'/*monthly.????'+SEASON[-2:]+'.nc4')
+   files.sort() 
+   hi11=np.zeros(tmask.shape)
+   for f in files:
+      ncfile = Dataset(f, 'r', format='NETCDF4')
+      hi=ncfile.variables['HICE'][0]
+      ncfile.close()
+      hi11 += hi
+   hi11 /= float(len(files))
 
 
 hifall=(hi10*31.0+hi11*30.0)/(31.0+30.0)

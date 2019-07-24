@@ -59,7 +59,7 @@ def compute_extent(fname,area,mask):
    atemp1=ma.masked_where(aice<1.e-3, atemp1)
    return np.sum(atemp)/np.sum(atemp1) 
 
-def compute_extent_mon(EXPDIR, COLLECTION, year0, year1, mon, area, POLE):
+def compute_extent_mon(EXPDIR, COLLECTION, year0, year1, mon, area, mask):
     asum = np.zeros(year1-year0+1)
     asum[:] = -9999.0
     for year in range(year0, year1+1):
@@ -67,7 +67,7 @@ def compute_extent_mon(EXPDIR, COLLECTION, year0, year1, mon, area, POLE):
         fname=EXPDIR+'/'+COLLECTION+'/'+filename
         print fname
         if os.path.isfile(fname): 
-            asum[year-year0] = compute_extent(fname,area,POLE)
+            asum[year-year0] = compute_extent(fname,area,mask)
     asum = ma.masked_where(asum==-9999.0, asum)
     return np.mean(asum)  
 
@@ -172,6 +172,8 @@ except ImportError:
     EXPID=EXPDIR.split('/')[-1]
     PLOT_PATH = './'
     pngname = EXPID+'_DRIFT_SPEED_ANNCYCLE'
+    if start_year and end_year:
+       pngname=pngname+'_'+str(start_year)+'-'+str(end_year)
 COLLECTION='geosgcm_seaice'
 
 aa=subprocess.check_output(['grep', 'OGCM_IM', HOMDIR+'/AGCM.rc'])
@@ -202,7 +204,7 @@ plt.colorbar(orientation='vertical',extend='both',shrink=0.8)
 plt.show()
 '''
 
-if len(glob.glob(EXPDIR+'/'+COLLECTION+'/'+'*.monthly.clim.*')) > 0 and start_year is None:
+if len(glob.glob(EXPDIR+'/'+COLLECTION+'/'+'*.monthly.clim.*')) == 12 and start_year is None:
    for mon in range(1,13,1):
        SEASON='M'+str(mon)
        if mon < 10:
@@ -222,7 +224,7 @@ else:
        SEASON=str(mon)
        if mon < 10:
            SEASON='0'+str(mon)
-       total_extent[mon-1] = compute_extent_mon(EXPDIR, COLLECTION, start_year, end_year, SEASON, area, POLE) 
+       total_extent[mon-1] = compute_extent_mon(EXPDIR, COLLECTION, start_year, end_year, SEASON, area, mask) 
 
 total_extent = total_extent*86400*1.e-3  # m/s -> km/day
 print total_extent
@@ -257,8 +259,6 @@ ax.set_ylabel(r'km/day',fontsize=20)
 #fig.legend((l1, l2), ('GEOS5', 'ICESat'), 'upper right')
 #ax.set_size('large')
 #plt.show()
-if start_year and end_year:
-   pngname=pngname+'_'+str(start_year)+'-'+str(end_year)
 plt.savefig(PLOT_PATH+'/'+pngname)
 
 
