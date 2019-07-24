@@ -131,6 +131,8 @@ except ImportError:
     EXPID=EXPDIR.split('/')[-1]
     PLOT_PATH = './'
     pngname = EXPID+'_EXTENT_ANNCYCLE'
+    if start_year and end_year:
+       pngname=pngname+'_'+str(start_year)+'-'+str(end_year)
 COLLECTION='geosgcm_seaice'
 
 aa=subprocess.check_output(['grep', 'OGCM_IM', HOMDIR+'/AGCM.rc'])
@@ -147,7 +149,7 @@ for k,POLE in enumerate(['N', 'S']):
     fname=NOBACKUP+'/ObservationData/NSIDC/'+POLE+'_'+SEASON+'_area.txt'
     nsidc_total_extent[mon-1]=computeMeanExtent(fname)
   print nsidc_total_extent
-  if len(glob.glob(EXPDIR+'/'+COLLECTION+'/'+'*.monthly.clim.*')) > 0 and start_year is None:
+  if len(glob.glob(EXPDIR+'/'+COLLECTION+'/'+'*.monthly.clim.*')) == 12 and start_year is None:
       for mon in range(1,13,1):
           SEASON='M'+str(mon)
           if mon < 10:
@@ -204,8 +206,6 @@ ax.set_ylabel(r'$10^6km^2$',fontsize=20)
 #fig.legend((l1, l2), ('GEOS5', 'ICESat'), 'upper right')
 #ax.set_size('large')
 #plt.show()
-if start_year and end_year:
-   pngname=pngname+'_'+str(start_year)+'-'+str(end_year)
 plt.savefig(PLOT_PATH+'/'+pngname)
 
 

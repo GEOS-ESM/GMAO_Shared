@@ -149,6 +149,28 @@ for sea,mon in zip(SEASON,MONTH):
      aice=ncfile.variables['AICE'][:]
      tmask=ncfile.variables['TMASK'][:]
      ncfile.close()
+  else:
+     files = glob.glob(EXPDIR+'/'+COLLECTION+'/*monthly.????'+sea[-2:]+'.nc4')
+     files.sort() 
+     ncfile = Dataset(files[0], 'r', format='NETCDF4')
+     LON=ncfile.variables['LON'][:]
+     LAT=ncfile.variables['LAT'][:]
+     lon = LON
+     lat = LAT
+     tmask=ncfile.variables['TMASK'][:]
+     ncfile.close()
+     aice=np.zeros((1, tmask.shape[0], tmask.shape[1]))
+     fbot=np.zeros((1, tmask.shape[0], tmask.shape[1]))
+     for f in files:
+       ncfile = Dataset(f, 'r', format='NETCDF4')
+       hi=ncfile.variables['HICE'][:]
+       ai=ncfile.variables['AICE'][:]
+       ncfile.close()
+       fbot += hi
+       aice += ai
+     fbot /= float(len(files))
+     aice /= float(len(files))
+     
 
 
 #print aice.shape
