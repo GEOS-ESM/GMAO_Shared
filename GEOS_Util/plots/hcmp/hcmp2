@@ -273,10 +273,12 @@ endif
 
 * Release memory for DEFINEd variables not needed
 * -----------------------------------------------
+say 'Releasing variables not needed ...'
       months = 'jan feb mar apr may jun jul aug sep oct nov dec djf jja son mam ann clim'
            m = 1
        month = subwrd(months,m)
 while( month != '' )
+
             k = 1
        season = subwrd(seasons,k)
       'lowercase 'season
@@ -288,7 +290,14 @@ while( month != '' )
           endif
                k = k+1
           season = subwrd(seasons,k)
+         'lowercase 'season
+                     season = result
        endwhile
+       if( needed = FALSE )
+          say ''month' is not NEEDED, needed = 'needed
+       else
+          say ''month' is     NEEDED, needed = 'needed
+       endif
        if( needed = FALSE )
            if( EXPORT = "CHI" | EXPORT = "PSI" )
                if( xdim>576 | ydim>361 )
@@ -553,6 +562,8 @@ while( month != '' )
           endif
                k = k+1
           season = subwrd(seasons,k)
+         'lowercase 'season
+                     season = result
        endwhile
        if( needed = FALSE )
            if( EXPORT = "CHI" | EXPORT = "PSI" )
@@ -1046,6 +1057,8 @@ while( month != '' )
           endif
                k = k+1
           season = subwrd(seasons,k)
+         'lowercase 'season
+                     season = result
        endwhile
        if( needed = FALSE )
            if( EXPORT = "CHI" | EXPORT = "PSI" )

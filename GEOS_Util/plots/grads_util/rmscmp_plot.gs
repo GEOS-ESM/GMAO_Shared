@@ -153,6 +153,8 @@ if( xpos =  7 ) ; region = "S.W. Quadrant (Lons:-180,0  Lats: 0,-90)"   ;  reg =
 if( xpos =  8 ) ; region = "S.E. Quadrant (Lons: 0,180  Lats: 0,-90)"   ;  reg = "SEQ"  ; endif
 if( xpos =  9 ) ; region = "North America (Lons:-140,-60  Lats: 20,60)" ;  reg = "NAM"  ; endif
 if( xpos = 10 ) ; region = "Europe (Lons:-10,30  Lats: 30,60)"          ;  reg = "EUR"  ; endif
+if( xpos = 11 ) ; region = "N.Polar (Lats: 60,90)"                      ;  reg = "NPO"  ; endif
+if( xpos = 12 ) ; region = "S.Polar (Lats: -60,-90)"                    ;  reg = "SPO"  ; endif
 
 
 filebeg  = 1
@@ -498,8 +500,8 @@ critval95 = subwrd(result,3)
 critval99 = subwrd(result,3)
 
 
-* Estimate Statistically Significant Range for Synoptic Variability from Average of All Experiment
-* ------------------------------------------------------------------------------------------------
+* Estimate Statistically Significant Range for Synoptic Variability from Average of All Experiment (90% Confidence)
+* -----------------------------------------------------------------------------------------------------------------
 'set dfile 'dfile
 'set t 1   'tmin
 'define zvarave = lev-lev'
@@ -520,8 +522,8 @@ endwhile
 'define rLave = pow( abs(zave0-dx),'irmsfact' )'
 
 
-* Estimate Statistically Significant Range for Zero-Mean Hypothesis in a Paired t-Test
-* ------------------------------------------------------------------------------------
+* Estimate Statistically Significant Ranges for Zero-Mean Hypothesis in a Paired t-Test
+* -------------------------------------------------------------------------------------
 m = 1
 while( m<=mexps )
 'set dfile 'ddif.m

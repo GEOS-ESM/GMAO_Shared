@@ -42,8 +42,10 @@ endif
 'rgbset'
 'c'
 
+'getinfo xdim'
+         xdim = result
 x = 1
-while ( x<=10 )
+while ( x<=xdim )
 'set  x 'x
 'corz h 'DESC
 'c'

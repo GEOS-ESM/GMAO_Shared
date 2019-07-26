@@ -166,9 +166,10 @@ say 'rcfile = 'rcfile
 
 'set dfile 'obsfile
 'set z 1'
-'sett'
+'getdates'
 'define   precip = 'oname'*'oscale
 'seasonal precip obs'
+
 
 
 * Perform Taylor Plots

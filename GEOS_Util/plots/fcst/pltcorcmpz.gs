@@ -106,6 +106,8 @@ endwhile
 *******************************************************
 
 'set dfile 1'
+'getinfo xdim'
+         xdim = result
 'q ctlinfo'
 say 'ctlinfo 'result
 'getinfo nvars'
@@ -140,6 +142,7 @@ numflds = m
 ****             Make Zonal Mean Plots             ****
 *******************************************************
 
+say 'XDIM = 'xdim
 n = 1
 while ( n<=numflds )
 
@@ -148,7 +151,7 @@ while ( n<=numflds )
 while( j<=numfields )
 if( field = subwrd(fields,j) & field != p )
     x = 1
-    while ( x<=10 )
+    while ( x<=xdim )
       'run 'geosutil'/plots/grads_util/corcmpz -x 'x' -field 'field' -rc 'rcfile' -desc 'DESC' -debug FALSE'
       'c'
        x = x + 1

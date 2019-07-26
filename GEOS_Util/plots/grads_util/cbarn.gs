@@ -21,6 +21,7 @@
 *                 < -snum   nn >
 *                 < -xmid   nn >
 *                 < -ymid   nn >
+*                 < -ndot   nn >
 *                 < -horz  >
 *                 < -abs   >
 *                 < -vert l or r (Default r:right) >
@@ -35,6 +36,7 @@
 *       vert   - FORCES a vertical   bar (left or right, default:right)
 *       xmid   - the x position on the virtual page the center the bar
 *       ymid   - the x position on the virtual page the center the bar
+*       ndot   - number of digits after decimal point (default: 2)
 *
 *       if arguments are not specified, they are selected
 *       as in the original algorithm
@@ -51,6 +53,7 @@ function colorbar (args)
     scaley = 1
       sbar = 1
       snum = 0.8
+      ndot = 2
       xmid = ''
       ymid = ''
       vert = 0
@@ -63,6 +66,7 @@ if( subwrd(args,num)='-sbar'  ) ; sbar   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-snum'  ) ; snum   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-xmid'  ) ; xmid   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-ymid'  ) ; ymid   = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-ndot'  ) ; ndot   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-vert'  ) 
     vpos = subwrd(args,num+1)
     if( vpos != 'l' ) ; vpos = 'r' ; endif
@@ -214,8 +218,8 @@ endwhile
         offset = 0
     endif
 
-* Note:  Only take NDOT values after decimal point  (LT)
-         ndot    = 2
+* Note:  Only take NDOT values after decimal point
+* ------------------------------------------------
          dotloc  = 0
          counter = 1
          while ( counter<20 )
@@ -224,11 +228,11 @@ endwhile
                               counter = counter + 1
          endwhile
          if( dotloc=2 )
-             dotloc = dotloc+2
+             dotloc = dotloc+ndot
              val = substr(val,1,dotloc+offset)
          else 
              if( dotloc=3 )
-                 dotloc = dotloc+1
+                 dotloc = dotloc+ndot-1
                  val = substr(val,1,dotloc+offset)
              else 
                  if( dotloc!=0 )
@@ -236,10 +240,6 @@ endwhile
                  endif
              endif
          endif
-*        if( dotloc!=0 )
-*            dotloc = dotloc+ndot
-*               val = substr(val,1,dotloc)
-*        endif
          say 'color = 'col', value = 'val
 
     if (vert)

@@ -266,6 +266,10 @@ end
 
 if( $cmpops_only == TRUE ) set cmpexp_only = TRUE
 
+if( $begdate != NULL ) set clim = false
+if( $enddate != NULL ) set clim = false
+if( $#seasons > 1    ) set clim = false
+
 setenv SOURCE         $source
 setenv CLIM           $clim
 setenv TAYLOR         $taylor
@@ -302,9 +306,6 @@ if( $rc   == HISTORY.rc ) then
 else
     setenv   HISTORYRC            $rc
 endif
-
-if( $TBEG != NULL ) setenv CLIM false
-if( $TEND != NULL ) setenv CLIM false
 
 
 # Echo Plotting Environment

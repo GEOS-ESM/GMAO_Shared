@@ -149,14 +149,19 @@ while( num <= ntot )
        num = num + 1
 endwhile
 
+'getinfo xdim'
+         xdim = result
+
 'set lev 'lev
 'set x   'x
 
-if( rms = 0 )
+if( x <= xdim )
+    if( rms = 0 )
    'corcmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc'            -debug 'debug
    'rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
-else
+    else
    'rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
+    endif
 endif
 
 return

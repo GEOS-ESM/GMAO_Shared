@@ -246,10 +246,6 @@ endwhile
 '!/bin/cp 'geosutil'/plots/grads_util/makefile.tmpl .'
 '!sed -f   sedfile makefile.tmpl > 'name'.ddf'
 
-'!ls  -latr'
-  say  name'.ddf:'
-'!cat 'name'.ddf'
-
    'xdfopen 'name'.ddf'
    'getinfo    numfiles'
                newfile = result

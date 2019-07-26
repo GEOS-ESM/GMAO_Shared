@@ -2728,7 +2728,7 @@ sub regrid_surface_rsts {
 
     # check vegdyn_internal_rst
     #--------------------------
-    check_vegdyn(\%H2, $OutData_dir) if $H1{"vegdyn_check"};
+    # check_vegdyn(\%H2, $OutData_dir) if $H1{"vegdyn_check"};
 }
 
 #=======================================================================

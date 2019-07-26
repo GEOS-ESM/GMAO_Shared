@@ -163,7 +163,7 @@ if( field = subwrd(fields,j) )
     while ( z<=numlevs )
     if( level.z = 100 | level.z = 150 | level.z = 200 | level.z = 250 | level.z = 300 | level.z = 400 | level.z = 500 | level.z = 600 | level.z = 700 | level.z = 750 | level.z = 800 | level.z = 850 | level.z = 900 | level.z = 925 | level.z = 950 | level.z = 975 | level.z = 1000 )
       x = 1
-      while ( x<=10 )
+      while ( x<=12 )
       'run 'geosutil'/plots/grads_util/corcmp -x 'x' -lev 'level.z' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE'
       'c'
       x = x + 1

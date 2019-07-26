@@ -44,7 +44,7 @@ endif
 
 z = 1
 x = 1
-while ( x<=10 )
+while ( x<=12 )
 'set x 'x
 'set z 'z
      n = 1

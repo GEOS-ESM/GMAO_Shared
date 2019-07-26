@@ -24,6 +24,7 @@ expdsc  = subwrd  (args,5)
 'set dfile 'obsfile
 'count "'season'"'
  nobs = result
+say 'NOBS = 'nobs
 
 'set dfile 'modfile
 'run getenv "BEGDATE"'
@@ -32,6 +33,7 @@ expdsc  = subwrd  (args,5)
              enddate  = result
 'count "'season'" 'begdate' 'enddate
  nmod = result
+say 'NMOD = 'nmod
 
 
 * Create Zonal Mean Variables
@@ -94,7 +96,9 @@ if( qmaxo >= qmaxm ) ; axlim = 1.1*qmaxo ; endif
 'd qmodz'
 
 'set vpage off'
-'lines "'geosutil'/precip/precip1.stk" 1'
+'!/bin/cp 'geosutil'/precip/precip1.stk dum.stk'
+'!cat dum.stk | sed -e "s/Verification/'obsnam'/g" > precip1.stk'
+'lines precip1.stk 1'
 
 
 * Convective & Large-Scale Precip

@@ -19,7 +19,7 @@ function pltsys (args)
 *****  Defaults: plot all fields for all experiments       *****
 *****       exp: 0 1 2 3 ... n                             *****
 *****     field: p u v t q h chi psi                       *****
-*****     level: 1000 850 700 500 400 300 250 200 150 100  *****
+*****     level: HORIZ   or   ZONAL  or  value             *****
 *****    rcfile: stats.rc                                  *****
 *****                                                      *****
 ****************************************************************
@@ -148,6 +148,8 @@ m=0
 n=1
 while(n<=nvars)
 
+* Determine Number of Levels Defined for each Field
+* -------------------------------------------------
 'run getvarz 'n
    name  = subwrd(result,1)
    levs  = subwrd(result,2)
@@ -195,49 +197,90 @@ while ( n<=numflds )
   if( field = chi ) ; name = chi  ; endif
   if( field = psi ) ; name = psi  ; endif
 
-if( level0 = 'NULL' )
+*******************************************************
+****         Begin Systematic Error Plots ...      ****
+*******************************************************
+
+say 'Processing 'field' for pltsys:'
+
+if( level0 = 'NULL' | level0 = 'HORIZ' | level0 = 'ZONAL' )
+
         numlevs = levs.n
     if( numlevs > 1 )
+
+*       Create Array of Levels associated with Field
+*       --------------------------------------------
         'set z 1'
         'getinfo level'
-        levels = result
-        z = 2
-        while( z<=numlevs )
+         levels = result
+         z = 2
+         while( z<=numlevs )
            'set z 'z
            'getinfo level'
                     level  = result
                  if(level >= 100 )
                     levels = levels' 'level
                  endif
-        z = z + 1
-        endwhile
-       'set lev 1000 100' 
+         z = z + 1
+         endwhile
+        'set lev 1000 100' 
+
     else
         numlevs = 1
         levels = '1000'
        'set z 1'
     endif
+
 else
-    if( level0 != 'zonal' )
         numlevs = 1
         levels = level0
-       'set lev 'level0
-    else
-        numlevs = levs.n
-        levels = level0
-       'set lev 1000 100'
-    endif
+
+*     Determine if Input Level is Valid
+*     ---------------------------------
+       'getlevs 'field'f'
+          nlevs = result
+          valid = false
+
+       if(nlevs > 1)
+          z = 1
+          while( z<=nlevs )
+            'set z 'z
+            'getinfo level'
+                     level = result
+            say 'Checking 'level' against 'level0
+            if( level = level0 )
+                valid = true
+            endif
+            z = z + 1
+          endwhile
+       else
+          if( level0 = 1000 )
+              valid = true
+          endif
+       endif
+
+       if( valid = true )
+          'set lev 'level0
+       else
+           return
+       endif
 endif
+
 say 'NUMLEVS = 'numlevs
 say '   LEVS = 'levels
 
+say 'Calling statmak_sys for 'field' 'DESC.k
+'q dims'
+say 'DIMS: 'result
+
 'statmak_sys 'field' 'DESC.k
+
 
 ************** 
 
 * Horizonal Plots
 * ---------------
-if( level0 != 'zonal' )
+if( level0 != 'ZONAL' )
   z = 1
   while ( z<=numlevs )
               level = subwrd(levels,z)
@@ -246,20 +289,52 @@ if( level0 != 'zonal' )
              'setlons'
              'sety'
              'set lev 'level
+              say 'Calling Horizontal Movie Statplt for Field: 'field
               say 'Z: 'z
               say 'LEVEL: 'level
              'c'
              'movie statplt "'field' -desc 'DESC' -nfcst 'numfiles' -title 'title'" -print -rotate 90 -name 'SOURCE'/'DESC'/stats_'name'_all_GLO_'level'_'month
              'c'
              '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'DESC'/stats_'name'_all_GLO_'level'_'month'.*.gif 'SOURCE'/'DESC'/stats_'name'_all_GLO_'level'_'month'.gif &'
+
+*              Write Systematic Error File
+*              ---------------------------
+              'set dfile 1'
+              'getinfo undef'
+                       undef = result
+              'set     undef ' undef
+              'setlons'
+              'getinfo xmin'
+                       xmin = result
+              'getinfo xmax'
+                       xmax = result - 1
+                      level = subwrd(levels,1)
+              'sett'
+              'set lat -90 90'
+              'set x 'xmin' 'xmax
+              'set lev 'level
+
+              if( field = p   ) ; name = slp  ; scale = 1    ; endif
+              if( field = h   ) ; name = hght ; scale = 1    ; endif
+              if( field = u   ) ; name = uwnd ; scale = 1    ; endif
+              if( field = v   ) ; name = vwnd ; scale = 1    ; endif
+              if( field = t   ) ; name = tmpu ; scale = 1    ; endif
+              if( field = q   ) ; name = sphu ; scale = 1000 ; endif
+              
+              'define 'name' = 'field'fma'DESC.k'/'scale
+              'set sdfwrite -4d -flt -nc3 'SOURCE'/'DESC'/'field'fma_'level'_'DESC'.nc3'
+                  'sdfwrite 'name
            endif
   z = z + 1
   endwhile
 endif
 
+
 * Zonal Mean Plots
 * ----------------
-if( level0 = 'zonal' | ( level0 = 'NULL' & numlevs > 1) )
+if( level0 = 'NULL' | level0 = 'ZONAL' )
+if( numlevs > 1 )
+    say 'Calling Zonal Movie Statpltz for Field: 'field
    'set dfile 1'
    'set x 1'
    'sety'
@@ -269,43 +344,20 @@ if( level0 = 'zonal' | ( level0 = 'NULL' & numlevs > 1) )
    'c'
    '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month'.*.gif 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month'.gif &'
 endif
+endif
 
 ************** 
 
-*  Write Systematic Error File
-*  ---------------------------
-
-'set dfile 1'
-'getinfo undef'
-         undef = result
-'set     undef ' undef
-'setlons'
-'getinfo xmin'
-         xmin = result
-'getinfo xmax'
-         xmax = result - 1
-'sett'
-'set lat -90 90'
-'set x 'xmin' 'xmax
-'set lev 1000 100'
-
-if( field = p   ) ; name = slp  ; scale = 1    ; endif
-if( field = h   ) ; name = hght ; scale = 1    ; endif
-if( field = u   ) ; name = uwnd ; scale = 1    ; endif
-if( field = v   ) ; name = vwnd ; scale = 1    ; endif
-if( field = t   ) ; name = tmpu ; scale = 1    ; endif
-if( field = q   ) ; name = sphu ; scale = 1000 ; endif
-
-'define 'name' = 'field'fma'DESC.k'/'scale
-'set sdfwrite -4d -flt -nc3 'SOURCE'/'DESC'/'field'fma'DESC'.nc3'
-    'sdfwrite 'name
-
-************** 
+**************
+** Loop over field
+**************
 
 n = n + 1
 endwhile
 
-************** 
+**************
+** Loop over EXP
+**************
 
 k = k+1
 endwhile
