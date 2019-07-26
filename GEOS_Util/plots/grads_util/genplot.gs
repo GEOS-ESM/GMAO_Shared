@@ -739,6 +739,108 @@ while(   k <= numrc )
      if(RC != 'NULL') ; RCFILE = geosutil'/plots/'NAME'/VERIFICATION.'RC'.rc' ; endif
  if( RCFILE =  rcfile )
 
+ say 'k = 'k'  RCFILE = 'RCFILE
+
+* Check for VERIFICATION Formula File
+* -----------------------------------
+'!remove OBSFORM.txt'
+'!echo `basename 'RCFILE' | cut -d. -f2 > OBSFORM.txt`'
+'run getenv OBSFORM'
+            OBSNAME = result
+            OBSFORM = OBSNAME'form.gs'
+
+say 'Checking for OBSFORM: 'geosutil'/plots/'NAME'/'OBSFORM
+
+'!remove CHECKFILE.txt'
+'!chckfile 'geosutil'/plots/'NAME'/'OBSFORM
+ 'run getenv CHECKFILE'
+             CHECKFILE  = result
+
+say 'CHECKFILE = 'CHECKFILE
+if( CHECKFILE != 'NULL' )
+        
+         LOBSFORM = 'TRUE'
+        'run 'geosutil'/plots/'NAME'/'OBSFORM' -OBS'
+         OBS = result
+         say 'OBSFORM OBS: 'OBS
+        'numargs  'OBS
+         numobs = result
+         say '     NUMOBS: 'numobs
+
+* Read Verification OBS:OBSGC
+* ---------------------------
+              n = 1
+          OBSNAME.n = subwrd(OBS,n   )
+           next = subwrd(OBS,n+1 )
+            bit = checkbit(next)
+       say 'OBSNAME.'n': 'OBSNAME.n
+       while( bit != '' )
+              n = n + 1
+          OBSNAME.n = subwrd(OBS,n   )
+           next = subwrd(OBS,n+1 )
+            bit = checkbit(next)
+       say 'OBSNAME.'n': 'OBSNAME.n
+       endwhile
+
+* Construct OBS GCs from OBS EXPORTS
+* ----------------------------------
+        m  = 0
+        n  = 1
+while ( n <= numobs )
+        EX = ''
+         j = 1
+       bit = substr(OBSNAME.n,j,1)
+       while(bit != ':' & bit != '')
+        EX = EX''bit
+         j = j + 1
+       bit = substr(OBSNAME.n,j,1)
+       endwhile
+       if( EX != OBSNAME.n )
+         m = m + 1
+         j = j + 1
+       OBSNAMEGC.m = ''
+       bit = substr(OBSNAME.n,j,1)
+       while(bit != '')
+       OBSNAMEGC.m = OBSNAMEGC.m''bit
+         j = j + 1
+       bit = substr(OBSNAME.n,j,1)
+       endwhile
+       OBSNAME.n = EX
+       endif
+n = n + 1
+endwhile
+
+* Get Verification Variables
+* --------------------------
+FOUND = TRUE
+        n  = 1
+while ( n <= numobs & FOUND = TRUE )
+'run getobs 'OBSNAME.n' 'OBSNAMEGC.n' 'rcfile
+        oname.n = subwrd(result,1)
+        ofile.n = subwrd(result,2)
+        oscal.n = subwrd(result,3)
+        odesc.n = subwrd(result,4)
+         otag.n = subwrd(result,5)
+
+say 'VERIFICATION_EXPORT_name: 'oname.n
+say '             description: 'odesc.n
+say '                     tag: ' otag.n
+say '                    file: 'ofile.n
+say '                 scaling: 'oscal.n
+say ''
+    if( oname.n = 'NULL' ) ; FOUND = FALSE ; endif
+         n  = n + 1
+endwhile
+
+* Save Original numn for other RCs
+* --------------------------------
+  numnorig = numn
+  numn     = numobs
+
+else
+
+  LOBSFORM = 'FALSE'
+   OBSFORM = 'obsform.gs'
 
 * Get Verification Variables
 * --------------------------
@@ -761,6 +863,8 @@ say ''
     if( oname.n = 'NULL' ) ; FOUND = FALSE ; endif
          n  = n + 1
 endwhile
+
+endif
 
 if( FOUND = TRUE )
 'setlons'
@@ -798,7 +902,7 @@ endif
 if( numn = 1 )
    'define qobs = 'oname.1'.'ofile.1'*'oscal.1
 else
-    filename  = geosutil'/plots/'NAME'/obsform.gs'
+    filename  = geosutil'/plots/'NAME'/'OBSFORM
     ioflag    = sublin( read(filename),1 )
     if(ioflag = 0)
        close  = close(filename)
@@ -808,7 +912,7 @@ else
           ostring = ostring' 'oname.n'.'ofile.n'*'oscal.n
                n  = n + 1
        endwhile
-      'run 'geosutil'/plots/'NAME'/obsform 'ostring
+      'run 'geosutil'/plots/'NAME'/'OBSFORM' 'ostring
     else
        ostring = NAME
        n  = 1
@@ -995,6 +1099,12 @@ endif
 * Update Verification Loop Index
 * ------------------------------
 k = k + 1
+
+* Restore Original numn for other RCs
+* -----------------------------------
+if( LOBSFORM = 'TRUE' )
+        numn = numnorig
+endif
 
 * End Verification Loop
 * ---------------------

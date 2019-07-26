@@ -47,6 +47,8 @@ endif
 'set dfile 1'
 'getinfo nvars'
          nvars = result
+'getinfo xdim'
+         xdim  = result
 n=1
 while(n<=nvars)
 
@@ -70,7 +72,7 @@ endif
 z = 1
 while ( z<=zmax )
 x = 1
-while ( x<=12 )
+while ( x<=xdim )
 'set x 'x
 'set z 'z
 'rms 'root' 'DESC

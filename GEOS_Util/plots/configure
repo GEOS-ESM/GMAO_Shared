@@ -82,19 +82,132 @@ s?ARCH?$arch?g
 EOF
 sed -f sedfile $GASCRP/udft.template > $GAUDFT
 
-# Link Radiation Directories for Cloud-Cleared Diagnostics
+# Link VERIFICATION Directories
+# -----------------------------------------------------------------------------------
+
+# VERIFICATION.SRB
+# ---------------------
+set dirs = `echo olrc olrcf radnetg radnetgc radswt tpw cldtt albedo             \
+            lwgnet lwgnetc lwgnetcf lwgup lwgupc lwgupcf lwgdwn lwgdwnc lwgdwncf \
+            swgnet swgnetc swgnetcf swgup swgupc swgupcf swgdwn swgdwnc swgdwncf `
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.SRB.rc  .
+end
+
+# VERIFICATION.ERBE
+# ----------------------
+set dirs = `echo osr osrc osrcf olr olrc olrcf nettoa nettoac toacf`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ERBE.rc  .
+end
+
+# VERIFICATION.CERES_EBAF-TOA_Ed4.0
+# --------------------------------------
+set dirs = `echo toacf tseries osrcf osrc osr radswt olrc olr olrcf nettoac nettoa`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.CERES_EBAF-TOA_Ed4.0.rc  .
+end
+
+# VERIFICATION.CERES_EBAF
+# -----------------------
+set dirs = `echo toacf olrc olrcf nettoac tseries nettoa olr osrcf osrc osr radswt`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.CERES_EBAF.rc  .
+end
+
+# VERIFICATION.COADS
+# -----------------------
+set dirs = `echo emp speed eflux hflux cldtt taux tauy`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.COADS.rc  .
+end
+
+# VERIFICATION.ISCCP
+# -----------------------
+set dirs = `echo cldhi cldlo cldmd cldtt`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ISCCP.rc  .
+end
+
+# VERIFICATION.GSSTF
+# -----------------------
+set dirs = `echo eflux hflux speed taux tauy tpw`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GSSTF.rc  .
+end
+
+# VERIFICATION.ECINTERIM
+# ---------------------------
+set dirs = `echo hcmp lcmp zcmp zcmp1 tseries precip`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECINTERIM.rc  .
+end
+
+# VERIFICATION.ECANA
+# -----------------------
+set dirs = `echo hcmp lcmp zcmp`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECANA.rc  .
+end
+
+# VERIFICATION.ERA5
+# ----------------------
+set dirs = `echo lwgdwnc lwgdwn lwgnetc lwgnet lwgupc lwgup \
+                 swgdwnc swgdwn swgnetc swgnet swgupc swgup \
+                 precipcn precipls precip `
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ERA5.rc  .
+end
+
+# VERIFICATION.GDAS1
+# -----------------------
+set dirs = `echo hcmp lcmp zcmp`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GDAS1.rc  .
+end
+
+# VERIFICATION.NCEP
+# ----------------------
+set dirs = `echo hcmp lcmp zcmp`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.NCEP.rc  .
+end
+
+# VERIFICATION.GPCP
+# ----------------------
+set dirs = `echo precip tseries`
+foreach dir ($dirs)
+cd $GEOSUTIL/plots/$dir
+/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GPCP.rc  .
+end
+
+
+# Link Radiation Directories for 5% Cloud-Cleared (cc5) Diagnostics
 # -----------------------------------------------------------------------------------
 cd $GEOSUTIL/plots
-/bin/ln -sf lwgupcf lwgupcf_cc5
-/bin/ln -sf lwgupc lwgupc_cc5
-/bin/ln -sf lwgnetcf lwgnetcf_cc5
-/bin/ln -sf lwgnetc lwgnetc_cc5
-/bin/ln -sf lwgdwncf lwgdwncf_cc5
-/bin/ln -sf lwgdwnc lwgdwnc_cc5
-/bin/ln -sf olrcf olrcf_cc5
-/bin/ln -sf olrc olrc_cc5
-/bin/ln -sf nettoac nettoac_cc5
-/bin/ln -sf toacf toacf_cc5
+if(! -e lwgupcf_cc5  ) /bin/ln -sf lwgupcf lwgupcf_cc5
+if(! -e lwgupc_cc5   ) /bin/ln -sf lwgupc lwgupc_cc5
+if(! -e lwgnetcf_cc5 ) /bin/ln -sf lwgnetcf lwgnetcf_cc5
+if(! -e lwgnetc_cc5  ) /bin/ln -sf lwgnetc lwgnetc_cc5
+if(! -e lwgdwncf_cc5 ) /bin/ln -sf lwgdwncf lwgdwncf_cc5
+if(! -e lwgdwnc_cc5  ) /bin/ln -sf lwgdwnc lwgdwnc_cc5
+if(! -e olrcf_cc5    ) /bin/ln -sf olrcf olrcf_cc5
+if(! -e olrc_cc5     ) /bin/ln -sf olrc olrc_cc5
+if(! -e nettoac_cc5  ) /bin/ln -sf nettoac nettoac_cc5
+if(! -e toacf_cc5    ) /bin/ln -sf toacf toacf_cc5
+
 
 # Link Cubed-Sphere FRAC Dataset for dc.gs Utility and CONST_2d Dataset for TopoShade
 # -----------------------------------------------------------------------------------

@@ -283,6 +283,9 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT $EXPORTS -OBS $OBS -NAME precip  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 86400                    -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT $EXPORTS -OBS $OBS -NAME precip  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 86400 -PREFIX LAND -LAND -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT CN_PRCP:MOIST AN_PRCP:MOIST -OBS CN_PRCP:MOIST -NAME precipcn  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 86400 -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LS_PRCP:MOIST               -OBS LS_PRCP:MOIST -NAME precipls  -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 86400 -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
    if( $plot == $plotname.$n ) $grads $batch -p -c "run  $GEOSUTIL/plots/precip/precip $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run  $GEOSUTIL/plots/olr/olr       $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run  $GEOSUTIL/plots/olr/olrcc5    $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -302,6 +305,10 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   TAUX:SURFACE  -NAME taux    -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 100 -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   TAUY:SURFACE  -NAME tauy    -EXPID $expid -OUTPUT $output -DEBUG $debug -SCALE 100 -OCEAN -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT ALBEDO:SOLAR    -NAME albedo  -EXPID $expid -OUTPUT $output -DEBUG $debug                   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  ALBNF:SOLAR    -NAME albnf   -EXPID $expid -OUTPUT $output -DEBUG $debug                   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  ALBNR:SOLAR    -NAME albnr   -EXPID $expid -OUTPUT $output -DEBUG $debug                   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  ALBVF:SOLAR    -NAME albvf   -EXPID $expid -OUTPUT $output -DEBUG $debug                   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT  ALBVR:SOLAR    -NAME albvr   -EXPID $expid -OUTPUT $output -DEBUG $debug                   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT TBISCCP:SATSIM                                                                       -NAME tb       -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT RADSRF:RADIATION LHFX:SURFACE SH:SURFACE -OBS QNET:RADIATION                         -NAME NETHEATG -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -320,11 +327,11 @@ endif
 
 # Radiation: Shortwave
 # --------------------
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME radswt   -EXPID $expid -EXPORT SLRTP:SOLAR              -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgnet   -EXPID $expid -EXPORT  RSRS:SOLAR              -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME radswt      -EXPID $expid -EXPORT SLRTP:SOLAR                                                     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgnetc  -EXPID $expid -EXPORT  RSCS:SOLAR -OBS SLRSFC:SOLAR ALBEDO:SOLAR -OUTPUT $output -DEBUG $debug -SEASON $seasons "                       ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgnetcf -EXPID $expid -EXPORT  RSCS:SOLAR RSRS:SOLAR -OBS SLRSFC:SOLAR ALBEDO:SOLAR RSRS:SOLAR -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgnet      -EXPID $expid -EXPORT RSRS:SOLAR                                                      -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgnetc     -EXPID $expid -EXPORT RSCS:SOLAR -OBS SLRSFC:SOLAR ALBEDO:SOLAR                       -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgnetcf    -EXPID $expid -EXPORT RSCS:SOLAR RSRS:SOLAR -OBS SLRSFC:SOLAR ALBEDO:SOLAR RSRS:SOLAR -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgdwn   -EXPID $expid -EXPORT SLRSF:SOLAR              -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgdwnc  -EXPID $expid -EXPORT SLRSFC:SOLAR             -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -333,10 +340,10 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME osr      -EXPID $expid -EXPORT RSR:SOLAR                -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME osrc     -EXPID $expid -EXPORT RSC:SOLAR                -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME osrcf    -EXPID $expid -EXPORT RSC:SOLAR RSR:SOLAR      -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgup    -EXPID $expid -EXPORT SLRSF:SOLAR  RSRS:SOLAR  -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgupc   -EXPID $expid -EXPORT SLRSFC:SOLAR RSCS:SOLAR -OBS ALBEDO:SOLAR SLRSFC:SOLAR -OUTPUT $output -DEBUG $debug -SEASON $seasons "                                               ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgupcf  -EXPID $expid -EXPORT SLRSFC:SOLAR RSCS:SOLAR SLRSF:SOLAR RSRS:SOLAR -OBS ALBEDO:SOLAR SLRSFC:SOLAR SLRSF:SOLAR RSRS:SOLAR -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgup     -EXPID $expid -EXPORT SLRSF:SOLAR  RSRS:SOLAR                                                                              -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgupc    -EXPID $expid -EXPORT SLRSFC:SOLAR RSCS:SOLAR -OBS ALBEDO:SOLAR SLRSFC:SOLAR                                               -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME swgupcf   -EXPID $expid -EXPORT SLRSFC:SOLAR RSCS:SOLAR SLRSF:SOLAR RSRS:SOLAR -OBS ALBEDO:SOLAR SLRSFC:SOLAR SLRSF:SOLAR RSRS:SOLAR -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
  
 
 # Radiation: Longwave
@@ -348,25 +355,28 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   OLC:IRRAD  -NAME olrc     -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT OLCC5:IRRAD  -NAME olrc_cc5 -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   OLC:IRRAD  OLR:IRRAD                      -NAME olrcf       -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT OLCC5:IRRAD  OLR:IRRAD                      -NAME olrcf_cc5   -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   LWS:IRRAD EMIS:SURFACE -OBS  SFCDWN:IRRAD -NAME lwgdwn      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   LCS:IRRAD EMIS:SURFACE -OBS SFCDWNC:IRRAD -NAME lwgdwnc     -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LCSC5:IRRAD EMIS:SURFACE -OBS SFCDWNC:IRRAD -NAME lwgdwnc_cc5 -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   OLC:IRRAD  OLR:IRRAD                       -NAME olrcf       -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT OLCC5:IRRAD  OLR:IRRAD                       -NAME olrcf_cc5   -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   LWS:IRRAD EMIS:SURFACE -OBS  SFCDWN:IRRAD  -NAME lwgdwn      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD   LCS:IRRAD EMIS:SURFACE -OBS SFCDWN:IRRAD SFCDWNC:IRRAD -NAME lwgdwncf      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "             ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD LCSC5:IRRAD EMIS:SURFACE -OBS SFCDWN:IRRAD SFCDWNC:IRRAD -NAME lwgdwncf_cc5  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "             ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD LWS:IRRAD -OBS SFCUP:IRRAD SFCDWN:IRRAD -NAME lwgnet    -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "                          ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD   LCS:IRRAD -OBS SFCUPC:IRRAD SFCDWNC:IRRAD -NAME lwgnetc       -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "                        ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD LCSC5:IRRAD -OBS SFCUPC:IRRAD SFCDWNC:IRRAD -NAME lwgnetc_cc5   -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "                        ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT   LCS:IRRAD EMIS:SURFACE -OBS SFCDWNC:IRRAD   -NAME lwgdwnc     -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LCSC5:IRRAD EMIS:SURFACE -OBS SFCDWNC:IRRAD   -NAME lwgdwnc_cc5 -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD   LCS:IRRAD EMIS:SURFACE -OBS SFCDWN:IRRAD SFCDWNC:IRRAD -NAME lwgdwncf      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD LCSC5:IRRAD EMIS:SURFACE -OBS SFCDWN:IRRAD SFCDWNC:IRRAD -NAME lwgdwncf_cc5  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD LWS:IRRAD -OBS SFCUP:IRRAD SFCDWN:IRRAD                -NAME lwgnet        -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD   LCS:IRRAD -OBS SFCUPC:IRRAD SFCDWNC:IRRAD                        -NAME lwgnetc       -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD LCSC5:IRRAD -OBS SFCUPC:IRRAD SFCDWNC:IRRAD                        -NAME lwgnetc_cc5   -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD   LCS:IRRAD -OBS SFCUPC:IRRAD SFCDWNC:IRRAD SFCUP:IRRAD SFCDWN:IRRAD -NAME lwgnetcf      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD LCSC5:IRRAD -OBS SFCUPC:IRRAD SFCDWNC:IRRAD SFCUP:IRRAD SFCDWN:IRRAD -NAME lwgnetcf_cc5  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD EMIS:SURFACE LWS:IRRAD -OBS SFCUP:IRRAD -NAME lwgup   -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "            ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD EMIS:SURFACE   LCS:IRRAD -OBS SFCUPC:IRRAD -NAME lwgupc      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "           ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD EMIS:SURFACE LCSC5:IRRAD -OBS SFCUPC:IRRAD -NAME lwgupc_cc5  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons "           ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD   LCS:IRRAD EMIS:SURFACE -OBS SFCUP:IRRAD SFCUPC:IRRAD -NAME lwgupcf     -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD LCSC5:IRRAD EMIS:SURFACE -OBS SFCUP:IRRAD SFCUPC:IRRAD -NAME lwgupcf_cc5 -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD EMIS:SURFACE LWS:IRRAD -OBS SFCUP:IRRAD                -NAME lwgup     -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD EMIS:SURFACE   LCS:IRRAD -OBS SFCUPC:IRRAD                   -NAME lwgupc      -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT SFCEM:IRRAD EMIS:SURFACE LCSC5:IRRAD -OBS SFCUPC:IRRAD                   -NAME lwgupc_cc5  -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD   LCS:IRRAD EMIS:SURFACE -OBS SFCUP:IRRAD SFCUPC:IRRAD         -NAME lwgupcf     -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT LWS:IRRAD LCSC5:IRRAD EMIS:SURFACE -OBS SFCUP:IRRAD SFCUPC:IRRAD         -NAME lwgupcf_cc5 -EXPID $expid -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
 
 # Radiation: Net
@@ -577,6 +587,11 @@ if( $MAKE_LIST == TRUE | "$CMPEXP" != "NULL" ) then
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT          EVAP:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           T2M:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           Q2M:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT            QS:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT          U10M:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT          V10M:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT          U10N:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT          V10N:SURFACE     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           THAT:SURFACE    -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           QHAT:SURFACE    -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           WET1:SURFACE    -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -586,6 +601,10 @@ if( $MAKE_LIST == TRUE | "$CMPEXP" != "NULL" ) then
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           CLDTT:SOLAR     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           ZPBL:TURBULENCE -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
       if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           DMDT:PHYSICS    -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           TAULO:SOLAR     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           TAUMD:SOLAR     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           TAUHI:SOLAR     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+      if( $plot == $plotname.$n) $grads $batch -p -c "run gencmp -EXPID $expid -EXPORT           TAUTT:SOLAR     -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
 # Dynamics Diagnostics
 # --------------------

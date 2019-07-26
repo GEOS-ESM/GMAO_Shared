@@ -1,7 +1,7 @@
 #!/bin/csh -f
 
 set datetime = `date +%Y%m%d_%H%M%S`
-cat $1 | sed -e 's/,/ , /g' > HISTORYRC.$datetime
+cat $1 | sed -e 's/,/ , /g' | sed -e 's/*/@/g' | sed -e 's/?/ /g' > HISTORYRC.$datetime
 
 if( .$2 == . ) then
     set PLOT_SCRIPTS = `echo $GEOSUTIL/plots/landscape.script $GEOSUTIL/plots/portrait.script`

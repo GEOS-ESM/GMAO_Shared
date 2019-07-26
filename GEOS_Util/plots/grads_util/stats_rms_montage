@@ -4,7 +4,7 @@ set STATSDIR = corcmp
 cd $STATSDIR
 
 set fields  = `echo slp uwnd vwnd tmpu hght sphu chi psi`
-set regions = `echo GLO NHE TRO SHE NWQ NEQ SWQ SEQ NAM EUR NPO SPO`
+set regions = `echo GLO NHE TRO SHE NWQ NEQ SWQ SEQ NAM EUR NPO SPO XPO`
 
 foreach field  ($fields)
 foreach region ($regions)

@@ -3,7 +3,7 @@
 set    plots = "hght tmpu uwnd vwnd"
 set    types = "tcor cor rms"
 set  seasons = "JAN"
-set  regions = "EUR GLO NAM NEQ NHE NWQ SEQ SHE SWQ TRO NPO SPO"
+set  regions = "EUR GLO NAM NEQ NHE NWQ SEQ SHE SWQ TRO NPO SPO XPO"
 set     levs = "1000 850 700 500 400 300 250 200 150 100 z"
 
 # Create Postscript from Grads
