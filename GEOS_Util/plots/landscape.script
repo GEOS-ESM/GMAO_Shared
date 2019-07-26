@@ -367,6 +367,7 @@ end
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT RSRS:SOLAR RSRSNA:SOLAR  -NAME SWGNETAF  -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT RSCS:SOLAR RSCSNA:SOLAR  -NAME SWGNETCAF -OUTPUT $output -DEBUG $debug -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ALBEDO:SOLAR -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ALBVR:SOLAR  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ALBVF:SOLAR  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ALBNR:SOLAR  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1

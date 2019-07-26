@@ -119,6 +119,7 @@ if( xpos =  9 ) ; region = "North America (Lons:-140,-60  Lats: 20,60)" ;  reg =
 if( xpos = 10 ) ; region = "Europe (Lons:-10,30  Lats: 30,60)"          ;  reg = "EUR"  ; endif
 if( xpos = 11 ) ; region = "N.Polar (Lats: 60,90)"                      ;  reg = "NPO"  ; endif
 if( xpos = 12 ) ; region = "S.Polar (Lats: -60,-90)"                    ;  reg = "SPO"  ; endif
+if( xpos = 13 ) ; region = "X.Polar (Lats: -60,60)"                     ;  reg = "XPO"  ; endif
 
 
 filebeg  = 1
@@ -653,14 +654,44 @@ while( flag = '' )
 'set gxout shaded'
 'rgbset'
 
+* Define New Variables for Montage Plots
+* -------------------------------------
+'set dfile 'ddif.m
+'set t 'tbeg.m' 'tdif.m
+
+* For ravediff > 0
+* ----------------
+'define sigdiffp90 = 1000 * ( ravediff-rUp90diff )'
+'define sigdiffp95 = 1000 * ( ravediff-rUp95diff )'
+'define sigdiffp99 = 1000 * ( ravediff-rUp99diff )'
+
+* For ravediff < 0
+* ----------------
+'define sigdiffm90 = 1000 * ( ravediff+rUp90diff )'
+'define sigdiffm95 = 1000 * ( ravediff+rUp95diff )'
+'define sigdiffm99 = 1000 * ( ravediff+rUp99diff )'
+
+'define maskm90 = ( sigdiffm90 - abs(sigdiffm90) )/2'
+'define maskm95 = ( sigdiffm95 - abs(sigdiffm95) )/2'
+'define maskm99 = ( sigdiffm99 - abs(sigdiffm99) )/2'
+
+'define maskp90 = ( sigdiffp90 + abs(sigdiffp90) )/2'
+'define maskp95 = ( sigdiffp95 + abs(sigdiffp95) )/2'
+'define maskp99 = ( sigdiffp99 + abs(sigdiffp99) )/2'
+
+'define sigdiff90 = maskm90 + maskp90'
+'define sigdiff95 = maskm95 + maskp95'
+'define sigdiff99 = maskm99 + maskp99'
+
 * Find maximum value of rUp90diff across all levels (at end of forecast period)
 * -----------------------------------------------------------------------------
-'set t 'tdif.m
-'minmax rUp90diff'
- dcint = subwrd(result,1) * 1000 / 6
+       'set t 'tdif.m
+       'minmax rUp90diff'
+               rUp90diffmax = result
+dcint = subwrd(rUp90diffmax,1) * 1000 / 6
 
-* Save dcint base on Global Region
-* --------------------------------
+* Save dcint based on Global Region
+* ---------------------------------
 if( xpos = 1 )
    'run setenv corcmp_'field'_DCINT 'dcint
 else
@@ -668,12 +699,19 @@ else
                               dcint = result
 endif
 
-* WMP
-* Fixed Color Scales to better judge magnitude of change...
-* dcint = 7.5
-
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
+
+' minmax sigdiff90'
+    qmax = subwrd(result,1)
+    qmin = subwrd(result,2)
+    qmax = math_abs(qmax)
+    qmin = math_abs(qmin)
+if( qmin > qmax )
+    qmax = qmin
+endif
+   dcint = qmax / 9
+
 'set csmooth on'
 'set datawarn off'
 
@@ -681,54 +719,41 @@ dcintx = dcint * 100
 'getint 'dcintx
          dcintx = result / 100
 
-* Shade ravediff that is > 90% confidence diffs (grey shaded)
-* -----------------------------------------------------------
-'set gxout shaded'
-'shades 1.0'
-'set csmooth on'
-'d ravediff/rUp90diff'
-'cbarn -xmid 6 -snum 0.80 -ndot 1'
+* Shade where sigdiff > 90% confidence error bar (color shaded)
+* -------------------------------------------------------------
+ ' rgbset'
+ ' set gxout grfill '
+ ' set csmooth off'
+ ' shades 'dcint
+ ' run getenv SHADES_CLEVS'
+              SHADES_CLEVS = result
 
-* Draw ravediff that is > 90% confidence diffs (thin black outline contours)
-* --------------------------------------------------------------------------
-'shades 1'
-'set gxout contour'
-'run getenv SHADES_CLEVS'
-            clevs = result
-            ccols = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
-say 'CCOLS = 'ccols
-say 'CLEVS = 'clevs
-'set ccols 'ccols
-'set clevs 'clevs
-'set clab off'
-'set cthick 1'
-'set csmooth on'
-'d ravediff/rUp90diff'
+  clevs = subwrd( SHADES_CLEVS,1 )
+  ii = 2
+  while( ii <= 9 )
+  clev  = subwrd( SHADES_CLEVS,ii )
+  clevs = clevs' 'clev
+  ii = ii + 1
+  endwhile
+  clevs = clevs'  -0.0001 0.0001 '
+  ii = 10
+  while( ii <= 18 )
+  clev  = subwrd( SHADES_CLEVS,ii )
+  clevs = clevs' 'clev
+  ii = ii + 1
+  endwhile
 
-* Draw ravediff (grey contours without labels)
-* --------------------------------------------
-'set gxout contour'
-'set clab off'
-'set cthick 1'
-'set ccolor 99'
-'set cint 'dcint
-'set csmooth on'
+ 'set clevs 'clevs
+ 'set ccols 59 57 55 47 44 37 36 34 33 31 0 20 21 22 23 24 25 26 27 28 29'
 
-'black 'dcint
+*' set gxout shaded '
+ ' d sigdiff90 '
+ ' cbarn -xmid 6 -snum 0.80 -ndot 1'
 
-'d ravediff*1000'
-'q contours'
-say 'Contours = 'result
 
-'set cthick 6'
-'set clab  off'
-'set ccolor 99'
-'set clevs 0'
-'set csmooth on'
-'d ravediff*1000'
 
-* Draw ravediff that is = 99% confidence diffs (black contour without label)
-* --------------------------------------------------------------------------
+* Contour sigdiff that is = 90, 95, & 99% confidence diffs (black lines without label)
+* ------------------------------------------------------------------------------------
 'set gxout contour'
 'set csmooth on'
 'set clab off'
@@ -736,83 +761,67 @@ say 'Contours = 'result
 'set cstyle 2'
 'set cthick 8'
 'set ccolor 1'
-'set clevs 1'
-'d ravediff/rUp99diff'
+'set clevs  0'
+'d sigdiffp99'
 'set cstyle 2'
 'set cthick 8'
 'set ccolor 1'
-'set clevs -1'
-'d ravediff/rUp99diff'
+'set clevs  0'
+'d sigdiffm99'
 
 'set cstyle 6'
 'set cthick 4'
 'set ccolor 1'
-'set clevs 1'
-'d ravediff/rUp95diff'
+'set clevs  0'
+'d sigdiffp95'
 'set cstyle 6'
 'set cthick 4'
 'set ccolor 1'
-'set clevs -1'
-'d ravediff/rUp95diff'
+'set clevs  0'
+'d sigdiffm95'
 
 'set cstyle 1'
 'set cthick 1'
 'set ccolor 1'
-'set clevs 1'
-'d ravediff/rUp90diff'
+'set clevs  0'
+'d sigdiffp90'
 'set cstyle 1'
 'set cthick 1'
 'set ccolor 1'
-'set clevs -1'
-'d ravediff/rUp90diff'
+'set clevs  0'
+'d sigdiffm90'
 
 * reset some background values
+* ----------------------------
 'set datawarn on'
 'set clab on'
 
-* Re-Draw Individual Plots
-* ------------------------
-'set gxout contour'
-'set clab  on'
-'set xaxis 0 'nday' .5'
-'set cmark  0'
-'set cthick 6'
-'set ccolor rainbow'
-'set rbrange 'rbrange
-'set cint 'cint
-'set cstyle 2'
-*'d ravem'
-'set cmark  0'
-'set cthick 6'
-'set ccolor rainbow'
-'set rbrange 'rbrange
-'set cint 'cint
-'set cstyle 3'
-*'d raveo'
-
+* Draw Labels
+* -----------
 'draw ylab Pressure (hPa)'
 'set  string 1 c 6 0'
 
 'set  strsiz .132'
-'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'region
-'draw string 6.0 7.90 'name'   Anomaly Correlation Difference (x10`a-3`n)  CINT: 'dcintx
+'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'name'   'region
+'draw string 6.0 7.90 Anomaly Correlation Difference  (x10`a-3`n)'
 'set  strsiz .125'
 'draw string 6.0 7.65 'desc
 'set  strsiz .12'
 'draw string 6.0 0.72 Forecast Day'
 
-'set  string 1 l 8 0'
-'set  strsiz .32'
 'run uppercase 'field
                 FIELD = result
+
+'set  string 1 l 8 0'
+'set  strsiz .32'
 'draw string 0.70 7.38 'reg
 'draw string 0.70 7.01 'FIELD
 
 'set  string 1 l 3 0'
 'set  strsiz .087'
-'draw string 0.25 1.50 Color  Shaded  (>90%)'
-'draw string 0.25 1.35 Dot -Dash Line (>95%)'
-'draw string 0.25 1.20 Long-Dash Line (>99%)'
+'draw string 0.23 1.50 Thin  Solid Line (>90%)'
+'draw string 0.23 1.35 Dot -Dash Line (>95%)'
+'draw string 0.23 1.20 Long-Dash Line (>99%)'
 
 'set  string 1 c 6 90'
 'set  strsiz .18'

@@ -1,0 +1,48 @@
+
+OBSNAM: COADS
+OBSDSC: COADS_CLIMATOLOGY_(1945-1989)
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'EMP'  , 'SURFACE' , 'EMINUSP' , 8
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'TPREC'  , 'MOIST' , 'PRECIP6' , 8
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'EVAP'  , 'SURFACE' , 'EVAPRATE' , 8
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'VENT', 'SURFACE' , 'W3' , 1
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'SH'  , 'SURFACE' , 'SENSIB3' , 1
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'LHFX'  , 'SURFACE' , 'LATENT3' , 1
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'CLDTT' , 'SOLAR'   , 'CLOUD' , 1 ,
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'TAUX'  , 'SURFACE' , 'TAUX3' , 100
+                    ::
+
+        filename:   'VERIFICATION/surface_fields/coads/coadsgrads2.tabl'
+        filetype:   'BIN'
+        fields:     'TAUY'  , 'SURFACE' , 'TAUY3' , 100
+                    ::

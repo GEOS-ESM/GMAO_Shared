@@ -174,7 +174,7 @@ class Writer(object):
         #    Descr = Coll.LongName.split()[4:]
         #    descr = ' '.join(Descr)
             
-        descr = descr.replace('Forecast,','').replace('Assimilation,','').replace('Analysis,','')
+        descr = descr.replace('Forecast,','').replace('Assimilation,','').replace('Analysis,','').replace('Model,','')
 
         # Section Header
         # --------------
@@ -249,12 +249,12 @@ class stdoutWriter(Writer):
     def table(self,choice='header'):
         if choice == 'header':
             print
-            print " -----------|------|------------------------------------------------------------|------------"
-            print "   Name     | Dims |                     Description                            |    Units   "
-        print " -----------|------|------------------------------------------------------------|------------"
+            print " -------------|------|--------------------------------------------------------------------------------|------------"
+            print "     Name     | Dims |                               Description                                      |    Units   "
+        print     " -------------|------|--------------------------------------------------------------------------------|------------"
         return
     def row(self,vname,dim,descr,units):
-        print ' %-10s | %4s | %-58s | %-10s '%(vname,dim,descr,units)
+        print ' %-12s | %4s | %-78s | %-10s '%(vname,dim,descr,units)
 
     def close(self):
         pass
@@ -282,12 +282,12 @@ class txtWriter(Writer):
     def table(self,choice='header'):
         if choice == 'header':
             self.doc.write("\n")
-            self.doc.write( " -----------|------|------------------------------------------------------------|------------\n" )
-            self.doc.write( "   Name     | Dims |                     Description                            |    Units   \n" )
-        self.doc.write( " -----------|------|------------------------------------------------------------|------------\n" )
+            self.doc.write( " -------------|------|--------------------------------------------------------------------------------|------------\n" )
+            self.doc.write( "     Name     | Dims |                               Description                                      |    Units   \n" )
+        self.doc.write(     " -------------|------|--------------------------------------------------------------------------------|------------\n" )
         return
     def row(self,vname,dim,descr,units):
-        self.doc.write( ' %-10s | %4s | %-58s | %-10s \n'%(vname,dim,descr,units) )
+        self.doc.write( ' %-12s | %4s | %-78s | %-10s \n'%(vname,dim,descr,units) )
 
     def close(self):
         self.doc.close()

@@ -41,9 +41,11 @@ endif
 'set display color white'
 'rgbset'
 'c'
+'getinfo xdim'
+         xdim = result
 
 x = 1
-while ( x<=12 )
+while ( x<=xdim )
 'set  x 'x
 'rmsz h 'DESC
 'c'

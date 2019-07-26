@@ -34,7 +34,7 @@
 # ---------------------------------------------------------------------------------------------------
 
     TYPE_p: scalar
-   ALIAS_p: slp slprs mean_sea_level_ Mean_sea_level_pressure
+   ALIAS_p: slp slprs mean_sea_level_ Mean_sea_level_pressure msl
 
     TYPE_u10m: vector
    ALIAS_u10m: u10m

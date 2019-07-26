@@ -186,10 +186,11 @@ if( fixed = '' | fixed = '-quad' )
    'set ccols 59   57   55   47   44   37   36   34   33    0     21   22   23   24   25   26   27   28   29'
     say 'Inside Shades1, Quad   CLEVS: 'clevs
     cint = cint2
+    endif
+
    'run setenv SHADES_CLEVS 'clevs
    'run setenv SHADES_CCOLS 59   57   55   47   44   37   36   34   33    0     21   22   23   24   25   26   27   28   29'
    'run setenv SHADES_CINT  'cint
-    endif
 
     return cint
 

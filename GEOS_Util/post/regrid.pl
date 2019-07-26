@@ -22,20 +22,24 @@ use WriteLog qw(symlink_ system_ unlink_ );
 
 # global variables
 #-----------------
-my ($bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT, $bkgFLG, $bkg_regrid_FLG);
-my ($capture, $debug, $dbHash, $dyn2dynX, $c2cX, $drymassFLG);
-my ($ESMABIN, $ESMATAG, $expid, $gcmFLG, $g5modules, $getinput, $getsponsorX);
-my ($grIN, $grINocean, $grINocean_, $grOUT, $grOUTocean, $grpID, $grouplist);
-my ($hr, $interactive, $interp_restartsX, $landIceDT, $lblFLG, $lcvFLG);
-my ($levsIN, $levsOUT, $logfile, $merra, $mk_catch, $mk_catchcn, $mk_route);
-my ($mk_RestartsX, $mkdrstdateX, $month, $newid, $node, $noprompt, $outdir);
-my ($regridj, $qos, $rs_hinterpX, $rs_scaleX, $rsFLG, $rstdir, $rst_tarfile);
-my ($rst_template, $rst_templateB, $rstIN_template, $rstIN_templateB);
-my ($slurmjob, $scale_catchX, $scale_catchcnX, $surfFLG, $surflay, $surflayIN);
-my ($tagIN, $tagOUT, $upairFLG, $verbose, $workdir, $year, $ymd, $zoom, $zoom_);
-my (%IN, %iceIN, %OUT, %CS, %CSo, %atmLevs, %input_restarts, %hgrd);
-my (%im, %im4, %imo, %imo4, %jm, %jm4, %jm5, %jmo, %jmo4);
-my (%SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ, @anafiles, @warnings);
+my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT);
+my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir);
+my ($dbHash, $debug, $drymassFLG, $dyn2dynX, $expid);
+my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_);
+my ($grOUT, $grOUTocean, $grouplist, $grpID, $hr, $interactive);
+my ($interp_restartsX, $landIceDT, $lblFLG, $lcvFLG, $levsIN, $levsOUT);
+my ($logfile, $merra, $mk_RestartsX, $mk_catch, $mk_catchcn, $mk_route);
+my ($mkdrstdateX, $month, $newid, $node, $noprompt, $outdir, $outdir_save);
+my ($qos, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
+my ($rstIN_template, $rstIN_templateB, $rst_tarfile);
+my ($rst_template, $rst_templateB, $scale_catchX, $scale_catchcnX);
+my ($slurmjob, $surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT);
+my ($tarFLG, $upairFLG, $verbose, $workdir, $year, $ymd, $zoom, $zoom_);
+my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
+my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
+my (%im, %im4, %imo, %imo4, %input_restarts);
+my (%jm, %jm4, %jm5, %jmo, %jmo4);
+my (@anafiles, @warnings);
 
 # global tag variables
 #---------------------
@@ -77,6 +81,35 @@ foreach (qw/ 90 180 360 720 /) {
     $imo{"C$_"} = $_;
     $jmo{"C$_"} = 6*$_;
 }
+
+# coupled ocean grids
+#--------------------
+%coupledFLG = ( "cc" => 1, "dd" => 1, "ee" => 1 );
+$imo{"cc"} =  "360"; $jmo{"cc"} = "200";
+$imo{"dd"} =  "720"; $jmo{"dd"} = "410";
+$imo{"ee"} = "1440"; $jmo{"ee"} = "1080";
+
+# until an official location for coupled-model tiles is created
+#--------------------------------------------------------------
+$coupled_model_dir = "/discover/nobackup/yvikhlia/coupled/Forcings";
+
+$coupled_model_tile{"CF0048x6C_TM0360xTM0200-Pfafstetter.til"} =
+    "${coupled_model_dir}/Ganymed/a48x288_o360x200/";
+
+$coupled_model_tile{"CF0090x6C_TM0360xTM0200-Pfafstetter.til"} =
+    "${coupled_model_dir}/a90x540_o360x200";
+
+$coupled_model_tile{"CF0090x6C_TM0720xTM0410-Pfafstetter.til"} =
+    "${coupled_model_dir}/Ganymed/a90x540_o720x410";
+
+$coupled_model_tile{"CF0090x6C_TM1440xTM1080-Pfafstetter.til"} =
+    "${coupled_model_dir}/Ganymed/a90x540_o1440x1080";
+
+$coupled_model_tile{"CF0180x6C_TM0720xTM0410-Pfafstetter.til"} =
+    "${coupled_model_dir}/a180x1080_o720x410";
+
+$coupled_model_tile{"CF0180x6C_TM1440xTM1080-Pfafstetter.til"} =
+    "${coupled_model_dir}/Ganymed/a180x1080_o1440x1080";
 
 # atmosphere cubed-sphere grids
 #------------------------------
@@ -227,6 +260,7 @@ sub init {
                "newid=s"         => \$newid,
                "tagin=s"         => \$tagIN,
                "tagout=s"        => \$tagOUT,
+               "tar"             => \$tarFLG,
                "rs=i"            => \$rsFLG,
                "catchcn"         => \$mk_catchcn,
                "route"           => \$mk_route,
@@ -396,9 +430,9 @@ sub init_tag_arrays_and_hashes {
                 GEOSadas-5_22_0_p1     GEOSadas-5_22_0_p2     GEOSadas-5_23_0
                 GEOSadas-5_23_0_p1     GEOSadas-5_24_0        GEOSadas-5_24_0_p1 );
 
-    # BCS Tags: Icarus-NLv2 (New Land Parameters)
+    # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-    @INL  = qw( INL Icarus-NL Icarus-NLv2 );
+    @INL  = qw( INL Icarus-NL Icarus-NLv3 );
 
     foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0" }
@@ -409,7 +443,7 @@ sub init_tag_arrays_and_hashes {
     foreach (@G30)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_Reynolds" }
     foreach (@G40)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-4_0_Reynolds" }
     foreach (@ICA)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds" }
-    foreach (@INL)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv2_Reynolds" }
+    foreach (@INL)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
 
     foreach (@D214)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@D540)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
@@ -426,9 +460,9 @@ sub init_tag_arrays_and_hashes {
 
     # rank of BCS tags
     #-----------------
-    %rank = ( "Icarus-NLv2_Ostia"    => 20,
-              "Icarus-NLv2_MERRA-2"  => 19,
-              "Icarus-NLv2_Reynolds" => 18,
+    %rank = ( "Icarus-NLv3_Ostia"    => 20,
+              "Icarus-NLv3_MERRA-2"  => 19,
+              "Icarus-NLv3_Reynolds" => 18,
               "Icarus_Ostia"         => 17,
               "Icarus_MERRA-2"       => 16,
               "Icarus_Reynolds"      => 15,
@@ -449,8 +483,8 @@ sub init_tag_arrays_and_hashes {
 
     # minimum tag for catchcn and route options
     #------------------------------------------
-    $rank_1_catchcn = $rank{"Icarus-NLv2_Reynolds"};
-    $rank_1_route = $rank{"Icarus-NLv2_Reynolds"};
+    $rank_1_catchcn = $rank{"Icarus-NLv3_Reynolds"};
+    $rank_1_route = $rank{"Icarus-NLv3_Reynolds"};
     $rank_saltwater_split = $rank{"Icarus_Reynolds"};
 }
 
@@ -460,10 +494,15 @@ sub init_tag_arrays_and_hashes {
 #           not supplied (if interactive mode)
 #=======================================================================
 sub check_inputs {
-    my ($arcdir, $fvrst, $ans, $prompt, $len, $msg, $warnFLG);
-    my ($grINocean_dflt, $grOUTocean_, $grOUTocean_dflt, $levsOUTdflt);
-    my ($fname, $rstlcvIN, $newid_dflt, $bkg_dflt, $lcv_dflt, $lbl_dflt);
-    my ($dflt, $landIceVERin, $landIceVERout);
+    my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
+    my ($grINocean_dflt, $grOUTocean_dflt);
+    my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
+    my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
+    my ($prompt, $rstlcvIN, $warnFLG);
+
+    # check for input tarfile
+    #------------------------
+    get_inputs_from_tarname() if $rstdir;
 
     # use MERRA input restarts?
     #--------------------------
@@ -491,13 +530,14 @@ sub check_inputs {
                 .   "Inputs from archive directories are not available.\n"
                 .   "==================================================\n";
         }
-        $rstdir = query("Enter INPUT restart directory:");
+        $rstdir = query("Enter INPUT tarfile or restart directory:");
         print "\nCannot find restart dir: $rstdir\n" unless -d $rstdir;
     }
     if ($rstdir) {
         $rstdir =~ s/\/*$//;    # remove trailing '/'s
         $rstdir = realpath_($rstdir);
     }
+    get_inputs_from_tarname($rstdir);
 
     # check $outdir
     #--------------
@@ -508,6 +548,17 @@ sub check_inputs {
     mkpath_($outdir) unless -d $outdir;
     $outdir = realpath_($outdir);
     chdir_($outdir, $verbose);
+
+    # check $tarFLG
+    #--------------
+    $dflt = "n";
+    if ($interactive) {
+        until (defined($tarFLG)) {
+            $ans = query("Do you want to tar the output restarts? ", $dflt);
+            $tarFLG = 0 if lc($ans) eq "n";
+            $tarFLG = 1 if lc($ans) eq "y";
+        }
+    } else { $tarFLG = 0 unless defined($tarFLG) }
 
     # check $ymd and $hr
     #-------------------
@@ -525,9 +576,17 @@ sub check_inputs {
 
     # create $workdir
     #----------------
-    $workdir = "$outdir/${ymd}_$$";
+    chomp($label = `date +%d%H%M%S`);
+    $workdir = "$outdir/$label";
     unlink_($workdir, $verbose) if -d $workdir;
     mkpath_($workdir, $verbose);
+
+    $outdir_save = $outdir;
+    if ($tarFLG) {
+        $outdir = "$workdir/outdir";
+        mkpath_($outdir);
+        chdir_($outdir, $verbose);
+    }
 
     # set values for MERRA restarts
     #------------------------------
@@ -625,34 +684,34 @@ sub check_inputs {
         
     # input ocean grid: $grINocean
     #-----------------------------
-    # Two variables are used to represent the input ocean grid
+    # The value, "CSi", is used to represent the input cubed-sphere ocean grid
+    # whereas, "CS", is used to represent the output cubed-sphere ocean grid.
+    # The values are different, because one agrees with the input atmosphere
+    # grid while the other agrees with the output atmosphere grid.
     #
-    # 1. If input ocean grid is cubed-sphere ("CS"), then
-    #   ---------------------
-    #   * $grINocean = "CSi"
-    #   ---------------------
-    #     Indicates that input ocean grid agrees with input atmosphere cubed
-    #     grid. This distinguishes input ocean grid from $grOUTocean = "CS"
-    #     which indicates that output ocean grid agrees with output atmosphere
-    #     cubed grid.
-    #   ---------------------
-    #   * $grINocean_ = "CS"
-    #   ---------------------
-    #     This value is used for display purposes and for writing the *.CMD file
+    # The variable, $grINocean_ (with underscore), is for display purposes
+    # only and will show the input cubed-sphere ocean grid as "CS" even though
+    # internally, the value is actually "CSi".
     #
-    # 2. If input ocean grid it not cubed sphere, then $grINocean_ = $grINocean
+    # For non-cubed-sphere grids, $grINocean_ = $grINocean
     #---------------------------------------------------------------------------
     $grINocean_dflt  = "c";
     $grOUTocean_dflt = "c";
 
-    unless ($grINocean  and $imo{$grINocean} and
+    unless ($grINocean  and ($imo{$grINocean}) and
             $grOUTocean and $imo{$grOUTocean}) {
         print "\nOcean Grids\n"
             .   "-----------\n"
             .   "c  =  360x180   (Reynolds)\n"
             .   "e  = 1440x720   (MERRA-2)\n"
             .   "f  = 2880x1440  (OSTIA)\n"
-            .   "CS = same as atmosphere (OSTIA cubed-sphere)\n\n";
+            .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
+            .   "\n"
+            .   "Coupled Ocean Grids\n"
+            .   "-------------------\n"
+            .   "cc = 360x200\n"
+            .   "dd = 720x410\n"
+            .   "ee = 1440x1080\n\n";
     }
     until ($grINocean and $imo{$grINocean}) {
         $grINocean = query("Enter INPUT ocean grid:", $grINocean_dflt);
@@ -814,20 +873,15 @@ sub check_inputs {
     }
     # check $newid
     #-------------
-    if ($grOUTocean eq "CS") { $grOUTocean_ = "-$grOUTocean" }
-    else                     { $grOUTocean_ = $grOUTocean }
-
-    if ($expid) { $newid_dflt  = "$grOUT${grOUTocean_}_$expid" }
-    else        { $newid_dflt  = "$grOUT$grOUTocean_"          }
+    if ($expid) { $newid_dflt  = "$grOUT${grOUTocean}_$expid" }
+    else        { $newid_dflt  = "$grOUT$grOUTocean"          }
 
     if ($interactive) {
         until ($newid) {
             $newid = $newid_dflt unless $newid;
             $newid = query("Enter Experiment ID for OUTPUT restarts", $newid);
         }
-    } else {
-        $newid = $newid_dflt unless $newid;
-    }
+    } else { $newid = $newid_dflt unless $newid }
 
     # check $bkgFLG, $lblFLG, and $lcvFLG
     #------------------------------------
@@ -950,6 +1004,38 @@ sub check_inputs {
 }
 
 #=======================================================================
+# name - get_inputs_from_tarname
+# purpose - if $rstdir is an input tarfile, then get $rstdir, $expid,
+#           $ymd, and $hr from its name
+#=======================================================================
+sub get_inputs_from_tarname {
+    my ($base, $dir, @match);
+    my ($expidT, $ymdT, $hrT);
+    return unless -f $rstdir and $rstdir =~ m/\.tar$/;
+
+    $base = basename($rstdir);
+    $dir  = dirname($rstdir);
+
+    @match = ($base =~ m/(\S+)\.rst\.(\d{8})_(\d{2})z\.tar/);
+    unless (scalar(@match) == 3) {
+        die "Error. Cannot extract info from tarfile: $rstdir;" }
+    ($expidT, $ymdT, $hrT) = @match;
+
+    if ($expid and ($expid ne $expidT)) {
+        die "Error. expid mismatch, $expid != $expidT;" }
+    if ($ymd and ($ymd ne $ymdT)) {
+        die "Error. ymd mismatch, $ymd != $ymdT;" }
+    if ($hr and ($hr ne $hrT)) {
+        die "Error. hr mismatch, $hr != $hrT;" }
+
+    $rstTAR = $rstdir;
+    $rstdir = $dir;
+    $expid = $expidT;
+    $ymd = $ymdT;
+    $hr = $hrT;
+}
+
+#=======================================================================
 # name - get_fvrst
 # purpose - find fvcore restart file in INPUT restart directory and
 #           use it to determine naming template of restart files
@@ -968,7 +1054,9 @@ sub get_fvrst {
     # check for rst tar files
     #------------------------
     unless (@fvrsts) {
-        $pattern = "*\.rst\.*\.tar";
+        if ($expid) { $pattern = "$expid\.rst\.*\.tar" }
+        else        { $pattern = "*\.rst\.*\.tar" }
+
         @fvrsts = <$rstdir/$pattern>;
         @fvrsts = filter_datetimes(@fvrsts);
     }
@@ -1313,11 +1401,9 @@ sub check_programs {
     }
     if ($CS{$grOUT}) {
         $interp_restartsX = "$ESMABIN/interp_restarts.x";
-        $getsponsorX = "$ESMABIN/getsponsor.pl";
         $g5modules = "$ESMABIN/g5_modules";
         $c2cX = "$ESMABIN/c2c.x";
         die "Error. $interp_restartsX not found;" unless -e $interp_restartsX;
-        die "Error. $getsponsorX not found;" unless -e $getsponsorX;
         die "Error. $g5modules not found;" unless -e $g5modules;
         die "Error. $c2cX not found;" unless -x $c2cX;
     }
@@ -1687,9 +1773,11 @@ sub getLandIceInput {
 # purpose - set values in the %IN and %OUT hashes 
 #=======================================================================
 sub set_IN_OUT {
-    my ($HH, $bcsTAG, $agrid, $ogrid, $hgrid, $bcsdir, $tile, $topo, $val);
-    my ($oceanID1, $oceanID2, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
-    my ($gridID, $im, $jm, $im4, $jm4, $jm5);
+    my ($HH, $agrid, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
+    my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid);
+    my ($im, $im4, $imo, $imo4, $jm, $jm4, $jm5, $jmo, $jmo4);
+    my ($oceanID1, $oceanID2, $ogrid, $ogrid_);
+    my ($tile, $topo, $val);
 
     # tag values
     #-----------
@@ -1718,6 +1806,9 @@ sub set_IN_OUT {
     #-----------------------------
     $IN{"ogrid"}  = $grINocean;
     $OUT{"ogrid"} = $grOUTocean;
+
+    $IN{"ogrid_"}  = $grINocean_;  # used for display purposes
+    $OUT{"ogrid_"} = $grOUTocean;
 
     # bkg_eta grid value
     #-------------------
@@ -1773,41 +1864,63 @@ sub set_IN_OUT {
         $bcsTAG = $$HH{"bcsTAG"};
         $agrid  = $$HH{"agrid"};
         $ogrid  = $$HH{"ogrid"};
+        $ogrid_ = $$HH{"ogrid_"};
 
-        $oceanID1 = "$imo{$ogrid}x$jmo{$ogrid}";
-        $oceanID2 = "DE$imo4{$ogrid}xPE$jmo4{$ogrid}";
+        $im  = $im{$agrid};
+        $im4 = $im4{$agrid};
+        $jm  = $jm{$agrid};
+        $jm4 = $jm4{$agrid};
+        $jm5 = $jm5{$agrid};
 
+        $imo  = $imo{$ogrid};
+        $imo4 = $imo4{$ogrid};
+        $jmo  = $jmo{$ogrid};
+        $jmo4 = $jmo4{$ogrid};
+
+        # atmosphere IDs
+        #---------------
+        # * atmosID1: used in bcs directory name
+        # * atmosID2: used in topological and vegdyn file names
+        # * atmosID3: used for display and in jobscript file names
+        # * atmosID4: used as extension of GCM restart file names
+        #----------------------------------------------------------
         if ($CS{$agrid}) {
-            $im  = $im{$agrid};
-            $jm  = $jm{$agrid};
-            $im4 = $im4{$agrid};
-            $jm4 = $jm4{$agrid};
-            $jm5 = $jm5{$agrid};
-
             $atmosID1 = "c$im";
             $atmosID2 = "${im}x${jm}";
             $atmosID3 = $atmosID2;
             $atmosID4 = "CF${im4}x6C";
-
-            if ($ogrid eq "CS" or $ogrid eq "CSi") {
-                $oceanID1 = $atmosID3;
-                $oceanID2 = $atmosID4;
-            }
-
-            if ($bcsTAG eq "Ganymed-1_0") {
-                   $gridID = "${atmosID4}${jm5}_${oceanID2}" }
-            else { $gridID = "${atmosID4}_${oceanID2}" }
         }
         else {
-            $im  = $im{$agrid};
-            $jm  = $jm{$agrid};
-            $im4 = $im4{$agrid};
-            $jm4 = $jm4{$agrid};
-
             $atmosID1 = "${im}x${jm}";
             $atmosID2 = "${im}x${jm}_DC";
             $atmosID3 = $atmosID1;
             $atmosID4 = "${im4}x${jm4}";
+        }
+
+        # ocean IDs
+        #----------
+        # * oceanID1: used in tile file name for non-CS ocean grids
+        # * oceanID2: used in grid ID
+        #----------------------------------------------------------
+        $oceanID1 = "${imo}x${jmo}";
+
+        if ($coupledFLG{$ogrid}) { $oceanID2 = "TM${imo4}xTM${jmo4}" }
+        elsif ($ogrid_ eq "CS")  { $oceanID2 = $atmosID4 }
+        else                     { $oceanID2 = "DE${imo4}xPE${jmo4}" }
+
+        # grid IDs
+        #---------
+        if ($coupledFLG{$ogrid}) {
+            $gridID = "${atmosID4}";
+            $gridID_tile = "${atmosID4}_${oceanID2}";
+        }
+        elsif ($CS{$agrid}) {
+            $gridID = "${atmosID4}_${oceanID2}";
+            if ($bcsTAG eq "Ganymed-1_0") {
+                $gridID = "${atmosID4}${jm5}_${oceanID2}"
+            }
+        }
+        else {
             $gridID = "DC${im4}xPC${jm4}_${oceanID2}";
         }
 
@@ -1819,14 +1932,15 @@ sub set_IN_OUT {
         $$HH{"atmos4"} = $atmosID4;
         $$HH{"ocean" } = $oceanID1;
         $$HH{"gridID"} = $gridID;
+        $$HH{"gridID"} = $gridID_tile if $coupledFLG{$ogrid};
 
         # bcs directory
         #--------------
         if ($atmosID2 eq "5760x34560") {
             $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/C5760";
         }
-        elsif ($rank{$bcsTAG} >= $rank{"Icarus-NLv2_Reynolds"}) {
-            $bcsdir = "$bcsHEAD/Icarus-NLv2/$bcsTAG/$gridID";
+        elsif ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
+            $bcsdir = "$bcsHEAD/Icarus-NLv3/$bcsTAG/$gridID";
         }
         elsif ($rank{$bcsTAG} >= $rank{"Icarus_Reynolds"}) {
             if ($bcsHEAD eq $bcsHEAD_ops) {
@@ -1847,6 +1961,10 @@ sub set_IN_OUT {
         else {
             $bcsdir = "$bcsHEAD/$bcsTAG/$gridID";
         }
+        if ($coupledFLG{$ogrid}) {
+            $bcsdir = (<${bcsdir}*>)[0];
+        }
+
         die "Error; Cannot find bcs directory: $bcsdir;" unless -d $bcsdir;
         $$HH{"bcsdir"} = $bcsdir;
 
@@ -1859,13 +1977,19 @@ sub set_IN_OUT {
         # tile file
         #----------
         if ($rank{$bcsTAG} <= $rank{"Ganymed-1_0"}) {
-            if ($CS{$agrid}) { $tile = "${gridID}_Pfafstetter.til"}
+            if ($CS{$agrid}) { $tile = "${gridID}_Pfafstetter.til" }
             else             { $tile = "FV_${atmosID1}_DC_${oceanID1}_DE.til" }
         }
         else {
             $tile = "${gridID}-Pfafstetter.til";
         }
         $tile = "$bcsdir/$tile";
+
+        if ($coupledFLG{$ogrid}) {
+            $tile = "${gridID_tile}-Pfafstetter.til";
+            $tile = "$coupled_model_tile{$tile}/$tile";
+        }
+
         die "Error. Cannot find tile file: $tile" unless -f $tile;
         $$HH{"tile"} = "$tile";
     }
@@ -1947,7 +2071,9 @@ sub confirm_inputs {
            . ". hour:         $hr\n"
            . ". atmos grid:   $IN{atmos3} ($IN{agrid})\n"
            . ". atmos levs:   $IN{levs}\n"
-           . ". ocean grid:   $IN{ocean} ($IN{ogrid})\n"
+           . ". ocean grid:   $IN{ocean} ($IN{ogrid_})\n"
+           . ". bcsdir:       $IN{bcsdir}\n"
+           . ". tile file:    $IN{tile}\n"
            . ". BCS tag:      $IN{bcsTAG}\n"
            . ". surflay:      $surflayIN\n"
            . ". rstdir:       " .display($rstdir) ."\n");
@@ -1970,12 +2096,14 @@ sub confirm_inputs {
            . ". hour:         $hr\n"
            . ". atmos grid:   $OUT{atmos3} ($OUT{agrid})\n"
            . ". atmos levs:   $OUT{levs}\n"
-           . ". ocean grid:   $OUT{ocean} ($OUT{ogrid})\n");
+           . ". ocean grid:   $OUT{ocean} ($OUT{ogrid})\n"
+           . ". bcsdir:       $OUT{bcsdir}\n"
+           . ". tile file:    $OUT{tile}\n");
     print_(  ". bkg_eta grid: $OUT{bkg_regrid}\n") if $OUT{"bkg_regrid"};
     print_(  ". BCS tag:      $OUT{bcsTAG}\n"
            . ". surflay:      $surflay\n"
            . ". rescale:      $rescale_catch\n"
-           . ". outdir:       " .display($outdir) ."\n"
+           . ". outdir:       " .display($outdir_save) ."\n"
            . ". workdir:      " .display($workdir) ."\n\n");
 
     confirm("y");
@@ -2293,7 +2421,7 @@ EOF
         # -------------------------------------
         $qsublog =~ s/.o%j//g;
 
-        system_("$regridj 1>$qsublog 2>&1");
+        system_("$regridj 1>$qsublog 2>&1") && die "Error with $regridj;";
     } else {
         print_("\nThe CS regridding is MPI based; submitting job to PBS\n");
         system_("qsub -W block=true -o $qsublog $regridj");
@@ -2342,7 +2470,7 @@ sub regrid_upperair_rsts_LATLON {
         .  " -topo_old " .$IN{"topo"}
         .  " -topo_new " .$OUT{"topo"}
         .  " -im $im{$grOUT} -jm $jm{$grOUT}";
-    system_($cmd);
+    system_($cmd) && die "Error with $rs_hinterpX;";
 }
 
 #=======================================================================
@@ -2350,7 +2478,7 @@ sub regrid_upperair_rsts_LATLON {
 # purpose - rename the new upperair restarts
 #=======================================================================
 sub rename_upperair_rsts {
-    my ($label, $tagID, $gridID);
+    my ($tagID, $gridID);
     my ($arrAddr, $vFLG, $type, $newrst, $newname);
 
     $tagID  = $OUT{"bcsTAG"};
@@ -2458,7 +2586,7 @@ sub set_dry_mass {
     $cmd  = "$rs_scaleX $fvrst $moist";
     $cmd .= " $AREA_bin" if $CS{$grOUT};
 
-    $status = system_($cmd);
+    $status = system_($cmd) && die "Error with $rs_scaleX;";
     die "Error. Setting dry mass of atmosphere;" if $status;
 
     # rename outputs
@@ -2482,7 +2610,7 @@ sub regrid_surface_rsts {
     my ($hash1Addr, $hash2Addr, %H1, %H2);
     my (@SFC, $flags, $InData_dir, $OutData_dir);
     my ($rstdir1, $expid1, $template1, $tile1, $type, $src, $alt);
-    my ($rstdir2, $expid2, $template2, $tile2, $cmd, $status);
+    my ($rstdir2, $expid2, $template2, $tile2, $cmd, $status, $clsm);
     my ($catchName, $catchIN, $catch, $catch_regrid, $catch_scaled);
     my ($catchcnName, $catchcnIN, $catchcn, $catchcn_regrid, $catchcn_scaled);
     my ($label, $tagID, $gridID);
@@ -2615,7 +2743,7 @@ sub regrid_surface_rsts {
     # run mk_Restarts program
     #------------------------
     chdir_($workdir, $verbose);
-    system_("\n$mk_RestartsX $flags");
+    system_("\n$mk_RestartsX $flags") && die "Error with $mk_RestartsX;";
 
     # split saltwater into openwater and seaicethermo, if necessary
     #--------------------------------------------------------------
@@ -2673,7 +2801,9 @@ sub regrid_surface_rsts {
 
         # link clsm directory to OutData
         #-------------------------------
-        symlinkinput("$H2{bcsdir}/clsm", $OutData_dir);
+        $clsm = dirname($tile2) ."/clsm";
+        $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
+        symlinkinput($clsm, $OutData_dir);
 
         # catch and/or catchcn restart only during this pass
         #---------------------------------------------------
@@ -2696,7 +2826,7 @@ sub regrid_surface_rsts {
         # run mk_Restarts program
         #------------------------
         chdir_($workdir, $verbose);
-        system_("\n$mk_RestartsX $flags");
+        system_("\n$mk_RestartsX $flags") && die "Error with mk_RestartsX;";
 
         if ($mk_catchcn) {
             move_("\n$mk_catchcn_j", "$outdir/$mk_catchcn_j.2");
@@ -2728,6 +2858,9 @@ sub regrid_surface_rsts {
 
     # check vegdyn_internal_rst
     #--------------------------
+    # commented by S.Mahanama
+    # at some point in the future this code should be removed
+    #--------------------------------------------------------
     # check_vegdyn(\%H2, $OutData_dir) if $H1{"vegdyn_check"};
 }
 
@@ -2927,6 +3060,7 @@ sub get_anafiles {
         foreach (qw(bkg ana_satb)) {
             @ana_tar = (`tar tf $rst_tarfile | grep $_`);
             foreach $ana (@ana_tar) {
+                next if $ana =~ m/\.orig$/i;
                 chomp($ana);
                 $dbase = basename($ana);
                 $dbase =~ s/$expid/$newid/ if $expid ne $newid;
@@ -2972,6 +3106,7 @@ sub satbias_edit {
         open NEW, "> $satbias" or die "Error. Opening new satbias: $satbias;";
         foreach (@biasNEW) { print NEW $_ }
         close NEW;
+        unlink_($sbORIG) unless $debug;
         print_("( airs281SUBSET_aqua -> airs281_aqua )\n");
     }
 }
@@ -2998,7 +3133,8 @@ sub regrid_bkg_eta {
     #--------------------
     $flags = "-g5 -res $hgrd{$grOUT} -nlevs $levsOUT";
     $cmd = "$dyn2dynX $flags -o $bkg_eta $bkg_eta_orig";
-    system_($cmd);
+    system_($cmd) && die "Error with $dyn2dynX;";
+    unlink_($bkg_eta_orig) unless $debug;
 }
 
 #=======================================================================
@@ -3009,7 +3145,22 @@ sub write_rst_lcv {
     my ($rstlcvOUT, $hhmmss);
     $rstlcvOUT = rstname($newid, "rst.lcv", "$outdir/$rst_templateB");
     $hhmmss = $hr."0000";
-    system_("\n$mkdrstdateX $ymd $hhmmss $rstlcvOUT");
+    system_("\n$mkdrstdateX $ymd $hhmmss $rstlcvOUT")
+        && die "Error with $mkdrstdateX";
+}
+
+#=======================================================================
+# name - tar_outputs
+# purpose - tar all outputs into a single file
+#=======================================================================
+sub tar_outputs {
+    my ($tarfile);
+    return unless $tarFLG;
+    chdir_($outdir);
+    $tarfile = "${newid}.rst.${ymd}_${hr}z.tar";
+    system_("tar --remove-files -cf $tarfile \*") && die "Error with tar;";
+    move_($tarfile, $outdir_save);
+    $outdir = $outdir_save;
 }
 
 #=======================================================================
@@ -3022,8 +3173,10 @@ sub write_CMD_file {
     # update captured command inputs
     #-------------------------------
     $capture =~ s/\s+\-i\b//;
-    $capture .= " -ymd $ymd"                  if $capture !~ m/\s+\-ymd\b/;
-    $capture .= " -hr $hr"                    if $capture !~ m/\s+\-hr\b/;
+    unless ($rstTAR) {
+        $capture .= " -ymd $ymd"              if $capture !~ m/\s+\-ymd\b/;
+        $capture .= " -hr $hr"                if $capture !~ m/\s+\-hr\b/;
+    }
     $capture .= " -grout $grOUT"              if $capture !~ m/\s+\-grout\b/
         and                                      $capture !~ m/\s+\-gridout\b/;
     $capture .= " -levsout $levsOUT"          if $capture !~ m/\s+\-levsout\b/
@@ -3038,8 +3191,13 @@ sub write_CMD_file {
             or                    $capture !~ m/\s+\-merra\b/;
     }
     else {
-        $capture .= " -d $rstdir"           if $capture !~ m/\s+\-d\b/;
-        $capture .= " -expid $expid"        if $capture !~ m/\s+\-expid\b/ and $expid;
+        if ($rstTAR) {
+            $capture .= " -d $rstTAR"       if $capture !~ m/\s+\-d\b/;
+        }
+        else {
+            $capture .= " -d $rstdir"       if $capture !~ m/\s+\-d\b/;
+            $capture .= " -expid $expid"    if $capture !~ m/\s+\-expid\b/ and $expid;
+        }
         $capture .= " -tagin $tagIN"        if $capture !~ m/\s+\-tagin\b/;
         $capture .= " -oceanin $grINocean_" if $capture !~ m/\s+\-oceanin\b/;
     }
@@ -3106,6 +3264,15 @@ sub write_CMD_file {
 #=======================================================================
 sub cleanup {
 
+    # print warnings before closing logfile
+    #--------------------------------------
+    foreach (@warnings) { print_("WARNING: $_\n") }
+    closeLOG();
+
+    # tar outputs if requested
+    #-------------------------
+    tar_outputs() if $tarFLG;
+
     # remove work directory
     #----------------------
     unless ($debug) {
@@ -3114,11 +3281,6 @@ sub cleanup {
             unlink_($workdir, $verbose);
         }
     }
-
-    # print warnings before closing logfile
-    #--------------------------------------
-    foreach (@warnings) { print_("WARNING: $_\n") }
-    closeLOG();
     exit;
 }
 
@@ -3405,6 +3567,20 @@ sub pause {
 }
 
 #=======================================================================
+# name - pauseDB
+# purpose - print message and then pause the interactive session until
+#           user enters input; the $noprompt flag is ignored
+#=======================================================================
+sub pauseDB {
+    my ($msg);
+    $msg = shift(@_);
+    $msg = "" unless defined($msg);
+    print "$msg\n" if $msg;
+    print "Hit <cr> to continue ... ";
+    my $dummy = <STDIN>;
+}
+
+#=======================================================================
 # name - printlabel
 # purpose - print a label or msg sandwiched between upper and lower lines
 #
@@ -3567,7 +3743,7 @@ REQUIRED OPTION FOR MERRA INPUTS
    -merra2            get input restarts from OPS MERRA-2 data archives
 
 REQUIRED OPTIONS FOR NON-MERRA INPUTS
-   -d        rstdir   location of input restart files
+   -d        rstdir   pathname for input tarfile or restart directory
    -expid    expid    experiment ID of input restart files
 
 INTERACTIVE OPTION
@@ -3687,6 +3863,6 @@ EOF
     close INFO;
     select $FH;
 
-    system("echo \"$info\" | more");
+    system("echo \"$info\" | less");
     exit;
 }

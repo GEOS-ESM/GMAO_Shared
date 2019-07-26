@@ -1,0 +1,49 @@
+OBSNAM: ERA5
+OBSDSC: ECMWF_ERA5_ANA
+
+        filename:   'VERIFICATION//ERA5_Monthly/era5_pl.tabl'
+        filetype:   'HDF'
+        fields:     'ZLE'      , 'DYN'           , 'h'        , 1
+                    'T'        , 'DYN'           , 't'        , 1
+                    'U'        , 'DYN'           , 'u'        , 1
+                    'V'        , 'DYN'           , 'v'        , 1
+                    'OMEGA'    , 'DYN'           , 'w'        , 1
+                    'Q'        , 'MOIST'         , 'q'        , 1
+                    'RH2'      , 'MOIST'         , 'r'        , 1/100
+                    'QITOT'    , 'AGCM'          , 'ciwc'     , 1
+                    'QLTOT'    , 'AGCM'          , 'clwc'     , 1
+                    'O3'       , 'CHEMISTRY'     , 'o3'       , 1
+                    ::
+
+        filename:   'VERIFICATION//ERA5_Monthly/era5_sl-atm.tabl'
+        filetype:   'HDF'
+        fields:     'SLP'        , 'DYN'           , 'msl'        , 1
+                    'PS'         , 'DYN'           , 'sp'         , 1
+                    'TS'         , 'SURFACE'       , 'skt'        , 1
+                    'T2M'        , 'SURFACE'       , 't2'         , 1
+                    'U10M'       , 'SURFACE'       , 'u10'        , 1
+                    'V10M'       , 'SURFACE'       , 'v10'        , 1
+                    'U10N'       , 'SURFACE'       , 'u10n'       , 1
+                    'V10N'       , 'SURFACE'       , 'v10n'       , 1
+                    'CLDTT'      , 'SOLAR'         , 'tcc'        , 1
+                    'CLDLO'      , 'SOLAR'         , 'lcc'        , 1
+                    'CLDMD'      , 'SOLAR'         , 'mcc'        , 1
+                    'CLDHI'      , 'SOLAR'         , 'hcc'        , 1
+                    'ZPBL'       , 'TURBULENCE'    , 'blh'        , 1
+                    'CN_PRCP'    , 'MOIST'         , 'cp'         , 1000
+                    'LS_PRCP'    , 'MOIST'         , 'lsp'        , 1000
+                    'TPREC'      , 'MOIST'         , 'tp'         , 1000
+                    'TQV'        , 'AGCM'          , 'tcwv'       , 1
+                    'TQI'        , 'AGCM'          , 'tciw'       , 1
+                    'TQL'        , 'AGCM'          , 'tclw'       , 1
+                    'EVAP'       , 'SURFACE'       , 'e'          , -1/100
+                    'MSNLWRF'    , 'ERA5'          , 'msnlwrf'    , -1
+                    'MSNLWRFCS'  , 'ERA5'          , 'msnlwrfcs'  , -1
+                    'MSDWLWRF'   , 'ERA5'          , 'msdwlwrf'   , 1
+                    'MSDWLWRFCS' , 'ERA5'          , 'msdwlwrfcs' , 1
+                    'RSRS'       , 'SOLAR'         , 'msnswrf'    , 1
+                    'RSCS'       , 'SOLAR'         , 'msnswrfcs'  , 1
+                    'SLRSF'      , 'SOLAR'         , 'msdwswrf'   , 1
+                    'SLRSFC'     , 'SOLAR'         , 'msdwswrfcs' , 1
+                    ::
+

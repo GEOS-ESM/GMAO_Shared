@@ -434,12 +434,14 @@ if( "$plots" =~ *corcmp* ) then
            set       pltdir = $SOURCE/scratch_corcmp$rmstype/$field.`date +%Y%m%d_%H%M%S`
            mkdir -p $pltdir
            cd       $pltdir ; set tmpdir = `echo $tmpdir $pltdir`
+
            if( $debug == 'TRUE' ) then
                $GRADS -l    -c "run $GEOSUTIL/plots/fcst/pltcorcmp -source $SOURCE -rc $statsrc -fields $field -rms $rmstype"
            else
                $GRADS -l -b -c "run $GEOSUTIL/plots/fcst/pltcorcmp -source $SOURCE -rc $statsrc -fields $field -rms $rmstype" &
            endif
            sleep 5
+
         end
      end
 
@@ -471,8 +473,8 @@ if( "$plots" =~ *corcmp* ) then
            else
                $GRADS -l -b -c "run $GEOSUTIL/plots/fcst/pltcorcmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field" &
            endif
-
            sleep 5
+
         endif
         end
 
@@ -502,8 +504,8 @@ if( "$plots" =~ *corcmp* ) then
            else
                $GRADS -l -b -c "run $GEOSUTIL/plots/fcst/pltrmscmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field -rms $rmstype" &
            endif
-
            sleep 5
+
            end
         endif
         end

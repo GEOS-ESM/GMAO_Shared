@@ -92,6 +92,7 @@ if( xpos =  9 ) ; region = "North America (Lons:-140,-60  Lats: 20,60)" ;  reg =
 if( xpos = 10 ) ; region = "Europe (Lons:-10,30  Lats: 30,60)"          ;  reg = "EUR"  ; endif
 if( xpos = 11 ) ; region = "N.Polar (Lats: 60,90)"                      ;  reg = "NPO"  ; endif
 if( xpos = 12 ) ; region = "S.Polar (Lats: -60,-90)"                    ;  reg = "SPO"  ; endif
+if( xpos = 13 ) ; region = "X.Polar (Lats: -60,60)"                     ;  reg = "XPO"  ; endif
 
 'getinfo tdim'
          tdim = result

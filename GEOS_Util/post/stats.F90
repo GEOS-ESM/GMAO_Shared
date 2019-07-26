@@ -38,7 +38,7 @@
 
       parameter ( im = 144 )        ! x-dimension for unified comparison
       parameter ( jm = 91  )        ! y-dimension for unified comparison
-      parameter ( nr = 12  )        ! r-dimension (number of geographic regions )
+      parameter ( nr = 13  )        ! r-dimension (number of geographic regions )
 
       integer,parameter :: luout = 90 ! output file unit for formatted datafile w/ results
 
@@ -69,15 +69,16 @@
       real  zlon1(nr),  lon1
       real  zlon2(nr),  lon2
 
-      data zlat1  / -90.,  20., -20., -80.,   0.,  0., -90.,-90.,  20.,  30.,   60., -90.  /                  
-      data zlat2  /  90.,  80.,  20., -20.,  90., 90.,   0.,  0.,  60.,  60.,   90., -60.  /                  
-      data zlon1  /-180.,-180.,-180.,-180.,-180.,  0.,-180.,  0.,-140., -10., -180., -180. /                  
-      data zlon2  / 180., 180., 180., 180.,   0.,180.,   0.,180.,- 60.,  30.,  180.,  180. /                  
+      data zlat1  / -90.,  20., -20., -80.,   0.,  0., -90.,-90.,  20.,  30.,   60.,  -90.,  -60.  /
+      data zlat2  /  90.,  80.,  20., -20.,  90., 90.,   0.,  0.,  60.,  60.,   90.,  -60.,   60.  /
+      data zlon1  /-180.,-180.,-180.,-180.,-180.,  0.,-180.,  0.,-140., -10., -180., -180., -180.  /
+      data zlon2  / 180., 180., 180., 180.,   0.,180.,   0.,180.,- 60.,  30.,  180.,  180.,  180.  /
 
       character(len=7) region(nr)
       data region / 'global ', 'n.hem  ','tropics','s.hem  ',  &
                     'nw.quad', 'ne.quad','sw.quad','se.quad',  &
-                    'america', 'europe ','npolar ','spolar '   /
+                    'america', 'europe ','npolar ','spolar ',  &
+                    'xpolar '/
 
       character*1    char
       character*256  name, suffix

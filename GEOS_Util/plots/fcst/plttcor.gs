@@ -41,10 +41,12 @@ endif
 'set display color white'
 'rgbset'
 'c'
+'getinfo xdim'
+         xdim = result
 
 z = 1
 x = 1
-while ( x<=12 )
+while ( x<=xdim )
 'set x 'x
 'set z 'z
      n = 1
@@ -59,7 +61,7 @@ endwhile
 z = 1
 while ( z<=10 )
 x = 1
-while ( x<=10 )
+while ( x<=xdim )
 'set x 'x
 'set z 'z
      n = 1
