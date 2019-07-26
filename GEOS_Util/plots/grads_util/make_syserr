@@ -1,70 +1,114 @@
 #!/bin/csh -f
 
-set SOURCE = $1
+#######################################################################
+#      This script creates systematic error files based on
+#              quickstat sys (aka pltsys) plots
+#      INPUT:  Complete pathname of corcmp.rc used for plots
+#######################################################################
+
+set statsrc = $1
+set SOURCE  = `dirname $statsrc`
 cd $SOURCE
 
+# Determine Experiments to plot
+# -----------------------------
+ set allexps = `grep "DSC.*:" $statsrc | grep -v \# | grep -v \*`
+ @   numexps = $#allexps / 2
+ set    exps = ''
+ @   n = 1
+ while ($n <= $numexps )
+   @ loc = $n * 2 - 1
+   set len1 = `echo $allexps[$loc] | awk '{print length($0)}'`
+   @   len2 = $len1 - 1
+   set exp  = `echo $allexps[$loc] | cut -c4-$len2`
+   set exps = `echo $exps $exp`
+   @      n = $n + 1
+ end
+
+foreach DSC ($exps)
+set EXP = `grep DSC${DSC}: $statsrc | grep -v \# | grep -v \* | cut -d: -f2`
+cd $SOURCE/$EXP
+
 #######################################################################
-#                     Create FIXCTL Utility
+#        Check for Number Consistency Among Upper-Level Fields
 #######################################################################
 
-set           FILE = fixctl
-/bin/rm -f   $FILE
-cat << EOF > $FILE
-#!/bin/ksh
-/bin/mv \$1 \$1.tmp
-touch   \$1
-while read line
-do
-echo \$line | cut -d'>' -f2- >> \$1
-done < \$1.tmp
-exit
-EOF
-chmod +x $FILE
+set fields1 = `echo u v t q h`
+set fields2 = `echo u v t q h`
+set success = TRUE
 
-#######################################################################
-#           Gather Systematic Error Files into Single File
-#######################################################################
+foreach field1 ($fields1)
+    set levs1 = `/bin/ls -1 ${field1}fma*nc3 | wc -l`
 
-set  files = `/bin/ls -1 *fma*.nc3`
-set nfiles = $#files
-     @  n = 1
-/bin/cp $files[$n] previous
-while( $n < $nfiles )
-     @  m = $n + 1
-/bin/cp    $files[$m] next
-ncks -h -A  previous  next
-/bin/mv -f  next  previous
-     @  n = $n + 1
+set dummy = ''
+foreach field ($fields2)
+if( $field != $field1 ) set dummy = `echo $dummy $field`
+end
+set fields2 = `echo $dummy`
+
+foreach field2 ($fields2)
+   if( $field1 != $field2 ) then
+     set levs2 = `/bin/ls -1 ${field2}fma*nc3 | wc -l`
+     if( ${levs1} != ${levs2} ) then
+         echo NumLevs for $field1 \(${levs1}\) does not equal NumLevs for $field2 \(${levs2}\)
+         set success = FALSE
+     endif
+   endif
+
+end
 end
 
-set name = `echo $files[1] | cut -b5-`
-/bin/mv -f previous syserr_$name
+if( $success == 'FALSE' ) exit
+ 
+set  levs1  = `/bin/ls -1 pfma*nc3 | wc -l`
+if( $levs1 != 1 ) then
+     echo Cannot find pfma files.
+     exit
+endif
+
+set    pfiles = `/bin/ls -1 stats_slp*gif`
+set numpfiles = $#pfiles
+set SEASON    = `echo $pfiles[$numpfiles] | cut -d. -f1 | cut -b24-`
+set expdsc    = `cat $statsrc | grep "DESC:" | cut -d: -f2`
 
 #######################################################################
-#               Convert Systematic Error File to NC4
+#             Merge Separate Level Files into Single File
 #######################################################################
 
-set SYSERR_FILE = `echo syserr_$name | cut -d. -f1`
+set fields = `echo p u v t q h`
 
-/bin/rm -f                                               grads.commands
-touch                                                    grads.commands
-echo \'sdfopen ${SYSERR_FILE}.nc3\'                   >> grads.commands
-echo \'run $GEOSUTIL/plots/grads_util/writegrads.gs\' >> grads.commands
-echo \'q ctlinfo\'                                    >> grads.commands
-echo   write \(ctlinfo,\result\)                      >> grads.commands
-echo \'quit\'                                         >> grads.commands
-grads -b -l -c "run grads.commands"
+foreach field ($fields)
 
-./$FILE ctlinfo
+if( $field == 'p' ) then
+    cdo -f nc4 --reduce_dim merge `/bin/ls -1 ${field}fma_*nc3 | sort -rV` ${field}fma_${EXP}_merged.nc4
+else
+    cdo -f nc4 merge              `/bin/ls -1 ${field}fma_*nc3 | sort -rV` ${field}fma_${EXP}_merged.nc4
+endif
 
-/bin/mv -f ctlinfo   ctlinfo.tmp
-set oldstring = `cat ctlinfo.tmp | grep slp`
-set newstring = "slp 0 t,z,y,x slp"
-cat ctlinfo.tmp | sed -e "s?$oldstring?$newstring?g" > ctlinfo
+end
+ 
+#######################################################################
+#             Merge Separate Field Files into Single File
+#######################################################################
 
-$GEOSUTIL/post/flat2hdf.x -flat grads.fwrite -ctl ctlinfo -nymd 19800101 -nhms 0 -ndt 21600
-/bin/mv -f grads.fwrite.nc4 ${SYSERR_FILE}.nc4
+cdo merge pfma_${EXP}_merged.nc4 \
+          ufma_${EXP}_merged.nc4 \
+          vfma_${EXP}_merged.nc4 \
+          tfma_${EXP}_merged.nc4 \
+          qfma_${EXP}_merged.nc4 \
+          hfma_${EXP}_merged.nc4 syserr_${EXP}.nc4
 
-/bin/rm -f $FILE
-/bin/rm -f grads*
-/bin/rm -f ctlinfo*
+ncatted -O -a time_increment,time,o,l,60000                                            \
+           -a begin_date,time,o,l,19800101                                             \
+           -a begin_time,time,o,l,0                                                    \
+           -a long_name,,c,c,"long_name"                                               \
+           -a units,,c,c,"unknown"                                                     \
+           -a vmin,,c,f,1.e15                                                          \
+           -a vmax,,c,f,1.e15                                                          \
+           -a Source,global,o,c,"Goddard Modeling and Assimilation Office, NASA/GSFC"  \
+           -a Title,global,o,c,"Flat to HDF Format Conversion"                         \
+           -a Contact,global,o,c,"data@gmao.gsfc.nasa.gov"                             \
+            syserr_${EXP}.nc4
+
+           /bin/mv syserr_${EXP}.nc4 ../${EXP}_syserr_${expdsc}_${SEASON}.nc4
+end

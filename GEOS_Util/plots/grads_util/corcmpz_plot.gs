@@ -117,6 +117,8 @@ if( xpos =  7 ) ; region = "S.W. Quadrant (Lons:-180,0  Lats: 0,-90)"   ;  reg =
 if( xpos =  8 ) ; region = "S.E. Quadrant (Lons: 0,180  Lats: 0,-90)"   ;  reg = "SEQ"  ; endif
 if( xpos =  9 ) ; region = "North America (Lons:-140,-60  Lats: 20,60)" ;  reg = "NAM"  ; endif
 if( xpos = 10 ) ; region = "Europe (Lons:-10,30  Lats: 30,60)"          ;  reg = "EUR"  ; endif
+if( xpos = 11 ) ; region = "N.Polar (Lats: 60,90)"                      ;  reg = "NPO"  ; endif
+if( xpos = 12 ) ; region = "S.Polar (Lats: -60,-90)"                    ;  reg = "SPO"  ; endif
 
 
 filebeg  = 1
@@ -320,7 +322,6 @@ n = n + 1
 endwhile
 m = m + 1
 endwhile
-*pull flag
 
 * Define New Fisher Transform Variable (to force Gaussian Distribution)
 * ---------------------------------------------------------------------
@@ -491,6 +492,10 @@ critval99=subwrd(result,3)
 'q defval astudtout 1 1'
 critval95=subwrd(result,3)
 
+'astudt 'dof' 0.10'  ;* 90% Confidence
+'q defval astudtout 1 1'
+critval90=subwrd(result,3)
+
 'astudt 'dof' 0.32'  ;* 68% Confidence
 'q defval astudtout 1 1'
 critval68=subwrd(result,3)
@@ -510,6 +515,9 @@ while( m<=mexps )
 'define dx95  = se*'critval95
 'define rUp95'm' = 2*(exp( 2*dx95)-1)/(exp( 2*dx95)+1)'
 'define rLp95'm' = 2*(exp(-2*dx95)-1)/(exp(-2*dx95)+1)'
+'define dx90  = se*'critval90
+'define rUp90'm' = 2*(exp( 2*dx90)-1)/(exp( 2*dx90)+1)'
+'define rLp90'm' = 2*(exp(-2*dx90)-1)/(exp(-2*dx90)+1)'
 'define dx68  = se*'critval68
 'define rUp68'm' = 2*(exp( 2*dx68)-1)/(exp( 2*dx68)+1)'
 'define rLp68'm' = 2*(exp(-2*dx68)-1)/(exp(-2*dx68)+1)'
@@ -580,7 +588,6 @@ endwhile
 
 * Plot Difference plus Significance
 * ---------------------------------
-
 m = 1
 while( m<=mexps )
        n  = filebeg
@@ -598,6 +605,8 @@ while( flag = '' )
 'set xaxis 0 'nday' .5'
 'set string 1 c 6 0'
 
+* Compute RMS difference between ravem and rave0: ravediff
+* --------------------------------------------------------
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1  rave'm' -file1 'mfile' -q2 rave0  -file2 1  -ptop 100 -name rave'
@@ -605,6 +614,8 @@ while( flag = '' )
          newfile = result
 'close ' newfile
 
+* Compute difference between 99% Confidence and zero: rUp99diff
+* -------------------------------------------------------------
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp99'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp99'
@@ -612,6 +623,8 @@ while( flag = '' )
          newfile = result
 'close ' newfile
 
+* Compute difference between 95% Confidence and zero: rUp95diff
+* -------------------------------------------------------------
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp95'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp95'
@@ -619,6 +632,17 @@ while( flag = '' )
          newfile = result
 'close ' newfile
 
+* Compute difference between 90% Confidence and zero: rUp90diff
+* -------------------------------------------------------------
+'set dfile 'ddif.m
+'set t 'tbeg.m' 'tdif.m
+'makezdif3 -q1   rUp90'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp90'
+'getinfo numfiles'
+         newfile = result
+'close ' newfile
+
+* Compute difference between 68% Confidence and zero: rUp68diff
+* -------------------------------------------------------------
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp68'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp68'
@@ -629,9 +653,20 @@ while( flag = '' )
 'set gxout shaded'
 'rgbset'
 
+* Find maximum value of rUp90diff across all levels (at end of forecast period)
+* -----------------------------------------------------------------------------
 'set t 'tdif.m
-'minmax rUp95diff'
+'minmax rUp90diff'
  dcint = subwrd(result,1) * 1000 / 6
+
+* Save dcint base on Global Region
+* --------------------------------
+if( xpos = 1 )
+   'run setenv corcmp_'field'_DCINT 'dcint
+else
+   'run getenv corcmp_'field'_DCINT '
+                              dcint = result
+endif
 
 * WMP
 * Fixed Color Scales to better judge magnitude of change...
@@ -640,30 +675,96 @@ while( flag = '' )
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 'set csmooth on'
+'set datawarn off'
 
-* Draw 95% confidence colored shading
+dcintx = dcint * 100
+'getint 'dcintx
+         dcintx = result / 100
+
+* Shade ravediff that is > 90% confidence diffs (grey shaded)
+* -----------------------------------------------------------
 'set gxout shaded'
-'set datawarn off'
-'shades 'dcint
-'d maskout( ravediff*1000, abs(ravediff)-rUp95diff )'
-'cbarn -xmid 6 -snum 0.6'
+'shades 1.0'
+'set csmooth on'
+'d ravediff/rUp90diff'
+'cbarn -xmid 6 -snum 0.80 -ndot 1'
 
-* Draw 68% confidence colored contours
+* Draw ravediff that is > 90% confidence diffs (thin black outline contours)
+* --------------------------------------------------------------------------
+'shades 1'
+'set gxout contour'
+'run getenv SHADES_CLEVS'
+            clevs = result
+            ccols = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
+say 'CCOLS = 'ccols
+say 'CLEVS = 'clevs
+'set ccols 'ccols
+'set clevs 'clevs
+'set clab off'
+'set cthick 1'
+'set csmooth on'
+'d ravediff/rUp90diff'
+
+* Draw ravediff (grey contours without labels)
+* --------------------------------------------
 'set gxout contour'
 'set clab off'
-'set cthick 8'
-'set datawarn off'
-'shades 'dcint
-'d maskout( ravediff*1000, abs(ravediff)-rUp68diff )'
-
-* Draw 99% confidence black contours without labels
-'set gxout contour'
-'set clab off'
-'set cthick 6'
+'set cthick 1'
+'set ccolor 99'
 'set cint 'dcint
+'set csmooth on'
+
+'black 'dcint
+
+'d ravediff*1000'
+'q contours'
+say 'Contours = 'result
+
+'set cthick 6'
+'set clab  off'
+'set ccolor 99'
+'set clevs 0'
+'set csmooth on'
+'d ravediff*1000'
+
+* Draw ravediff that is = 99% confidence diffs (black contour without label)
+* --------------------------------------------------------------------------
+'set gxout contour'
+'set csmooth on'
+'set clab off'
+
+'set cstyle 2'
+'set cthick 8'
 'set ccolor 1'
-'set datawarn off'
-'d maskout( ravediff*1000,  abs(ravediff)-rUp99diff )'
+'set clevs 1'
+'d ravediff/rUp99diff'
+'set cstyle 2'
+'set cthick 8'
+'set ccolor 1'
+'set clevs -1'
+'d ravediff/rUp99diff'
+
+'set cstyle 6'
+'set cthick 4'
+'set ccolor 1'
+'set clevs 1'
+'d ravediff/rUp95diff'
+'set cstyle 6'
+'set cthick 4'
+'set ccolor 1'
+'set clevs -1'
+'d ravediff/rUp95diff'
+
+'set cstyle 1'
+'set cthick 1'
+'set ccolor 1'
+'set clevs 1'
+'d ravediff/rUp90diff'
+'set cstyle 1'
+'set cthick 1'
+'set ccolor 1'
+'set clevs -1'
+'d ravediff/rUp90diff'
 
 * reset some background values
 'set datawarn on'
@@ -694,7 +795,9 @@ while( flag = '' )
 
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'region
-'draw string 6.0 7.8 'name'   Anomaly Correlation Difference (x10`a-3`n)'
+'draw string 6.0 7.90 'name'   Anomaly Correlation Difference (x10`a-3`n)  CINT: 'dcintx
+'set  strsiz .125'
+'draw string 6.0 7.65 'desc
 'set  strsiz .12'
 'draw string 6.0 0.72 Forecast Day'
 
@@ -704,6 +807,12 @@ while( flag = '' )
                 FIELD = result
 'draw string 0.70 7.38 'reg
 'draw string 0.70 7.01 'FIELD
+
+'set  string 1 l 3 0'
+'set  strsiz .087'
+'draw string 0.25 1.50 Color  Shaded  (>90%)'
+'draw string 0.25 1.35 Dot -Dash Line (>95%)'
+'draw string 0.25 1.20 Long-Dash Line (>99%)'
 
 'set  string 1 c 6 90'
 'set  strsiz .18'

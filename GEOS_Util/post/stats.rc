@@ -21,8 +21,13 @@
 
    COLLECTIONS:  default
 
+# Collection Descriptions:
+# ------------------------
+
      default.fields_2d: p
      default.fields_3d: u v t q h
+
+     inst1_2d_asm_Nx.fields_2d: u10m v10m t2m
 
      aerosol.fields_2d: tau du ss su bc oc
 
@@ -30,6 +35,17 @@
 
     TYPE_p: scalar
    ALIAS_p: slp slprs mean_sea_level_ Mean_sea_level_pressure
+
+    TYPE_u10m: vector
+   ALIAS_u10m: u10m
+
+    TYPE_v10m: vector
+   ALIAS_v10m: v10m
+
+    TYPE_t2m: scalar
+   ALIAS_t2m: t2m
+
+# ---------------------------------------------------------------------------------------------------
 
     TYPE_u: vector
    ALIAS_u: u uwnd ugrd ugrdprs u_velocity
@@ -45,6 +61,8 @@
 
     TYPE_h: scalar
    ALIAS_h: h hght hgt hgtprs height
+
+# ---------------------------------------------------------------------------------------------------
 
     TYPE_tau: aerosol
    ALIAS_tau: totexttau

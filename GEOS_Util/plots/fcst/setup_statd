@@ -107,6 +107,7 @@ if( subwrd(args,num) = '-levels' )
         endif
     endif
     endwhile
+say 'levs0 = 'levs0
 endif
 
 endwhile
@@ -280,7 +281,7 @@ endwhile
          tinc = result
 'close ' newfile
 
-if( tinc < mtinc & levs0 = 'zonal' )
+if( tinc < mtinc & levs0 = 'ZONAL' )
 say ' '
 say 'Master ZDIM File: 'zminfile
 say 'Contains a time increment ('tinc') that is not consistent with Master TINC: 'mtinc
@@ -334,7 +335,7 @@ while ( n<=numflds )
 'getinfo zdim'
          zdim.k = result
 
-if( levs0 = 'zonal' )
+if( levs0 = 'ZONAL' | levs0 = 'NULL' )
        'getinfo zdim'
                 zdim = result
        'set z 1'
@@ -435,7 +436,7 @@ endwhile
 ****                  Make Horizontal Plots                 ****
 ****************************************************************
 
-if( levs0 != 'zonal' )
+if( levs0 != 'ZONAL' )
 
 'open 'tincfile
 'getinfo    numfiles'

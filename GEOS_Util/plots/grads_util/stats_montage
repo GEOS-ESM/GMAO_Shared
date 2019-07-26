@@ -23,10 +23,22 @@ echo EXPS: $EXPS
 set STATSDIR = corcmp
 cd $STATSDIR
 
-set files  = `/bin/ls -1 stats_*_*_*_*_*.gif`
+set files  = `/bin/ls -1 *_*_stats_uwnd_corcmp_GLO_z_*.gif`
 
 if( $#files >= 1 ) then
-set SEASON = `echo $files[1] | cut -d_ -f6 | cut -d. -f1`
+
+# Find Location of SEASON
+# -----------------------
+    @       n  = 0
+    set  node  = ''
+while( .$node != '.corcmp' )
+    @       n  = $n + 1
+    set  node  = `echo $files[1] | cut -d_ -f$n`
+end
+    @       n  = $n + 3
+   set SEASON = `echo $files[1] | cut -d_ -f$n | cut -d. -f1`
+
+
 
 foreach VAR  ('corcmp' \
               'rmscmp' \
@@ -57,7 +69,17 @@ foreach EXP  ($EXPS)
              ${DSC0}_${EXP}_stats_vwnd_${VAR}_TRO_z* \
              ${DSC0}_${EXP}_stats_tmpu_${VAR}_TRO_z* \
              ${DSC0}_${EXP}_stats_sphu_${VAR}_TRO_z* \
-        -tile 5x4 -geometry +0+0 ${DSC0}_${EXP}_${VAR}_${SEASON}_montage.gif &
+        -tile 5x4 -geometry +0+0 ${DSC0}_${EXP}_${VAR}_${SEASON}_montage.gif & 
+
+  foreach field ('hght' 'uwnd' 'vwnd' 'tmpu' 'sphu' )
+     montage ${DSC0}_${EXP}_stats_${field}_${VAR}_SHE_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats_${field}_${VAR}_GLO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats_${field}_${VAR}_NHE_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats_${field}_${VAR}_SPO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats_${field}_${VAR}_TRO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats_${field}_${VAR}_NPO_z_${SEASON}.gif \
+        -tile 3x2 -geometry +0+0  ${DSC0}_${EXP}_${field}_${VAR}_${SEASON}_montage.gif &
+  end
 
 echo " "
 

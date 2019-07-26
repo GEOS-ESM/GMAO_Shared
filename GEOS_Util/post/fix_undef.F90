@@ -62,6 +62,7 @@
       real, allocatable :: ps (:,:)
       real, allocatable :: ps2(:,:)
       real, allocatable ::   q(:,:)
+      logical match
       logical found_ps
       logical found_ps2
       character*256 :: PSNAME

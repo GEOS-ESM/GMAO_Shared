@@ -76,8 +76,13 @@ if( .$output != .. ) set file = ${output}/${file}
 # Create Postscript from Grads
 # ----------------------------
         if( -e $file.out ) then
-             if( $rotate == 0   ) $GXYAT  -y $dim1 -x $dim2 -i $file.out -o $file.$ext
-             if( $rotate == 90  ) $GXYAT  -x $dim1 -y $dim2 -i $file.out -o $file.$ext
+          if( $bw == 'true' ) then
+             if( $rotate == 0   ) $GXYAT -r -y $dim1 -x $dim2 -i $file.out -o $file.$ext
+             if( $rotate == 90  ) $GXYAT -r -x $dim1 -y $dim2 -i $file.out -o $file.$ext
+          else
+             if( $rotate == 0   ) $GXYAT    -y $dim1 -x $dim2 -i $file.out -o $file.$ext
+             if( $rotate == 90  ) $GXYAT    -x $dim1 -y $dim2 -i $file.out -o $file.$ext
+          endif
         endif
 
 # Create GIF from Postscript

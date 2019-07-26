@@ -13,8 +13,11 @@
 #                                  Options: JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC DJF MAM JJA SON ANN
 #
 #     PLOT_OPTIONS:           .... Any valid optional argument to QUICKPLOT
+#                                  Note:  Use -ana to invoke "Analysis" contour intervals
 #
 #      PLOT_CMPEXP:      EXPs .... List of experiment locations to use for plot comparisons
+#                                  Note:  Appending :A to the comparison will invoke "Analysis" contour intervals
+#                                         Appending :V to the comparison will treat the experiment as a "Verification" dataset for use in closeness plots
 #
 #        PLOT_MISC:  EXPORT:GC ... List of Specifc EXPORT:GCs to plot (use: 'MISC' to plot ALL miscellaneous HISTORY.rc EXPORTS)
 #                                  Horizontal Plots are created for 2-D Variables, while

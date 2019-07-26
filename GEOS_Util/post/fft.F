@@ -1,3 +1,302 @@
+      subroutine atoc ( qa,qc,im,jm,km,itype )
+!
+! ******************************************************************
+! ****                                                          ****
+! ****  This program converts 'A' gridded data                  ****
+! ****                     to 'C' gridded data.                 ****
+! ****                                                          ****
+! ****  An FFT shift transformation is made in x for itype = 1  ****
+! ****  An FFT shift transformation is made in y for itype = 2  ****
+! ****                                                          ****
+! ******************************************************************
+
+      real*4 qa   (im,jm,km)
+      real*4 qc   (im,jm,km)
+      real*4 qz   (im,jm,km)
+
+      real*4 qax  (   im+2 ,km)
+      real*4  cx  (2*(im+2),km)
+      real*4 qay  (   2*jm ,km)
+      real*4  cy  (2*(2*jm),km)
+
+      real*4 cosx (im/2), sinx(im/2)
+      real*4 cosy (jm)  , siny(jm)
+      integer IFX  (100) , IFY (100)
+      REAL*4      TRIGX(  3*(IM+1))
+      REAL*4      TRIGY(3*(2*JM+1))
+      REAL*4      dx,dy,pi
+
+      parameter ( zero  = 0.0 )
+      parameter ( ahalf = 0.5 )
+
+      JMM1  = JM-1
+      JMM2  = JM-2
+      JMM3  = JM-3
+      JP    = 2*jmm1
+
+      IMD2  = IM/2
+      PI    = 4.0*ATAN(1.0)
+      DX    = 2*PI/IM
+      DY    = PI/JMM1
+
+! *********************************************************
+! ****     define sinx, cosx and trigs coefficients    ****
+! *********************************************************
+
+      call fftfax (im,ifx,trigx)
+      do k=1,im/2
+      thx = k*dx*ahalf
+      cosx(k) = cos(thx)
+      sinx(k) = sin(thx)
+      enddo
+
+      call fftfax (jp,ify,trigy)
+      do l=1,jmm1
+      thy = l*dy*ahalf
+      cosy(l) = cos(thy)
+      siny(l) = sin(thy)
+      enddo
+
+! *********************************************************
+! ****       load input array into temporary array     ****
+! *********************************************************
+
+      do i = 1,im*jm*km
+      qz(i,1,1) = qa(i,1,1)
+      enddo
+
+! *********************************************************
+! ****           stagger in x-direction                ****
+! *********************************************************
+
+      if (itype.eq.1) then
+      do j=1,jm
+
+      do l=1,km
+      do i=1,im
+      qax(i,l) = qz(i,j,l)
+      enddo
+      enddo
+      call rfftmlt (qax,cx,trigx,ifx,1 ,im+2,im,km,-1)
+
+      do l=1,km
+      do k=1,IMD2
+      kr = 2*k+1
+      ki = 2*k+2
+      crprime = qax(kr,l)*cosx(k) - qax(ki,l)*sinx(k)
+      ciprime = qax(ki,l)*cosx(k) + qax(kr,l)*sinx(k)
+      qax(kr,l) = crprime
+      qax(ki,l) = ciprime
+      enddo
+      enddo
+
+      call rfftmlt (qax,cx,trigx,ifx,1 ,im+2,im,km, 1)
+      do l=1,km
+      do i=1,im
+      qc(i,j,l) = qax(i,l)
+      enddo
+      enddo
+
+      enddo
+
+      endif
+
+C *********************************************************
+C ****           stagger in y-direction                ****
+C *********************************************************
+
+      if (itype.eq.2) then
+
+      do i=1,im/2
+
+      do l=1,km
+      do j=1,jmm1
+      qay(j,l)      =  qz(i,j,l)
+      qay(j+jmm1,l) = -qz(i+imd2,jm-j+1,l)
+      enddo
+      enddo
+
+      call rfftmlt (qay,cy,trigy,ify,1 ,jp+2,jp,km,-1)
+
+      do l=1,km
+      do k=1,jmm1
+      kr = 2*k+1
+      ki = 2*k+2
+      crprime = qay(kr,l)*cosy(k) - qay(ki,l)*siny(k)
+      ciprime = qay(ki,l)*cosy(k) + qay(kr,l)*siny(k)
+      qay(kr,l) = crprime
+      qay(ki,l) = ciprime
+      enddo
+      enddo
+
+      call rfftmlt (qay,cy,trigy,ify,1 ,jp+2,jp,km, 1)
+
+      do l=1,km
+      do j=1,jmm1
+      qc(i,j,l)             =  qay(j,l)
+      qc(i+imd2,jmm1-j+1,l) = -qay(j+jmm1,l)
+      enddo
+      enddo
+
+      enddo
+
+      endif
+
+      RETURN
+      END
+      
+      subroutine ctoa ( qc,qa,im,jm,km,itype )
+C
+C ******************************************************************
+C ****                                                          ****
+C ****  This program converts 'C' gridded data                  ****
+C ****                     to 'A' gridded data.                 ****
+C ****                                                          ****
+C ****  An FFT shift transformation is made in x for itype = 1  ****
+C ****  An FFT shift transformation is made in y for itype = 2  ****
+C ****                                                          ****
+C ******************************************************************
+
+      real*4 qa   (im,jm,km)
+      real*4 qc   (im,jm,km)
+      real*4 qz   (im,jm,km)
+
+      real*4 qcx  (   im+2 ,km)
+      real*4  cx  (2*(im+2),km)
+      real*4 qcy  (   2*jm ,km)
+      real*4  cy  (2*(2*jm),km)
+
+      real*4 cosx (im/2), sinx(im/2)
+      real*4 cosy (jm)  , siny(jm)
+      integer IFX  (100) , IFY (100)
+      REAL*4    TRIGX(3*(IM+1))
+      REAL*4    TRIGY(3*(2*JM+1))
+      REAL*4    pi,dx,dy
+
+      parameter ( zero  = 0.0 )
+      parameter ( ahalf = 0.5 )
+
+      imh   = IM/2
+      JMM1  = JM-1
+      JMM2  = JM-2
+      JMM3  = JM-3
+      JP    = 2*jmm1
+      JP    = 2*jm
+
+      PI    = 4.*ATAN(1.)
+      DX    = 2*PI/IM
+      DY    = PI/JMM1
+      DY    = PI/JM
+
+C *********************************************************
+C ****     define sinx, cosx and trigs coefficients    ****
+C *********************************************************
+
+      call fftfax (im,ifx,trigx)
+      do k=1,imh
+      thx = k*dx*ahalf
+      cosx(k) = cos(thx)
+      sinx(k) = sin(thx)
+      enddo
+
+      call fftfax (jp,ify,trigy)
+      do l=1,jmm1
+      thy = l*dy*ahalf
+      cosy(l) = cos(thy)
+      siny(l) = sin(thy)
+      enddo
+
+C *********************************************************
+C ****       load input array into temporary array     ****
+C *********************************************************
+
+      do i = 1,im*jm*km
+      qz(i,1,1) = qc(i,1,1)
+      enddo
+
+C *********************************************************
+C ****           stagger in x-direction                ****
+C *********************************************************
+
+      if (itype.eq.1) then
+      do j=1,jm
+
+      do l=1,km
+      do i=1,im
+      qcx(i,l) = qz(i,j,l)
+      enddo
+      enddo
+      call rfftmlt (qcx,cx,trigx,ifx,1 ,im+2,im,km,-1)
+
+      do l=1,km
+      do k=1,imh
+      kr = 2*k+1
+      ki = 2*k+2
+      crprime = qcx(kr,l)*cosx(k) + qcx(ki,l)*sinx(k)
+      ciprime = qcx(ki,l)*cosx(k) - qcx(kr,l)*sinx(k)
+      qcx(kr,l) = crprime
+      qcx(ki,l) = ciprime
+      enddo
+      enddo
+
+      call rfftmlt (qcx,cx,trigx,ifx,1 ,im+2,im,km, 1)
+      do l=1,km
+      do i=1,im
+      qa(i,j,l) = qcx(i,l)
+      enddo
+      enddo
+      enddo
+
+      endif
+
+C *********************************************************
+C ****           stagger in y-direction                ****
+C *********************************************************
+
+      if (itype.eq.2) then
+
+      do i=1,imh
+
+      do l=1,km
+      do j=1,jmm1
+      qcy(j,l)      =  qz(i,j,l)
+      qcy(j+jmm1,l) = -qz(i+imh,jmm1-j+1,l)
+      enddo
+      enddo
+
+      call rfftmlt (qcy,cy,trigy,ify,1 ,jp+2,jp,km,-1)
+
+      do l=1,km
+      do k=1,jmm1
+      kr = 2*k+1
+      ki = 2*k+2
+      crprime = qcy(kr,l)*cosy(k) + qcy(ki,l)*siny(k)
+      ciprime = qcy(ki,l)*cosy(k) - qcy(kr,l)*siny(k)
+      qcy(kr,l) = crprime
+      qcy(ki,l) = ciprime
+      enddo
+      enddo
+
+      call rfftmlt (qcy,cy,trigy,ify,1 ,jp+2,jp,km, 1)
+
+      do l=1,km
+      do j=1,jmm1
+      qa(i,j,l)          =  qcy(j,l)
+      qa(i+imh,jm-j+1,l) = -qcy(j+jmm1,l)
+      enddo
+      enddo
+      enddo
+      do l=1,km
+      do i=1,imh
+      qa(i+imh,1,l) = -qa(i,1,l)
+      qa(i,jm,l)    = -qa(i+imh,jm,l)
+      enddo
+      enddo
+      endif
+
+      return
+      END
+
       subroutine atod ( qa,qd,im,jm,lm,itype )
  
 C ******************************************************************

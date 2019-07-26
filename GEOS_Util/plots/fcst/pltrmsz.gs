@@ -43,7 +43,7 @@ endif
 'c'
 
 x = 1
-while ( x<=10 )
+while ( x<=12 )
 'set  x 'x
 'rmsz h 'DESC
 'c'

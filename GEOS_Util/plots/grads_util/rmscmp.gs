@@ -126,9 +126,14 @@ while( num <= ntot )
        num = num + 1
 endwhile
 
+'getinfo xdim'
+         xdim = result
+
 'set lev 'lev
 'set x   'x
 
-'rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
+if( x<=xdim )
+   'rmscmp_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
+endif
 
 return

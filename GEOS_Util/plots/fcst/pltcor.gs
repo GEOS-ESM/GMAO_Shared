@@ -70,7 +70,7 @@ endif
 z = 1
 while ( z<=zmax )
 x = 1
-while ( x<=10 )
+while ( x<=12 )
 'set x 'x
 'set z 'z
 'cor 'root' 'DESC
