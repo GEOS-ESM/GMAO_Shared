@@ -683,22 +683,8 @@ while( flag = '' )
 'define sigdiff95 = maskm95 + maskp95'
 'define sigdiff99 = maskm99 + maskp99'
 
-* Find maximum value of rUp90diff across all levels (at end of forecast period)
-* -----------------------------------------------------------------------------
-       'set t 'tdif.m
-       'minmax rUp90diff'
-               rUp90diffmax = result
-dcint = subwrd(rUp90diffmax,1) * 1000 / 6
-
-* Save dcint based on Global Region
-* ---------------------------------
-if( xpos = 1 )
-   'run setenv corcmp_'field'_DCINT 'dcint
-else
-   'run getenv corcmp_'field'_DCINT '
-                              dcint = result
-endif
-
+* Find maximum value of sigdiff90 across all levels and times
+* -----------------------------------------------------------
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 
