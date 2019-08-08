@@ -26,16 +26,13 @@ use Query qw(query yes);
 
 # global variables
 #-----------------
-my ($bindiff, $bwiFLG, $debug, $delim, $diffFLGs, $dir1, $dir2);
-my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
-my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
-my ($subdir, $tmpdir, $verbose);
+my ($bindiff, $bwiFLG, $debug, $diffFLGs, $dir1, $dir2, $dirA, $dirB, $dirL1);
+my ($dirL2, $dmgetX, $filemode, $first, $follow, $ignoreFLG, $ignoreFile);
+my ($list, $listx, $quiet, $recurse, $sortFLG, $subdir, $tmpdir, $verbose);
 my (%different, %diffsBIN, %diffsTXT, %dir_display, %filesize, %found);
 my (%identical, %ignore, %opts, %patterns, %vopts);
 my (@exclude, @extINC, @fileIDs, @files, @files1, @files2);
 my (@p1, @p2, @subdirs, @unmatched1, @unmatched2);
-
-$delim = "="; # character to use when defining diffs to ignore
 
 # main program
 #-------------
@@ -996,7 +993,7 @@ sub display_text_diffs {
 #=======================================================================
 sub diffs_to_ignore {
     my (@diff1List, $max, $fmt, $index, $diff1, $diff2, $diffs12, %diff1Hash);
-    my ($dflt, $delim_dflt, $sel, $fmt1, $fmt2, $ans);
+    my ($dflt, $sel, $fmt1, $fmt2, $ans);
 
     $dflt = 0;
   outer: while (1) {
@@ -1018,7 +1015,6 @@ sub diffs_to_ignore {
       }
       print "\n" if @diff1List;
       printf $fmt2, "a", "add new diffs to ignore";
-      printf $fmt2, "c", "use alt character when defining diffs to ignore";
       printf $fmt2, "r", "read ignore list from file";
       if (%ignore) {
           printf $fmt2, "w", "write ignore list to file";
@@ -1042,20 +1038,17 @@ sub diffs_to_ignore {
       #--------------------
       if ($sel eq "a") {
           while (1) {
-              print "  Enter diff1${delim}diff2 [quit] ";
+              print "  Enter diff1=diff2 [quit] ";
               chomp($diffs12 = <STDIN>);
               $diffs12 =~ s/\s//g;  # remove blank spaces
 
-              # allow user to make menu choice from previous menu
-              #--------------------------------------------------
               if    ($diffs12 eq "a") { next }
               elsif ($diffs12 eq "")  { last }
               elsif ($diffs12 eq "0") { last outer }
-              elsif ($diffs12 eq "c") { $sel = "c"; last }
               elsif ($diffs12 eq "r") { $sel = "r"; last }
 
               ($diff1, $diff2) = ();
-              ($diff1, $diff2) = split /[$delim]/, $diffs12;
+              ($diff1, $diff2) = split /[=]/, $diffs12;
 
               if ($diff1 and $diff2) { $ignore{$diff1} = $diff2 }
               else { print "  Cannot decipher input: $diffs12; Try again.\n\n" }
@@ -1122,19 +1115,9 @@ sub diffs_to_ignore {
           }
       }
 
-      # use alternate character when defining diffs to ignore
-      #------------------------------------------------------
-      if ($sel eq "c") {
-          if ($delim eq "=") { $delim_dflt = "+" }
-          else               { $delim_dflt = "=" }
-          print "  Alt character for defining diffs to ignore [$delim_dflt]: ";
-          chomp($delim = <STDIN>);
-          $delim = $delim_dflt if $delim eq "";
-      }
-
       # read ignore list from file
       #---------------------------
-      elsif ($sel eq "r") {
+      if ($sel eq "r") {
           while (1) {
               print "  Read ignore list from file [$ignoreFile]: ";
               chomp($ans = <STDIN>);

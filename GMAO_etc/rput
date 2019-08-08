@@ -1,4 +1,4 @@
-#!@DASPERL@
+#!@DASPERL
 
 # The setting of the options and the module lookup paths will
 # be done first using the BEGIN subroutine.  This section of the

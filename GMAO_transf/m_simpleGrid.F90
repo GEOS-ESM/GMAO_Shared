@@ -126,7 +126,7 @@ end subroutine init1_
 
   lsizes(1)=isize
   lsizes(2)=jsize
-  call init_(lsizes,comm,counts,displs)
+  call init0_(lsizes,comm,counts,displs)
   icount=counts(1);idispl=displs(1)
   jcount=counts(2);jdispl=displs(2)
 end subroutine init2_

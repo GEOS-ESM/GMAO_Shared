@@ -140,6 +140,8 @@
       integer  dates(3,1000)
       integer  iargc
 
+      logical  isPresent
+
 ! Default Aliases
 ! ---------------
       character*256 descr_p, alias_p (2)
@@ -413,8 +415,8 @@
       config = ESMF_ConfigCreate   ( rc=rc )
         call   ESMF_ConfigLoadFile ( config, trim(rcfile),  rc=rc )
 
-        call ESMF_ConfigFindLabel      ( config, LABEL='COLLECTIONS:',  rc=rc )
-        if( rc == ESMF_SUCCESS ) then
+        call ESMF_ConfigFindLabel      ( config, LABEL='COLLECTIONS:',  isPresent=isPresent, rc=rc )
+        if( isPresent ) then
             ncoll = ESMF_ConfigGetLen  ( config, LABEL='COLLECTIONS:',  rc=rc )
             allocate( collections(ncoll) )
             call ESMF_ConfigFindLabel  ( config, LABEL='COLLECTIONS:',  rc=rc )
@@ -423,8 +425,8 @@
             enddo
 
             do m=1,ncoll
-            call ESMF_ConfigFindLabel      ( config, trim(collections(m)%name)//'.fields_2d:',  rc=rc )
-            if( rc == ESMF_SUCCESS ) then
+            call ESMF_ConfigFindLabel      ( config, trim(collections(m)%name)//'.fields_2d:',  isPresent=isPresent, rc=rc )
+            if( isPresent ) then
                 n2d = ESMF_ConfigGetLen    ( config, LABEL=trim(collections(m)%name)//'.fields_2d:',  rc=rc )
                 collections(m)%n2d = n2d
                 allocate( collections(m)%fields_2d(n2d) )
@@ -460,8 +462,8 @@
                 collections(m)%n2d = 0
              endif
 
-            call ESMF_ConfigFindLabel      ( config, trim(collections(m)%name)//'.fields_3d:',  rc=rc )
-            if( rc == ESMF_SUCCESS ) then
+            call ESMF_ConfigFindLabel      ( config, trim(collections(m)%name)//'.fields_3d:',  isPresent=isPresent, rc=rc )
+            if( isPresent ) then
                 n3d = ESMF_ConfigGetLen    ( config, LABEL=trim(collections(m)%name)//'.fields_3d:',  rc=rc )
                 collections(m)%n3d = n3d
                 allocate( collections(m)%fields_3d(n3d) )

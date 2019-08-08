@@ -8,6 +8,11 @@ module GenGridCompMod
 
    use ESMF
    use MAPL_Mod
+   use MAPL_GridManagerMod
+   use MAPL_RegridderManagerMod
+   use MAPL_AbstractRegridderMod
+   use MAPL_RegridderSpecMod
+
    use, intrinsic :: iso_fortran_env
 
   implicit none
@@ -21,14 +26,9 @@ module GenGridCompMod
 !EOP
 
   type :: T_PrivateState
-     type(MAPL_LocStream)      :: LocStream_O
-     type(MAPL_LocStream)      :: LocStream_P     
-     type(MAPL_LocStreamXform) :: XFORM_P2O
-     type(MAPL_LocStreamXform) :: XFORM_O2P
+     class(AbstractRegridder), pointer :: regridder => null()
      type(ESMF_Grid)           :: pgrid
      type(ESMF_Grid)           :: ogrid
-     integer                   :: ntO
-     integer                   :: ntP
      logical                   :: initialized=.false.
      logical                   :: transformNeeded
      integer                   :: PIM
@@ -166,7 +166,7 @@ contains
     integer                                :: DIMS(3)
     logical                                :: transformNeeded
     character(len=ESMF_MAXSTR)             :: TILINGFILE, OUTPUT_GRIDNAME, INPUT_GRIDNAME
-    integer                                :: NX, NY, output_im, output_jm, input_im, input_jm
+    integer                                :: NX, NY, output_im, output_jm
     type(ESMF_Config)                      :: cf
 
 ! Begin... 
@@ -206,18 +206,14 @@ contains
     _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(cf,ny,label='NY:',RC=status)
     _VERIFY(STATUS)
-    call ESMF_ConfigGetAttribute(cf,input_im,label='INPUT_IM:',RC=status)
-    _VERIFY(STATUS)
-    call ESMF_ConfigGetAttribute(cf,input_jm,label='INPUT_JM:',RC=status)
-    _VERIFY(STATUS)
     call ESMF_ConfigGetAttribute(cf,input_gridname,label='INPUT_GRIDNAME:',RC=status)
     _VERIFY(STATUS)
 
 ! Create grid for this component
 !-------------------------------
-    ogrid = MAPL_LatLonGridCreate(input_gridname,nx=nx,ny=ny, &
-            IM_World=input_im,JM_World=input_jm,LM_World=1,rc=status)
-    _VERIFY(STATUS)
+    ogrid = grid_manager%make_grid(cf,prefix=trim(input_gridname)//".",rc=status)
+    _VERIFY(status)
+    !_VERIFY(STATUS)
     call ESMF_GridCompSet(GC, grid=ogrid, rc=status)
     _VERIFY(STATUS)
 
@@ -251,14 +247,16 @@ contains
     call ESMF_DistGridGet(distGRID, deLayout=layout, RC=STATUS)
     _VERIFY(STATUS)
 
-    call ESMF_ConfigGetAttribute(cf,output_im,label='OUTPUT_IM:',RC=status)
-    _VERIFY(STATUS)
-    output_jm = output_im*6
     call ESMF_ConfigGetAttribute(cf,output_gridname,label='OUTPUT_GRIDNAME:',RC=status)
     _VERIFY(STATUS)
-    pgrid = MAPL_LatLonGridCreate(output_gridname,nx=nx,ny=ny, &
-            IM_World=output_im,JM_World=output_jm,LM_World=1,rc=status)
+    pgrid = grid_manager%make_grid(cf,prefix=trim(output_gridname)//".",rc=status)
     _VERIFY(STATUS)
+    call MAPL_GridGet(ogrid, localCellCountPerDim=COUNTS, &
+         globalCellCountPerDim=dims, RC=STATUS)
+    _VERIFY(STATUS)
+    output_im=dims(1)
+    output_jm=dims(2)
+    
 
     PrivateState%ogrid=ogrid
     PrivateState%pgrid=pgrid
@@ -284,32 +282,8 @@ contains
 ! Create exchange grids from tile file
 !-------------------------------------
 
-       call MAPL_GetResource(MAPL, TILINGFILE, 'OUTPUT_TILING_FILE:', &
-            default="mittile.til", RC=STATUS)
-       _VERIFY(STATUS)
-
-       call MAPL_LocStreamCreate(PrivateState%LocStream_O, LAYOUT=layout, &
-                                 FILENAME=TILINGFILE, MASK=(/MAPL_Ocean/),&
-                                 NAME='This_Ocn', grid=ogrid, NewGridNames=.true.,RC=STATUS)
-       _VERIFY(STATUS)
-       call MAPL_LocStreamCreate(PrivateState%LocStream_P, LAYOUT=layout, &
-                                 FILENAME=TILINGFILE, MASK=(/MAPL_Ocean/),&
-                                 NAME='Plug_Ocn', grid=pgrid, NewGridNames=.true.,RC=STATUS)
-       _VERIFY(STATUS)
-
-       call MAPL_LocStreamCreateXform(XFORM=PrivateState%XFORM_O2P, &
-                                      LocStreamOut=PrivateState%LocStream_P, &
-                                      LocStreamIn=PrivateState%LocStream_O, &
-                                      NAME='XFORM_O2P', &
-                                      RC=STATUS )
-       _VERIFY(STATUS)
-
-       call MAPL_LocStreamCreateXform(XFORM=PrivateState%XFORM_P2O, &
-                                      LocStreamOut=PrivateState%LocStream_O, &
-                                      LocStreamIn=PrivateState%LocStream_P, &
-                                      NAME='XFORM_P2O', &
-                                      RC=STATUS )
-       _VERIFY(STATUS)
+       privateState%regridder => new_regridder_manager%make_regridder(ogrid,pgrid,REGRID_METHOD_CONSERVE,rc=status)
+       _VERIFY(status)
     end if
 
 
@@ -319,58 +293,6 @@ contains
 
     _RETURN(ESMF_SUCCESS)
   end subroutine Initialize
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine DO_O2P(PSTATE, VARO, VARP, RC)
-    type (T_PrivateState)     , intent(INOUT) :: PSTATE
-    real                      , intent(INout) :: varO(:,:)
-    real                      , intent(  OUT) :: varP(:,:)
-    integer, optional,          intent(  OUT) ::  RC
-    
-    character(len=ESMF_MAXSTR), parameter :: IAm="DO_O2P"
-    integer                               :: STATUS
-
-    real, allocatable :: tileO(:), tileP(:)
-    integer           :: ntP, ntO
-    
-    if (.not.pState%initialized) then
-       call MAPL_LocStreamGet( pState%LOCSTREAM_O, nt_local=ntO, RC=STATUS ) 
-       _VERIFY(STATUS)
-       call MAPL_LocStreamGet( pState%LOCSTREAM_P, nt_local=ntP, RC=STATUS ) 
-       _VERIFY(STATUS)
-       pState%ntP = ntP
-       pState%ntO = ntO
-       pState%initialized = .true.
-    else
-       ntP = pState%ntP
-       ntO = pState%ntO
-    end if
-
-    allocate(tileO(NTO), stat=status)
-    _VERIFY(STATUS)
-    allocate(tileP(NTP), stat=status)
-    _VERIFY(STATUS)
-    
-!    call ESMF_VMBarrier(VM, rc=status)
-!    _VERIFY(STATUS)
-
-    !    G2T (ocean-grid-to-ocean-tile)
-    call MAPL_LocStreamTransform( pState%LOCSTREAM_O, tileO, varO, RC=STATUS ) 
-    _VERIFY(STATUS)
-    !    T2T (ocean-to-plug tile)
-    call MAPL_LocStreamTransform( tileP, pState%XFORM_O2P, tileO, RC=STATUS ) 
-    _VERIFY(STATUS)
-    !    T2G (plug-tile-to-plug-grid)
-    call MAPL_LocStreamTransform( pState%LOCSTREAM_P, varP, tileP, RC=STATUS ) 
-    _VERIFY(STATUS)
-
-!    call ESMF_VMBarrier(VM, rc=status)
-!    _VERIFY(STATUS)
-    deallocate(tileP)
-    deallocate(tileO)
-     
-
-    _RETURN(ESMF_SUCCESS)
-  end subroutine DO_O2P
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !BOP
@@ -517,8 +439,8 @@ contains
    call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
    _VERIFY(STATUS)
    ! transform data from ocean (tripolar or Reynolds) to mit-cubed
-   call DO_O2P(PrivateState, odata, pdata, rc=status)
-   _VERIFY(STATUS)
+   call privateState%regridder%regrid(odata,pdata,rc=status)
+   _VERIFY(status) 
 !   write(unit_w) pdata
    call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
    _VERIFY(STATUS)
@@ -526,15 +448,6 @@ contains
    enddo
 
    deallocate(pdata)
-
-! The next few lines are commented out. They should be done in Finalize
-!   deallocate(odata)
-
-!   call Free_File(unit_r, rc=status)
-!   _VERIFY(STATUS)
-
-!   call Free_File(unit_w, rc=status)
-!   _VERIFY(STATUS)
 
    _RETURN(ESMF_SUCCESS)
 

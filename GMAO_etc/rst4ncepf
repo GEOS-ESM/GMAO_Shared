@@ -1,4 +1,4 @@
-#!@DASPERL@
+#!@DASPERL
 #
 # Script to generate GEOS-4/4 dynamics initial condition from a blend
 # of NCEP and GEOS analyses.

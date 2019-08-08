@@ -158,3 +158,4 @@ class ObsysRc(object):
         """
         for record in self.__obsinfo:
             yield record
+
