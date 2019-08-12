@@ -8,6 +8,7 @@ function corcmpz (args)
 
 field = h
 desc  = ''
+PLOT  = TRUE
 
        num = 0
 while( num < numargs )
@@ -16,6 +17,7 @@ if( subwrd(args,num)='-field'  ) ; field  = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-numexp' ) ; numexp = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-desc'   ) ; desc   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-debug'  ) ; debug  = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-NOPLOT' ) ; PLOT   = FALSE              ; endif
 endwhile
                                    mexps  = numexp-1
        num = 0
@@ -108,9 +110,9 @@ endif
          ypos  = result
 
 if( xpos =  1 ) ; region = "Global"                                     ;  reg = "GLO"  ; endif
-if( xpos =  2 ) ; region = "Northern Hemisphere ExtraTropics"           ;  reg = "NHE"  ; endif
-if( xpos =  3 ) ; region = "Tropics"                                    ;  reg = "TRO"  ; endif
-if( xpos =  4 ) ; region = "Southern Hemisphere ExtraTropics"           ;  reg = "SHE"  ; endif
+if( xpos =  2 ) ; region = "N.Hem. ExtraTropics (Lats: 20,80)"          ;  reg = "NHE"  ; endif
+if( xpos =  3 ) ; region = "Tropics (Lats: -20,20)"                     ;  reg = "TRO"  ; endif
+if( xpos =  4 ) ; region = "S.Hem. ExtraTropics (Lats: -20,-80)"        ;  reg = "SHE"  ; endif
 if( xpos =  5 ) ; region = "N.W. Quadrant (Lons:-180,0  Lats: 0, 90)"   ;  reg = "NWQ"  ; endif
 if( xpos =  6 ) ; region = "N.E. Quadrant (Lons: 0,180  Lats: 0, 90)"   ;  reg = "NEQ"  ; endif
 if( xpos =  7 ) ; region = "S.W. Quadrant (Lons:-180,0  Lats: 0,-90)"   ;  reg = "SWQ"  ; endif
@@ -283,7 +285,6 @@ while( m<=mexps )
 'set t  'tbeg.m' 'tdim.m
 'define  zave'm' = 0.0'
 'define  zvar'm' = 0.0'
-*pause '   DFILE: 'n.m'   Defined zave'm' and zvar'm
 m = m+1
 endwhile
 
@@ -298,7 +299,6 @@ while( m<=mexps )
 'set t  'tbeg.m' 'tdif.m
 'define zaved'm' = 0.0'
 'define zvard'm' = 0.0'
-*pause '   DFILE: 'ddif.m'   Defined zaved'm' and zvard'm
 m = m+1
 endwhile
 
@@ -343,7 +343,6 @@ n = n + 1
 endwhile
 m = m + 1
 endwhile
-*pause ' Finished New Fisher Transform Variable znem'
 
 say ' Define New Fisher Transform Variable zdnem ...'
 m = 0
@@ -387,7 +386,6 @@ n = n + 1
 endwhile
 m = m + 1
 endwhile
-*pause ' Finished makezdif2'
 
 * Compute Mean
 * ------------
@@ -526,6 +524,10 @@ m = m + 1
 endwhile
 
 
+************************************************************************
+if( PLOT = TRUE )
+************************************************************************
+
 * Plot Fisher Mean for Experiments
 * --------------------------------
 say '  Plot Fisher Mean for Experiments'
@@ -586,6 +588,10 @@ endif
 m = m + 1
 endwhile
 
+************************************************************************
+endif
+************************************************************************
+
 
 * Plot Difference plus Significance
 * ---------------------------------
@@ -596,15 +602,6 @@ while( m<=mexps )
 
 mfile = 1 + m*files_per_month
 
-flag = ''
-while( flag = '' )
-'set vpage off'
-'set grads off'
-'set grid  off'
-'set gxout contour'
-'set parea 2.25 9.75 1.0 7.5'
-'set xaxis 0 'nday' .5'
-'set string 1 c 6 0'
 
 * Compute RMS difference between ravem and rave0: ravediff
 * --------------------------------------------------------
@@ -698,12 +695,37 @@ if( qmin > qmax )
 endif
    dcint = qmax / 9
 
-'set csmooth on'
-'set datawarn off'
+if( PLOT = FALSE )
+  if( xpos=2 ) ; 'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint ; endif
+  if( xpos=3 ) ; 'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint ; endif
+  if( xpos=4 ) ; 'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint ; endif
+endif
 
-dcintx = dcint * 100
-'getint 'dcintx
-         dcintx = result / 100
+************************************************************************
+if( PLOT = TRUE )
+************************************************************************
+
+'run getenv DCINT_'field'_rms'rms'.2'
+                             DCINT.2 = result
+'run getenv DCINT_'field'_rms'rms'.3'
+                             DCINT.3 = result
+'run getenv DCINT_'field'_rms'rms'.4'
+                             DCINT.4 = result
+
+dcint = DCINT.2
+    if( DCINT.3 > dcint ) ; dcint = DCINT.3 ; endif
+    if( DCINT.4 > dcint ) ; dcint = DCINT.4 ; endif
+
+flag = ''
+while( flag = '' )
+'set vpage off'
+'set grads off'
+'set grid  off'
+'set parea 2.25 9.75 1.0 7.5'
+'set xaxis 0 'nday' .5'
+'set string 1 c 6 0'
+
+'set datawarn off'
 
 * Shade where sigdiff > 90% confidence error bar (color shaded)
 * -------------------------------------------------------------
@@ -734,9 +756,7 @@ dcintx = dcint * 100
 
 *' set gxout shaded '
  ' d sigdiff90 '
- ' cbarn -xmid 6 -snum 0.80 -ndot 1'
-
-
+ ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
 * Contour sigdiff that is = 90, 95, & 99% confidence diffs (black lines without label)
 * ------------------------------------------------------------------------------------
@@ -787,6 +807,10 @@ dcintx = dcint * 100
 'draw ylab Pressure (hPa)'
 'set  string 1 c 6 0'
 
+dcintx = dcint * 100
+'getint 'dcintx
+         dcintx = result / 100
+
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'name'   'region
 'draw string 6.0 7.90 Anomaly Correlation Difference  (x10`a-3`n)'
@@ -830,8 +854,13 @@ endif
 'c'
 endwhile
 
+************************************************************************
+endif
+************************************************************************
+
 m = m + 1
 endwhile
+
 return
 
 function getlength (string)
