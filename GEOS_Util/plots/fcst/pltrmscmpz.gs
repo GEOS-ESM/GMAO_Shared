@@ -152,12 +152,25 @@ while ( n<=numflds )
        j = 1
 while( j<=numfields )
 if( field = subwrd(fields,j) & field != p )
+
+* Run Script over Regions NHE,TRO,SHE to Find sigdiff90 Range
+* -----------------------------------------------------------
+    x = 2
+    while ( x<=4 )
+      'run 'geosutil'/plots/grads_util/rmscmpz -x 'x' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE -NOPLOT'
+      'c'
+       x = x + 1
+    endwhile
+
+* Run Script to Produce PLOTS
+* ---------------------------
     x = 1
     while ( x<=xdim )
       'run 'geosutil'/plots/grads_util/rmscmpz -x 'x' -field 'field' -rc 'rcfile' -rms 'rms' -desc 'DESC' -debug FALSE'
       'c'
        x = x + 1
     endwhile
+
     j = numfields + 1
 else
     j = j + 1
