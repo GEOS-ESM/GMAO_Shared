@@ -198,6 +198,7 @@ say 'MONTH_LABEL: 'month
 
 * Loop over Experiments
 * ---------------------
+   mxdim = 1e15
    mzdim = 1e15
    mtdim = 1e15
    mtinc = 0
@@ -226,6 +227,8 @@ say 'Opening Files for EXP: 'k
         ctinc = result
 'getinfo zdim'
         czdim = result
+'getinfo xdim'
+        cxdim = result
 
 * ----------------------------------------------------------------------------
 * For Zonal Mean Plots, we need to define a Master Default File which contains 
@@ -243,6 +246,12 @@ say 'Opening Files for EXP: 'k
          zminfile = subwrd(zminfile,2)
      endif
 
+* Find Smallest Horizontal Dimension among Experiment Files
+* ---------------------------------------------------------
+     if( cxdim < mxdim )
+         mxdim = cxdim
+     endif
+
 * Find Master Time Dimension (smallest) among Experiment Files
 * ------------------------------------------------------------
      if( ctdim < mtdim )
@@ -257,6 +266,7 @@ say 'Opening Files for EXP: 'k
      endif
 
 say DESC.k
+say '  Current XDIM: 'cxdim'  Master XDIM: 'mxdim
 say '  Current ZDIM: 'czdim'  Master ZDIM: 'mzdim
 say '  Current TDIM: 'ctdim'  Master TDIM: 'mtdim
 say '  Current TINC: 'ctinc'  Master TINC: 'mtinc
@@ -292,6 +302,7 @@ endif
 
 say ' '
 
+'run setenv "SYSCMP_XDIM" 'mxdim
 'run setenv "SYSCMP_TDIM" 'mtdim
 'run setenv "SYSCMP_TINC" 'mtinc
 'run setenv "TINCFILE"    'tincfile

@@ -513,6 +513,10 @@ endwhile
 * ------------------------------------------------------------------------
  dof = numfiles-1    ;* Degrees of Freedom (dof)
 
+'astudt 'dof' 0.0001'  ;* 99.99% Confidence, and Minimum Value used for Shading
+'q defval astudtout 1 1'
+critval9999=subwrd(result,3)
+
 'astudt 'dof' 0.01'  ;* 99% Confidence
 'q defval astudtout 1 1'
 critval99=subwrd(result,3)
@@ -538,21 +542,26 @@ while( m<=mexps )
 'set lev 1000 100'
 'set t 'tbeg.m' 'tdif.m
 'define se  = sqrt( zvard'm'/'numfiles' )'
-'define dx99  = se*'critval99
-'define rUp99'm' =  pow( abs(zave0+dx99),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
-'define rLp99'm' =  pow( abs(zave0-dx99),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
-'define dx95  = se*'critval95
-'define rUp95'm' =  pow( abs(zave0+dx95),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
-'define rLp95'm' =  pow( abs(zave0-dx95),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define dx = se*'critval9999
+'define rUp9999'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp9999'm' =  pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
-'define dx90  = se*'critval90
-'define rUp90'm' =  pow( abs(zave0+dx90),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
-'define rLp90'm' =  pow( abs(zave0-dx90),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define dx = se*'critval99
+'define rUp99'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp99'm' =  pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
-'define dx68  = se*'critval68
-'define rUp68'm' =  pow( abs(zave0+dx68),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
-'define rLp68'm' =  pow( abs(zave0-dx68),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define dx = se*'critval95
+'define rUp95'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp95'm' =  pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+
+'define dx = se*'critval90
+'define rUp90'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp90'm' =  pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+
+'define dx = se*'critval68
+'define rUp68'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp68'm' =  pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
 m = m + 1
 endwhile
@@ -700,6 +709,15 @@ mfile = 1 + m*files_per_month
          newfile = result
 'close ' newfile
 
+* Compute difference between 99.99% Confidence and zero: rUp9999diff
+* ------------------------------------------------------------------
+'set dfile 'ddif.m
+'set t 'tbeg.m' 'tdif.m
+'makezdif3 -q1   rUp9999'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp9999'
+'getinfo numfiles'
+         newfile = result
+'close ' newfile
+
 * Compute difference between 99% Confidence and zero: rUp99diff
 * -------------------------------------------------------------
 'set dfile 'ddif.m
@@ -746,9 +764,9 @@ mfile = 1 + m*files_per_month
 
 * For ravediff > 0
 * ----------------
-'define sigdiffp90 = 1000 * ( ravediff-rUp90diff )'
-'define sigdiffp95 = 1000 * ( ravediff-rUp95diff )'
-'define sigdiffp99 = 1000 * ( ravediff-rUp99diff )'
+'define sigdiffp90   = 1000 * ( ravediff-rUp90diff )'
+'define sigdiffp95   = 1000 * ( ravediff-rUp95diff )'
+'define sigdiffp99   = 1000 * ( ravediff-rUp99diff )'
 
 * For ravediff < 0
 * ----------------
@@ -768,19 +786,63 @@ mfile = 1 + m*files_per_month
 'define sigdiff95 = maskm95 + maskp95'
 'define sigdiff99 = maskm99 + maskp99'
 
+'define sigdiffp9999 = 1000 * ( rUp9999diff-rUp90diff )'
+
 * Find maximum value of sigdiff90 across all levels and times
 * -----------------------------------------------------------
 'set dfile 'ddif.m
 'set t 'tbeg.m' 'tdif.m
 
 ' minmax sigdiff90'
+
     qmax = subwrd(result,1)
     qmin = subwrd(result,2)
+
+    xmax = subwrd(result,3)
+    ymax = subwrd(result,4)
+    zmax = subwrd(result,7)
+    tmax = subwrd(result,9)
+
+    xmin = subwrd(result,5)
+    ymin = subwrd(result,6)
+    zmin = subwrd(result,8)
+    tmin = subwrd(result,10)
+
     qmax = math_abs(qmax)
     qmin = math_abs(qmin)
+
 if( qmin > qmax )
     qmax = qmin
+    xmax = xmin
+    ymax = ymin
+    zmax = zmin
+    tmax = tmin
 endif
+
+* Compare maximum value of sigdiff90 to 99.99% Confidence Difference
+* ------------------------------------------------------------------
+'set t 'tmax
+'set z 'zmax
+'getinfo level'
+         level = result
+'d sigdiff90'
+     qtmp90 = subwrd(result,4)
+'d sigdiffp9999'
+     qtmp = subwrd(result,4)
+say 'initial qmax = 'qmax
+say 'tmax = 'tmax
+say 'zmax = 'zmax' level: 'level
+say 'sigdiffp9999: 'qtmp
+say 'sigdiff90: 'qtmp90
+
+if( qtmp > qmax )
+    qmax = qtmp
+endif
+say '  final qmax = 'qmax
+
+'set t 'tbeg.m' 'tdif.m
+'set lev 1000 100'
+
    dcint = qmax / 9
 
 if( PLOT = FALSE )

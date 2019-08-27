@@ -24,6 +24,7 @@ say ''
 
 * Open Control Experiment
 * -----------------------
+     XDIM = 1e15
    SETCTL = EXPDSC.0'.setup'
  CTLFILES = sublin( read(SETCTL),2 )
             n  = 1
@@ -31,6 +32,12 @@ say ''
            file  = sublin( read(SETCTL),2 )
     say 'Opening CTL 0: 'file
     'open 'file
+    'set dfile 'n
+    'getinfo xdim'
+             xtmp = result
+     if( xtmp < XDIM )
+         XDIM = xtmp
+     endif
             n = n + 1
     endwhile
     say ''
@@ -124,6 +131,14 @@ while( L <= numargs-1 )
 
              if( expdate = ctldate )
                 'open 'file
+                'getinfo numfiles'
+                         dfiletmp = result
+                'set dfile 'dfiletmp
+                'getinfo xdim'
+                         xtmp = result
+                 if( xtmp < XDIM )
+                     XDIM = xtmp
+                 endif
                  say 'Opening EXP 'L': 'file
                      n = NUMFILES 
                 status = 0
@@ -153,6 +168,10 @@ while( L <= numargs-1 )
 
 L = L + 1
 endwhile
+
+'set dfile 1'
+'run setenv "SYSCMP_XDIM" 'XDIM
+
 return
 
 function checkname (name)

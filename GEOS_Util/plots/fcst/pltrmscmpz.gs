@@ -108,8 +108,8 @@ endwhile
 *******************************************************
 
 'set dfile 1'
-'getinfo xdim'
-         xdim = result
+'run getenv SYSCMP_XDIM'
+            xdim = result
 'q ctlinfo'
 say 'ctlinfo 'result
 'getinfo nvars'
