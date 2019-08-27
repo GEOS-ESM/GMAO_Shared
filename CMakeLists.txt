@@ -31,11 +31,8 @@ esma_add_subdirectories(
   pnagpack
   )
 
-# Special cases - GMAO_gfio, and GFDL_fms are built twice with two
-# different precisions.
+# Special case - GMAO_gfio is built twice with two different precisions.
 add_subdirectory (GMAO_gfio GMAO_gfio_r4)
 add_subdirectory (GMAO_gfio GMAO_gfio_r8)
 add_dependencies (GMAO_gfio_r4 GMAO_gfio_r8)
 
-add_subdirectory (GFDL_fms GFDL_fms_r4)
-add_subdirectory (GFDL_fms GFDL_fms_r8)
