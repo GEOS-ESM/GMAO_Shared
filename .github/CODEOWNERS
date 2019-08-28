@@ -5,10 +5,10 @@
 
 # Larry is the CODEOWNER for plots and post
 /GEOS_Util/plots/ @lltakacs 
-GEOS_Util/post/ @lltakacs 
+/GEOS_Util/post/ @lltakacs 
 
 # Yuri owns the coupled plots
-/GEOS_Util/coupled_diagnostics @yvikhlya 
+/GEOS_Util/coupled_diagnostics/ @yvikhlya 
 
 # The GEOS CMake Team is the CODEOWNER for the CMakeLists.txt files in this repository
 CMakeLists.txt @GEOS-ESM/cmake-team
