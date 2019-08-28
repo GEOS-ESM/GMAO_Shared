@@ -98,6 +98,8 @@ sub g5_mpw_get_expected_values {
     chomp( @usemods     = (`$g5_modules usemodules`) );
     chomp( $modinit     = `$g5_modules modinit` );
 
+    @usemods = () if scalar(@usemods) == 1 and $usemods[0] eq "0";
+
     # convert modinit script to perl
     #-------------------------------
     @fields = split "/", $modinit;
@@ -136,7 +138,7 @@ sub g5_mpw_set_env_variables {
         module ("purge");
 
         if ($loadmodules) { module ("load modules") };
-        if (@usemods) foreach ( @usemods ) { module ("use -a $_") };
+        if (@usemods) { foreach ( @usemods ) { module ("use -a $_") } }
         foreach ( @libmods ) { module ("load $_") };
         print " for $node\n";
     }
