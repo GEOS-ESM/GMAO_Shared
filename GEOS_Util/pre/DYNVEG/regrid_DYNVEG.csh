@@ -15,7 +15,7 @@ set HOMDIR = `echo $HOMDIR | sed 's|$EXPDIR|'"$EXPDIR"'|g'`
 set SPONSORID = `getsponsor | tail -3 | head -1 | cut -d'|' -f1`
 
 if( -e LDAS.rc ) then
-    set GEOSBIN = $EXPDIR/build/Linux/bin/
+    set GEOSBIN = $EXPDIR/build/install/bin/
     set MODELING_SYSTEM = GEOSldas
     set BCSPATH = `ls -d $EXPDIR/output/*/rc_out/`
     set  BCSDIR = `grep BCS_PATH $EXPDIR/run/* | cut -d':' -f3`
