@@ -32,7 +32,9 @@ esma_add_subdirectories(
   )
 
 # Special case - GMAO_gfio is built twice with two different precisions.
-add_subdirectory (GMAO_gfio GMAO_gfio_r4)
-add_subdirectory (GMAO_gfio GMAO_gfio_r8)
-add_dependencies (GMAO_gfio_r4 GMAO_gfio_r8)
+if (EXISTS GMAO_gfio)
+  add_subdirectory (GMAO_gfio GMAO_gfio_r4)
+  add_subdirectory (GMAO_gfio GMAO_gfio_r8)
+  add_dependencies (GMAO_gfio_r4 GMAO_gfio_r8)
+endif ()
 
