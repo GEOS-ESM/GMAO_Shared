@@ -121,6 +121,7 @@ set (post_progs
    get_archive
    getdates
    gcmclim.script
+   check_clim
    )
 
 install (

@@ -393,7 +393,7 @@ else
 # -------------------------------------
 set execs = "time_ave"
 foreach exec ($execs)
-if( ! -e $GEOSUTIL/post/${exec}.x ) then
+if( ! -e $GEOSUTIL/bin/${exec}.x ) then
     echo "Error!  Post-Processing Utility  ${exec}.x  is not found."
     exit  7
 endif
@@ -611,11 +611,11 @@ sleep 5
                    echo "   Performing time average ..."
                    if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
                    if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
-                           $GEOSUTIL/post/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
+                           $GEOSUTIL/bin/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
                                                            -tag $expid.$collection.monthly \
                                                            -d   $expid.$collection.diurnal $STRICT
                    else
-                  $RUN_CMD $NCPUS $GEOSUTIL/post/time_ave.x -hdf $locals -rc time_ave.rc    \
+                  $RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave.x -hdf $locals -rc time_ave.rc    \
                                                             -tag $expid.$collection.monthly \
                                                             -d   $expid.$collection.diurnal $STRICT
                    endif

@@ -159,8 +159,8 @@ for sea,mon in zip(SEASON,MONTH):
      lat = LAT
      tmask=ncfile.variables['TMASK'][:]
      ncfile.close()
-     aice=np.zeros((1, tmask.shape[0], tmask.shape[1]))
-     fbot=np.zeros((1, tmask.shape[0], tmask.shape[1]))
+     aice=np.zeros((1, tmask.shape[1], tmask.shape[2]))
+     fbot=np.zeros((1, tmask.shape[1], tmask.shape[2]))
      for f in files:
        ncfile = Dataset(f, 'r', format='NETCDF4')
        hi=ncfile.variables['HICE'][:]

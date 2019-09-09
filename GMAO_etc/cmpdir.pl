@@ -26,13 +26,16 @@ use Query qw(query yes);
 
 # global variables
 #-----------------
-my ($bindiff, $bwiFLG, $debug, $diffFLGs, $dir1, $dir2, $dirA, $dirB, $dirL1);
-my ($dirL2, $dmgetX, $filemode, $first, $follow, $ignoreFLG, $ignoreFile);
-my ($list, $listx, $quiet, $recurse, $sortFLG, $subdir, $tmpdir, $verbose);
+my ($bindiff, $bwiFLG, $debug, $cdoX, $delim, $diffFLGs, $dir1, $dir2);
+my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
+my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
+my ($subdir, $tmpdir, $verbose);
 my (%different, %diffsBIN, %diffsTXT, %dir_display, %filesize, %found);
 my (%identical, %ignore, %opts, %patterns, %vopts);
 my (@exclude, @extINC, @fileIDs, @files, @files1, @files2);
 my (@p1, @p2, @subdirs, @unmatched1, @unmatched2);
+
+$delim = "="; # character to use when defining diffs to ignore
 
 # main program
 #-------------
@@ -145,10 +148,12 @@ sub init {
     #-----------------------------------
     if (-x "/home/jstassi/bin/cdo") {
         $bindiff = "/home/jstassi/bin/cdo diffn";
+        $cdoX = "/home/jstassi/bin/cdo";
     }
     else  {
         chomp($bindiff = `which h5diff`);
         $bindiff = "" unless -x $bindiff;
+        $cdoX = 0;
     }
 
     # look for dmget command
@@ -329,7 +334,12 @@ sub cmp_files {
         $filesize{$file1} = -s abs_path($file1);
         $filesize{$file2} = -s abs_path($file2);
 
-        $status = system_("diff $diffFLGs $file1 $file2 >& /dev/null");
+        if ($cdoX and ($file1 =~ /\.hdf/ or $file2 =~ /\.nc4/)) {
+            $status = cdo_diff($file1, $file2);
+        }
+        else {
+            $status = system_("diff $diffFLGs $file1 $file2 >& /dev/null");
+        }
         unless ($status) {
             $identical{$file1} = $file2;
             next;
@@ -351,6 +361,33 @@ sub cmp_files {
 
     @unmatched1 = sort @unmatched1;
     @unmatched2 = sort @unmatched2;
+}
+
+#=======================================================================
+# name - cdo_diff
+# purpose - use cdo utility to test equivalence of two files
+#
+# input parameters
+# => file1: first file to compare
+# => file2: second file to compare
+#
+# notes
+# 1. check for line from cdo telling how many records differ
+# 2. if cdo reports that zero records differ, then files are assumed equivalent
+# 3. otherwise, this sub will report that the files differ
+#=======================================================================
+sub cdo_diff {
+    my ($file1, $file2) = @_;
+    my ($diffFLG, $line);
+    
+    $diffFLG = 1;
+    foreach $line (`$cdoX -s diffn $file1 $file2`) {
+        if ($line =~ m/0(\s+)of(\s+)(\d+) records differ/) {
+            $diffFLG = 0;
+            last;
+        }
+    }
+    return $diffFLG;
 }
 
 #=======================================================================
@@ -651,7 +688,7 @@ sub show_binary_diffs {
             unless ( $diffs{$dflt} ) { $dflt = 0; last }
             last if $diffs{$dflt} =~ /\.tar$/;
 
-            if ($bindiff =~ m/cdo/) {
+            if ($cdoX) {
                 last if $diffs{$dflt} =~ /\.hdf$/
                     or  $diffs{$dflt} =~ /\.nc4$/
                     or  $diffs{$dflt} =~ /\.ods$/;
@@ -993,7 +1030,7 @@ sub display_text_diffs {
 #=======================================================================
 sub diffs_to_ignore {
     my (@diff1List, $max, $fmt, $index, $diff1, $diff2, $diffs12, %diff1Hash);
-    my ($dflt, $sel, $fmt1, $fmt2, $ans);
+    my ($dflt, $delim_dflt, $sel, $fmt1, $fmt2, $ans);
 
     $dflt = 0;
   outer: while (1) {
@@ -1015,6 +1052,7 @@ sub diffs_to_ignore {
       }
       print "\n" if @diff1List;
       printf $fmt2, "a", "add new diffs to ignore";
+      printf $fmt2, "c", "use alt character when defining diffs to ignore";
       printf $fmt2, "r", "read ignore list from file";
       if (%ignore) {
           printf $fmt2, "w", "write ignore list to file";
@@ -1038,17 +1076,20 @@ sub diffs_to_ignore {
       #--------------------
       if ($sel eq "a") {
           while (1) {
-              print "  Enter diff1=diff2 [quit] ";
+              print "  Enter diff1${delim}diff2 [quit] ";
               chomp($diffs12 = <STDIN>);
               $diffs12 =~ s/\s//g;  # remove blank spaces
 
+              # allow user to make menu choice from previous menu
+              #--------------------------------------------------
               if    ($diffs12 eq "a") { next }
               elsif ($diffs12 eq "")  { last }
               elsif ($diffs12 eq "0") { last outer }
+              elsif ($diffs12 eq "c") { $sel = "c"; last }
               elsif ($diffs12 eq "r") { $sel = "r"; last }
 
               ($diff1, $diff2) = ();
-              ($diff1, $diff2) = split /[=]/, $diffs12;
+              ($diff1, $diff2) = split /[$delim]/, $diffs12;
 
               if ($diff1 and $diff2) { $ignore{$diff1} = $diff2 }
               else { print "  Cannot decipher input: $diffs12; Try again.\n\n" }
@@ -1115,9 +1156,19 @@ sub diffs_to_ignore {
           }
       }
 
+      # use alternate character when defining diffs to ignore
+      #------------------------------------------------------
+      if ($sel eq "c") {
+          if ($delim eq "=") { $delim_dflt = "+" }
+          else               { $delim_dflt = "=" }
+          print "  Alt character for defining diffs to ignore [$delim_dflt]: ";
+          chomp($delim = <STDIN>);
+          $delim = $delim_dflt if $delim eq "";
+      }
+
       # read ignore list from file
       #---------------------------
-      if ($sel eq "r") {
+      elsif ($sel eq "r") {
           while (1) {
               print "  Read ignore list from file [$ignoreFile]: ";
               chomp($ans = <STDIN>);
