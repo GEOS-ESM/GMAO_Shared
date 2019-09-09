@@ -27,6 +27,7 @@ set (plots_progs
    get_exports
    chckhist.new
    chckhist.old
+	chckrc
    zonal
    )
 

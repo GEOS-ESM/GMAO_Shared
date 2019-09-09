@@ -26,9 +26,10 @@ use Query qw(query yes);
 
 # global variables
 #-----------------
-my ($bindiff, $bwiFLG, $debug, $diffFLGs, $dir1, $dir2, $dirA, $dirB, $dirL1);
-my ($dirL2, $dmgetX, $filemode, $first, $follow, $ignoreFLG, $ignoreFile);
-my ($list, $listx, $quiet, $recurse, $sortFLG, $subdir, $tmpdir, $verbose);
+my ($bindiff, $bwiFLG, $debug, $cdoX, $delim, $diffFLGs, $dir1, $dir2);
+my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
+my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
+my ($subdir, $tmpdir, $verbose);
 my (%different, %diffsBIN, %diffsTXT, %dir_display, %filesize, %found);
 my (%identical, %ignore, %opts, %patterns, %vopts);
 my (@exclude, @extINC, @fileIDs, @files, @files1, @files2);
@@ -145,10 +146,12 @@ sub init {
     #-----------------------------------
     if (-x "/home/jstassi/bin/cdo") {
         $bindiff = "/home/jstassi/bin/cdo diffn";
+        $cdoX = "/home/jstassi/bin/cdo";
     }
     else  {
         chomp($bindiff = `which h5diff`);
         $bindiff = "" unless -x $bindiff;
+        $cdoX = 0;
     }
 
     # look for dmget command
@@ -329,7 +332,12 @@ sub cmp_files {
         $filesize{$file1} = -s abs_path($file1);
         $filesize{$file2} = -s abs_path($file2);
 
-        $status = system_("diff $diffFLGs $file1 $file2 >& /dev/null");
+        if ($cdoX and ($file1 =~ /\.hdf/ or $file2 =~ /\.nc4/)) {
+            $status = cdo_diff($file1, $file2);
+        }
+        else {
+            $status = system_("diff $diffFLGs $file1 $file2 >& /dev/null");
+        }
         unless ($status) {
             $identical{$file1} = $file2;
             next;
@@ -351,6 +359,33 @@ sub cmp_files {
 
     @unmatched1 = sort @unmatched1;
     @unmatched2 = sort @unmatched2;
+}
+
+#=======================================================================
+# name - cdo_diff
+# purpose - use cdo utility to test equivalence of two files
+#
+# input parameters
+# => file1: first file to compare
+# => file2: second file to compare
+#
+# notes
+# 1. check for line from cdo telling how many records differ
+# 2. if cdo reports that zero records differ, then files are assumed equivalent
+# 3. otherwise, this sub will report that the files differ
+#=======================================================================
+sub cdo_diff {
+    my ($file1, $file2) = @_;
+    my ($diffFLG, $line);
+    
+    $diffFLG = 1;
+    foreach $line (`$cdoX -s diffn $file1 $file2`) {
+        if ($line =~ m/0(\s+)of(\s+)(\d+) records differ/) {
+            $diffFLG = 0;
+            last;
+        }
+    }
+    return $diffFLG;
 }
 
 #=======================================================================
@@ -651,7 +686,7 @@ sub show_binary_diffs {
             unless ( $diffs{$dflt} ) { $dflt = 0; last }
             last if $diffs{$dflt} =~ /\.tar$/;
 
-            if ($bindiff =~ m/cdo/) {
+            if ($cdoX) {
                 last if $diffs{$dflt} =~ /\.hdf$/
                     or  $diffs{$dflt} =~ /\.nc4$/
                     or  $diffs{$dflt} =~ /\.ods$/;

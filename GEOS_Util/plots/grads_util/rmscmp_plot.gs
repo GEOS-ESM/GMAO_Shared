@@ -144,9 +144,9 @@ endif
          level = result
 
 if( xpos =  1 ) ; region = "Global"                                     ;  reg = "GLO"  ; endif
-if( xpos =  2 ) ; region = "Northern Hemisphere ExtraTropics"           ;  reg = "NHE"  ; endif
-if( xpos =  3 ) ; region = "Tropics"                                    ;  reg = "TRO"  ; endif
-if( xpos =  4 ) ; region = "Southern Hemisphere ExtraTropics"           ;  reg = "SHE"  ; endif
+if( xpos =  2 ) ; region = "N.Hem. ExtraTropics (Lats: 20,80)"          ;  reg = "NHE"  ; endif
+if( xpos =  3 ) ; region = "Tropics (Lats: -20,20)"                     ;  reg = "TRO"  ; endif
+if( xpos =  4 ) ; region = "S.Hem. ExtraTropics (Lats: -20,-80)"        ;  reg = "SHE"  ; endif
 if( xpos =  5 ) ; region = "N.W. Quadrant (Lons:-180,0  Lats: 0, 90)"   ;  reg = "NWQ"  ; endif
 if( xpos =  6 ) ; region = "N.E. Quadrant (Lons: 0,180  Lats: 0, 90)"   ;  reg = "NEQ"  ; endif
 if( xpos =  7 ) ; region = "S.W. Quadrant (Lons:-180,0  Lats: 0,-90)"   ;  reg = "SWQ"  ; endif
@@ -500,6 +500,14 @@ critval95 = subwrd(result,3)
 'q defval astudtout 1 1'
 critval99 = subwrd(result,3)
 
+'astudt 'dof' 0.001'  ;* 99.9% Confidence
+'q defval astudtout 1 1'
+critval999 = subwrd(result,3)
+
+'astudt 'dof' 0.0001'  ;* 99.99% Confidence
+'q defval astudtout 1 1'
+critval9999 = subwrd(result,3)
+
 
 * Estimate Statistically Significant Range for Synoptic Variability from Average of All Experiment (90% Confidence)
 * -----------------------------------------------------------------------------------------------------------------
@@ -546,6 +554,14 @@ while( m<=mexps )
 'define dx       =  se*'critval99
 'define rUp99'm' = pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 'define rLp99'm' = pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+
+'define dx       =  se*'critval999
+'define rUp999'm' = pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp999'm' = pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+
+'define dx       =  se*'critval9999
+'define rUp9999'm' = pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp9999'm' = pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
 m = m + 1
 endwhile
@@ -789,15 +805,27 @@ valrUp99.m = subwrd(result,4)
 'd rLp99'm
 valrLp99.m = subwrd(result,4)
 
+'d rUp999'm
+valrUp999.m = subwrd(result,4)
+'d rLp999'm
+valrLp999.m = subwrd(result,4)
+
+'d rUp9999'm
+valrUp9999.m = subwrd(result,4)
+'d rLp9999'm
+valrLp9999.m = subwrd(result,4)
+
 'set t 'tbeg.m' 'tdif.m
 'minmax rave'm'-rave0'
 raveMX.m = subwrd(result,1)
 raveMN.m = subwrd(result,2)
 'set t 'tdif.m
-say 'tdif.'m': 'tdif.m' 68% Confidence rUp: 'valrUp68.m' rLp: 'valrLp68.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 90% Confidence rUp: 'valrUp90.m' rLp: 'valrLp90.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 95% Confidence rUp: 'valrUp95.m' rLp: 'valrLp95.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
-say 'tdif.'m': 'tdif.m' 99% Confidence rUp: 'valrUp99.m' rLp: 'valrLp99.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 68.00% Confidence rUp: 'valrUp68.m' rLp: 'valrLp68.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 90.00% Confidence rUp: 'valrUp90.m' rLp: 'valrLp90.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 95.00% Confidence rUp: 'valrUp95.m' rLp: 'valrLp95.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 99.00% Confidence rUp: 'valrUp99.m' rLp: 'valrLp99.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 99.90% Confidence rUp: 'valrUp999.m' rLp: 'valrLp999.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
+say 'tdif.'m': 'tdif.m' 99.99% Confidence rUp: 'valrUp9999.m' rLp: 'valrLp9999.m' raveMN: 'raveMN.m'  raveMX: 'raveMX.m
 m = m + 1
 endwhile
 
@@ -873,6 +901,20 @@ if( mexps=1 )
    'set cthick 5'
    'set bargap 80'
    'd rUp99'm'*1000;rLp99'm'*1000'
+
+*  'set gxout errbar'
+*  'set ccolor 1'
+*  'set cstyle 1'
+*  'set cthick 5'
+*  'set bargap 80'
+*  'd rUp999'm'*1000;rLp999'm'*1000'
+
+*  'set gxout errbar'
+*  'set ccolor 1'
+*  'set cstyle 1'
+*  'set cthick 5'
+*  'set bargap 80'
+*  'd rUp9999'm'*1000;rLp9999'm'*1000'
 else
    'set ccolor 'expcol.m
    'd rUp90'm'*1000;rLp90'm'*1000'

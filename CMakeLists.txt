@@ -9,8 +9,6 @@ esma_add_subdirectories(
   GEOS_Shared
   GMAO_hermes
   GEOS_Util 
-  Chem_Base
-  Chem_Shared
   LANL_Shared
   GMAO_perllib
   GMAO_transf
@@ -31,11 +29,10 @@ esma_add_subdirectories(
   pnagpack
   )
 
-# Special cases - GMAO_gfio, and GFDL_fms are built twice with two
-# different precisions.
-add_subdirectory (GMAO_gfio GMAO_gfio_r4)
-add_subdirectory (GMAO_gfio GMAO_gfio_r8)
-add_dependencies (GMAO_gfio_r4 GMAO_gfio_r8)
+# Special case - GMAO_gfio is built twice with two different precisions.
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/GMAO_gfio)
+  add_subdirectory (GMAO_gfio GMAO_gfio_r4)
+  add_subdirectory (GMAO_gfio GMAO_gfio_r8)
+  add_dependencies (GMAO_gfio_r4 GMAO_gfio_r8)
+endif ()
 
-add_subdirectory (GFDL_fms GFDL_fms_r4)
-add_subdirectory (GFDL_fms GFDL_fms_r8)
