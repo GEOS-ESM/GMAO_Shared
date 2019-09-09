@@ -1,4 +1,4 @@
-#!@DASPERL
+#!@DASPERL@
 #
 # Script to copy restarts from rs location to recycle
 #
