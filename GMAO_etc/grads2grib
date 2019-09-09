@@ -1,4 +1,4 @@
-#!@DASPERL@
+#!@DASPERL
 # Simple perl script to convert HDF files to GRID. Uses lats4d.
 #
 # Revision history:

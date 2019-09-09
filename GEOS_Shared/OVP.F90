@@ -364,7 +364,7 @@ contains
       IF( .NOT. ASSOCIATED(SOURCE_FIELD) ) THEN
         IF(MAPL_AM_I_ROOT()) PRINT *, "OVP_apply_mask_2D: Cannot extract values because source-field is not available"
         RC=99
-        VERIFY_(RC)
+        _VERIFY(RC)
       END IF
 
       IF ( CURRENT_HMS == FIRST_HMS ) OVERPASS_FIELD(:,:) = -987.0    ! SET UNDEFINED ON FIRST TIMESTEP OF THE DAY
@@ -441,7 +441,7 @@ contains
       IF( .NOT. ASSOCIATED(SOURCE_FIELD) ) THEN
         IF(MAPL_AM_I_ROOT()) PRINT *, "OVP_apply_mask_3D: Cannot extract values because source-field is not available"
         RC=99
-        VERIFY_(RC)
+        _VERIFY(RC)
       END IF
 
       km = SIZE(SOURCE_FIELD(1,1,:))

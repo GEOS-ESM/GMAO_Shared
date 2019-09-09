@@ -243,20 +243,12 @@ contains
 ! !DESCRIPTION:
 !  This routine enables a user to flush the output from an IO unit
 !  (typically stdout) to force output when the system is buffering
-!  such output.  Because this system function is system dependent,
-!  we only support this wrapper and users are welcome to insert the
-!  code relevant to their local machine.  In the case where the CCSM
-!  libraries are available, the shared routine for sys flush can be
-!  used (and is provided here under a preprocessor option).
+!  such output.  This functionality is now standardized in Fortran (2003).
 !
 ! !REVISION HISTORY:
 !  same as module
 !
 ! !USES:
-
-#ifdef CCSM
-      use shr_sys_mod, only : shr_sys_flush
-#endif
 
 ! !INPUT PARAMETER:
 
@@ -270,16 +262,7 @@ contains
 !
 !-----------------------------------------------------------------------
 
-#if (defined IRIX64 || defined CRAY || defined OSF1 || defined SUNOS || defined LINUX || defined NEC_SX | defined UNICOSMP)
-   call flush(iunit)
-#endif
-#if (defined AIX)
-   call flush_(iunit)
-#endif
-
-#ifdef CCSM
-   call shr_sys_flush(iunit)
-#endif
+   flush(iunit)
 
 !EOC
  end subroutine flush_fileunit
