@@ -4,6 +4,7 @@ function genplt (args)
 expid   = subwrd(args,n) ; n = n + 1
 EXPORT  = subwrd(args,n) ; n = n + 1
 GC      = subwrd(args,n) ; n = n + 1
+alias   = subwrd(args,n) ; n = n + 1
 season  = subwrd(args,n) ; n = n + 1
 output  = subwrd(args,n) ; n = n + 1
 level   = subwrd(args,n) ; n = n + 1
@@ -15,6 +16,7 @@ anal    = subwrd(args,n) ; n = n + 1
 obsname = subwrd(args,n) ; n = n + 1
 debug   = subwrd(args,n) ; n = n + 1
 expdsc  = subwrd(args,n) ; n = n + 1
+stat    = subwrd(args,n) ; n = n + 1
  
 blak   = 0
 
@@ -61,33 +63,46 @@ endif
          geosutil = result
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
 
+    PRFX = ''
+if( stat = 'STD' )
+    PRFX = 'STD_'
+endif
+if( stat = 'RMS' )
+    PRFX = 'RMS_'
+  EXPORT =  alias
+endif
+if( stat = 'BIAS' )
+    PRFX = 'BIAS_'
+  EXPORT =  alias
+endif
+
 say 'LEVTYPE: 'CLEVS
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_'level'_CBSCALE'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_CBSCALE' ; endif
-                                                            cbscale = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CBSCALE'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CBSCALE' ; endif
+                                                                  cbscale = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_'level'_FACTOR'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_FACTOR' ; endif
-                                                            fact = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; endif
+                                                                  fact = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_'level'_TITLE'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_TITLE' ; endif
-                                                            title = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_TITLE'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE' ; endif
+                                                                  title = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_'level'_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_CCOLS' ; endif
-                                                            ccols = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
+                                                                  ccols = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_'level'_'CLEVS
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_'level'_CLEVS' ; endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_'CLEVS ; endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_CLEVS' ; endif
-                                                            clevs = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_'CLEVS
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_CLEVS' ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'CLEVS ; endif
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
+                                                                  clevs = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_REGRID'
-                                                            method = result
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_MASK'
-                                                            mask   = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_REGRID'
+                                                                  method = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_MASK'
+                                                                  mask   = result
 
 * Remove possible BLANKS from mask
 * --------------------------------
@@ -437,7 +452,7 @@ eyearo = subwrd(date,2)
 'draw string 0.050 3.05 Mean: 'avgdif
 'draw string 0.050 2.90  Std: 'stddif
 
-'myprint -name 'output'/hdiag_'anal'_'EXPORT'.'GC'_'level'.'season
+'myprint -name 'output'/hdiag_'PRFX''anal'_'EXPORT'.'GC'_'level'.'season
 'set clab on'
 
 'set mproj latlon'
