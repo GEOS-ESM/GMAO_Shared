@@ -586,6 +586,7 @@ ENDOFHELP
              print "remote file = $remote_file\n";
              print "clean = $clean\n";
         }
+        unlink($remote_file) if -e $remote_file;
         if ( -l $local_file ) {
                 $trans_retcode = copy( $local_file, $remote_file);
                 $chmod_retcode = chmod( oct(${mode}), ${remote_file});
@@ -1056,6 +1057,7 @@ my ( $LOCAL, $local_host_name, $local_domain_name,
 # Else if this is a local transfer (on the same machine), use the copy function.
 
    } else {
+      unlink($remote_file) if -e $remote_file;
       print "cmd= copy( $local_file, $remote_file )\n" if ($debug);
       $rcp_ok = copy( $local_file, $remote_file );
       if( (-e $dmftag) && $rcp_ok ) {
