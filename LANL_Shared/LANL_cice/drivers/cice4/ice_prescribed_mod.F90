@@ -521,7 +521,7 @@ end subroutine ice_prescribed_run2
                           rn,                            & 
                           nilyr,          nslyr,         & 
                           option,         dt,            &
-                          salinity)   
+                          salinity, ai_tend, vi_tend)   
     
       real, dimension(:,:,:), intent(inout)   ::  aicen
       real, dimension(:,:,:), intent(inout)   ::  Tsfc
@@ -541,6 +541,7 @@ end subroutine ice_prescribed_run2
       integer(nudging_type_kind),  intent(in)      ::  option   ! 
       real,               intent(in)      ::  dt       ! time step
       real, optional, dimension(:,:),   intent(in) ::  salinity   ! 
+      real, optional, dimension(:,:),   intent(inout) ::  ai_tend, vi_tend   ! 
  
 ! locals
       real, parameter                     ::  alpha =  6.0
@@ -559,17 +560,27 @@ end subroutine ice_prescribed_run2
       integer                             ::  sl1, sl2
       integer                             ::  n, k 
       integer                             ::  i, j, im, jm
+      real, allocatable, dimension(:,:)   ::  ai_old 
+      real, allocatable, dimension(:,:)   ::  vi_old 
 
 
       im = size(aicen, dim=1)
       jm = size(aicen, dim=2)
+      if(present(ai_tend)) then
+          allocate(ai_old(im,jm)) 
+          ai_old = sum(aicen, dim=3)
+      endif  
+      if(present(vi_tend)) then
+          allocate(vi_old(im,jm)) 
+          vi_old = sum(vicen, dim=3)
+      endif  
  
       do i=1, im
         do j=1,jm
           aice = sum(aicen(i,j,:))
           if(frt(i,j) < puny .and. aice < puny) cycle
           if(present(salinity)) then
-            Tf = -depressT*salinity(i,j)
+            Tf = -depressT*max(salinity(i,j), 5.0)
           else
             Tf = Tocnfrz
           endif  
@@ -652,6 +663,15 @@ end subroutine ice_prescribed_run2
        end select
      enddo
      enddo   
+
+     if(present(ai_tend)) then
+          ai_tend = (sum(aicen, dim=3) - ai_old) / dt * 100.0 * 86400
+          deallocate(ai_old) 
+     endif  
+     if(present(vi_tend)) then
+          vi_tend = (sum(vicen, dim=3) - vi_old) / dt * 100.0 * 86400
+          deallocate(vi_old) 
+     endif  
                            
    end subroutine ice_nudging
 
