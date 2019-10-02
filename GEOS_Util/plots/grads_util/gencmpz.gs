@@ -8,6 +8,7 @@ function gencmpz (args)
  numargs = result
 
 NAME   = NULL
+STAT   = NULL
 DEBUG  = FALSE
 PTOPS  = NULL
 
@@ -21,6 +22,7 @@ if( subwrd(args,num) = '-EXPORT' ) ; EXPORT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT' ) ; OUTPUT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-NAME'   ) ; NAME   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'  ) ; DEBUG  = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-STAT'   ) ; STAT   = subwrd(args,num+1) ; endif
 
 * Read PTOP
 * ---------
@@ -163,6 +165,23 @@ while ( n <= nexp )
         mfile.n = subwrd(result,2)
        mscale.n = subwrd(result,3)
        expdsc.n = subwrd(result,4)
+    if( STAT = "STD" )
+        mname.n = 'VAR_'mname.n
+    endif
+    if( STAT = "BIAS" )
+              k = n + 1 
+        mname.k =       mname.n
+        mfile.k =       mfile.n
+       mscale.k =      mscale.n
+       expdsc.k =      expdsc.n
+    endif
+    if( STAT = "RMS" )
+              k = n + 1 
+        mname.k = 'VAR_'mname.n
+        mfile.k =       mfile.n
+       mscale.k =      mscale.n
+       expdsc.k =      expdsc.n
+    endif
     if( mfile.n != 'NULL' )
             mexp = mexp + 1
     else
@@ -172,6 +191,9 @@ while ( n <= nexp )
     endif
          n  = n + 1
 endwhile
+if( STAT = "RMS" | STAT = "BIAS" )
+    mexp = mexp + 1
+endif
 
 
 * Compute PTOP Info
@@ -249,8 +271,8 @@ endif
 
 * Ensure NAME has no underscores
 * ------------------------------
-        m=1
-while ( m<mexp+1 )
+        m  = 1
+while ( m <= mexp )
 'fixname 'mname.m
           alias.m = result
      say 'Alias #'m' = 'alias.m
@@ -270,7 +292,7 @@ endwhile
  say 'Model Environment:'
  say result
 
-if( nexp = 1 )
+if( mexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT = EXPORT.1
@@ -358,6 +380,23 @@ while ( n <= nexp )
        oscale.n = subwrd(result,3)
        obsdsc.n = subwrd(result,4)
        obsnam.n = subwrd(result,5)
+    if( STAT = "STD" )
+        oname.n = 'VAR_'oname.n
+    endif
+    if( STAT = "RMS" )
+              k = n + 1 
+        oname.k = 'VAR_'oname.n
+        ofile.k =       ofile.n
+       oscale.k =      oscale.n
+       obsdsc.k =      obsdsc.n
+    endif
+    if( STAT = "BIAS" )
+              k = n + 1 
+        oname.k =       oname.n
+        ofile.k =       ofile.n
+       oscale.k =      oscale.n
+       obsdsc.k =      obsdsc.n
+    endif
     if( ofile.n != 'NULL' )
             oexp = oexp + 1
     else
@@ -367,6 +406,9 @@ while ( n <= nexp )
     endif
          n  = n + 1
 endwhile
+if( STAT = "RMS" | STAT = "BIAS" )
+    oexp = oexp + 1
+endif
 
 
 * Continue if all EXPORT(s) are found
@@ -389,8 +431,8 @@ endif
 
 * Ensure NAME has no underscores
 * ------------------------------
-        m=1
-while ( m<oexp+1 )
+        m  = 1
+while ( m <= oexp )
 'fixname 'oname.m
           olias.m = result
       say 'Olias #'m' = 'olias.m
@@ -409,7 +451,7 @@ endwhile
  say 'CMPEXP Environment:'
  say result
 
-if( nexp = 1 )
+if( oexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT = EXPORT.1
@@ -478,6 +520,10 @@ endif
 'set t 1'
 'define mod = mod0'season'*'facm
 'makez  mod z'
+if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
+   'mod  = sqrt( mod  )'
+   'modz = sqrt( modz )'
+endif
 
 'set dfile 'expfile
 if(  numlevs = 1 )
@@ -488,7 +534,10 @@ endif
 'set t 1'
 'define obs = exp'num''season'*'faco
 'makez  obs z'
-
+if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
+   'obs  = sqrt( obs  )'
+   'obsz = sqrt( obsz )'
+endif
 
 * Make ZPLT
 * ---------
@@ -519,6 +568,7 @@ while( n<=NPTOPS )
 
       'set dfile 'mfile.1
       'set t 1'
+
       'makezdif -q1 mod -q2 obs -file1 'modfile' -file2 'expfile' -ptop 'PTOP
        qmax = subwrd(result,1)
        qmin = subwrd(result,2)
@@ -526,7 +576,7 @@ while( n<=NPTOPS )
                        flag = ""
                while ( flag = "" )
 
-'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'obsnam.1' -OBDATE 'begdateo' -OEDATE 'enddateo' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG
+'run genpltz.gs -EXPID 'EXPID' -EXPORT 'EXPORT' -GC 'GC' -ALIAS 'mname.1' -QFILE 'mfile.1' -OFILE 'ofile.1' -ONAME 'obsnam.1' -OBDATE 'begdateo' -OEDATE 'enddateo' -NMOD 'nmod' -NOBS 'nobs' -QDESC 'expdsc.1' -ODESC 'obsdsc.1' -OUTPUT 'OUTPUT' -SEASON 'season' -PTOP 'PTOP' -MAX 'qmax' -MIN 'qmin' -ZLOG 'ZLOG' -STAT 'STAT
 
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"

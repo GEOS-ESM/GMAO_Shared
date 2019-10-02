@@ -7,6 +7,8 @@ USE_PLOTRC = FALSE
 
 dqmax = NULL
 dqmin = NULL
+STAT  = ''
+PRFX  = ''
 
         num = 0
 while ( num < numargs )
@@ -31,6 +33,7 @@ if( subwrd(args,num) = '-PTOP'    ) ; ptop     = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-MAX'     ) ; dqmax    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-MIN'     ) ; dqmin    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-ZLOG'    ) ; zlog     = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-STAT'    ) ; STAT     = subwrd(args,num+1) ; endif
 
 endwhile
 
@@ -98,34 +101,46 @@ endif
 PLOTRC = geosutil'/plots/grads_util/plot.rc'
  
 say ''
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_TITLE'  ; title   = result
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_FACTOR' ; fact    = result
+if( STAT = 'STD' )
+    PRFX = 'STD_'
+endif
+if( STAT = 'RMS' )
+    PRFX = 'RMS_'
+  EXPORT =  alias
+endif
+if( STAT = 'BIAS' )
+    PRFX = 'BIAS_'
+  EXPORT =  alias
+endif
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_Z_CCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_CCOLS' ; endif
-                                                            ccols = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'  ; title   = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; fact    = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_Z_DCOLS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_DCOLS' ; endif
-                                                             dcols = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
+                                                                  ccols = result
+
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_DCOLS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DCOLS' ; endif
+                                                                  dcols = result
 
 if( zlog = 'ON' & ptop < 10 )
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_ZLOG_CLEVS'
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_Z_CLEVS' ; endif
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_ZLOG_CLEVS'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS' ; endif
 else
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_Z_CLEVS'
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS'
 endif
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_CLEVS' ; endif
-                                                            clevs = result
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
+                                                                  clevs = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_Z_'LEVTYPE
-if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'EXPORT'_'GC'_'LEVTYPE ; endif
-                                                             dlevs = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_'LEVTYPE
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'LEVTYPE ; endif
+                                                                   dlevs = result
 
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_DIFFMAX'
-                                                            diffmax = result
-                        'getresource 'PLOTRC' 'EXPORT'_'GC'_DIFFMIN'
-                                                            diffmin = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMAX'
+                                                                  diffmax = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMIN'
+                                                                  diffmin = result
 
 if( fact    = 'NULL' ) ; fact    = 1            ; endif
 if( title   = 'NULL' )
@@ -148,9 +163,9 @@ say 'DIFFMAX: 'diffmax
 say 'DIFFMIN: 'diffmin
 
 if( zlog = 'OFF' )
-    oname = '/hdiag_'obsnam'_'EXPORT'.'GC'_z'
+    oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_z'
 else
-    oname = '/hdiag_'obsnam'_'EXPORT'.'GC'_zlog'ptop
+    oname = '/hdiag_'PRFX''obsnam'_'EXPORT'.'GC'_zlog'ptop
 endif
 
 * Remove possible BLANKS from FACTOR

@@ -8,6 +8,7 @@ function gencmp (args)
  numargs = result
 
 NAME  = NULL
+STAT  = NULL
 DEBUG = FALSE
 LEVEL = 0
 
@@ -20,6 +21,7 @@ if( subwrd(args,num) = '-EXPID'  ) ; EXPID  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT' ) ; OUTPUT = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-DEBUG'  ) ; DEBUG  = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-NAME'   ) ; NAME   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-STAT'   ) ; STAT   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-LEVEL'  ) ; LEVEL  = subwrd(args,num+1) ; endif
 
 * Read EXPORTS with format  EXPORT:GC[:OPT]
@@ -139,6 +141,25 @@ while ( n <= numGCs )
        qscale.n = subwrd(result,3)
         qdesc.n = subwrd(result,4)
          qtag.n = subwrd(result,5)
+    if( STAT = "STD" )
+        qname.n = 'VAR_'qname.n
+    endif
+    if( STAT = "BIAS" )
+              k = n + 1
+        qname.k =  qname.n
+        qfile.k =  qfile.n
+       qscale.k = qscale.n
+        qdesc.k =  qdesc.n
+         qtag.k =   qtag.n
+    endif
+    if( STAT = "RMS" )
+              k = n + 1
+        qname.k = 'VAR_'qname.n
+        qfile.k =       qfile.n
+       qscale.k =      qscale.n
+        qdesc.k =       qdesc.n
+         qtag.k =        qtag.n
+    endif
     if( qfile.n != 'NULL' )
             mexp = mexp + 1
     else
@@ -148,6 +169,9 @@ while ( n <= numGCs )
     endif
          n  = n + 1
 endwhile
+if( STAT = "RMS" | STAT = "BIAS" )
+    mexp = mexp + 1
+endif
 
 
 * Get Environment Variables
@@ -197,8 +221,8 @@ endif
 
 * Ensure NAME has no underscores
 * ------------------------------
-        m=1
-while ( m<mexp+1 )
+        m  = 1
+while ( m <= mexp )
 'fixname 'qname.m
           alias.m = result
      say 'Alias #'m' = 'alias.m
@@ -217,7 +241,7 @@ endwhile
  say 'Model Environment:'
  say result
 
-if( numGCs = 1 )
+if( mexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT = EXPORT.1
@@ -244,6 +268,18 @@ else
         GC = GC.1
 endif
 
+if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
+       k = 1
+while( k > 0 )
+  season = subwrd(seasons,k)
+  if( season = '' )
+           k = -1
+  else
+     'define mod'season' = sqrt( mod'season' )'
+           k = k+1
+  endif
+endwhile
+endif
 
 ***********************************************************************************
 *              Loop over Possible Experiment Datasets for Comparison
@@ -305,6 +341,25 @@ while ( m <= numGCs )
        oscale.numexp.m = subwrd(result,3)
        obsdsc.numexp.m = subwrd(result,4)
        obsnam.numexp.m = subwrd(result,5)
+    if( STAT = "STD" )
+        oname.numexp.m = 'VAR_'oname.numexp.m
+    endif
+    if( STAT = "BIAS" )
+              k = m + 1
+        oname.numexp.k =   oname.numexp.m
+      obsfile.numexp.k = obsfile.numexp.m
+       oscale.numexp.k =  oscale.numexp.m
+       obsdsc.numexp.k =  obsdsc.numexp.m
+       obsnam.numexp.k =  obsnam.numexp.m
+    endif
+    if( STAT = "RMS" )
+              k = m + 1
+        oname.numexp.k = 'VAR_'oname.numexp.m
+      obsfile.numexp.k = obsfile.numexp.m
+       oscale.numexp.k =  oscale.numexp.m
+       obsdsc.numexp.k =  obsdsc.numexp.m
+       obsnam.numexp.k =  obsnam.numexp.m
+    endif
     if( obsfile.numexp.m != 'NULL' )
             oexp = oexp + 1
     else
@@ -314,6 +369,9 @@ while ( m <= numGCs )
     endif
          m  = m + 1
 endwhile
+if( STAT = "RMS" | STAT = "BIAS" )
+    oexp = oexp + 1
+endif
 
 * Continue if all EXPORT(s) are found
 * -----------------------------------
@@ -336,8 +394,8 @@ if( found = "TRUE" )
 
 * Ensure NAME has no underscores
 * ------------------------------
-        m=1
-while ( m<oexp+1 )
+        m  = 1
+while ( m <= oexp )
 'fixname 'oname.numexp.m
           olias.numexp.m = result
      say 'Olias #'m' = 'olias.numexp.m
@@ -356,7 +414,7 @@ endwhile
  say 'CMPEXP Environment:'
  say result
 
-if( numGCs = 1 )
+if( oexp = 1 )
       NAME = EXPORT.1
         GC =     GC.1
     EXPORT = EXPORT.1
@@ -404,12 +462,16 @@ endif
                   'count "'season'" 'begdateo' 'enddateo
                    nobs.numexp = result
 
+                  if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
+                     'define obs'numexp''season' = sqrt( obs'numexp''season' )'
+                  endif
                  'define obs'season' = obs'numexp''season
+
                  'run setenv "CLIMATE" 'climate
 
                        flag = ""
                while ( flag = "" )
-              'run genplt.gs 'EXPID' 'EXPORT' 'GC' 'season' 'OUTPUT' 'LEVEL' 'nmod' 'nobs.numexp' 'qfile.1' 'anafile' 'ananam' 'anadsc' 'DEBUG' 'qdesc.1
+              'run genplt.gs 'EXPID' 'EXPORT' 'GC' 'alias.1' 'season' 'OUTPUT' 'LEVEL' 'nmod' 'nobs.numexp' 'qfile.1' 'anafile' 'ananam' 'anadsc' 'DEBUG' 'qdesc.1' 'STAT
                 if( DEBUG = "debug" )
                     say "Hit  ENTER  to repeat plot"
                     say "Type 'next' for  next plot, 'done' for next field"
