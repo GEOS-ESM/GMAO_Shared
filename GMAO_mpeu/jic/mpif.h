@@ -92,7 +92,7 @@ C
      $     MPI_LOR, MPI_BOR, MPI_LXOR, MPI_BXOR, MPI_MINLOC, MPI_MAXLOC,
      $     MPI_OP_NULL
 
-      integer MPI_ERRORS_ARE_FATAL, MPI_ERRORS_RETURN
+      integer MPI_ERRORS_ARE_FATAL, MPI_ERRORSRETURN_
 
 #ifdef _ORIGINAL_
       common /mpipriv/ MPI_BOTTOM, MPI_INTEGER, MPI_REAL, 
@@ -109,7 +109,7 @@ C
      $     MPI_LOR, MPI_BOR, MPI_LXOR, MPI_BXOR, MPI_MINLOC, MPI_MAXLOC,
      $     MPI_OP_NULL, 
      $     MPI_TAG_UB, MPI_HOST, MPI_IO, MPI_ERRORS_ARE_FATAL, 
-     $     MPI_ERRORS_RETURN, MPI_PACKED, MPI_WTIME_IS_GLOBAL
+     $     MPI_ERRORSRETURN_, MPI_PACKED, MPI_WTIME_IS_GLOBAL
 C
 C     Without this save, some Fortran implementations may make the common
 C     dynamic!
@@ -139,7 +139,7 @@ C
      $     MPI_OP_NULL=0)
       parameter (MPI_TAG_UB=32767, MPI_HOST=MPI_PROC_NULL, MPI_IO=0)
       parameter (MPI_ERRORS_ARE_FATAL=MPI_OP_NULL, 
-     $     MPI_ERRORS_RETURN=MPI_OP_NULL)
+     $     MPI_ERRORSRETURN_=MPI_OP_NULL)
       parameter (MPI_PACKED=1, MPI_WTIME_IS_GLOBAL=1)
 #endif
 C
