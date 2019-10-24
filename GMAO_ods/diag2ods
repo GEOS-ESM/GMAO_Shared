@@ -48,7 +48,6 @@ use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
 use File::Copy "cp";     # for cp()
 use Getopt::Long;        # command line options
-use Shell qw(cat rm);    # cat command
 use Time::Local;         # time functions
 
 # look for perl packages in the following locations
@@ -196,9 +195,9 @@ sub matchOMA {
                 die ">>>> ERROR <<< running odsmatch" if ( $rc );
                 print " $0: odsmatch \$rc =  $rc\n";
                 print "rm  $expid.${grp}_${res0}.${nymdhh}.ods \n";
-                       rm("$expid.${grp}_${res0}.${nymdhh}.ods");
+                       unlink("$expid.${grp}_${res0}.${nymdhh}.ods");
                 print "rm  $expid.${grp}_${res1}.${nymdhh}.ods \n";
-                       rm("$expid.${grp}_${res1}.${nymdhh}.ods");
+                       unlink("$expid.${grp}_${res1}.${nymdhh}.ods");
             }
             exit;
         }
@@ -227,7 +226,7 @@ sub matchOMA {
             die ">>>> ERROR <<< creating single ods file" if ( $rc );
             print " $0: odsselect \$rc =  $rc\n";
             print "rm  ${odsfnbase}_${grp}.${nymdhh}.ods \n";
-                   rm("${odsfnbase}_${grp}.${nymdhh}.ods");
+                   unlink("${odsfnbase}_${grp}.${nymdhh}.ods");
         }
     }
 
@@ -301,7 +300,7 @@ sub imp0hr {
                 die ">>>> ERROR <<< running odsmatch during imp0hr" if ( $rc );
                 print " $0: odsmatch \$rc =  $rc\n";
                 print "rm  $expid.selgood_${grp}.${nymdhh}.ods \n";
-                       rm("$expid.selgood_${grp}.${nymdhh}.ods");
+                       unlink("$expid.selgood_${grp}.${nymdhh}.ods");
             }
             exit;
         }
@@ -553,8 +552,8 @@ sub init {
 
 # Clean up
 # --------
-        rm("$expid.${res0}_${nymdhh}.ods") if ( -e "$expid.${res0}_${nymdhh}.ods");
-        rm("$expid.${res1}_${nymdhh}.ods") if ( -e "$expid.${res1}_${nymdhh}.ods");
+        unlink("$expid.${res0}_${nymdhh}.ods") if ( -e "$expid.${res0}_${nymdhh}.ods");
+        unlink("$expid.${res1}_${nymdhh}.ods") if ( -e "$expid.${res1}_${nymdhh}.ods");
 
 return 0;
 }

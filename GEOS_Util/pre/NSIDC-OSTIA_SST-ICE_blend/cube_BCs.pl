@@ -166,7 +166,7 @@ sub write_and_submit_jobfile {
 #SBATCH --job-name=$base
 #SBATCH --output=$logfile.RUNNING
 #SBATCH --ntasks=24
-#SBATCH --constraint=hasw
+#SBATCH --constraint=sky
 #SBATCH --time=1:00:00
 
 set echo

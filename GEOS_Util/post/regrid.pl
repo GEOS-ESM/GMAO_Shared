@@ -2311,7 +2311,7 @@ EOF
 #SBATCH --time=1:00:00
 #SBATCH --ntasks=${NPE} ${MEMPERCPU}
 #SBATCH --job-name=regrid
-#SBATCH --constraint=hasw
+#SBATCH --constraint=sky
 #$QOSline
 
 unlimit

@@ -679,13 +679,13 @@ sub submit_calcjob {
 #SBATCH --job-name=$jobname
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
-#SBATCH --constraint=hasw
+#SBATCH --constraint=sky
 
 source $Bin/g5_modules
 set echo
 chdir $fstatswork
 
-$dryrun mpiexec_mpt $statsX -np 1 -fcst @fcst_fnames \\
+$dryrun mpirun $statsX -np 1 -fcst @fcst_fnames \\
                     -ana @ana_fnames \\
                     -cli @climfiles \\
                     -tag $expid.${ihh}z \\
@@ -774,7 +774,7 @@ sub submit_archivejob {
 #SBATCH --partition=datamove
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
-#SBATCH --constraint=hasw
+#SBATCH --constraint=sky
 
 set echo
 @ archive_status = 0
