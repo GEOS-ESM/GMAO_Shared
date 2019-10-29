@@ -21,16 +21,19 @@ ecbuild_add_executable (
   TARGET regrid_forcing.x
   SOURCES regrid_forcing.F90
   LIBS ${this})
+set_target_properties(regrid_forcing.x PROPERTIES Fortran_MODULE_DIRECTORY ${esma_include}/${this})
 
 ecbuild_add_executable (
   TARGET sst_sic_EIGTHdeg.x
   SOURCES proc_SST_FRACI.F90
   LIBS ${this})
+set_target_properties(sst_sic_EIGTHdeg.x PROPERTIES Fortran_MODULE_DIRECTORY ${esma_include}/${this})
 
 ecbuild_add_executable (
   TARGET sst_sic_QUARTdeg.x
   SOURCES proc_SST_FRACI_ostia_quart.F90
   LIBS ${this})
+set_target_properties(sst_sic_QUARTdeg.x PROPERTIES Fortran_MODULE_DIRECTORY ${esma_include}/${this})
 
 file(GLOB cshscripts *.csh)
 file(GLOB perlscripts *.pl)
