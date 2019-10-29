@@ -36,12 +36,6 @@ if (precision STREQUAL "r8")
   foreach(flag ${tmp})
      target_compile_options (${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${flag}>)
   endforeach()
-  # Create a softlink (_r8 is default for gfio)
-  add_custom_target (link_target ALL
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${this} GMAO_gfio
-    WORKING_DIRECTORY ${esma_include}
-    )
-  add_dependencies (${this} link_target)
 endif ()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
