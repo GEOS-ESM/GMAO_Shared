@@ -1,4 +1,4 @@
-#!/bin/csh 
+#!/bin/csh -f
 #
 # Packs NetCDF files with ncks with gzip level 4;
 # the file is made setgid to indicate that it is packed;
