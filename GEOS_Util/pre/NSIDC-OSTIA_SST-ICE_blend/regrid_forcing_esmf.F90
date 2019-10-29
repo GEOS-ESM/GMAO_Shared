@@ -35,6 +35,9 @@ module GenGridCompMod
      integer                   :: PJM
      integer                   :: GPIM
      integer                   :: GPJM
+     type(ESMF_Time)           :: start_time
+     type(ESMF_Time)           :: end_time
+     logical                   :: select_time
   end type T_PrivateState
 
   type :: T_PrivateState_Wrap
@@ -166,7 +169,8 @@ contains
     integer                                :: DIMS(3)
     logical                                :: transformNeeded
     character(len=ESMF_MAXSTR)             :: TILINGFILE, OUTPUT_GRIDNAME, INPUT_GRIDNAME
-    integer                                :: NX, NY, output_im, output_jm
+    integer                                :: NX, NY, output_im, output_jm, tdate
+    integer                                :: yy,mm,dd,stat1,stat2
     type(ESMF_Config)                      :: cf
 
 ! Begin... 
@@ -208,6 +212,19 @@ contains
     VERIFY_(STATUS)
     call ESMF_ConfigGetAttribute(cf,input_gridname,label='INPUT_GRIDNAME:',RC=status)
     VERIFY_(STATUS)
+    call ESMF_ConfigGetAttribute(cf,tdate,label='START_DATE:',RC=stat1)
+    if (stat1 == ESMF_SUCCESS) then
+       call MAPL_UnpackTime(tdate,yy,mm,dd)
+       call ESMF_TimeSet(privateState%start_time,yy=yy,mm=mm,dd=dd,rc=status)
+       VERIFY_(STATUS)
+    end if
+    call ESMF_ConfigGetAttribute(cf,tdate,label='END_DATE:',RC=stat2)
+    if (stat2 == ESMF_SUCCESS) then
+       call MAPL_UnpackTime(tdate,yy,mm,dd)
+       call ESMF_TimeSet(privateState%end_time,yy=yy,mm=mm,dd=dd,rc=status)
+       VERIFY_(STATUS)
+    end if
+    privateState%select_time = ( (stat1 == ESMF_SUCCESS) .and. (stat2 == ESMF_SUCCESS) )
 
 ! Create grid for this component
 !-------------------------------
@@ -282,8 +299,10 @@ contains
 ! Create exchange grids from tile file
 !-------------------------------------
 
+       if (mapl_am_I_root()) write(*,*)'Making transform'
        privateState%regridder => new_regridder_manager%make_regridder(ogrid,pgrid,REGRID_METHOD_CONSERVE,rc=status)
        VERIFY_(status)
+       if (mapl_am_I_root()) write(*,*)'Done making transform'
     end if
 
 
@@ -340,7 +359,8 @@ contains
   character(len=ESMF_MAXSTR) :: filename
   TYPE(T_PrivateState_Wrap) :: wrap
   type (MAPL_MetaComp), pointer          :: MAPL 
-  logical :: amIRoot
+  logical :: amIRoot,dowrite
+  type(ESMF_Time) :: start_interval, end_interval
 
 !=============================================================================
 
@@ -402,48 +422,77 @@ contains
 
    do 
 
-   if(amIRoot) then
+      if(amIRoot) then
 
-      ! test for end-of-file by 
-      ! making a blank read followed by backspace
-      read(UNIT_R,IOSTAT=status)
-   end if
-   call MAPL_CommsBcast(layout, status, n=1, ROOT=MAPL_Root, rc=stat)
-   VERIFY_(stat)
+         ! test for end-of-file by 
+         ! making a blank read followed by backspace
+         read(UNIT_R,IOSTAT=status)
+      end if
+      call MAPL_CommsBcast(layout, status, n=1, ROOT=MAPL_Root, rc=stat)
+      VERIFY_(stat)
 
-   if (status == IOSTAT_END) then
-      RETURN_(ESMF_SUCCESS)
-   end if
-   VERIFY_(STATUS)
-   call MAPL_Backspace(UNIT_R,layout,rc=status)
-   VERIFY_(STATUS)
-   
-   if(amIRoot) then
-
-      read(UNIT_R, iostat=status) HDR
+      if (status == IOSTAT_END) then
+         RETURN_(ESMF_SUCCESS)
+      end if
       VERIFY_(STATUS)
+      call MAPL_Backspace(UNIT_R,layout,rc=status)
+      VERIFY_(STATUS)
+      
+      if(amIRoot) then
+
+         read(UNIT_R, iostat=status) HDR
+         VERIFY_(STATUS)
+         HEADER = nint(HDR)
+
+      end if
+
+      call MAPL_CommsBcast(layout,hdr,n=14,root=mapl_root,rc=stat)
+      VERIFY_(Stat)
       HEADER = nint(HDR)
+      call ESMF_TimeSet(start_interval,yy=header(1),mm=header(2),dd=header(3),h=header(4),m=header(5),s=header(6),rc=status)
+      VERIFY_(STATUS)
+      call ESMF_TimeSet(end_interval,yy=header(7),mm=header(8),dd=header(9),h=header(10),m=header(11),s=header(12),rc=status)
+      VERIFY_(STATUS)
 
-      HDR(13) = IM_WORLD
-      HDR(14) = JM_WORLD
-      write(UNIT_W) HDR
-   end if
+      if (privateState%select_time) then
+         dowrite = (end_interval > privatestate%start_time) .and. (start_interval < privatestate%end_time)
+      else
+         dowrite = .true.
+      end if
+      if (mapL_am_I_root()) then 
+         write(*,*)'Valid Data between:'
+         !write(*,'(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)')header(1),header(2),header(3),header(4),header(5),header(6)
+         !write(*,'(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)')header(7),header(8),header(9),header(10),header(11),header(12)
+         write(*,"(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)")header(1:6)
+         write(*,"(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)")header(7:12)
+         write(*,*)'Are we writing ',doWrite
+      end if
 
-   call ESMF_VMBarrier(vm, rc=status)
-   VERIFY_(STATUS)
-   
-   allocate(PDATA(IM,JM), stat=status)
-   VERIFY_(STATUS)
+      if (amIRoot .and. dowrite) then
 
-!   read(unit_r) odata
-   call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
-   VERIFY_(STATUS)
-   ! transform data from ocean (tripolar or Reynolds) to mit-cubed
-   call privateState%regridder%regrid(odata,pdata,rc=status)
-   VERIFY_(status) 
-!   write(unit_w) pdata
-   call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
-   VERIFY_(STATUS)
+         HDR(13) = IM_WORLD
+         HDR(14) = JM_WORLD
+         write(UNIT_W) HDR
+
+      end if
+
+      call ESMF_VMBarrier(vm, rc=status)
+      VERIFY_(STATUS)
+      
+      allocate(PDATA(IM,JM), stat=status)
+      VERIFY_(STATUS)
+
+   !   read(unit_r) odata
+      call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
+      VERIFY_(STATUS)
+      ! transform data from ocean (tripolar or Reynolds) to mit-cubed
+      call privateState%regridder%regrid(odata,pdata,rc=status)
+      VERIFY_(status) 
+   !   write(unit_w) pdata
+      if (doWrite) then
+         call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
+         VERIFY_(STATUS)
+      end if
 
    enddo
 

@@ -23,6 +23,11 @@ ecbuild_add_executable (
   LIBS ${this})
 
 ecbuild_add_executable (
+  TARGET regrid_forcing_esmf.x
+  SOURCES regrid_forcing_esmf.F90
+  LIBS ${this})
+
+ecbuild_add_executable (
   TARGET sst_sic_EIGTHdeg.x
   SOURCES proc_SST_FRACI.F90
   LIBS ${this})
