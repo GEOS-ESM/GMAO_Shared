@@ -7,7 +7,7 @@
 #----------------------------------------------------------------
 
   set arch = `uname -s`
-  set ncks_opts = "--history --abc -4 -L 2 --cnk_dmn lev,1 "
+  set ncks_opts = "--history --no_abc -4 -L 2 --cnk_dmn lev,1 "
   set ncks = "$BASEDIR/$arch/bin/ncks ${ncks_opts}"
 
 ###  set ncks = "$SHARE/dasilva/bin/ncks ${ncks_opts}"
