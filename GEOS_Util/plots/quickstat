@@ -251,28 +251,9 @@ if( $batch == 'BATCH' ) then
 
 # Set Default GEOS Build Directories
 # ----------------------------------
-                set   command = `which $0`
-set   root =   `echo $command | cut -d / -f1`
-if(  $root == . ) set command = `echo $lcd`/quickstat
-  set root =   `echo $command | cut -b1`
-if( "$root" != "/" ) set command = `echo $lcd`/$command
-
-@ n = 1
-set root = `echo $command | cut -d / -f$n`
-while( .$root == . )
-@ n = $n + 1
-set root = `echo $command | cut -d / -f$n`
-end
-
-set GEOSDEF = ''
-while( $root != 'src' )
-set GEOSDEF = `echo ${GEOSDEF}/${root}`
-@ n = $n + 1
-set root = `echo $command | cut -d / -f$n`
-end
-set  GEOSSRC = ${GEOSDEF}/src
-set  GEOSBIN = ${GEOSDEF}/Linux/bin
-set  GEOSAPP = ${GEOSDEF}/src/Applications/GEOSgcm_App
+set  GEOSSRC = @CMAKE_INSTALL_PREFIX@
+set  GEOSBIN = @CMAKE_INSTALL_PREFIX@/bin
+set  GEOSAPP = @CMAKE_INSTALL_PREFIX@/bin
 
 
 # Create QUICKSTAT commands

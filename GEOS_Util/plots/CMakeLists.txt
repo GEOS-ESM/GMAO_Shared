@@ -18,7 +18,6 @@ endif ()
 
 set (plots_progs
    quickplot
-   quickstat
    configure
    landscape.script
    portrait.script
@@ -35,6 +34,9 @@ install (
    PROGRAMS ${plots_progs}
    DESTINATION plots
    )
+
+configure_file(quickstat quickstat @ONLY)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/quickstat DESTINATION bin)
 
 # From https://stackoverflow.com/questions/7787823/cmake-how-to-get-the-name-of-all-subdirectories-of-a-directory
 
