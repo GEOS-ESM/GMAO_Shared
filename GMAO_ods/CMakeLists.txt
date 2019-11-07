@@ -34,13 +34,23 @@ set (ODSSRC
   ods_do3lev.f 
   )
 
-# This is equivalent to FOPT=$(FOPT3) in GNU Make
 if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
-   string (REPLACE "${OPTREPORT0}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
+   string (REPLACE "${OPTREPORT0}" "${BIG_ENDIAN}" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
    string (REPLACE "${FTZ}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
    string (REPLACE "${ALIGN_ALL}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
    string (REPLACE "${NO_ALIAS}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
+else ()
+   set_target_properties (${this}     PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (saber2ods.x PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (dconv2ods.x PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (odsmatch    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (odslist     PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (odsselect   PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (odsshuffle  PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (odsstats    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   set_target_properties (odsemean    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
 endif ()
+
 esma_add_library (${this}
   SRCS ${MODSRC} ${ODSSRC}
   DEPENDENCIES GMAO_mpeu GMAO_pilgrim

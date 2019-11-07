@@ -1186,6 +1186,42 @@ DTDT_ORO_GWD_CLEVS:  .05 .10 .15 .20 .25 .30 .35 .40 .45 .5 .6  .7  .8  .9  1.0 
                                Analysis Tendencies
 ************************************************************************************
 
+STD_DMDTANA_DYN_TITLE: DMDT from Analysis (mb/day)  Standard_Deviation Error
+STD_DMDTANA_DYN_FACTOR: 864
+STD_DUDT_ANA_AGCM_TITLE: DUDT from Analysis (m/sec/day)  Standard_Deviation Error
+STD_DUDT_ANA_AGCM_FACTOR: 86400
+STD_DVDT_ANA_AGCM_TITLE: DVDT from Analysis (m/sec/day)  Standard_Deviation Error
+STD_DVDT_ANA_AGCM_FACTOR: 86400
+STD_DTDT_ANA_AGCM_TITLE: DTDT from Analysis (K/day)  Standard_Deviation Error
+STD_DTDT_ANA_AGCM_FACTOR: 86400
+STD_DQVDT_ANA_AGCM_TITLE: DQVDT from Analysis (g/kg/day)  Standard_Deviation Error
+STD_DQVDT_ANA_AGCM_FACTOR: 86400000
+
+
+RMS_DMDTANA_DYN_TITLE: DMDT from Analysis (mb/day)  Root_Mean_Square Error
+RMS_DMDTANA_DYN_FACTOR: 864
+RMS_DUDTANA_AGCM_TITLE: DUDT from Analysis (m/sec/day)  Root_Mean_Square Error
+RMS_DUDTANA_AGCM_FACTOR: 86400
+RMS_DVDTANA_AGCM_TITLE: DVDT from Analysis (m/sec/day)  Root_Mean_Square Error
+RMS_DVDTANA_AGCM_FACTOR: 86400
+RMS_DTDTANA_AGCM_TITLE: DTDT from Analysis (K/day)  Root_Mean_Square Error
+RMS_DTDTANA_AGCM_FACTOR: 86400
+RMS_DQVDTANA_AGCM_TITLE: DQVDT from Analysis (g/kg/day)  Root_Mean_Square Error
+RMS_DQVDTANA_AGCM_FACTOR: 86400000
+
+
+BIAS_DMDTANA_DYN_TITLE: DMDT from Analysis (mb/day)  Root_Bias Error
+BIAS_DMDTANA_DYN_FACTOR: 864
+BIAS_DUDTANA_AGCM_TITLE: DUDT from Analysis (m/sec/day)  Root_Bias Error
+BIAS_DUDTANA_AGCM_FACTOR: 86400
+BIAS_DVDTANA_AGCM_TITLE: DVDT from Analysis (m/sec/day)  Root_Bias Error
+BIAS_DVDTANA_AGCM_FACTOR: 86400
+BIAS_DTDTANA_AGCM_TITLE: DTDT from Analysis (K/day)  Root_Bias Error
+BIAS_DTDTANA_AGCM_FACTOR: 86400
+BIAS_DQVDTANA_AGCM_TITLE: DQVDT from Analysis (g/kg/day)  Root_Bias Error
+BIAS_DQVDTANA_AGCM_FACTOR: 86400000
+
+
 DUDT_ANA_AGCM_TITLE: DUDT from Analysis (m/sec/day)
 DUDT_ANA_AGCM_FACTOR: 86400
 DUDT_ANA_AGCM_CCOLS: 55  49  47  45  44  36  34  33  32  0  21  22  23  24  25  26  27  28 69
