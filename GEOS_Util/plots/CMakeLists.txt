@@ -36,7 +36,7 @@ install (
    )
 
 configure_file(quickstat quickstat @ONLY)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/quickstat DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/quickstat DESTINATION plots)
 
 # From https://stackoverflow.com/questions/7787823/cmake-how-to-get-the-name-of-all-subdirectories-of-a-directory
 
