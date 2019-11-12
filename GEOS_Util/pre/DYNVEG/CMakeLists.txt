@@ -1,4 +1,5 @@
 # No library
+esma_set_this ()
 set (srcs regrid_DYNVEG.F90)
 
 include_directories(${INC_ESMF})
