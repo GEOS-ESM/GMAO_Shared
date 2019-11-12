@@ -1,5 +1,4 @@
 # No library
-esma_set_this(OVERRIDE raster)
 set (srcs regrid_DYNVEG.F90)
 
 include_directories(${INC_ESMF})
