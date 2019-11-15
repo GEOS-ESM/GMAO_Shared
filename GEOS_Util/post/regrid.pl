@@ -2623,7 +2623,7 @@ sub regrid_surface_rsts {
     my ($catchName, $catchIN, $catch, $catch_regrid, $catch_scaled);
     my ($catchcnName, $catchcnIN, $catchcn, $catchcn_regrid, $catchcn_scaled);
     my ($label, $tagID, $gridID);
-    my ($mk_catchcn_j, $mk_catchcn_log);
+    my ($mk_catchcn_j, $mk_catchcn_log, %catchtype);
 
     # input and output values
     #------------------------
@@ -2707,7 +2707,9 @@ sub regrid_surface_rsts {
             $src = $input_restarts{$type};
 
             if ($src) {
-                if ($type eq "catchcn_internal_rst") {
+                $catchtype{"catch_internal_rst"} = 1;
+                $catchtype{"catchcn_internal_rst"} = 1;
+                if ($catchtype{$type}) {
                     &$getinput($src, $InData_dir);
                 } else {
                     symlinkinput($src, $InData_dir);
