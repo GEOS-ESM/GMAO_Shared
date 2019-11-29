@@ -32,6 +32,7 @@ if( -e AGCM.rc ) then
     set OGCM_IM = `grep OGCM.IM_WORLD AGCM.rc | head -1 | cut -d':' -f2`
     set OGCM_JM = `grep OGCM.JM_WORLD AGCM.rc | head -1 | cut -d':' -f2` 
     set BCSPATH = `echo $BCSDIR/*${AGCM_IM}*${OGCM_IM}*${OGCM_JM}`
+    set BCSDIR  = $BCSPATH
     set TILFILE = `ls $BCSPATH/*til | head -1 | rev | cut -d'/' -f1 | rev`
     set PRESCRIBE_DVG = `grep PRESCRIBE_DVG RC/GEOS_LandGridComp.rc | cut -d':' -f2`
 endif
