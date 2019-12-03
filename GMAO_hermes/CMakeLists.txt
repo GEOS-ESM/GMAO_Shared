@@ -1,7 +1,7 @@
 esma_set_this()
 
 add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
-include_directories (${include_MAPL_Base} ${include_GEOS_Shared})
+include_directories (${include_GEOS_Shared})
 include_directories (${include_GMAO_gfio_r8})
 
 string (REPLACE " " ";" flags ${FREAL8})
@@ -35,7 +35,7 @@ set_source_files_properties (GFIO_remap.f90 PROPERTIES COMPILE_FLAGS ${PP})
 
 ecbuild_add_executable (TARGET GFIO_remap.x     SOURCES GFIO_remap.f90     LIBS ${this} MAPL_cfio_r8)
 ecbuild_add_executable (TARGET GFIO_Shave.x     SOURCES GFIO_Shave.f90     LIBS ${this} MAPL_cfio_r8)
-ecbuild_add_executable (TARGET lcv2prs.x        SOURCES lcv2prs.F90        LIBS ${this} MAPL_cfio_r8 MAPL_Base GEOS_Shared)
+ecbuild_add_executable (TARGET lcv2prs.x        SOURCES lcv2prs.F90        LIBS ${this} MAPL_cfio_r8 MAPL GEOS_Shared)
 
 ecbuild_add_executable (TARGET ana5sfc.x        SOURCES ana5sfc.F90        LIBS ${this})
 ecbuild_add_executable (TARGET diag2dyn.x       SOURCES diag2dyn.F         LIBS ${this})

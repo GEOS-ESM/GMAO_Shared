@@ -8,7 +8,7 @@ set (srcs
   getco2.F90
   )
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL)
 
 # other dependencies
 target_include_directories(${this} PUBLIC ${INC_ESMF} ${INC_NETCDF})

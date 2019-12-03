@@ -1,8 +1,7 @@
 program rs_numtiles  
 
   use iso_fortran_env
-  use MAPL_IOMod
-  use pFIO
+  use MAPL
 
   implicit none
 

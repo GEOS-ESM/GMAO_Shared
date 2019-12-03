@@ -13,7 +13,7 @@ set (srcs
   read_Reynolds.F90
   )
 
-esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
+esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL)
 target_link_libraries (${this} PUBLIC ${NETCDF_LIBRARIES})
 target_include_directories (${this} PUBLIC ${INC_NETCDF})
 

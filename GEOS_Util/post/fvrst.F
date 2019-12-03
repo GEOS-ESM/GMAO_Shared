@@ -1,7 +1,6 @@
       program  main
 
-      use MAPL_IOMod
-      use pFIO
+      use MAPL
  
       implicit none
 

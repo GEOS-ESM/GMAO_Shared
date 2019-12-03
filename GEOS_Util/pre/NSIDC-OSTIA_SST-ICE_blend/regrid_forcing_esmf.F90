@@ -7,11 +7,7 @@ module GenGridCompMod
 ! !USES:
 
    use ESMF
-   use MAPL_Mod
-   use MAPL_GridManagerMod
-   use MAPL_RegridderManagerMod
-   use MAPL_AbstractRegridderMod
-   use MAPL_RegridderSpecMod
+   use MAPL
 
    use, intrinsic :: iso_fortran_env
 
@@ -526,7 +522,7 @@ end Program regrid_forcing
 
 Subroutine do_regrid_forcing(rc)
   use ESMF
-  use MAPL_Mod
+  use MAPL
 
   use GenGridCompMod,          only : Root_SetServices => SetServices
 
