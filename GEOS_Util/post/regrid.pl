@@ -34,12 +34,12 @@ my ($qos, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
 my ($rstIN_template, $rstIN_templateB, $rst_tarfile, $rst_template);
 my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
-my ($upairFLG, $verbose, $weminIN, $weminOUT, $weminDFLT, $workdir);
+my ($upairFLG, $verbose, $wemIN, $wemOUT, $workdir);
 my ($year, $ymd, $zoom, $zoom_);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
 my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
-my (%jm, %jm4, %jm5, %jmo, %jmo4);
+my (%jm, %jm4, %jm5, %jmo, %jmo4, %newLand);
 my (@anafiles, @warnings);
 
 # global tag variables
@@ -264,9 +264,9 @@ sub init {
                "tar"             => \$tarFLG,
                "rs=i"            => \$rsFLG,
                "catchcn"         => \$mk_catchcn,
-               "wemin"           => \$weminIN,
-               "wemout"          => \$weminOUT,
                "route"           => \$mk_route,
+               "wemin"           => \$wemIN,
+               "wemout"          => \$wemOUT,
                "bkg!"            => \$bkgFLG,
                "lbl!"            => \$lblFLG,
                "lcv!"            => \$lcvFLG,
@@ -285,10 +285,6 @@ sub init {
     $dbHash  = 1 if $debug;
     $verbose = 0 unless $verbose;
     $qos = 0 unless $qos;
-
-    $weminDFLT = 26;
-    $weminIN = $weminDFLT unless defined($weminIN);
-    $weminOUT = $weminDFLT unless defined($weminOUT);
 
     usage() if $help;
     setprompt(0) if $noprompt;
@@ -488,6 +484,12 @@ sub init_tag_arrays_and_hashes {
               "Fortuna-1_5"          =>  2,
               "Fortuna-1_4"          =>  1 );
 
+    $newLand{"Icarus-NL"} = 1;
+    $newLand{"Icarus-NLv3"} = 1;
+    $newLand{"Icarus-NLv3_Ostia"} = 1;
+    $newLand{"Icarus-NLv3_MERRA-2"} = 1;
+    $newLand{"Icarus-NLv3_Reynolds"} = 1;
+
     # minimum tag for catchcn and route options
     #------------------------------------------
     $rank_1_catchcn = $rank{"Icarus-NLv3_Reynolds"};
@@ -505,7 +507,7 @@ sub check_inputs {
     my ($grINocean_dflt, $grOUTocean_dflt);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
-    my ($prompt, $rstlcvIN, $warnFLG);
+    my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
 
     # check for input tarfile
     #------------------------
@@ -845,6 +847,26 @@ sub check_inputs {
     #---------------------------------------------------
     if ($surfFLG) { $mk_catch = 1 }
     else          { $mk_catch = 0; $mk_catchcn = 0; $mk_route = 0 }
+
+    # get minimum water snow water equivalent values
+    #-----------------------------------------------
+    if ($mk_catch or $mk_catchcn) {
+        if ($newLand{$bcsTagIN}) { $wemINdflt = 13 }
+        else                     { $wemINdflt = 26 }
+
+        if ($newLand{$bcsTagOUT}) { $wemOUTdflt = 13 }
+        else                      { $wemOUTdflt = 26 }
+
+        until (defined($wemIN)) {
+            $prompt = "Enter INPUT minimum water snow water equivalent";
+            $wemIN = query($prompt, $wemINdflt);
+        }
+
+        until (defined($wemOUT)) {
+            $prompt = "Enter OUTPUT minimum water snow water equivalent";
+            $wemOUT = query($prompt, $wemOUTdflt);
+        }
+    }
 
     # no catchcn prior to $rank_1_catchcn
     #------------------------------------
@@ -2082,7 +2104,7 @@ sub confirm_inputs {
            . ". bcsdir:       $IN{bcsdir}\n"
            . ". tile file:    $IN{tile}\n"
            . ". BCS tag:      $IN{bcsTAG}\n");
-    print_(  ". WEMIN_IN:     $weminIN\n") if $mk_catch or $mk_catchcn;
+    print_(  ". wemIN:        $wemIN\n") if $mk_catch or $mk_catchcn;
     print_(  ". surflay:      $surflayIN\n"
            . ". rstdir:       " .display($rstdir) ."\n");
     print_(  ". rst tarfile:  " .display($rst_tarfile) ."\n") if $rst_tarfile;
@@ -2109,7 +2131,7 @@ sub confirm_inputs {
            . ". tile file:    $OUT{tile}\n");
     print_(  ". bkg_eta grid: $OUT{bkg_regrid}\n") if $OUT{"bkg_regrid"};
     print_(  ". BCS tag:      $OUT{bcsTAG}\n");
-    print_(  ". WEMIN_OUT:    $weminOUT\n") if $mk_catch or $mk_catchcn;
+    print_(  ". wemOUT:       $wemOUT\n") if $mk_catch or $mk_catchcn;
     print_(  ". surflay:      $surflay\n"
            . ". rescale:      $rescale_catch\n"
            . ". outdir:       " .display($outdir_save) ."\n"
@@ -2668,8 +2690,8 @@ sub regrid_surface_rsts {
         $flags .= " -route"            if $mk_route;
         $flags .= " -catch"            if $mk_catch;
         $flags .= " -catchcn"          if $mk_catchcn;
-        $flags .= " -wemin $weminIN"   if $mk_catchcn or $mk_catch;
-        $flags .= " -wemout $weminOUT" if $mk_catchcn or $mk_catch;
+        $flags .= " -wemin $wemIN"     if $mk_catchcn or $mk_catch;
+        $flags .= " -wemout $wemOUT"   if $mk_catchcn or $mk_catch;
         $flags .= " -surflay $surflay" if $mk_catchcn or $mk_catch;
         $flags .= " -grpID $grpID"     if $mk_catchcn and $grpID;
         $flags .= " -rsttime $ymd$hr"  if $mk_catchcn or $mk_route;
@@ -2702,13 +2724,14 @@ sub regrid_surface_rsts {
         $expid1    = $H1{"expid"};
         $template1 = $H1{"template"};
 
+        $catchtype{"catch_internal_rst"} = 1;
+        $catchtype{"catchcn_internal_rst"} = 1;
+
         foreach $type (@SFC) {
             next if $type eq "route_internal_rst";
             $src = $input_restarts{$type};
 
             if ($src) {
-                $catchtype{"catch_internal_rst"} = 1;
-                $catchtype{"catchcn_internal_rst"} = 1;
                 if ($catchtype{$type}) {
                     &$getinput($src, $InData_dir);
                 } else {
@@ -2823,8 +2846,8 @@ sub regrid_surface_rsts {
         $flags = "";
         $flags .= " -catch"             if $mk_catch;
         $flags .= " -catchcn"           if $mk_catchcn;
-        $flags .= " -wemin $weminIN"    if $mk_catchcn or $mk_catch;
-        $flags .= " -wemout $weminOUT"  if $mk_catchcn or $mk_catch;
+        $flags .= " -wemin $wemIN"      if $mk_catchcn or $mk_catch;
+        $flags .= " -wemout $wemOUT"    if $mk_catchcn or $mk_catch;
         $flags .= " -surflay $surflay";
         $flags .= " -grpID $grpID"      if $mk_catchcn and $grpID;
         $flags .= " -rsttime $ymd$hr"   if $mk_catchcn;
@@ -3788,8 +3811,8 @@ OTHER OPTIONS
    -catchcn           Create a version of the catch restart which contains carbon values;
                       Not valid for tags prior to Heracles; Note: This option will add
                       10-20 minutes to the regrid process.
-   -wemin weminIN     minimum water snow water equivalent for input catch/cn [$weminDFLT]
-   -wemout weminOUT   minimum water snow water equivalent for output catch/cn [$weminDFLT]
+   -wemin wemIN       minimum water snow water equivalent for input catch/cn
+   -wemout wemOUT     minimum water snow water equivalent for output catch/cn
 
    -route             write the route_internal_rst
 
