@@ -95,7 +95,7 @@ limit stacksize unlimited
 cd ${EXPDIR}/VEGDATA/scratch
 
 ##mpirun -map-by core --mca btl ^vader -np 56 $GEOSBIN/regrid_DYNVEG.x
-mpirun -np 56 $GEOSBIN/regrid_DYNVEG.x
+$GEOSBIN/esma_mpirun -np 56 $GEOSBIN/regrid_DYNVEG.x
 sleep 300
 /bin/rm *.nc *.nc4
 
