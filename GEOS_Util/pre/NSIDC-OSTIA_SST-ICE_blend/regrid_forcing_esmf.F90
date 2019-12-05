@@ -2,7 +2,7 @@
 
 #include "MAPL_Generic.h"
 
-module GenGridCompMod
+module GenESMFGridCompMod
 
 ! !USES:
 
@@ -498,7 +498,7 @@ contains
 
   end subroutine RUN
 
-end module GenGridCompMod
+end module GenESMFGridCompMod
 
 ! $Id$
 
@@ -524,7 +524,7 @@ Subroutine do_regrid_forcing(rc)
   use ESMF
   use MAPL
 
-  use GenGridCompMod,          only : Root_SetServices => SetServices
+  use GenESMFGridCompMod,          only : Root_SetServices => SetServices
 
   implicit none
   integer, optional :: rc
