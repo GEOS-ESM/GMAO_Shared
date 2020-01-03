@@ -82,6 +82,17 @@ s?ARCH?$arch?g
 EOF
 sed -f sedfile $GASCRP/udft.template > $GAUDFT
 
+
+# Build Grads UDF Utilities
+# -------------------------
+set files = `echo regrid2`
+foreach file ($files)
+   if(! -e $GASCRP/${file}_$arch.x ) then
+     if( $arch == 'Linux'  ) ifort -o $GASCRP/${file}_$arch.x $GASCRP/${file}.f
+   endif
+end
+
+
 # Link VERIFICATION Directories
 # -----------------------------------------------------------------------------------
 

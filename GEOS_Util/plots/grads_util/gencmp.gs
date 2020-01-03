@@ -264,8 +264,13 @@ else
     endwhile
    'run 'geosutil'/plots/formulas/'NAME'.gs 'mstring
     climfile = result
-    EXPORT = NAME
-        GC = GC.1
+    if( STAT = "RMS" | STAT = "BIAS" )
+        EXPORT = EXPORT.1
+            GC = GC.1
+    else
+        EXPORT = NAME
+            GC = GC.1
+    endif
 endif
 
 if( STAT = "STD" | STAT = "RMS" | STAT = "BIAS" )
@@ -437,8 +442,13 @@ else
     endwhile
    'run 'geosutil'/plots/formulas/'NAME'.gs 'mstring
     climfile = result
-    EXPORT = NAME
-        GC = GC.1
+    if( STAT = "RMS" | STAT = "BIAS" )
+        EXPORT = EXPORT.1
+            GC = GC.1
+    else
+        EXPORT = NAME
+            GC = GC.1
+    endif
 endif
 
                'run getenv "CLIMATE"'
