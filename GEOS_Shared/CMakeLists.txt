@@ -1,5 +1,7 @@
 esma_set_this()
 
+add_subdirectory (Chem_Shared2G)
+
 set (srcs
   GEOS_Utilities.F90 DragCoefficients.F90 GEOS.F90
   tropovars.F90 surfacelayer.F90 GEOS_TopoGet.F90
@@ -8,7 +10,7 @@ set (srcs
   getco2.F90
   )
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
+esma_add_library(${this}  SRCS ${srcs}  DEPENDENCIES MAPL_Base)
 
 # other dependencies
 target_include_directories(${this} PUBLIC ${INC_ESMF} ${INC_NETCDF})
