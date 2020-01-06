@@ -142,7 +142,7 @@ while( m<=mexps )
 'q dims'
    tline    = sublin(result,5)
    toff.m.n = subwrd(tline,9)
-say 'toffset:  m = 'm'  n = 'n'  toff = 'toff.m.n
+*say 'toffset:  m = 'm'  n = 'n'  toff = 'toff.m.n
 m = m+1
 endwhile
 
@@ -229,7 +229,7 @@ while( m<=mexps )
          ndayloc = (tdim-toff.m.n) * tinc / 24
          tmax    = toff.m.n + ndayloc*(24/tinc)
          tbeg.m  = toff.m.n -(tmax-tdim)
-         tdim.m = tbeg.m + nday*(24/tinc)
+         tdim.m  = tbeg.m   + nday*(24/tinc)
 
 if( tdim.m < tdim.0 )
     tdif.m = tdim.m
@@ -238,7 +238,7 @@ else
     tdif.m = tdim.0
     ddif.m = 1
 endif
-say 'tbeg.'m': 'tbeg.m'  tdim'm': 'tdim.m'  tinc: 'tinc'  tdif.'m': 'tdif.m
+say '  m: 'm'  tbeg: 'tbeg.m'  tdim: 'tdim.m'  tinc: 'tinc'  tdif: 'tdif.m'  ddif: 'ddif.m
 
 m = m+1
 endwhile
@@ -283,6 +283,7 @@ while( m<=mexps )
 'set dfile 'd.m
 'set lev 1000 100'
 'set t  'tbeg.m' 'tdim.m
+say '  m: 'm'  dfile: 'd.m'  tbeg: 'tbeg.m'  tdim: 'tdim.m
 'define  zave'm' = 0.0'
 'define  zvar'm' = 0.0'
 m = m+1
@@ -297,6 +298,7 @@ while( m<=mexps )
 'set dfile 'ddif.m
 'set lev 1000 100'
 'set t  'tbeg.m' 'tdif.m
+*say '  m: 'm'  ddfile: 'ddif.m'  tbeg: 'tbeg.m'  tdif: 'tdif.m
 'define zaved'm' = 0.0'
 'define zvard'm' = 0.0'
 m = m+1
@@ -352,34 +354,85 @@ while ( n  <= fileend )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
 
+* Set Proper Time Domain
+* ----------------------
+'set dfile 'm
+'sett'
+'getinfo tinc'
+         tinc1  = result
+        'getinfo tmin'
+                 tmin1 = result
+        'getinfo tmax'
+                 tmax1 = result
+     tdim1 = tmax1 - tmin1 + 1
+    'set t 'tmin1
+    'getinfo date'
+             datemin1 = result
+    'set t 'tmax1
+    'getinfo date'
+             datemax1 = result
+
 'set dfile 'n
-'set dfile 'ddif.m
+'sett'
+'getinfo tinc'
+         tinc2  = result
+        'getinfo tmin'
+                 tmin2 = result
+        'getinfo tmax'
+                 tmax2 = result
+     tdim2 = tmax2 - tmin2 + 1
+    'set t 'tmin2
+    'getinfo date'
+             datemin2 = result
+    'set t 'tmax2
+    'getinfo date'
+             datemax2 = result
+
+if( tinc1 >= tinc2 )
+    timefile.m = m
+else
+    timefile.m = n
+endif
+
+if( datemin1 <= datemin2 )
+    tmin.m = tmin2
+else
+    tmin.m = tmin1
+endif
+
+if( datemax1 >= datemax2 )
+    tmax.m = tmax2
+else
+    tmax.m = tmax1
+endif
+     tdim.m = tmax - tmin + 1
+
+*say 'm: 'm'  tmin1: 'tmin1'  tmin2: 'tmin2'  tmin.m: 'tmin.m
+*say 'm: 'm'  tmax1: 'tmax1'  tmax2: 'tmax2'  tmax.m: 'tmax.m
+*say 'm: 'm'  tdim.m: 'tdim.m
+
+* ----------------------
+
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 'define ctl = 'field'cor'n
 *say '   DFILE: 'n'  CTL defined for TBEG = 'tbeg.0' to TEND: 'tdif.0
 
-'set dfile 'd.m
-'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 'define dum  = 'field'cor'n.m
 *say   '   DFILE: 'n.m'  DUM defined for TBEG = 'tbeg.0' to TEND: 'tdif.0
 
-'set dfile 'ddif.m
-'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 if( m = 0 )
-*say 'Computing DumDiff for EXP: 'm'   File: 'ddif.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
+    say 'Computing DumDiff for EXP: 'm'   File: 'ddif.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
    'define dumdiff = dum'
 else
-*say 'Computing DumDiff for EXP: 'm'   File: 'n.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
+    say 'Computing DumDiff in makezdif2 for EXP: 'm'   File: 'n.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
    'makezdif2 -q1 dum -file1 'd.m' -q2 zero    -file2   1 -ptop 100 -name dum'
 endif
 
-'set dfile 'n
-'set dfile 'ddif.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 'define     dq'm' = 0.5*(ctl-dumdiff)'
 'define zd'n'e'm' = 0.5*log( (1+dq'm')/(1-dq'm') )'
 n = n + 1
@@ -396,9 +449,9 @@ while( m<=mexps )
 while ( n <= fileend )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'd.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdim.m
 'define  zave'm' =  zave'm' +  z'n'e'm
 n = n + 1
 endwhile
@@ -413,9 +466,9 @@ m = 0
 while( m<=mexps )
         n  = filebeg
 while ( n <= fileend )
-'set dfile 'ddif.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 'define zaved'm' = zaved'm' + zd'n'e'm
 n = n + 1
 endwhile
@@ -435,9 +488,9 @@ while( m<=mexps )
 while ( n <= fileend )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'd.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdim.m
 'define  zvar'm' =  zvar'm' + pow(  z'n'e'm'- zave'm',2 )'
 n = n + 1
 endwhile
@@ -452,9 +505,9 @@ m = 0
 while( m<=mexps )
         n  = filebeg
 while ( n <= fileend )
-'set dfile 'ddif.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 'define zvard'm' = zvard'm' + pow( zd'n'e'm'-zaved'm',2 )'
 n = n + 1
 endwhile
@@ -473,9 +526,9 @@ while( m<=mexps )
         n  = filebeg
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'd.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdim.m
 'define rave'm' = (exp(2*zave'm')-1) / (exp(2*zave'm')+1)'
 m = m + 1
 endwhile
@@ -485,10 +538,6 @@ endwhile
 * Copmute Confidence Intervals for Two-Tailed Students T-Test Distribution
 * ------------------------------------------------------------------------
  dof = numfiles-1    ;* Degrees of Freedom (dof)
-
-'astudt 'dof' 0.0001'  ;* 99.99% Confidence, and Minimum Value used for Shading
-'q defval astudtout 1 1'
-critval9999=subwrd(result,3)
 
 'astudt 'dof' 0.01'  ;* 99% Confidence
 'q defval astudtout 1 1'
@@ -506,6 +555,10 @@ critval95=subwrd(result,3)
 'q defval astudtout 1 1'
 critval90=subwrd(result,3)
 
+'astudt 'dof' 0.20'  ;* 80% Confidence
+'q defval astudtout 1 1'
+critval80=subwrd(result,3)
+
 'astudt 'dof' 0.32'  ;* 68% Confidence
 'q defval astudtout 1 1'
 critval68=subwrd(result,3)
@@ -515,14 +568,10 @@ critval68=subwrd(result,3)
 say ' Estimate T-Test Range rUpm rLpm ...'
 m = 1
 while( m<=mexps )
-'set dfile 'ddif.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdif.m
 'define se  = sqrt( zvard'm'/'numfiles' )'
-
-'define dx = se*'critval9999
-'define rUp9999'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
-'define rLp9999'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
 'define dx = se*'critval99
 'define rUp99'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
@@ -539,6 +588,10 @@ while( m<=mexps )
 'define dx = se*'critval90
 'define rUp90'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp90'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
+
+'define dx = se*'critval80
+'define rUp80'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
+'define rLp80'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
 'define dx = se*'critval68
 'define rUp68'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
@@ -565,9 +618,9 @@ while( m<=mexps )
         n  = filebeg
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
-'set dfile 'd.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
 'set lev 1000 100'
-'set t 'tbeg.m' 'tdim.m
 
 'set vpage off'
 'set grads off'
@@ -626,29 +679,17 @@ while( m<=mexps )
 
 mfile = 1 + m*files_per_month
 
+say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region: 'region
 
 * Compute RMS difference between ravem and rave0: ravediff
 * --------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1  rave'm' -file1 'mfile' -q2 rave0  -file2 1  -ptop 100 -name rave'
-'getinfo numfiles'
-         newfile = result
-'close ' newfile
-
-* Compute difference between 99.99% Confidence and zero: rUp9999diff
-* ------------------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
-'makezdif3 -q1   rUp9999'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp9999'
 'getinfo numfiles'
          newfile = result
 'close ' newfile
 
 * Compute difference between 99% Confidence and zero: rUp99diff
 * -------------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp99'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp99'
 'getinfo numfiles'
          newfile = result
@@ -656,8 +697,6 @@ mfile = 1 + m*files_per_month
 
 * Compute difference between 98% Confidence and zero: rUp98diff
 * -------------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp98'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp98'
 'getinfo numfiles'
          newfile = result
@@ -665,8 +704,6 @@ mfile = 1 + m*files_per_month
 
 * Compute difference between 95% Confidence and zero: rUp95diff
 * -------------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp95'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp95'
 'getinfo numfiles'
          newfile = result
@@ -674,17 +711,20 @@ mfile = 1 + m*files_per_month
 
 * Compute difference between 90% Confidence and zero: rUp90diff
 * -------------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp90'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp90'
+'getinfo numfiles'
+         newfile = result
+'close ' newfile
+
+* Compute difference between 80% Confidence and zero: rUp80diff
+* -------------------------------------------------------------
+'makezdif3 -q1   rUp80'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp80'
 'getinfo numfiles'
          newfile = result
 'close ' newfile
 
 * Compute difference between 68% Confidence and zero: rUp68diff
 * -------------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
 'makezdif3 -q1   rUp68'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 100 -name  rUp68'
 'getinfo numfiles'
          newfile = result
@@ -695,8 +735,9 @@ mfile = 1 + m*files_per_month
 
 * Define New Variables for Montage Plots
 * -------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
+'set lev 1000 100'
 
 * For ravediff > 0
 * ----------------
@@ -727,14 +768,16 @@ mfile = 1 + m*files_per_month
 'define sigdiff98 = maskm95 + maskp98'
 'define sigdiff99 = maskm99 + maskp99'
 
-'define sigdiffp9999 = 1000 * ( rUp9999diff-rUp90diff )'
 
-* Find maximum value of sigdiff90 across all levels and times
-* -----------------------------------------------------------
-'set dfile 'ddif.m
-'set t 'tbeg.m' 'tdif.m
+* Find maximum value of critical sigdiff across all levels and times
+* ------------------------------------------------------------------
+'set dfile 'timefile.m
+'set t 'tmin.m' 'tmax.m
+'set lev 1000 100'
 
-' minmax sigdiff90'
+         critvalue   = 90
+' define sigdiffcrit = sigdiff'critvalue
+' minmax sigdiffcrit'
 
     qmax = subwrd(result,1)
     qmin = subwrd(result,2)
@@ -760,26 +803,29 @@ if( qmin > qmax )
     tmax = tmin
 endif
 
-* Compare maximum value of sigdiff90 to 99.99% Confidence Difference
-* ------------------------------------------------------------------
-'set t 'tmax
-'set z 'zmax
-'getinfo level'
-         level = result
-'d sigdiff90'
-     qtmp90 = subwrd(result,4)
-'d sigdiffp9999'
-     qtmp = subwrd(result,4)
-say 'initial qmax = 'qmax
-say 'tmax = 'tmax
-say 'zmax = 'zmax' level: 'level
-say 'sigdiffp9999: 'qtmp
-say 'sigdiff90: 'qtmp90
+* To eliminate marginally significant shading, compute shading scale based on
+* the maximum value of sigdiffcrit and sigdiffmax (Difference between 99% & 80%)
+* ------------------------------------------------------------------------------
+           maxvalue  = 80
+' define sigdiffmax  = 1000 * ( rUp99diff-rUp'maxvalue'diff )'
+' minmax sigdiffmax'
 
-if( qtmp > qmax )
-    qmax = qtmp
+    cmax = subwrd(result,1)
+    cmin = subwrd(result,2)
+
+    cmax = math_abs(cmax)
+    cmin = math_abs(cmin)
+
+if( cmin > cmax )
+    cmax = cmin
 endif
-say '  final qmax = 'qmax
+
+say 'qmax based on critvalue:'critvalue' = 'qmax
+say 'qmax based on  maxvalue:' maxvalue' = 'cmax
+if(  cmax > qmax )
+     qmax = cmax
+endif
+say '                final qmax = 'qmax
 
 'set t 'tbeg.m' 'tdif.m
 'set lev 1000 100'
@@ -803,9 +849,15 @@ if( PLOT = TRUE )
 'run getenv DCINT_'field'_rms'rms'.4'
                              DCINT.4 = result
 
+say 'DCINT for   NHE: 'DCINT.2
+say 'DCINT for   TRO: 'DCINT.3
+say 'DCINT for   SHE: 'DCINT.4
+
 dcint = DCINT.2
     if( DCINT.3 > dcint ) ; dcint = DCINT.3 ; endif
     if( DCINT.4 > dcint ) ; dcint = DCINT.4 ; endif
+
+say 'DCINT for plots: 'dcint
 
 flag = ''
 while( flag = '' )
@@ -818,15 +870,16 @@ while( flag = '' )
 
 'set datawarn off'
 
-* Shade where sigdiff > 90% confidence error bar (color shaded)
-* -------------------------------------------------------------
+* Shade where sigdiff > critvalue confidence error bar (color shaded)
+* -------------------------------------------------------------------
  ' rgbset'
  ' set gxout grfill '
  ' set csmooth off'
  ' shades 'dcint
+ ' set ccols 59 57 55 47 44 36 34 32 30 0 20 21 23 24 25 26 27 28 29'
+
  ' run getenv SHADES_CLEVS'
               SHADES_CLEVS = result
-
   clevs = subwrd( SHADES_CLEVS,1 )
   ii = 2
   while( ii <= 9 )
@@ -834,21 +887,18 @@ while( flag = '' )
   clevs = clevs' 'clev
   ii = ii + 1
   endwhile
-  clevs = clevs'  -0.0001 0.0001 '
+  dcintfrac = dcint/6.0
+  clevs = clevs' -'dcintfrac' 'dcintfrac
   ii = 10
   while( ii <= 18 )
   clev  = subwrd( SHADES_CLEVS,ii )
   clevs = clevs' 'clev
   ii = ii + 1
   endwhile
-
  'set clevs 'clevs
- 'set ccols 59 57 55 47 44 37 36 34 33 31 0 20 21 22 23 24 25 26 27 28 29'
+ 'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
 
-*' d sigdiff90 '
-*' d sigdiff99 '
-*' d sigdiff95 '
- ' d sigdiff99 '
+ ' d sigdiffcrit '
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
 * Contour sigdiff that is = 90, 95, & 99% confidence diffs (black lines without label)
@@ -943,7 +993,7 @@ dcintx = dcint * 100
 
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'name'   'region
-'draw string 6.0 7.90 Anomaly Correlation Difference  (x10`a-3`n)'
+'draw string 6.0 7.90 Anomaly Correlation Difference (x10`a-3`n) > 'critvalue'% Confidence (Shaded)'
 'set  strsiz .125'
 'draw string 6.0 7.65 'desc
 'set  strsiz .12'
@@ -962,7 +1012,6 @@ dcintx = dcint * 100
 'draw string 0.23 1.50 Solid Line       (=90%)'
 'draw string 0.23 1.35 Dot-Dash Line  (=95%)'
 'draw string 0.23 1.20 Long-Dash Line (=99%)'
-'draw string 0.23 1.05 Shaded (>99%)'
 
 'set  string 1 c 6 90'
 'set  strsiz .18'
@@ -987,6 +1036,7 @@ endwhile
 
 ************************************************************************
 endif
+'set dfile 'ddif.m
 ************************************************************************
 
 m = m + 1

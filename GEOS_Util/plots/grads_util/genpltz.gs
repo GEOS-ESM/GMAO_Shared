@@ -106,11 +106,9 @@ if( STAT = 'STD' )
 endif
 if( STAT = 'RMS' )
     PRFX = 'RMS_'
-  EXPORT =  alias
 endif
 if( STAT = 'BIAS' )
     PRFX = 'BIAS_'
-  EXPORT =  alias
 endif
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'  ; title   = result
