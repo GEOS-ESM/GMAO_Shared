@@ -1198,8 +1198,8 @@ STD_DQVDT_ANA_AGCM_TITLE: DQVDT from Analysis (g/kg/day)  Standard_Deviation Err
 STD_DQVDT_ANA_AGCM_FACTOR: 86400000
 
 
-RMS_DMDT_ANA_DYN_TITLE: DMDT from Analysis (mb/day)  Root_Mean_Square Error
-RMS_DMDT_ANA_DYN_FACTOR: 864
+RMS_DMDTANA_DYN_TITLE: DMDT from Analysis (mb/day)  Root_Mean_Square Error
+RMS_DMDTANA_DYN_FACTOR: 864
 RMS_DUDT_ANA_AGCM_TITLE: DUDT from Analysis (m/sec/day)  Root_Mean_Square Error
 RMS_DUDT_ANA_AGCM_FACTOR: 86400
 RMS_DVDT_ANA_AGCM_TITLE: DVDT from Analysis (m/sec/day)  Root_Mean_Square Error
@@ -1210,8 +1210,8 @@ RMS_DQVDT_ANA_AGCM_TITLE: DQVDT from Analysis (g/kg/day)  Root_Mean_Square Error
 RMS_DQVDT_ANA_AGCM_FACTOR: 86400000
 
 
-BIAS_DMDT_ANA_DYN_TITLE: DMDT from Analysis (mb/day)  Root_Bias Error
-BIAS_DMDT_ANA_DYN_FACTOR: 864
+BIAS_DMDTANA_DYN_TITLE: DMDT from Analysis (mb/day)  Root_Bias Error
+BIAS_DMDTANA_DYN_FACTOR: 864
 BIAS_DUDT_ANA_AGCM_TITLE: DUDT from Analysis (m/sec/day)  Root_Bias Error
 BIAS_DUDT_ANA_AGCM_FACTOR: 86400
 BIAS_DVDT_ANA_AGCM_TITLE: DVDT from Analysis (m/sec/day)  Root_Bias Error
