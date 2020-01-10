@@ -3,6 +3,7 @@ esma_set_this ()
 set (srcs
   Chem_MieMod2G.F90
   Chem_MieTableMod.F90
+  Chem_AeroGeneric.F90
   )
 
 esma_add_library(${this} 
