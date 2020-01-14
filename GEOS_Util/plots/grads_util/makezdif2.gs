@@ -19,6 +19,12 @@ endwhile
 'run getenv "GEOSUTIL"'
              geosutil = result
 
+*'q dims'
+*say ' '
+*say 'Dimension Environment Going Into MAKEZDIF2: 'result
+*say result
+*say ' '
+
 * Get Current Environment Settings
 * --------------------------------
 'getinfo file'
@@ -47,7 +53,7 @@ endwhile
 * Determin Time Domain
 * --------------------
 'set dfile 'file1
-'sett'
+'sett -q'
 'getinfo tinc'
          tinc1  = result
 'getinfo tunit'
@@ -75,7 +81,7 @@ endwhile
 
 
 'set dfile 'file2
-'sett'
+'sett -q'
 'getinfo tinc'
          tinc2  = result
 'getinfo tunit'
@@ -142,7 +148,7 @@ endif
       timeinc = result''tunit
 
 'set t 'tmin' 'tmax
-say 'dfile: 'dfile'  tmin: 'tmin'  tmax: 'tmax'  tdim: 'tdim'  timebeg: 'timebeg'  timeinc: 'timeinc
+*say 'dfile: 'dfile'  tmin: 'tmin'  tmax: 'tmax'  tdim: 'tdim'  timebeg: 'timebeg'  timeinc: 'timeinc
 
 * Create Array of Target Pressure Levels
 * --------------------------------------
@@ -265,11 +271,9 @@ endwhile
 'set dfile 'newfile
 'set x 1'
 'set y 1'
-'setz'
-'sett'
+'setz -q'
+'sett -q'
 'define 'name'diff = q'
-*'q dims'
-*say 'DIMS: 'result
 
 'close 'newfile
 
@@ -281,5 +285,11 @@ endwhile
 'set y 'ypos
 'set z 'zmin' 'zmax
 'set t 'tmin' 'tmax
+
+*'q dims'
+*say ' '
+*say 'Dimension Environment Leaving MAKEZDIF2: 'result
+*say result
+*say ' '
 
 return timefile

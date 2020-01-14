@@ -1,4 +1,5 @@
 function sett (args)
+verbose = subwrd(args,1)
 
 * Initialize Time based on Existance of Pre-Set Environment Variables
 * -------------------------------------------------------------------
@@ -63,10 +64,14 @@ endif
 
 if( begYYYYMM != 'NULL' & endYYYYMM != 'NULL' )
    'set t 1 'tdim
+    if( verbose = "" )
     say 'Setting T 1 to 'tdim
+    endif
 else
    'set time 'tmin' 'tmax
+    if( verbose = "" )
     say 'Setting Time Dates: 'tmin' to 'tmax
+    endif
 endif
 
 return
