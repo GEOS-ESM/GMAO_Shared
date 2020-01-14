@@ -69,18 +69,20 @@ PROGRAM regrid_DYNVEG
   INTEGER            :: YEARB, YEARE, YEAR, MONTH, DAY, NTILES, NTILES_G, i,n,nv, nplus, ityp_new, loc_size
   CHARACTER*8        :: YYYYMMDD
   CHARACTER*4        :: YYYY
+  CHARACTER*2        :: MM
   CHARACTER*300      :: MODELING_SYSTEM, BCSPATH, TILFILE, EXPDIR, ACTORCLIM, BCSDIR
   real               :: dw, this_min_lon, this_max_lon, this_min_lat, this_max_lat, fveg_new
-  integer            :: file_units (NFILES), NCInID, YR1, MN1, DY1 
+  integer            :: file_units (NFILES), NCInID(2), YR1, MN1, DY1 
+  logical, parameter :: clim_sai = .true.
 
   CHARACTER*7, dimension (NFILES), PARAMETER :: OUT_VARS = (/     &
         'CNSAI11',  'CNSAI12',  'CNSAI13', &  
-        'CNLAI11',  'CNLAI12',  'CNLAI13', &    
         'CNSAI21',  'CNSAI22',  'CNSAI23', &   
-        'CNLAI21',  'CNLAI22',  'CNLAI23', &   
         'CNSAI31',  'CNSAI32',  'CNSAI33', &   
-        'CNLAI31',  'CNLAI32',  'CNLAI33', &   
         'CNSAI41',  'CNSAI42',  'CNSAI43', &   
+        'CNLAI11',  'CNLAI12',  'CNLAI13', &    
+        'CNLAI21',  'CNLAI22',  'CNLAI23', &   
+        'CNLAI31',  'CNLAI32',  'CNLAI33', &   
         'CNLAI41',  'CNLAI42',  'CNLAI43'/)   
 
   call init_MPI()
@@ -399,7 +401,8 @@ PROGRAM regrid_DYNVEG
         ! -------------------------------------------
 
         write (YYYY,'(i4.4)') YEAR -1
-        STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYY//'1231_1200z.nc4', NF_NOWRITE, NCInID) ; VERIFY_(STATUS) 
+        NCInID = 0
+        STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYY//'1231_1200z.nc4', NF_NOWRITE, NCInID(1)) ; VERIFY_(STATUS) 
 
         if(donot_regrid) then
            if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
@@ -417,7 +420,7 @@ PROGRAM regrid_DYNVEG
            END DO
         endif
 
-        STATUS = NF_CLOSE (NCInID)
+        STATUS = NF_CLOSE (NCInID(1))
         write (YYYY,'(i4.4)') YEAR
         YR1 = YEAR
 
@@ -438,7 +441,8 @@ PROGRAM regrid_DYNVEG
               ! Read, process and gather CF180 LAI/SAI data
               ! -------------------------------------------
               WRITE (YYYYMMDD,'(i4.4,i2.2,i2.2)') YEAR, MONTH, DAY
-              STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYYMMDD//'_1200z.nc4', NF_NOWRITE, NCInID) ; VERIFY_(STATUS) 
+              NCInID = 0
+              STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYYMMDD//'_1200z.nc4', NF_NOWRITE, NCInID(1)) ; VERIFY_(STATUS) 
 
               if(donot_regrid) then
                  if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
@@ -457,7 +461,7 @@ PROGRAM regrid_DYNVEG
                  END DO
               endif
 
-              STATUS = NF_CLOSE (NCInID)
+              STATUS = NF_CLOSE (NCInID(1))
               
            END DO D_LOOP
         END DO M_LOOP
@@ -465,7 +469,8 @@ PROGRAM regrid_DYNVEG
         IF (master_proc) THEN; DO N = 1, NFILES; WRITE (file_units(N)) float((/YEAR+1,1,1,0,0,0,YEAR+1,1,2,0,0,0,NTILES,1/)); END DO; ENDIF
 
         write (YYYY,'(i4.4)') YEAR + 1
-        STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYY//'0101_1200z.nc4', NF_NOWRITE, NCInID) ; VERIFY_(STATUS) 
+        NCInID = 0
+        STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYY//'0101_1200z.nc4', NF_NOWRITE, NCInID(1)) ; VERIFY_(STATUS) 
 
         if(donot_regrid) then
            if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
@@ -483,7 +488,7 @@ PROGRAM regrid_DYNVEG
            END DO
         endif
         
-        STATUS = NF_CLOSE (NCInID)
+        STATUS = NF_CLOSE (NCInID(1))
         IF (master_proc) call create_output_files (file_units, YYYY, trim(EXPDIR), close_files = .true.)
 
      END DO Y_LOOP
@@ -497,36 +502,61 @@ PROGRAM regrid_DYNVEG
      
      IF (master_proc) THEN
         call create_output_files (file_units, YYYY, trim(EXPDIR))
-        DO N = 1, NFILES; WRITE (file_units(N)) float((/0,12,31,0,0,0,1,1,1,0,0,0,NTILES,1/)); END DO
+        DO N = 1, NFILES
+           if (clim_sai) then
+              if(N <= 12) then
+                 WRITE (file_units(N)) float((/0,12,1,0,0,0,1,1,1,0,0,0,NTILES,1/))
+              else
+                 WRITE (file_units(N)) float((/0,12,31,0,0,0,1,1,1,0,0,0,NTILES,1/))
+              endif
+           else
+              WRITE (file_units(N)) float((/0,12,31,0,0,0,1,1,1,0,0,0,NTILES,1/))
+           endif
+        END DO
      ENDIF
 
      ! Read, process and gather CF180 LAI/SAI data
      ! -------------------------------------------
      
      YYYY = 'YYYY'
-     STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYY//'1231_1200z.nc', NF_NOWRITE, NCInID) ; VERIFY_(STATUS) 
+     NCInID = 0
+     STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYY//'1231_1200z.nc' , NF_NOWRITE, NCInID(1)) ; VERIFY_(STATUS) 
+     if (clim_sai) STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg_monthly.'//YYYY//'12.nc4', NF_NOWRITE, NCInID(2)) ; VERIFY_(STATUS) 
 
      if(donot_regrid) then
-        if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
+        if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units, 1)
         call MPI_BARRIER( MPI_COMM_WORLD,STATUS)
      else
         DO NV = 1, num_veg
            if (nv == 1) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
-                CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1)
+                CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1,1)
            if (nv == 2) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
-                CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2)
+                CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2,1)
            if (nv == 3) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
-                CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1)
+                CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1,1)
            if (nv == 4) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
-                CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2)
+                CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2,1)
         END DO
      endif
      
-     STATUS = NF_CLOSE (NCInID)
-     
+     STATUS = NF_CLOSE (NCInID(1))
+     if (clim_sai) STATUS = NF_CLOSE (NCInID(2))
+
      YR1  = 1
      YEAR = 1
      DO MONTH = 1,12
+
+        MN1 = MONTH
+        IF (master_proc) THEN       
+           if (clim_sai) then
+              MN1 = MONTH +1
+              IF(MN1 == 13) then ; MN1 = 1; YR1 = 2; ENDIF
+                 DO N = 1, NFILES
+                    IF(N <= 12) WRITE (file_units(N)) float((/YEAR,MONTH,1,0,0,0,YR1,MN1,1,0,0,0,NTILES,1/))
+                 END DO
+                 YR1 = 1
+              endif
+           ENDIF
 
         MN1 = MONTH
 
@@ -538,89 +568,130 @@ PROGRAM regrid_DYNVEG
            DY1 = DAY + 1
            IF(DAY == days_in_month(1997, month)) THEN; DY1  = 1; MN1  = MONTH + 1 ; ENDIF
            IF(MN1 == 13) then ; MN1 = 1; YR1 = 2; ENDIF
-           IF (master_proc) THEN; DO N = 1, NFILES; WRITE (file_units(N)) float((/YEAR,MONTH,DAY,0,0,0,YR1,MN1,DY1,0,0,0,NTILES,1/)); END DO; ENDIF
-
+           IF (master_proc) THEN              
+              DO N = 1, NFILES
+                 if (clim_sai) then
+                    if(N > 12) WRITE (file_units(N)) float((/YEAR,MONTH,DAY,0,0,0,YR1,MN1,DY1,0,0,0,NTILES,1/))
+                 else
+                    WRITE (file_units(N)) float((/YEAR,MONTH,DAY,0,0,0,YR1,MN1,DY1,0,0,0,NTILES,1/))
+                 endif
+              END DO
+           ENDIF
+           
            ! Read, process and gather CF180 LAI/SAI data
            ! -------------------------------------------
            WRITE (YYYYMMDD,'(a4,i2.2,i2.2)') 'YYYY', MONTH, DAY
-           STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYYMMDD//'_1200z.nc', NF_NOWRITE, NCInID) ; VERIFY_(STATUS) 
+           WRITE (MM, '(i2.2)') MONTH
+           NCInID = 0
+           STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.'//YYYYMMDD//'_1200z.nc', NF_NOWRITE, NCInID(1)) ; VERIFY_(STATUS) 
+           if (clim_sai) STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg_monthly.'//YYYY//MM//'.nc4', NF_NOWRITE, NCInID(2)) ; VERIFY_(STATUS) 
  
            if(donot_regrid) then
-              if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
+              if (master_proc) then
+                 if (day ==1) then
+                    call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units,1)
+                 else
+                    call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
+                 endif
+              endif
               call MPI_BARRIER( MPI_COMM_WORLD,STATUS)
            else
               DO NV = 1, num_veg
-                 if (nv == 1) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
-                      CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1)
-                 if (nv == 2) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
-                      CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2)
-                 if (nv == 3) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
-                      CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1)
-                 if (nv == 4) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
-                      CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2)
+                 if (day ==1) then
+                    if (nv == 1) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
+                         CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1,1)
+                    if (nv == 2) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
+                         CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2,1)
+                    if (nv == 3) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
+                         CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1,1)
+                    if (nv == 4) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
+                         CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2,1)
+                 else
+                    if (nv == 1) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
+                         CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1)
+                    if (nv == 2) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
+                         CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2)
+                    if (nv == 3) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
+                         CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1)
+                    if (nv == 4) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
+                         CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2)
+                 endif
               END DO
            endif
 
-           STATUS = NF_CLOSE (NCInID)
-              
-           END DO 
+           STATUS = NF_CLOSE (NCInID(1))
+           if (clim_sai) STATUS = NF_CLOSE (NCInID(2))
+        END DO 
         END DO 
 
-        IF (master_proc) THEN; DO N = 1, NFILES; WRITE (file_units(N)) float((/2,1,1,0,0,0,2,1,2,0,0,0,NTILES,1/)); END DO; ENDIF
-        STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.YYYY0101_1200z.nc', NF_NOWRITE, NCInID) ; VERIFY_(STATUS) 
+        IF (master_proc) THEN
+           DO N = 1, NFILES
+              if (clim_sai) then
+                 if(N <= 12) then
+                    WRITE (file_units(N)) float((/2,1,1,0,0,0,2,2,1,0,0,0,NTILES,1/))
+                 else
+                    WRITE (file_units(N)) float((/2,1,1,0,0,0,2,1,2,0,0,0,NTILES,1/))
+                 endif
+              else
+                 WRITE (file_units(N))  float((/2,1,1,0,0,0,2,1,2,0,0,0,NTILES,1/))
+              endif
+           END DO
+        ENDIF
+        NCInID = 0
+        STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg.YYYY0101_1200z.nc', NF_NOWRITE, NCInID(1)) ; VERIFY_(STATUS) 
+        if (clim_sai) STATUS = NF_OPEN (trim(GLDASName)//'.tavg1_tile_veg_monthly.'//YYYY//'01.nc4', NF_NOWRITE, NCInID(2)) ; VERIFY_(STATUS) 
 
         if(donot_regrid) then
-           if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
+           if (master_proc) call READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units,1)
            call MPI_BARRIER( MPI_COMM_WORLD,STATUS)
         else        
            DO NV = 1, num_veg
               if (nv == 1) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
-                   CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1)
+                   CNT_TYP1, AREA_TYP1, INTPUT_TID1, CLMC_pf1,1)
               if (nv == 2) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
-                   CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2)
+                   CNT_TYP2, AREA_TYP2, INTPUT_TID2, CLMC_pf2,1)
               if (nv == 3) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, & 
-                   CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1)
+                   CNT_TYP3, AREA_TYP3, INTPUT_TID3, CLMC_sf1,1)
               if (nv == 4) call read_and_put (NTILES, loc_size, nt_local, low_ind, NCInID, file_units, NV, &
-                   CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2)
+                   CNT_TYP4, AREA_TYP4, INTPUT_TID4, CLMC_sf2,1)
            END DO
         endif
         
-        STATUS = NF_CLOSE (NCInID)
+        STATUS = NF_CLOSE (NCInID(1))
+        if (clim_sai) STATUS = NF_CLOSE (NCInID(2))
         IF (master_proc) call create_output_files (file_units, YYYY, trim(EXPDIR), close_files = .true.)
   ENDIF
 
- call MPI_BARRIER( MPI_COMM_WORLD,STATUS)
- call MPI_Finalize(STATUS)
+  call MPI_BARRIER( MPI_COMM_WORLD,STATUS)
+  call MPI_Finalize(STATUS)
 
 contains
 
+  
   ! -----------------------------------------------------------------------------------------
 
   SUBROUTINE read_and_put (NTILES, NT, nt_local, low_ind, NCInID, file_units, NV, &
-       CNT_TYP, AREA_TYP, INTPUT_TID, CLMC_fr)
-
+       CNT_TYP, AREA_TYP, INTPUT_TID, CLMC_fr, day)
+    
     implicit none
     
-    integer, intent (in) :: NTILES, NT, nt_local(numprocs), low_ind(numprocs), NCInID, file_units (NFILES), &
+    integer, intent (in) :: NTILES, NT, nt_local(numprocs), low_ind(numprocs), file_units (NFILES), &
          CNT_TYP (NT, NUM_VEG), INTPUT_TID(NT, NUM_VEG,Noff_per_pft), NV
     real   , intent (in) :: AREA_TYP (NT, NUM_VEG,Noff_per_pft), CLMC_fr (NT)
-    INTEGER              :: N, TV, NZ, I, Var, file_no, STATUS
-    REAL                 :: sum_a
+    INTEGER              :: TV, NZ, Var, file_no, STATUS
     CHARACTER*7          :: OUTVAR,   INVAR(4)
-    REAL, allocatable, dimension (:)   :: out_local, out_global
     REAL, allocatable, dimension (:,:) :: off_var
-
+    integer, intent (in), optional     :: day
+    integer, intent (in), dimension (:):: NCInID
+    
+    ALLOCATE (off_var   (1: NTILES_CN, 4))
     ! Must do         
     ! 'CNSAI[nv]1',  'CNSAI[nv]2',  'CNSAI[nv]3', &  
     ! 'CNLAI[nv]1',  'CNLAI[nv]2',  'CNLAI[nv]3', &    
     
-    IF (master_proc) ALLOCATE (out_global (1: NTILES))
-    ALLOCATE (out_local (1: NT))
-    ALLOCATE (off_var   (1: NTILES_CN, 4))
-
     DO NZ = 1,NUM_ZONE
        DO Var = 1,2
-
+          
           if (Var == 1) then
              write (OUTVAR  , '(a5,i1,i1)') 'CNSAI', nv,nz
              write (INVAR(1), '(a5,i1,i1)') 'CNSAI', 1,nz
@@ -628,7 +699,6 @@ contains
              write (INVAR(3), '(a5,i1,i1)') 'CNSAI', 3,nz
              write (INVAR(4), '(a5,i1,i1)') 'CNSAI', 4,nz
           endif
-
           if (Var == 2) then
              write (OUTVAR  , '(a5,i1,i1)') 'CNLAI', nv,nz
              write (INVAR(1), '(a5,i1,i1)') 'CNLAI', 1,nz
@@ -636,229 +706,281 @@ contains
              write (INVAR(3), '(a5,i1,i1)') 'CNLAI', 3,nz
              write (INVAR(4), '(a5,i1,i1)') 'CNLAI', 4,nz
           endif
-
-          file_no = 6*nv -6 + 3*(var -1) + nz
-
-          ! Should check IN_VAR1[NZ] IN_VAR2[NZ] IN_VAR3[NZ] IN_VAR4[NZ]
-          DO TV = 1,NUM_VEG
-              STATUS = NF_GET_VARA_REAL (NCInID, VarID(NCInID,INVAR(TV)),  (/1,1/), (/NTILES_CN,1/), off_var(:,TV)) ; VERIFY_(STATUS)
-          END DO
-
-          out_local = undef
-
-          LOCAL_LOOP : DO N = 1, NT
-             if(CLMC_fr (n) > fmin) then
-                ! this fraction is active
-                sum_a         = 0.
-                out_local (n) = 0.
-                do TV = 1,  num_veg
-                   if(CNT_TYP (N, TV) > 0) then
-                      ! loop through all available fractions of ssimilar out type
-                      DO i = 1, CNT_TYP (N, TV) ; out_local (n) = out_local (n) + off_var(INTPUT_TID(n,tv,i),TV) * AREA_TYP (n,tv,i) ; END DO
-                      sum_a = sum_a + SUM (AREA_TYP (n,tv,1:CNT_TYP (N, TV)))
-                   endif
-                end do
-                out_local (n) = out_local (n) / sum_a 
-             endif             
-          END DO LOCAL_LOOP
-
-          call MPI_Barrier(MPI_COMM_WORLD, STATUS)
-          call MPI_GATHERV( out_local, nt_local(myid+1)   , MPI_real, &
-                            out_global, nt_local,low_ind-1, MPI_real, &
-                            0, MPI_COMM_WORLD, STATUS)
-          
-          IF (master_proc) WRITE (file_units (file_no)) out_global
-          
+              
+          ! file_no = 6*nv -6 + 3*(var -1) + nz
+          file_no = 12*(var -1) + 3*nv -3 + nz
+          if (clim_sai) then  
+             if (Var == 1) then
+                if(present(day))then
+                   DO TV = 1,NUM_VEG
+                      STATUS = NF_GET_VARA_REAL (NCInID(2), VarID(NCInID(2),INVAR(TV)),  (/1,1/), (/NTILES_CN,1/), off_var(:,TV)) ; VERIFY_(STATUS)
+                   END DO
+                   call WRITE_OUTPUT (file_no, off_var, NTILES, NT, nt_local, low_ind,CNT_TYP, AREA_TYP, INTPUT_TID, CLMC_fr)
+                endif
+             else
+                DO TV = 1,NUM_VEG
+                   STATUS = NF_GET_VARA_REAL (NCInID(1), VarID(NCInID(1),INVAR(TV)),  (/1,1/), (/NTILES_CN,1/), off_var(:,TV)) ; VERIFY_(STATUS)
+                END DO
+                call WRITE_OUTPUT (file_no, off_var, NTILES, NT, nt_local, low_ind,CNT_TYP, AREA_TYP, INTPUT_TID, CLMC_fr)
+             endif
+          else
+             
+             ! Should check IN_VAR1[NZ] IN_VAR2[NZ] IN_VAR3[NZ] IN_VAR4[NZ]
+             DO TV = 1,NUM_VEG
+                STATUS = NF_GET_VARA_REAL (NCInID(1), VarID(NCInID(1),INVAR(TV)),  (/1,1/), (/NTILES_CN,1/), off_var(:,TV)) ; VERIFY_(STATUS)
+             END DO
+             call WRITE_OUTPUT (file_no, off_var, NTILES, NT, nt_local, low_ind,CNT_TYP, AREA_TYP, INTPUT_TID, CLMC_fr)
+          endif
        END DO
     END DO
-
-    IF (master_proc) deallocate (out_global)
-    deallocate (out_local, off_var)
-
-
+        
+    deallocate (off_var)
   END SUBROUTINE read_and_put
-  
-  ! -----------------------------------------------------------------------------------------
 
-  SUBROUTINE READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units)
+  ! -------------------------------------------------------------------------
+     
+  SUBROUTINE WRITE_OUTPUT (FILE_UNIT, off_var, &
+       NTILES, NT, nt_local, low_ind,CNT_TYP, AREA_TYP, INTPUT_TID, CLMC_fr)
+      
+      implicit none
+      integer, intent (in) :: FILE_UNIT,  NTILES, NT, nt_local(numprocs), low_ind(numprocs), &
+           CNT_TYP (NT, NUM_VEG), INTPUT_TID(NT, NUM_VEG,Noff_per_pft)  
+      REAL,    intent (in), dimension (NTILES_CN, 4) :: off_var
+      real   , intent (in) :: AREA_TYP (NT, NUM_VEG,Noff_per_pft), CLMC_fr (NT)
+      REAL, allocatable, dimension (:)               :: out_local, out_global
+      INTEGER              :: N, TV, NZ, I
+      REAL                 :: sum_a
+      
+      IF (master_proc) ALLOCATE (out_global (1: NTILES))
+      ALLOCATE (out_local (1: NT))
+      
+      out_local = undef
+      
+      LOCAL_LOOP : DO N = 1, NT
+         if(CLMC_fr (n) > fmin) then
+            ! this fraction is active
+            sum_a         = 0.
+            out_local (n) = 0.
+            do TV = 1,  num_veg
+               if(CNT_TYP (N, TV) > 0) then
+                  ! loop through all available fractions of ssimilar out type
+                  DO i = 1, CNT_TYP (N, TV) 
+                     out_local (n) = out_local (n) + off_var(INTPUT_TID(n,tv,i),TV) * AREA_TYP (n,tv,i) 
+                  END DO
+                  sum_a = sum_a + SUM (AREA_TYP (n,tv,1:CNT_TYP (N, TV)))
+               endif
+            end do
+            out_local (n) = out_local (n) / sum_a 
+         endif
+      END DO LOCAL_LOOP
+      
+      call MPI_Barrier(MPI_COMM_WORLD, STATUS)
+      call MPI_GATHERV( out_local, nt_local(myid+1)   , MPI_real, &
+           out_global, nt_local,low_ind-1, MPI_real, &
+           0, MPI_COMM_WORLD, STATUS)       
+      
+      IF (master_proc) WRITE (file_unit) out_global
+      IF (master_proc) deallocate (out_global)
+      deallocate (out_local)
+      
+    END SUBROUTINE WRITE_OUTPUT
+               
+    ! -----------------------------------------------------------------------------------------
+     
+    SUBROUTINE READ_NOREGRID_PUT (NTILES, out_tile_data,NCInID, file_units, day)
+       
+      implicit none
+      integer, intent (in) :: NTILES
+      type(tile_data_type), INTENT (IN), DIMENSION(NTILES) :: out_tile_data 
+      integer, intent (in) :: file_units (NFILES)
+      integer, intent (in), dimension (:):: NCInID
+      integer              :: n, STATUS
+      integer, intent (in), optional     :: day
+      REAL, allocatable, dimension (:)   :: out_global
+      
+      ALLOCATE (out_global (1: NTILES))
+      do n = 1, NFILES       
+         if (clim_sai) then       
+            if(N <= 12) then
+               if(present(day))then
+                  STATUS = NF_GET_VARA_REAL (NCInID(2), VarID(NCInID(2),OUT_VARS(n)),  (/1,1/), (/NTILES,1/), out_global(:)) ; VERIFY_(STATUS)
+                  WRITE (file_units (n)) out_global (out_tile_data%tile_id)
+               endif
+            else
+               STATUS = NF_GET_VARA_REAL (NCInID(1), VarID(NCInID(1),OUT_VARS(n)),  (/1,1/), (/NTILES,1/), out_global(:)) ; VERIFY_(STATUS)    
+               WRITE (file_units (n)) out_global (out_tile_data%tile_id)
+            endif
+         else
+            STATUS = NF_GET_VARA_REAL (NCInID(1), VarID(NCInID(1),OUT_VARS(n)),  (/1,1/), (/NTILES,1/), out_global(:)) ; VERIFY_(STATUS)    
+            WRITE (file_units (n)) out_global (out_tile_data%tile_id)
+         endif
+         
+      end do
+      
+      STATUS = NF_CLOSE (NCInID(1))
+      IF(NCInID(2) /= 0) STATUS = NF_CLOSE (NCInID(2))
+      deallocate (out_global)
+      
+    END SUBROUTINE READ_NOREGRID_PUT
 
-     implicit none
-     integer, intent (in) :: NTILES
-     type(tile_data_type), INTENT (IN), DIMENSION(NTILES) :: out_tile_data
-     integer, intent (in) :: file_units (NFILES), NCInID
-     integer              :: n, STATUS
-     REAL, allocatable, dimension (:)   :: out_global
+    ! -----------------------------------------------------------------------------------------
 
-     ALLOCATE (out_global (1: NTILES))
-     do n = 1, NFILES
-        STATUS = NF_GET_VARA_REAL (NCInID, VarID(NCInID,OUT_VARS(n)),  (/1,1/), (/NTILES,1/), out_global(:)) ; VERIFY_(STATUS)
-        WRITE (file_units (n)) out_global (out_tile_data%tile_id)
-     end do
-
-     STATUS = NF_CLOSE (NCInID)
-     deallocate (out_global)
-
-   END SUBROUTINE READ_NOREGRID_PUT
-
-  ! -----------------------------------------------------------------------------------------
-
-  SUBROUTINE look4_input_cells (OUT_TYPE, nplus, sub_tid, sub_ityp, sub_fveg, sub_area, &
+    SUBROUTINE look4_input_cells (OUT_TYPE, nplus, sub_tid, sub_ityp, sub_fveg, sub_area, &
                    t_count, CNT_TYP, AREA_TYP, INTPUT_TID)
-    implicit none
+      implicit none
+      
+      integer, intent (in)               :: OUT_TYPE, nplus
+      integer, dimension(:), intent (in) :: sub_tid, sub_ityp
+      real,    dimension(:), intent (in) :: sub_fveg, sub_area
+      integer, intent (inout)            :: t_count, CNT_TYP
+      integer, dimension(:), intent (inout) :: INTPUT_TID
+      real,    dimension(:), intent (inout) :: AREA_TYP
+      integer :: i
+      
+      WINDOW_LOOP : do i = 1, nplus
+         
+         if((sub_fveg (i) > fmin).and.(OUT_TYPE == sub_ityp(i)).and.(CNT_TYP < Noff_per_pft)) then
+            if(t_count < 0)  t_count = 0 ! initialize if need be
+            if(CNT_TYP < 0)  CNT_TYP = 0 ! initialize if need be
+            t_count = t_count + 1
+            CNT_TYP = CNT_TYP + 1
+            INTPUT_TID(CNT_TYP) = sub_tid(i)
+            AREA_TYP  (CNT_TYP) = sub_fveg(i) * sub_area (i)
+            !          if( CNT_TYP == Noff_per_pft) then ; print *,'COUNT EXCEEDED Noff_per_pft' ; exit ; endif
+         endif
+         
+      END DO WINDOW_LOOP
+      
+    END SUBROUTINE look4_input_cells
 
-    integer, intent (in)               :: OUT_TYPE, nplus
-    integer, dimension(:), intent (in) :: sub_tid, sub_ityp
-    real,    dimension(:), intent (in) :: sub_fveg, sub_area
-    integer, intent (inout)            :: t_count, CNT_TYP
-    integer, dimension(:), intent (inout) :: INTPUT_TID
-    real,    dimension(:), intent (inout) :: AREA_TYP
-    integer :: i
-
-    WINDOW_LOOP : do i = 1, nplus
-
-       if((sub_fveg (i) > fmin).and.(OUT_TYPE == sub_ityp(i)).and.(CNT_TYP < Noff_per_pft)) then
-          if(t_count < 0)  t_count = 0 ! initialize if need be
-          if(CNT_TYP < 0)  CNT_TYP = 0 ! initialize if need be
-          t_count = t_count + 1
-          CNT_TYP = CNT_TYP + 1
-          INTPUT_TID(CNT_TYP) = sub_tid(i)
-          AREA_TYP  (CNT_TYP) = sub_fveg(i) * sub_area (i)
-!          if( CNT_TYP == Noff_per_pft) then ; print *,'COUNT EXCEEDED Noff_per_pft' ; exit ; endif
-       endif
-
-    END DO WINDOW_LOOP
+    ! -----------------------------------------------------------------------------------------
     
-  END SUBROUTINE look4_input_cells
+    SUBROUTINE read_OUT_TileData (NTILES, out_tile_data, MODELING_SYSTEM, BCSPATH, TILFILE, EXPDIR)
+      
+      implicit none
+      
+      CHARACTER(*), INTENT (IN) :: MODELING_SYSTEM, BCSPATH, TILFILE, EXPDIR
+      INTEGER, INTENT (INOUT)   :: NTILES
+      type(tile_data_type), pointer, INTENT (INOUT), DIMENSION(:) :: out_tile_data
+      INTEGER, ALLOCATABLE, DIMENSION (:) :: IDUM
+      REAL,    ALLOCATABLE, DIMENSION (:) :: RDUM
+      REAL                                :: AREA
+      INTEGER                             :: N, STATUS, NCID, PFAF
+      CHARACTER*10                        :: TMPSTRING
+      
+      SYSTEM : IF (TRIM(MODELING_SYSTEM) == "GEOSldas") THEN
+         
+         OPEN (10, FILE = TRIM(TILFILE), FORM = 'UNFORMATTED', STATUS = 'OLD', ACTION = 'READ')
+         
+         read (10) NTILES
+         
+         ALLOCATE (OUT_TILE_DATA (1:NTILES))
+         ALLOCATE (IDUM       (1:NTILES))
+         ALLOCATE (RDUM       (1:NTILES))
+         
+         read (10) (out_tile_data(n)%tile_id,   n=1,NTILES)
+         read (10) (IDUM(n),                 n=1,NTILES)
+         read (10) (IDUM(n),                 n=1,NTILES)
+         read (10) (out_tile_data(n)%com_lon,   n=1,NTILES)
+         read (10) (out_tile_data(n)%com_lat,   n=1,NTILES)
+         read (10) (out_tile_data(n)%min_lon,   n=1,NTILES)
+         read (10) (out_tile_data(n)%max_lon,   n=1,NTILES)
+         read (10) (out_tile_data(n)%min_lat,   n=1,NTILES)
+         read (10) (out_tile_data(n)%max_lat,   n=1,NTILES)
+         close (10, status = 'keep')
+         
+         STATUS = NF_OPEN (trim (EXPDIR)//'/input/restart/catchcn_internal_rst', NF_NOWRITE,NCID) ; VERIFY_(STATUS)
+         
+         DO N = 1, NUM_VEG
+            STATUS = NF_GET_VARA_REAL (NCID, VarID(NCID,'ITY'),  (/1,N/), (/NTILES,1/), RDUM) ; VERIFY_(STATUS)
+            out_tile_data(:)%ITY(N) = INT (RDUM)
+            STATUS = NF_GET_VARA_REAL (NCID, VarID(NCID,'FVG'),  (/1,N/), (/NTILES,1/), out_tile_data(:)%FVG(N)) ; VERIFY_(STATUS) 
+         END DO
+         DEALLOCATE (IDUM, RDUM)
+         STATUS = NF_CLOSE (NCID )
+         
+      ELSE
+         
+         OPEN (11, FILE = TRIM(BCSPATH)//'/clsm/catchment.def',      FORM = 'FORMATTED', STATUS = 'OLD', ACTION = 'READ') 
+         
+         read (11, *) NTILES
+         ALLOCATE (OUT_TILE_DATA (1:NTILES))
+         
+         DO N = 1, NTILES
+            read (11,*) out_tile_data(n)%tile_id, PFAF, out_tile_data(n)%min_lon, out_tile_data(n)%max_lon, out_tile_data(n)%min_lat, out_tile_data(n)%max_lat
+         END DO
+         
+         close (11, status = 'keep')
+         
+         call ReadCNTilFile  (TRIM(BCSPATH)//'/'//trim(TILFILE), NTILES, out_tile_data(:)%com_lon, out_tile_data(:)%com_lat)
+         call ReadCLMvegFile (TRIM(BCSPATH)//'/clsm/CLM_veg_typs_fracs', NTILES,                                   &
+              out_tile_data(:)%ITY(1),  out_tile_data(:)%ITY(2), out_tile_data(:)%ITY(3), out_tile_data(:)%ITY(4), &
+              out_tile_data(:)%FVG(1),  out_tile_data(:)%FVG(2), out_tile_data(:)%FVG(3), out_tile_data(:)%FVG(4))          
+         
+      ENDIF SYSTEM
+      
+    END SUBROUTINE read_OUT_TileData
 
-  ! -----------------------------------------------------------------------------------------
+    ! ------------------------------------------------------------------
 
-  SUBROUTINE read_OUT_TileData (NTILES, out_tile_data, MODELING_SYSTEM, BCSPATH, TILFILE, EXPDIR)
+    integer function days_in_month(year, month)
+      
+      ! return the number of days in a given month
+      
+      implicit none
+      
+      integer :: year, month
+      
+      integer, dimension(12), parameter :: days_in_month_leap = &
+           (/ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
+      
+      integer, dimension(12), parameter :: days_in_month_nonleap = &
+           (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
+      
+      if (is_leap_year(year)) then
+         days_in_month = days_in_month_leap(month) 
+      else
+         days_in_month = days_in_month_nonleap(month) 
+      end if
+      
+    end function days_in_month
     
-    implicit none
-
-    CHARACTER(*), INTENT (IN) :: MODELING_SYSTEM, BCSPATH, TILFILE, EXPDIR
-    INTEGER, INTENT (INOUT)   :: NTILES
-    type(tile_data_type), pointer, INTENT (INOUT), DIMENSION(:) :: out_tile_data
-    INTEGER, ALLOCATABLE, DIMENSION (:) :: IDUM
-    REAL,    ALLOCATABLE, DIMENSION (:) :: RDUM
-    REAL                                :: AREA
-    INTEGER                             :: N, STATUS, NCID, PFAF
-    CHARACTER*10                        :: TMPSTRING
-
-    SYSTEM : IF (TRIM(MODELING_SYSTEM) == "GEOSldas") THEN
-       
-       OPEN (10, FILE = TRIM(TILFILE), FORM = 'UNFORMATTED', STATUS = 'OLD', ACTION = 'READ')
-       
-       read (10) NTILES
-       
-       ALLOCATE (OUT_TILE_DATA (1:NTILES))
-       ALLOCATE (IDUM       (1:NTILES))
-       ALLOCATE (RDUM       (1:NTILES))
-       
-       read (10) (out_tile_data(n)%tile_id,   n=1,NTILES)
-       read (10) (IDUM(n),                 n=1,NTILES)
-       read (10) (IDUM(n),                 n=1,NTILES)
-       read (10) (out_tile_data(n)%com_lon,   n=1,NTILES)
-       read (10) (out_tile_data(n)%com_lat,   n=1,NTILES)
-       read (10) (out_tile_data(n)%min_lon,   n=1,NTILES)
-       read (10) (out_tile_data(n)%max_lon,   n=1,NTILES)
-       read (10) (out_tile_data(n)%min_lat,   n=1,NTILES)
-       read (10) (out_tile_data(n)%max_lat,   n=1,NTILES)
-       close (10, status = 'keep')
-
-
-       STATUS = NF_OPEN (trim (EXPDIR)//'/input/restart/catchcn_internal_rst', NF_NOWRITE,NCID) ; VERIFY_(STATUS)
-
-       DO N = 1, NUM_VEG
-          STATUS = NF_GET_VARA_REAL (NCID, VarID(NCID,'ITY'),  (/1,N/), (/NTILES,1/), RDUM) ; VERIFY_(STATUS)
-          out_tile_data(:)%ITY(N) = INT (RDUM)
-          STATUS = NF_GET_VARA_REAL (NCID, VarID(NCID,'FVG'),  (/1,N/), (/NTILES,1/), out_tile_data(:)%FVG(N)) ; VERIFY_(STATUS) 
-       END DO
-       DEALLOCATE (IDUM, RDUM)
-       STATUS = NF_CLOSE (NCID )
-
-    ELSE
-
-       OPEN (11, FILE = TRIM(BCSPATH)//'/clsm/catchment.def',      FORM = 'FORMATTED', STATUS = 'OLD', ACTION = 'READ') 
-
-       read (11, *) NTILES
-       ALLOCATE (OUT_TILE_DATA (1:NTILES))
-
-       DO N = 1, NTILES
-          read (11,*) out_tile_data(n)%tile_id, PFAF, out_tile_data(n)%min_lon, out_tile_data(n)%max_lon, out_tile_data(n)%min_lat, out_tile_data(n)%max_lat
-       END DO
-
-       close (11, status = 'keep')
-
-       call ReadCNTilFile  (TRIM(BCSPATH)//'/'//trim(TILFILE), NTILES, out_tile_data(:)%com_lon, out_tile_data(:)%com_lat)
-       call ReadCLMvegFile (TRIM(BCSPATH)//'/clsm/CLM_veg_typs_fracs', NTILES,                                   &
-            out_tile_data(:)%ITY(1),  out_tile_data(:)%ITY(2), out_tile_data(:)%ITY(3), out_tile_data(:)%ITY(4), &
-            out_tile_data(:)%FVG(1),  out_tile_data(:)%FVG(2), out_tile_data(:)%FVG(3), out_tile_data(:)%FVG(4))          
-
-    ENDIF SYSTEM
-
-  END SUBROUTINE read_OUT_TileData
+  ! ------------------------------------------------------------------
+    
+    logical function is_leap_year(year)
+      
+      implicit none
+      
+      integer :: year
+      
+      if (mod(year,4) /= 0) then 
+         is_leap_year = .false.
+      else if (mod(year,400) == 0) then
+         is_leap_year = .true.
+      else if (mod(year,100) == 0) then 
+         is_leap_year = .false.
+      else
+         is_leap_year = .true.
+      end if
+      
+    end function is_leap_year
 
   ! ------------------------------------------------------------------
-
-  integer function days_in_month(year, month)
     
-    ! return the number of days in a given month
+    integer function VarID (NCFID, VNAME) 
+      
+      integer, intent (in)      :: NCFID
+      character(*), intent (in) :: VNAME
+      integer                   :: status
+      
+      STATUS = NF_INQ_VARID (NCFID, trim(VNAME) ,VarID)
+      IF (STATUS .NE. NF_NOERR) &
+           CALL HANDLE_ERR(STATUS, trim(VNAME))  
+      
+    end function VarID
     
-    implicit none
-    
-    integer :: year, month
-    
-    integer, dimension(12), parameter :: days_in_month_leap = &
-         (/ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
-    
-    integer, dimension(12), parameter :: days_in_month_nonleap = &
-         (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
-    
-    if (is_leap_year(year)) then
-       days_in_month = days_in_month_leap(month) 
-    else
-       days_in_month = days_in_month_nonleap(month) 
-    end if
-    
-  end function days_in_month
-
-  ! ------------------------------------------------------------------
-  
-  logical function is_leap_year(year)
-    
-    implicit none
-
-    integer :: year
-    
-    if (mod(year,4) /= 0) then 
-       is_leap_year = .false.
-    else if (mod(year,400) == 0) then
-       is_leap_year = .true.
-    else if (mod(year,100) == 0) then 
-       is_leap_year = .false.
-    else
-       is_leap_year = .true.
-    end if
-    
-  end function is_leap_year
-
-  ! ------------------------------------------------------------------
-
-  integer function VarID (NCFID, VNAME) 
-    
-    integer, intent (in)      :: NCFID
-    character(*), intent (in) :: VNAME
-    integer                   :: status
-    
-    STATUS = NF_INQ_VARID (NCFID, trim(VNAME) ,VarID)
-    IF (STATUS .NE. NF_NOERR) &
-         CALL HANDLE_ERR(STATUS, trim(VNAME))  
-    
-  end function VarID
-  
   ! -----------------------------------------------------------------------
-  
+    
   SUBROUTINE HANDLE_ERR(STATUS, Line)
     
     INTEGER,      INTENT (IN) :: STATUS
