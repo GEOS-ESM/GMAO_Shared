@@ -1,4 +1,4 @@
-#!@DASPERL@
+#!@DASPERL
 # Simple perl script to convert HDF files to GRID. Uses lats4d.
 #
 # Revision history:
@@ -15,7 +15,7 @@ use File::Basename;              # for basename(), dirname()
 use File::Copy;                  # for copy()
 use Getopt::Long;                # command line options
 use Time::Local;                 # time functions
-use Shell qw(cat rcp rsh scp ssh);   # make C-shell commands available
+use CPAN::Shell qw(cat rcp rsh scp ssh);   # make C-shell commands available
 
 # command line options
 # --------------------

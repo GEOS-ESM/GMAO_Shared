@@ -144,7 +144,7 @@ sub init {
 sub write_and_submit_jobfile {
     my ($base, $jobfile, $logfile, $output);
     my (@oResList, @varList);
-    my ($FH, $cmd);
+    my ($FH, $cmd, $mynodes);
 
     @oResList = (sort keys %oResVals);
     @varList = (sort keys %varVals);
@@ -155,6 +155,11 @@ sub write_and_submit_jobfile {
     unlink $jobfile if -e $jobfile;
     unlink $jobfile if -e $logfile;
 
+    if ( -e "/etc/os-release" ) {
+      $mynodes = "sky";
+    } else {
+      $mynodes = "hasw";
+    }
     open JF, "> $jobfile" or die "Error opening jobfile: $jobfile; $!";
     $FH = select;
     select JF;
@@ -166,7 +171,7 @@ sub write_and_submit_jobfile {
 #SBATCH --job-name=$base
 #SBATCH --output=$logfile.RUNNING
 #SBATCH --ntasks=24
-#SBATCH --constraint=hasw
+#SBATCH --constraint=$mynodes
 #SBATCH --time=1:00:00
 
 set echo

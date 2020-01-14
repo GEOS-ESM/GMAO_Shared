@@ -18,7 +18,6 @@
 use Env;                 # make env vars readily available
 use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
-use Shell qw(rm);        # rm commands
 use Getopt::Long;        # command line options
 
 # look for perl packages in the following locations

@@ -120,7 +120,7 @@ sub gen_archive {
 # PROCESS THE OPTIONS FROM THE HASH TABLE
 # Option to specify a Run_Config file location
 
-   if ( defined( %options ) && exists( $options{'run_config'} ) ) {
+   if ( $options{'run_config'} ) {
       $run_config = $options{'run_config'};
    }
    else {
@@ -130,7 +130,7 @@ sub gen_archive {
 
 # Option indicating that prep ID is not included on the file names.
 
-   if ( defined( %options ) && exists( $options{"no_prep_id"} ) ) {
+   if ( $options{"no_prep_id"} ) {
       $no_prep_id = $options{"no_prep_id"};
    }
    else {
@@ -139,7 +139,7 @@ sub gen_archive {
 
 #  Option to delete local file(s) after archive step.
 
-   if ( defined( %options ) && exists( $options{"delete"} ) ) {
+   if ( $options{"delete"} ) {
       $delete = $options{"delete"};
    }
    else {
@@ -148,7 +148,7 @@ sub gen_archive {
 
 #  Verbose option
 
-   if ( defined( %options ) && exists( $options{"verbose"} ) ) {
+   if ( $options{"verbose"} ) {
       $verbose = $options{"verbose"};
    }
    else {
@@ -157,7 +157,7 @@ sub gen_archive {
 
 #  Option to include subtype in the file path.
 
-   if ( defined( %options ) && exists( $options{"subtype"} ) ) {
+   if ( $options{"subtype"} ) {
       $subtype = $options{"subtype"};
    }
    else {
@@ -165,7 +165,7 @@ sub gen_archive {
    }
 
 #  Option to specify different remote file name
-   if ( defined( %options ) && exists( $options{"remote_name"} ) ) {
+   if ( $options{"remote_name"} ) {
       if (! $#archived_files ) {
           $remote_name = $options{"remote_name"};
           $use_remote  = 1;
@@ -180,7 +180,7 @@ sub gen_archive {
    }
 
 #  Option to specify deletion of remote file before transfer
-   if ( defined( %options ) && exists( $options{"remdel"} ) ) {
+   if ( $options{"remdel"} ) {
        $remote_delete = $options{"remdel"};
    }
    else {
@@ -189,7 +189,7 @@ sub gen_archive {
 
 # Option to specify file permissions
 
-   if ( defined( %options ) && exists( $options{"filemode"} ) ) {
+   if ( $options{"filemode"} ) {
        $filemode = $options{"filemode"};
    }
    else {
@@ -198,7 +198,7 @@ sub gen_archive {
 
 # Option to specify directory permissions 
 
-   if ( defined( %options ) && exists( $options{"dirmode"} ) ) {
+   if ( $options{"dirmode"} ) {
        $dirmode = $options{"dirmode"};
    }
    else {
@@ -208,7 +208,7 @@ sub gen_archive {
 
 # Option to specify y4only date
 
-   if ( defined( %options ) && exists( $options{"y4only"} ) ) {
+   if ( $options{"y4only"} ) {
        $y4only = $options{"y4only"};
    }
    else {
@@ -216,7 +216,7 @@ sub gen_archive {
    }
 
 # Option to specify no ATM/NREN hopping
-   if ( defined( %options ) && exists( $options{"direct"} ) ) {
+   if ( $options{"direct"} ) {
        $direct = $options{"direct"};
    }
    else {
@@ -224,7 +224,7 @@ sub gen_archive {
    }
 
 # Option to specify explicit archive path
-   if ( defined( %options ) && exists( $options{"exp_path"} ) ) {
+   if ( $options{"exp_path"} ) {
        $explicit_path = $options{"exp_path"};
    }
    else {
@@ -234,7 +234,7 @@ sub gen_archive {
  
 # DETERMINE ARCHIVE LOCATION
 
-   if ( $archive_loc =~ /@/ && $archive_loc !~ /:/ ) { 
+   if ( $archive_loc =~ /@/ and $archive_loc !~ /:/ ) { 
       $archive_loc = "$archive_loc:"; 
    }
 
@@ -250,7 +250,7 @@ sub gen_archive {
 
 # Parse date information.  
  
-   if ((length($date) != 8)&&( ! $y4only )) {
+   if ((length($date) != 8) and ( ! $y4only )) {
       print "gen_archive: Date must be 8 characters (YYYYMMDD)\n";
       return -1;
    }
@@ -332,7 +332,7 @@ sub gen_archive {
             mkpath( "$archive_loc$subdir" ) or $err_trans = 4;
             chmod( oct($dirmode), "$archive_loc$subdir" ) or $err_trans = 5;
          }
-         if ( ($remote_delete) && ( -e "$archive_loc$subdir/$remote_name") ){
+         if ( $remote_delete and ( -e "$archive_loc$subdir/$remote_name") ){
               unlink ("$archive_loc$subdir/$remote_name") or $err_trans = 6;
          }
          copy( "$sfile", "$archive_loc$subdir/$remote_name" ) or $err_trans = 7;
