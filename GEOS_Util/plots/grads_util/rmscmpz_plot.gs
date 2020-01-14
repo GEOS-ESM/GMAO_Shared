@@ -393,7 +393,7 @@ while ( n  <= fileend )
 * Set Proper Time Domain
 * ----------------------
 'set dfile 'm
-'sett'
+'sett -q'
 'getinfo tinc'
          tinc1  = result
         'getinfo tmin'
@@ -409,7 +409,7 @@ while ( n  <= fileend )
              datemax1 = result
 
 'set dfile 'n
-'sett'
+'sett -q'
 'getinfo tinc'
          tinc2  = result
         'getinfo tmin'
@@ -462,7 +462,7 @@ if( rms = 3 ) ; 'define dum  =       'field'rmsdis'n.m     ; endif
 if( rms = 4 ) ; 'define dum  =       'field'rmsdsp'n.m     ; endif
 
 if( m = 0 )
-    say 'Computing DumDiff for EXP: 'm'   File: 'ddif.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
+*   say 'Computing DumDiff for EXP: 'm'   File: 'ddif.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
    'define dumdiff = dum'
 else
     say 'Computing DumDiff in makezdif2 for EXP: 'm'   File: 'n.m' for TBEG = 'tbeg.0' to TEND: 'tdif.0
@@ -856,6 +856,7 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 
          critvalue   = 90
 ' define sigdiffcrit = sigdiff'critvalue
+
 ' minmax sigdiffcrit'
 
     qmax = subwrd(result,1)
@@ -882,11 +883,13 @@ if( qmin > qmax )
     tmax = tmin
 endif
 
-* To eliminate marginally significant shading, compute shading scale based on
-* the maximum value of sigdiffcrit and sigdiffmax (Difference between 99% & 80%)
-* ------------------------------------------------------------------------------
+* To eliminate shading that is insignificant in a practical sense, 
+* compare the shading scale based on the maximum value of sigdiffcrit ( ravediff - rUp90diff)
+*                                 to the maximum value of sigdiffmax  (rUp99diff - rUp80diff)
+* -------------------------------------------------------------------------------------------
            maxvalue  = 80
 ' define sigdiffmax  = 1000 * ( rUp99diff-rUp'maxvalue'diff )'
+
 ' minmax sigdiffmax'
 
     cmax = subwrd(result,1)
@@ -899,12 +902,86 @@ if( cmin > cmax )
     cmax = cmin
 endif
 
-say 'qmax based on critvalue:'critvalue' = 'qmax
-say 'qmax based on  maxvalue:' maxvalue' = 'cmax
+say ' '
+say 'qmax based on critvalue ( ravediff-rUp'critvalue'diff) = 'qmax
+say 'qmax based on  maxvalue (rUp99diff-rUp'maxvalue'diff) = 'cmax
+say ' '
 if(  cmax > qmax )
      qmax = cmax
 endif
 say '                final qmax = 'qmax
+
+* Finally, only perform shading when the significant difference 
+* is greater than the magnitude of the thickness of a standard RMS line
+* (i.e., we need to see a gap between RMS lines)
+* ---------------------------------------------------------------------
+'set vpage off'
+'set parea off'
+'set grads off'
+
+'getinfo zdim'
+         zdim = result
+zsum = 0.0
+zmin =  1e15
+zmax = -1e15
+
+z = 1
+while( z<=zdim )
+   'set z 'z
+
+'minmax rave0'
+maxval = subwrd(result,1)
+maxval = 1.02 * maxval
+
+axmax  =   1.08 * maxval
+axmin  = - 0.08 * maxval
+
+'set vpage off'
+'set parea off'
+'set grads off'
+'set parea 2.25 9.75 4.0 7.5'
+'set axlim 'axmin' 'axmax
+'d rave0'
+'d rave1'
+'q gr2xy 1 0'
+ xval = subwrd(result,3)
+ yval = subwrd(result,6)
+
+  if( xval != environment )
+
+    say 'xval = 'xval
+    say 'yval = 'yval
+    say 'GR2XY Result, xval:yval = 'result
+   'set line 2 1 3'
+   'draw line 'xval' 'yval' 4 'yval
+    yval = yval + 0.03
+    say 'New yval = 'yval
+   'q xy2gr 'xval' 'yval
+    say 'XY2GR Result: 'result
+    thickness.xpos.z = subwrd(result,6)
+    thickness.xpos.z = thickness.xpos.z * 1000
+    zsum = zsum + thickness.xpos.z
+    if( thickness.xpos.z > zmax ) ; zmax = thickness.xpos.z ; endif
+    if( thickness.xpos.z < zmin ) ; zmin = thickness.xpos.z ; endif
+   'set line 3 1 3'
+   'draw line 3.5 'yval' 7.5 'yval
+    say ' '
+    say 'z = 'z' LINE_THICKNESS x 1000 = 'thickness.xpos.z
+    say 'zmin = 'zmin'  zmax = 'zmax'  zsum = 'zsum
+    say ' '
+    say 'Hit Enter to Continue ...'
+    pull flag
+   'c'
+
+  else
+    zsum = 0
+    zmin = 0
+  endif
+
+z = z + 1
+endwhile
+   zsum = zsum / zdim
+   say 'Average zthick = 'zsum
 
 'set t 'tbeg.m' 'tdif.m
 'set lev 1000 100'
@@ -912,13 +989,26 @@ say '                final qmax = 'qmax
    dcint = qmax / 9
 
 if( PLOT = FALSE )
-  if( xpos=2 ) ; 'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint ; endif
-  if( xpos=3 ) ; 'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint ; endif
-  if( xpos=4 ) ; 'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint ; endif
+  if( xpos=2 ) 
+     'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint
+     'run setenv MEAN_THICKNESS.'xpos' 'zsum ; say 'MEAN_THICKNESS.'xpos' 'zsum
+     'run setenv  MIN_THICKNESS.'xpos' 'zmin ; say ' MIN_THICKNESS.'xpos' 'zmin
+  endif
+  if( xpos=3 )
+     'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint
+     'run setenv MEAN_THICKNESS.'xpos' 'zsum ; say 'MEAN_THICKNESS.'xpos' 'zsum
+     'run setenv  MIN_THICKNESS.'xpos' 'zmin ; say ' MIN_THICKNESS.'xpos' 'zmin
+  endif
+  if( xpos=4 )
+     'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint
+     'run setenv MEAN_THICKNESS.'xpos' 'zsum ; say 'MEAN_THICKNESS.'xpos' 'zsum
+     'run setenv  MIN_THICKNESS.'xpos' 'zmin ; say ' MIN_THICKNESS.'xpos' 'zmin
+  endif
 endif
 
 ************************************************************************
 if( PLOT = TRUE )
+'c'
 ************************************************************************
 
 'run getenv DCINT_'field'_rms'rms'.2'
@@ -928,15 +1018,47 @@ if( PLOT = TRUE )
 'run getenv DCINT_'field'_rms'rms'.4'
                              DCINT.4 = result
 
-say 'DCINT for   NHE: 'DCINT.2
-say 'DCINT for   TRO: 'DCINT.3
-say 'DCINT for   SHE: 'DCINT.4
+say 'DCINT for NHE: 'DCINT.2
+say 'DCINT for TRO: 'DCINT.3
+say 'DCINT for SHE: 'DCINT.4
 
 dcint = DCINT.2
     if( DCINT.3 > dcint ) ; dcint = DCINT.3 ; endif
     if( DCINT.4 > dcint ) ; dcint = DCINT.4 ; endif
 
+'run getenv MEAN_THICKNESS.2'
+            MEAN_THICKNESS.2 = result
+'run getenv MEAN_THICKNESS.3'
+            MEAN_THICKNESS.3 = result
+'run getenv MEAN_THICKNESS.4'
+            MEAN_THICKNESS.4 = result
+
+say 'MEAN_THICKNESS for NHE: 'MEAN_THICKNESS.2
+say 'MEAN_THICKNESS for TRO: 'MEAN_THICKNESS.3
+say 'MEAN_THICKNESS for SHE: 'MEAN_THICKNESS.4
+
+                                          mean_thickness = MEAN_THICKNESS.2
+if( MEAN_THICKNESS.3 > mean_thickness ) ; mean_thickness = MEAN_THICKNESS.3 ; endif
+if( MEAN_THICKNESS.4 > mean_thickness ) ; mean_thickness = MEAN_THICKNESS.4 ; endif
+
+if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
 say 'DCINT for plots: 'dcint
+
+'run getenv MIN_THICKNESS.2'
+            MIN_THICKNESS.2 = result
+'run getenv MIN_THICKNESS.3'
+            MIN_THICKNESS.3 = result
+'run getenv MIN_THICKNESS.4'
+            MIN_THICKNESS.4 = result
+
+say 'MIN_THICKNESS for NHE: 'MIN_THICKNESS.2
+say 'MIN_THICKNESS for TRO: 'MIN_THICKNESS.3
+say 'MIN_THICKNESS for SHE: 'MIN_THICKNESS.4
+
+                                        min_thickness = MIN_THICKNESS.2
+if( MIN_THICKNESS.3 < min_thickness ) ; min_thickness = MIN_THICKNESS.3 ; endif
+if( MIN_THICKNESS.4 < min_thickness ) ; min_thickness = MIN_THICKNESS.4 ; endif
+say 'MIN_THICKNESS for plots: 'min_thickness
 
 flag = ''
 while( flag = '' )
@@ -955,8 +1077,8 @@ while( flag = '' )
  ' set gxout grfill '
  ' set csmooth off'
  ' shades 'dcint
- ' set ccols 59 57 55 47 44 36 34 32 30 0 20 21 23 24 25 26 27 28 29'
 
+ ' set ccols 59 57 55 47 44    36 34 32 30 0 20 21    23 24 25 26 27 28 29'
  ' run getenv SHADES_CLEVS'
               SHADES_CLEVS = result
   clevs = subwrd( SHADES_CLEVS,1 )
@@ -966,7 +1088,7 @@ while( flag = '' )
   clevs = clevs' 'clev
   ii = ii + 1
   endwhile
-  dcintfrac = dcint/6.0
+  dcintfrac = min_thickness
   clevs = clevs' -'dcintfrac' 'dcintfrac
   ii = 10
   while( ii <= 18 )
@@ -976,6 +1098,7 @@ while( flag = '' )
   endwhile
  'set clevs 'clevs
  'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
+
 
  ' d sigdiffcrit '
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'

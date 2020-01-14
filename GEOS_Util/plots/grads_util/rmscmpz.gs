@@ -127,6 +127,11 @@ endwhile
 
 'set lev 1000 100'
 'set x   'x
+'q dims'
+say ' '
+say 'Dimension Environment for Calling RMSCMPZ:'
+say result
+say ' '
 say 'Calling RMSCMPZ for x = 'x'  RMS Option: 'rms
     'rmscmpz_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug' 'NOPLOT
 
