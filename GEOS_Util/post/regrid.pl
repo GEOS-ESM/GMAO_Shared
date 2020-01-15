@@ -2067,7 +2067,7 @@ sub confirm_inputs {
         if ($mk_route) { print_("yes\n") } else { print_("no\n") }
     }
 
-    if ($surfFLG and $rank{$bcsTagOUT} >= $rank_1_catchcn) {
+    if ($surfFLG) {
         print_("- catch:   ");
         if ($mk_catch) { print_("yes\n") } else { print_("no\n") }
 
