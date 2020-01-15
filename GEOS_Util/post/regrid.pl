@@ -263,6 +263,7 @@ sub init {
                "tagout=s"        => \$tagOUT,
                "tar"             => \$tarFLG,
                "rs=i"            => \$rsFLG,
+               "catch"           => \$mk_catch,
                "catchcn"         => \$mk_catchcn,
                "route"           => \$mk_route,
                "wemin"           => \$wemIN,
@@ -540,6 +541,7 @@ sub check_inputs {
                 .   "==================================================\n";
         }
         $rstdir = query("Enter INPUT tarfile or restart directory:");
+        get_inputs_from_tarname() if $rstdir;
         print "\nCannot find restart dir: $rstdir\n" unless -d $rstdir;
     }
     if ($rstdir) {
@@ -2228,6 +2230,7 @@ sub regrid_upperair_rsts_CS {
     my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
     my ($moist, $newrst, $rst, $status);
+    my ($mynodes);
 
     $im = $im{$grOUT};
     if    ($im eq   "12") { $NPE =  12; $nwrit = 1 }
@@ -2314,6 +2317,12 @@ sub regrid_upperair_rsts_CS {
 
     $AGCMout   = rstnameI(".", "agcm_import_rst");
 
+    if ( -e "/etc/os-release" ) {
+      $mynodes = "sky";
+    } else {
+      $mynodes = "hasw";
+    }
+
     # write input.nml file
     #---------------------
     $input_nml = "$workdir/input.nml";
@@ -2342,7 +2351,7 @@ EOF
 #SBATCH --time=1:00:00
 #SBATCH --ntasks=${NPE} ${MEMPERCPU}
 #SBATCH --job-name=regrid
-#SBATCH --constraint=hasw
+#SBATCH --constraint=$mynodes
 #$QOSline
 
 unlimit
@@ -2690,12 +2699,12 @@ sub regrid_surface_rsts {
         $flags .= " -route"            if $mk_route;
         $flags .= " -catch"            if $mk_catch;
         $flags .= " -catchcn"          if $mk_catchcn;
-        $flags .= " -wemin $wemIN"     if $mk_catchcn or $mk_catch;
-        $flags .= " -wemout $wemOUT"   if $mk_catchcn or $mk_catch;
-        $flags .= " -surflay $surflay" if $mk_catchcn or $mk_catch;
-        $flags .= " -grpID $grpID"     if $mk_catchcn and $grpID;
+        $flags .= " -wemin $wemIN"     if $mk_catch or $mk_catchcn;
+        $flags .= " -wemout $wemOUT"   if $mk_catch or $mk_catchcn;
+        $flags .= " -surflay $surflay" if $mk_catch or $mk_catchcn;
+        $flags .= " -grpID $grpID"     if ($mk_catch or $mk_catchcn) and $grpID;
         $flags .= " -rsttime $ymd$hr"  if $mk_catchcn or $mk_route;
-        $flags .= " -qos $qos"         if $mk_catchcn and $qos;
+        $flags .= " -qos $qos"         if ($mk_catch or $mk_catchcn) and $qos;
     }
     $flags .= " -zoom $zoom" if $zoom;
 
@@ -2787,7 +2796,7 @@ sub regrid_surface_rsts {
 
     # use mk_catchcn job and log file names from mk_Restarts script
     #--------------------------------------------------------------
-    if ($mk_catchcn) {
+    if ($mk_catch or $mk_catchcn) {
         $mk_catchcn_j = "mk_catchcn.j";
         $mk_catchcn_log = "mk_catchcn.log";
         move_("$mk_catchcn_j", "$outdir/$mk_catchcn_j.1");
@@ -2846,14 +2855,14 @@ sub regrid_surface_rsts {
         $flags = "";
         $flags .= " -catch"             if $mk_catch;
         $flags .= " -catchcn"           if $mk_catchcn;
-        $flags .= " -wemin $wemIN"      if $mk_catchcn or $mk_catch;
-        $flags .= " -wemout $wemOUT"    if $mk_catchcn or $mk_catch;
+        $flags .= " -wemin $wemIN"      if $mk_catch or $mk_catchcn;
+        $flags .= " -wemout $wemOUT"    if $mk_catch or $mk_catchcn;
         $flags .= " -surflay $surflay";
-        $flags .= " -grpID $grpID"      if $mk_catchcn and $grpID;
+        $flags .= " -grpID $grpID"      if ($mk_catch or $mk_catchcn) and $grpID;
         $flags .= " -rsttime $ymd$hr"   if $mk_catchcn;
-        $flags .= " -rescale"           if $mk_catchcn;
+        $flags .= " -rescale"           if $mk_catch or $mk_catchcn;
         $flags .= " -zoom $zoom"        if $zoom;
-        $flags .= " -qos $qos"          if $mk_catchcn and $qos;
+        $flags .= " -qos $qos"          if ($mk_catch or $mk_catchcn) and $qos;
         #--$flags .= " -walltime 2:00:00"  if $mk_catchcn;
         #--$flags .= " -ntasks 112"        if $mk_catchcn;
 
@@ -2866,7 +2875,7 @@ sub regrid_surface_rsts {
         chdir_($workdir, $verbose);
         system_("\n$mk_RestartsX $flags") && die "Error with mk_RestartsX;";
 
-        if ($mk_catchcn) {
+        if ($mk_catch or $mk_catchcn) {
             move_("\n$mk_catchcn_j", "$outdir/$mk_catchcn_j.2");
             move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.2");
         }
