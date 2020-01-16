@@ -34,7 +34,7 @@ my ($qos, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
 my ($rstIN_template, $rstIN_templateB, $rst_tarfile, $rst_template);
 my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
-my ($upairFLG, $verbose, $weminIN, $weminOUT, $workdir);
+my ($upairFLG, $verbose, $wemIN, $wemOUT, $workdir);
 my ($year, $ymd, $zoom, $zoom_);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
 my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
@@ -263,10 +263,11 @@ sub init {
                "tagout=s"        => \$tagOUT,
                "tar"             => \$tarFLG,
                "rs=i"            => \$rsFLG,
+               "catch"           => \$mk_catch,
                "catchcn"         => \$mk_catchcn,
                "route"           => \$mk_route,
-               "weminin"         => \$weminIN,
-               "weminout"        => \$weminOUT,
+               "wemin"           => \$wemIN,
+               "wemout"          => \$wemOUT,
                "bkg!"            => \$bkgFLG,
                "lbl!"            => \$lblFLG,
                "lcv!"            => \$lcvFLG,
@@ -507,7 +508,7 @@ sub check_inputs {
     my ($grINocean_dflt, $grOUTocean_dflt);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
-    my ($prompt, $rstlcvIN, $warnFLG, $weminINdflt, $weminOUTdflt);
+    my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
 
     # check for input tarfile
     #------------------------
@@ -540,6 +541,7 @@ sub check_inputs {
                 .   "==================================================\n";
         }
         $rstdir = query("Enter INPUT tarfile or restart directory:");
+        get_inputs_from_tarname() if $rstdir;
         print "\nCannot find restart dir: $rstdir\n" unless -d $rstdir;
     }
     if ($rstdir) {
@@ -853,25 +855,25 @@ sub check_inputs {
     #  WEmin = 26 mm is older value, used in MERRA-2)
     #-----------------------------------------------
     if ($mk_catch or $mk_catchcn) {
-	print "\nMinimum snow water equivalent thresholds (WEmin) needed for catch(cn).\n"
+        print "\nMinimum snow water equivalent thresholds (WEmin) needed for catch(cn).\n"
             .   "  WEmin = 13 mm is newer value (INL),\n"
             .   "  WEmin = 26 mm is older value (ICA,G40)\n"
             .   "----------------------------------------------\n";
 	
-        if ($newLand{$bcsTagIN}) { $weminINdflt = 13 }
-        else                     { $weminINdflt = 26 }
+        if ($newLand{$bcsTagIN}) { $wemINdflt = 13 }
+        else                     { $wemINdflt = 26 }
 
-        if ($newLand{$bcsTagOUT}) { $weminOUTdflt = 13 }
-        else                      { $weminOUTdflt = 26 }
+        if ($newLand{$bcsTagOUT}) { $wemOUTdflt = 13 }
+        else                      { $wemOUTdflt = 26 }
 
-        until (defined($weminIN)) {
+        until (defined($wemIN)) {
             $prompt = "Enter INPUT WEmin";
-            $weminIN = query($prompt, $weminINdflt);
+            $wemIN = query($prompt, $wemINdflt);
         }
 
-        until (defined($weminOUT)) {
+        until (defined($wemOUT)) {
             $prompt = "Enter OUTPUT WEmin";
-            $weminOUT = query($prompt, $weminOUTdflt);
+            $wemOUT = query($prompt, $wemOUTdflt);
         }
     }
 
@@ -2111,7 +2113,7 @@ sub confirm_inputs {
            . ". bcsdir:       $IN{bcsdir}\n"
            . ". tile file:    $IN{tile}\n"
            . ". BCS tag:      $IN{bcsTAG}\n");
-    print_(  ". weminIN:      $weminIN\n") if $mk_catch or $mk_catchcn;
+    print_(  ". weminIN:      $wemIN\n") if $mk_catch or $mk_catchcn;
     print_(  ". surflay:      $surflayIN\n"
            . ". rstdir:       " .display($rstdir) ."\n");
     print_(  ". rst tarfile:  " .display($rst_tarfile) ."\n") if $rst_tarfile;
@@ -2138,7 +2140,7 @@ sub confirm_inputs {
            . ". tile file:    $OUT{tile}\n");
     print_(  ". bkg_eta grid: $OUT{bkg_regrid}\n") if $OUT{"bkg_regrid"};
     print_(  ". BCS tag:      $OUT{bcsTAG}\n");
-    print_(  ". weminOUT:     $weminOUT\n") if $mk_catch or $mk_catchcn;
+    print_(  ". wemOUT:       $wemOUT\n") if $mk_catch or $mk_catchcn;
     print_(  ". surflay:      $surflay\n"
            . ". rescale:      $rescale_catch\n"
            . ". outdir:       " .display($outdir_save) ."\n"
@@ -2235,6 +2237,7 @@ sub regrid_upperair_rsts_CS {
     my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
     my ($moist, $newrst, $rst, $status);
+    my ($mynodes);
 
     $im = $im{$grOUT};
     if    ($im eq   "12") { $NPE =  12; $nwrit = 1 }
@@ -2321,6 +2324,12 @@ sub regrid_upperair_rsts_CS {
 
     $AGCMout   = rstnameI(".", "agcm_import_rst");
 
+    if ( -e "/etc/os-release" ) {
+      $mynodes = "sky";
+    } else {
+      $mynodes = "hasw";
+    }
+
     # write input.nml file
     #---------------------
     $input_nml = "$workdir/input.nml";
@@ -2349,7 +2358,7 @@ EOF
 #SBATCH --time=1:00:00
 #SBATCH --ntasks=${NPE} ${MEMPERCPU}
 #SBATCH --job-name=regrid
-#SBATCH --constraint=hasw
+#SBATCH --constraint=$mynodes
 #$QOSline
 
 unlimit
@@ -2694,15 +2703,15 @@ sub regrid_surface_rsts {
         $flags .= " -openwater" if $input_restarts{"openwater_internal_rst"};
         $flags .= " -seaice"    if $input_restarts{"seaicethermo_internal_rst"};
 
-        $flags .= " -route"              if $mk_route;
-        $flags .= " -catch"              if $mk_catch;
-        $flags .= " -catchcn"            if $mk_catchcn;
-        $flags .= " -weminin $weminIN"   if $mk_catchcn or $mk_catch;
-        $flags .= " -weminout $weminOUT" if $mk_catchcn or $mk_catch;
-        $flags .= " -surflay $surflay"   if $mk_catchcn or $mk_catch;
-        $flags .= " -grpID $grpID"       if $mk_catchcn and $grpID;
-        $flags .= " -rsttime $ymd$hr"    if $mk_catchcn or $mk_route;
-        $flags .= " -qos $qos"           if $mk_catchcn and $qos;
+        $flags .= " -route"            if $mk_route;
+        $flags .= " -catch"            if $mk_catch;
+        $flags .= " -catchcn"          if $mk_catchcn;
+        $flags .= " -wemin $wemIN"     if $mk_catch or $mk_catchcn;
+        $flags .= " -wemout $wemOUT"   if $mk_catch or $mk_catchcn;
+        $flags .= " -surflay $surflay" if $mk_catch or $mk_catchcn;
+        $flags .= " -grpID $grpID"     if ($mk_catch or $mk_catchcn) and $grpID;
+        $flags .= " -rsttime $ymd$hr"  if $mk_catchcn or $mk_route;
+        $flags .= " -qos $qos"         if ($mk_catch or $mk_catchcn) and $qos;
     }
     $flags .= " -zoom $zoom" if $zoom;
 
@@ -2794,11 +2803,11 @@ sub regrid_surface_rsts {
 
     # use mk_catchcn job and log file names from mk_Restarts script
     #--------------------------------------------------------------
-    if ($mk_catchcn) {
+    if ($mk_catch or $mk_catchcn) {
         $mk_catchcn_j = "mk_catchcn.j";
         $mk_catchcn_log = "mk_catchcn.log";
         move_("$mk_catchcn_j", "$outdir/$mk_catchcn_j.1");
-        move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.1");
+        move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.1") unless $slurmjob;
     }
     rename_surface_rsts(\%H1, \%H2, \@SFC);
 
@@ -2853,14 +2862,14 @@ sub regrid_surface_rsts {
         $flags = "";
         $flags .= " -catch"             if $mk_catch;
         $flags .= " -catchcn"           if $mk_catchcn;
-        $flags .= " -weminin $weminIN"      if $mk_catchcn or $mk_catch;
-        $flags .= " -weminout $weminOUT"    if $mk_catchcn or $mk_catch;
+        $flags .= " -wemin $wemIN"      if $mk_catch or $mk_catchcn;
+        $flags .= " -wemout $wemOUT"    if $mk_catch or $mk_catchcn;
         $flags .= " -surflay $surflay";
-        $flags .= " -grpID $grpID"      if $mk_catchcn and $grpID;
+        $flags .= " -grpID $grpID"      if ($mk_catch or $mk_catchcn) and $grpID;
         $flags .= " -rsttime $ymd$hr"   if $mk_catchcn;
-        $flags .= " -rescale"           if $mk_catchcn;
+        $flags .= " -rescale"           if $mk_catch or $mk_catchcn;
         $flags .= " -zoom $zoom"        if $zoom;
-        $flags .= " -qos $qos"          if $mk_catchcn and $qos;
+        $flags .= " -qos $qos"          if ($mk_catch or $mk_catchcn) and $qos;
         #--$flags .= " -walltime 2:00:00"  if $mk_catchcn;
         #--$flags .= " -ntasks 112"        if $mk_catchcn;
 
@@ -2873,9 +2882,9 @@ sub regrid_surface_rsts {
         chdir_($workdir, $verbose);
         system_("\n$mk_RestartsX $flags") && die "Error with mk_RestartsX;";
 
-        if ($mk_catchcn) {
+        if ($mk_catch or $mk_catchcn) {
             move_("\n$mk_catchcn_j", "$outdir/$mk_catchcn_j.2");
-            move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.2");
+            move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.2") unless $slurmjob;
         }
         rename_surface_rsts(\%H2, \%H2, \@SFC);
     }
@@ -3818,8 +3827,8 @@ OTHER OPTIONS
    -catchcn           Create a version of the catch restart which contains carbon values;
                       Not valid for tags prior to Heracles; Note: This option will add
                       10-20 minutes to the regrid process.
-   -weminin  weminIN  minimum snow water equivalent threshold for input catch/cn
-   -weminout weminOUT minimum snow water equivalent threshold for output catch/cn
+   -wemin wemIN       minimum water snow water equivalent for input catch/cn
+   -wemout wemOUT     minimum water snow water equivalent for output catch/cn
 
    -route             write the route_internal_rst
 
