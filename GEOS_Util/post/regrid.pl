@@ -2800,7 +2800,7 @@ sub regrid_surface_rsts {
         $mk_catchcn_j = "mk_catchcn.j";
         $mk_catchcn_log = "mk_catchcn.log";
         move_("$mk_catchcn_j", "$outdir/$mk_catchcn_j.1");
-        move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.1");
+        move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.1") unless $slurmjob;
     }
     rename_surface_rsts(\%H1, \%H2, \@SFC);
 
@@ -2877,7 +2877,7 @@ sub regrid_surface_rsts {
 
         if ($mk_catch or $mk_catchcn) {
             move_("\n$mk_catchcn_j", "$outdir/$mk_catchcn_j.2");
-            move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.2");
+            move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.2") unless $slurmjob;
         }
         rename_surface_rsts(\%H2, \%H2, \@SFC);
     }
