@@ -25,7 +25,6 @@ use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
 use File::Copy "cp";     # for cp()
 use Getopt::Long;        # load module with GetOptions function
-use Shell qw(cat rm);    # cat and rm commands
 use Time::Local;         # time functions
 
 use GD::Graph::bars;
@@ -127,7 +126,7 @@ $lb = $lb + 1;
 my @words = split /:/, $lines[0];
 $le = "@words[0]\n" ;
 
-if ( -e ".zeit.tmp.file" ) {rm(".zeit.tmp.file")};
+if ( -e ".zeit.tmp.file" ) {unlink(".zeit.tmp.file")};
 $cmd = "awk 'NR==$lb, NR==$le' $fname > .zeit.tmp.file";
 system($cmd);
 

@@ -1129,6 +1129,9 @@ foreach date ($checkdates)
             if( $MON == "OCT"  &&  $case == "SON"  &&  $num > 2  ) set season = `echo $season $case `
             if( $MON == "DEC"  &&  $case == "ANN"  &&  $num > 11 ) set season = `echo $season $case `
     end
+    # Check for "gcmpost.script -plots SEASON" Over-ride
+    # --------------------------------------------------
+    if( $PLOTS[1] != "NULL" ) set season = `echo $PLOTS`
 
     if( $season[1] != '' ) set plotdate = $date
 
@@ -1164,10 +1167,6 @@ endif
 
     set year  = `echo $plotdate | cut -c1-4`
     set month = `echo $plotdate | cut -c5-6`
-
-# Check for "gcmpost.script -plots SEASON" Over-ride
-# --------------------------------------------------
-if( $PLOTS[1] != "NULL" ) set season = `echo $PLOTS`
 
 if( $season[1] != '' ) then
 

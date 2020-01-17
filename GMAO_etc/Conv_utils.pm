@@ -29,7 +29,7 @@ sub repack_stage {
 
 # Directory in which the REPACK files to be staged will be found).
 
-   if ( defined( %options ) && exists( $options{"from_dir"} ) ) {
+   if ( $options{"from_dir"} ) {
       $from_dir = $options{"from_dir"};
    } else {
       $from_dir = ".";
@@ -37,7 +37,7 @@ sub repack_stage {
 
 # Option indicating that prep ID is not included on the file names.
 
-   if ( defined( %options ) && exists( $options{"no_prep_id"} ) ) {
+   if ( $options{"no_prep_id"} ) {
       $no_prep_id = $options{"no_prep_id"};
    } else {
       $no_prep_id = 0;
@@ -61,7 +61,7 @@ sub repack_stage {
 # just put a ":" at the end.  The subdirectory will be appended, and the path 
 # will be relative to the user's home directory on that machine.
 
-   if ( $stage_loc =~ /@/ && $stage_loc !~ /:/ ) { $stage_loc = "$stage_loc:"; }
+   if ( $stage_loc =~ /@/ and $stage_loc !~ /:/ ) { $stage_loc = "$stage_loc:"; }
 
 # If the archive location does not end with a ":" or a "/", then assume some path 
 # has been given, and put a "/" there to allow later appending of the subdirectory.
@@ -170,7 +170,7 @@ sub conv_archive {
 # archived from a "unpack_storage" subdirectory in this directory, and
 # the REPACK files will be archived from the "repack_storage" subdirectory.
 
-   if ( defined( %options ) && exists( $options{"conv_work_dir"} ) ) {
+   if ( $options{"conv_work_dir"} ) {
       $conv_work_dir = $options{"conv_work_dir"};
    } else {
       $conv_work_dir = ".";
@@ -178,7 +178,7 @@ sub conv_archive {
 
 # Option indicating that prep ID is not included on the file names.
 
-   if ( defined( %options ) && exists( $options{"no_prep_id"} ) ) {
+   if ( $options{"no_prep_id"} ) {
       $no_prep_id = $options{"no_prep_id"};
    } else {
       $no_prep_id = 0;
@@ -202,7 +202,7 @@ sub conv_archive {
 # just put a ":" at the end.  The subdirectory will be appended, and the path 
 # will be relative to the user's home directory on that machine.
 
-   if ( $archive_loc =~ /@/ && $archive_loc !~ /:/ ) { $archive_loc = "$archive_loc:"; }
+   if ( $archive_loc =~ /@/ and $archive_loc !~ /:/ ) { $archive_loc = "$archive_loc:"; }
 
 # If the archive location does not end with a ":" or a "/", then assume some path 
 # has been given, and put a "/" there to allow later appending of the subdirectory.
@@ -391,7 +391,7 @@ sub raw_archive {
 # Working directory for the preprocessing.  The raw files will be 
 # archived from a "raw_storage" subdirectory in this directory.
 
-   if ( defined( %options ) && exists( $options{"conv_work_dir"} ) ) {
+   if ( $options{"conv_work_dir"} ) {
       $conv_work_dir = $options{"conv_work_dir"};
    } else {
       $conv_work_dir = ".";
@@ -399,7 +399,7 @@ sub raw_archive {
 
 # Option indicating that prep ID is not included on the file names.
 
-   if ( defined( %options ) && exists( $options{"no_prep_id"} ) ) {
+   if ( $options{"no_prep_id"} ) {
       $no_prep_id = $options{"no_prep_id"};
    } else {
       $no_prep_id = 0;
@@ -422,7 +422,7 @@ sub raw_archive {
 # just put a ":" at the end.  The subdirectory will be appended, and the path 
 # will be relative to the user's home directory on that machine.
 
-   if ( $archive_loc =~ /@/ && $archive_loc !~ /:/ ) { $archive_loc = "$archive_loc:"; }
+   if ( $archive_loc =~ /@/ and $archive_loc !~ /:/ ) { $archive_loc = "$archive_loc:"; }
 
 # If the archive location does not end with a ":" or a "/", then assume some path 
 # has been given, and put a "/" there to allow later appending of the subdirectory.

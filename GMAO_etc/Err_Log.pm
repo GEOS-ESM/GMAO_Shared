@@ -58,12 +58,13 @@ use Exporter;
 # HISTORY: INITIAL CODE 10/05/99
 #
 # 04/05/2002 Owens - added support for split or joined logs and Run_Config
+# 11/13/2019 Todling - replace reference to timelocal.pl with Time::Local
 #
 #*****************************************************************
 
 sub err_log {
 
-require('timelocal.pl');
+use Time::Local;
 use Extract_config;
 
 $remote = 0;
@@ -82,7 +83,7 @@ $REMSH = "";
 
 # Option to include error desc.
 
-   if ( defined( %options ) && exists( $options{"err_desc"} ) && ($options{"err_desc"} ne "DEFAULT") ) {
+   if ( $options{"err_desc"} and ($options{"err_desc"} ne "DEFAULT") ) {
       $err_desc = $options{"err_desc"};
    } else {
       $err_desc = "";
@@ -90,7 +91,7 @@ $REMSH = "";
 
 # Option to join logs 
 
-   if ( defined( %options ) && exists( $options{"join"} )  ) {
+   if ( $options{"join"} ) {
       $join = $options{"join"};
    } else {
       $join = 0;
@@ -98,7 +99,7 @@ $REMSH = "";
 
 # Run-time configuration file.
 
-   if ( defined( %options ) && exists( $options{"run_config"} ) ) {
+   if ( $options{"run_config"} ) {
       $RUN_CONFIG_FILE = $options{"run_config"};
    } else {
       $RUN_CONFIG_FILE = "DEFAULT";
@@ -106,7 +107,7 @@ $REMSH = "";
 
 # Option for user-defined file_name_for_err.
 
-   if ( defined( %options ) && exists( $options{"log_name"} ) && ($options{"log_name"} ne "DEFAULT") ) {
+   if ( $options{"log_name"} and ($options{"log_name"} ne "DEFAULT") ) {
         
         $log_name = $options{"log_name"};
         if ( $log_name =~ /:/ ) {

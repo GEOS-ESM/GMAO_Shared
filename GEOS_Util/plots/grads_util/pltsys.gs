@@ -322,7 +322,7 @@ if( level0 != 'ZONAL' )
               if( field = q   ) ; name = sphu ; scale = 1000 ; endif
               
               'define 'name' = 'field'fma'DESC.k'/'scale
-              'set sdfwrite -4d -flt -nc3 'SOURCE'/'DESC'/'field'fma_'level'_'DESC'.nc3'
+              'set sdfwrite -4d -flt -nc3 'SOURCE'/'DESC'/'DESC'.'field'fma_'level'.'month'.nc3'
                   'sdfwrite 'name
            endif
   z = z + 1

@@ -1,4 +1,4 @@
-#!@DASPERL@
+#!@DASPERL
 
 # bacon is a utility for performing tasks on a list of files
 
@@ -10,7 +10,7 @@ use File::Find;                  # for using Find command
 use Getopt::Long;                # command line options
 #use File::Copy;                  # for copy() 
 #use Time::Local;                 # time functions 
-#use Shell qw(rcp rsh scp ssh);   # make C-shell commands available 
+#use CPAN::Shell qw(rcp rsh scp ssh);   # make C-shell commands available 
 @line_list = ();
 
 print "---------------------------------------------------------------------------------\n" if ($v) ;
