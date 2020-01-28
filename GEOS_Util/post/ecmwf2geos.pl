@@ -15,7 +15,6 @@ use Cwd;                 # current directory
 use Env;                 # make env vars readily available
 use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
-use Shell qw(rm);        # rm commands
 use Getopt::Long;        # command line options
 
 # look for perl packages in the following locations
@@ -167,10 +166,10 @@ sub e2g {
 
    $rc = 0;
 
-   rm("ctlinfo");
-   rm("ecmwf.data");
-   rm("grads.fwrite");
-   rm("grads.fwrite.$ncsuffix");
+   unlink("ctlinfo");
+   unlink("ecmwf.data");
+   unlink("grads.fwrite");
+   unlink("grads.fwrite.$ncsuffix");
 
 } # end e2g
 #=======================================================================

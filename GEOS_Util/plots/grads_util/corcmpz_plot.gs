@@ -619,7 +619,8 @@ while( m<=mexps )
         n.m = n + m*numfiles
         d.m = 1 + m*numfiles
 'set dfile 'timefile.m
-'set t 'tmin.m' 'tmax.m
+*'set t 'tmin.m' 'tmax.m
+'set t 'tbeg.m' 'tdif.m
 'set lev 1000 100'
 
 'set vpage off'
@@ -772,7 +773,8 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 * Find maximum value of critical sigdiff across all levels and times
 * ------------------------------------------------------------------
 'set dfile 'timefile.m
-'set t 'tmin.m' 'tmax.m
+*'set t 'tmin.m' 'tmax.m
+'set t 'tbeg.m' 'tdif.m
 'set lev 1000 100'
 
          critvalue   = 90
@@ -846,9 +848,14 @@ zsum = 0.0
 zmin =  1e15
 zmax = -1e15
 
+zcnt = 0
 z = 1
 while( z<=zdim )
    'set z 'z
+'getinfo level'
+         level  = result
+if( level >= 100 ) 
+zcnt = zcnt + 1
 
 'minmax rave0'
 maxval = subwrd(result,1)
@@ -899,9 +906,10 @@ axmin  = 0.92 * minval
     zmin = 0
   endif
 
+endif
 z = z + 1
 endwhile
-   zsum = zsum / zdim
+   zsum = zsum / zcnt
    say 'Average zthick = 'zsum
 
 'set t 'tbeg.m' 'tdif.m
@@ -909,21 +917,25 @@ endwhile
 
    dcint = qmax / 9
 
+     'run setenv DCINT_'field'_cor0 'dcint ; say 'DCINT_'field'_cor0 = 'dcint
+     'run setenv MEAN_THICKNESS_'field'0 'zsum ; say 'MEAN_THICKNESS0 'zsum
+     'run setenv  MIN_THICKNESS_'field'0 'zmin ; say ' MIN_THICKNESS0 'zmin
+
 if( PLOT = FALSE )
   if( xpos=2 ) 
-     'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint
-     'run setenv MEAN_THICKNESS.'xpos' 'zsum ; say 'MEAN_THICKNESS.'xpos' 'zsum
-     'run setenv  MIN_THICKNESS.'xpos' 'zmin ; say ' MIN_THICKNESS.'xpos' 'zmin
+     'run setenv DCINT_'field'_cor'xpos' 'dcint ; say 'DCINT_'field'_cor'xpos' = 'dcint
+     'run setenv MEAN_THICKNESS_'field''xpos' 'zsum ; say 'MEAN_THICKNESS'xpos' 'zsum
+     'run setenv  MIN_THICKNESS_'field''xpos' 'zmin ; say ' MIN_THICKNESS'xpos' 'zmin
   endif
   if( xpos=3 )
-     'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint
-     'run setenv MEAN_THICKNESS.'xpos' 'zsum ; say 'MEAN_THICKNESS.'xpos' 'zsum
-     'run setenv  MIN_THICKNESS.'xpos' 'zmin ; say ' MIN_THICKNESS.'xpos' 'zmin
+     'run setenv DCINT_'field'_cor'xpos' 'dcint ; say 'DCINT_'field'_cor'xpos' = 'dcint
+     'run setenv MEAN_THICKNESS_'field''xpos' 'zsum ; say 'MEAN_THICKNESS'xpos' 'zsum
+     'run setenv  MIN_THICKNESS_'field''xpos' 'zmin ; say ' MIN_THICKNESS'xpos' 'zmin
   endif
   if( xpos=4 )
-     'run setenv DCINT_'field'_rms'rms'.'xpos' 'dcint ; say 'DCINT_'field'_rms'rms'.'xpos' = 'dcint
-     'run setenv MEAN_THICKNESS.'xpos' 'zsum ; say 'MEAN_THICKNESS.'xpos' 'zsum
-     'run setenv  MIN_THICKNESS.'xpos' 'zmin ; say ' MIN_THICKNESS.'xpos' 'zmin
+     'run setenv DCINT_'field'_cor'xpos' 'dcint ; say 'DCINT_'field'_cor'xpos' = 'dcint
+     'run setenv MEAN_THICKNESS_'field''xpos' 'zsum ; say 'MEAN_THICKNESS'xpos' 'zsum
+     'run setenv  MIN_THICKNESS_'field''xpos' 'zmin ; say ' MIN_THICKNESS'xpos' 'zmin
   endif
 endif
 
@@ -932,53 +944,75 @@ if( PLOT = TRUE )
 'c'
 ************************************************************************
 
-'run getenv DCINT_'field'_rms'rms'.2'
-                             DCINT.2 = result
-'run getenv DCINT_'field'_rms'rms'.3'
-                             DCINT.3 = result
-'run getenv DCINT_'field'_rms'rms'.4'
-                             DCINT.4 = result
+'run getenv DCINT_'field'_cor0'
+                             DCINT0 = result
+'run getenv DCINT_'field'_cor2'
+                             DCINT2 = result
+'run getenv DCINT_'field'_cor3'
+                             DCINT3 = result
+'run getenv DCINT_'field'_cor4'
+                             DCINT4 = result
 
-say 'DCINT for NHE: 'DCINT.2
-say 'DCINT for TRO: 'DCINT.3
-say 'DCINT for SHE: 'DCINT.4
+say 'DCINT   local: 'DCINT0
+say 'DCINT for NHE: 'DCINT2
+say 'DCINT for TRO: 'DCINT3
+say 'DCINT for SHE: 'DCINT4
 
-dcint = DCINT.2
-    if( DCINT.3 > dcint ) ; dcint = DCINT.3 ; endif
-    if( DCINT.4 > dcint ) ; dcint = DCINT.4 ; endif
+if( DCINT2 = "NULL" )
+                           dcint = DCINT0
+else
+                           dcint = DCINT2
+    if( DCINT3 > dcint ) ; dcint = DCINT3 ; endif
+    if( DCINT4 > dcint ) ; dcint = DCINT4 ; endif
+endif
 
-'run getenv MEAN_THICKNESS.2'
-            MEAN_THICKNESS.2 = result
-'run getenv MEAN_THICKNESS.3'
-            MEAN_THICKNESS.3 = result
-'run getenv MEAN_THICKNESS.4'
-            MEAN_THICKNESS.4 = result
+'run getenv MEAN_THICKNESS_'field'0'
+            MEAN_THICKNESS0 = result
+'run getenv MEAN_THICKNESS_'field'2'
+            MEAN_THICKNESS2 = result
+'run getenv MEAN_THICKNESS_'field'3'
+            MEAN_THICKNESS3 = result
+'run getenv MEAN_THICKNESS_'field'4'
+            MEAN_THICKNESS4 = result
 
-say 'MEAN_THICKNESS for NHE: 'MEAN_THICKNESS.2
-say 'MEAN_THICKNESS for TRO: 'MEAN_THICKNESS.3
-say 'MEAN_THICKNESS for SHE: 'MEAN_THICKNESS.4
+say 'MEAN_THICKNESS   local: 'MEAN_THICKNESS0
+say 'MEAN_THICKNESS for NHE: 'MEAN_THICKNESS2
+say 'MEAN_THICKNESS for TRO: 'MEAN_THICKNESS3
+say 'MEAN_THICKNESS for SHE: 'MEAN_THICKNESS4
 
-                                          mean_thickness = MEAN_THICKNESS.2
-if( MEAN_THICKNESS.3 > mean_thickness ) ; mean_thickness = MEAN_THICKNESS.3 ; endif
-if( MEAN_THICKNESS.4 > mean_thickness ) ; mean_thickness = MEAN_THICKNESS.4 ; endif
+if( MEAN_THICKNESS2 = "NULL" )
+                                         mean_thickness = MEAN_THICKNESS0
+else
+                                         mean_thickness = MEAN_THICKNESS2
+if( MEAN_THICKNESS3 > mean_thickness ) ; mean_thickness = MEAN_THICKNESS3 ; endif
+if( MEAN_THICKNESS4 > mean_thickness ) ; mean_thickness = MEAN_THICKNESS4 ; endif
+endif
 
 if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
 say 'DCINT for plots: 'dcint
 
-'run getenv MIN_THICKNESS.2'
-            MIN_THICKNESS.2 = result
-'run getenv MIN_THICKNESS.3'
-            MIN_THICKNESS.3 = result
-'run getenv MIN_THICKNESS.4'
-            MIN_THICKNESS.4 = result
+'run getenv MIN_THICKNESS_'field'0'
+            MIN_THICKNESS0 = result
+'run getenv MIN_THICKNESS_'field'2'
+            MIN_THICKNESS2 = result
+'run getenv MIN_THICKNESS_'field'3'
+            MIN_THICKNESS3 = result
+'run getenv MIN_THICKNESS_'field'4'
+            MIN_THICKNESS4 = result
 
-say 'MIN_THICKNESS for NHE: 'MIN_THICKNESS.2
-say 'MIN_THICKNESS for TRO: 'MIN_THICKNESS.3
-say 'MIN_THICKNESS for SHE: 'MIN_THICKNESS.4
+say 'MIN_THICKNESS   local: 'MIN_THICKNESS0
+say 'MIN_THICKNESS for NHE: 'MIN_THICKNESS2
+say 'MIN_THICKNESS for TRO: 'MIN_THICKNESS3
+say 'MIN_THICKNESS for SHE: 'MIN_THICKNESS4
 
-                                        min_thickness = MIN_THICKNESS.2
-if( MIN_THICKNESS.3 < min_thickness ) ; min_thickness = MIN_THICKNESS.3 ; endif
-if( MIN_THICKNESS.4 < min_thickness ) ; min_thickness = MIN_THICKNESS.4 ; endif
+if( MIN_THICKNESS2 = "NULL" )
+                                       min_thickness = MIN_THICKNESS0
+else
+                                       min_thickness = MIN_THICKNESS2
+if( MIN_THICKNESS3 < min_thickness ) ; min_thickness = MIN_THICKNESS3 ; endif
+if( MIN_THICKNESS4 < min_thickness ) ; min_thickness = MIN_THICKNESS4 ; endif
+endif
+
 say 'MIN_THICKNESS for plots: 'min_thickness
 
 flag = ''
