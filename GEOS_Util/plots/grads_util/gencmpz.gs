@@ -319,7 +319,7 @@ else
         EXPORT = EXPORT.1
             GC = GC.1
     else
-        EXPORT = EXPORT
+        EXPORT = NAME
             GC = GC.1
     endif
 endif
@@ -483,7 +483,7 @@ else
         EXPORT = EXPORT.1
             GC = GC.1
     else
-        EXPORT = EXPORT
+        EXPORT = NAME
             GC = GC.1
     endif
 endif
