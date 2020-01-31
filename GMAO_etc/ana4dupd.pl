@@ -26,7 +26,6 @@ use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
 use File::Copy "cp";     # for cp()
 use Getopt::Long;        # load module with GetOptions function
-use Shell qw(cat rm);    # cat and rm commands
 use Time::Local;         # time functions
 
 # Look for perl packages in the following locations
@@ -325,9 +324,9 @@ sub iau {
 # Create iau tendency for this time
   $iaufname = `$fvroot/bin/echorc.x -rc $rcdir/fvpsas.rc -template $expid $nymd $nhms iau_tendency_filename`; chomp($iaufname);
   $agcm4gcm = `$fvroot/bin/echorc.x -rc $rcdir/fvpsas.rc -template $expid $nymd $nhms noexp_iau_tendency_filename`; chomp($agcm4gcm);
-  if ( -e "agcm_import_rst" ) { rm("agcm_import_rst") };
-  if ( -e "$iaufname" )       { rm("$iaufname") };
-  if ( -e "$agcm4gcm" )       { rm("$agcm4gcm") };
+  if ( -e "agcm_import_rst" ) { unlink("agcm_import_rst") };
+  if ( -e "$iaufname" )       { unlink("$iaufname") };
+  if ( -e "$agcm4gcm" )       { unlink("$agcm4gcm") };
   $cmd = "$MPIRUN_IAU";
   print "On ITER $iter: Begin $cmd \n";
   if ( ! $opt_debug ) {
@@ -409,7 +408,7 @@ sub ed_mkiau_rc {
 
   my($bkgfile,$anafile,$incfile,$anymd,$anhms) = @_;
 
-  if( -e "$rcdir/mkiau.rc" ) { rm("$rcdir/mkiau.rc") };
+  if( -e "$rcdir/mkiau.rc" ) { unlink("$rcdir/mkiau.rc") };
 
   cp("$rcdir/mkiau.rc.tmpl","$rcdir/mkiau.rc.tmp");
 
@@ -433,7 +432,7 @@ sub ed_mkiau_rc {
 
   close(LUN);
   close(LUN2);
-  rm("$rcdir/mkiau.rc.tmp");
+  unlink("$rcdir/mkiau.rc.tmp");
 
 }
 
@@ -569,7 +568,7 @@ sub ed_rstupd_rc {
 
   my($anymd,$anhms) = @_;
 
-  if( -e "$rcdir/rstupd.rc" ) { rm("$rcdir/rstupd.rc") };
+  if( -e "$rcdir/rstupd.rc" ) { unlink("$rcdir/rstupd.rc") };
 
   cp("$rcdir/rstupd.rc.tmpl","$rcdir/rstupd.rc.tmp");
 
@@ -588,7 +587,7 @@ sub ed_rstupd_rc {
 
   close(LUN);
   close(LUN2);
-  rm("$rcdir/rstupd.rc.tmp");
+  unlink("$rcdir/rstupd.rc.tmp");
 
 }
 

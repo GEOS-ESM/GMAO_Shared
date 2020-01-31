@@ -25,6 +25,8 @@ cd $SOURCE
    @      n = $n + 1
  end
 
+#######################################################################
+
 foreach DSC ($exps)
 set EXP = `grep DSC${DSC}: $statsrc | grep -v \# | grep -v \* | cut -d: -f2`
 cd $SOURCE/$EXP
@@ -38,7 +40,7 @@ set fields2 = `echo u v t q h`
 set success = TRUE
 
 foreach field1 ($fields1)
-    set levs1 = `/bin/ls -1 ${field1}fma*nc3 | wc -l`
+    set levs1 = `/bin/ls -1 *${field1}fma*nc3 | wc -l`
 
 set dummy = ''
 foreach field ($fields2)
@@ -48,7 +50,7 @@ set fields2 = `echo $dummy`
 
 foreach field2 ($fields2)
    if( $field1 != $field2 ) then
-     set levs2 = `/bin/ls -1 ${field2}fma*nc3 | wc -l`
+     set levs2 = `/bin/ls -1 *${field2}fma*nc3 | wc -l`
      if( ${levs1} != ${levs2} ) then
          echo NumLevs for $field1 \(${levs1}\) does not equal NumLevs for $field2 \(${levs2}\)
          set success = FALSE
@@ -60,7 +62,7 @@ end
 
 if( $success == 'FALSE' ) exit
  
-set  levs1  = `/bin/ls -1 pfma*nc3 | wc -l`
+set  levs1  = `/bin/ls -1 *pfma*nc3 | wc -l`
 if( $levs1 != 1 ) then
      echo Cannot find pfma files.
      exit
@@ -79,10 +81,12 @@ set fields = `echo p u v t q h`
 
 foreach field ($fields)
 
-if( $field == 'p' ) then
-    cdo -f nc4 --reduce_dim merge `/bin/ls -1 ${field}fma_*nc3 | sort -rV` ${field}fma_${EXP}_merged.nc4
-else
-    cdo -f nc4 merge              `/bin/ls -1 ${field}fma_*nc3 | sort -rV` ${field}fma_${EXP}_merged.nc4
+if( ! -e ${field}fma_${EXP}_merged.nc4 ) then
+    if( $field == 'p' ) then
+    cdo -f nc4 --reduce_dim merge `/bin/ls -1 *${field}fma_*nc3 | sort -rV` ${field}fma_${EXP}_merged.nc4
+    else
+    cdo -f nc4 merge              `/bin/ls -1 *${field}fma_*nc3 | sort -rV` ${field}fma_${EXP}_merged.nc4
+    endif
 endif
 
 end
@@ -90,6 +94,8 @@ end
 #######################################################################
 #             Merge Separate Field Files into Single File
 #######################################################################
+
+if( ! -e ../${EXP}_syserr_${expdsc}_${SEASON}.nc4 ) then
 
 cdo merge pfma_${EXP}_merged.nc4 \
           ufma_${EXP}_merged.nc4 \
@@ -111,4 +117,8 @@ ncatted -O -a time_increment,time,o,l,60000                                     
             syserr_${EXP}.nc4
 
            /bin/mv syserr_${EXP}.nc4 ../${EXP}_syserr_${expdsc}_${SEASON}.nc4
+endif
+
+#######################################################################
+
 end

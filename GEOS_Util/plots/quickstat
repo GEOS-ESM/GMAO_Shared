@@ -558,17 +558,23 @@ if( "$plots" =~ *pltsys* ) then
      end
      end
      wait
-   # set  files = `find $SOURCE/scratch_pltsys -name MONTHLAB.txt`
-   # set SEASON = `cat $files[1]`
-   # foreach exp   ($exps)
-   #    set DESC = `cat $statsrc | grep DSC$exp | grep -v \# | grep -v \* | grep : | cut -d: -f2`
-   #    set   sysfiles = `/bin/ls -1 $SOURCE/$DESC/*fma*.nc3`
-   #    if( $#sysfiles == 56 ) then
-   #        $GEOSUTIL/plots/grads_util/make_syserr $SOURCE/$DESC
-   #        set expdsc = `cat $statsrc | grep "DESC:" | cut -d: -f2`
-   #        /bin/mv $SOURCE/$DESC/syserr_${DESC}.nc4 $SOURCE/${DESC}_syserr_${expdsc}_${SEASON}.nc4
-   #    endif
-   # end
+     foreach exp   ($exps)
+        set DESC = `cat $statsrc | grep DSC$exp | grep -v \# | grep -v \* | grep : | cut -d: -f2`
+        set sysfiles = `/bin/ls -1 $SOURCE/$DESC/*fma*.nc3`
+        set SEASON = `echo $sysfiles[1] | cut -d. -f3`
+        if( $#sysfiles == 56 ) then
+            if(    -e LOCKFILE ) /bin/echo "Waiting for LOCKFILE ... "
+            if(    -e LOCKFILE ) set LOCK = `stat -c %Z LOCKFILE`
+            while( -e LOCKFILE )
+                      set    EPOCH = `date +'%s'`
+                      @    LOCKAGE = $EPOCH - $LOCK
+                      if( $LOCKAGE > 120 ) /bin/rm -f LOCKFILE
+            end
+            lockfile LOCKFILE
+            $GEOSUTIL/plots/grads_util/make_syserr $statsrc
+            /bin/rm -f LOCKFILE
+        endif
+     end
     /bin/rm -r $tmpdir
 endif
 

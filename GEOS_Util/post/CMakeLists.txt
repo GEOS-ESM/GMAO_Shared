@@ -32,6 +32,7 @@ ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
   set_target_properties (stats.x PROPERTIES COMPILE_FLAGS ${DISABLE_FIELD_WIDTH_WARNING})
 endif ()
+set_target_properties (stats.x PROPERTIES COMPILE_FLAGS "${BIG_ENDIAN}")
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 
 file(GLOB perlscripts *.pl)

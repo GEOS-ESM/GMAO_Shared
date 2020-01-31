@@ -69,11 +69,9 @@ if( stat = 'STD' )
 endif
 if( stat = 'RMS' )
     PRFX = 'RMS_'
-  EXPORT =  alias
 endif
 if( stat = 'BIAS' )
     PRFX = 'BIAS_'
-  EXPORT =  alias
 endif
 
 say 'LEVTYPE: 'CLEVS

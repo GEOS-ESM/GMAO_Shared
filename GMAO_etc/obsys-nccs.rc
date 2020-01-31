@@ -173,79 +173,59 @@ END
 # NCEP unconventional observational data
 # ---------------------------------------
 BEGIN ncep_osbuv8_6_bufr => gdas1.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
-# 20021215_00z-20030131_18z 060000 /archive/u/ebrin/s1/ncep_obs/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d
-# 20031201_00z-20040331_18z 060000 /archive/input/todling/obs/ncep/fnl/osbuv/Y%y4/M%m2/osbuv.fnl.%y4%m2%d2%h2
 # 20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.osbuv.tm00.bufr_d
-# 20040415_00z-20040415_18z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d
 # 20040615_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv.tm00.bufr_d
 # Use merra_sbuv_prep_bufr prior to 20071001
   20071001_00z-20080204_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv.tm00.bufr_d
   20080205_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8_6.tm00.bufr_d
+# 20071215_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8_6.tm00.bufr_d
 END
 BEGIN ncep_osbuv_bufr => gdas1.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
-# 19781031_00z-21001231_18z 060000 /archive/input/gmao_ops/ops/merra/sbuv8_6/bufr/Y%y4/M%m2/gmao.sbuv8_6.%y4%m2%d2.%h2z.bufr
   20071215_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8.tm00.bufr_d
-# 20080205_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/sbuv/gdas1.%y2%m2%d2.t%h2z.osbuv8.tm00.bufr_d
+# 20080205_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8.tm00.bufr_d
 END
 BEGIN ncep_spssmi_bufr => gdas1.%y4%m2%d2.t%h2z.spssmi.tm00.bufr_d.ublk
-# 20021215_00z-20030131_18z 060000 /archive/u/ebrin/s1/ncep_obs/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.spssmi.tm00.bufr_d
-# 20031201_00z-20040331_18z 060000 /archive/input/todling/obs/ncep/fnl/spssmi/Y%y4/M%m2/spssmi.fnl.%y4%m2%d2%h2
-# 20040415_00z-20040415_18z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.spssmi.tm00.bufr_d
 # 20040416_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ssmi_nesdis/bufr/wind/Y%y4/M%m2/smi%y2%m2%d2.%h2z.bufr_d
 # Use merra_gprofpXX for precip data prior to 20060401.
   20060401_00z-20091119_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SPSSMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.spssmi.tm00.bufr_d
 END
 BEGIN ncep_ssmis_bufr => gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d.ublk
   20110228_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_gps/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
-# 20110228_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/ssmisu/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
+# 20110228_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
 END
 BEGIN ncep_sptrmm_bufr => gdas1.%y4%m2%d2.t%h2z.sptrmm.tm00.bufr_d.ublk
-# 20021215_00z-20030131_18z 060000 /archive/u/ebrin/s1/ncep_obs/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.sptrmm.tm00.bufr_d
-# 20031201_00z-20040331_18z 060000 /archive/input/todling/obs/ncep/fnl/sptrmm/Y%y4/M%m2/sptrmm.fnl.%y4%m2%d2%h2
 # 20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.sptrmm.tm00.bufr_d
-# 20040415_00z-20040415_18z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.t%h2z.sptrmm.tm00.bufr_d
 # 20040714_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/TRMM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.sptrmm.tm00.bufr_d
 # Use merra_tmio_bufr & merra_tmil_bufr prior to 20060101
   20060101_00z-20150114_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/TRMM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.sptrmm.tm00.bufr_d
-# 20040714_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/trmm/gdas1.%y2%m2%d2.t%h2z.sptrmm.tm00.bufr_d
 END
 
 # NCEP Operational (satellite) data
 # ---------------------------------
 BEGIN ncep_1bamua_bufr => gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d.ublk
-# 00000000_00z-00000000_00z 060000 /archive/input/todling/obs/ncep/fnl/1bamua/Y%y4/M%m2/1bamua.fnl.%y4%m2%d2%h2
   20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bamua.tm00.bufr_d
-# 00000000_00z-00000000_00z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.1bamua.tm00.bufr_d
   20041001_00z-20041017_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
   20041019_00z-20041031_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
   20050201_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
-# 20040615_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/tovs/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+# 20040615_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
 END
 BEGIN ncep_1bamub_bufr => gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d.ublk
-# 00000000_00z-00000000_00z 060000 /archive/input/todling/obs/ncep/fnl/1bamub/Y%y4/M%m2/1bamub.fnl.%y4%m2%d2%h2
   20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bamub.tm00.bufr_d
-# 00000000_00z-00000000_00z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.1bamub.tm00.bufr_d
   20050201_00z-20140606_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
-# 20040615_00z-20140606_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/tovs/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
+# 20040615_00z-20140606_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
 END
 BEGIN ncep_1bhrs2_bufr => gdas1.%y2%m2%d2.t%h2z.1bhrs2.tm00.bufr_d.ublk
-# 00000000_00z-00000000_00z 060000 /archive/input/todling/obs/ncep/fnl/1bhrs2/Y%y4/M%m2/1bhrs2.fnl.%y4%m2%d2%h2
   20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bhrs2.tm00.bufr_d
-# 00000000_00z-00000000_00z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.1bhrs2.tm00.bufr_d
   20050201_00z-20060926_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS2/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs2.tm00.bufr_d
 # 20040615_00z-20060926_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS2/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs2.tm00.bufr_d
 END
 BEGIN ncep_1bhrs3_bufr => gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d.ublk
-# 00000000_00z-00000000_00z 060000 /archive/input/todling/obs/ncep/fnl/1bhrs3/Y%y4/M%m2/1bhrs3.fnl.%y4%m2%d2%h2
   20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bhrs3.tm00.bufr_d
-# 00000000_00z-00000000_00z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
   20050201_00z-20140606_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
-# 20040615_00z-20140606_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/tovs/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
+# 20040615_00z-20140606_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
 END
 BEGIN ncep_1bmsu_bufr => gdas1.%y2%m2%d2.t%h2z.1bmsu.tm00.bufr_d.ublk
-# 00000000_00z-00000000_00z 060000 /archive/input/todling/obs/ncep/fnl/1bmsu/Y%y4/M%m2/1bmsu.fnl.%y4%m2%d2%h2
   20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bmsu.tm00.bufr_d
-# 00000000_00z-00000000_00z 060000 /archive/u/rtodling/obs/ncep/%y4%m2%d2/gdas1.%y4%m2%d2.t%h2z.1bmsu.tm00.bufr_d
   20050201_00z-20060926_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/MSU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmsu.tm00.bufr_d
 END
 BEGIN ncep_ssmit_bufr => gdas1.%y2%m2%d2.t%h2z.ssmitbufr.tm00.bufr_d.ublk
@@ -260,7 +240,7 @@ BEGIN ncep_prep_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.ublk
 #  20020307_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
 #  data available from 2002, but we only use from 2006 after merra data ends.
    20060101_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
-#  20100213_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/prepbufr/gdas1.%y2%m2%d2.t%h2z.prepbufr
+#  20100213_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
 END
 # NESDIS/GMAO AIRS/AMSU-A data
 # ----------------------------
@@ -384,7 +364,7 @@ END
 BEGIN ncep_tcvitals => tcvitals.%y4%m2%d2%h2
   20040101_00z-20041231_18z 060000 /archive/input/dao_ops/ops/merra/tcvitals/txt/Y%y4/M%m2/syndat_tcvitals.%y4%m2%d2.t%h2z.txt
   20060401_00z-21001231_18z 060000 /archive/input/dao_ops/obs/flk/tcvitals/text/TCVITALS/Y%y4/M%m2/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
-# 20060217_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gfs/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
+# 20060217_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/tcvitals/text/TCVITALS/Y%y4/M%m2/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
 END
 
 # MERRA ERS-2 Scatterometer
@@ -431,10 +411,10 @@ END
 #END
 
 #BEGIN merra_tmi2l_bufr => tmi2l.%y4%m2%d2.%h2z.bufr.ublk
-# 20001201_00z-20020131_18z 060000 /archive/input/dao_ops/obs/merra/trmm/bufr/Y%y4/M%m2/tmi2.land.%y4%m2%d2.%h2z.bufr
+# 00000000_00z-00000000_00z 060000 /archive/input/dao_ops/obs/merra/trmm/bufr/Y%y4/M%m2/tmi2.land.%y4%m2%d2.%h2z.bufr
 #END
 #BEGIN merra_tmi2o_bufr => tmi2o.%y4%m2%d2.%h2z.bufr.ublk
-# 20001201_00z-20020131_18z 060000 /archive/input/dao_ops/obs/merra/trmm/bufr/Y%y4/M%m2/tmi2.ocean.%y4%m2%d2.%h2z.bufr
+# 00000000_00z-00000000_00z 060000 /archive/input/dao_ops/obs/merra/trmm/bufr/Y%y4/M%m2/tmi2.ocean.%y4%m2%d2.%h2z.bufr
 #END
 
 # MERRA reduced-resolution TRMM TMI
@@ -497,12 +477,12 @@ END
 
 BEGIN ncep_mhs_bufr => gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d.ublk
   20081021_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
-# 20081021_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/tovs/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+# 20081021_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
 END
 
 BEGIN ncep_1bhrs4_bufr => gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d.ublk
   20090129_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BHRS4/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d
-# 20090129_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/tovs/gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d
+# 20090129_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BHRS4/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d
 END
 
 BEGIN ncep_airs_bufr => gdas1.%y2%m2%d2.t%h2z.airsev.tm00.bufr_d.ublk
@@ -511,7 +491,6 @@ END
 
 BEGIN ncep_amsre_bufr => gdas1.%y2%m2%d2.t%h2z.amsre.tm00.bufr_d.ublk
   20090129_00z-20111006_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSRE/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.amsre.tm00.bufr_d
-# 20090129_00z-20111006_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/amsre/gdas1.%y2%m2%d2.t%h2z.amsre.tm00.bufr_d
 END
 
 BEGIN ncep_geoimr_bufr => gdas1.%y2%m2%d2.t%h2z.geoimr.tm00.bufr_d.ublk
@@ -520,7 +499,7 @@ END
 
 BEGIN ncep_goesfv_bufr => gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d.ublk
   20070222_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
-# 20080904_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/goesfv/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
+# 20080904_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
 END
 
 BEGIN ncep_gome_bufr => gdas1.%y2%m2%d2.t%h2z.gome.tm00.bufr_d.ublk
@@ -533,46 +512,49 @@ END
 
 BEGIN ncep_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20080811_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
-# 20080811_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/gpsro/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+# 20080811_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
 BEGIN ncep_mtiasi_bufr => gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d.ublk
   20090129_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
-# 20090129_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/mtiasi/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
+# 20090129_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
 END
 
 BEGIN ncep_atms_bufr => gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d.ublk
   20120213_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/ATMS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d
-# 20111116_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/atms/gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d
+# 20111116_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/ATMS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d
 END
 BEGIN ncep_cris_bufr => gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d.ublk
   20120107_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
-# 20120107_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/cris/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
+# 20120107_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
 END
 BEGIN ncep_crisfsr_bufr => gdas1.%y4%m2%d2.t%h2z.crisfsr.tm00.bufr_d.ublk
   20171020_00z-20180930_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/CRISF4/Y%y4/M%m2/crisf4.gdas.%y4%m2%d2%h2
   20181001_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
-# 20181001_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/crisf4/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
+# 20171020_00z-20180930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/crisf4.gdas.%y4%m2%d2%h2
+# 20181001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
 END
 BEGIN ncep_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
   20100701_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
-# 20120201_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/satwnd/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+# 20120201_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
 END
 BEGIN ncep_sevcsr_bufr => gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d.ublk
   20120502_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
-# 20111116_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/sevcsr/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
+# 20111116_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
 END
 BEGIN ncep_avcsam_bufr => gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
   20120207_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+# 20120207_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
 END
 BEGIN ncep_avcspm_bufr => gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
   20120207_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+# 20181201_00z-20181231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y2018/M12/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
 END
 BEGIN ncep_mls_bufr => gdas1.%y2%m2%d2.t%h2z.mls.tm00.bufr_d.ublk
   20120502_00z-20170201_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/MLS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.mls.tm00.bufr_d
 END
 BEGIN ncep_aura_omi_bufr => gdas1.%y4%m2%d2.t%h2z.omi.tm00.bufr_d.ublk
-# 20120201_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/gdas1/omi/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+# 20120201_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
   20091212_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
 END
 
@@ -582,15 +564,15 @@ END
 BEGIN disc_airs_bufr => airs.%y4%m2%d2.t%h2z.bufr
   20100801_00z-20100818_18z 060000 /archive/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc.%y4%m2%d2.t%h2z.bufr
   20100819_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
-# 20100819_00z-20131001_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/aqua_disc/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
-# 20131002_00z-20131011_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/aqua_disc_repro/airs_disc_final.%y4%m2%d2.t%h2z.bufr
-# 20131012_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/aqua_disc/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+# 20100819_00z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+# 20131002_00z-20131011_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
+# 20131012_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
 END
 BEGIN disc_amsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
   20100801_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
-# 20100815_00z-20131001_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/aqua_disc/amsua_disc.%y4%m2%d2.t%h2z.bufr
-# 20131002_00z-20131011_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/aqua_disc/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
-# 20131012_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/aqua_disc/amsua_disc.%y4%m2%d2.t%h2z.bufr
+# 20100815_00z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+# 20131002_00z-20131011_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
+# 20131012_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
 END
 
 # MERRA CONV OBS (IN PIECES)
@@ -662,11 +644,11 @@ END
 #-------------------------
 #BEGIN mls12_oenew_text => mlsoz.%y4%m2%d2.t%h2z.txt
 # This is an old name for aura_mlsoz_text, for backward reference purpose only.
-# 20041231_00z-20111231_18z 060000 /archive/u/kwargan/data/MLSv3.3/aver/Y%y4/M%m2/MLSoz.%y4%m2%d2.t%h2z.txt
+# 00000000_00z-00000000_00z 060000 /archive/u/kwargan/data/MLSv3.3/aver/Y%y4/M%m2/MLSoz.%y4%m2%d2.t%h2z.txt
 #END
 #BEGIN aura_mlsoz_text => mlsoz.%y4%m2%d2.t%h2z.txt
 # Note the difference between v2.2 and v3.3.
-# 20041231_00z-20111231_18z 060000 /archive/u/kwargan/data/MLSv3.3/aver/Y%y4/M%m2/MLSoz.%y4%m2%d2.t%h2z.txt
+# 00000000_00z-00000000_00z 060000 /archive/u/kwargan/data/MLSv3.3/aver/Y%y4/M%m2/MLSoz.%y4%m2%d2.t%h2z.txt
 # 00000000_00z-00000000_00z 060000 /archive/u/kwargan/data/MLSv2.2/txt/aver/Y%y4/M%m2/MLSoz.%y4%m2%d2.t%h2z.txt
 #END
 
@@ -681,11 +663,9 @@ END
 # 00000000_00z-00000000_00z 060000 /archive/u/jjin3/gmao_mls_bufr/te_v3_bufr/Y%y4/M%m2/MLSt.%y4%m2%d2.t%h2z.ublk
 #END
 
-
 #AURA OMI totoz+eff., NetCDF data
 #-------------------------
 BEGIN aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
-# 20041231_18z-20121231_18z 060000 /archive/u/kwargan/data/OMI/NETCDF/Y%y4/M%m2/OMIeff.%y4%m2%d2_%h2z.nc
   20041231_18z-20111231_18z 060000 /archive/input/dao_ops/obs/reanalysis/omi_eff/netcdf/Y%y4/M%m2/OMIeff.%y4%m2%d2_%h2z.nc
 END
 
@@ -700,9 +680,8 @@ END
 
 # AURA MLS near real time
 BEGIN mls_nrt_nc => mlsnc.%y4%m2%d2.t%h2z.nc
-# 20140723_00z-20140815_18z 060000  /discover/nobackup/dao_ops/intermediate/flk/stage/mls_oz_nrt/MLSNRToz.%y4%m2%d2_%h2z.nc
-# 20140818_00z-20180331_18z 060000  /discover/nobackup/dao_ops/intermediate/flk/stage/mls_oz_nrt/MLSNRToz.%y4%m2%d2_%h2z.nc
-# 20180401_00z-21001231_18z 060000  /discover/nobackup/dao_ops/intermediate/flk/stage/mls_oz_nrt/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+# 20140723_00z-20180331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
+# 20180401_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
   20140723_00z-20140815_18z 060000  /archive/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
   20140818_00z-20180331_18z 060000  /archive/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
   20180401_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
@@ -710,9 +689,9 @@ END
 
 # TRMM TMI 1B11 brightness temperature
 #-------------------------
-BEGIN tmi_bufr => tmi.%y4%m2%d2.t%h2z.bufr
-  19971208_00z-20141216_00z 060000 /archive/u/jjin3/obs_data/tmi/tmi_bufr/Y%y4/M%m2/tmi.%y4%m2%d2.t%h2z.bufr
-END
+#BEGIN tmi_bufr => tmi.%y4%m2%d2.t%h2z.bufr
+#  00000000_00z-00000000_00z 060000 /archive/u/jjin3/obs_data/tmi/tmi_bufr/Y%y4/M%m2/tmi.%y4%m2%d2.t%h2z.bufr
+#END
 
 # GPM GMI 1B brightness temperature
 #-------------------------
@@ -728,14 +707,12 @@ END
 #-------------------------
 BEGIN gmao_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
 # V03A
-# 20140304_18z-21001231_18z 060000  /archive/u/jjin3/obs_data/gmi/gmi_bufr_data/V03/1CR/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
   20140304_18z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
 END
 
 # RapidScat Scatterometer Surface Winds onboard ISS
 #-------------------------
 BEGIN rscat_bufr => rscat.%y4%m2%d2.t%h2z.bufr_d.ublk
-# 20150501_00z-21001231_18z 060000 /discover/nobackup/dao_ops/intermediate/flk/stage/rapidscat/rscat.%y4%m2%d2.%h2z.bufr
   20150501_00z-20170501_12z 060000 /archive/input/dao_ops/ops/flk/rapidscat/bufr/rapidscat/Y%y4/M%m2/rscat.%y4%m2%d2.%h2z.bufr
 END
 
