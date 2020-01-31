@@ -19,6 +19,7 @@
    use MAPL_Mod
    use Chem_MieTableMod1G
 
+   use m_chars, only : uppercase
    implicit none
 
 ! !PUBLIC TYPES:
@@ -69,6 +70,14 @@
                                                   ! mapping of vtable for given idx
      type(Chem_MieTable), pointer :: vtableUse => null()
   end type Chem_Mie
+
+
+  interface Chem_MieQuery
+     module procedure Chem_MieQueryByInt
+     module procedure Chem_MieQueryByChar
+     module procedure Chem_MieQueryByIntWithpmom
+  end interface
+
 
 contains
 
@@ -242,7 +251,7 @@ contains
 !
 ! !INTERFACE:
 !
-   impure elemental subroutine Chem_MieQuery ( this, idx, channel, q_mass, rh,     &
+   impure elemental subroutine Chem_MieQueryByInt ( this, idx, channel, q_mass, rh,     &
                                    tau, ssa, gasym, bext, bsca, bbck,  &
                                    reff, p11, p22, gf, rhop, rhod, &
                                    vol, area, refr, refi, rc )
@@ -264,7 +273,6 @@ contains
    real,    optional,      intent(out) :: bsca  ! mass scattering efficiency [m2 (kg dry mass)-1]
    real,    optional,      intent(out) :: bbck  ! mass backscatter efficiency [m2 (kg dry mass)-1]
    real,    optional,      intent(out) :: reff  ! effective radius (micron)
-!   real,    optional,      intent(out) :: pmom(:,:)
    real,    optional,      intent(out) :: p11   ! P11 phase function at backscatter
    real,    optional,      intent(out) :: p22   ! P22 phase function at backscatter
    real,    optional,      intent(out) :: gf    ! Growth factor (ratio of wet to dry radius)
@@ -301,7 +309,7 @@ contains
                                       refrIn, refiIn
       type(Chem_MieTable), pointer :: TABLE
 
-      character(len=*), parameter  :: Iam = 'Chem_MieQueryByInt'
+      character(len=*), parameter  :: Iam = 'Chem_MieQuery'
 
       if ( present(rc) ) rc = 0
 
@@ -356,6 +364,12 @@ contains
 !         pmom(:,:) = TABLE%pmom(irh  ,ichannel,TYPE,:,:) * (1.-arh) &
 !                   + TABLE%pmom(irhp1,ichannel,TYPE,:,:) * arh
 !      endif
+
+
+!      if(present(pmom)) then
+!         call Chem_MieQueryByIntWithpmom(this, idx, channel, q_mass, rh, pmom)
+!      endif
+
 
       if(present(p11) ) then
          p11In =   TABLE%pback(irh  ,ichannel,TYPE,1) * (1.-arh) &
@@ -415,10 +429,165 @@ contains
 
 !  All Done
 !----------
+  end subroutine Chem_MieQueryByInt
 
-      return
 
- end subroutine Chem_MieQuery
+
+  subroutine Chem_MieQueryByChar( this, idx, channel, q_mass, rh,     &
+                                   tau, ssa, gasym, bext, bsca, bbck,  &
+                                   rEff, pmom, p11, p22, rc )
+
+!  ! INPUT parameters
+   type(Chem_Mie), target, intent(in ) :: this     
+   character(*),           intent(in ) :: idx     ! variable index on Chem_Mie
+   real,                   intent(in ) :: channel ! channel number
+   real,                   intent(in ) :: q_mass  ! aerosol mass [kg/m2],
+   real,                   intent(in ) :: rh      ! relative himidity
+
+!  ! OUTPUT Parameters
+   real,    optional,      intent(out) :: tau   ! aerol extinction optical depth
+   real,    optional,      intent(out) :: ssa   ! single scattering albedo
+   real,    optional,      intent(out) :: gasym ! asymmetry parameter
+   real,    optional,      intent(out) :: bext  ! mass extinction efficiency [m2 (kg dry mass)-1]
+   real,    optional,      intent(out) :: bsca  ! mass scattering efficiency [m2 (kg dry mass)-1]
+   real,    optional,      intent(out) :: bbck  ! mass backscatter efficiency [m2 (kg dry mass)-1]
+   real,    optional,      intent(out) :: reff  ! effective radius (micron)
+   real,    optional,      intent(out) :: pmom(:,:)
+   real,    optional,      intent(out) :: p11   ! P11 phase function at backscatter
+   real,    optional,      intent(out) :: p22   ! P22 phase function at backscatter
+   integer, optional,      intent(out) :: rc    ! error code
+
+   integer :: iq, i
+
+   character(len=*), parameter  :: Iam = 'Chem_MieQueryByChar'
+   character(len=255) :: NAME
+
+   if ( present(rc) ) rc = 0
+
+!  Remove qualifier from variable name: GOCART::du001 --> du001
+!   ------------------------------------------------------------
+   NAME = trim(idx)
+   i = index(NAME,'::')
+   if ( i > 0 ) then
+      NAME = NAME(i+2:)
+   end if
+
+   do iq = 1, this%nq
+      if( uppercase(trim(NAME)) == uppercase(trim(this%vname(iq)))) then
+         call  Chem_MieQueryByInt( this, iq, channel, q_mass, rh,     &
+                             tau, ssa, gasym, bext, bsca, bbck, &
+                             rEff, p11, p22, rc=rc )
+         if ( rc /= 0 ) return
+      endif
+   enddo
+
+ end subroutine Chem_MieQueryByChar
+
+
+!-------------------------------------------------------------------------
+!     NASA/GSFC, Global Modeling and Assimilation Office, Code 900.3     !
+!-------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  Chem_MieQueryByIntWithpmom --- Return Tau, SSA, etc 
+!
+!
+! !INTERFACE:
+!
+   subroutine Chem_MieQueryByIntWithpmom ( this, idx, channel, q_mass, rh,     &
+                                   tau, ssa, gasym, bext, bsca, bbck,  &
+                                   reff, pmom, p11, p22, gf, rhop, rhod, &
+                                   vol, area, refr, refi, rc )
+
+! !INPUT PARAMETERS:
+
+   type(Chem_Mie), target, intent(in ) :: this
+   integer,                intent(in ) :: idx     ! variable index on Chem_Mie
+   real,                   intent(in ) :: channel ! channel number
+   real,                   intent(in ) :: q_mass  ! aerosol mass [kg/m2],
+   real,                   intent(in ) :: rh      ! relative himidity
+
+! !OUTPUT PARAMETERS:
+
+   real,    optional,      intent(out) :: tau   ! aerol extinction optical depth
+   real,    optional,      intent(out) :: ssa   ! single scattering albedo
+   real,    optional,      intent(out) :: gasym ! asymmetry parameter
+   real,    optional,      intent(out) :: bext  ! mass extinction efficiency [m2 (kg dry mass)-1]
+   real,    optional,      intent(out) :: bsca  ! mass scattering efficiency [m2 (kg dry mass)-1]
+   real,    optional,      intent(out) :: bbck  ! mass backscatter efficiency [m2 (kg dry mass)-1]
+   real,    optional,      intent(out) :: reff  ! effective radius (micron)
+   real,                   intent(out) :: pmom(:,:)
+   real,    optional,      intent(out) :: p11   ! P11 phase function at backscatter
+   real,    optional,      intent(out) :: p22   ! P22 phase function at backscatter
+   real,    optional,      intent(out) :: gf    ! Growth factor (ratio of wet to dry radius)
+   real,    optional,      intent(out) :: rhop  ! Wet particle density [kg m-3]
+   real,    optional,      intent(out) :: rhod  ! Dry particle density [kg m-3]
+   real,    optional,      intent(out) :: vol   ! Wet particle volume [m3 kg-1]
+   real,    optional,      intent(out) :: area  ! Wet particle cross section [m2 kg-1]
+   real,    optional,      intent(out) :: refr  ! Wet particle real part of ref. index
+   real,    optional,      intent(out) :: refi  ! Wet particle imag. part of ref. index
+   integer, optional,      intent(out) :: rc    ! error code
+
+! !DESCRIPTION:
+!
+!   Returns requested parameters from the Mie tables, as a function 
+!   of species, relative humidity, and channel
+!
+!  Notes: Needs some checking, and I still force an interpolation step
+
+!
+! !REVISION HISTORY:
+!
+!  23Mar2005 Colarco
+!  11Jul2005 da Silva   Standardization.
+!
+!EOP
+!-------------------------------------------------------------------------
+
+
+      integer                      :: ICHANNEL, TYPE
+      integer                      :: irh, irhp1, isnap
+      real                         :: rhUse, arh
+      type(Chem_MieTable), pointer :: TABLE
+
+      character(len=*), parameter  :: Iam = 'Chem_MieQueryByIntWithpmom'
+
+      if ( present(rc) ) rc = 0
+
+      ICHANNEL = nint(CHANNEL)
+      TABLE => this%vtableUse
+      TYPE = idx
+
+!     Now map the input RH to the high resolution hash table for RH
+      rhUse = max(rh,0.)
+      rhUse = min(rh,0.99)
+      isnap = int((rhUse+0.001)*1000.)
+      if(isnap .lt. 1) isnap = 1
+      arh   = TABLE%rha( isnap )
+      irh   = TABLE%rhi( isnap )
+      irhp1 = irh+1
+      if(irhp1 .gt. TABLE%nrh) irhp1 = TABLE%nrh
+
+!     Now linearly interpolate the input table for the requested aerosol and
+!     channel; rh is the relative humidity.
+    call Chem_MieQuery ( this, idx, channel, q_mass, rh,     &
+                                   tau, ssa, gasym, bext, bsca, bbck,  &
+                                   reff, p11, p22, gf, rhop, rhod, &
+                                   vol, area, refr, refi, rc )
+
+         pmom(:,:) = TABLE%pmom(irh  ,ichannel,TYPE,:,:) * (1.-arh) &
+                   + TABLE%pmom(irhp1,ichannel,TYPE,:,:) * arh
+
+
+
+!  All Done
+!----------
+  end subroutine Chem_MieQueryByIntWithpmom
+
+
+
+
+
 
 
  end module Chem_MieMod2G
