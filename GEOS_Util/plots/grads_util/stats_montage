@@ -71,6 +71,52 @@ foreach EXP  ($EXPS)
              ${DSC0}_${EXP}_stats_sphu_${VAR}_TRO_z* \
         -tile 5x4 -geometry +0+0 ${DSC0}_${EXP}_${VAR}_${SEASON}_montage.gif & 
 
+     montage ${DSC0}_${EXP}_stats2_hght_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats2_uwnd_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats2_vwnd_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats2_tmpu_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats2_sphu_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats2_hght_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats2_uwnd_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats2_vwnd_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats2_tmpu_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats2_sphu_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats2_hght_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats2_uwnd_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats2_vwnd_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats2_tmpu_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats2_sphu_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats2_hght_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats2_uwnd_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats2_vwnd_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats2_tmpu_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats2_sphu_${VAR}_TRO_z* \
+        -tile 5x4 -geometry +0+0 ${DSC0}_${EXP}_${VAR}_${SEASON}_montage2.gif & 
+
+     montage ${DSC0}_${EXP}_stats3_hght_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats3_uwnd_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats3_vwnd_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats3_tmpu_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats3_sphu_${VAR}_GLO_z* \
+             ${DSC0}_${EXP}_stats3_hght_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats3_uwnd_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats3_vwnd_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats3_tmpu_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats3_sphu_${VAR}_NHE_z* \
+             ${DSC0}_${EXP}_stats3_hght_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats3_uwnd_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats3_vwnd_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats3_tmpu_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats3_sphu_${VAR}_SHE_z* \
+             ${DSC0}_${EXP}_stats3_hght_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats3_uwnd_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats3_vwnd_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats3_tmpu_${VAR}_TRO_z* \
+             ${DSC0}_${EXP}_stats3_sphu_${VAR}_TRO_z* \
+        -tile 5x4 -geometry +0+0 ${DSC0}_${EXP}_${VAR}_${SEASON}_montage3.gif & 
+
+
+
   foreach field ('hght' 'uwnd' 'vwnd' 'tmpu' 'sphu' )
      montage ${DSC0}_${EXP}_stats_${field}_${VAR}_SHE_z_${SEASON}.gif \
              ${DSC0}_${EXP}_stats_${field}_${VAR}_TRO_z_${SEASON}.gif \
@@ -79,6 +125,22 @@ foreach EXP  ($EXPS)
              ${DSC0}_${EXP}_stats_${field}_${VAR}_XPO_z_${SEASON}.gif \
              ${DSC0}_${EXP}_stats_${field}_${VAR}_NPO_z_${SEASON}.gif \
         -tile 3x2 -geometry +0+0  ${DSC0}_${EXP}_${field}_${VAR}_${SEASON}_montage.gif &
+
+     montage ${DSC0}_${EXP}_stats2_${field}_${VAR}_SHE_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats2_${field}_${VAR}_TRO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats2_${field}_${VAR}_NHE_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats2_${field}_${VAR}_SPO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats2_${field}_${VAR}_XPO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats2_${field}_${VAR}_NPO_z_${SEASON}.gif \
+        -tile 3x2 -geometry +0+0  ${DSC0}_${EXP}_${field}_${VAR}_${SEASON}_montage2.gif &
+
+     montage ${DSC0}_${EXP}_stats3_${field}_${VAR}_SHE_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats3_${field}_${VAR}_TRO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats3_${field}_${VAR}_NHE_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats3_${field}_${VAR}_SPO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats3_${field}_${VAR}_XPO_z_${SEASON}.gif \
+             ${DSC0}_${EXP}_stats3_${field}_${VAR}_NPO_z_${SEASON}.gif \
+        -tile 3x2 -geometry +0+0  ${DSC0}_${EXP}_${field}_${VAR}_${SEASON}_montage3.gif &
   end
 
 echo " "
