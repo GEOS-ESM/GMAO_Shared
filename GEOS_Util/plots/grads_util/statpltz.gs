@@ -9,6 +9,23 @@ field = subwrd (args,1)
 'getinfo time'
          time = result
 
+'getinfo zmin'
+         zmin = result
+'getinfo zmax'
+         zmax = result
+
+'set z 'zmin
+'getinfo level'
+         levmin = result
+'set z 'zmax
+'getinfo level'
+         levmax = result
+
+if( levmax < levmin )
+    levmin = levmax
+endif
+'set z 'zmin' 'zmax
+
         num = 0
 while ( num < numargs )
         num = num + 1
@@ -16,8 +33,10 @@ if( subwrd(args,num) = '-desc'   ) ; DESC0 = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-nfcst'  ) ; nfcst = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-title'  ) ; title = subwrd(args,num+1) ; endif
 endwhile
-'fixname 'DESC0
-          DESC = result
+
+*'fixname 'DESC0
+*          DESC = result
+           DESC = "DESC"
 
 'getinfo pagex'
          pagex = result
@@ -90,6 +109,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set clab 'CLAB
 'set gxout contour'
 'set t 'tdim
@@ -116,6 +141,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 'set t 'tdim
    dummy = getstuff( field'fmc'DESC'z' )
@@ -138,6 +169,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 'set t 'tdim
    dummy = getstuff( field'fma'DESC'z' )
@@ -160,6 +197,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 'set t 'tdim
    dummy = getstuff( field'rms'DESC'z' )
@@ -182,6 +225,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 'set t 'time
 'shades 'field'rms'DESC'z*'FMA_scale' 0 -minval 0 -cint 'FMA_CINT
@@ -199,6 +248,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 'set t 'time
 'shades 'field'rms'DESC'z*'FMA_scale' 0 -minval 0 -cint 'FMA_CINT
@@ -216,6 +271,12 @@ ytop = subwrd(result,3)
 
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 'set t 'time
 'shades 'field'rms'DESC'z*'FMA_scale' 0 -minval 0 -cint 'FMA_CINT
@@ -232,6 +293,12 @@ ybot = subwrd(result,2)
 ytop = subwrd(result,3)
 'set grads off'
 'set grid  off'
+ if( levmin < 100 )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
 'set gxout shaded'
 
      'define diffa    = 'field'mse'DESC'z'

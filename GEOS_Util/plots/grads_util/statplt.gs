@@ -13,8 +13,10 @@ if( subwrd(args,num) = '-desc'   ) ; DESC0 = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-nfcst'  ) ; nfcst = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-title'  ) ; title = subwrd(args,num+1) ; endif
 endwhile
-'fixname 'DESC0
-          DESC = result
+
+*'fixname 'DESC0
+*          DESC = result
+           DESC = "DESC"
 
 'getinfo pagex'
          pagex = result
