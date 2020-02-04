@@ -232,7 +232,7 @@ say 'Opening Files for EXP: 'k
 
 * ----------------------------------------------------------------------------
 * For Zonal Mean Plots, we need to define a Master Default File which contains 
-* the smallest number of vertical levels (from 1000 to 100 mb) as well as
+* the smallest number of vertical levels (from 1000 to 1 mb) as well as
 * the largest time increment.  If these are not consistent, the  code will 
 * simply return with diagnostic error message.
 * ----------------------------------------------------------------------------
@@ -340,6 +340,7 @@ while ( n<=numflds )
 
 * Set Default File to 1st Ensemble Member for this Experiment
 * -----------------------------------------------------------
+ levmin = 1000
 'set dfile 1'
 'setlons'
 'sety'
@@ -357,7 +358,8 @@ if( levs0 = 'ZONAL' | levs0 = 'NULL' )
            'set z 'z
            'getinfo level'
                     lev  = result
-                 if(lev >= 100 )
+                 if(lev >= 1 )
+                    if( lev < levmin ) ; levmin = lev ; endif
                     levs = levs' 'lev
                  endif
         z = z + 1
@@ -379,7 +381,7 @@ endif
  numlevs = result
 
 if( numlevs > 1 )
-   'set lev 1000 100'
+   'set lev 1000 'levmin
 else
     say 'FIELD: 'field'  NAME: 'name'  LEVELS: 'levels
 'q file'
@@ -477,7 +479,7 @@ while( k <= ktot )
                     'set z 'z
                     'getinfo level'
                              lev  = result
-                          if(lev >= 100 )
+                          if(lev >= 1 )
                              levs = levs' 'lev
                           endif
                  z = z + 1
@@ -501,7 +503,7 @@ while( k <= ktot )
                      z = 1
                      while( z <= numlevs )
                      level = subwrd(levels,z)
-                  if(level >= 100)
+                  if(level >= 1)
                      'set lev 'level
                      'movie statpltdrv "'field' 'desc.k' 'desc.kp1' 'numfiles' 'title'" -tend 'mtdim' -print -rotate 90 -name 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_'level'_'month
                      '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_'level'_'month'.*.gif 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_'level'_'month'.gif &'
@@ -532,7 +534,6 @@ else
 'set dfile 'newfile
 'set x 1'
 'sety'
-'set lev 1000 100'
 
 k    = 0
 ktot = ntot-1
@@ -552,8 +553,29 @@ while( k <= ktot )
              if( field  = q   ) ; name = sphu ; endif
              if( field  = chi ) ; name = chi  ; endif
              if( field  = psi ) ; name = psi  ; endif
-            'movie statpltdrvz "'field' 'desc.k' 'desc.kp1' 'numfiles' 'title'" -tend 'mtdim' -print -rotate 90 -name 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_z_'month
-            '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_z_'month'.*.gif 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_z_'month'.gif &'
+
+             if( levmin <= 100 )
+                 'set lev 1000 100'
+                 'set zlog off'
+                 'movie statpltdrvz "'field' 'desc.k' 'desc.kp1' 'numfiles' 'title'" -tend 'mtdim' -print -rotate 90 -name 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_z_'month
+                 '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_z_'month'.*.gif 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_z_'month'.gif &'
+             endif
+
+             if( levmin <= 10 & field != q )
+                 'set lev 1000 10'
+                 'set zlog on'
+                 'setlevs'
+                 'movie statpltdrvz "'field' 'desc.k' 'desc.kp1' 'numfiles' 'title'" -tend 'mtdim' -print -rotate 90 -name 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_zlog10_'month
+                 '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_zlog10_'month'.*.gif 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_zlog10_'month'.gif &'
+             endif
+
+             if( levmin <= 1 & field != q )
+                 'set lev 1000 1'
+                 'set zlog on'
+                 'setlevs'
+                 'movie statpltdrvz "'field' 'desc.k' 'desc.kp1' 'numfiles' 'title'" -tend 'mtdim' -print -rotate 90 -name 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_zlog1_'month
+                 '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_zlog1_'month'.*.gif 'SOURCE'/'desc.k'.'desc.kp1'/stats_'name'_syscmp_GLO_zlog1_'month'.gif &'
+             endif
          endif
 
        n = n + 1

@@ -30,7 +30,6 @@ desc   = ''
 debug  = TRUE
 field  = h
     x  = 2
-NOPLOT = ''
 
        num = 0
 while( num < numargs )
@@ -40,8 +39,6 @@ if( subwrd(args,num)='-x'      ) ; x      = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-desc'   ) ; desc   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-rc'     ) ; rcfile = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-debug'  ) ; debug  = subwrd(args,num+1) ; endif
-if( subwrd(args,num)='-NOPLOT' ) ; NOPLOT = '-NOPLOT'          ; endif
-
 endwhile
 
 ****************************************************************
@@ -126,6 +123,6 @@ endwhile
 'set lev 1000 100'
 'set x   'x
 say 'Calling CORCMPZ for x = 'x
-    'corcmpz_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -debug 'debug' 'NOPLOT
+    'corcmpz_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -debug 'debug
 
 return

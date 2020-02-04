@@ -540,7 +540,7 @@ if( "$plots" =~ *pltsys* ) then
             endif
         else
                                       set levels =  $level
-            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100`
+            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 1`
             if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
             foreach level  ( $levels )
@@ -600,7 +600,7 @@ if( "$plots" =~ *syscmp* ) then
                endif
            else
                                          set levels =  $level
-               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100`
+               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 1`
                if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
                foreach level  ( $levels )
