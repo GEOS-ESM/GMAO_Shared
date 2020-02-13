@@ -3,12 +3,7 @@
 module stoch_module
 
   use ESMF
-  use MAPL_Mod   
-  use MAPL_CFIOMod  
-  use MAPL_AbstractRegridderMod
-  use MAPL_RegridderManagerMod
-  use MAPL_GridManagerMod
-  use MAPL_LatLonGridFactoryMod
+  use MAPL
   use mod_param
   use stoch_data
 

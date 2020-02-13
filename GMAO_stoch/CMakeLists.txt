@@ -8,17 +8,15 @@ esma_set_this()
 # The "correct" lines should be:
 #
 #include_directories (${include_NCEP_sp_r8i4})
-#target_link_libraries (${this} GMAO_mpeu GMAO_gfio_r8 GMAO_transf MAPL_Base NCEP_sfcio NCEP_sp_r8i4 MAPL_cfio_r4)
+#target_link_libraries (${this} GMAO_mpeu GMAO_gfio_r8 GMAO_transf MAPL NCEP_sfcio NCEP_sp_r8i4 MAPL_cfio_r4)
 
 include_directories (${include_NCEP_sigio})
 include_directories (${include_NCEP_sfcio})
 include_directories (${include_GMAO_hermes})
 include_directories (${include_GMAO_transf})
 include_directories (${include_GMAO_mpeu})
-include_directories (${include_MAPL_Base})
 include_directories (${INC_NETCDF})
 include_directories (${INC_ESMF})
-include_directories (${include_MAPL_cfio_r4})
 include_directories (${include_NCEP_sp_r4i4})
 include_directories (${include_${this}})
 
@@ -49,7 +47,7 @@ set (srcs
 
  esma_add_library(${this}
    SRCS ${srcs}
-   DEPENDENCIES GMAO_mpeu GMAO_gfio_r8 GMAO_transf MAPL_Base NCEP_sfcio NCEP_sp_r4i4 MAPL_cfio_r4
+   DEPENDENCIES GMAO_mpeu GMAO_gfio_r8 GMAO_transf MAPL NCEP_sfcio NCEP_sp_r4i4
    )
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
