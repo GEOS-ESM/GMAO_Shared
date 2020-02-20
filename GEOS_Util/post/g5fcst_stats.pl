@@ -629,6 +629,7 @@ sub submit_calcjob {
     my ($logdir, $logfile1, $logfile2, $jobname, $jobdate, $jobfile, $jobtype);
     my ($cmd, $jobID, $jobIDline);
     my (@levs, @levels_19, @levels_11);
+    my ($mynodes, $mympi);
 
     @levels_19 = ( 1000.0, 975.0, 950.0, 925.0,
                     900.0, 850.0, 800.0, 750.0,
@@ -670,6 +671,13 @@ sub submit_calcjob {
     $jobfile = "$jobdir/$jobname.j";
     $logfile1 = "$jobdir/$jobtype.log.$jobdate.o%j.txt";
     $logfile2 = "$logdir/$expid.$jobtype.log.$jobdate.txt";
+    if ( -e "/etc/os-release" ) {
+      $mynodes = "sky";
+      $mympi   = "mpirun";
+    } else {
+      $mynodes = "hasw";
+      $mympi   = "mpiexec_mpt";
+    }
 
     print "\nwriting jobfile: $jobfile\n";
     open FH, "> $jobfile" or die "Error opening $jobfile; $!";
@@ -679,13 +687,13 @@ sub submit_calcjob {
 #SBATCH --job-name=$jobname
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
-#SBATCH --constraint=hasw
+#SBATCH --constraint=$mynodes
 
 source $Bin/g5_modules
 set echo
 chdir $fstatswork
 
-$dryrun mpiexec_mpt $statsX -np 1 -fcst @fcst_fnames \\
+$dryrun $mympi $statsX -np 1 -fcst @fcst_fnames \\
                     -ana @ana_fnames \\
                     -cli @climfiles \\
                     -tag $expid.${ihh}z \\
@@ -736,6 +744,7 @@ sub submit_archivejob {
     my ($yyyy, $mm, $dd, $logdir, $logfile1, $logfile2, $pdir);
     my ($jobname, $jobdate, $jobfile_0, $jobfile, $jobtype);
     my ($cmd, $deps, $dependFLG, $jobIDline, $jobID);
+    my ($mynodes);
 
     # input arguments
     #----------------
@@ -763,6 +772,12 @@ sub submit_archivejob {
     if ($ndays == 1) { $dtFLG = "-date $vdate0 -syntime ${vhh0}0000" }
     else             { $dtFLG = "" }    
 
+    if ( -e "/etc/os-release" ) {
+      $mynodes = "sky";
+    } else {
+      $mynodes = "hasw";
+    }
+
     # write archive jobfile
     #----------------------
     print "writing jobfile: $jobfile\n";
@@ -774,7 +789,7 @@ sub submit_archivejob {
 #SBATCH --partition=datamove
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
-#SBATCH --constraint=hasw
+#SBATCH --constraint=$mynodes
 
 set echo
 @ archive_status = 0

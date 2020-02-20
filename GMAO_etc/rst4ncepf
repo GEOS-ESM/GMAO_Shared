@@ -1,4 +1,4 @@
-#!@DASPERL@
+#!@DASPERL
 #
 # Script to generate GEOS-4/4 dynamics initial condition from a blend
 # of NCEP and GEOS analyses.
@@ -16,7 +16,6 @@ use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
 use File::Copy "cp";     # for cp()
 use Getopt::Long;        # command line options
-use Shell qw(cat);       # cat command
  
 # Command line options
 # --------------------

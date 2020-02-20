@@ -205,6 +205,7 @@ say 'Processing 'field' for pltsys:'
 
 if( level0 = 'NULL' | level0 = 'HORIZ' | level0 = 'ZONAL' )
 
+        levmin  = 1000
         numlevs = levs.n
     if( numlevs > 1 )
 
@@ -218,12 +219,13 @@ if( level0 = 'NULL' | level0 = 'HORIZ' | level0 = 'ZONAL' )
            'set z 'z
            'getinfo level'
                     level  = result
-                 if(level >= 100 )
+                 if(level >= 1 )
+                    if( level < levmin ) ; levmin = level ; endif
                     levels = levels' 'level
                  endif
          z = z + 1
          endwhile
-        'set lev 1000 100' 
+        'set lev 1000 'levmin
 
     else
         numlevs = 1
@@ -232,6 +234,7 @@ if( level0 = 'NULL' | level0 = 'HORIZ' | level0 = 'ZONAL' )
     endif
 
 else
+        levmin  = level0
         numlevs = 1
         levels = level0
 
@@ -273,7 +276,7 @@ say 'Calling statmak_sys for 'field' 'DESC.k
 'q dims'
 say 'DIMS: 'result
 
-'statmak_sys 'field' 'DESC.k
+'statmak_sys 'field'  DESC'
 
 
 ************** 
@@ -284,7 +287,7 @@ if( level0 != 'ZONAL' )
   z = 1
   while ( z<=numlevs )
               level = subwrd(levels,z)
-           if(level >= 100 )
+           if(level >= levmin )
              'set dfile 1'
              'setlons'
              'sety'
@@ -321,8 +324,8 @@ if( level0 != 'ZONAL' )
               if( field = t   ) ; name = tmpu ; scale = 1    ; endif
               if( field = q   ) ; name = sphu ; scale = 1000 ; endif
               
-              'define 'name' = 'field'fma'DESC.k'/'scale
-              'set sdfwrite -4d -flt -nc3 'SOURCE'/'DESC'/'field'fma_'level'_'DESC'.nc3'
+              'define 'name' = 'field'fmaDESC/'scale
+              'set sdfwrite -4d -flt -nc3 'SOURCE'/'DESC'/'DESC'.'field'fma_'level'.'month'.nc3'
                   'sdfwrite 'name
            endif
   z = z + 1
@@ -338,11 +341,34 @@ if( numlevs > 1 )
    'set dfile 1'
    'set x 1'
    'sety'
-   'set lev 1000 100'
-   'c'
-   'movie statpltz "'field' -desc 'DESC' -nfcst 'numfiles' -title 'title'" -print -rotate 90 -name 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month
-   'c'
-   '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month'.*.gif 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month'.gif &'
+
+    if( levmin <= 100 )
+       'set lev 1000 100'
+       'set zlog off'
+       'c'
+       'movie statpltz "'field' -desc 'DESC' -nfcst 'numfiles' -title 'title'" -print -rotate 90 -name 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month
+       'c'
+       '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month'.*.gif 'SOURCE'/'DESC'/stats_'name'_all_GLO_z_'month'.gif &'
+    endif
+
+    if( levmin <= 10 & field != q )
+       'set lev 1000 10'
+       'set zlog off'
+       'c'
+       'movie statpltz "'field' -desc 'DESC' -nfcst 'numfiles' -title 'title'" -print -rotate 90 -name 'SOURCE'/'DESC'/stats_'name'_all_GLO_zlog10_'month
+       'c'
+       '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'DESC'/stats_'name'_all_GLO_zlog10_'month'.*.gif 'SOURCE'/'DESC'/stats_'name'_all_GLO_zlog10_'month'.gif &'
+    endif
+
+    if( levmin <= 1 & field != q )
+       'set lev 1000 1'
+       'set zlog off'
+       'c'
+       'movie statpltz "'field' -desc 'DESC' -nfcst 'numfiles' -title 'title'" -print -rotate 90 -name 'SOURCE'/'DESC'/stats_'name'_all_GLO_zlog1_'month
+       'c'
+       '!sleep 60 ; convert -loop 0 -delay 30 'SOURCE'/'DESC'/stats_'name'_all_GLO_zlog1_'month'.*.gif 'SOURCE'/'DESC'/stats_'name'_all_GLO_zlog1_'month'.gif &'
+    endif
+
 endif
 endif
 

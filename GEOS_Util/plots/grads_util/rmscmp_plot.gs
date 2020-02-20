@@ -636,7 +636,6 @@ maxval = 1.02 * maxval
 
 say ' AXMAX: 'axmax
 say ' AXMIN: 'axmin
-say 'MINVAL: 'minval
 
 * Plot Fisher Mean for Experiments
 * --------------------------------
@@ -669,6 +668,25 @@ if( rms != 0 & m = 0 )
 endif
 m = m + 1
 endwhile
+
+* Determine magnitude associated with line thickness
+* --------------------------------------------------
+'q gr2xy 1 0'
+ xval = subwrd(result,3)
+ yval = subwrd(result,6)
+ if( xval != environment )
+ say 'GR2XY Result, xval:yval = 'result
+ yval = yval + 0.02
+ say 'New yval = 'yval
+'q xy2gr 'xval' 'yval
+ say 'XY2GR Result: 'result
+ line_thickness = subwrd(result,6)
+ say ' '
+ say 'LINE_THICKNESS = 'line_thickness
+ say ' '
+ else
+ say 'LINE_THICKNESS = UNDEF'
+ endif
 
 if( rms = 0 )
 'draw ylab Root Mean Square Error'

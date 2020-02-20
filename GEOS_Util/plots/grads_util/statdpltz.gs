@@ -82,6 +82,31 @@ endif
 'set grads off'
 'set gxout shaded'
 
+'getinfo zmin'
+         zmin = result
+'getinfo zmax'
+         zmax = result
+
+'set z 'zmin
+'getinfo level'
+         levmin = result
+'set z 'zmax
+'getinfo level'
+         levmax = result
+
+ if( levmax < levmin )
+     levmin = levmax
+ endif
+'set z 'zmin' 'zmax
+
+ if( levmin < 100 & field != q )
+    'set zlog on'
+    'setlevs'
+ else
+    'set zlog off'
+ endif
+
+
 *******************************************************************************
 *         TVAL = SQRT(N) x NAME_DIFF_MEAN / NAME_DIFF_STD     *
 *                                                             *

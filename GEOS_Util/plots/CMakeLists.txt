@@ -2,7 +2,7 @@ set (zonal_prog_name
    zonal_${CMAKE_SYSTEM_NAME}.x
    )
 
-ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL_Base)
+ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL)
 if (EXTENDED_SOURCE)
   set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif ()

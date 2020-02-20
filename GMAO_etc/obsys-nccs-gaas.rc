@@ -32,11 +32,19 @@ END
 # MODIS Terra Level2 Data
 #------------------------
 BEGIN mod04_061_flk => MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20171101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+END
+BEGIN mod04_061_arc => MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
   20171101_00z-21001231_18z 000500 /archive/input/dao_ops/obs/flk/modis.061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
 END
+
 BEGIN mod04_006_flk => MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20161101_00z-20171031_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/006/MOD14/%y4/%j3/MOD14.A%y4%j3.%h2%n2.006.NRT.hdf
+END
+BEGIN mod04_006_arc => MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
   20161101_00z-20171031_18z 000500 /archive/input/dao_ops/obs/flk/modis.006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
 END
+
 BEGIN mod04_006_his
   20030101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/iesa/aerosol/Data/MODIS/Level2/006/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.006.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
 END
@@ -47,6 +55,13 @@ END
 #--BEGIN mod04_005_flk => MOD04_L2.A%y4%j3.%h2%n2.005.NRT.hdf
 #-20100719_01z-20110920_24z 000500 /archive/input/dao_ops/obs/flk/modis/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.005.NRT.hdf
 #--END
+
+BEGIN mod03_061_flk => MOD03_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20171101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MOD03/%y4/%j3/MOD03.A%y4%j3.%h2%n2.061.NRT.hdf
+END
+BEGIN mod03_061_arc => MOD03_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20171101_00z-21001231_18z 000500 /archive/input/dao_ops/obs/flk/modis.061/MOD03/%y4/%j3/MOD03.A%y4%j3.%h2%n2.061.NRT.hdf
+END
 
 # MODIS Terra NNR Data
 #---------------------
@@ -60,17 +75,32 @@ END
 # MODIS Aqua Level2 Data
 #-----------------------
 BEGIN myd04_061_flk => MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20171101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+END
+BEGIN myd04_061_arc => MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
   20171101_00z-21001231_18z 000500 /archive/input/dao_ops/obs/flk/modis.061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
 END
+
 BEGIN myd04_006_flk => MYD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
+  20161101_00z-20171031_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/006/MYD14/%y4/%j3/MYD14.A%y4%j3.%h2%n2.006.NRT.hdf
+END
+BEGIN myd04_006_arc => MYD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
   20161101_00z-20171031_18z 000500 /archive/input/dao_ops/obs/flk/modis.006/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.006.NRT.hdf
 END
+
 BEGIN myd04_006_his
   20030101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/iesa/aerosol/Data/MODIS/Level2/006/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.006.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
 END
 BEGIN myd04_051_flk => MYD04_L2.A%y4%j3.%h2%n2.051.NRT.hdf
   20140101_00z-20170331_20z 000500 /discover/nobackup/dao_ops/intermediate/flk/modis/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.051.NRT.hdf
 #-20100719_01z-21001231_18z 000500 /archive/input/dao_ops/obs/flk/modis/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.051.NRT.hdf
+END
+
+BEGIN myd03_061_flk => MYD03_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20171101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MYD03/%y4/%j3/MYD03.A%y4%j3.%h2%n2.061.NRT.hdf
+END
+BEGIN myd03_061_arc => MYD03_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20171101_00z-21001231_18z 000500 /archive/input/dao_ops/obs/flk/modis.061/MYD03/%y4/%j3/MYD03.A%y4%j3.%h2%n2.061.NRT.hdf
 END
 
 # MODIS Aqua NNR Data

@@ -251,9 +251,28 @@ if( $batch == 'BATCH' ) then
 
 # Set Default GEOS Build Directories
 # ----------------------------------
-set  GEOSSRC = @CMAKE_INSTALL_PREFIX@
-set  GEOSBIN = @CMAKE_INSTALL_PREFIX@/bin
-set  GEOSAPP = @CMAKE_INSTALL_PREFIX@/bin
+                set   command = `which $0`
+set   root =   `echo $command | cut -d / -f1`
+if(  $root == . ) set command = `echo $lcd`/quickstat
+  set root =   `echo $command | cut -b1`
+if( "$root" != "/" ) set command = `echo $lcd`/$command
+
+@ n = 1
+set root = `echo $command | cut -d / -f$n`
+while( .$root == . )
+@ n = $n + 1
+set root = `echo $command | cut -d / -f$n`
+end
+
+set GEOSDEF = ''
+while( $root != 'src' )
+set GEOSDEF = `echo ${GEOSDEF}/${root}`
+@ n = $n + 1
+set root = `echo $command | cut -d / -f$n`
+end
+set  GEOSSRC = ${GEOSDEF}/src
+set  GEOSBIN = ${GEOSDEF}/Linux/bin
+set  GEOSAPP = ${GEOSDEF}/src/Applications/GEOSgcm_App
 
 
 # Create QUICKSTAT commands
@@ -521,7 +540,7 @@ if( "$plots" =~ *pltsys* ) then
             endif
         else
                                       set levels =  $level
-            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100`
+            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 1`
             if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
             foreach level  ( $levels )
@@ -539,17 +558,23 @@ if( "$plots" =~ *pltsys* ) then
      end
      end
      wait
-   # set  files = `find $SOURCE/scratch_pltsys -name MONTHLAB.txt`
-   # set SEASON = `cat $files[1]`
-   # foreach exp   ($exps)
-   #    set DESC = `cat $statsrc | grep DSC$exp | grep -v \# | grep -v \* | grep : | cut -d: -f2`
-   #    set   sysfiles = `/bin/ls -1 $SOURCE/$DESC/*fma*.nc3`
-   #    if( $#sysfiles == 56 ) then
-   #        $GEOSUTIL/plots/grads_util/make_syserr $SOURCE/$DESC
-   #        set expdsc = `cat $statsrc | grep "DESC:" | cut -d: -f2`
-   #        /bin/mv $SOURCE/$DESC/syserr_${DESC}.nc4 $SOURCE/${DESC}_syserr_${expdsc}_${SEASON}.nc4
-   #    endif
-   # end
+     foreach exp   ($exps)
+        set DESC = `cat $statsrc | grep DSC$exp | grep -v \# | grep -v \* | grep : | cut -d: -f2`
+        set sysfiles = `/bin/ls -1 $SOURCE/$DESC/*fma*.nc3`
+        set SEASON = `echo $sysfiles[1] | cut -d. -f3`
+        if( $#sysfiles == 56 ) then
+            if(    -e LOCKFILE ) /bin/echo "Waiting for LOCKFILE ... "
+            if(    -e LOCKFILE ) set LOCK = `stat -c %Z LOCKFILE`
+            while( -e LOCKFILE )
+                      set    EPOCH = `date +'%s'`
+                      @    LOCKAGE = $EPOCH - $LOCK
+                      if( $LOCKAGE > 120 ) /bin/rm -f LOCKFILE
+            end
+            lockfile LOCKFILE
+            $GEOSUTIL/plots/grads_util/make_syserr $statsrc
+            /bin/rm -f LOCKFILE
+        endif
+     end
     /bin/rm -r $tmpdir
 endif
 
@@ -575,7 +600,7 @@ if( "$plots" =~ *syscmp* ) then
                endif
            else
                                          set levels =  $level
-               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100`
+               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 1`
                if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
                foreach level  ( $levels )

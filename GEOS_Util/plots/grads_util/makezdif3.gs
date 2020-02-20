@@ -19,6 +19,12 @@ endwhile
 'run getenv "GEOSUTIL"'
              geosutil = result
 
+*'q dims'
+*say ' '
+*say 'Dimension Environment Entering MAKEZDIF3: 'result
+*say result
+*say ' '
+
 * Get Current Environment Settings
 * --------------------------------
 'getinfo file'
@@ -44,20 +50,91 @@ endwhile
                   zmax = result
      endif
 
+* Determin Time Domain
+* --------------------
+'set dfile 'file1
+'sett -q'
+'getinfo tinc'
+         tinc1  = result
+'getinfo tunit'
+         tunit1 = result
 'getinfo tfreq'
          tfreq = result
      if( tfreq = 'varying' )
         'getinfo tmin'
-                 tmin = result
+                 tmin1 = result
         'getinfo tmax'
-                 tmax = result
+                 tmax1 = result
      endif
      if( tfreq = 'fixed' )
         'getinfo time'
-                 tmin = result
-                 tmax = result
+                 tmin1 = result
+                 tmax1 = result
      endif
-     tdim = tmax-tmin+1
+     tdim1 = tmax1 - tmin1 + 1
+    'set t 'tmin1
+    'getinfo date'
+             datemin1 = result
+    'set t 'tmax1
+    'getinfo date'
+             datemax1 = result
+
+
+'set dfile 'file2
+'sett -q'
+'getinfo tinc'
+         tinc2  = result
+'getinfo tunit'
+         tunit2 = result
+'getinfo tfreq'
+         tfreq = result
+     if( tfreq = 'varying' )
+        'getinfo tmin'
+                 tmin2 = result
+        'getinfo tmax'
+                 tmax2 = result
+     endif
+     if( tfreq = 'fixed' )
+        'getinfo time'
+                 tmin2 = result
+                 tmax2 = result
+     endif
+     tdim2 = tmax2 - tmin2 + 1
+    'set t 'tmin2
+    'getinfo date'
+             datemin2 = result
+    'set t 'tmax2
+    'getinfo date'
+             datemax2 = result
+
+if( tinc1 >= tinc2 ) 
+    timefile = file1
+else
+    timefile = file2
+endif
+
+'set dfile 'timefile
+
+if( datemin1 <= datemin2 )
+    tmin = tmin2
+else
+    tmin = tmin1
+endif
+
+if( datemax1 >= datemax2 )
+    tmax = tmax2
+else
+    tmax = tmax1
+endif
+     tdim = tmax - tmin + 1
+
+*say 'datemin1: 'datemin1' tmin1: 'tmin1' tdim1: 'tdim1
+*say 'datemin2: 'datemin2' tmin2: 'tmin2' tdim2: 'tdim2
+*say 'datemax1: 'datemax1' tmax1: 'tmax1' tdim1: 'tdim1
+*say 'datemax2: 'datemax2' tmax2: 'tmax2' tdim2: 'tdim2
+*say 'tmin: 'tmin
+*say 'tmax: 'tmax
+
 'set t 'tmin
 'getinfo date'
          timebeg = result
@@ -71,7 +148,7 @@ endwhile
       timeinc = result''tunit
 
 'set t 'tmin' 'tmax
-say 'dfile: 'dfile'  tmin: 'tmin'  tmax: 'tmax'  tdim: 'tdim'  timebeg: 'timebeg'  timeinc: 'timeinc
+*say 'dfile: 'dfile'  tmin: 'tmin'  tmax: 'tmax'  tdim: 'tdim'  timebeg: 'timebeg'  timeinc: 'timeinc
 
 * Determine Consistent PTOP
 * -------------------------
@@ -91,7 +168,7 @@ say 'dfile: 'dfile'  tmin: 'tmin'  tmax: 'tmax'  tdim: 'tdim'  timebeg: 'timebeg
                  level = result
              if( level > ptop ) ; ptop = level ; endif
 
-say 'PTOP: 'ptop
+*say 'PTOP: 'ptop
 
 
 * Compute Number of Levels in Target Zone
@@ -114,8 +191,8 @@ say 'PTOP: 'ptop
          zptop = result
       numlevs2 = zptop-z1000 + 1
 
-say 'Number of Levels in File 1 between 1000 and 'ptop' is: 'numlevs1
-say 'Number of Levels in File 2 between 1000 and 'ptop' is: 'numlevs2
+*say 'Number of Levels in File 1 between 1000 and 'ptop' is: 'numlevs1
+*say 'Number of Levels in File 2 between 1000 and 'ptop' is: 'numlevs2
 
 
 * Create Array of Target Pressure Levels
@@ -158,10 +235,10 @@ while( z2<=zdim2 )
 z2 = z2 + 1
 endwhile
 
-say 'Number of Target Pressure Levels: 'nlev
-say '                 Pressure Levels: 'levs
-say '                            Name: 'name
-say ''
+*say 'Number of Target Pressure Levels: 'nlev
+*say '                 Pressure Levels: 'levs
+*say '                            Name: 'name
+*say ''
 
 
 * Create Temporary File at 1x1 degree resolution with consistent levels
@@ -178,7 +255,7 @@ while( t<= tmax )
 while( i<= 3 )
        z = 1
 while( z<=nlev )
-      'set dfile 'file1
+      'set dfile 'timefile
       'set t 't
       'set dfile 'file2
       'set lev 'level.z
@@ -224,31 +301,34 @@ endwhile
 '!echo "s@LEVS@"'levs'@g          >> sedfile'
 '!sed -f  sedfile 'geosutil'/plots/grads_util/zdiff3.template > 'name'.ctl'
 
-say 'Opening: 'name'.ctl'
+*say 'Opening: 'name'.ctl'
 'open 'name'.ctl'
 'getinfo    numfiles'
             newfile = result
 'set dfile 'newfile
 'set x 1'
 'set y 1'
-'setz'
-'sett'
+'setz -q'
+'sett -q'
 'define 'name'm    = qm'
 'define 'name'o    = qo'
 'define 'name'diff = qd'
-'q dims'
-say 'DIMS: 'result
 
 *'close 'newfile
 
 * Reset Initial Environment Settings
 * ----------------------------------
-*'set gxout 'gxout
-*'set dfile 'dfile
-*'set x 'xpos
-*'set y 'ypos
-*'set z 'zmin' 'zmax
-*'set t 'tmin' 'tmax
+'set gxout 'gxout
+'set dfile 'dfile
+'set x 'xpos
+'set y 'ypos
+'set z 'zmin' 'zmax
+'set t 'tmin' 'tmax
 
-say 'Finished makezdif3'
-return
+*'q dims'
+*say ' '
+*say 'Dimension Environment Leaving MAKEZDIF3: 'result
+*say result
+*say ' '
+
+return timefile

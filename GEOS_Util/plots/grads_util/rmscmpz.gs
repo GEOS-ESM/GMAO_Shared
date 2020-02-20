@@ -31,7 +31,6 @@ debug  = TRUE
 field  = h
     x  = 2
   rms  = 0
-NOPLOT = ''
 
        num = 0
 while( num < numargs )
@@ -42,8 +41,6 @@ if( subwrd(args,num)='-desc'   ) ; desc   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-rc'     ) ; rcfile = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-debug'  ) ; debug  = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-rms'    ) ; rms    = subwrd(args,num+1) ; endif
-if( subwrd(args,num)='-NOPLOT' ) ; NOPLOT = '-NOPLOT'          ; endif
-
 endwhile
 
 ****************************************************************
@@ -127,7 +124,12 @@ endwhile
 
 'set lev 1000 100'
 'set x   'x
+'q dims'
+say ' '
+say 'Dimension Environment for Calling RMSCMPZ:'
+say result
+say ' '
 say 'Calling RMSCMPZ for x = 'x'  RMS Option: 'rms
-    'rmscmpz_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug' 'NOPLOT
+    'rmscmpz_plot.gs -field 'field' -numexp 'ntot' 'dsc' -desc 'desc' -rms 'rms' -debug 'debug
 
 return

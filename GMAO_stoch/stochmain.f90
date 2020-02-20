@@ -1,13 +1,7 @@
   subroutine stochmain
 
-    use MAPL_Mod
+    use MAPL
     use ESMF
-    use MAPL_BaseMod
-    use MAPL_CFIOMod
-    use MAPL_AbstractRegridderMod
-    use MAPL_RegridderManagerMod
-    use MAPL_GridManagerMod
-    use MAPL_LatLonGridFactoryMod
     use stoch_module
 
     implicit none

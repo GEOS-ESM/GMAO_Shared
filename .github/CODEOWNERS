@@ -4,8 +4,8 @@
 # precedence.
 
 # Larry is the CODEOWNER for plots and post
-/GEOS_Util/plots/ @lltakacs 
-/GEOS_Util/post/ @lltakacs 
+/GEOS_Util/plots/ @GEOS-ESM/postprocessing-team
+/GEOS_Util/post/ @GEOS-ESM/postprocessing-team
 
 # Yuri owns the coupled plots
 /GEOS_Util/coupled_diagnostics/ @yvikhlya 
