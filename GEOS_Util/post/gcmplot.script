@@ -39,6 +39,28 @@ if ( ! $?GEOSUTIL ) then
       exit 1
 endif
 
+# Determine Machine ID
+# --------------------
+setenv ARCH `   uname`
+setenv HOST `hostname`
+set name = `echo $HOST` ; if ( ($name =~ pfe*) || ($name =~ r[0-9]*i[0-9]*n[0-9]*) ) setenv HOST pleiades
+
+set name = `echo $HOST | cut -b 1-8` ; if( $name == 'discover' ) setenv HOST $name
+set name = `echo $HOST | cut -b 1-4` ; if( $name == 'borg'     ) setenv HOST discover
+set name = `echo $HOST | cut -b 1-4` ; if( $name == 'warp'     ) setenv HOST discover
+set name = `echo $HOST | cut -b 1-4` ; if( $name == 'dali'     ) setenv HOST discover
+
+# Set Architecture Specific Variables
+# -----------------------------------
+if( $ARCH == 'Linux'  ) then
+    if( $HOST == 'pleiades' ) then
+       set batch_cmd  = "qsub"
+    endif
+    if( $HOST == 'discover' ) then
+       set batch_cmd  = "sbatch"
+    endif
+endif
+
 # Process Input String
 # --------------------
         set    EXPID     = 'NULL'
@@ -431,7 +453,7 @@ s|@N|$n|g
 EOF
 sed -f sedfile FILE > $FILE
 
-echo qsub $FILE
+echo $batch_cmd $FILE
 
 /bin/rm -f FILE
 /bin/rm -f sedfile
