@@ -26,6 +26,7 @@ Usage:
       echo "         [-gradsx   GRADSX]"
       echo "         [-batch          ]"
       echo "         [-partition PARTITION]"
+      echo "         [-model   MODEL]"
       echo "         [-qos       QOS]"
       echo "         [-debug        ]"
       echo " "
@@ -35,6 +36,9 @@ Usage:
       echo "            FIELDS: Fields to plot (e.g., p u v )            (Default: p u v t q h)                 "
       echo "             PLOTS: Plot Types (corcmp, sys, syscmp)         (Default: ALL)                         "
       echo "            OUTPUT: Output directory to contain plots        (Default: STATS_RC directory)          "
+      echo "            GRADSX: GrADS executable to use for processing   (Default: grads)                       "
+      echo "         PARTITION: Partition to use                         (Default: compute)                     "
+      echo "             MODEL: Processor model to use                   (Default: hasw)                        "
       echo "            GRADSX: GrADS executable to use for processing   (Default: grads)                       "
       echo " "
       echo "Note:    Plots will be located in experiment sub-directories under OUTPUT                           "
@@ -48,6 +52,7 @@ endif
 # -------------
 set QUEUE     = partition
 set PARTITION = compute
+set MODEL     = hasw
 set debug     = FALSE
 set batch     = NULL
 set statsrc   = NULL
@@ -84,6 +89,10 @@ while( $n <= $nmax )
        if( "$argv[$n]" == "-partition" ) then
                     @ n = $n + 1
              set PARTITION = $argv[$n]
+       endif
+       if( "$argv[$n]" == "-model" ) then
+                    @ n = $n + 1
+             set MODEL = $argv[$n]
        endif
        if( "$argv[$n]" == "-qos" ) then
                     @ n = $n + 1
@@ -409,6 +418,7 @@ s?@GEOSBIN?$GEOSBIN?g
 s?@GEOSSRC?$GEOSSRC?g
 s?@NTASKS?$NTASKS?g
 s?@PARTITION?$PARTITION?g
+s?@MODEL?$MODEL?g
 s?@QUEUE?$QUEUE?g
 EOF
 sed -f $SOURCE/sedfile $SOURCE/gcm_quickstat.tmpl > $SOURCE/gcm_quickstat.j
