@@ -120,6 +120,8 @@ if( EXPORT = 'HE'    ) ; pname = hghte ; endif
 if( EXPORT = 'CHI'   ) ; pname = chi   ; endif
 if( EXPORT = 'PSI'   ) ; pname = psi   ; endif
 if( EXPORT = 'O3'    ) ; pname = o3    ; endif
+if( EXPORT = 'QLTOT' ) ; pname = ql    ; endif
+if( EXPORT = 'QITOT' ) ; pname = qi    ; endif
 
 * Set Default EXPORT Model and Observation Scaling Factors
 * --------------------------------------------------------
@@ -131,6 +133,8 @@ if( EXPORT = "Q"     ) ; facm = 1    ; faco = 1    ; endif
 if( EXPORT = "RH2"   ) ; facm = 1    ; faco = 1    ; endif
 if( EXPORT = "SLP"   ) ; facm = 1    ; faco = 1    ; endif
 if( EXPORT = "O3"    ) ; facm = 1    ; faco = 1    ; endif
+if( EXPORT = "QLTOT" ) ; facm = 1    ; faco = 1    ; endif
+if( EXPORT = "QITOT" ) ; facm = 1    ; faco = 1    ; endif
 
 if( EXPORT = "SLP" & level != 1000  ) ; return ; endif
 
@@ -782,6 +786,8 @@ if( EXPORT = "Q"     ) ; facm = 1    ; faco = 1    ; endif
 if( EXPORT = "RH2"   ) ; facm = 1    ; faco = 1    ; endif
 if( EXPORT = "SLP"   ) ; facm = 1    ; faco = 1    ; endif
 if( EXPORT = "O3"    ) ; facm = 1    ; faco = 1    ; endif
+if( EXPORT = "QLTOT" ) ; facm = 1    ; faco = 1    ; endif
+if( EXPORT = "QITOT" ) ; facm = 1    ; faco = 1    ; endif
 
                                      fact = faco
 if( EXPORT = "Q"   & level < 400 ) ; fact = fact*1000  ; endif

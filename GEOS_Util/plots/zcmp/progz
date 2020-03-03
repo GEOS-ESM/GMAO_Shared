@@ -221,6 +221,8 @@ if( EXPORT = "ZLE"   ) ; facm = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; e
 if( EXPORT = "RH2"   ) ; facm = 100   ; nplots = 2 ; ptops = "30 30:L"       ; endif
 if( EXPORT = "OMEGA" ) ; facm = 864   ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "O3"    ) ; facm = 1e6   ; nplots = 2 ; ptops = "30      0.1:L" ; endif
+if( EXPORT = "QLTOT" ) ; facm = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
+if( EXPORT = "QITOT" ) ; facm = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
 
 faco = facm
 
@@ -452,6 +454,8 @@ if( EXPORT = "ZLE"   ) ; facm = 1     ; faco = 1     ; nplots = 3 ; ptops = "30 
 if( EXPORT = "RH2"   ) ; facm = 100   ; faco = 100   ; nplots = 2 ; ptops = "30 30:L"       ; endif
 if( EXPORT = "OMEGA" ) ; facm = 864   ; faco = 864   ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "O3"    ) ; facm = 1e6   ; faco = 1e6   ; nplots = 2 ; ptops = "30      0.1:L" ; endif
+if( EXPORT = "QLTOT" ) ; facm = 1e6   ; faco = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
+if( EXPORT = "QITOT" ) ; facm = 1e6   ; faco = 1e6   ; nplots = 1 ; ptops = "30"            ; endif
 
 * Get Plotting Values from Resource File
 * --------------------------------------
