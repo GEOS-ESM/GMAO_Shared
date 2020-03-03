@@ -251,28 +251,9 @@ if( $batch == 'BATCH' ) then
 
 # Set Default GEOS Build Directories
 # ----------------------------------
-                set   command = `which $0`
-set   root =   `echo $command | cut -d / -f1`
-if(  $root == . ) set command = `echo $lcd`/quickstat
-  set root =   `echo $command | cut -b1`
-if( "$root" != "/" ) set command = `echo $lcd`/$command
-
-@ n = 1
-set root = `echo $command | cut -d / -f$n`
-while( .$root == . )
-@ n = $n + 1
-set root = `echo $command | cut -d / -f$n`
-end
-
-set GEOSDEF = ''
-while( $root != 'src' )
-set GEOSDEF = `echo ${GEOSDEF}/${root}`
-@ n = $n + 1
-set root = `echo $command | cut -d / -f$n`
-end
-set  GEOSSRC = ${GEOSDEF}/src
-set  GEOSBIN = ${GEOSDEF}/Linux/bin
-set  GEOSAPP = ${GEOSDEF}/src/Applications/GEOSgcm_App
+set  GEOSSRC = @CMAKE_INSTALL_PREFIX@
+set  GEOSBIN = @CMAKE_INSTALL_PREFIX@/bin
+set  GEOSAPP = @CMAKE_INSTALL_PREFIX@/bin
 
 
 # Create QUICKSTAT commands
@@ -448,11 +429,11 @@ if( "$plots" =~ *corcmp* ) then
      foreach exp ($exps)
      if( $exp != 0 ) then
 
-        set DESC = `cat $statsrc | grep DESC:      | grep -v \# | grep -v \* | cut -d: -f2`
-        set EXP0 = `cat $statsrc | grep EXP0:      | grep -v \# | grep -v \* | cut -d: -f2`
-        set DSC0 = `cat $statsrc | grep DSC0:      | grep -v \# | grep -v \* | cut -d: -f2`
-        set EXP1 = `cat $statsrc | grep EXP${exp}: | grep -v \# | grep -v \* | cut -d: -f2`
-        set DSC1 = `cat $statsrc | grep DSC${exp}: | grep -v \# | grep -v \* | cut -d: -f2`
+        set DESC = `cat $statsrc | grep DESC:      | grep -v \# | grep -v \* | cut -d: -f2-`
+        set EXP0 = `cat $statsrc | grep EXP0:      | grep -v \# | grep -v \* | cut -d: -f2-`
+        set DSC0 = `cat $statsrc | grep DSC0:      | grep -v \# | grep -v \* | cut -d: -f2-`
+        set EXP1 = `cat $statsrc | grep EXP${exp}: | grep -v \# | grep -v \* | cut -d: -f2-`
+        set DSC1 = `cat $statsrc | grep DSC${exp}: | grep -v \# | grep -v \* | cut -d: -f2-`
 
         foreach field ($fields)
         if( $field != p ) then
@@ -540,7 +521,7 @@ if( "$plots" =~ *pltsys* ) then
             endif
         else
                                       set levels =  $level
-            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 1`
+            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 7 5 3 1`
             if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
             foreach level  ( $levels )
@@ -600,7 +581,7 @@ if( "$plots" =~ *syscmp* ) then
                endif
            else
                                          set levels =  $level
-               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 1`
+               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 7 5 3 1`
                if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
                foreach level  ( $levels )
