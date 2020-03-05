@@ -71,6 +71,7 @@ ecbuild_add_executable (TARGET dyn_cov.x        SOURCES dyn_cov.f90        LIBS 
 ecbuild_add_executable (TARGET dyn_efsens.x     SOURCES dyn_efsens.f90     LIBS ${this})
 ecbuild_add_executable (TARGET eta_echo.x       SOURCES eta_echo.f90       LIBS ${this})
 ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
+ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
 
 install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
 
