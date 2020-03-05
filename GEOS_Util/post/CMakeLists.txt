@@ -8,13 +8,13 @@ set(srcs
 
 esma_add_library (${this}
   SRCS ${srcs}
-  DEPENDENCIES GEOS_Shared MAPL_Base GMAO_pFIO GMAO_hermes)
+  DEPENDENCIES GEOS_Shared MAPL GMAO_hermes)
 target_compile_definitions(${this} PRIVATE mpi)
 
 
 esma_add_library (post_nompi
   SRCS dynamics_lattice_module.F mpi_util.F mymalloc.F timer.F
-  DEPENDENCIES MAPL_Base GMAO_pFIO GMAO_hermes)
+  DEPENDENCIES MAPL GMAO_hermes)
 target_compile_definitions(post_nompi PRIVATE mpi)
 
 foreach (basename
@@ -71,21 +71,21 @@ set_property(SOURCE convert_aerosols.F APPEND_STRING PROPERTY COMPILE_FLAGS "${B
 set_property(SOURCE PWSSSP.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${EXTENDED_SOURCE} ${BYTERECLEN}")
 set_property(SOURCE alias.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN}")
 
-target_link_libraries (convert_eta.x ${this} GMAO_hermes MAPL_Base)
-target_link_libraries (eta2prs.x ${this} GMAO_gfio_r4 MAPL_Base GEOS_Shared)
-target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL_Base)
-target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL_Base)
-target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL_Base)
-target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL_Base ${ESMF_LIBRARIES})
+target_link_libraries (convert_eta.x ${this} GMAO_hermes MAPL)
+target_link_libraries (eta2prs.x ${this} GMAO_gfio_r4 MAPL GEOS_Shared)
+target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
+target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
+target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL)
+target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL ${ESMF_LIBRARIES})
 target_link_libraries (flat2hdf.x post_nompi ${this} GMAO_gfio_r4)
 target_link_libraries (gg2fv.x post)
 target_link_libraries (rs2hdf.x post)
-target_link_libraries (time_ave.x ${this} GMAO_gfio_r4 MAPL_Base )
+target_link_libraries (time_ave.x ${this} GMAO_gfio_r4 MAPL )
 
 target_link_libraries (rsg3_vinterp.x ${this} GMAO_hermes)
 target_link_libraries (rs_vinterp.x ${this} GMAO_hermes)
 target_link_libraries (eta2rst.x ${this} GMAO_hermes ${MPI_Fortran_LIBRARIES})
-target_link_libraries (fvrst.x GMAO_gfio_r4 MAPL_Base GMAO_pFIO)
+target_link_libraries (fvrst.x GMAO_gfio_r4 MAPL)
 set_target_properties (fvrst.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
 target_link_libraries (gg2eta.x ${this} GMAO_gfio_r4)
 target_link_libraries (gg2fv.x ${this} GMAO_gfio_r4)
@@ -93,10 +93,10 @@ target_link_libraries (hdf2rs.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
 target_link_libraries (makeiau.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
 target_link_libraries (merra2scm.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
 target_link_libraries (rs2hdf.x ${this} GMAO_gfio_r4)
-target_link_libraries (rs_hinterp.x ${this} MAPL_Base GMAO_pFIO)
+target_link_libraries (rs_hinterp.x ${this} MAPL)
 set_target_properties (rs_hinterp.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
 
-target_link_libraries (rs_numtiles.x MAPL_Base GMAO_pFIO)
+target_link_libraries (rs_numtiles.x MAPL)
 set_target_properties (rs_numtiles.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
 
 # Unit tests?
@@ -110,10 +110,8 @@ target_link_libraries (rs_vinterp_scm.x ${this} GMAO_hermes)
 target_link_libraries (convert_aerosols.x ${this} GMAO_gfio_r8 MAPL_cfio_r8 GMAO_hermes)
 
 
-include_directories (${include_MAPL_Base})
 include_directories (${include_GMAO_hermes})
 include_directories (${include_GEOS_Shared})
-include_directories (${include_GMAO_pFIO})
 
 set (post_progs
    gcmpost.script

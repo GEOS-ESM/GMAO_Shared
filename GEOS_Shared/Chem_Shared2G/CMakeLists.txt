@@ -4,11 +4,12 @@ set (srcs
   Chem_MieMod2G.F90
   Chem_MieTableMod.F90
   Chem_AeroGeneric.F90
+  GriddedEmission.F90
   )
 
 esma_add_library(${this} 
   SRCS ${srcs} 
-  DEPENDENCIES MAPL_Base GMAO_mpeu)
+  DEPENDENCIES MAPL GMAO_mpeu)
 
 target_include_directories (${this} PUBLIC ${INC_ESMF} ${INC_NETCDF})
 

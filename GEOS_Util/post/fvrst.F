@@ -1,6 +1,6 @@
       program  main
 
-      use MAPL_IOMod
+      use MAPL
  
       implicit none
 
@@ -24,8 +24,9 @@
       character*512, allocatable :: arg(:)
       integer   nargs,iargc,n
       logical   HEADER
-      type(MAPL_NCIO) :: NCIO
       integer :: filetype,rc
+      type(Netcdf4_fileformatter) :: fmt
+      type(FileMetadata) :: cfg
 
       HEADER = .false.
 
@@ -48,8 +49,13 @@
       call MAPL_NCIOGetFileType(dynrst,filetype)
       if (filetype ==0) then
          if (header) then
-            NCIO = MAPL_NCIOOpen(dynrst,rc=rc)
-            call MAPL_NCIOGetDimSizes(NCIO,lon=im,lat=jm,lev=lm,date=nymd,time=nhms)
+            call fmt%open(dynrst,pFIO_READ,rc=rc)
+            cfg = fmt%read(rc=rc)
+            im = cfg%get_dimension('lon',rc=rc)
+            jm = cfg%get_dimension('lat',rc=rc)
+            lm = cfg%get_dimension('lev',rc=rc)
+            call MAPL_IOGetTime(cfg,nymd,nhms)
+
             print *, im,jm,lm,nymd,nhms
             stop
          else

@@ -1,7 +1,7 @@
 program rs_numtiles  
 
   use iso_fortran_env
-  use MAPL_IOMod
+  use MAPL
 
   implicit none
 
@@ -14,7 +14,8 @@ program rs_numtiles
 
   integer           :: bpos, epos, ntiles, nargs
 
-  type(MAPL_NCIO) :: NCIO
+  type(Netcdf4_Fileformatter) :: formatter
+  type(FileMetadata) :: cfg
   integer :: rc, filetype
     
 ! Usage
@@ -42,7 +43,8 @@ program rs_numtiles
   call MAPL_NCIOGetFileType(trim(fname1), filetype, rc=rc)
 
   if (filetype == 0) then
-     NCIO = MAPL_NCIOOpen(trim(fname1))
+     call formatter%open(trim(fname1),pFIO_READ,rc=rc)
+     cfg = formatter%read(rc=rc)
   else
      open (unit=10, file=trim(fname1), form='unformatted')
   end if
@@ -51,7 +53,7 @@ program rs_numtiles
 ! ----------------
 
   if (filetype == 0) then
-     call MAPL_NCIOGetDimSizes(NCIO,tile=ntiles)
+     ntiles = cfg%get_dimension('tile',rc=rc)
   else
      bpos=0
      read (10)
@@ -66,7 +68,7 @@ program rs_numtiles
 ! ------------------------
 
   if (filetype == 0) then
-     call MAPL_NCIOClose(NCIO)
+     call formatter%close()
   else
      close (10)
   end if

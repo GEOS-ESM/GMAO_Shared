@@ -138,7 +138,7 @@ contains
 
 !  Get file names for the optical tables
 !  -------------------------------------
-   call ESMF_ConfigGetAttribute( CF, this%optics_file, Label="OPTICS_FILE:", __RC__ )
+   call ESMF_ConfigGetAttribute( CF, this%optics_file, Label="radiation_optics:", __RC__ )
 
 !  Set the number of bands and channels
 !  -------------------------------------

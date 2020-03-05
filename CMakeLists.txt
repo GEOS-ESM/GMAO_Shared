@@ -4,8 +4,6 @@ esma_add_subdirectories(
   GMAO_mpeu
   GMAO_pilgrim
   GMAO_etc
-  GMAO_pFIO 
-  MAPL_Base 
   GEOS_Shared
   GMAO_hermes
   GEOS_Util 

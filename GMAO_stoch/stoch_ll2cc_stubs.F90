@@ -31,8 +31,8 @@ subroutine xwritit ( q,im,jm,lm,ku,Grid )
       use ESMF, only: ESMF_GridCompGet
       use ESMF, only: ESMF_GridComp
       use ESMF, only: ESMF_Grid
-      use MAPL_Mod, only: ArrayGather
-      use MAPL_Mod, only: MAPL_GridGet
+      use MAPL, only: ArrayGather
+      use MAPL, only: MAPL_GridGet
       implicit none
       type ( ESMF_Grid ) Grid
       integer  im,jm,lm
