@@ -1,6 +1,6 @@
 esma_set_this()
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.F90)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.f90)
 
    add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
    include_directories (${include_GEOS_Shared})
@@ -78,17 +78,20 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.F90)
    install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
 else ()
 
+   add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
    string (REPLACE " " ";" flags ${FREAL8})
    add_compile_options(${flags})
 
    set (srcs
-     shared_topo_remap.F90
+     m_set_eta.F90 shared_topo_remap.F90
      )
    
    esma_add_library(${this} SRCS ${srcs} )
    target_compile_options(${this} PRIVATE ${flags})
 
    set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
+
+   ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
 
 endif ()
 
