@@ -1,6 +1,6 @@
 esma_set_this()
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.f90)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.F90)
 
    add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
    include_directories (${include_GEOS_Shared})
