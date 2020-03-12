@@ -1,13 +1,14 @@
 esma_set_this()
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.F90)
+add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
+string (REPLACE " " ";" flags ${FREAL8})
+add_compile_options(${flags})
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
 
-   add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
+if ( NOT DEFINED HERMES_LIGHT )
+
    include_directories (${include_GEOS_Shared})
    include_directories (${include_GMAO_gfio_r8})
-   
-   string (REPLACE " " ";" flags ${FREAL8})
-   add_compile_options(${flags})
    
    set (srcs
      m_ana2dyn.F m_const.f90 m_dyn.f90 m_dyn2dyn.f90 m_dynp.F90
@@ -19,8 +20,6 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.F90)
    
    esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu GMAO_gfio_r8)
    target_compile_options(${this} PRIVATE ${flags})
-   
-   set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
    
    if (EXTENDED_SOURCE)
      set_source_files_properties (m_interpack.F    PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
@@ -73,14 +72,10 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/m_topo_remap.F90)
    ecbuild_add_executable (TARGET dyn_efsens.x     SOURCES dyn_efsens.f90     LIBS ${this})
    ecbuild_add_executable (TARGET eta_echo.x       SOURCES eta_echo.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
-   ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
    
    install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
 else ()
 
-   add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
-   string (REPLACE " " ";" flags ${FREAL8})
-   add_compile_options(${flags})
 
    set (srcs
      m_set_eta.F90 shared_topo_remap.F90
@@ -89,11 +84,11 @@ else ()
    esma_add_library(${this} SRCS ${srcs} )
    target_compile_options(${this} PRIVATE ${flags})
 
-   set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
 
-   ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
 
 endif ()
+
+ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
 
 file(GLOB resource_files *.rc)
 install(FILES ${resource_files} DESTINATION etc)

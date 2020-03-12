@@ -15,8 +15,9 @@ program write_eta
   ! -s 1 use sigma
   ! -s 0 do not use sigma
   ! -c 1 use ncep levels
-  ! -c 0 do not use ncept levels
-  character(len=*), parameter :: Usage="./write_eta.x -l n  -s 1 (or 0) -e (1 or 0) -p ref_pressure"
+  ! -c 0 do not use ncep levels
+  ! -p reference pressure
+  character(len=*), parameter :: Usage="./write_eta.x -l n  -s 1 (or 0) -e 1 (or 0) -p ref_pressure"
 
   p0 = 98400.d0 
   use_sigma = 0
