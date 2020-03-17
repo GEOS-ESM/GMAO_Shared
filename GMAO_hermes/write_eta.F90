@@ -6,10 +6,11 @@ program write_eta
   integer :: nxt
   integer :: levels, use_sigma, use_ncep, stat
   character :: opt
-  integer :: ks, k
+  integer :: ks, k, ks_tmp, status
   real(kind=REAL64), allocatable :: ak(:), bk(:)
+  real(kind=REAL64) :: ak_tmp, bk_tmp
   real(kind=REAL64) :: p0, ptop, pint
-
+  character(len=100) :: line
   !
   ! -l levels
   ! -s 1 use sigma
@@ -80,10 +81,38 @@ program write_eta
   enddo
  
   write(10,'(A, ES23.15)') "REF_PRESSURE: ",p0
-  write(10,'(A, 5I)') "TRANSIT_TO_P: ", ks
-  
-
   close(10) 
 
+  ! read back date from the file and verify the data
+
+  open(10, file="eta.rc", action="read", FORM="FORMATTED")
+  do 
+    read(10,'(A)', IOSTAT = status) line
+    if (status < 0) exit
+    if(index(line,"ak-bk") == 0)cycle
+
+    ks_tmp = -1
+    do k = 1, levels + 1
+      read(10,'(A)', IOSTAT = status) line
+      read(line,*) ak_tmp, bk_tmp
+      if(abs(ak_tmp-ak(k)) > 0.0d0) then
+         print*, k
+         stop " ak is not consistent"
+      endif
+      if(abs(bk_tmp-bk(k)) > 0.0d0) then
+         print*, k
+         stop " bk is not consistent"
+      endif
+      if (bk_tmp > 0.0d0 .and. ks_tmp == -1 ) then
+           ks_tmp = k-2
+           if (ks_tmp /= ks) then
+              print*, "ks : ", ks_tmp
+              stop "transition to pure pressure level is not correct"
+           endif
+       endif
+     enddo
+     exit
+   enddo
+   close(10)
 end program
 
