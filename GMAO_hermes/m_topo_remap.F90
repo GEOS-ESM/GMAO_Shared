@@ -12,7 +12,7 @@ module m_topo_remap
 ! !USES:
 
 use m_dyn
-use shared_topo_remap, only : topo_remap0_, topo_remap1_, ps_remap0_
+use shared_topo_remap, only : dyn_topo_remap, gmap
 implicit none
 private
 
@@ -23,8 +23,6 @@ public dyn_real_eta    ! nothing else should be made public
 !
 interface dyn_topo_remap
   module procedure dyn_topo_remap_
-  module procedure topo_remap0_
-  module procedure topo_remap1_
 end interface
 interface dyn_real_eta
   module procedure dyn_real_eta_
@@ -108,7 +106,7 @@ CONTAINS
           stop
       endif
 
-      call topo_remap0_( w_f%ps,w_f%delp,w_f%u,w_f%v,thv,w_f%q,w_f%phis,phis_new, &
+      call dyn_topo_remap( w_f%ps,w_f%delp,w_f%u,w_f%v,thv,w_f%q,w_f%phis,phis_new, &
                          w_f%grid%ak,w_f%grid%bk,&
                          im,jm,km,4)
 
@@ -220,5 +218,111 @@ CONTAINS
       deallocate(ple_new)
       deallocate(ple_cur)
       end subroutine dyn_real_eta_
+
+      subroutine ps_remap0_( ple,ple_out,u,v,thv,q,ak,bk,im,jm,lm,nq )
+
+!***********************************************************************
+!
+!  Purpose
+!     Driver for remapping fields lcv fields to consistent eta-coordinate
+!
+!  Argument Description
+!     ple ...... model edge pressure
+!     u  ....... model zonal      wind
+!     v  ....... model meridional wind
+!     thv  ..... model virtual potential  temperature
+!     q  ....... model specific   humidity; ozone; others
+!     ak ....... model vertical   dimension
+!     bk ....... model vertical   dimension
+!     ple_out .. target pressure levels
+!
+!     im ....... zonal      dimension
+!     jm ....... meridional dimension
+!     lm ....... meridional dimension
+!     nq ....... number of tracers including spec. hum.
+!
+! 20Oct2013  Todling  Addapted for dyn-vect needs
+!
+!***********************************************************************
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+!***********************************************************************
+
+
+
+      implicit none
+      integer  im,jm,lm,nq
+
+! Input variables
+! ---------------
+      real      ple(im,jm,lm+1)
+      real  ple_out(im,jm,lm+1)
+      real        u(im,jm,lm)
+      real        v(im,jm,lm)
+      real      thv(im,jm,lm)
+      real        q(im,jm,lm,nq)
+
+      real       ak(lm+1)
+      real       bk(lm+1)
+
+! Local variables
+! ---------------
+      real, allocatable ::  pke    (:,:,:)
+      real, allocatable ::  pke_out(:,:,:)
+
+      real, allocatable ::    u_out(:,:,:)
+      real, allocatable ::    v_out(:,:,:)
+      real, allocatable ::  thv_out(:,:,:)
+      real, allocatable ::    q_in (:,:,:,:)
+      real, allocatable ::    q_out(:,:,:,:)
+
+      real    kappa,cp,rgas,eps,rvap
+
+      _UNUSED_DUMMY(ak)
+      _UNUSED_DUMMY(bk)
+
+      kappa = 2.0/7.0
+      rgas  = 8314.3/28.97
+      rvap  = 8314.3/18.01
+      eps   = rvap/rgas-1.0
+      cp    = rgas/kappa
+
+      allocate(  pke    (im,jm,lm+1) )
+      allocate(  pke_out(im,jm,lm+1) )
+
+      allocate(    u_out(im,jm,lm)   )
+      allocate(    v_out(im,jm,lm)   )
+      allocate(  thv_out(im,jm,lm)   )
+      allocate(    q_in (im,jm,lm,nq))
+      allocate(    q_out(im,jm,lm,nq))
+
+! Construct fv pressure variables using new surface pressure
+! ----------------------------------------------------------
+      pke(:,:,:)     = ple    (:,:,:)**kappa
+      pke_out(:,:,:) = ple_out(:,:,:)**kappa
+
+! Map original fv state onto new eta grid
+! ---------------------------------------
+      q_in(:,:,:,:) =  q(:,:,:,:)
+
+      call gmap( im,jm,nq, kappa, &
+                  lm, pke    ,ple    ,u    ,v    ,thv    ,q_in , &
+                  lm, pke_out,ple_out,u_out,v_out,thv_out,q_out)
+
+        u(:,:,:)   =   u_out(:,:,:)
+        v(:,:,:)   =   v_out(:,:,:)
+      thv(:,:,:)   = thv_out(:,:,:)
+        q(:,:,:,:) =   q_out(:,:,:,:)
+
+      deallocate(  pke_out )
+      deallocate(  pke     )
+
+      deallocate(    q_out )
+      deallocate(    q_in  )
+      deallocate(  thv_out )
+      deallocate(    v_out )
+      deallocate(    u_out )
+
+      return
+      end subroutine ps_remap0_
 
 end module m_topo_remap
