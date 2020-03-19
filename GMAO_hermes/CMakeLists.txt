@@ -5,7 +5,7 @@ string (REPLACE " " ";" flags ${FREAL8})
 add_compile_options(${flags})
 set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
 
-if ( NOT DEFINED HERMES_LIGHT )
+if ( NOT HERMES_LIGHT )
 
    include_directories (${include_GEOS_Shared})
    include_directories (${include_GMAO_gfio_r8})
@@ -74,8 +74,8 @@ if ( NOT DEFINED HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
    
    install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
-else ()
 
+else ()
 
    set (srcs
      m_set_eta.F90 shared_topo_remap.F90
@@ -83,8 +83,6 @@ else ()
    
    esma_add_library(${this} SRCS ${srcs} )
    target_compile_options(${this} PRIVATE ${flags})
-
-
 
 endif ()
 

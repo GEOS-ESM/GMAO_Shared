@@ -6,11 +6,12 @@ program write_eta
   integer :: nxt
   integer :: levels, use_sigma, use_ncep, stat
   character :: opt
-  integer :: ks, k, ks_tmp, status
+  integer :: ks, k, ks_tmp, status, unit
   real(kind=REAL64), allocatable :: ak(:), bk(:)
   real(kind=REAL64) :: ak_tmp, bk_tmp
   real(kind=REAL64) :: p0, ptop, pint
   character(len=100) :: line
+  character(len=100) :: filename
   !
   ! -l levels
   ! -s 1 use sigma
@@ -18,13 +19,18 @@ program write_eta
   ! -c 1 use ncep levels
   ! -c 0 do not use ncep levels
   ! -p reference pressure
-  character(len=*), parameter :: Usage="./write_eta.x -l n  -s 1 (or 0) -e 1 (or 0) -p ref_pressure"
+  ! -f output filename
+  character(len=*), parameter :: Usage="Usage: ./write_eta.x -l n  -s 1 (or 0) -e 1 (or 0) -p ref_pressure -f filename \n &
+                                        required: -l \n &
+                                         default: -s 0 -e 0 -f eta.rc "
 
   p0 = 98400.d0 
   use_sigma = 0
   use_ncep  = 0
   levels    = 0
   nxt = 1
+  filename = 'eta.rc'
+
   call getarg(nxt,arg)
 
   do while(arg(1:1)=='-')
@@ -46,6 +52,8 @@ program write_eta
         read(arg,*, iostat=stat) use_ncep
      case ('p')
         read(arg,*, iostat=stat) p0
+     case ('f')
+        read(arg,*, iostat=stat) filename
      case default
         stop Usage
      end select
@@ -67,52 +75,55 @@ program write_eta
 
   call set_eta(levels, ks, ptop, pint, ak, bk)
 
-  open(10, file="eta.rc", action="write", FORM="FORMATTED")
+  open(newunit=unit, file=trim(filename), action="write",status='new', FORM="FORMATTED")
 
-  write(10,'(A)') "# The label bk-ak is for data for ak(k), bk(k)"
-  write(10,'(A)') "# the label TRANSIT_TO_P is ks for pint"
-  write(10,*)
-  write(10,'(A, I5)') "NUM_LEVELS:  ", levels
-  write(10,*)
+  write(unit,'(A)') "# The label bk-ak is for data for ak(k), bk(k)"
+  write(unit,'(A)') "# the label TRANSIT_TO_P is ks for pint"
+  write(unit,*)
+  write(unit,'(A, I5)') "NUM_LEVELS:  ", levels
+  write(unit,*)
 
-  write(10,'(A)') "ak-bk:  "
+  write(unit,'(A)') "ak-bk:  "
   do k = 1,levels+1
-     write(10,'(2ES23.15)'), ak(k), bk(k)
+     write(unit,'(2ES23.15)'), ak(k), bk(k)
   enddo
  
-  write(10,'(A, ES23.15)') "REF_PRESSURE: ",p0
-  close(10) 
+  write(unit,'(A, ES23.15)') "REF_PRESSURE: ",p0
+  close(unit) 
 
   ! read back date from the file and verify the data
 
-  open(10, file="eta.rc", action="read", FORM="FORMATTED")
+  open(newunit=unit, file=trim(filename), action="read", FORM="FORMATTED")
   do 
-    read(10,'(A)', IOSTAT = status) line
+    read(unit,'(A)', IOSTAT = status) line
     if (status < 0) exit
     if(index(line,"ak-bk") == 0)cycle
 
     ks_tmp = -1
     do k = 1, levels + 1
-      read(10,'(A)', IOSTAT = status) line
+      read(unit,'(A)', IOSTAT = status) line
       read(line,*) ak_tmp, bk_tmp
+
       if(abs(ak_tmp-ak(k)) > 0.0d0) then
-         print*, k
-         stop " ak is not consistent"
+         print*, "WARNING!! double check ak(",k,") which is inconsistent"
+         print*, ak(k), "is changed to ", ak_tmp
       endif
       if(abs(bk_tmp-bk(k)) > 0.0d0) then
-         print*, k
-         stop " bk is not consistent"
+         print*, "WARNING!! double check bk(",k,") which is inconsistent"
+         print*, bk(k), "is changed to ", bk_tmp
       endif
       if (bk_tmp > 0.0d0 .and. ks_tmp == -1 ) then
            ks_tmp = k-2
            if (ks_tmp /= ks) then
-              print*, "ks : ", ks_tmp
-              stop "transition to pure pressure level is not correct"
+              print*, "WARNING!! double check ks = ", ks
+              print*, "ks is changed to ", ks_tmp
            endif
        endif
      enddo
      exit
    enddo
-   close(10)
+
+   close(unit)
+
 end program
 

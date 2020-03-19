@@ -1,18 +1,14 @@
 esma_check_if_debug()
 
-if ( DEFINED HERMES_LIGHT )
+esma_add_subdirectories(GEOS_Shared)
+esma_add_subdirectories(GMAO_hermes)
 
-   esma_add_subdirectories(GEOS_Shared)
-   esma_add_subdirectories(GMAO_hermes)
-
-else ()
+if ( NOT HERMES_LIGHT )
 
    esma_add_subdirectories(
      GMAO_mpeu
      GMAO_pilgrim
      GMAO_etc
-     GEOS_Shared
-     GMAO_hermes
      GEOS_Util 
      LANL_Shared
      GMAO_perllib
