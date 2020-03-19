@@ -86,6 +86,8 @@ if( mname = 'HE'    ) ; GC = DYN       ; name = hghte ; endif
 if( mname = 'CHI'   ) ; GC = DYN       ; name = chi   ; endif
 if( mname = 'PSI'   ) ; GC = DYN       ; name = psi   ; endif
 if( mname = 'O3'    ) ; GC = CHEMISTRY ; name = o3    ; endif
+if( mname = 'QLTOT' ) ; GC = AGCM      ; name = ql    ; endif
+if( mname = 'QITOT' ) ; GC = AGCM      ; name = qi    ; endif
 
 * Get Plotting Values from Resource File
 * --------------------------------------
@@ -136,6 +138,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'GC'_CBSCALE' ; endif
 
 if( cbscale = 'NULL' ) ; cbscale =  0.8      ; endif
 if( clab    = 'NULL' ) ; clab    =  on       ; endif
+
+say 'After GETRESOURCE, CLEVS = 'cvals
+say 'After GETRESOURCE, CINT  = 'cint
+say 'After GETRESOURCE, FACT  = 'fact
 
 * Set Default Plotting Variables
 ********************************
@@ -511,12 +517,18 @@ if( std_dev = 'true' )
 endif
 
    'set gxout shaded'
+
+if( mname = "QLTOT" | mname = "QITOT" )
+   'shades qmod 0 -cint 'cint' -minval 0'
+   'd qmod'
+else
    'set clevs 'cvals
    'set ccols 'ccols
    'set clab  'clab
    'd qmod'
+endif
 
-if( mname != "OMEGA" & mname != "RH2" & mname != "O3" )
+if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" )
    'set gxout contour'
    'set ccolor 1'
    'set cint 'cint
@@ -530,11 +542,17 @@ endif
 'set grads off'
 
    'set gxout shaded'
+
+if( mname = "QLTOT" | mname = "QITOT" )
+   'shades qmod 0 -cint 'cint' -minval 0'
+   'd maskout(qobso,masko)'
+else
    'set clevs 'cvals
    'set ccols 'ccols
    'd maskout(qobso,masko)'
+endif
 
-if( mname != "OMEGA" & mname != "RH2" & mname != "O3" )
+if( mname != "OMEGA" & mname != "RH2" & mname != "O3" & mname != "QLTOT" & mname != "QITOT" )
    'set gxout contour'
    'set ccolor 1'
    'set cint 'cint
@@ -567,7 +585,7 @@ say 'DIMS before Final Regridding: 'result
              CINTDIFF  = result
 if( mname = "O3" ) ; CINTDIFF = ON ; endif
 
-if( CINTDIFF = 'NULL' & std_dev != 'true' )
+if( CINTDIFF = 'NULL' & std_dev != 'true' &  mname != "QLTOT" & mname != "QITOT" )
    'set clevs 'dlevs
    'set ccols 'dcols
 else

@@ -245,8 +245,8 @@ endif
 echo Use: NCPUS = $NCPUS
 
 
-# Set Architecture Speicific Variables
-# ------------------------------------
+# Set Architecture Specific Variables
+# -----------------------------------
 if( $ARCH == 'Linux'  ) then
     if( $HOST == 'pleiades' ) then
                               setenv MASTOR lfe
@@ -255,6 +255,7 @@ if( $ARCH == 'Linux'  ) then
                               set scpvar = "mcp -a"
                               set cpvar  = "mcp -a"
                               set mytar  = "mtar"
+                              set batch_cmd  = "qsub"
     endif
     if( $HOST == 'discover' ) then
                               setenv MASTOR  dirac
@@ -263,6 +264,7 @@ if( $ARCH == 'Linux'  ) then
                               set scpvar = "bbscp -r3 -z"
                               set cpvar  = "/bin/cp"
                               set mytar  = "tar"
+                              set batch_cmd  = "sbatch"
     endif
 endif
 
@@ -601,7 +603,7 @@ EOF
 /bin/rm -f                               gcm_post.${collection}.j${date}
 sed -f sedfile $SOURCE/post/gcm_post.j > gcm_post.${collection}.j${date}
 chmod 755                                gcm_post.${collection}.j${date}
- qsub                                    gcm_post.${collection}.j${date}
+ $batch_cmd                                    gcm_post.${collection}.j${date}
 /bin/rm -f sedfile
 /bin/rm -f LOCKFILE
 sleep 5
@@ -919,7 +921,7 @@ EOF
          if( $HOST == 'pleiades' ) then
                   ./gcm_archive.$collection.$streamdates[1].j > ./gcm_archive.$collection.$streamdates[1].o
          else
-            qsub     gcm_archive.$collection.$streamdates[1].j
+            $batch_cmd     gcm_archive.$collection.$streamdates[1].j
          endif
          /bin/rm -f $archfile
          /bin/rm -f sedfile
@@ -1304,7 +1306,7 @@ EOF
 sed -f sedfile FILE > $FILE
 
 echo "Submitting Plot Job: $FILE for ${ofile_season}"
-qsub $FILE
+$batch_cmd $FILE
 
 /bin/rm -f FILE
 /bin/rm -f sedfile

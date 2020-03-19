@@ -1,0 +1,24 @@
+#!/bin/csh -fx
+
+set PLOTDIR = $1
+cd $PLOTDIR
+
+set files  = `echo AEROSOL_Black-Carbon_TIME_SERIES.gif   \
+                   AEROSOL_Dust_TIME_SERIES.gif           \
+                   AEROSOL_Nitrates_TIME_SERIES.gif       \
+                   AEROSOL_Organic-Carbon_TIME_SERIES.gif \
+                   AEROSOL_Sea-Salt_TIME_SERIES.gif       \
+                   AEROSOL_Sulfates_TIME_SERIES.gif`
+
+foreach file ($files)
+     if( ! -e $file ) exit
+endif
+
+montage            AEROSOL_Dust_TIME_SERIES.gif           \
+                   AEROSOL_Sea-Salt_TIME_SERIES.gif       \
+                   AEROSOL_Sulfates_TIME_SERIES.gif       \
+                   AEROSOL_Black-Carbon_TIME_SERIES.gif   \
+                   AEROSOL_Organic-Carbon_TIME_SERIES.gif \
+                   AEROSOL_Nitrates_TIME_SERIES.gif       \
+                   -tile 3x2 -geometry +0+0 AEROSOL_TIME_SERIES_montage.gif
+

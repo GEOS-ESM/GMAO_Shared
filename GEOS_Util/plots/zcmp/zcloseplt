@@ -138,6 +138,22 @@ if( EXPORT = "Q"   )
    'getresource 'PLOTRC' Q_MOIST_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' Q_MOIST_Z_'LEVTYPE'LEVS' ; dlevs = result
 endif
+if( EXPORT = "QLTOT"   )
+    oname = "/horiz_"cmpnam"_ql_"zid"_closeness_"obsnam
+   'getresource 'PLOTRC' QLTOT_AGCM_TITLE'           ; title = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_CLEVS'         ; clevs = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_CCOLS'         ; ccols = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_DCOLS'         ; dcols = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+endif
+if( EXPORT = "QITOT"   )
+    oname = "/horiz_"cmpnam"_qi_"zid"_closeness_"obsnam
+   'getresource 'PLOTRC' QITOT_AGCM_TITLE'           ; title = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_CLEVS'         ; clevs = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_CCOLS'         ; ccols = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_DCOLS'         ; dcols = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+endif
 if( EXPORT = "RH2" )
     oname = "/horiz_"cmpnam"_rh_"zid"_closeness_"obsnam
    'getresource 'PLOTRC' RH2_MOIST_TITLE'           ; title = result
@@ -196,6 +212,8 @@ say ' DLEVS: 'dlevs
 'set lev 1000 'ptop
 'set t 1'
 
+* Top Plot:  Source_EXP - Verfification
+* -------------------------------------
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 7.70 10.50'
 'set dfile 'qfile
@@ -208,10 +226,10 @@ if( scale = LOG ) ; 'setlevs' ; endif
 'set grads off'
 'set gxout shaded'
 
- dfact = 1
+ source_fact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
-if( CINTDIFF = 'NULL' )
+if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
    'set clevs 'dlevs
    'set ccols 'dcols
    'd dif1z'
@@ -220,6 +238,9 @@ if( CINTDIFF = 'NULL' )
    'set clevs 'dlevs
    'd dif1z'
 else
+
+* Examine Both Source_EXP and Comparison_EXP for Consistent Scaling
+* -----------------------------------------------------------------
    'stats dif1z'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
@@ -230,7 +251,7 @@ else
    else
        n = 0
    endif
-   say '    Log Factor: 'n
+   say '    Log Factor for Source_EXP: 'n
    if( n<0 ) ; n = n-2 ; endif
    'getint 'n
             n = result
@@ -241,22 +262,65 @@ else
            n = n+2
         endif
    endif
-   say 'Diff Scaling Factor: 'n
-      'd 'qmax'/1e'n
-       cint = subwrd(result,4)
-      'shades 'cint
-      'define qzplt = dif1z/1e'n
-       dfact = "10**"n
+   source_n = n
+   say 'Diff Scaling Factor for Source_EXP: 'source_n
+      'd 'qmax'/1e'source_n
+       source_cint = subwrd(result,4)
+   say '   Contour Interval for Source_EXP: 'source_cint
+
+* -----------------------------------------------------------------
+   'stats dif2z'
+     avgdif = subwrd(result,1)
+     stddif = subwrd(result,2)
+       qmax = stddif/3
+   if( qmax > 0 )
+      'd log10('qmax')'
+       n = subwrd(result,4)
+   else
+       n = 0
+   endif
+   say '    Log Factor for Comparison_EXP: 'n
+   if( n<0 ) ; n = n-2 ; endif
+   'getint 'n
+            n = result
+   if( n>0 )
+       if( n<=2 )
+           n = 0
+        else
+           n = n+2
+        endif
+   endif
+   comparison_n = n
+   say 'Diff Scaling Factor for Comparison_EXP: 'comparison_n
+      'd 'qmax'/1e'comparison_n
+       comparison_cint = subwrd(result,4)
+   say '   Contour Interval for Comparison_EXP: 'comparison_cint
+
+* -----------------------------------------------------------------
+
+       if( comparison_n > source_n )
+               source_n = comparison_n
+            source_cint = comparison_cint
+       endif
+
+* -----------------------------------------------------------------
+
+      'shades 'source_cint
+      'define qzplt = dif1z/1e'source_n
+       source_fact = "10**"source_n
       'd qzplt'
       'set gxout contour'
-      'set clevs -'cint' 'cint
+      'set clevs -'source_cint' 'source_cint
       'set ccolor 1'
       'd qzplt'
+
 endif
 'set parea 0 8.5 7.0 11'
 'cbarn -vert'
 
 
+* Middle Plot:  Comparison_EXP - Verfification
+* --------------------------------------------
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 4.30 7.10'
 'set dfile 'cfile
@@ -269,10 +333,9 @@ if( scale = LOG ) ; 'setlevs' ; endif
 'set grads off'
 'set gxout shaded'
 
- dfact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
-if( CINTDIFF = 'NULL' )
+if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
    'set clevs 'dlevs
    'set ccols 'dcols
    'd dif2z'
@@ -281,40 +344,19 @@ if( CINTDIFF = 'NULL' )
    'set clevs 'dlevs
    'd dif2z'
 else
-   'stats dif2z'
-     avgdif = subwrd(result,1)
-     stddif = subwrd(result,2)
-       qmax = stddif/3
-   if( qmax > 0 )
-      'd log10('qmax')'
-       n = subwrd(result,4)
-   else
-       n = 0
-   endif
-   say '    Log Factor: 'n
-   if( n<0 ) ; n = n-2 ; endif
-   'getint 'n
-            n = result
-   if( n>0 )
-       if( n<=2 )
-           n = 0
-        else
-           n = n+2
-        endif
-   endif
-   say 'Diff Scaling Factor: 'n
-      'd 'qmax'/1e'n
-       cint = subwrd(result,4)
-      'shades 'cint
-      'define qzplt = dif2z/1e'n
-       dfact = "10**"n
+
+      'shades 'source_cint
+      'define qzplt = dif2z/1e'source_n
       'd qzplt'
       'set gxout contour'
-      'set clevs -'cint' 'cint
+      'set clevs -'source_cint' 'source_cint
       'set ccolor 1'
       'd qzplt'
+
 endif
 
+* Bottom Plot:  Closeness to Verfification
+* ----------------------------------------
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 0.90 3.70'
 'set dfile 'ofile
@@ -352,8 +394,14 @@ if( scale = LOG ) ; 'setlevs' ; endif
         endif
    endif
    say 'Diff Scaling Factor: 'n
-      'd 'qmax'/1e'n
-       cint = subwrd(result,4)
+   'd 'qmax'/1e'n
+   cint = subwrd(result,4)
+
+* Set Hardwired Values for Consistent Plots
+* -----------------------------------------
+*         n = -2
+*      cint = 1
+
       'shades 'cint
       'define qzplt = absdifz/1e'n
        dfact = "10**"n
@@ -379,7 +427,11 @@ if( scale = LOG ) ; 'setlevs' ; endif
 
 'set string 1 c 6'
 'set strsiz .13'
-'draw string 4.25 10.85 'title
+if( source_fact = 1 )
+   'draw string 4.25 10.85 'title' Difference'
+else
+   'draw string 4.25 10.85 'title' Difference  x 'source_fact
+endif
 
 'set strsiz .10'
 'draw string 4.25 10.635 'qdesc' - 'obsnam'  'season' ('nmod')'
