@@ -1,5 +1,7 @@
 esma_check_if_debug()
 
+option(HERMES_LIGHT "Build light-weighted GMAO_shared library" OFF)
+
 esma_add_subdirectories(GEOS_Shared)
 esma_add_subdirectories(GMAO_hermes)
 
