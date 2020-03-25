@@ -264,6 +264,7 @@ if( $ARCH == 'Linux'  ) then
                               setenv BATCHQ normal
                               set scpvar = "shiftc --wait"
                               set mytar  = "tar"
+                              set batch_cmd  = "qsub"
     endif
     if( $HOST == 'discover' ) then
                               setenv MASTOR  dirac
@@ -271,6 +272,7 @@ if( $ARCH == 'Linux'  ) then
                               setenv BATCHQ general
                               set scpvar = "bbscp -r3 -z"
                               set mytar  = "tar"
+                              set batch_cmd  = "sbatch"
     endif
 endif
 
@@ -871,7 +873,7 @@ EOF
     if( $HOST == 'pleiades' ) then
                 ./gcm_archive.$collection.$streamdates[1].j > ./gcm_archive.$collection.$streamdates[1].o
     else
-         qsub     gcm_archive.$collection.$streamdates[1].j
+         $batch_cmd     gcm_archive.$collection.$streamdates[1].j
     endif
     /bin/rm -f $archfile
     /bin/rm -f sedfile
@@ -1187,7 +1189,7 @@ EOF
 sed -f sedfile FILE > $FILE
 
 echo Submitting Plot Job: $FILE for ${ofile_season}
-qsub $FILE
+$batch_cmd $FILE
 
 /bin/rm -f FILE
 /bin/rm -f sedfile

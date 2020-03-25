@@ -169,6 +169,9 @@ endif
 
 # Time-Series
 # -----------
+# Time Series
+# -----------
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/aerosols   $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/ps         $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/pme        $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/tpw        $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
