@@ -25,7 +25,7 @@
    public DustEmissionGOCART2G
    public DistributePointEmission
 
-  real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
+   real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
 
 !
 ! !DESCRIPTION:
@@ -65,6 +65,8 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
 !   real  ::  emissions(i1:i2, j1:j2, n_bins)    ! Local emission
    real, intent(out)  ::  emissions(:,:,:)    ! Local emission
+!   real, pointer, intent(inout)  ::  emissions(:,:,:)    ! Local emission
+
    integer, intent(out) :: rc                   ! Error return code:
 
 
