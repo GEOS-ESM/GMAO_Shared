@@ -88,7 +88,6 @@ contains
 !BOP
 !
 ! !IROUTINE:  Chem_MieCreateng --- Construct Mie LUTs from CF object for GOCARTng.
-!                                  It does not use any Registry.rc files.
 !
 ! !INTERFACE:
 !
@@ -157,8 +156,8 @@ contains
    call Chem_MieTableRead( this%mie_aerosol, this%nch, this%channels, __RC__)
 
 
-!  Now map the mie tables to the hash table for the registry
-!  ---------------------------------------------------------
+!  Now map the mie tables to the hash table
+!  -----------------------------------------
    do iq = 1, this%nq
        this%vtable(iq) = this%mie_aerosol
    end do
