@@ -53,7 +53,7 @@ CONTAINS
    implicit NONE
 
 ! !INPUT PARAMETERS:
-!   integer, intent(in) :: i1, i2, j1, j2, n_bins            ! grid dimensions
+!   integer, intent(in) :: i1, i2, j1, j2, nbins            ! grid dimensions
 !   real, dimension(:) :: radius, sfrac                      ! particle radius [m]
 !   real, pointer, dimension(:,:) :: fraclake, gwettop, oro, u10m, v10m, du_src
 !   real :: Ch_DU, grav
@@ -63,7 +63,7 @@ CONTAINS
    real, intent(in) :: Ch_DU, grav
 
 ! !OUTPUT PARAMETERS:
-!   real  ::  emissions(i1:i2, j1:j2, n_bins)    ! Local emission
+!   real  ::  emissions(i1:i2, j1:j2, nbins)    ! Local emission
    real, intent(out)  ::  emissions(:,:,:)    ! Local emission
 !   real, pointer, intent(inout)  ::  emissions(:,:,:)    ! Local emission
 
@@ -87,7 +87,7 @@ CONTAINS
    real            ::  u_thresh0
    real            ::  u_thresh
    real            ::  w10m
-   integer         ::  i1, i2, j1, j2, n_bins
+   integer         ::  i1, i2, j1, j2, nbins
    integer         ::  dims(2)
 !   _UNUSED_DUMMY(km)
 
@@ -98,7 +98,7 @@ CONTAINS
 
 !  Get dimensions
 !  ---------------
-   n_bins = size(radius)
+   nbins = size(radius)
    dims = shape(u10m)
    i1 = 1; j1 = 1
    i2 = dims(1); j2 = dims(2)
@@ -110,7 +110,7 @@ CONTAINS
 !  small compared to errors in other parameters.
 
 
-  do e = 1, n_bins
+  do e = 1, nbins
    diameter = 2. * radius(e)
 
    u_thresh0 = 0.13 * sqrt(soil_density*grav*diameter/air_dens) &
