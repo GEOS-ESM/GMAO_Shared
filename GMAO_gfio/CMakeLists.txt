@@ -48,23 +48,21 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories (${BASEDIR}/lib)
 include_directories (${include_${this}})
 include_directories (${INC_NETCDF})
-include (UseF2Py)
 
-#add_f2py_module(GFIO_ GFIO_py.F90
-#	DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-if (precision STREQUAL "r4")
-  add_f2py_module(GFIO_ SOURCES GFIO_py.F90
-    DESTINATION lib/Python
-    ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
-    gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
-    gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
-    LIBRARIES GMAO_gfio_r4 ${NETCDF_LIBRARIES}
-    INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
-    USE_MPI
-    )
-  add_dependencies(GFIO_ ${this})
-endif ()
+if (F2PY_FOUND)
+   if (precision STREQUAL "r4")
+   add_f2py_module(GFIO_ SOURCES GFIO_py.F90
+      DESTINATION lib/Python
+      ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
+      gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
+      gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
+      LIBRARIES GMAO_gfio_r4 ${NETCDF_LIBRARIES}
+      INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
+      USE_MPI
+      )
+   add_dependencies(GFIO_ ${this})
+   endif ()
+endif (F2PY_FOUND)
 
 ecbuild_add_executable(TARGET GFIO_mean_${precision}.x SOURCES GFIO_mean.f90 LIBS GMAO_gfio_${precision} )
 

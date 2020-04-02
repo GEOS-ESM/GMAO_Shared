@@ -1,0 +1,242 @@
+function aerosols (args)
+                                                                                                                            
+expid    = subwrd(args,1)
+output   = subwrd(args,2)
+debug    = subwrd(args,3)
+                                                                                                                            
+
+* Initialize
+* ----------
+'reinit'
+'set display color white'
+'set clab off'
+'c'
+
+* Set Aerosol Species
+* -------------------
+                              n = 1
+        species.n = DUST    ; n = n + 1
+        species.n = SSALT   ; n = n + 1
+        species.n = SULFATE ; n = n + 1
+        species.n = BCARBON ; n = n + 1
+        species.n = OCARBON ; n = n + 1
+        species.n = NITRATE ; n = n + 1
+
+       nspecies   = n - 1
+
+       n = 1
+while( n<=nspecies )
+       tag = substr( species.n,1,2 )
+      'run getvar 'tag'EXTTAU GOCART'
+        qname.n = subwrd(result,1)
+        qfile.n = subwrd(result,2)
+        scale.n = subwrd(result,3)
+       expdsc.n = subwrd(result,4)
+        expid.n = subwrd(result,5)
+        n = n + 1
+endwhile
+        if( qfile.1 = 'NULL' ) ; return ; endif
+
+        expids  = expid.1
+        expdscs = expdsc.1
+
+* Get Environment Variables
+* -------------------------
+'run getenv "GEOSUTIL"'
+         geosutil = result
+                                                                                                                            
+* Experiment Datasets
+* -------------------
+    n = 1
+while( n<=nspecies )
+   'set dfile 'qfile.n
+   'setx'
+   'sety'
+   'sett'
+   'set z 1'
+   'make_ts -FUNCTION 'qname.n' -NAME VAR'n
+   'set x 1'
+   'set y 1'
+   'run minmax VAR'n'g'
+          amax = subwrd(result,1)
+          amin = subwrd(result,2)
+         delta = ( amax - amin )/5
+        amax.n = amax + delta
+        amin.n = amin - delta
+    n = n+1
+endwhile
+
+sum = nspecies
+
+*****************************************************************
+****         Loop over Possible Comparison Datasets          ****
+*****************************************************************
+
+'!/bin/mv HISTORY.T HISTORY.Tmp'
+'run getenv "CMPEXP"'
+         cmpexp = result
+            num = 1
+
+          dummy = get_cmpexp (cmpexp,num)
+            exp = subwrd(dummy,1)
+           type = subwrd(dummy,2)
+
+while( exp != 'NULL' )
+say ' '
+say 'Comparing with: 'exp
+
+'!chckfile 'exp'/.HOMDIR'
+ 'run getenv CHECKFILE'
+         CHECKFILE  = result
+     if( CHECKFILE != 'NULL' )
+        '!/bin/cp `cat 'exp'/.HOMDIR`/HISTORY.rc .'
+     else
+        '!/bin/cp 'exp'/HISTORY.rc .'
+     endif
+'!remove CHECKFILE.txt'
+
+'!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
+
+* Get Comparison Experiment Variables
+* -----------------------------------
+       n  = 1
+while( n <= nspecies )
+       tag = substr( species.n,1,2 )
+      'run getvar 'tag'EXTTAU GOCART 'exp
+              m = n + num * nspecies
+        qname.m = subwrd(result,1)
+        qfile.m = subwrd(result,2)
+        scale.m = subwrd(result,3)
+       expdsc.m = subwrd(result,4)
+        expid.m = subwrd(result,5)
+       n = n + 1
+endwhile
+
+n = 1
+m = n + num * nspecies
+if( qfile.m != 'NULL' )
+
+    say 'expid orig: 'expids
+    say 'expid next: 'expid.m
+    expids  = expids' 'expid.m
+    say 'expid totl: 'expids
+
+    expdscs = expdscs' 'expdsc.m
+     say ' EXPIDS: 'expids
+     say 'EXPDSCS: 'expdscs
+    sum = sum + nspecies
+    while( n<=nspecies )
+           m = n + num * nspecies
+       'set dfile 'qfile.m
+       'setx'
+       'sety'
+       'sett'
+       'set z 1'
+       'make_ts -FUNCTION 'qname.m' -NAME VAR'm
+       'set x 1'
+       'set y 1'
+       'run minmax VAR'm'g'
+              amax = subwrd(result,1)
+              amin = subwrd(result,2)
+             delta = ( amax - amin )/5
+              amax = amax + delta
+              amin = amin - delta
+          if( amax > amax.n ) ; amax.n = amax ; endif
+          if( amin < amin.n ) ; amin.n = amin ; endif
+        n = n+1
+    endwhile
+endif
+
+* Check next Comparison Experiment Dataset
+* ----------------------------------------
+    num = num + 1
+  dummy = get_cmpexp (cmpexp,num)
+    exp = subwrd(dummy,1)
+   type = subwrd(dummy,2)
+
+endwhile
+'!/bin/mv HISTORY.Tmp HISTORY.T'
+
+*****************************************************************
+****                        Make Plots                       ****
+*****************************************************************
+
+'set dfile 1'
+'set x 1'
+'set y 1'
+'set z 1'
+
+mplots = sum / nspecies
+say '   sum = 'sum
+say 'mplots = 'mplots
+
+*******************************************************************
+*******************************************************************
+
+n = 1
+while( n<= 6 )
+   if( n = 1 ) ;  Aerosol = 'Dust'           ; endif
+   if( n = 2 ) ;  Aerosol = 'Sea-Salt'       ; endif
+   if( n = 3 ) ;  Aerosol = 'Sulfates'       ; endif
+   if( n = 4 ) ;  Aerosol = 'Black-Carbon'   ; endif
+   if( n = 5 ) ;  Aerosol = 'Organic-Carbon' ; endif
+   if( n = 6 ) ;  Aerosol = 'Nitrates'       ; endif
+
+        flag = ""
+while ( flag = "" )
+
+     say ' EXPIDS: 'expids
+     say 'EXPDSCS: 'expdscs
+    'run 'geosutil'/plots/tseries/aeroplot -type 'n' -mplots 'mplots' -amax 'amax.n' -amin 'amin.n' -output 'output' -expids 'expids' -expdscs 'expdscs
+
+     if( debug = "debug" )
+         say "Hit  ENTER  to repeat plot"
+         say "Type 'next' for  next plot, 'done' for next field"
+              pull flag
+     else
+              flag = "next"
+     endif
+     'c'
+endwhile
+
+n = n + 1
+endwhile
+
+*******************************************************************
+*******************************************************************
+
+'!'geosutil'/plots/tseries/aeromont 'output
+
+*******************************************************************
+*******************************************************************
+return
+
+
+* Get Next EXP from CMPEXP List
+* -----------------------------
+function get_cmpexp (cmpexp,num)
+      exp  = subwrd(cmpexp,num)
+      len = get_length (exp)
+      bit = substr(exp,len-1,1)
+      if( bit = ":" )
+          type = substr(exp,len,1)
+          exp  = substr(exp,1,len-2)
+      else
+          type = M
+      endif
+return exp' 'type
+
+function get_length (string)
+tb = ""
+i = 1
+while (i<=256)
+blank = substr(string,i,1)
+if( blank = tb )
+length = i-1
+i = 999
+else
+i = i + 1
+endif
+endwhile
+return length
+
