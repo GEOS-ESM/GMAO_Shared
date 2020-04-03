@@ -254,9 +254,9 @@ sub get_xtraflags {
     if ($mpi_type eq "intel") {
        if ($perhost) {
 
-          # Detect if we are on slurm
-          # -------------------------
-          if ($ENV{SLURM_JOB_ID}) {
+          # Detect if we are on slurm on SLES 11
+          # ------------------------------------
+          if ($ENV{SLURM_JOB_ID} && ! -e "/etc/os-release") {
 
              #############################################################
              # Intel MPI on SLURM handles -perhost in a possibly         #
