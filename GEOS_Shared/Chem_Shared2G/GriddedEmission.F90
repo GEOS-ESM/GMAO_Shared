@@ -46,26 +46,19 @@ CONTAINS
 ! !IROUTINE: DustEmissionGOCART2G
 
    subroutine DustEmissionGOCART2G(radius, fraclake, gwettop, oro, u10m, &
-                                   v10m, Ch_DU, sfrac, du_src, grav, &
+                                   v10m, Ch_DU, du_src, grav, &
                                    emissions, rc )
 
 ! !USES:
    implicit NONE
 
 ! !INPUT PARAMETERS:
-!   integer, intent(in) :: i1, i2, j1, j2, nbins            ! grid dimensions
-!   real, dimension(:) :: radius, sfrac                      ! particle radius [m]
-!   real, pointer, dimension(:,:) :: fraclake, gwettop, oro, u10m, v10m, du_src
-!   real :: Ch_DU, grav
-
-   real, dimension(:), intent(in) :: radius, sfrac                      ! particle radius [m]
+   real, dimension(:), intent(in) :: radius                      ! particle radius [m]
    real, pointer, dimension(:,:), intent(in) :: fraclake, gwettop, oro, u10m, v10m, du_src
    real, intent(in) :: Ch_DU, grav
 
 ! !OUTPUT PARAMETERS:
-!   real  ::  emissions(i1:i2, j1:j2, nbins)    ! Local emission
-   real, intent(out)  ::  emissions(:,:,:)    ! Local emission
-!   real, pointer, intent(inout)  ::  emissions(:,:,:)    ! Local emission
+   real  ::  emissions(:,:,:)    ! Local emission
 
    integer, intent(out) :: rc                   ! Error return code:
 
@@ -103,12 +96,16 @@ CONTAINS
    i1 = 1; j1 = 1
    i2 = dims(1); j2 = dims(2)
 
+!allocate(emissions(1:i2,1:j2,nbins))
+!emissions(:,:,:)=0.
+
 !  Calculate the threshold velocity of wind erosion [m/s] for each radius
 !  for a dry soil, as in Marticorena et al. [1997].
 !  The parameterization includes the air density which is assumed 
 !  = 1.25 kg m-3 to speed the calculation.  The error in air density is
 !  small compared to errors in other parameters.
 
+!print*,'DustEmiss shape(emissions) = ',shape(emissions)
 
   do e = 1, nbins
    diameter = 2. * radius(e)
@@ -125,7 +122,6 @@ CONTAINS
      if ( oro(i,j) /= LAND ) cycle ! only over LAND gridpoints
 
      w10m = sqrt(u10m(i,j)**2.+v10m(i,j)**2.)
-
 !    Modify the threshold depending on soil moisture as in Ginoux et al. [2001]
      if(gwettop(i,j) .lt. 0.5) then
       u_thresh = amax1(0.,u_thresh0* &
@@ -135,12 +131,22 @@ CONTAINS
 !       Emission of dust [kg m-2 s-1]
        emissions(i,j,e) = (1.-fraclake(i,j)) * w10m**2. * (w10m-u_thresh)
 
+!print*,'e = ', e, 'DustEmiss1 sum(emissions(:,:,e)) = ', sum(emissions(:,:,e))
+
        endif
       endif
 
      end do   ! i
     end do    ! j
-    emissions(:,:,e) =  Ch_DU * sfrac(e) * du_src *  emissions(:,:,e)
+
+!print*,'e = ', e, 'DustEmiss2 before sum(emissions(:,:,e)) = ', sum(emissions_surface(:,:,e))
+!print*,'Ch_DU = ',Ch_DU
+!print*,'sfrac(e) = ',sfrac(e)
+!print*,'DustEmiss sum(du_src)',sum(du_src)
+
+    emissions(:,:,e) =  Ch_DU * du_src *  emissions(:,:,e)
+
+!print*,'e = ', e, 'DustEmiss2 after sum(emissions(:,:,e)) = ', sum(emissions_surface(:,:,e))
  end do ! e
 
    rc=0
@@ -154,7 +160,7 @@ CONTAINS
 ! !INTERFACE:
 
    subroutine DistributePointEmission(km, delp, rhoa, z_bot, z_top, &
-                                      GRAV, emissions_point, &
+                                      GRAV, emissions_point, area, &
                                       point_column_emissions, rc)
 
 ! !USES:
@@ -164,7 +170,7 @@ CONTAINS
    integer, intent(in)             :: km
    real, dimension(:), intent(in)  :: delp, rhoa
    real, intent(in)                :: z_bot, z_top
-   real,               intent(in)  :: GRAV, emissions_point
+   real,               intent(in)  :: GRAV, emissions_point, area
 
 
 ! !OUTPUT PARAMETERS:
@@ -243,7 +249,7 @@ CONTAINS
     end if
 
 !   distribute emissions in the vertical
-    point_column_emissions(:) = (w_ / sum(w_)) * emissions_point
+    point_column_emissions(:) = ((w_ / sum(w_)) * emissions_point) / area
 
     rc = 0
 
