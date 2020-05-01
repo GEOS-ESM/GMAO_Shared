@@ -6,27 +6,47 @@ Created on Tue Jul 30 10:33:12 2019
 @author: smahanam
 """
 
+from bs4 import BeautifulSoup
 from netCDF4 import Dataset
 import numpy as np
 import re, os
 import matplotlib.pyplot as plt
 from pyhdf.SD import SD, SDC
 import numpy.ma as ma
-#import pandas as pd
-#import xarray as xr
+from datetime import datetime, timedelta
+import requests
+import shutil
 
- 
-MAPL_UNDEF = np.float(1.e15)
+#----------------------------------------------------------#
+#                 BEGIN USER DEFINED VARIABLES             #
 
-process_lai = False
-process_alb = True
+"""
+MODIS LAI Product Name (M6_NAME):
+    MOD15A2H (Terra   ) 20000218 (DOY : 049) - to date   
+    MYD15A2H (Auqa    ) 20020704 (DOY : 185) - to date
+    MCD15A2H (combined) 20020704 (DOY : 185) - to date
+"""
 
+M6_NAME     = 'MCD15A2H'
+process_lai = True
+process_alb = False
 # Output file dimensions
-
 IM = 720
 JM = 360
+
+#                  END USER DEFINED VARIABLES              # 
+#----------------------------------------------------------#
+
+# ---- Global Parameters
+ 
+MAPL_UNDEF = np.float(1.e15)
 DY = 180. / JM 
 DX = 360. / IM
+CWD= os.getcwd()
+M6_DIR       = {'MCD15A2H':'MOTA', 'MOD15A2H':'MOLT','MYD15A2H':'MOLA'}
+MODIS_DOWN   = "https://e4ftl01.cr.usgs.gov/" + M6_DIR[M6_NAME] + '/' + M6_NAME + '.006/'
+MODIS_PATH   = "https://ladsweb.modaps.eosdis.nasa.gov/opendap/hyrax/allData/6/" + M6_NAME + '/'
+EXTDATA_PATH = "/discover/nobackup/rreichle/l_data/LandBCs_files_for_mkCatchParam/V001/"
 
 class DriverFunctions (object):
 
@@ -69,8 +89,8 @@ class DriverFunctions (object):
         latout [:] = varr 
         
         # Mask
-        IX = np.array(np.loadtxt ('ExtData/DE_00720x00360_PE_0720x0360.til',skiprows=8, usecols=4,dtype='int'))
-        JX = np.array(np.loadtxt ('ExtData/DE_00720x00360_PE_0720x0360.til',skiprows=8, usecols=5,dtype='int'))
+        IX = np.array(np.loadtxt (EXTDATA_PATH + 'DE_00720x00360_PE_0720x0360.til',skiprows=8, usecols=4,dtype='int'))
+        JX = np.array(np.loadtxt (EXTDATA_PATH + 'DE_00720x00360_PE_0720x0360.til',skiprows=8, usecols=5,dtype='int'))
         geos5_mask    = np.full ((JM, IM), 0)
         
         for i in range (IX.size):
@@ -104,13 +124,18 @@ class DriverFunctions (object):
         IX = NC // IM
         temp = data.reshape((data.shape[0] // JX, JX, data.shape[1] // IX, IX))
         return np.nanmean(temp, axis=(1,3))
+
+    def get_tag_list(url,label):
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        allfiles = soup.find_all(label)
+        thislist = [tag.text for tag in allfiles]
+        return thislist
         
 if process_lai:   
 
-    if not os.path.isfile('ExtData/MCD15A2H.006_LAI_ExtData.nc4'):
-        DriverFunctions.create_netcdf('ExtData/MCD15A2H.006_LAI_ExtData.nc4',['MODIS_LAI'])
-
-    from datetime import datetime
+    if not os.path.isfile(EXTDATA_PATH +'MCD15A2H.006_LAI_ExtData.nc4'):
+        DriverFunctions.create_netcdf(EXTDATA_PATH +'MCD15A2H.006_LAI_ExtData.nc4',['MODIS_LAI'])
     
     LAI_PATH = '/l_data/model_parameters/LAI/MODIS6/MCD15A2H.006/'
     NC = 86400
@@ -221,8 +246,8 @@ if process_lai:
     
             self.lai_500 =  data * scale_factor
             hdf.end()    
-    
-    ncFidOut = Dataset('ExtData/MCD15A2H.006_LAI_ExtData.nc4',mode='a')
+    os.chdir(CWD)
+    ncFidOut = Dataset(EXTDATA_PATH +'MCD15A2H.006_LAI_ExtData.nc4',mode='a')
     IM = np.array (ncFidOut.variables['lon'][:]).size
     JM = np.array (ncFidOut.variables['lat'][:]).size    
     datestamp = ncFidOut.variables['REFERENCE_DATE']
@@ -230,65 +255,79 @@ if process_lai:
     mask      = np.array (ncFidOut.variables['mask'][:])
     timeout   = ncFidOut.variables['time']
     noland    = mask == 0
-    
+    firstdate = np.str(np.array(datestamp)[ 0])
+    lastdate  = np.array(datestamp)[-1 -3] -4
+    date0     = datetime(int(firstdate[0:4]), int(firstdate[4:6]), int(firstdate[6:8]))
+    next_day  = np.array(datestamp)[:].shape[0] - 3
+
     # Processomh 8-day composites
-                    
-    laidirs = sorted(os.listdir(LAI_PATH))
-    laidirs.remove('MCD_DATA_DIR')
-    laidirs.remove('wget_mod6_1.csh')
-    laidirs.remove('wget_mod6_2.csh')
-    laidirs.remove('wget_mod6_3.csh')
-    laidirs.remove('wget_mod6.csh')
-    
-    for d in range(len(laidirs)-1):
-        # Processing MODIS Date
-        date1 = datetime(int(laidirs[d][0:4]), int(laidirs[d][5:7]), int(laidirs[d][8:10]))
-        date2 = datetime(int(laidirs[d+1][0:4]), int(laidirs[d+1][5:7]), int(laidirs[d+1][8:10]))
-        mday  = date1 + (date2 - date1)/2
-        if d == 0:
-            date0 = mday
-            timeout.units = 'days since ' + mday.strftime("%Y-%m-%d %H:%M:%S")
-            ncFidOut.description = 'MODIS MCD15A2H v006 LAI @ 500m regridded from MODIS tiles to lat/lon and then aggrregated to the 0.5 degree grid'
-        datestamp[d] = int(mday.strftime("%Y%m%d")) 
-        timeout[d]   = (mday - date0).days
-        print ('Processing Date :', mday.strftime("%Y-%m-%d"))
-        
-        # Processing particular 8-day MODIS tiles
-        laifiles = os.listdir(LAI_PATH + laidirs[d])
-        if 'get_this' in laifiles:
-            laifiles.remove('get_this')
-        if 'tmp.file' in laifiles:
-            laifiles.remove('tmp.file')
-        if 'index.html' in laifiles:
-            laifiles.remove('index.html')    
-        lai_high = np.full((NR,NC),np.nan)
+
+    years = DriverFunctions.get_tag_list(MODIS_PATH,"a")[1:-6]
+
+    for year in years:
+        doys  = DriverFunctions.get_tag_list(MODIS_PATH + year,"a")[1:-6]
+        for doy in doys:
+            this_date = datetime(int(year[0:4]),1,1) + timedelta (days=int(doy[0:3])-1)
+            yyyymmdd  =int(this_date.strftime(('%Y%m%d')))
+            if yyyymmdd > lastdate:
+                files    = DriverFunctions.get_tag_list(MODIS_PATH + year + doy,"span")[1:-1]
+                date1 = datetime(int(year[0:4]),1,1) + timedelta (days=int(doy[0:3])-1) 
+                date2 = date1 + timedelta (days=8)
+                mday  = date1 + (date2 - date1)/2
+                os.chdir(CWD)
+                DATADIR = CWD + '/download/' + year + doy + '/'
+                if not os.path.exists(DATADIR):
+                    os.makedirs(DATADIR)
+                    os.chdir(DATADIR)
+                    for f in range(len(files)):
+                        FILE_NAME = MODIS_DOWN + date1.strftime('%Y.%m.%d') + '/' + files[f]
+                        os.system('wget --user=sarith --password=GusBoy2017 --max-redirect=20 ' + FILE_NAME)
+                    os.chdir(CWD)
+
+                # ---- Stitch MODIS granules
             
-        for f in range(len(laifiles)):   
-            FILE_NAME = LAI_PATH + laidirs[d] + '/' + laifiles[f]
-            print(FILE_NAME)
-            thistile = MCD15A2H (FILE_NAME)
-            lai_mask = np.where((thistile.lai_500 >= 0.) & (thistile.lai_500 <= 10.))
-            lai_array= thistile.lai_500.reshape (N_MODIS*N_MODIS)
-            xin_array= thistile.x_index.reshape (N_MODIS*N_MODIS)
-            yin_array= thistile.y_index.reshape (N_MODIS*N_MODIS)
-            lai_mask = np.where((lai_array >= 0.) & (lai_array <= 10.))
-            lai_high [yin_array[lai_mask],xin_array[lai_mask]] = lai_array[lai_mask]
-        
-        # regrid to IMxJM
-        lai_low   = DriverFunctions.regrid_to_coarse(lai_high)
-        invalid   = np.ma.masked_invalid(lai_low)    
-    #    lai_low [invalid.mask] = -9999.
-        lai_low [invalid.mask] = 0.
-        lai_low [noland] = MAPL_UNDEF
-    #    DriverFunctions.fill_gaps (lai_low, fill_value=-9999., ocean=MAPL_UNDEF)
-        LAIOUT[d] = lai_low
+                print ('Processing Date :', mday.strftime("%Y-%m-%d"))
+                                
+                lai_high = np.full((NR,NC),np.nan)
             
+                for f in range(len(files)):   
+                    FILE_NAME = DATADIR + files[f]
+                    #LAI_PATH + laidirs[next_day] + '/' + files[f]
+                    print(FILE_NAME)
+                    thistile = MCD15A2H (FILE_NAME)
+                    lai_mask = np.where((thistile.lai_500 >= 0.) & (thistile.lai_500 <= 10.))
+                    lai_array= thistile.lai_500.reshape (N_MODIS*N_MODIS)
+                    xin_array= thistile.x_index.reshape (N_MODIS*N_MODIS)
+                    yin_array= thistile.y_index.reshape (N_MODIS*N_MODIS)
+                    lai_mask = np.where((lai_array >= 0.) & (lai_array <= 10.))
+                    lai_high [yin_array[lai_mask],xin_array[lai_mask]] = lai_array[lai_mask]
+        
+                # regrid to IMxJM
+                lai_low   = DriverFunctions.regrid_to_coarse(lai_high)
+                invalid   = np.ma.masked_invalid(lai_low)    
+                #    lai_low [invalid.mask] = -9999.
+                lai_low [invalid.mask] = 0.
+                lai_low [noland] = MAPL_UNDEF
+                #    DriverFunctions.fill_gaps (lai_low, fill_value=-9999., ocean=MAPL_UNDEF)
+                LAIOUT   [next_day] = lai_low
+                datestamp[next_day] = int(mday.strftime("%Y%m%d")) 
+                timeout  [next_day] = 1440 * (mday - date0).days
+                next_day = next_day + 1
+                shutil.rmtree(DATADIR)
+
+    # Add 3 MODIS dates (24 calendar days)
+    for ext_day in range(3):
+        mday = mday + timedelta (days=8)
+        datestamp[next_day] = int(mday.strftime("%Y%m%d")) 
+        timeout  [next_day] = 1440 * (mday - date0).days
+        LAIOUT[next_day] = lai_low
+        next_day = next_day + 1
     ncFidOut.close()
     
 if process_alb:   
 
-    if not os.path.isfile('ExtData/MCD43GF.006_ALBEDO_ExtData.nc4'):
-        DriverFunctions.create_netcdf('ExtData/MCD43GF.006_ALBEDO_ExtData.nc4',['MODIS_VISDF', 'MODIS_NIRDF'])
+    if not os.path.isfile(EXTDATA_PATH + 'MCD43GF.006_ALBEDO_ExtData.nc4'):
+        DriverFunctions.create_netcdf(EXTDATA_PATH +'MCD43GF.006_ALBEDO_ExtData.nc4',['MODIS_VISDF', 'MODIS_NIRDF'])
 
     from datetime import datetime
     
