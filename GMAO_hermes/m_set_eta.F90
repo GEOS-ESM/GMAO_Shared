@@ -1127,12 +1127,12 @@ CONTAINS
         case (91)
         ks = 33
         do k=1,km+1
-          ak(k) = a91(k)
-          bk(k) = b91(k)
+          ak(k) = a91_EC(k)
+          bk(k) = b91_EC(k)
         end do
 #else
         case (91)
-        ks = 39
+        ks = 42
         do k=1,km+1
           ak(k) = a91(k)
           bk(k) = b91(k)
@@ -1175,7 +1175,7 @@ CONTAINS
           enddo
 
         case (181)
-        ks = 71
+        ks = 84
         do k=1,km+1
           ak(k) = a181(k)
           bk(k) = b181(k)
