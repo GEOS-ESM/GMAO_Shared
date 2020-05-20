@@ -16,7 +16,7 @@ module  Chem_AeroGeneric
 
 ! !USES:
    use ESMF
-   use MAPL_Mod
+   use MAPL
    USE Chem_MieMod2G
 
    implicit none
@@ -24,10 +24,10 @@ module  Chem_AeroGeneric
 
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-   public  addAero
+   public  add_aero
    public  run_aerosol_optics1  ! Method that runs the aerosol_optics method for each child of GOCART2G.
-   public  readAeroConfig  ! Read config files for GOCART2G's children
-
+   public append_to_bundle
+   public determine_data_driven
 !
 ! !DESCRIPTION:
 !
@@ -46,7 +46,7 @@ contains
 
 
 !====================================================================================
-  subroutine addAero (state, label, label2, grid, typekind, ptr, rc)
+  subroutine add_aero (state, label, label2, grid, typekind, ptr, rc)
 
 !   Description: Adds fields to aero state for aerosol optics calcualtions. 
 
@@ -64,7 +64,7 @@ contains
     type (ESMF_Field)                                             :: field
     character (len=ESMF_MAXSTR)                                   :: field_name
 
-    __Iam__('addAero')
+    __Iam__('add_aero')
 
 !----------------------------------------------------------------------------------
 !   Begin...
@@ -86,38 +86,67 @@ contains
 
     RETURN_(ESMF_SUCCESS)
 
-  end subroutine addAero
+  end subroutine add_aero
 
-!========================================================================================
+!=====================================================================================
 
-  subroutine readAeroConfig (cf, label, parms, rc)
+  subroutine determine_data_driven(COMP_NAME, data_driven, RC)
 
-!    Description: Reads parameters in config file and writes them to aerosol_state
+    !ARGUMENTS:
+    integer, optional,               intent(  out)   :: RC          ! Error code:
+    character (len=ESMF_MAXSTR),     intent(in   )   :: COMP_NAME
+    logical,                         intent(  out)   :: data_driven
 
-     implicit none
+    !Local
+    integer                                          :: i
 
-     type (ESMF_Config),                 intent(inout)     :: cf
-     character (len=*),                  intent(in   )     :: label
-     real,                               intent(  out)     :: parms(:)
-     integer,                            intent(  out)     :: rc
+!   Description: Determines whether gridded component is data driven or not.
 
+     __Iam__('determine_data_driven')
 
-     __Iam__('readAeroConfig')
+!   Begin... 
 
+!   Is DU data driven?
+!   ------------------
+    data_driven = .false.
 
-
-!-----------------------------------------------------------------------------------
-!   Begin...
-
-!    call ESMF_ConfigFindLabel (cf, trim(label), __RC__)
-!    call ESMF_ConfigGetAttribute (cf, parms, __RC__)
-
-
-
+    i = index(COMP_NAME, 'data')
+    if (i > 0) then
+      data_driven = .true.
+    end if
 
     RETURN_(ESMF_SUCCESS)
 
-  end subroutine readAeroConfig
+  end subroutine determine_data_driven
+
+!=====================================================================================
+
+  subroutine append_to_bundle(varName, providerState, prefix, bundle, rc)
+
+    implicit none
+
+!   !ARGUMENTS:
+    character (len=*),           intent(in   )   :: varName, prefix
+    type (ESMF_State),           intent(in   )   :: providerState
+    type (ESMF_FieldBundle),     intent(inout)   :: bundle
+    integer,                     intent(  out)   :: rc  ! return code
+
+!   !Local
+    type (ESMF_Field)                              :: field
+
+!   Description: Adds deposition variables to deposition bundle
+
+     __Iam__('append_to_bundle')
+
+!   Dry deposition
+!   ---------------
+    call ESMF_StateGet (providerState, trim(prefix)//trim(varName), field, __RC__)
+    call MAPL_AllocateCoupling (field, __RC__)
+    call MAPL_FieldBundleAdd (bundle, field, __RC__)
+
+    RETURN_(ESMF_SUCCESS)
+
+  end subroutine append_to_bundle
 
 !===================================================================================
   subroutine run_aerosol_optics1 (state, rc)
