@@ -64,7 +64,7 @@
      type(Chem_MieTable), pointer :: mie_aerosol  => null()
 
      integer :: nq                                ! number of tracers
-     character(len=255), pointer  :: vname(:)  => null()
+     character(len=255), pointer  :: vname(:)  => null()      ! possibly remove lines 67-71 vname,vindex,vtable
      integer, pointer             :: vindex(:) => null()
      type(Chem_MieTable), pointer :: vtable(:) => null()
                                                   ! mapping of vtable for given idx
@@ -74,8 +74,8 @@
 
   interface Chem_MieQuery
      module procedure Chem_MieQueryByInt
-     module procedure Chem_MieQueryByChar
-     module procedure Chem_MieQueryByIntWithpmom
+     module procedure Chem_MieQueryByChar  !can remove
+     module procedure Chem_MieQueryByIntWithpmom  !possibly remove
   end interface
 
 
@@ -87,7 +87,7 @@ contains
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  Chem_MieCreateng --- Construct Mie LUTs from CF object for GOCARTng.
+! !IROUTINE:  Chem_MieCreateng --- Construct Mie LUTs from CF object for GOCARTng.  !CHANGE ng to 2G
 !
 ! !INTERFACE:
 !
@@ -95,7 +95,7 @@ contains
 
 ! !INPUT PARAMETERS:
    type (ESMF_Config)             :: cf          ! Mie table file name
-   integer                        :: NUM_BANDS   ! Number of radiation bands
+   integer                        :: NUM_BANDS   ! Number of wavelengths/radiation bands 
 
 ! !OUTPUT PARAMETERS:
    type (Chem_Mie) this
@@ -105,8 +105,6 @@ contains
 !
 !  This routine creates a LUT object from an ESMF configuration
 !  attribute CF. This routine is usually called from GEOS-5.
-!
-!  IMPORTANT: Does not yet handle the phase function!!!!
 !
 ! !REVISION HISTORY:
 !
@@ -156,7 +154,7 @@ contains
    call Chem_MieTableRead( this%mie_aerosol, this%nch, this%channels, __RC__)
 
 
-!  Now map the mie tables to the hash table
+!  Now map the mie tables to the hash table    !remove this%vtable(iq)....
 !  -----------------------------------------
    do iq = 1, this%nq
        this%vtable(iq) = this%mie_aerosol
