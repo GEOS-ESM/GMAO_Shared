@@ -682,11 +682,11 @@ sleep 5
                       if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
                               $GEOSUTIL/bin/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
                                                              -tag $expid.$collection.monthly \
-                                                             -d   $expid.$collection.diurnal $STRICT
+                                                             -d   $expid.$collection.diurnal $STRICT $IGNORE_NAN
                       else
                           $RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave.x -hdf $locals -rc time_ave.rc    \
                                                              -tag $expid.$collection.monthly \
-                                                             -d   $expid.$collection.diurnal $STRICT
+                                                             -d   $expid.$collection.diurnal $STRICT $IGNORE_NAN
                       endif
                  endif
 
