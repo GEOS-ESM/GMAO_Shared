@@ -69,7 +69,6 @@
            nbits         ! no. of bits per variable (0 for sequential access)
 
       character (*) :: filename
-      integer       :: recln, i
 !
 !EOP
 !
@@ -80,9 +79,7 @@
             open(nu,file=filename,form='unformatted')
 
          else                   ! direct access
-            inquire(iolength=recln) [(i,i=1,nx_global*ny_global*nbits/8)]
-            !open(nu,file=filename,recl=nx_global*ny_global*nbits/8, &
-            open(nu,file=filename,recl=recln, &
+            open(nu,file=filename,recl=nx_global*ny_global*nbits/8, &
                   form='unformatted',access='direct')
          endif                   ! nbits = 0
 
