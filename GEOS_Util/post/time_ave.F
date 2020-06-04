@@ -37,7 +37,7 @@ c **********************************************************************
       integer  begdate, begtime
       integer  enddate, endtime
 
-      integer id,rc,precision,timeinc,timeid
+      integer id,rc,sumrc,precision,timeinc,timeid
       integer ntime,nvars,ngatts,ncvid,nvars2
 
       character*256, allocatable ::   arg(:)
@@ -91,6 +91,7 @@ c **********************************************************************
       integer timinc,i,j,k,nmax,kbeg,kend,loc1,loc2
       integer nstar
       logical defined, tend, first, strict, diurnal, mdiurnal, lquad, ldquad
+      logical ignore_nan
       data first  /.true./
       data strict /.true./
 
@@ -150,27 +151,29 @@ c ---------------------------
       if( nargs.eq.0 ) then
           call usage(root)
       else
-           lquad   = .TRUE.
-           ldquad  = .FALSE.
-           diurnal = .FALSE.
-          mdiurnal = .FALSE.
+           lquad     = .TRUE.
+           ldquad    = .FALSE.
+           diurnal   = .FALSE.
+          mdiurnal   = .FALSE.
+          ignore_nan = .FALSE.
           allocate ( arg(nargs) )
           do n=1,nargs
           call getarg(n,arg(n))
           enddo
           do n=1,nargs
-             if( trim(arg(n)).eq.'-template' ) template = arg(n+1)
-             if( trim(arg(n)).eq.'-tag'      )   output = arg(n+1)
-             if( trim(arg(n)).eq.'-rc'       )   rcfile = arg(n+1)
-             if( trim(arg(n)).eq.'-begdate'  )     read ( arg(n+1),* ) begdate
-             if( trim(arg(n)).eq.'-begtime'  )     read ( arg(n+1),* ) begtime
-             if( trim(arg(n)).eq.'-enddate'  )     read ( arg(n+1),* ) enddate
-             if( trim(arg(n)).eq.'-endtime'  )     read ( arg(n+1),* ) endtime
-             if( trim(arg(n)).eq.'-ntmin'    )     read ( arg(n+1),* ) ntmin
-             if( trim(arg(n)).eq.'-ntod'     )     read ( arg(n+1),* ) ntod
-             if( trim(arg(n)).eq.'-ndt'      )     read ( arg(n+1),* ) ndt
-             if( trim(arg(n)).eq.'-strict'   )     read ( arg(n+1),* ) strict
-             if( trim(arg(n)).eq.'-noquad'   )     lquad = .false.
+             if( trim(arg(n)).eq.'-template'   )  template = arg(n+1)
+             if( trim(arg(n)).eq.'-tag'        )    output = arg(n+1)
+             if( trim(arg(n)).eq.'-rc'         )    rcfile = arg(n+1)
+             if( trim(arg(n)).eq.'-begdate'    )      read ( arg(n+1),* ) begdate
+             if( trim(arg(n)).eq.'-begtime'    )      read ( arg(n+1),* ) begtime
+             if( trim(arg(n)).eq.'-enddate'    )      read ( arg(n+1),* ) enddate
+             if( trim(arg(n)).eq.'-endtime'    )      read ( arg(n+1),* ) endtime
+             if( trim(arg(n)).eq.'-ntmin'      )      read ( arg(n+1),* ) ntmin
+             if( trim(arg(n)).eq.'-ntod'       )      read ( arg(n+1),* ) ntod
+             if( trim(arg(n)).eq.'-ndt'        )      read ( arg(n+1),* ) ndt
+             if( trim(arg(n)).eq.'-strict'     )      read ( arg(n+1),* ) strict
+             if( trim(arg(n)).eq.'-noquad'     )      lquad = .FALSE.
+             if( trim(arg(n)).eq.'-ignore_nan' ) ignore_nan = .TRUE.
 
              if( trim(arg(n)).eq.'-dv'.or. trim(arg(n)).eq.'-mdv') ldquad = .true.
 
@@ -666,9 +669,21 @@ c --------------
                    call mpi_gfio_getvar ( id,vname2(nv),nymd,nhms,im,jm,kbeg,kend,dum(1,1,nloc(nv)),lattice )
 
                    call timebeg('   PRIME')
+                          rc = 0
                    do L=1,max(1,kmvar2(nv))
                    do j=1,jm
                    do i=1,im
+                   if( isnan( dum(i,j,nloc(nv)+L-1) ) ) then
+                       print *, 'Warning!  Nan detected for ',trim(vname2(nv)),
+     .                          ' at lat: ',lattice%jglobal(j),' lon: ',lattice%iglobal(i)
+                       if( ignore_nan ) then
+                           print *, 'Setting Nan to UNDEF'
+                           print *
+                       else
+                           rc = 1
+                       endif
+                       dum(i,j,nloc(nv)+L-1) = undef
+                   endif
                    if( defined(dum(i,j,nloc(nv)+L-1),undef) ) then
                             q(i,j,nloc(nv)+L-1,0) =      q(i,j,nloc(nv)+L-1,0) + dum(i,j,nloc(nv)+L-1)
                        ntimes(i,j,nloc(nv)+L-1,0) = ntimes(i,j,nloc(nv)+L-1,0) + 1
@@ -683,6 +698,16 @@ c --------------
                    enddo
                    enddo
                    call timeend('   PRIME')
+
+#ifdef mpi
+                   call mpi_allreduce ( rc,sumrc,1,mpi_integer,mpi_sum,lattice%comm,ierror )
+                   rc = sumrc
+#endif
+                   if( .not.ignore_nan .and. rc.ne.0 ) then
+                       call my_finalize
+                       stop 1
+                   endif
+
               enddo
 
 c Quadratics
