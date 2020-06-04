@@ -276,9 +276,9 @@ if( $COLL[1] != 'ALL' ) then
     set collections = `echo $COLL`
 else
     set COLL        = ""
-    set collections = `$GEOSUTIL/bin/get_streams $HISTORYRC`
+    set collections = `$GEOSUTIL/post/get_streams $HISTORYRC`
 endif
-    set    archives = `$GEOSUTIL/bin/get_archive $HISTORYRC $COLL`
+    set    archives = `$GEOSUTIL/post/get_archive $HISTORYRC $COLL`
 
 echo "COLLECTIONS: $collections"
 echo "   ARCHIVES: $archives"
@@ -591,7 +591,7 @@ foreach collection ( $collections )
 # Find Dates within first local file
 # ----------------------------------
             set file     =  $locals[1]
-            set filedate = `$GEOSUTIL/bin/getdates $file`
+            set filedate = `$GEOSUTIL/post/getdates $file`
             set  begdate =  $filedate[1]
             set  begtime =  $filedate[2]
             set  enddate =  $filedate[3]
@@ -600,7 +600,7 @@ foreach collection ( $collections )
 
 # Decrement First Date by one Time Increment
 # ------------------------------------------
-            set prevdate = `$GEOSUTIL/bin/tick $begdate $begtime -$ndt`
+            set prevdate = `$GEOSUTIL/post/tick $begdate $begtime -$ndt`
             set  prvdate =  $prevdate[1]
             set  prvtime =  $prevdate[2]
 
@@ -612,7 +612,7 @@ foreach collection ( $collections )
 # Find Dates within last local file
 # ---------------------------------
             set file     =  $locals[$num]
-            set filedate = `$GEOSUTIL/bin/getdates $file`
+            set filedate = `$GEOSUTIL/post/getdates $file`
             set  begdate =  $filedate[1]
             set  begtime =  $filedate[2]
             set  enddate =  $filedate[3]
@@ -621,7 +621,7 @@ foreach collection ( $collections )
 
 # Increment Last Date by one Time Increment
 # -----------------------------------------
-            set nextdate = `$GEOSUTIL/bin/tick $enddate $endtime $ndt`
+            set nextdate = `$GEOSUTIL/post/tick $enddate $endtime $ndt`
             set  nxtdate =  $nextdate[1]
             set  nxttime =  $nextdate[2]
 
@@ -1117,9 +1117,9 @@ if( $RECDATE == "NULL" || $CLIMO == "TRUE" ) then
     if( $numlocs[$nstream] != 0 && $num >= 24 ) then
         set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
         set month = `echo $date            | cut -c5-6`
-               $GEOSUTIL/bin/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
+               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
         if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/bin/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
+               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
         endif
         if( $DDF == "NULL" ) set DDF = clim
     endif
@@ -1128,9 +1128,9 @@ else if( $RECDATE != "NULL" ) then
     set month = `echo $date | cut -c5-6`
     set num_recdates = `/bin/ls -1 $monthlies | grep ${month}.$ext | wc -l`
     if( $numlocs[$nstream] != 0 && $num_recdates >= 2 ) then
-               $GEOSUTIL/bin/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
+               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
         if( -e $SOURCE/${collection}/diurnal ) then
-               $GEOSUTIL/bin/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
+               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
         endif
         if( $DDF == "NULL" ) set DDF = clim
     endif
@@ -1152,7 +1152,7 @@ QUICKPLOT:
 if( $check_plot == "TRUE" ) then
 cd  $SOURCE/plot
 
-    if(! -e plot.rc ) /bin/ln -s $GEOSUTIL/bin/plot.rc .
+    if(! -e plot.rc ) /bin/ln -s $GEOSUTIL/post/plot.rc .
     set STATUS    = `grep    PLOT_STATUS: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
     set SEASONS   = `grep   PLOT_SEASONS: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
     set FREQUENCY = `grep PLOT_FREQUENCY: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
@@ -1197,7 +1197,7 @@ endif
 
 # Set STREAMS to ALL Streams in HISTORY.RC
 # ----------------------------------------
-set  streams = `$GEOSUTIL/bin/get_streams $HISTORYRC`
+set  streams = `$GEOSUTIL/post/get_streams $HISTORYRC`
 set nstreams = $#streams
 
 echo CHECKDATES: $checkdates
@@ -1305,7 +1305,7 @@ else
                  @ ndt =  2 * 30 * 86400
              endif
         set nymd = ${year}${month}15
-        set date = `$GEOSUTIL/bin/tick $nymd 000000 -$ndt`
+        set date = `$GEOSUTIL/post/tick $nymd 000000 -$ndt`
         set begdate  = `echo $date[1] | cut -c1-6`
         set enddate  = ${year}${month}
         endif
@@ -1316,7 +1316,7 @@ else
             @ ndt =  2 * 30 * 86400
         endif
         set nymd = ${year}${month}15
-        set date = `$GEOSUTIL/bin/tick $nymd 000000 -$ndt`
+        set date = `$GEOSUTIL/post/tick $nymd 000000 -$ndt`
         set begdate  = `echo $date[1] | cut -c1-6`
         set enddate  = ${year}${month}
     endif
