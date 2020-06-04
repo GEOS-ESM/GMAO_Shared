@@ -27,6 +27,7 @@ if( $nmax == 0 ) then
       echo "       <-rec_plt   YYYYMM    Optional Argument to Perform TimeAve of YYYYMM and Check for Plots>"
       echo "       <-ddf       clim      Optional Argument to Use clim.tabl for plots>"
       echo "       <-nostrict            Optional Argument to Disable STRICT (Default: TRUE)>"
+      echo "       <-ignore_nan          Optional Argument to Ignore Nans in Time_Average"
       echo " "
       echo "       <-plots    SEASON     Optional Argument to use SEASON              for plots>"
       echo "       <-begdate  BEGDATE    Optional Argument to use BEGDATE (YYYYMM)    for plots>"
@@ -63,6 +64,7 @@ endif
         set    COLL      = "ALL"
         set    STRICT    = ""
         set    ANA       = ""
+        set   IGNORE_NAN = ""
         set   check_plot = "NULL"
 
 @       n  = 1
@@ -105,6 +107,10 @@ while( $n <= $nmax )
 
        if( "$argv[$n]" == "-nostrict" ) then 
             set  STRICT = '-strict false'
+       endif
+
+       if( "$argv[$n]" == "-ignore_nan" ) then 
+            set  IGNORE_NAN = '-ignore_nan'
        endif
 
        if( "$argv[$n]" == "-ana" ) then 
@@ -245,8 +251,8 @@ endif
 echo Use: NCPUS = $NCPUS
 
 
-# Set Architecture Speicific Variables
-# ------------------------------------
+# Set Architecture Specific Variables
+# -----------------------------------
 if( $ARCH == 'Linux'  ) then
     if( $HOST == 'pleiades' ) then
                               setenv MASTOR lfe
@@ -255,6 +261,7 @@ if( $ARCH == 'Linux'  ) then
                               set scpvar = "mcp -a"
                               set cpvar  = "mcp -a"
                               set mytar  = "mtar"
+                              set batch_cmd  = "qsub"
     endif
     if( $HOST == 'discover' ) then
                               setenv MASTOR  dirac
@@ -263,11 +270,17 @@ if( $ARCH == 'Linux'  ) then
                               set scpvar = "bbscp -r3 -z"
                               set cpvar  = "/bin/cp"
                               set mytar  = "tar"
+                              set batch_cmd  = "sbatch"
     endif
 endif
 
 setenv GROUP `cat $HOME/.GROUProot`
 
+
+# Set STREAMS to ALL Streams in HISTORY.RC
+# ----------------------------------------
+set  streams = `$GEOSUTIL/post/get_streams $HISTORYRC`
+set nstreams = $#streams
 
 
 # Determine Collection Names and Archive Locations from HISTORY RC File
@@ -934,9 +947,9 @@ foreach collection ( $collections )
                end
             endif
 
-            # Archive Restarts (First Stream Only)
-            # ------------------------------------
-            if( $nstream == 1 ) then
+            # Archive Restarts (on First Stream Only)
+            # ---------------------------------------
+            if( $collection == $streams[1] ) then
                echo " "                                                                                          >> $archfile
                if( $HOST == 'pleiades' ) then
                      echo "ssh ${MASTOR}                                   mkdir -p ${MASDIR}/restarts/Y${year}" >> $archfile
@@ -1195,11 +1208,8 @@ else
      end
 endif
 
-# Set STREAMS to ALL Streams in HISTORY.RC
-# ----------------------------------------
-set  streams = `$GEOSUTIL/post/get_streams $HISTORYRC`
-set nstreams = $#streams
-
+# Set Seasons to plot
+# -------------------
 echo CHECKDATES: $checkdates
 set season   = ''
 set plotdate = ''
