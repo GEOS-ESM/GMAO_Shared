@@ -409,8 +409,6 @@ CONTAINS
       allocate (this%refr(this%nrh,this%nLambda,this%nbin),stat = rc )
       allocate (this%refi(this%nrh,this%nLambda,this%nbin),stat = rc )
 
-print*,'TEST 9'
-
 !     Preserve the full RH structure of the input table
       this%rh(:) = rh_table(:)
 
@@ -453,8 +451,6 @@ print*,'TEST 9'
        enddo
       enddo
 
-print*,'TEST 10'
-
 !     Insert growth factor
       this%gf(:,:) = gf_table(:,:)
 
@@ -491,9 +487,6 @@ print*,'TEST 10'
        enddo
 !       print *, j, this%rhi(j), this%rha(j), this%rh(this%rhi(j))
       enddo
-
-print*,'TEST 11'
-
 
 !      deallocate (channels_table, rh_table, bext_table, bsca_table, &
 !                  bbck_table, g_table, stat = rc )
