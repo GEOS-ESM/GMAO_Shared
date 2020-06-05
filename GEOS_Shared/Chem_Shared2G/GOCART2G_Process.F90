@@ -29,9 +29,16 @@
    public DryDeposition
    public WetRemovalGOCART2G
    public UpdateAerosolState
-   public DU_Compute_Diags
+   public Aero_Compute_Diags
+   public jeagleSSTcorrection
+   public deepLakesMask
+   public weibullDistribution
+   public SeasaltEmission
+   public wetRadius
+   public hoppelCorrection
 
    real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
+   integer, parameter     :: DP=kind(1.0d0)
 
 
 !
@@ -372,7 +379,7 @@ CONTAINS
    integer         :: i1=1, i2, j1=1, j2, nbins
    integer         :: dims(3)
 
-   integer, parameter     :: DP=kind(1.0d0)
+!   integer, parameter     :: DP=kind(1.0d0)
    real, parameter ::  rhow = 1000.  ! Density of water [kg m-3]
 
    real, dimension(:,:,:), allocatable  :: vsettle   ! fall speed [m s-1]
@@ -395,6 +402,7 @@ CONTAINS
 
 !EOP
 !-------------------------------------------------------------------------
+!  Begin
 
 !  Get dimensions
 !  ---------------
@@ -547,17 +555,12 @@ qa_temp = qa
 ! !IROUTINE:  Chem_CalcVsettle - Calculate the aerosol settling velocity
 !
 ! !INTERFACE:
-!
-
    subroutine Chem_CalcVsettle2G ( radius, rhop, rhoa, tmpu, grav, &
                                  vsettle )
-
 ! !USES:
-
-   implicit NONE
+  implicit NONE
 
 ! !INPUT PARAMETERS:
-
    real, intent(in)    :: radius              ! Particle radius [m]
    real, intent(in)    :: rhop                ! Particle density [kg m-3]
    real, intent(in)    :: rhoa                ! Layer air density [kg m-3]
@@ -565,7 +568,6 @@ qa_temp = qa
    real, intent(in)    :: grav
 
 ! !OUTPUT PARAMETERS:
-
    real, intent(out)   :: vsettle                 ! Layer fall speed [m s-1]
 
    character(len=*), parameter :: myname = 'Chem_CalcVsettle2G'
@@ -583,7 +585,6 @@ qa_temp = qa
 !  23Jan2003  da Silva  Standardization
 !
 !EOP
-!-------------------------------------------------------------------------
 
 ! !Local Variables
    real :: rmu                       ! Dynamic viscosity [kg m-1 s-1]
@@ -606,6 +607,10 @@ qa_temp = qa
    real, parameter :: a4 = -5.78878e-4
    real, parameter :: a5 =  8.55176e-5 
    real, parameter :: a6 = -3.27815e-6
+
+!-------------------------------------------------------------------------
+!  Begin
+
 !  Dynamic viscosity from corrected Sutherland's Equation
    rmu = 1.8325e-5*(416.16/(tmpu+120.))*(tmpu/296.16)**1.5
 
@@ -890,8 +895,7 @@ qa_temp = qa
 
    subroutine Chem_Settling2Gorig (km, flag, int_qa, grav, delp, &
                                radiusInp, rhopInp, cdt, tmpu, rhoa, &
-                               rh, hghte, fluxout, rc, &
-                               vsettleOut, correctionMaring)
+                               rh, hghte, fluxout, vsettleOut, correctionMaring, rc)
 
 ! !USES:
    implicit none
@@ -1292,8 +1296,8 @@ qa_temp = qa
 !
 
    subroutine DryDeposition ( km, tmpu, rhoa, hghte, oro, ustar, pblh, shflux, & 
-                                      von_karman, cpd, grav, z0h, drydepf, rc, &
-                                      radius, rhop, u10m, v10m, fraclake, gwettop )
+                              von_karman, cpd, grav, z0h, drydepf, rc, &
+                              radius, rhop, u10m, v10m, fraclake, gwettop )
 
 ! !USES:
 
@@ -1361,6 +1365,7 @@ qa_temp = qa
 !
 !EOP
 !-------------------------------------------------------------------------
+!  Begin...
 
    dims = shape(rhoa)
    i2 = dims(1); j2 = dims(2)
@@ -1612,6 +1617,7 @@ qa_temp = qa
 
 !EOP
 !-----------------------------------------------------------------------------
+!  Begin...
 
    dims = shape(rhoa)
    i2 = dims(1); j2 = dims(2)
@@ -2052,6 +2058,8 @@ qa_temp = qa
 
 !EOP
 !--------------------------------------------------------------------------------
+!   Begin...
+
     rc = 0
 
     do n = 1, nbins
@@ -2073,16 +2081,16 @@ qa_temp = qa
 
 !BOP
 !
-! !IROUTINE:  DU_Compute_Diags - Calculate dust 2D diagnostics
+! !IROUTINE:  Aero_Compute_Diags - Calculate aerosol diagnostics
 !
 ! !INTERFACE:
 !
 
-   subroutine DU_Compute_Diags ( mie_table, km, nbins, rlow, rup, channels, aerosol, grav, tmpu, rhoa, &
+   subroutine Aero_Compute_Diags ( mie_table, km, nbins, rlow, rup, channels, aerosol, grav, tmpu, rhoa, &
                                  rh, u, v, delp, sfcmass, colmass, mass, exttau, scatau,     &
                                  sfcmass25, colmass25, mass25, exttau25, scatau25, &
-                                 aerindx, fluxu, fluxv, conc, extcoef, scacoef,    &
-                                 exttaufm, scataufm, angstrom, rc )
+                                 fluxu, fluxv, conc, extcoef, scacoef,    &
+                                 exttaufm, scataufm, angstrom, aerindx, rc )
 
 ! !USES:
 
@@ -2117,7 +2125,7 @@ qa_temp = qa
    real, pointer, dimension(:,:,:), intent(inout)  :: mass25    ! 3d mass mixing ratio kg/kg (pm2.5)
    real, pointer, dimension(:,:), intent(inout)  :: exttau25  ! ext. AOT at 550 nm (pm2.5)
    real, pointer, dimension(:,:), intent(inout)  :: scatau25  ! sct. AOT at 550 nm (pm2.5)
-   real, pointer, dimension(:,:), intent(inout)  :: aerindx   ! TOMS UV AI
+   real, pointer, dimension(:,:),  intent(inout)  :: aerindx   ! TOMS UV AI
    real, pointer, dimension(:,:), intent(inout)  :: fluxu     ! Column mass flux in x direction
    real, pointer, dimension(:,:), intent(inout)  :: fluxv     ! Column mass flux in y direction
    real, pointer, dimension(:,:,:), intent(inout)  :: conc      ! 3d mass concentration, kg/m3
@@ -2138,7 +2146,7 @@ qa_temp = qa
 !  11MAR2010, Nowottnick  
 
 ! !Local Variables
-   character(len=*), parameter :: myname = 'DU_Compute_Diags'
+   character(len=*), parameter :: myname = 'Aero_Compute_Diags'
    integer :: i, j, k, n, ios, nch, idx
    integer :: i1 =1, i2, j1=1, j2
    real :: ilam550, ilam470, ilam870
@@ -2152,6 +2160,8 @@ qa_temp = qa
 !EOP
 !-------------------------------------------------------------------------
 !  Begin...
+ 
+   rc = 0
 
 !  Initialize local variables
 !  --------------------------
@@ -2183,14 +2193,21 @@ qa_temp = qa
       ilam870 .ne. 0. .and. &
       ilam470 .ne. ilam870) do_angstrom = .true.
 
-   if( associated(angstrom) .and. do_angstrom ) then
+!   if( associated(angstrom) .and. do_angstrom ) then
       allocate(tau470(i1:i2,j1:j2), tau870(i1:i2,j1:j2))
-   end if
+!   end if
+
+!print*,'SS2G ilam550 = ', ilam550
+!print*,'SS2G ilam470 = ', ilam470
+!print*,'SS2G ilam870 = ', ilam870
+!print*,'SS2G do_angstrom = ',do_angstrom
 
 !  Compute the fine mode (sub-micron) and PM2.5 bin-wise fractions
 !  ------------------------------------
-   call DU_Binwise_PM_Fractions(fPMfm, 0.50, rlow, rup, nbins)   ! 2*r < 1.0 um
-   call DU_Binwise_PM_Fractions(fPM25, 1.25, rlow, rup, nbins)   ! 2*r < 2.5 um
+   call Aero_Binwise_PM_Fractions(fPMfm, 0.50, rlow, rup, nbins)   ! 2*r < 1.0 um
+   call Aero_Binwise_PM_Fractions(fPM25, 1.25, rlow, rup, nbins)   ! 2*r < 2.5 um
+
+   if (associated(aerindx))  aerindx = 0.0  ! for now
 
 !  Calculate the diagnostic variables if requested
 !  -----------------------------------------------
@@ -2213,7 +2230,7 @@ qa_temp = qa
       end do
    endif
 
-!  Calculate the dust column loading
+!  Calculate the aerosol column loading
    if( associated(colmass) ) then
       colmass(i1:i2,j1:j2) = 0.
       do n = 1, nbins
@@ -2386,48 +2403,48 @@ qa_temp = qa
 
       enddo  ! nbins
 
+!print*,'SS2G sum(tau470) = ',sum(tau470)
+!print*,'SS2G sum(tau870) = ',sum(tau870)
+
       angstrom(i1:i2,j1:j2) = &
         -log(tau470(i1:i2,j1:j2)/tau870(i1:i2,j1:j2)) / &
          log(470./870.)
+!print*,'SS2G sum(angstrom) = ', sum(angstrom)
+
    endif
 
    rc = 0
 
-   end subroutine DU_Compute_Diags
+   end subroutine Aero_Compute_Diags
 !====================================================================
 
 !BOP
 !
-! !IROUTINE:  DU_Binwise_PM_Fractions - Calculate bin-wise PM fractions
+! !IROUTINE:  Aero_Binwise_PM_Fractions - Calculate bin-wise PM fractions
 !
 ! !INTERFACE:
-!
-
-   subroutine DU_Binwise_PM_Fractions(fPM, rPM, r_low, r_up, nbins)
+   subroutine Aero_Binwise_PM_Fractions(fPM, rPM, r_low, r_up, nbins)
 
 ! !USES:
-
   implicit NONE
 
 ! !INPUT/OUTPUT PARAMETERS:
-
   real, dimension(:), intent(inout) :: fPM     ! bin-wise PM fraction (r < rPM)
 
 ! !INPUT PARAMETERS:
-
    real,    intent(in)              :: rPM     ! PM radius
    integer, intent(in)              :: nbins   ! number of bins
    real, dimension(:), intent(in)   :: r_low   ! bin radii - low bounds
    real, dimension(:), intent(in)   :: r_up    ! bin radii - upper bounds
 
-! !OUTPUT PARAMETERS:
-!EOP
-
 ! !Local Variables
 
    integer :: n
 
-   character(len=*), parameter :: myname = 'DU_Binwise_PM_Fractions'
+   character(len=*), parameter :: myname = 'Aero_Binwise_PM_Fractions'
+!EOP
+!-------------------------------------------------------------------------
+!  Begin...
 
    do n = 1, nbins
      if(r_up(n) < rPM) then
@@ -2442,27 +2459,536 @@ qa_temp = qa
      endif
    enddo
 
-   end subroutine DU_Binwise_PM_Fractions
+   end subroutine Aero_Binwise_PM_Fractions
+
+!======================================================================================
+
+!BOP
+!
+! !IROUTINE:  deepLakesMask
+!
+! !INTERFACE:
+   subroutine deepLakesMask (lons, lats, radToDeg, deep_lakes_mask, rc)
+
+! !USES:
+   implicit NONE
+
+! !INPUT/OUTPUT PARAMETERS:
+   real, dimension(:,:), intent(inout) :: deep_lakes_mask      
+
+! !INPUT PARAMETERS:
+   real, pointer, dimension(:,:)        :: lats
+   real, pointer, dimension(:,:)        :: lons          
+   real                                :: radToDeg
+          
+! !OUTPUT PARAMETERS:
+   integer, optional, intent(out) :: rc
+!EOP
+
+! !Local Variables
+    real                :: dummylon
+    integer             :: i, j
+!EOP
+!-------------------------------------------------------------------------
+!  Begin...
+
+   rc = 0
+
+   deep_lakes_mask = 1.0
+   do j = 1, ubound(lons, 2)
+      do i = 1, ubound(lons, 1)
+                           dummylon = lons(i,j)*radToDeg
+      if( dummylon < 0.0 ) dummylon = dummylon + 360.0
+      ! The Great Lakes: lon = [91W,75W], lat = [40.5N, 50N]
+      if ((dummylon > 267.0) .and. &
+          (dummylon < 285.0) .and. &
+          (lats(i,j)*radToDeg >  40.5) .and. &
+          (lats(i,j)*radToDeg <  50.0)) deep_lakes_mask(i,j) = 0.0
+
+       ! The Caspian Sea: lon = [45.0, 56], lat = 35, 48]
+      if ((dummylon >  45.0) .and. &
+          (dummylon <  56.0) .and. &
+          (lats(i,j)*radToDeg >  35.0) .and. &
+          (lats(i,j)*radToDeg <  48.0)) deep_lakes_mask(i,j) = 0.0
+      end do
+   end do
+
+   end subroutine deepLakesMask
+
 !========================================================================================
+!BOP
+!
+! !IROUTINE:  jeagleSSTcorrection - Apply SST correction following Jaegle et al. 2011
+!
+! !INTERFACE:
+   subroutine jeagleSSTcorrection(sstEmisFlag, fsstemis, ts, rc)
+
+! !USES:
+  implicit NONE
+
+! !INPUT/OUTPUT PARAMETERS:
+  real, dimension(:,:), intent(inout) :: fsstemis     ! 
+
+! !INPUT PARAMETERS:
+   integer, intent(in)                       :: sstEmisFlag  ! 1 or 2 
+   real, dimension(:,:), intent(in)          :: ts  ! surface temperature (K)
+
+! !OUTPUT PARAMETERS:
+   integer, optional, intent(out) :: rc
+!EOP
+
+! !Local Variables
+   real, allocatable, dimension(:,:) :: tskin_c
+!EOP
+!-------------------------------------------------------------------------
+!  Begin...
+  
+   rc = 0
+
+   fsstemis = 1.0
+
+   if (sstemisFlag == 1) then          ! SST correction folowing Jaegle et al. 2011
+      fsstemis = 0.0
+
+      allocate( tskin_c, mold=fsstemis )
+      tskin_c  = ts - 273.15
+      fsstemis = (0.3 + 0.1*tskin_c - 0.0076*tskin_c**2 + 0.00021*tskin_c**3)
+
+      where(fsstemis < 0.0) fsstemis = 0.0
+
+      deallocate( tskin_c )
+   else if (sstemisFlag == 2) then     ! GEOS5 SST correction
+      fsstemis = 0.0
+
+      allocate( tskin_c, mold=fsstemis )
+      tskin_c  = ts - 273.15
+
+      where(tskin_c < -0.1) tskin_c = -0.1    ! temperature range (0, 36) C 
+      where(tskin_c > 36.0) tskin_c = 36.0    !
+
+      fsstemis = (-1.107211 -0.010681*tskin_c -0.002276*tskin_c**2 + 60.288927*1.0/(40.0 - tskin_c))
+      where(fsstemis < 0.0) fsstemis = 0.0
+      where(fsstemis > 7.0) fsstemis = 7.0
+
+      deallocate( tskin_c )
+   end if
+
+   end subroutine jeagleSSTcorrection
+
+!=====================================================================================
+!BOP
+!
+! !IROUTINE: weibullDistribution - Apply a Weibull distribution to emissions wind speeds
+!
+! !INTERFACE:
+   subroutine weibullDistribution (gweibull, weibullFlag, u10m, v10m, rc)
+
+! !USES:
+   implicit NONE
+
+! !INPUT/OUTPUT PARAMETERS:
+   real(kind=DP), dimension(:,:), intent(inout)    :: gweibull 
+
+! !INPUT PARAMETERS:
+   logical, intent(in)                    :: weibullFlag
+   real, dimension(:,:), intent(in)       :: u10m
+   real, dimension(:,:), intent(in)       :: v10m
 
 
+! !OUTPUT PARAMETERS:
+   integer, optional, intent(out) :: rc
+
+! !Descrption: The Weibull distribution correction ends up being a multiplicative constant
+!  (g) times our present source function (see Eq. 12 in Fan & Toon, 2011 and notes for
+!  (9/22/11). This constant is derived from the incomplete and complete forms of the gamma
+!  function, hence the utilities pasted below.  The Weibull function and shape
+!  parameters (k, c) assumed are from Justus 1978.
+
+!EOP
+
+! !Local Variables
+   real(kind=DP)                 :: a, c, k, wt, x
+   real(kind=DP), dimension(:,:), allocatable :: wm
+   integer     :: i, j
+
+!EOP
+!-------------------------------------------------------------------------
+!  Begin...
+
+   gweibull = 1.0
+
+   allocate(wm(ubound(u10m, 1),ubound(u10m, 2)))
+   wm = sqrt(u10m**2 + v10m**2)   ! mean wind speed
+   wt = 4.d0                      ! a threshold (Fan & Toon, 2011)
+
+   if (weibullFlag) then
+       gweibull = 0.0
+
+   do j = 1, ubound(u10m, 2)
+      do i = 1, ubound(u10m, 1)
+         if (wm(i,j) > 0.01) then
+            k = 0.94d0 * sqrt(wm(i,j))         ! Weibull shape parameter
+            c = wm(i,j) / gamma(1.d0 + 1.d0/k) ! Weibull shape parameter
+            x = (wt / c) ** k
+            a = 3.41d0 / k + 1.d0
+            gweibull(i,j)  = (c / wm(i,j))**3.41d0 * igamma(a,x)
+         end if
+      end do ! i
+   end do ! j
+   endif
+
+   deallocate(wm)
+
+   end subroutine weibullDistribution
+
+!=====================================================================================
+
+ DOUBLE PRECISION function igamma(A, X)
+!----------------------------------------------------------------------- 
+! incomplete Gamma function
+!----------------------------------------------------------------------- 
+ IMPLICIT NONE
+ double precision, intent(in) ::        A
+ DOUBLE PRECISION, INTENT(IN) ::      X
+! LOCAL VARIABLE
+ DOUBLE PRECISION :: XAM, GIN,  S, R, T0
+ INTEGER K
+        XAM=-X+A*LOG(X)
+        IF (XAM.GT.700.0.OR.A.GT.170.0) THEN
+           WRITE(*,*)'IGAMMA: a and/or x too large, X = ', X
+           WRITE(*,*) 'A = ', A
+           STOP
+
+        ENDIF
+
+        IF (X.EQ.0.0) THEN
+           IGAMMA=GAMMA(A)
+
+        ELSE IF (X.LE.1.0+A) THEN
+           S=1.0/A
+           R=S
+           DO  K=1,60
+              R=R*X/(A+K)
+              S=S+R
+              IF (ABS(R/S).LT.1.0e-15) EXIT
+           END DO
+           GIN=EXP(XAM)*S
+           IGAMMA=GAMMA(A)-GIN
+        ELSE IF (X.GT.1.0+A) THEN
+           T0=0.0
+           DO K=60,1,-1
+              T0=(K-A)/(1.0+K/(X+T0))
+           end do
+
+           IGAMMA=EXP(XAM)/(X+T0)
+
+        ENDIF
+
+ end function igamma
+
+!=====================================================================================
+
+! !IROUTINE:  SeasaltEmission - Master driver to compute the sea salt emissions
+!
+! !INTERFACE:
+!
+   subroutine SeasaltEmission ( rLow, rUp, method, u10m, v10m, ustar, &
+                                memissions, nemissions, rc )
+
+! !DESCRIPTION: Calculates the seasalt mass emission flux every timestep.
+!  The particular method (algorithm) used for the calculation is based
+!  on the value of "method" passed on input.  Mostly these algorithms are
+!  a function of wind speed and particle size (nominally at 80% RH).
+!  Routine is called once for each size bin, passing in the edge radii
+!  "rLow" and "rUp" (in dry radius, units of um).  Returned in the emission
+!  mass flux [kg m-2 s-1].  A sub-bin assumption is made to break (possibly)
+!  large size bins into a smaller space.
+!
+! !USES:
+
+  implicit NONE
+
+! !INPUT PARAMETERS:
+
+   real, intent(in)                  :: rLow, rUp   ! Dry particle bin edge radii [um]
+   real, intent(in)                  :: u10m(:,:)   ! 10-meter eastward wind [m s-1]
+   real, intent(in)                  :: v10m(:,:)   ! 10-m northward wind [m s-1]
+   real, target, intent(in)        :: ustar(:,:)  ! friction velocity [m s-1]
+   integer, intent(in)               :: method      ! Algorithm to use
+
+! !INOUTPUT PARAMETERS:
+
+!   real, pointer, dimension(:,:) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
+!   real, pointer, dimension(:,:) :: nemissions      ! Number Emissions Flux [# m-2 s-1]
+   real, dimension(:,:), intent(inout) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
+   real, dimension(:,:), intent(inout) :: nemissions      ! Number Emissions Flux [# m-2 s-1]
+
+! !OUTPUT PARAMETERS:
+   integer, intent(out)          :: rc              ! Error return code:
+                                                    !  0 - all is well
+                                                    !  1 - 
+! !Local Variables
+   integer       :: ir
+   real, pointer :: w(:,:)                          ! Intermediary wind speed [m s-1]
+   real          :: r, dr                           ! sub-bin radius spacing (dry, um)
+   real          :: rwet, drwet                     ! sub-bin radius spacing (rh=80%, um)
+   real          :: aFac, bFac, scalefac, rpow, exppow, wpow
+   real, allocatable, dimension(:,:), target  :: w10m  ! 10-m wind speed [m s-1]
+
+! !CONSTANTS
+   real, parameter    :: r80fac = 1.65     ! ratio of radius(RH=0.8)/radius(RH=0.) [Gerber]
+   real, parameter    :: rhop = 2200.      ! dry seasalt density [kg m-3]
+   real, parameter    :: pi = 3.1415       ! ratio of circumference to diameter of circle
+   integer, parameter :: nr = 10                    ! Number of (linear) sub-size bins
+
+   character(len=*), parameter :: myname = 'SeasaltEmission'
+
+!EOP
+!-------------------------------------------------------------------------
+!  Begin...
+
+   rc = 0
+
+!  Define 10-m wind speed
+   allocate(w10m, mold=u10m)
+   w10m = sqrt(u10m*u10m + v10m*v10m)
+!  Define the sub-bins (still in dry radius)
+   dr = (rUp - rLow)/nr
+   r  = rLow + 0.5*dr
+
+!  Loop over size bins
+   nemissions = 0.
+   memissions = 0.
+
+   do ir = 1, nr
+
+    rwet  = r80fac * r
+    drwet = r80fac * dr
+
+    select case(method)
+
+     case(1)  ! Gong 2003
+      aFac     = 4.7*(1.+30.*rwet)**(-0.017*rwet**(-1.44))
+      bFac     = (0.433-log10(rwet))/0.433
+      scalefac = 1.
+      rpow     = 3.45
+      exppow   = 1.607
+      wpow     = 3.41
+      w        => w10m
+
+     case(2)  ! Gong 1997
+      aFac     = 3.
+      bFac     = (0.380-log10(rwet))/0.650
+      scalefac = 1.
+      rpow     = 1.05
+      exppow   = 1.19
+      wpow     = 3.41
+      w        => w10m
+
+     case(3)  ! GEOS5 2012
+      aFac     = 4.7*(1.+30.*rwet)**(-0.017*rwet**(-1.44))
+      bFac     = (0.433-log10(rwet))/0.433
+      scalefac = 33.0e3
+      rpow     = 3.45
+      exppow   = 1.607
+      wpow     = 3.41 - 1.
+      w        => ustar
+
+     case default
+      print *, 'SeasaltEmission missing algorithm method'
+      rc = 1
+      return
+
+    end select
+
+!   Number emissions flux (# m-2 s-1)
+    nemissions = nemissions + SeasaltEmissionGong( rwet, drwet, w, scalefac, aFac, bFac, rpow, exppow, wpow )
+
+!   Mass emissions flux (kg m-2 s-1)
+    scalefac = scalefac * 4./3.*pi*rhop*r**3.*1.e-18
+    memissions = memissions + SeasaltEmissionGong( rwet, drwet, w, scalefac, aFac, bFac, rpow, exppow, wpow )
+
+    r = r + dr
+
+   end do
+
+   deallocate(w10m)
+
+   rc = 0
+
+  end subroutine SeasaltEmission
 
 
+! Function to compute sea salt emissions following the Gong style
+! parameterization.  Functional form is from Gong 2003:
+!  dN/dr = scalefac * 1.373 * (w^wpow) * (r^-aFac) * (1+0.057*r^rpow) * 10^(exppow*exp(-bFac^2))
+! where r is the particle radius at 80% RH, dr is the size bin width at 80% RH, and w is the wind speed
+
+  function SeasaltEmissionGong ( r, dr, w, scalefac, aFac, bFac, rpow, exppow, wpow )
+
+   real, intent(in)    :: r, dr     ! Wet particle radius, bin width [um]
+   real, pointer, intent(in)    :: w(:,:)    ! Grid box mean wind speed [m s-1] (10-m or ustar wind)
+   real, intent(in)    :: scalefac, aFac, bFac, rpow, exppow, wpow
+   real                :: SeasaltEmissionGong(size(w,1),size(w,2))
+
+!  Initialize
+   SeasaltEmissionGong = 0.
+
+!  Particle size distribution function
+   SeasaltEmissionGong = scalefac * 1.373*r**(-aFac)*(1.+0.057*r**rpow) &
+                         *10**(exppow*exp(-bFac**2.))*dr
+!  Apply wind speed function
+   SeasaltEmissionGong = w**wpow * SeasaltEmissionGong
+
+  end function SeasaltEmissionGong
+
+!============================================================================================
+
+!BOP
+!
+! !IROUTINE: weibullDistribution - Compute the wet radius of sea salt particle
+!
+! !INTERFACE:
+   subroutine wetRadius (radius, rhop, rh, flag, radius_wet, rhop_wet, rc)
+
+! !USES:
+   implicit NONE
+
+! !INPUT PARAMETERS:
+   real, intent(in)  :: radius    ! dry radius [m]
+   real, intent(in)  :: rhop      ! dry density [kg m-3]
+   real, intent(in)  :: rh        ! relative humidity [0-1]
+   integer           :: flag      ! 1 (Fitzgerald, 1975)
+                                  ! 2 (Gerber, 1985)
+
+! !OUTPUT PARAMETERS:
+   real, intent(out) :: radius_wet ! humidified radius [m]
+   real, intent(out) :: rhop_wet   ! wet density [kg m-3]
+   integer, intent(out) :: rc
+
+! !Local Variables
+   real :: sat, rcm, rrat
+   real, parameter ::  rhow = 1000.  ! Density of water [kg m-3]
+
+!  The following parameters relate to the swelling of seasalt like particles
+!  following Fitzgerald, Journal of Applied Meteorology, 1975.
+   real, parameter :: epsilon = 1.   ! soluble fraction of deliqeuscing particle
+   real, parameter :: alphaNaCl = 1.35
+   real :: alpha, alpha1, alpharat, beta, theta, f1, f2
+
+!  parameter from Gerber 1985 (units require radius in cm, see rcm)
+   real, parameter :: c1=0.7674, c2=3.079, c3=2.573e-11, c4=-1.424
+
+!EOP
+!------------------------------------------------------------------------------------
+!  Begin...
+
+   rc = 0
+
+!  Default is to return radius as radius_wet, rhop as rhop_wet
+   radius_wet = radius
+   rhop_wet   = rhop
+
+!  Make sure saturation ratio (RH) is sensible
+   sat = max(rh,tiny(1.0)) ! to avoid zero FPE
+
+!  Fitzgerald Scheme
+   if(flag .eq. 1 .and. sat .ge. 0.80) then
+!     parameterization blows up for RH > 0.995, so set that as max
+!     rh needs to be scaled 0 - 1
+      sat = min(0.995,sat)
+!     Calculate the alpha and beta parameters for the wet particle
+!     relative to amonium sulfate
+      beta = exp( (0.00077*sat) / (1.009-sat) )
+      if(sat .le. 0.97) then
+         theta = 1.058
+      else
+         theta = 1.058 - (0.0155*(sat-0.97)) /(1.02-sat**1.4)
+      endif
+      alpha1 = 1.2*exp( (0.066*sat) / (theta-sat) )
+      f1 = 10.2 - 23.7*sat + 14.5*sat**2.
+      f2 = -6.7 + 15.5*sat - 9.2*sat**2.
+      alpharat = 1. - f1*(1.-epsilon) - f2*(1.-epsilon**2.)
+      alpha = alphaNaCl * (alpha1*alpharat)
+!     radius_wet is the radius of the wet particle
+      radius_wet = alpha * radius**beta
+      rrat       = (radius/radius_wet)**3.
+      rhop_wet   = rrat*rhop + (1.-rrat)*rhow
+   elseif(flag .eq. 2) then   ! Gerber
+      sat = min(0.995,sat)
+      rcm = radius*100.
+      radius_wet = 0.01 * (c1*rcm**c2 / (c3*rcm**c4-alog10(sat)) &
+                           + rcm**3.)**(1./3.)
+      rrat       = (radius/radius_wet)**3.
+      rhop_wet   = rrat*rhop + (1.-rrat)*rhow
+   endif
+
+ end subroutine wetRadius
+
+!===============================================================================
+
+!BOP
+!
+! !IROUTINE: hoppelCorrection
+!
+! !INTERFACE:
+   subroutine hoppelCorrection (radius, rhop, rh, dz, ustar, rhFlag, &
+                                airdens, t, grav, karman, fhoppel, rc)
+
+! !USES:
+   implicit NONE
+
+! !INPUT PARAMETERS:
+   real, intent(in)     :: radius    ! dry radius [m]
+   real, intent(in)     :: rhop      ! dry density [kg m-3]
+   integer, intent(in)   :: rhFlag      ! 1 (Fitzgerald, 1975)
+                                        ! 2 (Gerber, 1985)
+   real, dimension(:,:), intent(in)  :: rh    ! relative humidity [0-1]
+   real, dimension(:,:), intent(in)  :: dz    ! surface layer height [m]
+   real, dimension(:,:), intent(in)  :: ustar ! surface velocity scale [m s-1]
+   real, dimension(:,:), intent(in)  :: airdens
+   real, dimension(:,:), intent(in)  :: t  ! temperature [k]
+   real, intent(in)  :: grav    ! gravity
+   real, intent(in)  :: karman  ! Von Karman constant
 
 
+! !INOUTPUT PARAMETERS:
+   real, dimension(:,:), intent(inout) :: fhoppel
+
+! !OUTPUT PARAMETERS:
+   integer, intent(out) :: rc
+
+! !Local Variables
+   real    :: radius_wet ! humidified radius [m]
+   real    :: rhop_wet   ! wet density [kg m-3]
+   real    :: diff_coef
+   real, allocatable, dimension(:,:) ::  vsettle
+   integer :: i, j
 
 
+!EOP
+!------------------------------------------------------------------------------------
+!  Begin..
+
+   rc = 0
+   fhoppel = 1.0
+   allocate(vsettle, mold=rh)
+
+   do j = 1, ubound(rh,2)
+      do i = 1, ubound(rh,1)
+         call wetRadius (radius, rhop, rh(i,j), rhFlag, &
+                         radius_wet, rhop_wet, rc)
+         if (rc /= 0) return
+         call Chem_CalcVsettle2Gorig (radius_wet, rhop_wet, airdens(i,j), t(i,j), &
+                                      GRAV, diff_coef, vsettle(i,j))
+         fhoppel(i,j) = (10./dz(i,j)) ** (vsettle(i,j)/KARMAN/ustar(i,j))
+      end do
+   end do
 
 
+   deallocate(vsettle)
 
-
-
-
-
-
-
-
-
+   end subroutine hoppelCorrection
 
 
 
