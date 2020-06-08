@@ -1,8 +1,6 @@
 esma_set_this ()
 
 set (srcs
-  Chem_MieMod2G.F90
-  Chem_MieTableMod.F90
   Chem_MieTableMod2G.F90
   Chem_AeroGeneric.F90
   GOCART2G_Process.F90
