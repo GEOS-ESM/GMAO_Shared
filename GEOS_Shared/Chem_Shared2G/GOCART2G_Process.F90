@@ -36,6 +36,9 @@
    public SeasaltEmission
    public wetRadius
    public hoppelCorrection
+   public OCEmission
+   public phobicTophilic
+
 
    real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
    integer, parameter     :: DP=kind(1.0d0)
@@ -893,20 +896,22 @@ qa_temp = qa
 !BOP
 ! !IROUTINE: Chem_Settling2G
 
-   subroutine Chem_Settling2Gorig (km, flag, int_qa, grav, delp, &
-                               radiusInp, rhopInp, cdt, tmpu, rhoa, &
-                               rh, hghte, fluxout, vsettleOut, correctionMaring, rc)
+   subroutine Chem_Settling2Gorig (km, flag, bin, int_qa, grav, delp, &
+                                   radiusInp, rhopInp, cdt, tmpu, rhoa, &
+                                   rh, hghte, fluxout, vsettleOut, correctionMaring, rc)
 
 ! !USES:
    implicit none
 
 ! !INPUT PARAMETERS:
    integer,    intent(in)    :: km
-   integer,    intent(in)    :: flag           ! flag to control particle swelling (see note)
-   real,       intent(in)    :: grav           !mapl_grav
+   integer,    intent(in)    :: flag     ! flag to control particle swelling (see note)
+   integer,    intent(in)    :: bin      ! aerosol bin index
+   real,       intent(in)    :: grav     ! gravity
    real,       intent(in)    :: cdt
-   real, dimension(:), intent(in)  :: radiusInp, rhopInp
-   real, dimension(:,:,:,:), intent(inout) :: int_qa(:,:,:,:)
+!   real, dimension(:), intent(in)  :: radiusInp, rhopInp
+   real, intent(in)  :: radiusInp, rhopInp
+   real, dimension(:,:,:), intent(inout) :: int_qa
 !   real, dimension(:,:,:), intent(in) :: tmpu, rhoa, rh, hghte, delp
    real, pointer, dimension(:,:,:), intent(in) :: tmpu, rhoa, rh, hghte, delp
    logical, optional, intent(in)    :: correctionMaring
@@ -915,7 +920,9 @@ qa_temp = qa
 ! !OUTPUT PARAMETERS:
 
    real, pointer, dimension(:,:,:), intent(inout)  :: fluxout
-   real, dimension(:,:,:,:), optional, intent(out)  :: vsettleOut
+!   real, optional, dimension(:,:), intent(inout)  :: fluxout
+!   real, dimension(:,:,:,:), optional, intent(out)  :: vsettleOut
+   real, dimension(:,:,:), optional, intent(out)  :: vsettleOut
 
    integer,   intent(out)   :: rc
 
@@ -944,7 +951,7 @@ qa_temp = qa
    real, parameter :: v_upwardMaring = 0.33e-2   ! upward velocity, [m s-1]
    real, parameter :: diameterMaring = 7.30e-6   ! particle diameter, [m]
 
-   integer         :: i1=1, i2, j1=1, j2, nbins
+   integer         :: i1=1, i2, j1=1, j2
    integer         :: dims(3)
    integer         :: nSubSteps, ijl, dk
    integer         :: i, j, k, iit, n
@@ -972,7 +979,7 @@ qa_temp = qa
 
 !  Get dimensions
 !  ---------------
-   nbins = size(radiusInp)
+!   nbins = size(radiusInp)
    dims = shape(rhoa)
    i2 = dims(1); j2 = dims(2)
    ijl  = ( i2 - i1 + 1 ) * ( j2 - j1 + 1 )
@@ -1008,23 +1015,31 @@ qa_temp = qa
 !print*,'CHEM_SETTLING TEST A'
 
 !  Loop over the number of dust bins
-   do n = 1, nbins
+!   do n = 1, nbins
 
 !    qa = w_c%qa(nbeg+n-1)%data3d
-    qa(:,:,:) = int_qa(:,:,:,n)
+!    qa(:,:,:) = int_qa(:,:,:,n)
+     qa(:,:,:) = int_qa(:,:,:)
 
-    radius = radiusInp(n)
-    rhop = rhopInp(n)
+!    radius = radiusInp(n)
+!    rhop = rhopInp(n)
+    radius = radiusInp
+    rhop = rhopInp
 
 !   Reset a (large) minimum time to cross a grid cell in settling
     minTime = cdt
 
-    if(associated(fluxout)) fluxout(:,:,n) = 0.0
+    if(associated(fluxout)) fluxout(:,:,bin) = 0.0
+!    fluxout = 0.0
     cmass_before(:,:) = 0.d0
     cmass_after(:,:) = 0.d0
 
 !   If radius le 0 then get out of loop
-    if(radius .le. 0.) cycle
+    if(radius .le. 0.) then
+       rc = 100
+       return
+    end if
+
     do k = 1, km
        do j = j1, j2
           do i = i1, i2
@@ -1056,34 +1071,34 @@ qa_temp = qa
                 alpharat = 1. - f1*(1.-epsilon) - f2*(1.-epsilon**2.)
                 alpha = alphaNaCl * (alpha1*alpharat)
 !               radius is the radius of the wet particle
-                radius = alpha * radiusInp(n)**beta
-                rrat = (radiusInp(n)/radius)**3.
-                rhop = rrat*rhopInp(n) + (1.-rrat)*rhow
+                radius = alpha * radiusInp**beta
+                rrat = (radiusInp/radius)**3.
+                rhop = rrat*rhopInp + (1.-rrat)*rhow
                end if
               case(2)
 !             elseif(flag .eq. 2) then   ! Gerber
                 sat = min(0.995,sat)
-                rcm = radiusInp(n)*100.
+                rcm = radiusInp*100.
                 radius = 0.01 * (c1*rcm**c2 / (c3*rcm**c4-alog10(sat)) &
                                  + rcm**3.)**(1./3.)
-                rrat = (radiusInp(n)/radius)**3.
-                rhop = rrat*rhopInp(n) + (1.-rrat)*rhow
+                rrat = (radiusInp/radius)**3.
+                rhop = rrat*rhopInp + (1.-rrat)*rhow
               case(3)
 !             elseif(flag .eq. 3) then
 !               Gerber parameterization for Ammonium Sulfate
                 sat = min(0.995,sat)
-                rcm = radiusInp(n)*100.
+                rcm = radiusInp*100.
                 radius = 0.01 * (SU_c1*rcm**SU_c2 / (SU_c3*rcm**SU_c4-alog10(sat)) &
                                  + rcm**3.)**(1./3.)
-                rrat = (radiusInp(n)/radius)**3.
-                rhop = rrat*rhopInp(n) + (1.-rrat)*rhow
+                rrat = (radiusInp/radius)**3.
+                rhop = rrat*rhopInp + (1.-rrat)*rhow
               case(4)
 !             elseif(flag .eq. 4) then
 !               Petters and Kreidenweis (ACP2007) parameterization
                 sat = min(0.99,sat)
-                radius = (radiusInp(n)**3 * (1+1.19*sat/(1-sat)))**(1./3.)
-                rrat = (radiusInp(n)/radius)**3
-                rhop = rrat*rhopInp(n) + (1.-rrat)*rhow
+                radius = (radiusInp**3 * (1+1.19*sat/(1-sat)))**(1./3.)
+                rrat = (radiusInp/radius)**3
+                rhop = rrat*rhopInp + (1.-rrat)*rhow
 !             endif
               end select
 
@@ -1097,7 +1112,7 @@ qa_temp = qa
 !print*,'CHEM_SETTLING TEST2'
 
     if(present(correctionMaring)) then
-       if ((correctionMaring) .and. (radiusInp(n) .le. (0.5*diameterMaring))) then
+       if ((correctionMaring) .and. (radiusInp .le. (0.5*diameterMaring))) then
           vsettle = max(1.0e-9, vsettle - v_upwardMaring)
        endif
     endif
@@ -1106,7 +1121,8 @@ qa_temp = qa
 
     if(present(vsettleOut)) then
 !       vsettleOut(n)%data3d = vsettle
-       vsettleOut(:,:,:,n) = vsettle
+!       vsettleOut(:,:,:,n) = vsettle
+       vsettleOut = vsettle
     endif
 
 !   Determine global min time to cross grid cell
@@ -1175,12 +1191,15 @@ qa_temp = qa
     cmass_after = sum(qa / gravDP * delp,3)
 
     if( associated(fluxout) ) then
-       fluxout(:,:,n) = (cmass_before - cmass_after)/cdt
+       fluxout(:,:,bin) = (cmass_before - cmass_after)/cdt
     endif
 
+!    fluxout = (cmass_before - cmass_after)/cdt
+
 !    w_c%qa(nbeg+n-1)%data3d = qa
-    int_qa(:,:,:,n) = qa
-   end do   ! n
+!    int_qa(:,:,:,n) = qa
+    int_qa = qa
+!   end do   ! n
 
    rc=0
 
@@ -2074,7 +2093,6 @@ qa_temp = qa
                              cdt * grav / delp(:,:,kmin:km)
     end do
 
-
    end subroutine UpdateAerosolState
 
 !==============================================================================
@@ -2086,7 +2104,7 @@ qa_temp = qa
 ! !INTERFACE:
 !
 
-   subroutine Aero_Compute_Diags ( mie_table, km, nbins, rlow, rup, channels, aerosol, grav, tmpu, rhoa, &
+   subroutine Aero_Compute_Diags ( mie_table, km, nbegin, nbins, rlow, rup, channels, aerosol, grav, tmpu, rhoa, &
                                  rh, u, v, delp, sfcmass, colmass, mass, exttau, scatau,     &
                                  sfcmass25, colmass25, mass25, exttau25, scatau25, &
                                  fluxu, fluxv, conc, extcoef, scacoef,    &
@@ -2098,11 +2116,12 @@ qa_temp = qa
 
 ! !INPUT PARAMETERS:
    type(Chem_Mie),  intent(in) :: mie_table        ! mie table
-   integer, intent(in) :: km, nbins
-   real, dimension(:), intent(in)   :: rlow   ! bin radii - low bounds
-   real, dimension(:), intent(in)   :: rup    ! bin radii - upper bounds
-   real, dimension(:), intent(in) :: channels
-   real, pointer, dimension(:,:,:,:) :: aerosol     ! 
+   integer, intent(in) :: km, nbegin, nbins
+   real, optional, dimension(:), intent(in)    :: rlow   ! bin radii - low bounds
+   real, optional, dimension(:), intent(in)    :: rup    ! bin radii - upper bounds
+   real, dimension(:), intent(in)    :: channels
+!   real, pointer, dimension(:,:,:,:) :: aerosol     ! 
+   real, dimension(:,:,:,:), intent(inout) :: aerosol     ! 
    real :: grav
    real, pointer, dimension(:,:,:) :: tmpu     ! temperature [K]
    real, pointer, dimension(:,:,:) :: rhoa     ! air density [kg m-3]
@@ -2114,26 +2133,26 @@ qa_temp = qa
 
 ! !OUTPUT PARAMETERS:
 !  Total mass
-   real, pointer, dimension(:,:), intent(inout)  :: sfcmass   ! sfc mass concentration kg/m3
-   real, pointer, dimension(:,:), intent(inout)  :: colmass   ! col mass density kg/m2
-   real, pointer, dimension(:,:,:), intent(inout)  :: mass      ! 3d mass mixing ratio kg/kg
+   real, pointer, dimension(:,:), intent(inout)   :: sfcmass   ! sfc mass concentration kg/m3
+   real, pointer, dimension(:,:), intent(inout)   :: colmass   ! col mass density kg/m2
+   real, pointer, dimension(:,:,:), intent(inout) :: mass      ! 3d mass mixing ratio kg/kg
 !  Total optical properties
-   real, pointer, dimension(:,:), intent(inout)  :: exttau    ! ext. AOT at 550 nm
-   real, pointer, dimension(:,:), intent(inout)  :: scatau    ! sct. AOT at 550 nm
-   real, pointer, dimension(:,:), intent(inout)  :: sfcmass25 ! sfc mass concentration kg/m3 (pm2.5)
-   real, pointer, dimension(:,:), intent(inout)  :: colmass25 ! col mass density kg/m2 (pm2.5)
-   real, pointer, dimension(:,:,:), intent(inout)  :: mass25    ! 3d mass mixing ratio kg/kg (pm2.5)
-   real, pointer, dimension(:,:), intent(inout)  :: exttau25  ! ext. AOT at 550 nm (pm2.5)
-   real, pointer, dimension(:,:), intent(inout)  :: scatau25  ! sct. AOT at 550 nm (pm2.5)
+   real, pointer, dimension(:,:), intent(inout)   :: exttau    ! ext. AOT at 550 nm
+   real, pointer, dimension(:,:), intent(inout)   :: scatau    ! sct. AOT at 550 nm
+   real, optional, pointer, dimension(:,:), intent(inout)   :: sfcmass25 ! sfc mass concentration kg/m3 (pm2.5)
+   real, optional, pointer, dimension(:,:), intent(inout)   :: colmass25 ! col mass density kg/m2 (pm2.5)
+   real, optional, pointer, dimension(:,:,:), intent(inout) :: mass25    ! 3d mass mixing ratio kg/kg (pm2.5)
+   real, optional, pointer, dimension(:,:), intent(inout)   :: exttau25  ! ext. AOT at 550 nm (pm2.5)
+   real, optional, pointer, dimension(:,:), intent(inout)   :: scatau25  ! sct. AOT at 550 nm (pm2.5)
    real, pointer, dimension(:,:),  intent(inout)  :: aerindx   ! TOMS UV AI
-   real, pointer, dimension(:,:), intent(inout)  :: fluxu     ! Column mass flux in x direction
-   real, pointer, dimension(:,:), intent(inout)  :: fluxv     ! Column mass flux in y direction
-   real, pointer, dimension(:,:,:), intent(inout)  :: conc      ! 3d mass concentration, kg/m3
-   real, pointer, dimension(:,:,:), intent(inout)  :: extcoef   ! 3d ext. coefficient, 1/m
-   real, pointer, dimension(:,:,:), intent(inout)  :: scacoef   ! 3d scat.coefficient, 1/m
-   real, pointer, dimension(:,:), intent(inout)  :: exttaufm  ! fine mode (sub-micron) ext. AOT at 550 nm
-   real, pointer, dimension(:,:), intent(inout)  :: scataufm  ! fine mode (sub-micron) sct. AOT at 550 nm
-   real, pointer, dimension(:,:), intent(inout)  :: angstrom  ! 470-870 nm Angstrom parameter
+   real, pointer, dimension(:,:), intent(inout)   :: fluxu     ! Column mass flux in x direction
+   real, pointer, dimension(:,:), intent(inout)   :: fluxv     ! Column mass flux in y direction
+   real, pointer, dimension(:,:,:), intent(inout) :: conc      ! 3d mass concentration, kg/m3
+   real, pointer, dimension(:,:,:), intent(inout) :: extcoef   ! 3d ext. coefficient, 1/m
+   real, pointer, dimension(:,:,:), intent(inout) :: scacoef   ! 3d scat.coefficient, 1/m
+   real, optional, pointer, dimension(:,:), intent(inout)   :: exttaufm  ! fine mode (sub-micron) ext. AOT at 550 nm
+   real, optional, pointer, dimension(:,:), intent(inout)   :: scataufm  ! fine mode (sub-micron) sct. AOT at 550 nm
+   real, pointer, dimension(:,:), intent(inout)   :: angstrom  ! 470-870 nm Angstrom parameter
    integer, intent(out)             :: rc        ! Error return code:
                                                  !  0 - all is well
                                                  !  1 - 
@@ -2162,6 +2181,7 @@ qa_temp = qa
 !  Begin...
  
    rc = 0
+!print*,'TEST 1'
 
 !  Initialize local variables
 !  --------------------------
@@ -2186,6 +2206,10 @@ qa_temp = qa
     enddo
    endif
 
+!print*,'TEST 2'
+
+!  Determine if going to do Angstrom parameter calculation
+!  -------------------------------------------------------
    do_angstrom = .false.
 !  If both 470 and 870 channels provided (and not the same) then
 !  possibly will do Angstrom parameter calculation
@@ -2193,21 +2217,29 @@ qa_temp = qa
       ilam870 .ne. 0. .and. &
       ilam470 .ne. ilam870) do_angstrom = .true.
 
-!   if( associated(angstrom) .and. do_angstrom ) then
+   if( associated(angstrom) .and. do_angstrom ) then
       allocate(tau470(i1:i2,j1:j2), tau870(i1:i2,j1:j2))
-!   end if
+   end if
 
 !print*,'SS2G ilam550 = ', ilam550
 !print*,'SS2G ilam470 = ', ilam470
 !print*,'SS2G ilam870 = ', ilam870
 !print*,'SS2G do_angstrom = ',do_angstrom
 
+!print*,'TEST 3'
+
 !  Compute the fine mode (sub-micron) and PM2.5 bin-wise fractions
 !  ------------------------------------
-   call Aero_Binwise_PM_Fractions(fPMfm, 0.50, rlow, rup, nbins)   ! 2*r < 1.0 um
-   call Aero_Binwise_PM_Fractions(fPM25, 1.25, rlow, rup, nbins)   ! 2*r < 2.5 um
+   if (present(rlow) .and. present(rup)) then
+      call Aero_Binwise_PM_Fractions(fPMfm, 0.50, rlow, rup, nbins)   ! 2*r < 1.0 um
+      call Aero_Binwise_PM_Fractions(fPM25, 1.25, rlow, rup, nbins)   ! 2*r < 2.5 um
+   end if
+
+!print*,'TEST 4'
 
    if (associated(aerindx))  aerindx = 0.0  ! for now
+
+!print*,'TEST 5'
 
 !  Calculate the diagnostic variables if requested
 !  -----------------------------------------------
@@ -2215,25 +2247,28 @@ qa_temp = qa
 !  Calculate the surface mass concentration
    if( associated(sfcmass) ) then
       sfcmass(i1:i2,j1:j2) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
          sfcmass(i1:i2,j1:j2) &
               =   sfcmass(i1:i2,j1:j2) &
               + aerosol(i1:i2,j1:j2,km,n)*rhoa(i1:i2,j1:j2,km)
       end do
    endif
-   if( associated(sfcmass25) ) then
+!print*,'TEST a'
+   if( present(sfcmass25) .and. associated(sfcmass25) ) then
       sfcmass25(i1:i2,j1:j2) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
          sfcmass25(i1:i2,j1:j2) &
               =   sfcmass25(i1:i2,j1:j2) &
               + aerosol(i1:i2,j1:j2,km,n)*rhoa(i1:i2,j1:j2,km)*fPM25(n)
       end do
    endif
 
+!print*,'TEST 6'
+
 !  Calculate the aerosol column loading
    if( associated(colmass) ) then
       colmass(i1:i2,j1:j2) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        do k = 1, km
         colmass(i1:i2,j1:j2) &
          =   colmass(i1:i2,j1:j2) &
@@ -2241,9 +2276,9 @@ qa_temp = qa
        end do
       end do
    endif
-   if( associated(colmass25)) then
+   if( present(colmass25) .and. associated(colmass25)) then
       colmass25(i1:i2,j1:j2) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        do k = 1, km
         colmass25(i1:i2,j1:j2) &
          =   colmass25(i1:i2,j1:j2) &
@@ -2252,38 +2287,44 @@ qa_temp = qa
       end do
    endif
 
+!print*,'TEST 7'
+
 !  Calculate the total mass concentration
    if( associated(conc) ) then
       conc(i1:i2,j1:j2,1:km) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        conc(i1:i2,j1:j2,1:km) &
          =   conc(i1:i2,j1:j2,1:km) &
            + aerosol(i1:i2,j1:j2,1:km,n)*rhoa(i1:i2,j1:j2,1:km)
       end do
    endif
 
+!print*,'TEST 8'
+
 !  Calculate the total mass mixing ratio
    if( associated(mass) ) then
       mass(i1:i2,j1:j2,1:km) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        mass(i1:i2,j1:j2,1:km) &
          =   mass(i1:i2,j1:j2,1:km) &
            + aerosol(i1:i2,j1:j2,1:km,n)
       end do
    endif
-   if( associated(mass25) ) then
+   if( present(mass25) .and. associated(mass25) ) then
       mass25(i1:i2,j1:j2,1:km) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        mass25(i1:i2,j1:j2,1:km) &
          =   mass25(i1:i2,j1:j2,1:km) &
            + aerosol(i1:i2,j1:j2,1:km,n)*fPM25(n)
       end do
    endif
 
+!print*,'TEST 9'
+
 !  Calculate the column mass flux in x direction
    if( associated(fluxu) ) then
       fluxu(i1:i2,j1:j2) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        do k = 1, km
         fluxu(i1:i2,j1:j2) &
          =   fluxu(i1:i2,j1:j2) &
@@ -2295,7 +2336,7 @@ qa_temp = qa
 !  Calculate the column mass flux in y direction
    if( associated(fluxv) ) then
       fluxv(i1:i2,j1:j2) = 0.
-      do n = 1, nbins
+      do n = nbegin, nbins
        do k = 1, km
         fluxv(i1:i2,j1:j2) &
          =   fluxv(i1:i2,j1:j2) &
@@ -2304,25 +2345,26 @@ qa_temp = qa
       end do
    endif
 
+!print*,'TEST 10'
+
 !  Calculate the extinction and/or scattering AOD
    if( associated(exttau) .or. associated(scatau) ) then
 
       if( associated(exttau)) exttau(i1:i2,j1:j2) = 0.
       if( associated(scatau)) scatau(i1:i2,j1:j2) = 0.
 
-      if( associated(exttau25)) exttau25(i1:i2,j1:j2) = 0.
-      if( associated(scatau)) scatau(i1:i2,j1:j2) = 0.
+      if( present(exttau25) .and. associated(exttau25)) exttau25(i1:i2,j1:j2) = 0.
+      if( present(scatau25) .and. associated(scatau25)) scatau25(i1:i2,j1:j2) = 0.
 
-      if( associated(exttau25)) exttau25(i1:i2,j1:j2) = 0.
-      if( associated(scatau25)) scatau25(i1:i2,j1:j2) = 0.
-
-      if( associated(exttaufm)) exttaufm(i1:i2,j1:j2) = 0.
-      if( associated(scataufm)) scataufm(i1:i2,j1:j2) = 0.
+      if( present(exttaufm) .and. associated(exttaufm)) exttaufm(i1:i2,j1:j2) = 0.
+      if( present(scataufm) .and. associated(scataufm)) scataufm(i1:i2,j1:j2) = 0.
 
       if( associated(extcoef)) extcoef(i1:i2,j1:j2,1:km) = 0.
       if( associated(scacoef)) scacoef(i1:i2,j1:j2,1:km) = 0.
 
-      do n = 1, nbins
+!print*,'TEST 11'
+
+      do n = nbegin, nbins
 
 !      Select the name for species
 !       qname = trim(w_c%reg%vname(w_c%reg%i_DU+n-1))
@@ -2348,20 +2390,22 @@ qa_temp = qa
 
 !         Integrate in the vertical
           if( associated(exttau) ) exttau(i,j) = exttau(i,j) + tau
-          if( associated(exttaufm)) &
+          if( present(exttaufm) .and. associated(exttaufm)) &
                          exttaufm(i,j) = exttaufm(i,j) + tau*fPMfm(n)
-          if( associated(exttau25)) &
+          if( present(exttau25) .and. associated(exttau25)) &
                          exttau25(i,j) = exttau25(i,j) + tau*fPM25(n)
 
           if( associated(scatau) ) scatau(i,j) = scatau(i,j) + tau*ssa
-          if( associated(scataufm) ) &
+          if( present(scataufm) .and. associated(scataufm) ) &
                          scataufm(i,j) = scataufm(i,j) + tau*ssa*fPMfm(n)
-          if( associated(scatau25) ) &
+          if( present(scatau25) .and. associated(scatau25) ) &
                          scatau25(i,j) = scatau25(i,j) + tau*ssa*fPM25(n)
 
          enddo
         enddo
        enddo
+
+!print*,'TEST 12'
 
       enddo  ! nbins
 
@@ -2375,7 +2419,7 @@ qa_temp = qa
       tau470(i1:i2,j1:j2) = tiny(1.0)
       tau870(i1:i2,j1:j2) = tiny(1.0)
 
-      do n = 1, nbins
+      do n = nbegin, nbins
 
 !      Select the name for species
 !       qname = trim(w_c%reg%vname(w_c%reg%i_DU+n-1))
@@ -2410,6 +2454,8 @@ qa_temp = qa
         -log(tau470(i1:i2,j1:j2)/tau870(i1:i2,j1:j2)) / &
          log(470./870.)
 !print*,'SS2G sum(angstrom) = ', sum(angstrom)
+
+!print*,'TEST 13'
 
    endif
 
@@ -2989,6 +3035,592 @@ qa_temp = qa
    deallocate(vsettle)
 
    end subroutine hoppelCorrection
+
+!===============================================================================
+!BOP
+!
+! !IROUTINE:  OC_Emission - Adds Organic Carbon emission for one timestep
+!             We have emissions from 6 sources, which are distributed
+!             differently in the vertical
+!             1) biomass burning - uniformly mixed in PBL
+!             2) biofuel sources - emitted into lowest 100 m
+!             3) anthropogenic l1 - emitted into lowest 100 m
+!             4) anthropogenic l2 - emitted into 100 - 500 m levels
+!             5) terpene          - emitted to surface (hydrophilic only)
+!             6) point sources    - emitted in altitudes specified in input
+!
+! !INTERFACE:
+!
+
+   subroutine OCEmission (mie_table, km, nbins, cdt, grav, ratPOM, fTerpene, aviation_lto_src, aviation_cds_src,&
+                           aviation_crs_src, fHydrophobic, pblh, tmpu, rhoa, rh, aerosolPhilic, aerosolPhobic, &
+                           delp, aviation_layers, &
+                            biomass_src, terpene_src, eocant1_src, eocant2_src, oc_ship_src, biofuel_src, &
+                           OC_emis, OC_emisAN, OC_emisBB, OC_emisBF, OC_emisBG, rc )
+
+! !USES:
+
+  implicit NONE
+
+! !INPUT PARAMETERS:
+   type(Chem_Mie),  intent(in) :: mie_table        ! mie table
+   integer, intent(in) :: km, nbins
+   real, intent(in)    :: cdt, grav
+   real, intent(in)    :: ratPOM
+   real, intent(in)    :: fTerpene
+   real, dimension(:), intent(in)  :: aviation_layers
+   real, pointer, dimension(:,:)    :: pblh
+   real, pointer, dimension(:,:,:)  :: tmpu
+   real, pointer, dimension(:,:,:)  :: rhoa
+   real, pointer, dimension(:,:,:)  :: rh
+   real, pointer, dimension(:,:,:)  :: delp
+   real, dimension(:,:), intent(in) :: aviation_cds_src
+   real, dimension(:,:), intent(in) :: aviation_crs_src
+   real, dimension(:,:), intent(in) :: aviation_lto_src
+   real, dimension(:,:), intent(in) :: biomass_src
+   real, dimension(:,:), intent(in) :: terpene_src
+   real, dimension(:,:), intent(in) :: eocant1_src
+   real, dimension(:,:), intent(in) :: eocant2_src
+   real, dimension(:,:), intent(in) :: oc_ship_src
+   real, dimension(:,:), intent(in) :: biofuel_src
+   real, intent(in) :: fHydrophobic
+
+! !OUTPUT PARAMETERS:
+   real, dimension(:,:,:), intent(inout) :: aerosolPhobic
+   real, dimension(:,:,:), intent(inout) :: aerosolPhilic
+   real, pointer, dimension(:,:,:)  :: OC_emis ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisAN      ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisBB      ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisBF      ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisBG      ! OC emissions, kg/m2/s
+   integer, optional, intent(out)             :: rc          ! Error return code:
+                                                   !  0 - all is well
+                                                   !  1 - 
+   character(len=*), parameter :: myname = 'OCEmission'
+
+! !DESCRIPTION: Updates the OC concentration with emissions every timestep
+!
+! !REVISION HISTORY:
+!
+!  06Nov2003, Colarco
+!  Based on Ginoux
+!
+!EOP
+!-------------------------------------------------------------------------
+
+! !Local Variables
+   integer  ::  i, j, k, m, n, ios, ijl, ii
+   integer  ::  n1, n2
+   integer  :: i1=1, i2, j1=1, j2
+!  pressure at 100m, 500m, & PBLH
+   real, dimension(:,:), allocatable :: p100, p500, pPBL
+   real, dimension(:,:), allocatable :: p0, z0, ps
+   real :: p1, z1, dz, delz, delp_, f100, f500, fPBL, fBot
+   real :: qmax, qmin, eBiofuel, eBiomass, eTerpene, eAnthro
+
+   real, dimension(:,:), allocatable :: factor, srcHydrophobic, srcHydrophilic
+   real, dimension(:,:), allocatable :: srcBiofuel, srcBiomass, srcAnthro, srcBiogenic
+   real                         :: srcTmp, zpbl, maxAll
+
+   real, dimension(:,:,:), allocatable :: emis_aviation
+   real, dimension(:,:,:), allocatable :: srcAviation
+   real                            :: z_lto_bot, z_lto_top
+   real                            :: z_cds_bot, z_cds_top
+   real                            :: z_crs_bot, z_crs_top
+
+   real, dimension(:,:), allocatable          :: f_bb_        ! scaling factor for BB emissions based on maximum allowed exttau
+   real, dimension(:,:), allocatable          :: exttau_bb_   ! increment of exttau due to BB during the current time step
+   real, allocatable, dimension(:,:,:,:) :: qa_bb_       ! increment of qa due to BB during the current time step (nbins,i1:i2,j1:j2:km)
+   real                                  :: cutoff_bb_exttau
+   integer                               :: nch, idx
+   real                                  :: ilam550
+   real                                  :: tau, ssa
+   character(len=255)                    :: qname
+   real, parameter                       :: max_bb_exttau = 30.0
+
+!  Indices for point emissions
+   integer, pointer, dimension(:)  :: iPoint, jPoint
+   real, dimension(km)          :: point_column_emissions
+
+!  Source function terms for SOA from Anthropogenic VOCs
+   real :: srcSOAanthro = 0.0
+
+!print*,'TEST 1'
+
+!  Initialize local variables
+!  --------------------------
+   i2 = size(rhoa,1)
+   j2 = size(rhoa,2)
+!   n1  = w_c%reg%i_OC
+!   n2  = w_c%reg%j_OC
+   ijl = ( i2 - i1 + 1 ) * ( j2 - j1 + 1 )
+
+   allocate(factor(i2,j2), srcHydrophobic(i2,j2), srcHydrophilic(i2,j2), srcBiofuel(i2,j2), &
+            srcBiomass(i2,j2), srcAnthro(i2,j2), srcBiogenic(i2,j2), f_bb_(i2,j2), exttau_bb_(i2,j2))
+
+
+!  Emission factors scaling from source files to desired mass quantity
+   eBiomass = ratPOM
+   eBiofuel = ratPOM
+   eTerpene = ratPOM * fTerpene
+   eAnthro  = ratPOM
+
+!  Zero diagnostic accumulators
+     if(associated(OC_emis)) OC_emis = 0.0
+     if(associated(OC_emisAN)) OC_emisAN = 0.0
+     if(associated(OC_emisBF)) OC_emisBF = 0.0
+     if(associated(OC_emisBB)) OC_emisBB = 0.0
+     if(associated(OC_emisBG)) OC_emisBG = 0.0
+
+!  Distribute aircraft emissions from LTO, CDS and CRS layers
+!  ----------------------------------------------------------
+   z_lto_bot = max(1e-3, aviation_layers(1))
+   z_lto_top = max(2e-3, aviation_layers(2))
+
+   z_cds_bot = max(2e-3, aviation_layers(2))
+   z_cds_top = max(3e-3, aviation_layers(3))
+
+   z_crs_bot = max(3e-3, aviation_layers(3))
+   z_crs_top = max(4e-3, aviation_layers(4))
+
+   allocate(emis_aviation, mold=tmpu)
+   allocate(srcAviation, mold=tmpu)
+   emis_aviation = 0.0
+   srcAviation   = 0.0
+
+   call distribute_aviation_emissions(delp, rhoa, z_lto_bot, z_lto_top, aviation_lto_src, emis_aviation, i1, i2, j1, j2, km, grav)
+   srcAviation = srcAviation + emis_aviation
+
+   call distribute_aviation_emissions(delp, rhoa, z_cds_bot, z_cds_top, aviation_cds_src, emis_aviation, i1, i2, j1, j2, km, grav)
+   srcAviation = srcAviation + emis_aviation
+
+   call distribute_aviation_emissions(delp, rhoa, z_crs_bot, z_crs_top, aviation_crs_src, emis_aviation, i1, i2, j1, j2, km, grav)
+   srcAviation = srcAviation + emis_aviation
+
+
+!  Determine surface pressure
+!  AMS Note: pass this in
+!  --------------------------
+   allocate(ps, mold=pblh)
+   allocate(p0, mold=pblh)
+   allocate(z0, mold=pblh)
+   allocate(p100, mold=pblh)
+   allocate(p500, mold=pblh)
+   allocate(pPBL, mold=pblh)
+   ps = 0.0
+   do k = 1, km
+    ps(i1:i2,j1:j2) = ps(i1:i2,j1:j2) + delp(i1:i2,j1:j2,k)
+   end do
+
+!  Find the pressure of the 100m, 500m, and PBLH altitudes
+!  AMS Note: this could be greatly simplified by using ze/zm and having a
+!      generic routine from the bottom up with an early exit condition
+!  -----------------------------------------------------------------------
+   p0 = ps
+   z0(i1:i2,j1:j2) = 0.
+   do k = km, 1, -1
+    do j = j1, j2
+     do i = i1, i2
+      p1 = p0(i,j) - delp(i,j,k)
+      dz = delp(i,j,k)/rhoa(i,j,k)/grav
+      z1 = z0(i,j)+dz
+      if(z0(i,j) .lt. 100 .and. z1 .ge. 100.) then
+       delz = z1-100.
+       delp_ = delz*rhoa(i,j,k)*grav
+       p100(i,j) = p1+delp_
+      endif
+      if(z0(i,j) .lt. 500 .and. z1 .ge. 500.) then
+       delz = z1-500.
+       delp_ = delz*rhoa(i,j,k)*grav
+       p500(i,j) = p1+delp_
+      endif
+      zpbl = max ( pblh(i,j), 100. )
+      if(z0(i,j) .lt. zpbl .and. z1 .ge. zpbl ) then
+       delz = z1-zpbl
+       delp_ = delz*rhoa(i,j,k)*grav
+       pPBL(i,j) = p1+delp_
+      endif
+      p0(i,j) = p1
+      z0(i,j) = z1
+     end do
+    end do
+   end do
+
+!print*,'TEST 5'
+
+
+#if 0
+   call pmaxmin ( 'OC: p100   ', p100,  qmin, qmax, ijl, 1, 1. )
+   call pmaxmin ( 'OC: p500   ', p500,  qmin, qmax, ijl, 1, 1. )
+   call pmaxmin ( 'OC: pPBL   ', pPBLh, qmin, qmax, ijl, 1, 1. )
+#endif
+
+
+!   Limit biomass burning emissions
+!   -------------------------------
+    allocate(qa_bb_(nbins,i1:i2,j1:j2,km))
+    qa_bb_ = 0.0
+
+    p0 = ps
+K_LOOP_BB: do k = km, 1, -1
+
+!   First determine emissions for this layer
+!   ----------------------------------------
+    maxAll = 0.0
+    do j = j1, j2
+     do i = i1, i2
+
+      p1 = p0(i,j) - delp(i,j,k)
+
+!     Pressure @ PBL height
+!     ---------------------
+      fPBL = 0.
+      if(p1 .ge. pPBL(i,j)) fPBL = delp(i,j,k)/(ps(i,j)-pPBL(i,j))
+      if(p1 .lt. pPBL(i,j) .and. p0(i,j) .ge. pPBL(i,j)) fPBL = (p0(i,j)-pPBL(i,j))/(ps(i,j)-pPBL(i,j))
+
+!     Sources by class in kg m-2 s-1
+!     ------------------------------
+      srcBiomass(i,j)  = fPBL * eBiomass * biomass_src(i,j)
+
+      srcHydrophobic(i,j) =     fHydrophobic  * srcBiomass(i,j)
+      srcHydrophilic(i,j) = (1.-fHydrophobic) * srcBiomass(i,j)
+
+!     Update pressure of lower level
+!     ------------------------------
+      p0(i,j) = p1
+
+     end do ! i
+    end do  ! j
+
+! REPLACE PMAXPMIN WITH SOMETIHNG?????
+!   Determine global max/min
+!   ------------------------
+!    call pmaxmin ( 'OC: Phobic ', srcHydrophobic, qmin, qmax, ijl, 1, 0. )
+!    maxAll = abs(qmax) + abs(qmin)
+!    call pmaxmin ( 'OC: Philic ', srcHydrophilic, qmin, qmax, ijl, 1, 0. )
+!    maxAll = max ( maxAll, abs(qmax) + abs(qmin) )
+
+!   If emissions are zero at this level (globally), we are done
+!   -----------------------------------------------------------
+!    if ( maxAll .eq. 0.0 ) exit K_LOOP_BB
+
+
+!   Update concentrations at this layer
+!   The "1" element is hydrophobic 
+!   The "2" element is hydrophilic
+!   -----------------------------------    
+    factor = cdt * grav / delp(:,:,k)
+
+    qa_bb_(1,:,:,k) = factor * srcHydrophobic
+    qa_bb_(2,:,:,k) = factor * srcHydrophilic
+
+   end do K_LOOP_BB
+
+
+    nch   = mie_table%nch
+
+!   Get the wavelength indices
+!   --------------------------
+!   Must provide ilam550 for AOT calculation
+    ilam550 = 1.
+    if(nch .gt. 1) then
+     do i = 1, nch
+      if ( mie_table%channels(i) .ge. 5.49e-7 .and. &
+           mie_table%channels(i) .le. 5.51e-7) ilam550 = i
+     enddo
+    endif
+
+!  Calculate the extinction and/or scattering AOD
+
+   exttau_bb_(i1:i2,j1:j2) = 0.0
+
+   do n = 1, nbins
+!     Select the name for species and the index
+      do k = 1, km
+       do j = j1, j2
+        do i = i1, i2
+         call Chem_MieQuery(mie_table, n, ilam550, &
+              qa_bb_(n,i,j,k)*delp(i,j,k)/grav, &
+              rh(i,j,k), tau=tau, ssa=ssa)
+
+!        Integrate in the vertical
+         exttau_bb_(i,j) = exttau_bb_(i,j) + tau
+
+        enddo
+       enddo
+      enddo
+
+   enddo  ! nbins
+
+
+   f_bb_ = 1.0
+   cutoff_bb_exttau = (cdt / (24 * 3600.0)) * max_bb_exttau
+
+   do j = j1, j2
+    do i = i1, i2
+     if (exttau_bb_(i,j) > cutoff_bb_exttau) then
+      f_bb_(i,j) = cutoff_bb_exttau / exttau_bb_(i,j)
+     end if
+    enddo
+   enddo
+
+   deallocate(qa_bb_)
+
+!  Now update the tracer mixing ratios with the aerosol sources
+!  ------------------------------------------------------------
+   p0 = ps
+K_LOOP: do k = km, 1, -1
+
+!!!    print *, 'OC_Emissions: getting emissions for layer ', k
+
+!   First determine emissions for this layer
+!   ----------------------------------------
+    maxAll = 0.0
+    do j = j1, j2
+     do i = i1, i2
+
+      p1 = p0(i,j) - delp(i,j,k)
+
+!     Pressure @ 100m
+!     ---------------
+      f100 = 0.
+      if(p1 .ge. p100(i,j)) f100 = delp(i,j,k)/(ps(i,j)-p100(i,j))
+      if(p1 .lt. p100(i,j) .and. p0(i,j) .ge. p100(i,j)) &
+       f100 = (p0(i,j)-p100(i,j))/(ps(i,j)-p100(i,j))
+
+!     Pressure @ 500m
+!     ---------------
+      f500 = 0.
+      if ( p0(i,j) .ge. p100(i,j) .and. p1 .lt. p100(i,j) .and. p1 .ge. p500(i,j)) &
+       f500 = (p100(i,j)-p1)/(p100(i,j)-p500(i,j))
+      if(p0(i,j) .lt. p100(i,j) .and. p1 .ge. p500(i,j)) &
+       f500 = delp(i,j,k)/(p100(i,j)-p500(i,j))
+      if(p0(i,j) .ge. p500(i,j) .and. p1 .lt. p500(i,j)) &
+       f500 = (p0(i,j)-p500(i,j))/(p100(i,j)-p500(i,j))
+
+!     Pressure @ PBL height
+!     ---------------------
+      fPBL = 0.
+      if(p1 .ge. pPBL(i,j)) fPBL = delp(i,j,k)/(ps(i,j)-pPBL(i,j))
+      if(p1 .lt. pPBL(i,j) .and. p0(i,j) .ge. pPBL(i,j)) &
+       fPBL = (p0(i,j)-pPBL(i,j))/(ps(i,j)-pPBL(i,j))
+
+!     Terpene is tree-top emission; only add in bottom layer
+!     ------------------------------------------------------
+      if ( k .eq. km ) then
+         fBot = 1.0
+      else
+         fBot = 0.0
+      end if
+
+!     Sources by class in kg m-2 s-1
+!     ------------------------------
+      srcBiofuel(i,j)  = f100 * eBiofuel * biofuel_src(i,j)
+      srcAnthro(i,j)   = f100 * eAnthro  * eocant1_src(i,j) &
+                       + f500 * eAnthro  * eocant2_src(i,j) &
+                       + f100 * eAnthro  * oc_ship_src(i,j) &
+                       +        eAnthro  * srcAviation(i,j,k)
+      srcBiomass(i,j)  = fPBL * eBiomass * biomass_src(i,j) * f_bb_(i,j)
+      srcBiogenic(i,j) = fBot * eTerpene * terpene_src(i,j)
+
+      srcTmp = srcBiofuel(i,j) + srcAnthro(i,j) + srcBiomass(i,j)
+
+      srcHydrophobic(i,j) =     fHydrophobic  * srcTmp
+      srcHydrophilic(i,j) = (1.-fHydrophobic) * srcTmp + srcBiogenic(i,j)
+
+!     Update pressure of lower level
+!     ------------------------------
+      p0(i,j) = p1
+
+     end do ! i
+    end do  ! j
+
+!   Determine global max/min
+!   ------------------------
+!    call pmaxmin ( 'OC: Phobic ', srcHydrophobic, qmin, qmax, ijl, 1, 0. )
+!    maxAll = abs(qmax) + abs(qmin)
+!    call pmaxmin ( 'OC: Philic ', srcHydrophilic, qmin, qmax, ijl, 1, 0. )
+!    maxAll = max ( maxAll, abs(qmax) + abs(qmin) )
+
+!   If emissions are zero at this level (globally), we are done
+!   -----------------------------------------------------------
+!    if ( maxAll .eq. 0.0 ) exit K_LOOP
+
+!   Update concentrations at this layer
+!   The "1" element is hydrophobic 
+!   The "2" element is hydrophilic
+!   -----------------------------------    
+    factor = cdt * grav / delp(:,:,k)
+
+    aerosolPhobic(:,:,k) = aerosolPhobic(:,:,k) &
+                             + factor * srcHydrophobic
+
+    aerosolPhilic(:,:,k) = aerosolPhilic(:,:,k) &
+                             + factor * srcHydrophilic
+
+
+!   Fill in diagnostics if requested
+!   --------------------------------
+    if ( associated(OC_emis)) &
+                    OC_emis(:,:,1) = OC_emis(:,:,1) + srcHydrophobic
+
+    if ( associated(OC_emis)) &
+                    OC_emis(:,:,2) = OC_emis(:,:,2) + srcHydrophilic
+
+    if ( associated(OC_emisBF)) &
+                    OC_emisBF  = OC_emisBF  + srcBiofuel
+
+    if ( associated(OC_emisBB)) &
+                    OC_emisBB  = OC_emisBB  + srcBiomass
+
+    if ( associated(OC_emisAN)) &
+                    OC_emisAN  = OC_emisAN  + srcAnthro
+
+    if ( associated(OC_emisBG)) &
+                    OC_emisBG  = OC_emisBG + srcBiogenic
+
+   end do K_LOOP
+
+   rc = 0
+   end subroutine OCEmission
+
+   subroutine distribute_aviation_emissions(delp, rhoa, z_bot, z_top, emissions_layer, emissions, i1, i2, j1, j2, km, grav)
+
+    implicit none
+
+    integer, intent(in) :: i1, i2, j1, j2, km
+
+    real, dimension(:,:,:), intent(in) :: delp
+    real, dimension(:,:,:), intent(in) :: rhoa
+    real, dimension(:,:),   intent(in) :: emissions_layer
+    real, intent(in)                   :: z_bot
+    real, intent(in)                   :: z_top
+    real, dimension(:,:,:), intent(out):: emissions
+    real, intent(in)                   :: grav
+!   local
+    integer :: i, j, k
+    integer :: k_bot, k_top
+    real    :: z_
+    real, dimension(km) :: z, dz, w_
+
+    do j = j1, j2
+        do i = i1, i2
+            ! find level height
+            z = 0.0
+            z_= 0.0
+
+            do k = km, 1, -1
+                dz(k) = delp(i,j,k)/rhoa(i,j,k)/grav
+                z_    = z_ + dz(k)
+                z(k)  = z_
+            end do
+
+            ! find the bottom level
+            do k = km, 1, -1
+                if (z(k) >= z_bot) then
+                    k_bot = k
+                    exit
+                end if
+            end do
+
+            ! find the top level
+            do k = k_bot, 1, -1
+                if (z(k) >= z_top) then
+                    k_top = k
+                    exit
+                end if
+            end do
+
+            ! find the weights
+            w_ = 0
+
+!           if (k_top > k_bot) then
+!               need to bail - something went wrong here
+!           end if
+
+            if (k_bot .eq. k_top) then
+                w_(k_bot) = z_top - z_bot
+            else
+                do k = k_bot, k_top, -1
+                    if ((k < k_bot) .and. (k > k_top)) then
+                        w_(k) = dz(k)
+                    else
+                        if (k == k_bot) then
+                            w_(k) = (z(k) - z_bot)
+                        end if
+
+                        if (k == k_top) then
+                            w_(k) = z_top - (z(k)-dz(k))
+                        end if
+                    end if
+                end do
+            end if
+
+            ! distribute emissions in the vertical 
+            emissions(i,j,:) = (w_ / sum(w_)) * emissions_layer(i,j)
+        end do
+    end do
+
+    end subroutine distribute_aviation_emissions
+
+!============================================================================
+
+!BOP
+!
+! !IROUTINE: phobicTophilic
+!
+! !INTERFACE:
+   subroutine phobicTophilic (aerosol_phobic, aerosol_philic, aerosol_toHydrophilic, &
+                              km, cdt, grav, delp, rc)
+
+! !USES:
+   implicit NONE
+
+! !INPUT PARAMETERS:
+   integer, intent(in)   :: km    ! model level 
+   real, intent(in)      :: cdt   
+   real, intent(in)      ::  grav ! [m -s^2]
+   real, dimension(:,:,:), intent(in)  :: delp  ! pressure thickness [Pa]
+
+! !INOUTPUT PARAMETERS:
+   real, dimension(:,:,:), intent(inout)  :: aerosol_phobic   ! OCphobic [kg kg-1]
+   real, dimension(:,:,:), intent(inout)  :: aerosol_philic   ! OCphilic [kg kg-1]
+   real, dimension(:,:), pointer   :: aerosol_toHydrophilic ! OCHYPHIL [kg m-2 s-1]
+! !OUTPUT PARAMETERS:
+   integer, optional, intent(out) :: rc
+
+! !Local Variables
+   integer :: i, j, k
+   real :: qUpdate, delq
+
+!EOP
+!------------------------------------------------------------------------------------
+!  Begin...
+
+   if(associated(aerosol_toHydrophilic)) aerosol_toHydrophilic = 0.0
+
+   do k = 1, km
+    do j = 1, ubound(delp, 2)
+     do i = 1, ubound(delp, 1)
+      qUpdate = aerosol_phobic(i,j,k)*exp(-4.63e-6*cdt)
+      qUpdate = max(qUpdate,1.e-32)
+      delq = max(0.,aerosol_phobic(i,j,k)-qUpdate)
+      aerosol_phobic(i,j,k) = qUpdate
+      aerosol_philic(i,j,k) = aerosol_philic(i,j,k)+delq
+      if(associated(aerosol_toHydrophilic)) &
+       aerosol_toHydrophilic(i,j) = aerosol_toHydrophilic(i,j) &
+        + delq*delp(i,j,k)/grav/cdt
+     end do
+    end do
+   end do
+
+   rc = 0
+
+
+  end subroutine phobicTophilic
+
+
+
 
 
 
