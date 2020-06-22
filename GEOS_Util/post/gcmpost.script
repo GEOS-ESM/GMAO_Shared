@@ -677,7 +677,7 @@ sleep 5
 # ------------------
                  else
                       echo "   Performing time average ..."
-                      if(! -e time_ave.rc ) ln -s $GEOSUTIL/bin/time_ave.rc .
+                      if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
 
                       if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
                               $GEOSUTIL/bin/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
