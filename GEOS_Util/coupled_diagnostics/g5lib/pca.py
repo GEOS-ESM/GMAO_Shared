@@ -88,3 +88,33 @@ class PCA(object):
         self.pcs=pcs[:,ind]
         self.eofs=eofs[:,ind]
 
+def pca(field, keep=None, center=False, weight=True):
+    '''
+    Performss principal component analysis on data field, and stores
+    a PCA object. Please, remove climatology, detrend data etc before
+    calling this method. 
+
+    If center=True, PCA object will center data using mean and standard deviation.
+    If weight=True, multiply data by area weights.
+        '''
+
+    nt,km,jm,im=field.data.shape
+
+    # multiply data by area factor, reshape, return matrix
+    if weight:
+        factor=sp.cos(sp.deg2rad(field.grid['lat']))
+        factor[factor<0.]=0.
+        factor=sp.sqrt(factor)
+    else:
+        factor=sp.ones(field.grid['lat'].shape)
+
+    mask=sp.ma.getmaskarray(field.data).copy()
+    field.data[mask]=0.0
+    field.data*=factor[sp.newaxis,sp.newaxis]
+    X=field.data.reshape((nt,km*jm*im)).view(sp.ndarray) 
+
+    field._pc=pca.PCA(X, center=center, keep=keep)
+
+    field.data/=factor[sp.newaxis,sp.newaxis]
+    field.data[mask]=field.data.fill_value
+    field.data.mask=mask

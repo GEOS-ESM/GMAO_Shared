@@ -2,6 +2,7 @@
 Contains Field class and field related routines.
 
 Note: g2g functionality was moved to gridtile.py due to dependence on f2py.
+      pca method is moved to pca.py module due to dependence on f2py.
 '''
 
 import scipy as sp
@@ -12,7 +13,6 @@ import netCDF4 as nc
 import utils as utl
 from domain import Domain
 import plotters
-import pca
 import grid
 
 
@@ -406,36 +406,6 @@ class Field(object):
         neg=self.subset(tind=0); neg.data=self.subset(tind=tminus).data.mean(0)[sp.newaxis]
         
         return pos,neg
-
-    def pca(self, keep=None, center=False, weight=True):
-        '''
-        Performss principal component analysis on data field, and stores
-        a PCA object. Please, remove climatology, detrend data etc before
-        calling this method. 
-
-        If center=True, PCA object will center data using mean and standard deviation.
-        If weight=True, multiply data by area weights.
-        '''
-
-        nt,km,jm,im=self.data.shape
-
-        # multiply data by area factor, reshape, return matrix
-        if weight:
-            factor=sp.cos(sp.deg2rad(self.grid['lat']))
-            factor[factor<0.]=0.
-            factor=sp.sqrt(factor)
-        else:
-            factor=sp.ones(self.grid['lat'].shape)
-        mask=sp.ma.getmaskarray(self.data).copy()
-        self.data[mask]=0.0
-        self.data*=factor[sp.newaxis,sp.newaxis]
-        X=self.data.reshape((nt,km*jm*im)).view(sp.ndarray) 
-
-        self._pc=pca.PCA(X, center=center, keep=keep)
-
-        self.data/=factor[sp.newaxis,sp.newaxis]
-        self.data[mask]=self.data.fill_value
-        self.data.mask=mask
 
     def from_array(self,a):
         x=self.subset(tind=1,kind=0)
