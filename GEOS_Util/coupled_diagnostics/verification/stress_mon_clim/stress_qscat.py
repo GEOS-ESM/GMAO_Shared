@@ -5,7 +5,7 @@ import scipy as sp
 import matplotlib.pyplot as pl
 from mpl_toolkits.basemap.cm import sstanom, s3pcpn_l
 from matplotlib import dates
-from my_lib import field
+from g5lib import field
 
 # Read validation data set
 obs={}

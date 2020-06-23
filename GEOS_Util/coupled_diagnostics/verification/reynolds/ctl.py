@@ -1,7 +1,7 @@
 import os
 import scipy as sp
 import netCDF4 as nc
-from my_lib import dset
+from g5lib import dset
 
 class Ctl(dset.NCDset):
     def __init__(self):
