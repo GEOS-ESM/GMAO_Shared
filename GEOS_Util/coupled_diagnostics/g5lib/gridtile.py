@@ -1,5 +1,4 @@
 import futils
-import field
 
 def g2g(datain,tiledata,hdimsout):
     '''
@@ -28,21 +27,21 @@ def g2g(datain,tiledata,hdimsout):
                    shout[-1],
                    shout[-2]),datain.fill_value).reshape(shout)
 
-    def g2g(field,ogrid,tiledata):
-        '''
-        Interpolates field from one horizontal grid onto another using 
-        exchange grid (tiles).
-        
-        ogrid - output grid
+def g2g_field(field,ogrid,tiledata):
+    '''
+    Interpolates field from one horizontal grid onto another using 
+    exchange grid (tiles).
+    
+    ogrid - output grid
 
-        tiledata - array of records of size Nt (Nt - number of tiles).
-        tiledata['iin'], tiledata['jin'], tiledata['iout'], tiledata['jout'], 
-        tiledata['frac']  - 
-        arrays of size Nt of indexes on the input grid, indexes on the output grid, 
-        corresponding to a tile N, and fraction of tile on the output grid.
-        '''
-        outdims=ogrid.dims[-2:]
+    tiledata - array of records of size Nt (Nt - number of tiles).
+    tiledata['iin'], tiledata['jin'], tiledata['iout'], tiledata['jout'], 
+    tiledata['frac']  - 
+    arrays of size Nt of indexes on the input grid, indexes on the output grid, 
+    corresponding to a tile N, and fraction of tile on the output grid.
+    '''
+    outdims=ogrid.dims[-2:]
 
-        field.data=utl.g2g(field.data,tiledata,outdims)
-        field.grid=grid.Grid(ogrid['lon'],ogrid['lat'],field.grid['lev'])
+    field.data=utl.g2g(field.data,tiledata,outdims)
+    field.grid=grid.Grid(ogrid['lon'],ogrid['lat'],field.grid['lev'])
 
