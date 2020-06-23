@@ -1,5 +1,7 @@
 '''
 Contains Field class and field related routines.
+
+Note: g2g functionality was moved to gridtile.py due to dependence on f2py.
 '''
 
 import scipy as sp
@@ -299,25 +301,6 @@ class Field(object):
         self.data=xnew            
         self.grid=grid.Grid(newgrid['lon'], newgrid['lat'], self.grid['lev'])
         
-    def g2g(self,ogrid,tiledata):
-        '''
-        Interpolates field from one horizontal grid onto another using 
-        exchange grid (tiles).
-        
-        ogrid - output grid
-
-        tiledata - array of records of size Nt (Nt - number of tiles).
-        tiledata['iin'], tiledata['jin'], tiledata['iout'], tiledata['jout'], 
-        tiledata['frac']  - 
-        arrays of size Nt of indexes on the input grid, indexes on the output grid, 
-        corresponding to a tile N, and fraction of tile on the output grid.
-        '''
-        outdims=ogrid.dims[-2:]
-
-        self.data=utl.g2g(self.data,tiledata,outdims)
-        self.grid=grid.Grid(ogrid['lon'],ogrid['lat'],self.grid['lev'])
-
-
     def vinterp(self,newgrid, revert_axis=False, newmask=None):
         '''
         Performs vertical interpolation from self.grid['lev'] to newgrid['lev'].
