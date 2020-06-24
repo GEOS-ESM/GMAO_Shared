@@ -189,8 +189,8 @@ endif
 
 # Prognostic Zonal Mean Comparisons
 # ---------------------------------
-     set EXPORTS = `echo U   V   T   Q     RH2   ZLE OMEGA O3`
-     set GCS     = `echo DYN DYN DYN MOIST MOIST DYN DYN   CHEMISTRY`
+     set EXPORTS = `echo U   V   T   Q     RH2   ZLE OMEGA O3         QLTOT QITOT`
+     set GCS     = `echo DYN DYN DYN MOIST MOIST DYN DYN   CHEMISTRY  AGCM  AGCM `
      @ k = 0
      foreach EXPORT ($EXPORTS)
        @ k = $k + 1
@@ -217,6 +217,16 @@ endif
      foreach EXPORT ($EXPORTS)
      foreach LEV    ($LEVS)
        if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/hcmp/hcmp2 $EXPORT MOIST $LEV $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+     end
+     end
+
+# Prognostic Horizontal Mean QL & QI Comparisons
+# ----------------------------------------------
+     set EXPORTS = `echo QLTOT QITOT`
+     set LEVS    = '1000 925 850 700 600 500 400 300 250 200 150 100 70 50 30'
+     foreach EXPORT ($EXPORTS)
+     foreach LEV    ($LEVS)
+       if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/hcmp/hcmp2 $EXPORT AGCM $LEV $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
      end
      end
 

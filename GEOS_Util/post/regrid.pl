@@ -36,6 +36,7 @@ my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
 my ($upairFLG, $verbose, $wemIN, $wemOUT, $workdir);
 my ($year, $ymd, $zoom, $zoom_);
+my ($qcmd, $qwaitFLG);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
 my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
@@ -65,10 +66,14 @@ $im{"e"} = "1152"; $jm{"e"} = "721";
 
 # atmosphere levels
 #------------------
+$atmLevs{"71"}  = "071";
 $atmLevs{"72"}  = "072";
+$atmLevs{"91"}  = "091";
+$atmLevs{"127"} = "127";
 $atmLevs{"132"} = "132";
 $atmLevs{"137"} = "137";
 $atmLevs{"144"} = "144";
+$atmLevs{"181"} = "181";
 
 # ocean grids
 #------------
@@ -218,8 +223,9 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 #=======================================================================
 sub init {
     use Getopt::Long;
-    my ($help, $prompt, $merra1, $merra2, $ESMAETC);
+    my ($cmd, $help, $prompt, $merra1, $merra2, $ESMAETC);
     my ($bcsALT, $bcsHEAD_lt);
+    my ($versionLine, $version);
 
     $| = 1;    # flush STDOUT buffer
 
@@ -335,6 +341,27 @@ sub init {
         if ($bcsALT) { $bcsHEAD = $bcsALT }
         else         { $bcsHEAD = $bcsHEAD_lt }
     } else           { $bcsHEAD = $bcsHEAD_ops }
+
+    # sbatch or qsub?
+    #----------------
+    foreach (qw(sbatch qsub)) {
+        $cmd = `which $_ 2>/dev/null`;
+        $cmd =~ s/\s+//g;
+        next unless -e $cmd and -x $cmd;
+
+        # earlier versions of SLURM do not have "-W" flag
+        #------------------------------------------------
+        if (basename($cmd) eq "sbatch") {
+            chomp($versionLine = `$cmd -V`);
+            $version = (split /[.]/, (split /\s+/, $versionLine)[1])[0];
+            next if $version < 19;
+        }
+
+        $qcmd = $cmd; last;
+    }
+    die "Cannot find sbatch or qsub command;" unless $qcmd;
+    if (basename($qcmd) eq "sbatch") { $qwaitFLG = "-W" }
+    else                             { $qwaitFLG = "-W block=true" }
 }
 
 #========================================================================
@@ -2076,7 +2103,7 @@ sub confirm_inputs {
         if ($mk_route) { print_("yes\n") } else { print_("no\n") }
     }
 
-    if ($surfFLG and $rank{$bcsTagOUT} >= $rank_1_catchcn) {
+    if ($surfFLG) {
         print_("- catch:   ");
         if ($mk_catch) { print_("yes\n") } else { print_("no\n") }
 
@@ -2115,7 +2142,7 @@ sub confirm_inputs {
            . ". bcsdir:       $IN{bcsdir}\n"
            . ". tile file:    $IN{tile}\n"
            . ". BCS tag:      $IN{bcsTAG}\n");
-    print_(  ". weminIN:      $wemIN\n") if $mk_catch or $mk_catchcn;
+    print_(  ". wemIN:        $wemIN\n") if $mk_catch or $mk_catchcn;
     print_(  ". surflay:      $surflayIN\n"
            . ". rstdir:       " .display($rstdir) ."\n");
     print_(  ". rst tarfile:  " .display($rst_tarfile) ."\n") if $rst_tarfile;
@@ -2234,7 +2261,7 @@ sub copy_upperair_rsts {
 #           cubed-sphere upper-air restarts
 #=======================================================================
 sub regrid_upperair_rsts_CS {
-    my ($qsublog, $im, $NPE, $QOS, $QOSline, $MEMPERCPU, $nwrit);
+    my ($qcmdlog, $im, $NPE, $QOS, $QOSline, $MEMPERCPU, $nwrit);
     my ($type, $src, $dest, $input_nml, $FH);
     my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
@@ -2276,7 +2303,7 @@ sub regrid_upperair_rsts_CS {
     if (($im{$grIN} eq "180") and ($im eq "1440")) { $NPE = "600" }
 
     $regridj = "$workdir/regrid.j";
-    $qsublog = "$outdir/$newid.upperair.${ymd}_${hr}z.log.o%j";
+    $qcmdlog = "$outdir/$newid.upperair.${ymd}_${hr}z.log.o%j";
     unlink_($regridj) if -e $regridj; 
 
     # get group ID for batch job
@@ -2326,7 +2353,8 @@ sub regrid_upperair_rsts_CS {
 
     $AGCMout   = rstnameI(".", "agcm_import_rst");
 
-    if ( -e "/etc/os-release" ) {
+    my $npn = `facter processorcount`; chomp($npn);
+    if ( $npn == 40 ) {
       $mynodes = "sky";
     } else {
       $mynodes = "hasw";
@@ -2466,14 +2494,14 @@ EOF
         # -----------------------
         chmod 0755, $regridj;
 
-        # Remove the .o%j from the qsublog file
+        # Remove the .o%j from the qcmdlog file
         # -------------------------------------
-        $qsublog =~ s/.o%j//g;
+        $qcmdlog =~ s/.o%j//g;
 
-        system_("$regridj 1>$qsublog 2>&1") && die "Error with $regridj;";
+        system_("$regridj 1>$qcmdlog 2>&1") && die "Error with $regridj;";
     } else {
         print_("\nThe CS regridding is MPI based; submitting job to PBS\n");
-        system_("qsub -W block=true -o $qsublog $regridj");
+        system_("$qcmd $qwaitFLG -o $qcmdlog $regridj");
     }
     chdir_($workdir, $verbose);
 }
@@ -2663,7 +2691,7 @@ sub regrid_surface_rsts {
     my ($catchName, $catchIN, $catch, $catch_regrid, $catch_scaled);
     my ($catchcnName, $catchcnIN, $catchcn, $catchcn_regrid, $catchcn_scaled);
     my ($label, $tagID, $gridID);
-    my ($mk_catchcn_j, $mk_catchcn_log, %catchtype);
+    my ($mk_catch_j, $mk_catch_log, %catchtype);
 
     # input and output values
     #------------------------
@@ -2806,10 +2834,10 @@ sub regrid_surface_rsts {
     # use mk_catchcn job and log file names from mk_Restarts script
     #--------------------------------------------------------------
     if ($mk_catch or $mk_catchcn) {
-        $mk_catchcn_j = "mk_catchcn.j";
-        $mk_catchcn_log = "mk_catchcn.log";
-        move_("$mk_catchcn_j", "$outdir/$mk_catchcn_j.1");
-        move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.1") unless $slurmjob;
+        $mk_catch_j = "mk_catch.j";
+        $mk_catch_log = "mk_catch.log";
+        move_("$mk_catch_j", "$outdir/$mk_catch_j.1");
+        move_("$mk_catch_log", "$outdir/$mk_catch_log.1") unless $slurmjob;
     }
     rename_surface_rsts(\%H1, \%H2, \@SFC);
 
@@ -2885,8 +2913,8 @@ sub regrid_surface_rsts {
         system_("\n$mk_RestartsX $flags") && die "Error with mk_RestartsX;";
 
         if ($mk_catch or $mk_catchcn) {
-            move_("\n$mk_catchcn_j", "$outdir/$mk_catchcn_j.2");
-            move_("$mk_catchcn_log", "$outdir/$mk_catchcn_log.2") unless $slurmjob;
+            move_("\n$mk_catch_j", "$outdir/$mk_catch_j.2");
+            move_("$mk_catch_log", "$outdir/$mk_catch_log.2") unless $slurmjob;
         }
         rename_surface_rsts(\%H2, \%H2, \@SFC);
     }

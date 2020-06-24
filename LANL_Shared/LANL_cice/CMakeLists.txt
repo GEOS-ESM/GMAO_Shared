@@ -46,7 +46,7 @@ set (srcs
   source/ice_work.F90
   )
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL)
 
 target_compile_definitions (${this} PRIVATE coupled GEOS MODIFY_TOPOGRAPHY USE_R8)
 

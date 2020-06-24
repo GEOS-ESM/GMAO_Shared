@@ -1,6 +1,5 @@
       program  main
-      use MAPL_ConstantsMod
-      use MAPL_IOMod
+      use MAPL
 
       implicit none
 
@@ -66,9 +65,14 @@
       character*4    xdim ,ydim
       integer m,n,nmax,nargs,iargc,i,j,L,rc
       integer nlots,nrem,num,num_other_rst
-      type(MAPL_NCIO) :: InNCIO, OutNCIO
-      integer :: filetype,nDims,dimSizes(3),counter,nVars
-      character*256 :: vname
+      integer :: filetype,dimSizes(3),counter,nVars
+
+      character(len=:), pointer :: var_name
+      type(FileMetadata), allocatable :: cfg_in(:), cfg_out(:)
+      type(Netcdf4_Fileformatter) :: fmt_in,fmt_out
+      type(StringVariableMap), pointer :: vars
+      type(StringVariableMapIterator) :: iter
+      
 
 ! **********************************************************************
 ! ****                      Initialize Filenames                    ****
@@ -152,8 +156,13 @@
 
       if (filetype ==0) then
 
-         InNCIO = MAPL_NCIOOpen(dynrst,rc=rc)
-         call MAPL_NCIOGetDimSizes(InNCIO,lon=im,lat=jm,lev=lm,date=nymd,time=nhms)
+         allocate(cfg_in(1),cfg_out(1))
+         call fmt_in%open(dynrst,pFIO_READ,rc=rc)
+         cfg_in(1) = fmt_in%read(rc=rc)
+         im = cfg_in(1)%get_dimension('lon',rc=rc)
+         jm = cfg_in(1)%get_dimension('lat',rc=rc)
+         lm = cfg_in(1)%get_dimension('lev',rc=rc)
+         call MAPL_IOGetTime(cfg_in(1),nymd,nhms)
 
       else
 
@@ -241,26 +250,26 @@
       allocate ( dum(im,jm) )
 
       if (filetype == 0) then
-         call MAPL_VarRead(InNCIO,"AK",ak) 
-         call MAPL_VarRead(InNCIO,"BK",bk)
+         call MAPL_VarRead(fmt_in,"AK",ak) 
+         call MAPL_VarRead(fmt_in,"BK",bk)
          do L=1,lm
-            call MAPL_VarRead(InNCIO,"U",dum,lev=l)
+            call MAPL_VarRead(fmt_in,"U",dum,lev=l)
             u(:,:,L) = dum(:,:)
          enddo
          do L=1,lm
-            call MAPL_VarRead(InNCIO,"V",dum,lev=l)
+            call MAPL_VarRead(fmt_in,"V",dum,lev=l)
             v(:,:,L) = dum(:,:)
          enddo
          do L=1,lm
-            call MAPL_VarRead(InNCIO,"PT",dum,lev=l)
+            call MAPL_VarRead(fmt_in,"PT",dum,lev=l)
             th(:,:,L) = dum(:,:)
          enddo
          do L=1,lm+1
-            call MAPL_VarRead(InNCIO,"PE",dum,lev=l)
+            call MAPL_VarRead(fmt_in,"PE",dum,lev=l)
             ple(:,:,L) = dum(:,:)
          enddo
          do L=1,lm
-            call MAPL_VarRead(InNCIO,"PKZ",dum,lev=l)
+            call MAPL_VarRead(fmt_in,"PKZ",dum,lev=l)
             pk(:,:,L) = dum(:,:)
          enddo
       else
@@ -384,33 +393,35 @@ c ---------------------------------
 
       if (filetype ==0) then
 
-         call MAPL_NCIOChangeRes(InNCIO,OutNCIO,latSize=jm_out,lonSize=im_out)
-         call MAPL_NCIOSet(OutNCIO,filename=anaeta)
-         call MAPL_NCIOCreateFile(OutNCIO)
-         call MAPL_VarWrite(OutNCIO,"AK",ak)
-         call MAPL_VarWrite(OutNCIO,"BK",bk)
+         call MAPL_IOChangeRes(cfg_in(1),cfg_out(1),(/'lon','lat'/),(/im_out,jm_out/),rc=rc)
+         call fmt_out%create(anaeta,rc=rc)
+         call fmt_out%write(cfg_out(1),rc=rc)
+
+         call MAPL_VarWrite(fmt_out,"AK",ak)
+         call MAPL_VarWrite(fmt_out,"BK",bk)
          do L=1,lm
             dum(:,:) = unew(:,:,L)
-            call MAPL_VarWrite(OutNCIO,"U",dum,lev=L)
+            call MAPL_VarWrite(fmt_out,"U",dum,lev=L)
          enddo
          do L=1,lm
             dum(:,:) = vnew(:,:,L)
-            call MAPL_VarWrite(OutNCIO,"V",dum,lev=L)
+            call MAPL_VarWrite(fmt_out,"V",dum,lev=L)
          enddo
          do L=1,lm
             dum(:,:) = thnew(:,:,L)
-            call MAPL_VarWrite(OutNCIO,"PT",dum,lev=L)
+            call MAPL_VarWrite(fmt_out,"PT",dum,lev=L)
          enddo
          do L=1,lm+1
             dum(:,:) = plenew(:,:,L)
-            call MAPL_VarWrite(OutNCIO,"PE",dum,lev=L)
+            call MAPL_VarWrite(fmt_out,"PE",dum,lev=L)
          enddo
          do L=1,lm
             dum(:,:) = pknew(:,:,L)
-            call MAPL_VarWrite(OutNCIO,"PKZ",dum,lev=L)
+            call MAPL_VarWrite(fmt_out,"PKZ",dum,lev=L)
          enddo
-         call MAPL_NCIOClose(InNCIO,destroy=.true.)
-         call MAPL_NCIOClose(OutNCIO,destroy=.true.)
+         call fmt_out%close()
+         call fmt_in%close()
+         deallocate(cfg_in,cfg_out)
 
       else
 
@@ -454,11 +465,13 @@ c ---------------------------------
 
       if (filetype ==0) then
 
-         InNCIO = MAPL_NCIOOpen(moistrst,rc=rc)
-         call MAPL_NCIOGetDimSizes(InNCIO,nVars=nVars)
-         call MAPL_NCIOChangeRes(InNCIO,OutNCIO,latSize=jm_out,lonSize=im_out)
-         call MAPL_NCIOSet(OutNCIO,filename=anaeta)
-         call MAPL_NCIOCreateFile(OutNCIO)
+         allocate(cfg_in(1),cfg_out(1))
+         call fmt_in%open(moistrst,pFIO_READ,rc=rc)
+         cfg_in(1) = fmt_in%read(rc=rc)
+         call MAPL_IOChangeRes(cfg_in(1),cfg_out(1),(/'lon','lat'/),(/im_out,jm_out/),rc=rc)
+         call fmt_out%create(anaeta,rc=rc)
+         call fmt_out%write(cfg_out(1),rc=rc)
+          
          nmax = 0
          do n=1,nVars
             nmax = nmax+lm
@@ -468,30 +481,40 @@ c ---------------------------------
            allocate ( q   (im,    jm,    nmax) )
            allocate ( qnew(im_out,jm_out,nmax) )
 
+         vars => cfg_in(1)%get_variables()
+         iter = vars%begin()
+
          counter = 0
-         do n=1,nVars
-            call MAPL_NCIOGetVarName(InNCIO,n,vname)
-            call MAPL_NCIOVarGetDims(InNCIO,vname,nDims,dimSizes)
-            do l=1,dimSizes(3)
-               call MAPL_VarRead(InNCIO,vname,dumold,lev=l)
-               counter = counter + 1
-               q(:,:,counter) = dumold
-            enddo
-         enddo
-         call hinterp ( q,im,jm,qnew,im_out,jm_out,nmax,undef, 1,-3,.false.)
-         counter = 0
-         do n=1,nVars
-            call MAPL_NCIOGetVarName(InNCIO,n,vname)
-            call MAPL_NCIOVarGetDims(InNCIO,vname,nDims,dimSizes)
-            do l=1,dimSizes(3)
-               counter = counter + 1
-               dumnew = qnew(:,:,counter)
-               call MAPL_VarWrite(OutNCIO,vname,dumnew,lev=l)
-            enddo
+         do while(iter /= vars%end())
+            var_name => iter%key()
+            if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
+               do l=1,dimSizes(3)
+                  call MAPL_VarRead(fmt_in,var_name,dumold,lev=l)
+                  counter = counter + 1
+                  q(:,:,counter) = dumold
+               enddo
+            end if
+            call iter%next()
          enddo
 
-         call MAPL_NCIOClose(InNCIO,destroy=.true.)
-         call MAPL_NCIOClose(OutNCIO,destroy=.true.)
+         call hinterp ( q,im,jm,qnew,im_out,jm_out,nmax,undef, 1,-3,.false.)
+
+         counter = 0
+         do while(iter /= vars%end())
+            var_name => iter%key()
+            if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
+               do l=1,dimSizes(3)
+                  counter = counter + 1
+                  dumnew = qnew(:,:,counter)
+                  call MAPL_VarWrite(fmt_out,var_name,dumnew,lev=l)
+               enddo
+            end if
+            call iter%next()
+         enddo
+
+         call fmt_out%close()
+         call fmt_in%close()
+         deallocate(cfg_in,cfg_out)
  
       else
 
@@ -555,11 +578,13 @@ c ---------------------------------
 
       if (filetype ==0) then
 
-         InNCIO = MAPL_NCIOOpen(other_rst(m),rc=rc)
-         call MAPL_NCIOGetDimSizes(InNCIO,nVars=nVars)
-         call MAPL_NCIOChangeRes(InNCIO,OutNCIO,latSize=jm_out,lonSize=im_out)
-         call MAPL_NCIOSet(OutNCIO,filename=anaeta)
-         call MAPL_NCIOCreateFile(OutNCIO)
+         allocate(cfg_in(1),cfg_out(1))
+         call fmt_in%open(other_rst(m),pFIO_READ,rc=rc)
+         cfg_in(1) = fmt_in%read(rc=rc)
+         call MAPL_IOChangeRes(cfg_in(1),cfg_out(1),(/'lon','lat'/),(/im_out,jm_out/),rc=rc)
+         call fmt_out%create(anaeta,rc=rc)
+         call fmt_out%write(cfg_out(1),rc=rc)
+
          nmax = 0
          do n=1,nVars
             nmax = nmax+lm
@@ -569,30 +594,40 @@ c ---------------------------------
            allocate ( q   (im,    jm,    nmax) )
            allocate ( qnew(im_out,jm_out,nmax) )
 
+         vars => cfg_in(1)%get_variables()
+         iter = vars%begin()
+
          counter = 0
-         do n=1,nVars
-            call MAPL_NCIOGetVarName(InNCIO,n,vname)
-            call MAPL_NCIOVarGetDims(InNCIO,vname,nDims,dimSizes)
-            do l=1,dimSizes(3)
-               call MAPL_VarRead(InNCIO,vname,dumold,lev=l)
-               counter = counter + 1
-               q(:,:,counter) = dumold
-            enddo
-         enddo
-         call hinterp ( q,im,jm,qnew,im_out,jm_out,nmax,undef, 1,-3,.false.)
-         counter = 0
-         do n=1,nVars
-            call MAPL_NCIOGetVarName(InNCIO,n,vname)
-            call MAPL_NCIOVarGetDims(InNCIO,vname,nDims,dimSizes)
-            do l=1,dimSizes(3)
-               counter = counter + 1
-               dumnew = qnew(:,:,counter)
-               call MAPL_VarWrite(OutNCIO,vname,dumnew,lev=l)
-            enddo
+         do while(iter /= vars%end())
+            var_name => iter%key()
+            if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
+               do l=1,dimSizes(3)
+                  call MAPL_VarRead(fmt_in,var_name,dumold,lev=l)
+                  counter = counter + 1
+                  q(:,:,counter) = dumold
+               enddo
+            end if
+            call iter%next()
          enddo
 
-         call MAPL_NCIOClose(InNCIO,destroy=.true.)
-         call MAPL_NCIOClose(OutNCIO,destroy=.true.)
+         call hinterp ( q,im,jm,qnew,im_out,jm_out,nmax,undef, 1,-3,.false.)
+
+         counter = 0
+         do while(iter /= vars%end())
+            var_name => iter%key()
+            if (.not.cfg_in(1)%is_coordinate_variable(var_name)) then
+               do l=1,dimSizes(3)
+                  counter = counter + 1
+                  dumnew = qnew(:,:,counter)
+                  call MAPL_VarWrite(fmt_out,var_name,dumnew,lev=l)
+               enddo
+            end if
+            call iter%next()
+         enddo
+
+         call fmt_out%close()
+         call fmt_in%close()
+         deallocate(cfg_in,cfg_out)
 
       else
 

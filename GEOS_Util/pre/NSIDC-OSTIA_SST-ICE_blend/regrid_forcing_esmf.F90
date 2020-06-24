@@ -2,12 +2,13 @@
 
 #include "MAPL_Generic.h"
 
-module GenGridCompMod
+module GenESMFGridCompMod
 
 ! !USES:
 
    use ESMF
    use MAPL
+
    use, intrinsic :: iso_fortran_env
 
   implicit none
@@ -21,20 +22,18 @@ module GenGridCompMod
 !EOP
 
   type :: T_PrivateState
-     type(MAPL_LocStream)      :: LocStream_O
-     type(MAPL_LocStream)      :: LocStream_P     
-     type(MAPL_LocStreamXform) :: XFORM_P2O
-     type(MAPL_LocStreamXform) :: XFORM_O2P
+     class(AbstractRegridder), pointer :: regridder => null()
      type(ESMF_Grid)           :: pgrid
      type(ESMF_Grid)           :: ogrid
-     integer                   :: ntO
-     integer                   :: ntP
      logical                   :: initialized=.false.
      logical                   :: transformNeeded
      integer                   :: PIM
      integer                   :: PJM
      integer                   :: GPIM
      integer                   :: GPJM
+     type(ESMF_Time)           :: start_time
+     type(ESMF_Time)           :: end_time
+     logical                   :: select_time
   end type T_PrivateState
 
   type :: T_PrivateState_Wrap
@@ -166,7 +165,8 @@ contains
     integer                                :: DIMS(3)
     logical                                :: transformNeeded
     character(len=ESMF_MAXSTR)             :: TILINGFILE, OUTPUT_GRIDNAME, INPUT_GRIDNAME
-    integer                                :: NX, NY, output_im, output_jm, input_im, input_jm
+    integer                                :: NX, NY, output_im, output_jm, tdate
+    integer                                :: yy,mm,dd,stat1,stat2
     type(ESMF_Config)                      :: cf
 
 ! Begin... 
@@ -206,18 +206,27 @@ contains
     VERIFY_(STATUS)
     call ESMF_ConfigGetAttribute(cf,ny,label='NY:',RC=status)
     VERIFY_(STATUS)
-    call ESMF_ConfigGetAttribute(cf,input_im,label='INPUT_IM:',RC=status)
-    VERIFY_(STATUS)
-    call ESMF_ConfigGetAttribute(cf,input_jm,label='INPUT_JM:',RC=status)
-    VERIFY_(STATUS)
     call ESMF_ConfigGetAttribute(cf,input_gridname,label='INPUT_GRIDNAME:',RC=status)
     VERIFY_(STATUS)
+    call ESMF_ConfigGetAttribute(cf,tdate,label='START_DATE:',RC=stat1)
+    if (stat1 == ESMF_SUCCESS) then
+       call MAPL_UnpackTime(tdate,yy,mm,dd)
+       call ESMF_TimeSet(privateState%start_time,yy=yy,mm=mm,dd=dd,rc=status)
+       VERIFY_(STATUS)
+    end if
+    call ESMF_ConfigGetAttribute(cf,tdate,label='END_DATE:',RC=stat2)
+    if (stat2 == ESMF_SUCCESS) then
+       call MAPL_UnpackTime(tdate,yy,mm,dd)
+       call ESMF_TimeSet(privateState%end_time,yy=yy,mm=mm,dd=dd,rc=status)
+       VERIFY_(STATUS)
+    end if
+    privateState%select_time = ( (stat1 == ESMF_SUCCESS) .and. (stat2 == ESMF_SUCCESS) )
 
 ! Create grid for this component
 !-------------------------------
-    ogrid = MAPL_LatLonGridCreate(input_gridname,nx=nx,ny=ny, &
-            IM_World=input_im,JM_World=input_jm,LM_World=1,rc=status)
-    VERIFY_(STATUS)
+    ogrid = grid_manager%make_grid(cf,prefix=trim(input_gridname)//".",rc=status)
+    VERIFY_(status)
+    !VERIFY_(STATUS)
     call ESMF_GridCompSet(GC, grid=ogrid, rc=status)
     VERIFY_(STATUS)
 
@@ -251,14 +260,16 @@ contains
     call ESMF_DistGridGet(distGRID, deLayout=layout, RC=STATUS)
     VERIFY_(STATUS)
 
-    call ESMF_ConfigGetAttribute(cf,output_im,label='OUTPUT_IM:',RC=status)
-    VERIFY_(STATUS)
-    output_jm = output_im*6
     call ESMF_ConfigGetAttribute(cf,output_gridname,label='OUTPUT_GRIDNAME:',RC=status)
     VERIFY_(STATUS)
-    pgrid = MAPL_LatLonGridCreate(output_gridname,nx=nx,ny=ny, &
-            IM_World=output_im,JM_World=output_jm,LM_World=1,rc=status)
+    pgrid = grid_manager%make_grid(cf,prefix=trim(output_gridname)//".",rc=status)
     VERIFY_(STATUS)
+    call MAPL_GridGet(ogrid, localCellCountPerDim=COUNTS, &
+         globalCellCountPerDim=dims, RC=STATUS)
+    VERIFY_(STATUS)
+    output_im=dims(1)
+    output_jm=dims(2)
+    
 
     PrivateState%ogrid=ogrid
     PrivateState%pgrid=pgrid
@@ -284,32 +295,10 @@ contains
 ! Create exchange grids from tile file
 !-------------------------------------
 
-       call MAPL_GetResource(MAPL, TILINGFILE, 'OUTPUT_TILING_FILE:', &
-            default="mittile.til", RC=STATUS)
-       VERIFY_(STATUS)
-
-       call MAPL_LocStreamCreate(PrivateState%LocStream_O, LAYOUT=layout, &
-                                 FILENAME=TILINGFILE, MASK=(/MAPL_Ocean/),&
-                                 NAME='This_Ocn', grid=ogrid, NewGridNames=.true.,RC=STATUS)
-       VERIFY_(STATUS)
-       call MAPL_LocStreamCreate(PrivateState%LocStream_P, LAYOUT=layout, &
-                                 FILENAME=TILINGFILE, MASK=(/MAPL_Ocean/),&
-                                 NAME='Plug_Ocn', grid=pgrid, NewGridNames=.true.,RC=STATUS)
-       VERIFY_(STATUS)
-
-       call MAPL_LocStreamCreateXform(XFORM=PrivateState%XFORM_O2P, &
-                                      LocStreamOut=PrivateState%LocStream_P, &
-                                      LocStreamIn=PrivateState%LocStream_O, &
-                                      NAME='XFORM_O2P', &
-                                      RC=STATUS )
-       VERIFY_(STATUS)
-
-       call MAPL_LocStreamCreateXform(XFORM=PrivateState%XFORM_P2O, &
-                                      LocStreamOut=PrivateState%LocStream_O, &
-                                      LocStreamIn=PrivateState%LocStream_P, &
-                                      NAME='XFORM_P2O', &
-                                      RC=STATUS )
-       VERIFY_(STATUS)
+       if (mapl_am_I_root()) write(*,*)'Making transform'
+       privateState%regridder => new_regridder_manager%make_regridder(ogrid,pgrid,REGRID_METHOD_CONSERVE,rc=status)
+       VERIFY_(status)
+       if (mapl_am_I_root()) write(*,*)'Done making transform'
     end if
 
 
@@ -319,58 +308,6 @@ contains
 
     RETURN_(ESMF_SUCCESS)
   end subroutine Initialize
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine DO_O2P(PSTATE, VARO, VARP, RC)
-    type (T_PrivateState)     , intent(INOUT) :: PSTATE
-    real                      , intent(INout) :: varO(:,:)
-    real                      , intent(  OUT) :: varP(:,:)
-    integer, optional,          intent(  OUT) ::  RC
-    
-    character(len=ESMF_MAXSTR), parameter :: IAm="DO_O2P"
-    integer                               :: STATUS
-
-    real, allocatable :: tileO(:), tileP(:)
-    integer           :: ntP, ntO
-    
-    if (.not.pState%initialized) then
-       call MAPL_LocStreamGet( pState%LOCSTREAM_O, nt_local=ntO, RC=STATUS ) 
-       VERIFY_(STATUS)
-       call MAPL_LocStreamGet( pState%LOCSTREAM_P, nt_local=ntP, RC=STATUS ) 
-       VERIFY_(STATUS)
-       pState%ntP = ntP
-       pState%ntO = ntO
-       pState%initialized = .true.
-    else
-       ntP = pState%ntP
-       ntO = pState%ntO
-    end if
-
-    allocate(tileO(NTO), stat=status)
-    VERIFY_(STATUS)
-    allocate(tileP(NTP), stat=status)
-    VERIFY_(STATUS)
-    
-!    call ESMF_VMBarrier(VM, rc=status)
-!    VERIFY_(STATUS)
-
-    !    G2T (ocean-grid-to-ocean-tile)
-    call MAPL_LocStreamTransform( pState%LOCSTREAM_O, tileO, varO, RC=STATUS ) 
-    VERIFY_(STATUS)
-    !    T2T (ocean-to-plug tile)
-    call MAPL_LocStreamTransform( tileP, pState%XFORM_O2P, tileO, RC=STATUS ) 
-    VERIFY_(STATUS)
-    !    T2G (plug-tile-to-plug-grid)
-    call MAPL_LocStreamTransform( pState%LOCSTREAM_P, varP, tileP, RC=STATUS ) 
-    VERIFY_(STATUS)
-
-!    call ESMF_VMBarrier(VM, rc=status)
-!    VERIFY_(STATUS)
-    deallocate(tileP)
-    deallocate(tileO)
-     
-
-    RETURN_(ESMF_SUCCESS)
-  end subroutine DO_O2P
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !BOP
@@ -418,7 +355,8 @@ contains
   character(len=ESMF_MAXSTR) :: filename
   TYPE(T_PrivateState_Wrap) :: wrap
   type (MAPL_MetaComp), pointer          :: MAPL 
-  logical :: amIRoot
+  logical :: amIRoot,dowrite
+  type(ESMF_Time) :: start_interval, end_interval
 
 !=============================================================================
 
@@ -480,67 +418,87 @@ contains
 
    do 
 
-   if(amIRoot) then
+      if(amIRoot) then
 
-      ! test for end-of-file by 
-      ! making a blank read followed by backspace
-      read(UNIT_R,IOSTAT=status)
-   end if
-   call MAPL_CommsBcast(layout, status, n=1, ROOT=MAPL_Root, rc=stat)
-   VERIFY_(stat)
+         ! test for end-of-file by 
+         ! making a blank read followed by backspace
+         read(UNIT_R,IOSTAT=status)
+      end if
+      call MAPL_CommsBcast(layout, status, n=1, ROOT=MAPL_Root, rc=stat)
+      VERIFY_(stat)
 
-   if (status == IOSTAT_END) then
-      RETURN_(ESMF_SUCCESS)
-   end if
-   VERIFY_(STATUS)
-   call MAPL_Backspace(UNIT_R,layout,rc=status)
-   VERIFY_(STATUS)
-   
-   if(amIRoot) then
-
-      read(UNIT_R, iostat=status) HDR
+      if (status == IOSTAT_END) then
+         RETURN_(ESMF_SUCCESS)
+      end if
       VERIFY_(STATUS)
+      call MAPL_Backspace(UNIT_R,layout,rc=status)
+      VERIFY_(STATUS)
+      
+      if(amIRoot) then
+
+         read(UNIT_R, iostat=status) HDR
+         VERIFY_(STATUS)
+         HEADER = nint(HDR)
+
+      end if
+
+      call MAPL_CommsBcast(layout,hdr,n=14,root=mapl_root,rc=stat)
+      VERIFY_(Stat)
       HEADER = nint(HDR)
+      call ESMF_TimeSet(start_interval,yy=header(1),mm=header(2),dd=header(3),h=header(4),m=header(5),s=header(6),rc=status)
+      VERIFY_(STATUS)
+      call ESMF_TimeSet(end_interval,yy=header(7),mm=header(8),dd=header(9),h=header(10),m=header(11),s=header(12),rc=status)
+      VERIFY_(STATUS)
 
-      HDR(13) = IM_WORLD
-      HDR(14) = JM_WORLD
-      write(UNIT_W) HDR
-   end if
+      if (privateState%select_time) then
+         dowrite = (end_interval > privatestate%start_time) .and. (start_interval < privatestate%end_time)
+      else
+         dowrite = .true.
+      end if
+      if (mapL_am_I_root()) then 
+         write(*,*)'Valid Data between:'
+         !write(*,'(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)')header(1),header(2),header(3),header(4),header(5),header(6)
+         !write(*,'(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)')header(7),header(8),header(9),header(10),header(11),header(12)
+         write(*,"(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)")header(1:6)
+         write(*,"(i4.4,'/',i2.2,'/',i2.2,' ',i2.2,':',i2.2,':',i2.2)")header(7:12)
+         write(*,*)'Are we writing ',doWrite
+      end if
 
-   call ESMF_VMBarrier(vm, rc=status)
-   VERIFY_(STATUS)
-   
-   allocate(PDATA(IM,JM), stat=status)
-   VERIFY_(STATUS)
+      if (amIRoot .and. dowrite) then
 
-!   read(unit_r) odata
-   call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
-   VERIFY_(STATUS)
-   ! transform data from ocean (tripolar or Reynolds) to mit-cubed
-   call DO_O2P(PrivateState, odata, pdata, rc=status)
-   VERIFY_(STATUS)
-!   write(unit_w) pdata
-   call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
-   VERIFY_(STATUS)
+         HDR(13) = IM_WORLD
+         HDR(14) = JM_WORLD
+         write(UNIT_W) HDR
+
+      end if
+
+      call ESMF_VMBarrier(vm, rc=status)
+      VERIFY_(STATUS)
+      
+      allocate(PDATA(IM,JM), stat=status)
+      VERIFY_(STATUS)
+
+   !   read(unit_r) odata
+      call MAPL_VarRead(unit_r, grid=ogrid, a=odata, rc=status)
+      VERIFY_(STATUS)
+      ! transform data from ocean (tripolar or Reynolds) to mit-cubed
+      call privateState%regridder%regrid(odata,pdata,rc=status)
+      VERIFY_(status) 
+   !   write(unit_w) pdata
+      if (doWrite) then
+         call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
+         VERIFY_(STATUS)
+      end if
 
    enddo
 
    deallocate(pdata)
 
-! The next few lines are commented out. They should be done in Finalize
-!   deallocate(odata)
-
-!   call Free_File(unit_r, rc=status)
-!   VERIFY_(STATUS)
-
-!   call Free_File(unit_w, rc=status)
-!   VERIFY_(STATUS)
-
    RETURN_(ESMF_SUCCESS)
 
   end subroutine RUN
 
-end module GenGridCompMod
+end module GenESMFGridCompMod
 
 ! $Id$
 
@@ -566,7 +524,7 @@ Subroutine do_regrid_forcing(rc)
   use ESMF
   use MAPL
 
-  use GenGridCompMod,          only : Root_SetServices => SetServices
+  use GenESMFGridCompMod,          only : Root_SetServices => SetServices
 
   implicit none
   integer, optional :: rc

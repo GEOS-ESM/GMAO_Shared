@@ -31,7 +31,7 @@ contains
 
   subroutine Iterate(TT,PP,QQ,QC,SuperSat)
 
-    use MAPL_Mod, only : QSAT=>MAPL_EQSAT, MAPL_ALHL, MAPL_CP, MAPL_AIRMW, MAPL_RUNIV, MAPL_RDRY, MAPL_RGAS, MAPL_CP
+    use MAPL, only : QSAT=>MAPL_EQSAT, MAPL_ALHL, MAPL_CP, MAPL_AIRMW, MAPL_RUNIV, MAPL_RDRY, MAPL_RGAS, MAPL_CP
 
     implicit none
 

@@ -13,13 +13,18 @@ set (srcs
   read_Reynolds.F90
   )
 
-esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
+esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL)
 target_link_libraries (${this} PUBLIC ${NETCDF_LIBRARIES})
 target_include_directories (${this} PUBLIC ${INC_NETCDF})
 
 ecbuild_add_executable (
   TARGET regrid_forcing.x
   SOURCES regrid_forcing.F90
+  LIBS ${this})
+
+ecbuild_add_executable (
+  TARGET regrid_forcing_esmf.x
+  SOURCES regrid_forcing_esmf.F90
   LIBS ${this})
 
 ecbuild_add_executable (
