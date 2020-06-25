@@ -6,7 +6,7 @@ from optparse import OptionParser
 
 modulepath='/home/yvikhlia/python'
 if not(sys.path.count(modulepath)): sys.path.append(modulepath)
-import my_lib.utils as utl
+from g5lib import utils as utl
 
 usage = '''
 usage: %prog option arg

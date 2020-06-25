@@ -25,3 +25,13 @@
 @anadir/clim/lhflx.py @expid
 @anadir/clim/lwflx.py @expid
 @anadir/clim/swflx.py @expid
+@anadir/clim/plot_aice_clim.py @expid
+@anadir/clim/plot_extent_anncycle.py @expid
+@anadir/clim/plot_hice_icesat.py @expid
+@anadir/clim/plot_mean_vel_anncycle.py @expid
+@anadir/clim/plot_volume_anncycle.py @expid
+@anadir/clim/rad_pole.py @expid
+@anadir/clim/sst_polar.py @expid
+@anadir/tseries/plot_extent_ts.py @expid
+@anadir/tseries/temp_gvm.py @expid
+

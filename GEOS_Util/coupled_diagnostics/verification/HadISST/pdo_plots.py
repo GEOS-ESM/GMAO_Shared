@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 import scipy as sp
 import mpl_toolkits.basemap as bm
 from mpl_toolkits.basemap.cm import sstanom
-from my_lib import plotters
+from g5lib import plotters
 
 dsetname='HadISST'
 varname='sst'
