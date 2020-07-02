@@ -82,7 +82,7 @@ set (srcs
    gmap.F
    )
 
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${ALIGNCOM}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${ALIGNCOM} ${MISMATCH}")
 set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG} ${EXTENDED_SOURCE}")
 
 ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} FFLAGS "${FREAL8}")
