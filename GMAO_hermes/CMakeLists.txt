@@ -3,7 +3,7 @@ esma_set_this()
 add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
 string (REPLACE " " ";" flags ${FREAL8})
 add_compile_options(${flags})
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
 
 if ( NOT HERMES_LIGHT )
 
