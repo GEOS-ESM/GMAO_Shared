@@ -9,4 +9,4 @@ esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL_Base)
 
 ecbuild_add_executable (TARGET regrid_DYNVEG.x SOURCES regrid_DYNVEG.F90  LIBS MAPL_Base ${this})
 
-install(PROGRAMS regrid_DYNVEG.csh process_modis.py DESTINATION bin)
+install(PROGRAMS regrid_DYNVEG.csh modis_mcd15a2h_forward.py DESTINATION bin)
