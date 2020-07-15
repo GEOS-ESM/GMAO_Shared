@@ -46,7 +46,7 @@ debug  = subwrd(args,6)
    'set string  1 c 6'
    'draw string 5.5 5 Not Exported'
  endif
-'draw title U-Wind Tendency from Total GWD (m/sec/day)'
+'draw title Total U-Wind Tendency (ORO+BKG+Rayleigh) (m/sec/day)'
 'draw ylab Pressure (mb)'
 
 'vpage 2 1 2 2'
@@ -175,7 +175,7 @@ endif
    'set string  1 c 6'
    'draw string 5.5 5 Not Exported'
  endif
-'draw title U-Wind Tendency from Total GWD (m/sec/day)'
+'draw title Total U-Wind Tendency (ORO+BKG+Rayleigh) (m/sec/day)'
 'draw ylab Pressure (mb)'
 
 'vpage 2 1 2 2'
@@ -304,7 +304,7 @@ endif
    'set string  1 c 6'
    'draw string 5.5 5 Not Exported'
  endif
-'draw title V-Wind Tendency from Total GWD (m/sec/day)'
+'draw title Total V-Wind Tendency (ORO+BKG+Rayleigh) (m/sec/day)'
 'draw ylab Pressure (mb)'
 
 'vpage 2 1 2 2'

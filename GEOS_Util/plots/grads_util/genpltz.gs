@@ -106,15 +106,15 @@ if( STAT = 'STD' )
 endif
 if( STAT = 'RMS' )
     PRFX = 'RMS_'
-  EXPORT =  alias
 endif
 if( STAT = 'BIAS' )
     PRFX = 'BIAS_'
-  EXPORT =  alias
 endif
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE'  ; title   = result
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; fact    = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_FACTOR' ; fixpltfact = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_CINT'   ; fixpltcint = result
 
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
@@ -508,13 +508,34 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
            dn = dn+2
         endif
    endif
-   if( dn<0 )
-       dm = -dn
-   else
-       dm =  dn
+
+   if( fixpltfact != NULL )
+       'd  'fixpltfact
+        dn =subwrd(result,4)
    endif
 
    say 'Scaling Factor: 'dn
+   
+   if( dn<0 )
+  say 'dm = -1 * 'dn
+       dm = -1 * dn
+   else
+       dm = dn
+   endif
+
+   if( fixpltcint != NULL ) 
+       'd  'fixpltcint
+            fixpltcint =subwrd(result,4)
+
+       cint = fixpltcint
+      'shades 'cint
+       if( dn>0 )
+         'd qz*'fact'/1e'dm
+       else
+         'd qz*'fact'*1e'dm
+       endif
+
+   else
 
      if( dn>0 )
        'd 0.1*'dqmax'/1e'dm
@@ -529,6 +550,8 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
        'shades 'cint
        'd qz*'fact'*1e'dm
      endif
+
+   endif
 
 * ----------------
 else

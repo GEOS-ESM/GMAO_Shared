@@ -1,4 +1,4 @@
-#!@DASPERL@ -w
+#!@DASPERL -w
 #
 # Script for retriving fvDAS files from mass-storage w/ conversion and collocation
 # See usage() for more info.
@@ -20,7 +20,7 @@ use File::Copy;                  # for copy()
 use Getopt::Long;                # command line options
 use Time::Local;                 # time functions
 #use Tie::IxHash;                 # ordered hashing
-use Shell qw(cat rcp rsh scp ssh);   # make C-shell commands available
+use CPAN::Shell qw(cat rcp rsh scp ssh);   # make C-shell commands available
 
       @options =
       ("vars=s", "levs=s", "fmt=s", "fcstv", "n", "cp=s","d=s","H=s","help", "p", "prs","rsh=s","rcp=s","f=s","q", "zrev");

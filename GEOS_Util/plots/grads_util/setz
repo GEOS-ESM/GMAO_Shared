@@ -1,4 +1,5 @@
 function setz (args)
+verbose = subwrd(args,1)
 
 * Get ZDIM from Current File and Check PTOP
 * -----------------------------------------
@@ -29,7 +30,9 @@ else
      zdim = zdim2
 endif
 
+if( verbose = "" )
 say "setting z from 1 to "zdim
+endif
 'set z 1 'zdim
 
 return

@@ -77,6 +77,7 @@ if($server == polar.gsfc.nasa.gov ) set www = /www/html/intranet/research/modeli
 @ nmax = $#argv
 
 set year     = 'NULL'
+set season   = 'NULL'
 set expid    = 'NULL'
 set pltdir   = 'NULL'
 set corcmprc = 'corcmp.rc'
@@ -92,6 +93,10 @@ while( $n <= $nmax )
        if( "$argv[$n]" == "-year" ) then
                     @ n = $n + 1
              set year   = $argv[$n]
+       endif
+       if( "$argv[$n]" == "-season" ) then
+                    @ n = $n + 1
+             set season = $argv[$n]
        endif
        if( "$argv[$n]" =~ \-plot* ) then
                     @ n = $n + 1
@@ -164,8 +169,10 @@ echo " "
 # ------------
      if( -e $pltdir/corcmp & ( $plots == NULL | $plots == corcmp ) ) then
          cd $pltdir/corcmp
+         if( $season == 'NULL' ) then
          set files = `/bin/ls -1 stats*gif`
          set season = `echo $files[1] | cut -d. -f1 | cut -d_ -f6`
+         endif
          ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/corcmp
          echo Syncing ${season} Files from $pltdir/corcmp to $webid@${server}:${www}/${webdir}/${season}/corcmp
          rsync -avx *gif $webid@${server}:${www}/${webdir}/${season}/corcmp
@@ -176,8 +183,10 @@ echo " "
      foreach DSC ($DSCS)
          if( -e $pltdir/$DSC & ( $plots == NULL | $plots == sys ) ) then
              cd $pltdir/$DSC
+             if( $season == 'NULL' ) then
              set files = `/bin/ls -1 stats*gif`
              set season = `echo $files[1] | cut -d. -f1 | cut -d_ -f6`
+             endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSC
              echo Syncing ${season} Files from $pltdir/$DSC to $webid@${server}:${www}/${webdir}/${season}/$DSC
              rsync -avx *gif $webid@${server}:${www}/${webdir}/${season}/$DSC
@@ -191,8 +200,10 @@ echo " "
          if( $DSC != $DSCS[1] ) then
          if( -e $pltdir/$DSCS[1].$DSC & ( $plots == NULL | $plots == syscmp ) ) then
              cd $pltdir/$DSCS[1].$DSC
+             if( $season == 'NULL' ) then
              set files = `/bin/ls -1 stats*gif`
              set season = `echo $files[1] | cut -d. -f1 | cut -d_ -f6`
+             endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSCS[1].$DSC
 
              echo Syncing ${season} Files from $pltdir/$DSCS[1].$DSC to $webid@${server}:${www}/${webdir}/${season}/$DSCS[1].$DSC
@@ -281,6 +292,7 @@ echo '                    [-expid   EXPID   (EXPID on Web Page)]'
 echo '                    [-rc      RCFILE  (RC File containing Experiments to compare)]'
 echo '                    [-plots   PLOTS   (Type of PLOT to move)]'
 echo '                    [-pltdir  PLTDIR  (Directory containing plot_directories to move)]'
+echo '                    [-season  SEASON  (Season to move)]'
 echo ' '
 echo '                      Default  EXPID  (assumed to be 2nd-to-last node from pwd)'
 echo '                      Default RCFILE  (assumed to be corcmp.rc)'

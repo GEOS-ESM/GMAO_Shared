@@ -133,6 +133,22 @@ if( EXPORT = "Q"   )
    'getresource 'PLOTRC' Q_MOIST_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' Q_MOIST_Z_'LEVTYPE'LEVS' ; dlevs = result
 endif
+if( EXPORT = "QLTOT"   )
+    oname = "/horiz_"obsnam"_ql_z"
+   'getresource 'PLOTRC' QLTOT_AGCM_TITLE'           ; title = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_CLEVS'         ; clevs = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_CCOLS'         ; ccols = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_DCOLS'         ; dcols = result
+   'getresource 'PLOTRC' QLTOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+endif
+if( EXPORT = "QITOT"   )
+    oname = "/horiz_"obsnam"_qi_z"
+   'getresource 'PLOTRC' QITOT_AGCM_TITLE'           ; title = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_CLEVS'         ; clevs = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_CCOLS'         ; ccols = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_DCOLS'         ; dcols = result
+   'getresource 'PLOTRC' QITOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+endif
 if( EXPORT = "RH2" )
     oname = "/horiz_"obsnam"_rh_z"
    'getresource 'PLOTRC' RH2_MOIST_TITLE'           ; title = result
@@ -247,7 +263,7 @@ if( Lbit = L ) ; 'setlevs' ; endif
  dfact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
-if( CINTDIFF = 'NULL' )
+if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
    'set clevs 'dlevs
    'set ccols 'dcols
    'd qz'

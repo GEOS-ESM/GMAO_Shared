@@ -84,7 +84,16 @@ if( zfreq = 'varying' )
    'getinfo     numfiles'
                 newfile = result
    'set dfile ' newfile
-   'set lev 1000 100'
+   'set z ' zmin
+   'getinfo level'
+            levmin = result
+   'set z ' zmax
+   'getinfo level'
+            levmax = result
+    if( levmax < levmin )
+        levmin = levmax
+    endif
+   'set lev 1000 'levmin
 endif
 
 

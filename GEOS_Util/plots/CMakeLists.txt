@@ -2,7 +2,7 @@ set (zonal_prog_name
    zonal_${CMAKE_SYSTEM_NAME}.x
    )
 
-ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL_Base)
+ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL)
 if (EXTENDED_SOURCE)
   set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif ()
@@ -18,7 +18,6 @@ endif ()
 
 set (plots_progs
    quickplot
-   quickstat
    configure
    landscape.script
    portrait.script
@@ -35,6 +34,9 @@ install (
    PROGRAMS ${plots_progs}
    DESTINATION plots
    )
+
+configure_file(quickstat quickstat @ONLY)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/quickstat DESTINATION plots)
 
 # From https://stackoverflow.com/questions/7787823/cmake-how-to-get-the-name-of-all-subdirectories-of-a-directory
 

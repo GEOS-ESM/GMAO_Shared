@@ -112,8 +112,6 @@ endwhile
 say 'ctlinfo 'result
 'getinfo nvars'
          nvars = result
-'getinfo zdim'
-         zdim  = result
 m=0
 n=1
 while(n<=nvars)
@@ -150,15 +148,6 @@ while ( n<=numflds )
        j = 1
 while( j<=numfields )
 if( field = subwrd(fields,j) & field != p )
-
-* Run Script over Regions NHE,TRO,SHE to Find sigdiff90 Range
-* -----------------------------------------------------------
-    x = 2
-    while ( x<=4 )
-      'run 'geosutil'/plots/grads_util/corcmpz -x 'x' -field 'field' -rc 'rcfile' -desc 'DESC' -debug FALSE -NOPLOT'
-      'c'
-       x = x + 1
-    endwhile
 
 * Run Script to Produce PLOTS
 * ---------------------------
