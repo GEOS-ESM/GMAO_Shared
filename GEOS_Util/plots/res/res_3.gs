@@ -257,7 +257,8 @@ endif
 'set string 1 c 6'
 'set strsiz .11'
 
-'draw string 4.25 10.6 EXPID: 'expid'  'expdsc'  'season' ('nmod')'
+'draw string 4.25 10.85 EXPID: 'expid
+'draw string 4.25 10.6 'expdsc'  'season' ('nmod')'
 'draw string 4.25  7.23 'obsdsc'  'season' ('nobs') ('climate')'
 
 if( dn != 0 )
