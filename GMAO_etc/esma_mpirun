@@ -335,8 +335,6 @@ sub get_xtraflags {
           $xtraflags .= " -oversubscribe";
        } elsif ($perhost) {
           $xtraflags .= " -map-by ppr:$perhost:node -bind-to core";
-       } else {
-          $xtraflags .= " -map-by core -bind-to core";
        }
 
     }
