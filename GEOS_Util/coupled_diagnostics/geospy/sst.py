@@ -1,6 +1,9 @@
 import importlib
+import numpy as np
 import matplotlib.pyplot as pl
+import matplotlib.ticker as mticker
 import cartopy.crs as ccrs
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import cmocean
 import geosdset
 
@@ -10,24 +13,32 @@ def plot_clim(exp, ds):
     sst=ds[var]; sst-=FREEZE
     sst_clim=sst.groupby('time.season').mean('time')
 
-    plotopts={'cmap': 'jet', 
-              'vmin': -2, 
-              'vmax': 32,
-              'transform': ccrs.PlateCarree()}
-    
-    subplot_kws=dict(projection=ccrs.PlateCarree(),
-                 facecolor='grey')
+    subplot_kws={'projection': ccrs.PlateCarree(),
+                 'facecolor':'grey'}
 
     cbar_kwargs={'orientation': 'horizontal',
               'shrink': 0.8,
               'extend': 'both'}
 
-    pl.figure(1)
-    sst_clim.sel(season='DJF').plot(**plotopts,subplot_kws=subplot_kws,cbar_kwargs=cbar_kwargs)
-    pl.figure(2)
-    sst_clim.sel(season='JJA').plot(**plotopts,subplot_kws=subplot_kws,cbar_kwargs=cbar_kwargs)
-    pl.figure(3)
-    sst.mean('time').plot(**plotopts,subplot_kws=subplot_kws,cbar_kwargs=cbar_kwargs)
+    plotopts={'cmap': cmocean.cm.thermal, 
+              'levels': np.arange(0.0,31.0,2.0),
+              'transform': ccrs.PlateCarree(),
+              'cbar_kwargs': cbar_kwargs}    
+
+    ff=pl.figure(1) 
+    ax=pl.axes(**subplot_kws)
+    pp=sst_clim.sel(season='DJF').plot.contourf(ax=ax,**plotopts)
+    ax.coastlines()
+    ax.stock_img()
+    gl=ax.gridlines()
+    gl.ylabbels_left=True
+    gl.ylocator = mticker.FixedLocator([-90, -60, -30, 0, 30, 60, 90])
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+#    pl.figure(2)
+#    sst_clim.sel(season='JJA').plot(**plotopts)
+#    pl.figure(3)
+#    sst.mean('time').plot(**plotopts)
     pl.show()
 
 def plot_diff(exp, ds1, ds2):
