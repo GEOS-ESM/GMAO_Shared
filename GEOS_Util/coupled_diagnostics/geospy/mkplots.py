@@ -11,6 +11,15 @@ def main(expid):
     # Plot SST
     import sst
     sst.plots(exps, ocn2d)
+
+    # Load ocean 3d data
+    ocn3d=geosdset.load_collection(exps, 'prog_z', type='MOM')
+
+    # Plot T profiles
+    import temp
+    temp.plots(exps, ocn3d)
+
+    # Add more plots....
     
 if __name__ == "__main__":
     import sys
