@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import importlib
 import matplotlib.pyplot as pl
 import cmocean
@@ -11,6 +13,7 @@ def plot_clim(exp, ds):
               'vmin': 0,
               'vmax': 30,
               'cmap': cmocean.cm.thermal}
+
     cbaropts={}
 
     # Replace data below with proper spatially averaged data using xgcm

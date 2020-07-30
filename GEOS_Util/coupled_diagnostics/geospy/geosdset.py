@@ -1,3 +1,4 @@
+import os
 import pathlib, importlib
 import xarray as xr
 
@@ -48,6 +49,13 @@ def load_exps(expid):
     exps.append(importlib.import_module(expid))
     for exp in exps[0].cmpexp:
         exps.append(importlib.import_module(exp))
+
+    # Make directory for plots if it does not exists
+    try:
+        os.makedirs(exps[0].plot_path)
+    except OSError:
+        pass
+
 
     return exps
 
