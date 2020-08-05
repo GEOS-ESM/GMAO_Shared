@@ -10,9 +10,9 @@ from plotutils import quickmap, drawstats
 def plot_clim(exp, ds):
     varid='TS'
     FREEZE=273.16
-    var=ds[varid]; var-=FREEZE
+    var=ds._ds[varid]; var-=FREEZE
     clim=var.groupby('time.season').mean('time')
-    ann=var.mean('time')
+    ann=clim.mean('season')
 
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,

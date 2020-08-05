@@ -6,8 +6,8 @@ import cmocean
 import geosdset
 
 def plot_clim(exp, ds):
-    var='temp'
-    temp=ds[var].mean('Time')
+    varid='temp'
+    var=ds._ds[var].mean('Time')
 
     plotopts={'yincrease': False,
               'vmin': 0,
