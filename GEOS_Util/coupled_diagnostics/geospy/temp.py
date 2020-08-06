@@ -1,28 +1,49 @@
 #!/usr/bin/env python3
+#!/usr/bin/env python3
+
+'''
+Plots temperature depth profiles.
+'''
 
 import importlib
+import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
 import geosdset
 
 def plot_clim(exp, ds):
     varid='temp'
-    var=ds._ds[var].mean('Time')
+    var=ds[varid].mean('Time')
 
-    plotopts={'yincrease': False,
-              'vmin': 0,
-              'vmax': 30,
-              'cmap': cmocean.cm.thermal}
+    cbar_kwargs={'label': '$^0C$'}
+    
+    fill_opts={'yincrease': False,
+               'levels': np.arange(0.0,31.0,2.0),
+               'cmap': cmocean.cm.thermal,
+               'cbar_kwargs': cbar_kwargs}
 
-    cbaropts={}
+    contour_opts={'levels': np.arange(0.0,31.0,4.0),
+                  'colors': 'black',
+                  'yincrease': False}
 
-    # Replace data below with proper spatially averaged data using xgcm
+    '''
+    Note: to do proper spatiall average of 3d fields, 
+    3d metrics with 3d land mask are needed. 
+    '''
     pl.figure(1)
-    temp.mean('xh').plot(**plotopts)
+    plot_var=var.sel(z_l=slice(0.0,3000.0),yh=slice(-85.0,60.0)).mean('xh')
+    plot_var.plot.contourf(**fill_opts)
+    cs=plot_var.plot.contour(**contour_opts)
+    cs.clabel(fmt='%1.0f')
+    pl.savefig(exp.plot_path+'/'+varid+'_lat_depth.png')
 
     pl.figure(2)
-    temp.mean('yh').plot(**plotopts)    
-    
+    plot_var=var.sel(yh=slice(-2.1,2.1),z_l=slice(0.0,500.0)).mean('yh')
+    plot_var.plot.contourf(**fill_opts)
+    cs=plot_var.plot.contour(**contour_opts)
+    cs.clabel(fmt='%1.0f')
+    pl.savefig(exp.plot_path+'/'+varid+'_eq_depth.png')
+
     pl.show()
 
 def plot_diff(exp, ds1, ds2):

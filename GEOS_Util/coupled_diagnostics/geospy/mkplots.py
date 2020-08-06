@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+'''
+This module runs different plotting modules. Can be used as script.
+'''
+
 import geosdset
 
 def main(expid):

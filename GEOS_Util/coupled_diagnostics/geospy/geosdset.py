@@ -1,17 +1,19 @@
+'''
+This modules provides utilities for reading different GEOS collections. 
+'''
+
 import os
 import pathlib, importlib
 import numpy as np
 import xarray as xr
-import xgcm
 
 R=6378e3 # Earth radius
 
 def load_ds(exp, collection, type='GEOS'):
     '''
-    Returns an xgcm grid corresponding to GEOS collection.
+    Returns an xarray dataset corresponding to GEOS collection.
     - exp: module with experiment metadata;
-    - collection: collection name, string;
-    - .
+    - collection: collection name, string
     '''
     
     if type=='GEOS':
@@ -39,12 +41,12 @@ def load_ds(exp, collection, type='GEOS'):
                       'dy': (('lat','lon'), dy),
                       'area': (('lat','lon'), area)})
         
-        coords={'X': {'center': 'lon'},
-                'Y': {'outer': 'lat'}}
-        
-        metrics={('X',):['dx'],
-                 ('Y',):['dy'],
-                 ('X','Y'):['area']}
+#        coords={'X': {'center': 'lon'},
+#                'Y': {'outer': 'lat'}}
+#        
+#        metrics={('X',):['dx'],
+#                 ('Y',):['dy'],
+#                 ('X','Y'):['area']}
         
     elif type=='GEOSTripolar':
         path=pathlib.Path(f'{exp.data_path}/{collection}')
@@ -53,9 +55,6 @@ def load_ds(exp, collection, type='GEOS'):
         ds=xr.open_mfdataset(flist,combine='by_coords')
         ds=ds.assign_coords({'LON': ds['LON'],
                              'LAT': ds['LAT']})
-
-        coords={}
-        metrics={}
 
     elif type=='MOM':
         path=pathlib.Path(f'{exp.data_path}/MOM_Output')
@@ -72,20 +71,19 @@ def load_ds(exp, collection, type='GEOS'):
                              'geolon_v': ds_static['geolon_v'],
                              'geolat_v': ds_static['geolat_v']})
         
-        ds=ds.assign({'dx': (('lat','lon'), ds_static['dxt']),
-                      'dy': (('lat','lon'), ds_static['dyt']),
-                      'area': (('lat','lon'), ds_static['area_t'])})
+        ds=ds.assign({'dx': (('yh','xh'), ds_static['dxt']),
+                      'dy': (('yh','xh'), ds_static['dyt']),
+                      'area': (('yh','xh'), ds_static['area_t'])})
         
-        coords={'X': {'center': 'xh', 'right': 'xq'},
-                'Y': {'center': 'yh', 'right': 'yq'},
-                'Z': {'center': 'z_l', 'right': 'z_i'}}
-        
-        metrics={('X',):['dx'],
-                 ('Y',):['dy'],
-                 ('X','Y'):['area']}
+#        coords={'X': {'center': 'xh', 'right': 'xq'},
+#                'Y': {'center': 'yh', 'right': 'yq'},
+#                'Z': {'center': 'z_l', 'right': 'z_i'}}
+#        
+#        metrics={('X',):['dx'],
+#                 ('Y',):['dy'],
+#                 ('X','Y'):['area']}
 
-    gr=xgcm.Grid(ds,coords=coords, metrics=metrics)
-    return gr    
+    return ds    
 
 def load_exps(expid):
     '''

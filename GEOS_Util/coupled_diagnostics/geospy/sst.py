@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+'''
+Plots SST.
+'''
+
 import importlib
 import numpy as np
 import matplotlib.pyplot as pl
@@ -10,13 +14,12 @@ from plotutils import quickmap, drawstats
 def plot_clim(exp, ds):
     varid='TS'
     FREEZE=273.16
-    var=ds._ds[varid]; var-=FREEZE
+    var=ds[varid]; var-=FREEZE
     clim=var.groupby('time.season').mean('time')
     ann=clim.mean('season')
 
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,
-                 'extend': 'both',
                  'label': '$^0C$'}
     
     fill_opts={'cmap': cmocean.cm.thermal, 
