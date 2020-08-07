@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-#!/usr/bin/env python3
 
 '''
 Plots temperature depth profiles.
@@ -9,11 +8,12 @@ import importlib
 import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import geosdset
 
 def plot_clim(exp, ds):
     varid='temp'
-    var=ds[varid].mean('Time')
+    var=ds[varid].sel(Time=slice(*exp.dates)).mean('Time')
 
     cbar_kwargs={'label': '$^0C$'}
     
@@ -35,6 +35,12 @@ def plot_clim(exp, ds):
     plot_var.plot.contourf(**fill_opts)
     cs=plot_var.plot.contour(**contour_opts)
     cs.clabel(fmt='%1.0f')
+    ax=pl.gca()
+    ax.set_title('T, zonal mean')
+    ax.set_xlabel('latitude')
+    ax.set_ylabel('depth')
+    ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
+    ax.grid()
     pl.savefig(exp.plot_path+'/'+varid+'_lat_depth.png')
 
     pl.figure(2)
@@ -42,6 +48,12 @@ def plot_clim(exp, ds):
     plot_var.plot.contourf(**fill_opts)
     cs=plot_var.plot.contour(**contour_opts)
     cs.clabel(fmt='%1.0f')
+    ax=pl.gca()
+    ax.set_title('T, equatorial')
+    ax.set_xlabel('longitude')
+    ax.set_ylabel('depth')
+    ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
+    ax.grid()
     pl.savefig(exp.plot_path+'/'+varid+'_eq_depth.png')
 
     pl.show()

@@ -14,7 +14,7 @@ from plotutils import quickmap, drawstats
 def plot_clim(exp, ds):
     varid='TS'
     FREEZE=273.16
-    var=ds[varid]; var-=FREEZE
+    var=ds[varid].sel(time=slice(*exp.dates)); var-=FREEZE
     clim=var.groupby('time.season').mean('time')
     ann=clim.mean('season')
 
