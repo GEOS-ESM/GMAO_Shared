@@ -4292,7 +4292,7 @@ K_LOOP: do k = km, 1, -1
 ! !IROUTINE: sktrs_hno3
 !
 ! !INTERFACE: 
-   function sktrs_hno3 ( tk, rh, sad, ad, radA, pi, rgas, fMassHNO3 )
+   function sktrs_hno3 ( tk, frh, sad, ad, radA, pi, rgas, fMassHNO3 )
 
 ! !DESCRIPTION:
 ! Below are the series of heterogeneous reactions
@@ -4316,7 +4316,7 @@ K_LOOP: do k = km, 1, -1
 
 ! !INPUT PARAMETERS:
    real(kind=DP)  :: tk   ! temperature [K]
-   real(kind=DP)  :: rh   ! fractional relative humidity [0 - 1]
+   real(kind=DP)  :: frh   ! fractional relative humidity [0 - 1]
    real(kind=DP)  :: sad  ! aerosol surface area density [cm2 cm-3]
    real(kind=DP)  :: ad   ! air number concentration [# cm-3]
    real(kind=DP)  :: radA ! aerosol radius [cm]
@@ -4332,49 +4332,29 @@ K_LOOP: do k = km, 1, -1
    real(kind=DP) :: dfkg
    real(kind=DP) :: avgvel
    real(kind=DP) :: gamma
-   real(kind=DP) :: f_rh
-   real(kind=DP) :: sqrt_tk
-
-   real(kind=DP) :: p_dfkg
-   real(kind=DP) :: p_avgvel
 
 !EOP
 !------------------------------------------------------------------------------------
 !  Begin..
-   p_dfkg   = sqrt(3.472e-2 + 1.0/fmassHNO3)
-   p_avgvel = sqrt(8.0 * rgas * 1000.0 / (pi * fmassHNO3))
+      sktrs_hno3 = 0.d0
+      gamma      = 3.d-5
 
-   ! RH factor - Figure 1 in Duncan et al. (2010)
-   f_rh = 0.03
+!      Following uptake coefficients of Liu et al.(2007)
+       if (frh >= 0.1d0 .and. frh < 0.3d0 )  gamma = gamma_hno3 * (0.03d0 + 0.08d0  * (frh - 0.1d0))
+       if (frh >= 0.3d0 .and. frh < 0.5d0 )  gamma = gamma_hno3 * (0.19d0 + 0.255d0 * (frh - 0.3d0))
+       if (frh >= 0.5d0 .and. frh < 0.6d0 )  gamma = gamma_hno3 * (0.7d0  + 0.3d0   * (frh - 0.5d0))
+       if (frh >= 0.6d0 .and. frh < 0.7d0 )  gamma = gamma_hno3 * (1.0d0  + 0.3d0   * (frh - 0.6d0))
+       if (frh >= 0.7d0 .and. frh < 0.8d0 )  gamma = gamma_hno3 * (1.3d0  + 0.7d0   * (frh - 0.7d0))
+       if (frh >= 0.8d0 )                    gamma = gamma_hno3 * 2.0d0
 
-   if (rh >= 0.1 .and. rh < 0.3)       then
-      f_rh = 0.03 + 0.8  * (rh - 0.1)
-   else if (rh >= 0.3 .and. rh < 0.5 ) then
-      f_rh = 0.19 + 2.55 * (rh - 0.3)
-   else if (rh >= 0.5 .and. rh < 0.6)  then
-      f_rh = 0.7  + 3.0  * (rh - 0.5)
-   else if (rh >= 0.6 .and. rh < 0.7)  then
-      f_rh = 1.0  + 3.0  * (rh - 0.6)
-   else if (rh >= 0.7 .and. rh < 0.8)  then
-      f_rh = 1.3  + 7.0  * (rh - 0.7)
-   else if (rh >= 0.8 )                then
-      f_rh = 2.0
-   end if
+!     calculate gas phase diffusion coefficient (cm2/s)
+      dfkg = 9.45D17 / ad * ( tk * (3.472D-2 + 1.D0/fmassHNO3) )**0.5d0
 
-!  Following uptake coefficients of Liu et al.(2007)
-   gamma = gamma_hno3 * f_rh
+!     calculate mean molecular speed (cm/s)
+      avgvel = 100.0d0 * (8.0d0 * rgas * tk * 1000.0d0 / (pi * fmassHNO3))**0.5d0
 
-   sqrt_tk = sqrt(tk)
-
-!  calculate gas phase diffusion coefficient (cm2/s)
-   dfkg = 9.45e17 / ad * sqrt_tk * p_dfkg
-
-!  calculate mean molecular speed (cm/s)
-   avgvel = 100.0 * sqrt_tk * p_avgvel
-
-!  calculate rate coefficient
-   sktrs_hno3 = sad / ( 4.0 / (gamma * avgvel) + radA / dfkg )
-
+!     calculate rate coefficient
+      sktrs_hno3 = sad * ( 4.0d0 / ( gamma * avgvel )+ radA / dfkg )**(-1.0d0)
 
    end function sktrs_hno3
 
@@ -4408,7 +4388,7 @@ K_LOOP: do k = km, 1, -1
 
 ! !INPUT PARAMETERS:
    real(kind=DP)  :: tk   ! temperature [K]
-   real(kind=DP) :: sad  ! aerosol surface area density [cm2 cm-3]
+   real(kind=DP)  :: sad  ! aerosol surface area density [cm2 cm-3]
    real(kind=DP)  :: ad   ! air number concentration [# cm-3]
    real(kind=DP)  :: radA ! aerosol radius [cm]
    real(kind=DP)  :: sktrs_sslt
@@ -4418,7 +4398,7 @@ K_LOOP: do k = km, 1, -1
 !   real(kind=DP), optional  :: gammaInp ! optional uptake coefficient (e.g., 0.2 for SS, else calculated)
 
 ! !Local Variables
-   real(kind=DP), parameter   :: GAMMA_SSLT = 0.2d0
+   real(kind=DP), parameter   :: GAMMA_SSLT = 0.1d0
    real(kind=DP) :: dfkg
    real(kind=DP) :: avgvel
 
