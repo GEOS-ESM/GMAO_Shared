@@ -37,6 +37,11 @@ ecbuild_add_executable (
   SOURCES proc_SST_FRACI_ostia_quart.F90
   LIBS ${this})
 
+ecbuild_add_executable (
+  TARGET lake_sst_sic_EIGTHdeg.x
+  SOURCES lake_data_EIGTHdeg.F90
+  LIBS ${this})
+
 file(GLOB cshscripts *.csh)
 file(GLOB perlscripts *.pl)
 install(PROGRAMS ${cshscripts} ${perlscripts} DESTINATION bin)
