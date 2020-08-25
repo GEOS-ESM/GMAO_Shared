@@ -22,8 +22,6 @@
    public DustEmissionGOCART2G
    public DistributePointEmission
    public updatePointwiseEmissions
-   public Chem_Settling2G
-   public Chem_SettlingSimple
    public Chem_Settling2Gorig
    public Chem_SettlingSimpleOrig
    public DryDeposition
@@ -39,8 +37,6 @@
    public CAEmission
    public phobicTophilic
    public NIheterogenousChem
-   public GetVolcContinuous
-   public GetVolcExplosive
    public CombineVolcEmiss
    public SulfateDistributeEmissions
    public DMSemission
@@ -51,6 +47,11 @@
    public SulfateChemDriver
    public get_HenrysLawCts
    public NIthermo
+   public Chem_UtilResVal 
+   public Chem_UtilIdow
+   public Chem_UtilCdow
+   public Chem_BiomassDiurnal
+
 
    real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
    integer, parameter     :: DP = kind(1.0d0)
@@ -59,11 +60,13 @@
 !
 ! !DESCRIPTION:
 !
-!  This module implements the gridded emission calculations
+!  This module contains and implements all necessary process calculations for GOCART.
 !
 ! !REVISION HISTORY:
 !
-!  11Feb2020  E.Sherman, A.da Silva, T.Clune, A.Darmenov -  First attempt at refactor
+!  11Feb2020  E.Sherman, A.da Silva, T.Clune, A.Darmenov - Ported/consolidated/refactored GOCART
+!                   physics and chemistry code into a single process library that only uses
+!                   intrinsic Fortran functions.
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -82,12 +85,18 @@ CONTAINS
 
 ! !INPUT PARAMETERS:
    real, intent(in) :: radius(:)       ! particle radius [m]
-   real, pointer, dimension(:,:), intent(in) :: fraclake, gwettop, oro, u10m, v10m, du_src
-   real, intent(in) :: Ch_DU, grav
+   real, pointer, dimension(:,:), intent(in) :: fraclake ! fraction of lake [1]
+   real, pointer, dimension(:,:), intent(in) :: gwettop  ! surface soil wetness [1]
+   real, pointer, dimension(:,:), intent(in) :: oro      ! land-ocean-ice mask [1]
+   real, pointer, dimension(:,:), intent(in) :: u10m     ! 10-meter eastward wind [m/sec]
+   real, pointer, dimension(:,:), intent(in) :: v10m     ! 10-meter northward wind [m/sec]
+   real, pointer, dimension(:,:), intent(in) :: du_src   ! dust emissions [(sec^2 m^5)/kg]
+   real, intent(in) :: Ch_DU   ! dust emission tuning coefficient [kg/(sec^2 m^5)]
+   real, intent(in) :: grav    ! gravity [m/sec^2]
 
 ! !OUTPUT PARAMETERS:
-   real  ::  emissions(:,:)    ! Local emission
-   integer, intent(out) :: rc                   ! Error return code:
+   real, pointer, intent(inout)  :: emissions(:,:)    ! Local emission [kg/(m^2 sec)]
+   integer, intent(out) :: rc  ! Error return code:
 
 
 ! !DESCRIPTION: Computes the dust emissions for one time step
@@ -175,38 +184,30 @@ CONTAINS
 
 ! !IROUTINE: updatePointwiseEmissions
 
-!  subroutine updatePointwiseEmissions (km, pBase, pTop, pEmis, nPts, pStart, &
-!                                       pEnd, airdens, delp, GRAV, area, &
-!                                       iPoint, jPoint, nhms, emissions_point, rc)
   subroutine updatePointwiseEmissions (km, pBase, pTop, pEmis, nPts, pStart, &
                                        pEnd, hghte, area, &
                                        iPoint, jPoint, nhms, emissions_point, rc)
     implicit none
 
 !   !ARGUMENTS:
-    integer,                              intent(in   )  :: km
-    real, dimension(:),                   intent(in   )  :: pBase
-    real, dimension(:),                   intent(in   )  :: pTop
-    real, dimension(:),                   intent(in   )  :: pEmis
-    integer,                              intent(in   )  :: nPts
-    integer, dimension(:),                intent(in   )  :: pStart
-    integer, dimension(:),                intent(in   )  :: pEnd
+    integer,                intent(in)  :: km     ! total model levels
+    real, dimension(:),     intent(in)  :: pBase  ! base altitude (e.g., bottom of plume)
+    real, dimension(:),     intent(in)  :: pTop   ! top altitude (e.g., top of plume)
+    real, dimension(:),     intent(in)  :: pEmis  ! emission flux (e.g., kg/sec of species)
+    integer,                intent(in)  :: nPts   ! number of events in file
+    integer, dimension(:),  intent(in)  :: pStart ! HHMMSS to start emissions
+    integer, dimension(:),  intent(in)  :: pEnd   ! HHMMSS to end emissions
     real, dimension(:,:,:), intent(in)  :: hghte  ! model level geopotential height [m]
-!    real, dimension(:,:,:),               intent(in   )  :: airdens
-!    real, dimension(:,:,:),               intent(in   )  :: delp
-!    real,                                 intent(in   )  :: GRAV
-    real, dimension(:,:),                 intent(in   )  :: area
-!    integer, pointer, dimension(:),       intent(in   )  :: iPoint
-!    integer, pointer, dimension(:),       intent(in   )  :: jPoint
-    integer, dimension(:),       intent(in   )  :: iPoint
-    integer, dimension(:),       intent(in   )  :: jPoint
-    integer,                              intent(in   )  :: nhms
-    real, dimension(:,:,:),               intent(inout)  :: emissions_point
-    integer, optional,                    intent(  out)  :: rc
+    real, dimension(:,:),   intent(in)  :: area   ! grid cell area [m^2]
+    integer, dimension(:),  intent(in)  :: iPoint ! i dimension location of emission on grid
+    integer, dimension(:),  intent(in)  :: jPoint ! j dimension location of emission on grid
+    integer,                intent(in)  :: nhms   ! model hour mintue second
+    real, dimension(:,:,:), intent(inout)  :: emissions_point ![kg/kg]
+    integer, optional,      intent(out)  :: rc  ! return code
 
 !   !Local
-    real, dimension(km)          :: point_column_emissions
-    integer                           :: n, i, j
+    real, dimension(km)              :: point_column_emissions
+    integer                          :: n, i, j
     real, dimension(:), allocatable  :: pEmis_
 
 !   Description: Returns 3D array of pointwise emissions.
@@ -216,27 +217,20 @@ CONTAINS
 !-----------------------------------------------------------------------------
 !    Begin...
 
-pEmis_ = pEmis
+     pEmis_ = pEmis
 
-        do  n = 1, nPts
-            i = iPoint(n)
-            j = jPoint(n)
-            if( i<1 .OR. j<1 ) cycle    ! Point emission not in this sub-domain
-            ! Emissions not occurring in current time step
-            if(nhms < pStart(n) .or. nhms >= pEnd(n)) cycle
+     do n = 1, nPts
+        i = iPoint(n)
+        j = jPoint(n)
+        if( i<1 .OR. j<1 ) cycle    ! Point emission not in this sub-domain
+        ! Emissions not occurring in current time step
+        if(nhms < pStart(n) .or. nhms >= pEnd(n)) cycle
 
-!Emissions per volcano
-if(area(i,j) > 1.) then
-   pEmis_(n) = pEmis(n) / area(i,j)     ! to kg SO2/sec/m2
-   pEmis_(n) = max(pEmis_(n),tiny(pEmis_(n)))
-endif
+        call DistributePointEmission(km, hghte(i,j,:), pBase(n), &
+                                     pTop(n), pEmis_(n), area(i,j), &
+                                     point_column_emissions, rc)
 
-            call DistributePointEmission(km, hghte(i,j,:), pBase(n), &
-                                         pTop(n), pEmis_(n), area(i,j), &
-                                         point_column_emissions, rc)
-
-            emissions_point(i,j,:) =  point_column_emissions
-!print*,'emissions_point(i,j,:) = ',emissions_point(i,j,:)
+        emissions_point(i,j,:) =  point_column_emissions
         end do
    rc = 0
 
@@ -248,10 +242,6 @@ endif
 
 ! !INTERFACE:
 
-!   subroutine DistributePointEmission(km, delp, rhoa, z_bot, z_top, &
-!                                      GRAV, emissions_point, area, &
-!                                      point_column_emissions, rc)
-
    subroutine DistributePointEmission(km, hghte, z_bot, z_top, &
                                       emissions_point, area, &
                                       point_column_emissions, rc)
@@ -259,17 +249,16 @@ endif
    implicit NONE
 
 ! !INPUT PARAMETERS:
-   integer, intent(in)             :: km
-!   real, dimension(:), intent(in)  :: delp, rhoa
-   real, dimension(:), intent(in)  :: hghte
-   real, intent(in)                :: z_bot, z_top
-   real,               intent(in)  :: emissions_point, area
+   integer, intent(in)             :: km       ! total model levels
+   real, dimension(:), intent(in)  :: hghte    ! model level geopotential height [m]
+   real, intent(in)                :: z_bot, z_top ! base and top altitude respectively
+   real,               intent(in)  :: area     ! grid cell area [m^2]
+   real,               intent(in)  :: emissions_point ![kg/kg]
 
 
 ! !OUTPUT PARAMETERS:
-   real, dimension(:), intent(out) ::  point_column_emissions
-
-   integer, optional, intent(out) :: rc                                 ! Error return code:
+   real, dimension(:), intent(out) ::  point_column_emissions ![kg/kg]
+   integer, optional, intent(out) :: rc                       ! Error return code:
 
 
 ! !DESCRIPTION: Distributes piont emissions uniformily in the vertical in height coordinates.
@@ -288,17 +277,10 @@ endif
 !-------------------------------------------------------------------------
 ! Begin
 
-!    z(1:km) = hghte(0:km-1)
-    z(1:km) = hghte(1:km)
+    z(1:km) = hghte(0:km-1)
 
-
-!    do k = km, 1, -1
-!       dz(k) = hghte(k-1)-hghte(k)
-!    end do
-
-    dz(km) = hghte(km)
-    do k = km-1, 1, -1
-       dz(k) = hghte(k)-hghte(k+1)
+    do k = km, 1, -1
+       dz(k) = hghte(k-1)-hghte(k)
     end do
 
 !   find the bottom level
@@ -361,751 +343,6 @@ endif
 !==================================================================================
 
 !BOP
-!
-! !IROUTINE:  Chem_Settling - 
-!
-! !INTERFACE:
-!
-   subroutine Chem_Settling2G (km, flag, int_qa, grav, delp, &
-                               radiusInp, rhopInp, cdt, tmpu, rhoa, &
-                               rh, hghte, fluxout, rc, &
-                               vsettleOut, correctionMaring)
-
-! !USES:
-
-  implicit NONE
-
-! !INPUT PARAMETERS:
-   integer, intent(in) :: km
-   integer, intent(in) :: flag     ! flag to control particle swelling (see note)
-   real, intent(in)    :: grav     ! mapl_grav
-   real, intent(in)    :: cdt
-   real, dimension(:), intent(in)  :: radiusInp, rhopInp
-   real, pointer, dimension(:,:,:) :: tmpu, rhoa, rh, hghte, delp
-   real, dimension(:,:,:,:), intent(inout) :: int_qa
-
-! !OUTPUT PARAMETERS:
-   real, pointer, dimension(:,:,:)  :: fluxout ! Mass lost by settling
-                                                  ! to surface, kg/m2/s
-   integer, intent(out)             :: rc         ! Error return code:
-                                                  !  0 - all is well
-                                                  !  1 - 
-!  Optionally output the settling velocity calculated
-   real, pointer, optional, dimension(:,:,:,:)  :: vsettleOut
-
-!  Optionally correct the settling velocity following Maring et al, 2003
-   logical, optional, intent(in)    :: correctionMaring
-
-   character(len=*), parameter :: myname = 'Chem_Settling2G'
-
-! !DESCRIPTION: Gravitational settling of aerosol between vertical
-!               layers.  Assumes input radius in [m] and density (rhop) 
-!               in [kg m-3]. If flag is set, use the Fitzgerald 1975 (flag = 1)
-!               or Gerber 1985 (flag = 2) parameterization to update the 
-!               particle radius for the calculation (local variables radius
-!               and rhop).
-!
-! !REVISION HISTORY:
-!
-!  05May2020  Sherman   Refactor - only uses intrinsic fortran types/functions
-!  15May2019  Darmenov  Refactor and speed up code
-!  17Sep2004  Colarco   Strengthen sedimentation flux out at surface
-!                       by setting removal to be valid from middle of
-!                       surface layer
-!  06Nov2003  Colarco   Based on Ginoux
-!  23Jan2003  da Silva  Standardization
-!
-
-! !Local Variables
-   integer  ::  i, j, k, n, dk
-
-   integer         :: i1=1, i2, j1=1, j2, nbins
-   integer         :: dims(3)
-
-!   integer, parameter     :: DP=kind(1.0d0)
-   real, parameter ::  rhow = 1000.  ! Density of water [kg m-3]
-
-   real, dimension(:,:,:), allocatable  :: vsettle   ! fall speed [m s-1]
-   real, dimension(:,:,:), allocatable  :: radius, rhop ! output for ParticleSwelling
-   real, dimension(:,:,:), allocatable  :: dz, qa
-
-   real(kind=DP), dimension(:,:), allocatable  :: cmass_before, cmass_after
-   
-   real, allocatable, dimension(:,:)    :: hsurf
-
-!  parameters from Maring et al, 2003
-   real, parameter :: v_upwardMaring = 0.33e-2   ! upward velocity, [m s-1]
-   real, parameter :: diameterMaring = 7.30e-6   ! particle diameter, [m]
-
-!   real, parameter :: one_over_g = 1.0/grav
-
-   real, dimension(:,:,:), allocatable  :: qa_temp
-   real(kind=DP) ::  gravDP
-   rc = 0
-
-!EOP
-!-------------------------------------------------------------------------
-!  Begin
-
-!  Get dimensions
-!  ---------------
-   nbins = size(radiusInp)
-   dims = shape(rhoa)
-   i2 = dims(1); j2 = dims(2)
-
-   gravDP = grav
-
-!  Allocate arrays
-!  ---------------
-   allocate(dz(i1:i2,j1:j2,km), vsettle(i1:i2,j1:j2,km), radius(i1:i2,j1:j2,km), qa(i1:i2,j1:j2,km), &
-            rhop(i1:i2,j1:j2,km), qa_temp(i1:i2,j1:j2,km))
-   allocate(cmass_before(i1:i2,j1:j2), cmass_after(i1:i2,j1:j2), hsurf(i1:i2,j1:j2))
-
-   hsurf = hghte(i1:i2,j1:j2,km)
-
-!print*,'sum(tmpu) = ',sum(tmpu)
-!print*,'sum(rhoa) = ',sum(rhoa)
-!print*,'sum(rh) = ',sum(rh)
-!print*,'sum(hghte) = ',sum(hghte)
-!print*,'sum(delp) = ',sum(delp)
-
-
-!  Handle the fact that hghte may be in the range [1,km+1] or [0,km]
-!  -----------------------------------------------------------------
-   dk = lbound(hghte,3) - 1  ! This is either 0 or 1
-  
-!  Layer thickness from hydrostatic equation
-   k = km
-   dz(:,:,k) = hghte(:,:,k+dk)-hsurf(:,:)
-   do k = km-1, 1, -1
-    dz(:,:,k) = hghte(:,:,k+dk) - hghte(:,:,k+dk+1)
-   enddo
-
-!  Loop over the number of dust bins
-   do n = 1, nbins
-
-    ! alias
-    qa(:,:,:) = int_qa(:,:,:,n)
-
-!    if( associated(fluxout(n)%data2d) ) fluxout(n)%data2d(i1:i2,j1:j2) = 0.0
-    if(associated(fluxout)) fluxout(:,:,n) = 0.0
-
-    cmass_before(:,:) = 0.d0
-    cmass_after(:,:)  = 0.d0
-
-!   If radius le 0 then get out of loop
-    if(radiusInp(n) .le. 0.) cycle
-
-!   Find the column dry mass before sedimentation
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
-       cmass_before(i,j) = cmass_before(i,j) + qa(i,j,k)/grav * delp(i,j,k)
-      enddo
-     enddo
-    enddo
-!    cmass_before = sum(qa * delp * 1.0/grav, 3)
-
-!   Particle swelling
-    call ParticleSwelling(i1, i2, j1, j2, km, rh, radiusInp(n), rhopInp(n), radius, rhop, flag)
-
-!print*,'sum(radius) = ',sum(radius)
-!print*,'sum(rhop) = ',sum(rhop)
-
-
-!   Settling velocity of the wet particle
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
-       call Chem_CalcVsettle2G(radius(i,j,k), rhop(i,j,k), rhoa(i,j,k), &
-                               tmpu(i,j,k), grav, vsettle(i,j,k))
-      end do
-     end do
-    end do
-
-
-    if(present(correctionMaring)) then
-     if (correctionMaring) then
-       vsettle = max(1.0e-9, vsettle - v_upwardMaring)
-     endif
-    endif
-
-!print*,'sum(vsettle) = ',sum(vsettle)
-
-    if(present(vsettleOut)) then
-!     vsettleOut(n)%data3d = vsettle
-     vsettleOut(:,:,:,n) = vsettle
-    endif
-
-qa_temp = qa
-!print*,'before sum(qa) = ',sum(qa)
-
-!   Time integration
-    call SettlingSolver(i1, i2, j1, j2, km, cdt, delp, dz, vsettle, qa)
-
-!print*,'after sum(qa)  = ',sum(qa)
-
-
-!if (sum(qa_temp) < sum(qa)) then
-!   print*,'< qa_temp = ',sum(qa_temp), ' : qa = ', sum(qa)
-!end if
-
-!if (sum(qa_temp) == sum(qa)) then
-!   print*,'== qa_temp = ',sum(qa_temp), ' : qa = ', sum(qa)
-!end if
-
-!   Find the column dry mass after sedimentation and thus the loss flux
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
-       cmass_after(i,j) = cmass_after(i,j) + qa(i,j,k)/grav * delp(i,j,k)
-      enddo
-     enddo
-    enddo
-!    cmass_after = sum(qa * delp * 1.0/grav, 3)
-
-    if( associated(fluxout) ) then
-       fluxout(i1:i2,j1:j2,n) = (cmass_before(i1:i2,j1:j2) - cmass_after(i1:i2,j1:j2))/cdt
-
-!if(sum(cmass_before) < sum(cmass_after)) then
-!  print*,'< cmass_before = ',sum(cmass_before), ' : cmass_after = ', sum(cmass_after)
-!endif
-
-!if(sum(cmass_before) ==  sum(cmass_after)) then
-! print*,'== cmass_before = ',sum(cmass_before), ' : cmass_after = ', sum(cmass_after)
-!endif
-
-    endif
-
-!print*,'sum(cmass_before) = ',sum(cmass_before)
-!print*,'sum(cmass_after) = ',sum(cmass_after)
-
-!print*,'sum(fluxout(:,:,n)) = ',sum(fluxout(:,:,n))
-
-    int_qa(:,:,:,n) = qa
-   end do   ! n
-
- end subroutine Chem_Settling2G
-
-
-!==================================================================================
-
-!BOP
-!
-! !IROUTINE:  Chem_SettlingSimple - 
-!
-! !INTERFACE:
-!
-   subroutine Chem_SettlingSimple (km, flag, int_qa, grav, delp, &
-                                   radiusInp, rhopInp, cdt, tmpu, rhoa, &
-                                   rh, hghte, fluxout, rc, &
-                                   vsettleOut, correctionMaring)
-
-! !USES:
-
-  implicit NONE
-
-! !INPUT PARAMETERS:
-   integer, intent(in) :: km       ! total model levels
-   integer, intent(in) :: flag     ! flag to control particle swelling (see note)
-   real, intent(in)    :: grav     ! gravity [m/sec]
-   real, intent(in)    :: cdt      ! model time-step [sec]
-   real, intent(in)  :: radiusInp, rhopInp
-   real, pointer, dimension(:,:,:) :: tmpu, rhoa, rh, hghte, delp
-   real, pointer, dimension(:,:,:), intent(inout) :: int_qa ! aerosol [kg/kg]
-
-! !OUTPUT PARAMETERS:
-   real, pointer, dimension(:,:)  :: fluxout ! Mass lost by settling
-                                                  ! to surface, kg/m2/s
-   integer, intent(out)             :: rc         ! Error return code:
-                                                  !  0 - all is well
-                                                  !  1 - 
-!  Optionally output the settling velocity calculated
-   real, pointer, optional, dimension(:,:,:)  :: vsettleOut
-
-!  Optionally correct the settling velocity following Maring et al, 2003
-   logical, optional, intent(in)    :: correctionMaring
-
-
-! !DESCRIPTION: Gravitational settling of aerosol between vertical
-!               layers.  Assumes input radius in [m] and density (rhop) 
-!               in [kg m-3]. If flag is set, use the Fitzgerald 1975 (flag = 1)
-!               or Gerber 1985 (flag = 2) parameterization to update the 
-!               particle radius for the calculation (local variables radius
-!               and rhop).
-
-! !REVISION HISTORY:
-!
-!  15May2019  Darmenov  Refactor and speed up code
-!  17Sep2004  Colarco   Strengthen sedimentation flux out at surface
-!                       by setting removal to be valid from middle of
-!                       surface layer
-!  06Nov2003  Colarco   Based on Ginoux
-!  23Jan2003  da Silva  Standardization
-!
-
-! !Local Variables
-   integer  ::  i, j, k, n, dk
-
-   integer         :: i1=1, i2, j1=1, j2
-
-!   integer, parameter     :: DP=kind(1.0d0)
-   real, parameter ::  rhow = 1000.  ! Density of water [kg m-3]
-
-   real, dimension(:,:,:), allocatable  :: vsettle   ! fall speed [m s-1]
-   real, dimension(:,:,:), allocatable  :: radius, rhop ! output for ParticleSwelling
-   real, dimension(:,:,:), allocatable  :: dz
-   real, pointer, dimension(:,:,:) :: qa
-
-   real(kind=DP), dimension(:,:), allocatable  :: cmass_before, cmass_after
-
-   real, allocatable, dimension(:,:)    :: hsurf
-
-!  parameters from Maring et al, 2003
-   real, parameter :: v_upwardMaring = 0.33e-2   ! upward velocity, [m s-1]
-   real, parameter :: diameterMaring = 7.30e-6   ! particle diameter, [m]
-
-!   real, parameter :: one_over_g = 1.0/grav
-   real :: one_over_g
-
-   rc = 0
-
-!EOP
-!-------------------------------------------------------------------------
-!  Begin...
-
-   one_over_g = 1.0/grav
-
-!  Get dimensions
-!  ---------------
-   i2 = ubound(rhoa,1)
-   j2 = ubound(rhoa,2)
-
-!  Allocate arrays
-!  ---------------
-   allocate(dz(i1:i2,j1:j2,km), vsettle(i1:i2,j1:j2,km), radius(i1:i2,j1:j2,km), qa(i1:i2,j1:j2,km), &
-            rhop(i1:i2,j1:j2,km))
-   allocate(cmass_before(i1:i2,j1:j2), cmass_after(i1:i2,j1:j2), hsurf(i1:i2,j1:j2))
-
-   hsurf = hghte(i1:i2,j1:j2,km)
-
-!  Handle the fact that hghte may be in the range [1,km+1] or [0,km]
-!  -----------------------------------------------------------------
-   dk = lbound(hghte,3) - 1  ! This is either 0 or 1
-
-!  Layer thickness from hydrostatic equation
-   k = km
-   dz(:,:,k) = hghte(:,:,k+dk)-hsurf(:,:)
-   do k = km-1, 1, -1
-    dz(:,:,k) = hghte(:,:,k+dk) - hghte(:,:,k+dk+1)
-   enddo
-
-   ! alias
-   qa => int_qa
-
-   if( associated(fluxout) ) fluxout = 0.0
-
-   cmass_before(:,:) = 0.d0
-   cmass_after(:,:)  = 0.d0
-
-!  If radius le 0 then get out of loop
-   if(radiusInp .le. 0.) return
-
-!  Find the column dry mass before sedimentation
-   do k = 1, km
-    do j = j1, j2
-     do i = i1, i2
-      cmass_before(i,j) = cmass_before(i,j) + qa(i,j,k) * delp(i,j,k)*one_over_g
-     enddo
-    enddo
-   enddo
-
-!  Particle swelling
-   call ParticleSwelling(i1, i2, j1, j2, km, rh, radiusInp, rhopInp, radius, rhop, flag)
-
-!  Settling velocity of the wet particle
-   do k = 1, km
-    do j = j1, j2
-     do i = i1, i2
-      call Chem_CalcVsettle2G(radius(i,j,k), rhop(i,j,k), rhoa(i,j,k), &
-                            tmpu(i,j,k), grav, vsettle(i,j,k))
-     end do
-    end do
-   end do
-
-   if(present(correctionMaring)) then
-    if (correctionMaring) then
-      vsettle = max(1.0e-9, vsettle - v_upwardMaring)
-    endif
-   endif
-
-   if(present(vsettleOut)) then
-    if(associated(vsettleOut)) vsettleOut = vsettle
-   endif
-
-!  Time integration
-   call SettlingSolver(i1, i2, j1, j2, km, cdt, delp, dz, vsettle, qa)
-
-!  Find the column dry mass after sedimentation and thus the loss flux
-   do k = 1, km
-    do j = j1, j2
-     do i = i1, i2
-      cmass_after(i,j) = cmass_after(i,j) + qa(i,j,k) * delp(i,j,k) * one_over_g
-     enddo
-    enddo
-   enddo
-
-   if( associated(fluxout) ) then
-      fluxout(i1:i2,j1:j2) = (cmass_before(i1:i2,j1:j2) - cmass_after(i1:i2,j1:j2))/cdt
-   endif
-
-   end subroutine Chem_SettlingSimple
-
-
-
-!==================================================================================
-
-!BOP
-!
-! !IROUTINE:  Chem_CalcVsettle - Calculate the aerosol settling velocity
-!
-! !INTERFACE:
-   subroutine Chem_CalcVsettle2G ( radius, rhop, rhoa, tmpu, grav, &
-                                 vsettle )
-! !USES:
-  implicit NONE
-
-! !INPUT PARAMETERS:
-   real, intent(in)    :: radius       ! Particle radius [m]
-   real, intent(in)    :: rhop         ! Particle density [kg m-3]
-   real, intent(in)    :: rhoa         ! Layer air density [kg m-3]
-   real, intent(in)    :: tmpu         ! Layer temperature [K]
-   real, intent(in)    :: grav         ! gravity [m/sec]
-
-! !OUTPUT PARAMETERS:
-   real, intent(out)   :: vsettle                 ! Layer fall speed [m s-1]
-
-   character(len=*), parameter :: myname = 'Chem_CalcVsettle2G'
-
-! !DESCRIPTION: Calculates the aerosol settling velocity and Brownian diffusion
-!               coefficient
-!               Follows discussions in Seinfeld and Pandis, Pruppacher and
-!               Klett, and the coding in CARMA (Toon et al., 1988)
-!               Should work satisfactorily for al reasonable sized aerosols
-!               (up to Reynolds number 300)
-!
-! !REVISION HISTORY:
-!
-!  06Nov2003  Colarco   Initial version.
-!  23Jan2003  da Silva  Standardization
-!
-!EOP
-
-! !Local Variables
-   real :: rmu                       ! Dynamic viscosity [kg m-1 s-1]
-   real :: vt                        ! Thermal velocity of air molecule [m s-1]
-   real :: rmfp                      ! Air molecule mean free path [m]
-   real :: bpm                       ! Cunningham slip correction factor
-   real :: rkn                       ! Knudsen number
-   real :: re, x, y                  ! reynold's number and parameters
-   real, parameter :: kb = 1.3807e-23 ! Boltzmann constant [kg m2 s-1 K-1 mol-1]
-   real, parameter :: m_air = 4.8096e-26 ! Mass of <avg> air molecule [kg]
-   real, parameter :: pi = 3.141529265
-   
-   real, parameter :: f_vt = 8*kb/pi/m_air
-   real, parameter :: f_diff_coef = kb/(6*pi)
-   real, parameter :: two_over_nine = 2./9.
-   real, parameter :: a0 = -3.18657
-   real, parameter :: a1 =  0.992696
-   real, parameter :: a2 = -1.53193e-3
-   real, parameter :: a3 = -9.870593e-4
-   real, parameter :: a4 = -5.78878e-4
-   real, parameter :: a5 =  8.55176e-5 
-   real, parameter :: a6 = -3.27815e-6
-
-!-------------------------------------------------------------------------
-!  Begin
-
-!  Dynamic viscosity from corrected Sutherland's Equation
-   rmu = 1.8325e-5*(416.16/(tmpu+120.))*(tmpu/296.16)**1.5
-
-!  Thermal velocity of air molecule
-   vt = sqrt(tmpu * f_vt)
-
-!  Air molecule mean free path
-   rmfp = 2*rmu/(rhoa*vt)
-
-!  Knudsen number
-   rkn = rmfp/radius
-
-!  Cunningham slip correction factor
-!  bpm = 1. + 1.246*rkn + 0.42*rkn*exp(-0.87/rkn)
-!  linearized form, Binkowski and Shankar (equation A27, 1995) 
-   bpm = 1 + 1.246*rkn
-
-!  Brownian diffusion coefficient
-!  diff_coef = tmpu*bpm/(rmu*radius) * f_diff_coef
-
-!  Fall speed (assumes Reynolds # < 0.01)
-   vsettle = two_over_nine*rhop*radius*radius*grav*bpm/rmu
-
-!  Check the Reynold's number to see if we need a drag correction
-!  First guess at Reynold's number using Stoke's calculation
-   re = 2.*rhoa*radius*vsettle/rmu
-!  If Re > 0.01 then apply drag correction following Pruppacher and
-!  Klett regime 2 (eq. 10-142).  Assuming reasonable aerosols we
-!  do not consider that particle Re may exceed 300.
-   if(re .gt. 0.01) then
-    x  = log(24.*re/bpm)
-    y  = a0 + x*(a1 + x*(a2 + x*(a3 + x*(a4 + x*(a5 + a6*x)))))
-    re = exp(y)*bpm
-    vsettle = 0.5*rmu*re/(rhoa*radius)
-   endif
-   end subroutine Chem_CalcVsettle2G
-
-!==================================================================================
-   
-   subroutine SettlingSolver(i1, i2, j1, j2, km, cdt, delp, dz, vs, qa)
-    implicit none
-    integer, intent(in) :: i1, i2
-    integer, intent(in) :: j1, j2
-    integer, intent(in) :: km
-    real,    intent(in) :: cdt
-    real, dimension(i1:i2,j1:j2,km), intent(in) :: delp
-    real, dimension(i1:i2,j1:j2,km), intent(in) :: dz
-    real, dimension(i1:i2,j1:j2,km), intent(in) :: vs
-    real, dimension(i1:i2,j1:j2,km), intent(inout) :: qa
-    ! local
-    integer :: i, j, iit
-    integer :: nSubSteps
-    real, dimension(i1:i2, j1:j2, km) :: tau
-    real, dimension(km) :: dp_
-    real, dimension(km) :: tau_
-    real :: dt, dt_cfl
-    
-    tau = vs/dz
-    do j = j1, j2
-      do i = i1, i2
-          dp_  = delp(i,j,:)
-          tau_ = tau(i,j,:)
-          
-          dt_cfl  = 1 / maxval(tau_)
-          if (dt_cfl > cdt) then
-              ! no need for time sub-splitting
-              nSubSteps = 1
-              dt = cdt
-          else
-              nSubSteps = ceiling(cdt / dt_cfl)
-              dt = cdt/nSubSteps
-          end if
-          do iit = 1, nSubSteps
-              qa(i,j,   1) = qa(i,j,   1) * (1 - dt*tau_(1))
-              qa(i,j,2:km) = qa(i,j,2:km) + ( (dp_(1:km-1)/dp_(2:km))*(dt*tau_(1:km-1))*qa(i,j,1:km-1) ) &
-                                          - dt*tau_(2:km)*qa(i,j,2:km)
-          end do
-      enddo
-    enddo
-   end subroutine SettlingSolver
-
-!==================================================================================
-
-   subroutine ParticleSwelling(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop, flag)
-    implicit none
-    integer, intent(in) :: i1, i2
-    integer, intent(in) :: j1, j2
-    integer, intent(in) :: km
-    real, dimension(i1:i2,j1:j2,km), intent(in)  :: rh
-    integer, intent(in) :: flag
-    real, intent(in) :: radius_dry
-    real, intent(in) :: rhop_dry
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: radius  ! radius  of the wet particle
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: rhop    ! density of the wet particle
-    select case (flag)
-        case (0)
-            radius = radius_dry
-            rhop   = rhop_dry
-        case (1)
-            call ParticleSwelling_Fitzgerald(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-        case (2)
-            call ParticleSwelling_Gerber(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-        case (3)
-            call ParticleSwelling_Gerber_AmmoniumSulfate(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)  
-        case (4)
-            call ParticleSwelling_PK2007(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-        case default
-            radius = radius_dry
-            rhop   = rhop_dry
-    end select 
-   end subroutine ParticleSwelling
-!----------------------------------------------------------------------
-
-   subroutine ParticleSwelling_Fitzgerald(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-    implicit none
-    integer, intent(in) :: i1, i2
-    integer, intent(in) :: j1, j2
-    integer, intent(in) :: km
-    real, dimension(i1:i2,j1:j2,km), intent(in)  :: rh
-    real, intent(in) :: radius_dry 
-    real, intent(in) :: rhop_dry
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: radius  ! radius  of the wet particle
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: rhop    ! density of the wet particle
-    ! local
-    real, parameter :: rhow = 1000.  ! density of water [kg m-3]
-    ! the following parameters relate to the swelling of seasalt like particles
-    ! following Fitzgerald, Journal of Applied Meteorology, 1975.
-    real, parameter :: epsilon = 1.   ! soluble fraction of deliqeuscing particle
-    real, parameter :: alphaNaCl = 1.35
-    real :: alpha, alpha1, alpharat, beta, theta, f1, f2
-    real :: sat, rrat
-    integer :: i, j, k
-!   Adjust particle size for relative humidity effects,
-!   based on Fitzgerald, Journal of Applied Meteorology, 1975
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
-       radius(i,j,k) = radius_dry
-       rhop(i,j,k) = rhop_dry
-       sat = rh(i,j,k)
-       if (sat > 0.80) then
-!       parameterization blows up for RH > 0.995, so set that as max
-!       rh needs to be scaled 0 - 1
-        sat = min(0.995, sat)
-!       Calculate the alpha and beta parameters for the wet particle
-!       relative to amonium sulfate
-        beta = exp( (0.00077*sat) / (1.009-sat) )
-        if(sat .le. 0.97) then
-         theta = 1.058
-        else
-         theta = 1.058 - (0.0155*(sat-0.97)) /(1.02-sat**1.4)
-        endif
-        alpha1 = 1.2*exp( (0.066*sat) / (theta-sat) )
-! no need of this calculations, because epsilon == 1
-!       f1 = 10.2 - 23.7*sat + 14.5*sat*sat
-!       f2 = -6.7 + 15.5*sat -  9.2*sat*sat
-!       alpharat = 1. - f1*(1.-epsilon) - f2*(1.-epsilon**2.)
-!       alpha = alphaNaCl * (alpha1*alpharat)
-! instead, it is faster to do 
-        alpha = alphaNaCl * alpha1
-        radius(i,j,k) = alpha * radius_dry**beta
-        rrat = radius_dry/radius(i,j,k)
-        rrat = rrat*rrat*rrat
-        rhop(i,j,k) = rrat*rhop_dry + (1 - rrat)*rhow
-       endif
-     end do
-    end do
-   end do
-   end subroutine ParticleSwelling_Fitzgerald
-!----------------------------------------------------------------------
-
-   subroutine ParticleSwelling_Gerber(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-    implicit none
-    integer, intent(in) :: i1, i2
-    integer, intent(in) :: j1, j2
-    integer, intent(in) :: km
-    real, dimension(i1:i2,j1:j2,km), intent(in)  :: rh
-    real, intent(in)  :: radius_dry 
-    real, intent(in)  :: rhop_dry
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: radius  ! radius  of the wet particle
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: rhop    ! density of the wet particle
-    ! local
-    real, parameter :: rhow = 1000.  ! density of water [kg m-3]
-    ! parameters from Gerber 1985 (units require radius in cm, see the variable rcm)
-    real, parameter :: c1=0.7674, c2=3.079, c3=2.573e-11, c4=-1.424
-    real :: sat, rrat, rcm
-    integer :: i, j, k
-    ! Adjust the particle size for relative humidity effects,
-    ! based on Gerber 1985
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
- 
-       sat = max(rh(i,j,k), tiny(1.0)) ! to avoid zero FPE
-       sat = min(0.995, sat)
-       rcm = radius_dry*100. ! radius in 'cm'
-       radius(i,j,k) = 0.01 * ( c1*rcm**c2 / (c3*rcm**c4-alog10(sat)) &
-                                + rcm*rcm*rcm )**(1./3.)
-       rrat = radius_dry/radius(i,j,k)
-       rrat = rrat*rrat*rrat
-       rhop(i,j,k) = rrat*rhop_dry + (1 - rrat)*rhow
- 
-      end do
-     end do
-    end do
-   end subroutine ParticleSwelling_Gerber
-!----------------------------------------------------------------------
-   
-   subroutine ParticleSwelling_Gerber_AmmoniumSulfate(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-    implicit none
-    integer, intent(in) :: i1, i2
-    integer, intent(in) :: j1, j2
-    integer, intent(in) :: km
-    real, dimension(i1:i2,j1:j2,km), intent(in)  :: rh
-    real, intent(in) :: radius_dry 
-    real, intent(in) :: rhop_dry
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: radius  ! radius  of the wet particle
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: rhop    ! density of the wet particle
-    ! local
-    real, parameter :: rhow = 1000.  ! density of water [kg m-3]
-    ! parameters for ammonium sulfate from Gerber 1985 (units require radius in cm, see the variable rcm)
-    real, parameter :: SU_c1=0.4809, SU_c2=3.082, SU_c3=3.110e-11, SU_c4=-1.428
-    real :: sat, rrat, rcm
-    integer :: i, j, k
-    ! Adjust the particle size for relative humidity effects,
-    ! based on Gerber parameterization for Ammonium Sulfate
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
- 
-       sat = max(rh(i,j,k), tiny(1.0)) ! to avoid zero FPE
-       sat = min(0.995, sat)
-       rcm = radius_dry*100. ! radius in 'cm'
-       radius(i,j,k) = 0.01 * ( SU_c1*rcm**SU_c2 / (SU_c3*rcm**SU_c4-alog10(sat)) &
-                                + rcm*rcm*rcm )**(1./3.)
-       rrat = radius_dry/radius(i,j,k)
-       rrat = rrat*rrat*rrat
-       rhop(i,j,k) = rrat*rhop_dry + (1 - rrat)*rhow
- 
-      end do
-     end do
-    end do
-   end subroutine ParticleSwelling_Gerber_AmmoniumSulfate
-!----------------------------------------------------------------------
-   
-   subroutine ParticleSwelling_PK2007(i1, i2, j1, j2, km, rh, radius_dry, rhop_dry, radius, rhop)
-    implicit none
-    integer, intent(in) :: i1, i2
-    integer, intent(in) :: j1, j2
-    integer, intent(in) :: km
-    real, dimension(i1:i2,j1:j2,km), intent(in)  :: rh
-    real, intent(in) :: radius_dry 
-    real, intent(in) :: rhop_dry
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: radius  ! radius  of the wet particle
-    real, dimension(i1:i2,j1:j2,km), intent(out) :: rhop    ! density of the wet particle
-    ! local
-    real, parameter :: rhow = 1000.  ! density of water [kg m-3]
-    real :: sat, rrat
-    integer :: i, j, k
- 
-    ! Adjust the particle size for relative humidity effects,
-    ! based on Petters and Kreidenweis (ACP2007) parameterization
-    do k = 1, km
-     do j = j1, j2
-      do i = i1, i2
-       sat = rh(i,j,k)
-       sat = min(0.99, sat)
-       radius(i,j,k) = radius_dry * (1+1.19*sat/(1-sat))**(1./3.)
-       rrat = radius_dry/radius(i,j,k)
-       rrat = rrat*rrat*rrat
-       rhop(i,j,k) = rrat*rhop_dry + (1 - rrat)*rhow
-     end do
-    end do
-   end do
-   end subroutine ParticleSwelling_PK2007
-
-!==================================================================================
-
-
-!BOP
 ! !IROUTINE: Chem_Settling2G
 
    subroutine Chem_Settling2Gorig (km, flag, bin, int_qa, grav, delp, &
@@ -1116,25 +353,27 @@ qa_temp = qa
    implicit none
 
 ! !INPUT PARAMETERS:
-   integer,    intent(in)    :: km
-   integer,    intent(in)    :: flag     ! flag to control particle swelling (see note)
-   integer,    intent(in)    :: bin      ! aerosol bin index
-   real,       intent(in)    :: grav     ! gravity
-   real,       intent(in)    :: cdt
-!   real, dimension(:), intent(in)  :: radiusInp, rhopInp
-   real, intent(in)  :: radiusInp, rhopInp
-   real, dimension(:,:,:), intent(inout) :: int_qa
-!   real, dimension(:,:,:), intent(in) :: tmpu, rhoa, rh, hghte, delp
-   real, pointer, dimension(:,:,:), intent(in) :: tmpu, rhoa, rh, hghte, delp
+   integer,    intent(in)    :: km     ! total model levels
+   integer,    intent(in)    :: flag   ! flag to control particle swelling (see note)
+   integer,    intent(in)    :: bin    ! aerosol bin index
+   real,       intent(in)    :: grav   ! gravity [m/sec^2]
+   real,       intent(in)    :: cdt    ! chemistry model time-step
+   real, intent(in)  :: radiusInp  ! particle radius [microns] 
+   real, intent(in)  :: rhopInp    ! soil class density [kg/m^3]
+   real, dimension(:,:,:), intent(inout) :: int_qa  ! aerosol [kg/kg]
+   real, pointer, dimension(:,:,:) :: tmpu  ! temperature [K]
+   real, pointer, dimension(:,:,:) ::rhoa   ! air density [kg/m^3]
+   real, pointer, dimension(:,:,:) ::rh     ! relative humidity [1]
+   real, pointer, dimension(:,:,:) ::hghte  ! geopotential height [m]
+   real, pointer, dimension(:,:,:) ::delp   ! pressure level thickness [Pa]   
    logical, optional, intent(in)    :: correctionMaring
 
 
 ! !OUTPUT PARAMETERS:
+   real, pointer, dimension(:,:,:), intent(inout) :: fluxout ! Mass lost by settling to surface [kg/(m^2 sec)]
 
-   real, pointer, dimension(:,:,:), intent(inout)  :: fluxout
-!   real, optional, dimension(:,:), intent(inout)  :: fluxout
-!   real, dimension(:,:,:,:), optional, intent(out)  :: vsettleOut
-   real, dimension(:,:,:), optional, intent(out)  :: vsettleOut
+!  Optionally output the settling velocity calculated
+   real, dimension(:,:,:), optional, intent(out)  :: vsettleOut !Layer fall speed [m/sec]
 
    integer, optional, intent(out)   :: rc
 
@@ -1434,17 +673,16 @@ qa_temp = qa
   implicit NONE
 
 ! !INPUT PARAMETERS:
+   real, intent(in) :: radius   ! Particle radius [m]
+   real, intent(in) :: rhop     ! Particle density [kg/m^3]
+   real, intent(in) :: rhoa     ! Layer air density [kg/m^3]
+   real, intent(in) :: tmpu     ! Layer temperature [K]
+   real, intent(in) :: grav     ! gravity [m/sec^2]
 
-   real, intent(in)    :: radius              ! Particle radius [m]
-   real, intent(in)    :: rhop                ! Particle density [kg m-3]
-   real, intent(in)    :: rhoa                ! Layer air density [kg m-3]
-   real, intent(in)    :: tmpu                ! Layer temperature [K]
-   real, intent(in)    :: grav                ! MAPL_GRAV
 ! !OUTPUT PARAMETERS:
-
-   real, intent(out)   :: diff_coef               ! Brownian diffusion 
-                                                  ! coefficient [m2 s-1]
-   real, intent(out)   :: vsettle                 ! Layer fall speed [m s-1]
+   real, intent(out)   :: diff_coef  ! Brownian diffusion 
+                                     ! coefficient [m2/sec]
+   real, intent(out)   :: vsettle    ! Layer fall speed [m s-1]
 
    character(len=*), parameter :: myname = 'Vsettle'
 
@@ -1469,8 +707,8 @@ qa_temp = qa
    real(kind=DP) :: bpm                   ! Cunningham slip correction factor
    real(kind=DP) :: rkn                   ! Knudsen number
    real(kind=DP) :: re, x, y              ! reynold's number and parameters
-   real, parameter :: kb = 1.3807e-23 ! Boltzmann constant [kg m2 s-1 K-1 mol-1]
-   real, parameter :: m_air = 4.8096e-26 ! Mass of <avg> air molecule [kg]
+   real, parameter :: kb = 1.3807e-23     ! Boltzmann constant [kg m2 s-1 K-1 mol-1]
+   real, parameter :: m_air = 4.8096e-26  ! Mass of <avg> air molecule [kg]
    real, parameter :: pi = 3.141529265
 
 !EOP
@@ -1570,7 +808,7 @@ qa_temp = qa
 
    integer         :: i1=1, i2, j1=1, j2
    integer         :: nSubSteps, ijl, dk
-   integer         :: i, j, k, iit, n
+   integer         :: i, j, k, iit
 
    real, allocatable    :: dz(:,:,:)
    real :: radius, rhop   ! particle radius and density passed to
@@ -1790,41 +1028,30 @@ qa_temp = qa
 ! !INPUT PARAMETERS:
    integer, intent(in) :: km                    ! total model levels
    real, pointer, dimension(:,:,:) :: tmpu      ! temperature [K]
-   real, pointer, dimension(:,:,:) :: rhoa      ! air density [kg m-3]
+   real, pointer, dimension(:,:,:) :: rhoa      ! air density [kg/m^3]
    real, pointer, dimension(:,:,:) :: hghte     ! top of layer geopotential height [m]
    real, pointer, dimension(:,:)   :: oro       ! orography flag
-   real, pointer, dimension(:,:)   :: ustar     ! friction speed [m s-1]
+   real, pointer, dimension(:,:)   :: ustar     ! friction speed [m/sec]
    real, pointer, dimension(:,:)   :: pblh      ! PBL height [m]
    real, pointer, dimension(:,:)   :: shflux    ! sfc. sens. heat flux [W m-2]
-
-! need to use pointers to maintain zero-diff... very strange
-!   real, dimension(:,:,:) :: tmpu      ! temperature [K]
-!   real, dimension(:,:,:) :: rhoa      ! air density [kg m-3]
-!   real, dimension(:,:,:) :: hghte     ! top of layer geopotential height [m]
-!   real, dimension(:,:)   :: oro       ! orography flag
-!   real, dimension(:,:)   :: ustar     ! friction speed [m s-1]
-!   real, dimension(:,:)   :: pblh      ! PBL height [m]
-!   real, dimension(:,:)   :: shflux    ! sfc. sens. heat flux [W m-2]
-
    real, intent(in)                :: von_karman ! Von Karman constant [unitless] 
-   real, intent(in)                :: cpd       
-   real, intent(in)                :: grav      ! gravity
+   real, intent(in)                :: cpd       ! thermodynamic constant, specific heat of something? 
+   real, intent(in)                :: grav      ! gravity [m/sec^2]
    real, pointer, dimension(:,:)   :: z0h       ! rough height, sens. heat [m]
-!   real, dimension(:,:)   :: z0h       ! rough height, sens. heat [m]
 
 ! !OUTPUT PARAMETERS:
-   real, intent(inout)        :: drydepf(:,:)     ! Deposition frequency [s-1]
+   real, intent(inout)        :: drydepf(:,:)     ! Deposition frequency [1/sec]
    integer, intent(out)          :: rc          ! Error return code:
 
 ! !OPTIONAL PARAMETERS:
 !  If these parameters are provided we compute a "resuspension" term as
 !  if the particles are lifted like dust
    real, optional                            :: radius    ! particle radius [m]
-   real, optional                            :: rhop      ! particle density [kg m-3]
-   real, pointer, dimension(:,:), optional   :: u10m      ! 10-m u-wind component [m s-1]
-   real, pointer, dimension(:,:), optional   :: v10m      ! 10-m v-wind component [m s-1]
-   real, pointer, dimension(:,:), optional   :: fraclake  ! fraction covered by water
-   real, pointer, dimension(:,:), optional   :: gwettop   ! fraction soil moisture
+   real, optional                            :: rhop      ! particle density [kg/m^3]
+   real, pointer, dimension(:,:), optional   :: u10m      ! 10-m u-wind component [m/sec]
+   real, pointer, dimension(:,:), optional   :: v10m      ! 10-m v-wind component [m/sec]
+   real, pointer, dimension(:,:), optional   :: fraclake  ! fraction covered by water [1]
+   real, pointer, dimension(:,:), optional   :: gwettop   ! fraction soil moisture [1]
 
 
 
@@ -1996,13 +1223,13 @@ qa_temp = qa
 
 ! !INPUT PARAMETERS:
    integer, intent(in) :: i1, i2, j1, j2
-   real, intent(in) :: von_karman
-   real, intent(in) :: cpd
-   real, intent(in) :: grav
+   real, intent(in) :: von_karman ! Von Karman constant [unitless] 
+   real, intent(in) :: cpd        ! thermodynamic constant, specific heat of something? 
+   real, intent(in) :: grav       ! gravity [m/sec^2]
    real, dimension(i1:i2,j1:j2)  :: t         ! temperature [K]
-   real, dimension(i1:i2,j1:j2)  :: rhoa      ! air density [kg m-3]
-   real, pointer, dimension(:,:) :: ustar     ! friction speed [m s-1]
-   real, pointer, dimension(:,:) :: shflux    ! sfc. sens. heat flux [W m-2]
+   real, dimension(i1:i2,j1:j2)  :: rhoa      ! air density [kg/m^3]
+   real, pointer, dimension(:,:) :: ustar     ! friction speed [m/sec]
+   real, pointer, dimension(:,:) :: shflux    ! sfc. sens. heat flux [W/m^2]
 
 ! !OUTPUT PARAMETERS
    real, dimension(i1:i2,j1:j2)  :: obk       ! Obukhov length [m]
@@ -2040,21 +1267,27 @@ qa_temp = qa
   implicit NONE
 
 ! !INPUT PARAMETERS:
-   integer, intent(in) :: km, n1, n2, bin_ind
-   real, intent(in)    :: cdt
+   integer, intent(in) :: km  ! total model levels
+   integer, intent(in) :: n1  ! total number of bins (probably can be removed)
+   integer, intent(in) :: n2  ! total number of bins (probably can be removed)
+   integer, intent(in) :: bin_ind ! bin index (usually the loop iteration)
+   real, intent(in)    :: cdt     ! chemistry model time-step [sec]
    character(len=*)    :: aero_type
    logical, intent(inout)  :: KIN ! true for aerosol
-   real, intent(in)    :: grav
+   real, intent(in)    :: grav    ! gravity [m/sec^2]
    real, intent(in)    :: fwet
-   real, dimension(:,:,:), intent(inout) :: aerosol  ! internal state aerosol
-   real, pointer, dimension(:,:,:)     :: ple, tmpu, rhoa
-   real, pointer, dimension(:,:,:)     :: pfllsan, pfilsan
-   real, pointer, dimension(:,:)       :: precc, precl
-   real, pointer, dimension(:,:,:)       :: fluxout  ! tracer loss flux [kg m-2 s-1]
+   real, dimension(:,:,:), intent(inout) :: aerosol  ! internal state aerosol [kg/kg]
+   real, pointer, dimension(:,:,:)  :: ple     ! pressure level thickness [Pa]
+   real, pointer, dimension(:,:,:)  :: tmpu    ! temperature [K]
+   real, pointer, dimension(:,:,:)  :: rhoa    ! moist air density [kg/m^3]
+   real, pointer, dimension(:,:,:)  :: pfllsan ! 3D flux of liquid nonconvective precipitation [kg/(m^2 sec)]
+   real, pointer, dimension(:,:,:)  :: pfilsan ! 3D flux of ice nonconvective precipitation [kg/(m^2 sec)]
+   real, pointer, dimension(:,:)    :: precc   ! surface convective rain flux [kg/(m^2 sec)]
+   real, pointer, dimension(:,:)    :: precl   ! Non-convective precipitation [kg/(m^2 sec)]
+   real, pointer, dimension(:,:,:)  :: fluxout ! tracer loss flux [kg m-2 s-1]
 
 ! !OUTPUT PARAMETERS:
    integer, intent(out)             :: rc          ! Error return code:
-!   real, pointer, dimension(:,:)       :: fluxout  ! tracer loss flux [kg m-2 s-1]
 
 ! !DESCRIPTION: Calculates the updated species concentration due to wet
 !               removal.  As written, intended to function for large
@@ -2528,15 +1761,14 @@ qa_temp = qa
    real, dimension(:,:,:,:), intent(inout) :: emissions
    real, dimension(:,:,:), intent(in) :: emissions_point
 
-   real, dimension(:), intent(in)   :: sfrac
-   integer, intent(in)  :: nPts
-   integer, intent(in) :: km
-   real, intent(in)  :: cdt
-   real, intent(in) :: grav
-   integer, intent(in) :: nbins
-   real, pointer, dimension(:,:,:) :: delp
-   real, pointer, dimension(:,:,:,:)  :: aero
-
+   real, dimension(:), intent(in)  :: sfrac ! source fraction [1]
+   integer, intent(in)             :: nPts  ! number of point emissions
+   integer, intent(in)             :: km    ! total model levels
+   real, intent(in)                :: cdt   ! chemistry model time-step [sec]
+   real, intent(in)                :: grav  ! gravity [m/sec^2]
+   integer, intent(in)             :: nbins ! number of aerosol size bins
+   real, pointer, dimension(:,:,:) :: delp  ! pressure thickness [Pa]
+   real, pointer, dimension(:,:,:,:)  :: aero ! aerosol [kg/kg]
 
 ! !OUTPUT PARAMETERS:
    integer, intent(out)             :: rc          ! Error return code:
@@ -2545,7 +1777,7 @@ qa_temp = qa
 !
 ! !REVISION HISTORY:
 !
-!  15May2020 - Sherman
+!  15May2020 - E.Sherman
 !
 ! !Local Variables
    integer :: n, kmin
@@ -2603,7 +1835,7 @@ qa_temp = qa
    real, pointer, dimension(:,:,:) :: tmpu     ! temperature [K]
    real, pointer, dimension(:,:,:) :: rhoa     ! air density [kg/m^3]
    real, pointer, dimension(:,:,:) :: delp     ! pressure thickness [Pa]
-   real, pointer, dimension(:,:,:) :: rh     ! 
+   real, pointer, dimension(:,:,:) :: rh       ! relative humidity [1] 
    real, pointer, dimension(:,:,:) :: u        ! east-west wind [m/s]
    real, pointer, dimension(:,:,:) :: v        ! north-south wind [m/s]
 
@@ -2644,13 +1876,12 @@ qa_temp = qa
 
 ! !Local Variables
    character(len=*), parameter :: myname = 'Aero_Compute_Diags'
-   integer :: i, j, k, n, ios, nch, idx
+   integer :: i, j, k, n, ios, nch
    integer :: i1 =1, i2, j1=1, j2
    real :: ilam550, ilam470, ilam870
    real :: tau, ssa
    real :: fPMfm(nbins)  ! fraction of bin with particles diameter < 1.0 um
    real :: fPM25(nbins)  ! fraction of bin with particles diameter < 2.5 um
-   character(len=255) :: qname
    logical :: do_angstrom
    real, dimension(:,:), allocatable :: tau470, tau870
 
@@ -2694,9 +1925,9 @@ qa_temp = qa
       ilam870 .ne. 0. .and. &
       ilam470 .ne. ilam870) do_angstrom = .true.
 
-   if( present(angstrom) .and. associated(angstrom) .and. do_angstrom ) then
+!   if( present(angstrom) .and. associated(angstrom) .and. do_angstrom ) then
       allocate(tau470(i1:i2,j1:j2), tau870(i1:i2,j1:j2))
-   end if
+!   end if
 
 !print*,'SS2G ilam550 = ', ilam550
 !print*,'SS2G ilam470 = ', ilam470
@@ -2915,7 +2146,7 @@ qa_temp = qa
               rh(i,j,k), tau=tau)
           tau470(i,j) = tau470(i,j) + tau
 
-          call Chem_MieQuery(mie_table, idx, ilam870, &
+          call Chem_MieQuery(mie_table, n, ilam870, &
               aerosol(i,j,k,n)*delp(i,j,k)/grav, &
               rh(i,j,k), tau=tau)
           tau870(i,j) = tau870(i,j) + tau
@@ -3003,9 +2234,9 @@ qa_temp = qa
    real, dimension(:,:), intent(inout) :: deep_lakes_mask      
 
 ! !INPUT PARAMETERS:
-   real, pointer, dimension(:,:)        :: lats
-   real, pointer, dimension(:,:)        :: lons          
-   real                                :: radToDeg
+   real, pointer, dimension(:,:)   :: lats ! latitude [radians]
+   real, pointer, dimension(:,:)   :: lons ! longtitude [radians]
+   real                            :: radToDeg
           
 ! !OUTPUT PARAMETERS:
    integer, optional, intent(out) :: rc
@@ -3236,16 +2467,13 @@ qa_temp = qa
 
 ! !INPUT PARAMETERS:
 
-   real, intent(in)                  :: rLow, rUp   ! Dry particle bin edge radii [um]
-   real, intent(in)                  :: u10m(:,:)   ! 10-meter eastward wind [m s-1]
-   real, intent(in)                  :: v10m(:,:)   ! 10-m northward wind [m s-1]
-   real, target, intent(in)        :: ustar(:,:)  ! friction velocity [m s-1]
-   integer, intent(in)               :: method      ! Algorithm to use
+   real, intent(in)             :: rLow, rUp   ! Dry particle bin edge radii [um]
+   real, intent(in)             :: u10m(:,:)   ! 10-meter eastward wind [m s-1]
+   real, intent(in)             :: v10m(:,:)   ! 10-m northward wind [m s-1]
+   real, target, intent(in)     :: ustar(:,:)  ! friction velocity [m s-1]
+   integer, intent(in)          :: method      ! Algorithm to use
 
 ! !INOUTPUT PARAMETERS:
-
-!   real, pointer, dimension(:,:) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
-!   real, pointer, dimension(:,:) :: nemissions      ! Number Emissions Flux [# m-2 s-1]
    real, dimension(:,:), intent(inout) :: memissions      ! Mass Emissions Flux [kg m-2 s-1]
    real, dimension(:,:), intent(inout) :: nemissions      ! Number Emissions Flux [# m-2 s-1]
 
@@ -3372,7 +2600,7 @@ qa_temp = qa
 
 !BOP
 !
-! !IROUTINE: weibullDistribution - Compute the wet radius of sea salt particle
+! !IROUTINE: wetRadius - Compute the wet radius of sea salt particle
 !
 ! !INTERFACE:
    subroutine wetRadius (radius, rhop, rh, flag, radius_wet, rhop_wet, rc)
@@ -3472,10 +2700,10 @@ qa_temp = qa
    real, dimension(:,:), intent(in)  :: rh    ! relative humidity [0-1]
    real, dimension(:,:), intent(in)  :: dz    ! surface layer height [m]
    real, dimension(:,:), intent(in)  :: ustar ! surface velocity scale [m s-1]
-   real, dimension(:,:), intent(in)  :: airdens
+   real, dimension(:,:), intent(in)  :: airdens ! air density [kg/m^3]s
    real, dimension(:,:), intent(in)  :: t  ! temperature [k]
-   real, intent(in)  :: grav    ! gravity
-   real, intent(in)  :: karman  ! Von Karman constant
+   real, intent(in)  :: grav    ! gravity [m/sec^2]
+   real, intent(in)  :: karman  ! Von Karman constant [unitless]
 
 
 ! !INOUTPUT PARAMETERS:
@@ -3544,39 +2772,41 @@ qa_temp = qa
 
 ! !INPUT PARAMETERS:
    type(Chem_Mie),  intent(in) :: mie_table        ! mie table
-   integer, intent(in) :: km, nbins
-   real, intent(in)    :: cdt, grav
-   character(len=2), intent(in)  :: prefix
+   integer, intent(in) :: km     ! total model levels
+   integer, intent(in) :: nbins  ! number of aerosol size bins
+   real, intent(in)    :: cdt    ! chemistry model time-step [sec]
+   real, intent(in)    :: grav   ! gravity [m/sec^2]
+   character(len=2), intent(in)  :: prefix ! varaible name prefix
    real, intent(in)    :: ratPOM
    real, intent(in)    :: fTerpene
-   real, dimension(:), intent(in)  :: aviation_layers
-   real, pointer, dimension(:,:)    :: pblh
-   real, pointer, dimension(:,:,:)  :: tmpu
-   real, pointer, dimension(:,:,:)  :: rhoa
-   real, pointer, dimension(:,:,:)  :: rh
-   real, pointer, dimension(:,:,:)  :: delp
-   real, dimension(:,:), intent(in) :: aviation_cds_src
-   real, dimension(:,:), intent(in) :: aviation_crs_src
-   real, dimension(:,:), intent(in) :: aviation_lto_src
-   real, dimension(:,:), intent(in) :: biomass_src
-   real, dimension(:,:), intent(in) :: terpene_src
-   real, dimension(:,:), intent(in) :: eocant1_src
-   real, dimension(:,:), intent(in) :: eocant2_src
-   real, dimension(:,:), intent(in) :: oc_ship_src
-   real, dimension(:,:), intent(in) :: biofuel_src
+   real, dimension(:), intent(in)  :: aviation_layers ! Heights [m] of LTO, CDS and CRS aviation emissions layers
+   real, pointer, dimension(:,:)    :: pblh  ! PBL height [m]
+   real, pointer, dimension(:,:,:)  :: tmpu  ! temperature [K]
+   real, pointer, dimension(:,:,:)  :: rhoa  ! air density [kg m-3]
+   real, pointer, dimension(:,:,:)  :: rh    ! relative humidity [1]
+   real, pointer, dimension(:,:,:)  :: delp  ! pressure level thickness [Pa]
+   real, dimension(:,:), intent(in) :: aviation_cds_src ! Climb/Descent aircraft fuel emission [1]
+   real, dimension(:,:), intent(in) :: aviation_crs_src ! Cruise aircraft fuel emission [1]
+   real, dimension(:,:), intent(in) :: aviation_lto_src ! Landing/Take-off aircraft fuel emission [1]
+   real, dimension(:,:), intent(in) :: biomass_src  
+   real, dimension(:,:), intent(in) :: terpene_src 
+   real, dimension(:,:), intent(in) :: eocant1_src  ! anthropogenic emissions
+   real, dimension(:,:), intent(in) :: eocant2_src  ! anthropogenic emissions
+   real, dimension(:,:), intent(in) :: oc_ship_src  ! ship emissions
+   real, dimension(:,:), intent(in) :: biofuel_src  ! biofuel emissions
    real, intent(in) :: fHydrophobic
 
 ! !OUTPUT PARAMETERS:
    real, dimension(:,:,:), intent(inout) :: aerosolPhobic
    real, dimension(:,:,:), intent(inout) :: aerosolPhilic
-   real, pointer, dimension(:,:,:)  :: OC_emis ! OC emissions, kg/m2/s
-   real, pointer, dimension(:,:)  :: OC_emisAN      ! OC emissions, kg/m2/s
-   real, pointer, dimension(:,:)  :: OC_emisBB      ! OC emissions, kg/m2/s
-   real, pointer, dimension(:,:)  :: OC_emisBF      ! OC emissions, kg/m2/s
-   real, pointer, dimension(:,:)  :: OC_emisBG      ! OC emissions, kg/m2/s
-   integer, optional, intent(out)             :: rc          ! Error return code:
-                                                   !  0 - all is well
-                                                   !  1 - 
+   real, pointer, dimension(:,:,:)  :: OC_emis  ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisAN  ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisBB  ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisBF  ! OC emissions, kg/m2/s
+   real, pointer, dimension(:,:)  :: OC_emisBG  ! OC emissions, kg/m2/s
+   integer, optional, intent(out) :: rc         ! Error return code:
+                                                !  0 - all is well
+                                                !  1 - 
    character(len=*), parameter :: myname = 'CAEmission'
 
 ! !DESCRIPTION: Updates the OC concentration with emissions every timestep
@@ -3585,12 +2815,12 @@ qa_temp = qa
 !
 !  06Nov2003, Colarco
 !  Based on Ginoux
-!
+!    June2020 E.Sherman - moved to process library
 !EOP
 !-------------------------------------------------------------------------
 
 ! !Local Variables
-   integer  ::  i, j, k, m, n, ios, ijl, ii
+   integer  ::  i, j, k, n, ios, ijl
    integer  ::  n1, n2
    integer  :: i1=1, i2, j1=1, j2
 !  pressure at 100m, 500m, & PBLH
@@ -3620,7 +2850,6 @@ qa_temp = qa
    real, parameter                       :: max_bb_exttau = 30.0
 
 !  Indices for point emissions
-   integer, pointer, dimension(:)  :: iPoint, jPoint
    real, dimension(km)          :: point_column_emissions
 
 !  Source function terms for SOA from Anthropogenic VOCs
@@ -4066,9 +3295,9 @@ K_LOOP: do k = km, 1, -1
    implicit NONE
 
 ! !INPUT PARAMETERS:
-   integer, intent(in)   :: km    ! model level 
-   real, intent(in)      :: cdt   
-   real, intent(in)      ::  grav ! [m -s^2]
+   integer, intent(in)   :: km   ! total model level 
+   real, intent(in)      :: cdt  ! chemistry model time-step [sec] 
+   real, intent(in)      :: grav ! [m/sec^2]
    real, dimension(:,:,:), intent(in)  :: delp  ! pressure thickness [Pa]
 
 ! !INOUTPUT PARAMETERS:
@@ -4420,632 +3649,6 @@ K_LOOP: do k = km, 1, -1
    end function sktrs_sslt
 
 !==================================================================================
-!BOP
-! !IROUTINE: GetVolcContinuous
-
-   subroutine GetVolcContinuous( nVolcC, vLatP, vLonP, vElevP, vCloudP, vSO2P, rc )
-
-! !USES:
-   implicit NONE
-
-! !INPUT PARAMETERS:
-   real, pointer, dimension(:), intent(inout)  :: vLatP, vLonP, vElevP, vCloudP, vSO2P
-   integer, intent(inout)                      :: nVolcC
-
-! !OUTPUT PARAMETERS:
-   integer, optional, intent(out) :: rc                   ! Error return code:
-
-! !DESCRIPTION: Data for outgassing volcanos provided by Thomas Diehl.  Data table is
-!           Mg SO2 day-1 and I convert to kg SO2 s-1 needed in emissions.  Assumption
-!           is continuous emissions throughout day. What is returned is the number of 
-!           volcanoes and an array of locations, elevations, and SO2 amounts.
-!
-! !REVISION HISTORY:
-! 10July2020 E.Sherman - Refactored original SulfateUpdateEmissions. Only uses intrinsic Fortran.
-!
-
-! !Local Variables
-   integer  :: it
-!  database parameters and data
-   integer, parameter :: nvolc = 47
-   real    :: vso2(nvolc), vlon(nvolc), vlat(nvolc), &
-              velev(nvolc), celev(nvolc)
-
-!EOP
-!-------------------------------------------------------------------------
-!  Begin...
-
-!  If previous instance of volcano point data tables exist, deallocate it
-!  to get the correct number of elements
-!   if(associated(vLatP))    deallocate(vLatP, stat=ios)
-!print*,'GetVolcCont stat = ',ios
-!   if(associated(vLonP))    deallocate(vLonP)
-!   if(associated(vSO2P))    deallocate(vSO2P)
-!   if(associated(vElevP))   deallocate(vElevP)
-!   if(associated(vCloudP))  deallocate(vCloudP)
-
-   data vso2 / &
-        730,           44,         4000,           21,           16, &
-        520,          920,          690,          480,         3300, &
-        900,           75,           58,          140,           14, &
-        370,          530,          570,         1900,          130, &
-         76,          140,          370,          270,           56, &
-         68,            3,           48,           22,         1027, &
-        140,          230,          640,          510,           20, &
-         20,          590,           84,           73,          790, &
-        110,          500,         1900,          650,         2400, &
-          3,           79 &
-     /
-   data velev / &
-        926,          500,         3350,          613,         2890, &
-        321,         1807,         1330,         2334,         1750, &
-        361,         2084,         3432,         2911,         2329, &
-       1565,         2462,          717,         1117,         1359, &
-       1592,         1788,         2560,          758,          731, &
-       1124,         1860,         1252,         3053,         1222, &
-       4100,         3772,         3763,         2552,         2365, &
-       1950,         1745,         1010,         1258,          635, &
-       1657,         2708,         5321,         4276,         5592, &
-       1920,         3794 &
-    /
-   data celev / &
-        926,          500,         3350,          613,         2890, &
-        321,         1807,         1330,         2334,         1750, &
-        361,         2084,         3432,         2911,         2329, &
-       1565,         2462,          717,         1117,         1359, &
-       1592,         1788,         2560,          758,          731, &
-       1124,         1860,         1252,         3053,         1222, &
-       4100,         3772,         3763,         2552,         2365, &
-       1950,         1745,         1010,         1258,          635, &
-       1657,         2708,         5321,         4276,         5592, &
-       1920,         3794 &
-    /
-   data vlon / &
-     15.2130,      14.9620,      15.0040,      40.6700,      35.9020, &
-    177.1800,     145.0610,     148.4200,     151.3300,     155.1950, &
-    169.4250,     107.6000,     109.2080,     110.4420,     112.9500, &
-    124.0500,     123.6850,     130.3080,     130.6570,     130.2940, &
-    131.1060,     131.2510,     138.5260,     139.3980,     140.8430, &
-    148.8430,    -155.3610,    -153.4300,    -153.0900,    -155.2920, &
-   -103.6200,     -91.5520,     -90.8800,     -90.6010,     -89.6300, &
-    -89.6330,     -87.0040,     -86.8450,     -86.5400,     -86.1610, &
-    -84.7030,     -84.2330,     -75.3220,     -77.3700,     -67.7300, &
-    -16.7200,     167.1700 &
-     /
-   data vlat / &
-     38.7890,      38.4040,      37.7340,      13.6000,      -2.7510, &
-    -37.5200,      -4.1000,      -5.5250,      -5.0500,      -6.1400, &
-    -19.5200,      -6.7700,      -7.2420,      -7.5420,      -7.9420, &
-     12.7700,      13.2570,      30.7890,      31.5850,      32.7570, &
-     32.8810,      33.0830,      36.4030,      34.7210,      42.5410, &
-     45.3870,      58.1720,      59.3630,      60.0320,      19.4250, &
-     19.5140,      14.7560,      14.4730,      14.3810,      13.8530, &
-     13.8130,      12.7020,      12.6020,      12.4220,      11.9840, &
-     10.4630,      10.2000,       4.8950,       1.2200,     -23.3700, &
-     64.6500,     -77.5300 &
-     /
-
-!   Allocate space for the volcanoes
-    allocate(vLatP(nvolc), vLonP(nvolc), &
-             vSO2P(nvolc), vElevP(nvolc), &
-             vCloudP(nvolc))
-
-
-!   Accumulate the volcanoes
-    do it = 1, nvolc
-       vLatP(it) = vlat(it)
-       vLonP(it) = vlon(it)
-       vSO2P(it) = vso2(it) * 1000. / 86400.  ! to kg SO2/sec
-       vElevP(it) = velev(it)
-       vCloudP(it) = celev(it)
-    enddo
-    nVolcC = nvolc
-
-   rc = 0
-
-   end subroutine GetVolcContinuous
-
-!==================================================================================
-!BOP
-! !IROUTINE: GetVolcContinuous
-
-   subroutine GetVolcExplosive( nymd, nVolcExp, vLatP, vLonP, vElevP, vCloudP, vSO2P, rc )
-
-! !USES:
-   implicit NONE
-
-! !INPUT PARAMETERS:
-   real, pointer, dimension(:), intent(inout)  :: vLatP, vLonP, vElevP, vCloudP, vSO2P
-   integer, intent(inout)                      :: nVolcExp
-   integer, intent(in)                         :: nymd
-
-! !OUTPUT PARAMETERS:
-   integer, optional, intent(out) :: rc                   ! Error return code:
-
-! !DESCRIPTION: Data for outgassing volcanos provided by Thomas Diehl.  Data table is
-!           Mg SO2 day-1 and I convert to kg SO2 s-1 needed in emissions.  Assumption
-!           is continuous emissions throughout day. What is returned is the number of 
-!           volcanoes and an array of locations, elevations, and SO2 amounts.
-!
-! !REVISION HISTORY:
-! 10July2020 E.Sherman - Refactored original SulfateUpdateEmissions. Only uses intrinsic Fortran.
-!
-
-! !Local Variables
-   integer  :: it, nv
-!  database parameters and data
-   integer, parameter :: nvolc = 349
-   integer :: startday(nvolc), endday(nvolc)
-   real    :: so2exp(nvolc), vlon(nvolc), vlat(nvolc), &
-             velev(nvolc), celev(nvolc)
-
-
-!EOP
-!-------------------------------------------------------------------------
-!  Begin...
-
-  data startday / &
-    20051231, 20051231, 20051231, 20061231, 20001015, 20061231,   &
-    20000301, 20021019, 20010717, 20061231, 20010905, 20001220,   &
-    20050619, 20061231, 20020615, 19990815, 20000425, 20010525,   &
-    19990815, 19991109, 19990719, 20000315, 20001214, 19990915,   &
-    19990224, 19990815, 19990712, 19990225, 19990418, 19990915,   &
-    20031028, 20000615, 19990329, 19990402, 19990701, 19990417,   &
-    19990412, 19990915, 19990421, 19990527, 19990915, 20000615,   &
-    19990514, 20001209, 20000415, 19990915, 19990630, 20000319,   &
-    19990628, 19991023, 19990720, 20010729, 19990807, 20061231,   &
-    19991115, 19991020, 19991116, 20010805, 20000302, 19991229,   &
-    20000315, 20000127, 20000210, 20000208, 20000214, 20000304,   &
-    20000224, 20000226, 20000229, 20000306, 20000905, 20000403,   &
-    20000326, 20000518, 20010915, 20001029, 20010818, 20030831,   &
-    20010215, 20000610, 20001030, 20000604, 20001113, 20000818,   &
-    20001018, 20001015, 20000831, 20001104, 20000721, 20000922,   &
-    20010705, 20010115, 20000820, 20000823, 20000827, 20000904,   &
-    20000910, 20001108, 20000926, 20061231, 20000930, 20001101,   &
-    20010721, 20010416, 20001129, 20001130, 20010115, 20001215,   &
-    20001218, 20001222, 20040705, 20010428, 20010808, 20021124,   &
-    20010429, 20010218, 20010302, 20010219, 20010219, 20010415,   &
-    20010405, 20010404, 20010605, 20010425, 20010429, 20031122,   &
-    20010501, 20010503, 20011209, 20020827, 20011003, 20010619,   &
-    20010707, 20010809, 20010915, 20010809, 20010730, 20030712,   &
-    20010806, 20061231, 20010828, 20011115, 20011019, 20011115,   &
-    20011005, 20061231, 20011031, 20061231, 20011126, 20020106,   &
-    20021026, 20061231, 20020116, 20020521, 20020116, 20020117,   &
-    20020203, 20020422, 20020515, 20020315, 20020609, 20040415,   &
-    20020715, 20021006, 20030409, 20021216, 20020617, 20020607,   &
-    20020825, 20021115, 20020725, 20020802, 20020815, 20020802,   &
-    20020915, 20020820, 20021103, 20021015, 20020925, 20020926,   &
-    20020929, 20040217, 20021106, 20021011, 20021207, 20021012,   &
-    20021026, 20021027, 20021030, 20021103, 20021103, 20021120,   &
-    20030128, 20021202, 20021112, 20021114, 20021219, 20021116,   &
-    20021118, 20021203, 20030110, 20021128, 20021228, 20030401,   &
-    20030101, 20040408, 20030228, 20030418, 20031015, 20030528,   &
-    20030723, 20031109, 20030514, 20030416, 20031010, 20030417,   &
-    20030703, 20030506, 20030510, 20030513, 20030523, 20030523,   &
-    20040325, 20030602, 20061231, 20040110, 20030901, 20030712,   &
-    20030608, 20030609, 20040614, 20030616, 20030723, 20030714,   &
-    20030715, 20031008, 20030801, 20031002, 20030915, 20030901,   &
-    20030904, 20030912, 20031115, 20031011, 20040328, 20031209,   &
-    20040114, 20050215, 20040127, 20040205, 20040214, 20040224,   &
-    20040915, 20040502, 20040925, 20050805, 20040414, 20050405,   &
-    20041008, 20041003, 20040528, 20050222, 20040517, 20040526,   &
-    20040607, 20040815, 20040912, 20040608, 20040609, 20040624,   &
-    20041024, 20040624, 20040916, 20040704, 20050207, 20050911,   &
-    20040730, 20040805, 20061231, 20040914, 20050315, 20040915,   &
-    20040915, 20041209, 20041005, 20061231, 20041212, 20061231,   &
-    20041110, 20041104, 20061231, 20041111, 20041115, 20041123,   &
-    20041125, 20041225, 20041126, 20041127, 20041219, 20041209,   &
-    20041213, 20041227, 20041220, 20050127, 20050214, 20061231,   &
-    20050407, 20061231, 20050525, 20050128, 20061231, 20050216,   &
-    20050331, 20050227, 20050225, 20050223, 20050407, 20050701,   &
-    20050406, 20050903, 20050718, 20050518, 20050414, 20061231,   &
-    20050418, 20061231, 20050718, 20050504, 20050529, 20061231,   &
-    20050616, 20051007, 20050815, 20051112, 20051104, 20050929,   &
-    20051001, 20051005, 20061231, 20051117, 20051030, 20061231,   &
-    20051208, 20061231, 20061231, 20051201, 20061231, 20051222,   &
-    20061231  &
-    /
-  data endday / &
-    20051231, 20051231, 20051231, 20061231, 20001015, 20061231,   &
-    20000301, 20021019, 20010717, 20061231, 20010905, 20001220,   &
-    20050619, 20061231, 20020615, 19990815, 20000425, 20010525,   &
-    19990815, 19991109, 19990719, 20000315, 20001214, 19990915,   &
-    19990224, 19990815, 19990712, 19990225, 19990418, 19990915,   &
-    20031028, 20000615, 19990329, 19990402, 19990701, 19990417,   &
-    19990412, 19990915, 19990421, 19990527, 19990915, 20000615,   &
-    19990514, 20001209, 20000415, 19990915, 19990630, 20000319,   &
-    19990628, 19991023, 19990720, 20010729, 19990807, 20061231,   &
-    19991115, 19991020, 19991116, 20010805, 20000302, 19991229,   &
-    20000315, 20000127, 20000210, 20000208, 20000214, 20000304,   &
-    20000224, 20000226, 20000229, 20000306, 20000905, 20000403,   &
-    20000326, 20000518, 20010915, 20001029, 20010818, 20030831,   &
-    20010215, 20000610, 20001030, 20000604, 20001113, 20000818,   &
-    20001018, 20001015, 20000831, 20001104, 20000721, 20000922,   &
-    20010705, 20010115, 20000820, 20000823, 20000827, 20000904,   &
-    20000910, 20001108, 20000926, 20061231, 20000930, 20001101,   &
-    20010721, 20010416, 20001129, 20001130, 20010115, 20001215,   &
-    20001218, 20001222, 20040705, 20010428, 20010808, 20021124,   &
-    20010429, 20010218, 20010302, 20010219, 20010219, 20010415,   &
-    20010405, 20010404, 20010605, 20010425, 20010429, 20031122,   &
-    20010501, 20010503, 20011209, 20020827, 20011003, 20010619,   &
-    20010707, 20010809, 20010915, 20010809, 20010730, 20030712,   &
-    20010806, 20061231, 20010828, 20011115, 20011019, 20011115,   &
-    20011005, 20061231, 20011031, 20061231, 20011126, 20020106,   &
-    20021026, 20061231, 20020116, 20020521, 20020116, 20020117,   &
-    20020203, 20020422, 20020515, 20020315, 20020609, 20040415,   &
-    20020715, 20021006, 20030409, 20021216, 20020617, 20020607,   &
-    20020825, 20021115, 20020725, 20020802, 20020815, 20020802,   &
-    20020915, 20020820, 20021103, 20021015, 20020925, 20020926,   &
-    20020929, 20040217, 20021106, 20021011, 20021207, 20021012,   &
-    20021026, 20021027, 20021030, 20021103, 20021103, 20021120,   &
-    20030128, 20021202, 20021112, 20021114, 20021219, 20021116,   &
-    20021118, 20021203, 20030110, 20021128, 20021228, 20030401,   &
-    20030101, 20040408, 20030228, 20030418, 20031015, 20030528,   &
-    20030723, 20031109, 20030514, 20030416, 20031010, 20030417,   &
-    20030703, 20030506, 20030510, 20030513, 20030523, 20030523,   &
-    20040325, 20030602, 20061231, 20040110, 20030901, 20030712,   &
-    20030608, 20030609, 20040614, 20030616, 20030723, 20030714,   &
-    20030715, 20031008, 20030801, 20031002, 20030915, 20030901,   &
-    20030904, 20030912, 20031115, 20031011, 20040328, 20031209,   &
-    20040114, 20050215, 20040127, 20040205, 20040214, 20040224,   &
-    20040915, 20040502, 20040925, 20050805, 20040414, 20050405,   &
-    20041008, 20041003, 20040528, 20050222, 20040517, 20040526,   &
-    20040607, 20040815, 20040912, 20040608, 20040609, 20040624,   &
-    20041024, 20040624, 20040916, 20040704, 20050207, 20050911,   &
-    20040730, 20040805, 20061231, 20040914, 20050315, 20040915,   &
-    20040915, 20041209, 20041005, 20061231, 20041212, 20061231,   &
-    20041110, 20041104, 20061231, 20041111, 20041115, 20041123,   &
-    20041125, 20041225, 20041126, 20041127, 20041219, 20041209,   &
-    20041213, 20041227, 20041220, 20050127, 20050214, 20061231,   &
-    20050407, 20061231, 20050525, 20050128, 20061231, 20050216,   &
-    20050331, 20050227, 20050225, 20050223, 20050407, 20050701,   &
-    20050406, 20050903, 20050718, 20050518, 20050414, 20061231,   &
-    20050418, 20061231, 20050718, 20050504, 20050529, 20061231,   &
-    20050616, 20051007, 20050815, 20051112, 20051104, 20050929,   &
-    20051001, 20051005, 20061231, 20051117, 20051030, 20061231,   &
-    20051208, 20061231, 20061231, 20051201, 20061231, 20051222,   &
-    20061231  &
-    /
-  data so2exp / &
-       0.004,    0.004,    0.008,    0.001,    0.011,    0.022,   &
-       0.031,    0.004,    0.044,    0.042,    0.008,    0.063,   &
-       0.001,    0.035,    0.001,    0.036,    0.177,    0.112,   &
-       0.047,    0.012,    0.038,    0.001,    0.041,    0.062,   &
-       0.044,    0.089,    0.108,   17.000,    1.513,    0.092,   &
-       0.068,    0.005,   30.952,   30.952,    0.183,   30.952,   &
-       1.700,    0.110,   21.000,    1.513,    0.016,    0.041,   &
-     190.000,    0.030,    0.051,    0.002,    0.141,    0.423,   &
-       2.250,    1.959,   16.000,    0.038,    5.667,    0.223,   &
-       0.006,    2.250,    3.000,    0.006,    0.022,    0.750,   &
-       0.279,   43.333,   43.333,    2.833,    9.167,    9.500,   &
-      17.000,  250.000,  250.000,  250.000,    0.628,    0.708,   &
-       1.308,    0.038,    0.032,    0.086,    0.036,    0.095,   &
-       2.434,   46.429,    0.015,    8.500,    1.319,    1.250,   &
-       0.155,    0.024,    0.362,    0.155,    8.500,    0.298,   &
-       0.007,    0.002,   11.500,    1.250,    0.375,   20.583,   &
-       0.225,    0.034,    1.250,    0.001,   17.143,   17.143,   &
-       0.008,    0.014,    0.354,    9.000,    0.354,   23.000,   &
-       0.041,   10.000,    0.089,    0.041,    0.540,    0.025,   &
-       1.065,    8.219,   28.000,    8.219,   17.000,    8.219,   &
-      11.017,   21.111,    0.315,    0.750,    4.000,    0.041,   &
-      15.000,    1.065,    0.011,    0.036,    0.002,    9.583,   &
-       7.037,    0.708,    0.039,    6.389,   33.000,    0.038,   &
-       3.000,    0.006,   17.000,    0.004,    0.078,    0.043,   &
-       2.250,    0.001,    2.250,    0.061,    2.250,    0.607,   &
-       0.007,    0.009,   15.833,    0.891,    2.250,   30.000,   &
-      10.556,    0.193,    0.177,    2.250,    0.274,    0.003,   &
-       0.258,    0.385,    0.053,    0.011,    0.118,    2.250,   &
-       0.236,    0.002,   12.264,   90.000,    0.125,   17.000,   &
-      12.264,    1.889,    0.230,    0.102,  120.000,  120.000,   &
-     120.000,    0.034,    8.387,    2.250,    0.039,    2.250,   &
-       1.211,    8.500,   10.000,   10.000,   10.000,   15.278,   &
-       1.211,    0.385,    0.436,    5.000,    0.436,   36.111,   &
-      36.111,   36.111,    8.696,    2.250,    5.000,    0.170,   &
-       1.700,    0.036,    0.385,    0.031,    0.070,   11.236,   &
-       0.016,    0.009,    0.288,    2.125,    0.094,    2.250,   &
-       0.221,    0.250,    1.797,   38.000,    1.797,    0.321,   &
-       0.007,   36.000,    0.385,    0.841,    0.179,    1.797,   &
-      12.778,   12.778,    0.108,   12.778,    0.061,    3.400,   &
-      33.333,    0.038,   16.429,    0.266,    0.125,   16.000,   &
-       0.095,  115.000,    0.005,    0.062,    0.015,    2.250,   &
-       2.250,    0.288,    2.125,    0.281,    0.750,    1.889,   &
-       0.080,    1.885,    0.083,    0.035,    5.667,    0.225,   &
-       0.096,    0.258,   52.581,    0.001,    1.125,   17.000,   &
-      52.581,    0.227,    0.022,    1.000,   30.000,    1.000,   &
-       0.136,  190.000,    0.224,    2.250,    0.556,    0.005,   &
-      20.000,   17.000,    0.003,    0.170,    0.012,   17.000,   &
-     100.000,    0.170,    3.400,    0.021,    1.620,    0.021,   &
-       0.751,  625.000,    0.022,    8.000,    0.450,    0.751,   &
-      55.000,    0.531,    0.751,    7.000,    0.751,    0.225,   &
-      15.000,    1.620,   40.000,    0.751,    0.405,    0.024,   &
-       0.218,    0.024,    0.140,  140.000,    0.751,    0.895,   &
-       0.279,    0.102,    4.444,    2.250,    0.083,    0.175,   &
-      70.000,    0.225,    0.173,    0.061,    2.250,    0.027,   &
-       5.667,    0.027,    0.187,  115.000,   38.235,    0.029,   &
-       2.250,    0.177,    0.708,    0.157,    0.038,   28.750,   &
-     115.000,    0.062,    0.088,    0.515,  277.778,    0.039,   &
-       7.667,    0.042,    1.625,    5.667,    0.006,    0.321,   &
-       0.006  &
-    /
-  data velev / &
-        1185,     5230,     3676,     3794,     1330,     1222,   &
-        2552,     2968,     3350,     2960,      688,     1536,   &
-        1334,     3850,     2847,      704,     1413,     4784,   &
-         321,     1807,      915,     1023,     5426,     1325,   &
-         799,      813,     4835,     2882,     2857,     3800,   &
-        1784,     1717,     4095,     4095,     1703,     4095,   &
-        3283,     2891,     2857,     2857,     3428,     1745,   &
-        4317,     3763,     1061,     1018,      799,     2462,   &
-        2799,     2631,      915,      915,      728,     3283,   &
-        5023,     2334,     5023,     5023,      635,     1700,   &
-         704,     3058,     3058,     4835,     3058,     2631,   &
-         799,     1491,     1491,     1491,      321,     2891,   &
-        2882,     4276,      737,     5967,     1580,     1784,   &
-        2745,     4095,      813,     1807,     2631,      815,   &
-        2997,     3428,     2462,     2882,     5592,     4835,   &
-        2552,      990,      815,      815,     1952,      815,   &
-        2799,     1131,      815,     1750,     2334,     2334,   &
-         704,      851,     2329,     2329,     2329,     5426,   &
-        5426,     5426,      799,     5426,     2462,      815,   &
-        2334,     1730,     3058,     1730,      321,     1730,   &
-        3058,     2631,     2891,      635,     5426,     5426,   &
-        2334,     2334,     1745,     3800,     1325,     1413,   &
-        2631,     3350,      813,     2882,      915,      915,   &
-        5023,     5023,     2334,      990,      161,     2597,   &
-        2741,     1370,     2552,     1536,     4784,     2882,   &
-        3350,     3763,     2631,     1807,     2130,     3470,   &
-        3470,     1816,     1580,      833,     4835,     4784,   &
-         704,     3470,     1330,     1745,     2552,     4276,   &
-        3332,      990,     3058,     3058,     2799,      140,   &
-        3058,      394,     2334,     2507,      725,      725,   &
-         725,      688,     3470,     2462,     4784,     1703,   &
-        3350,     5592,     3350,     3350,     3350,     3562,   &
-        3350,     3470,     2665,     2665,     2665,     2631,   &
-        2631,     2631,     3562,     2435,     3470,     1580,   &
-        2882,     4835,     3470,     2568,      704,     3470,   &
-        2435,     3350,     2462,     3125,     2334,     4784,   &
-        1816,      990,      790,      790,      790,     1807,   &
-        2847,      790,     3470,     2631,     1703,      790,   &
-        1413,     1413,     2745,     1413,     1745,     1592,   &
-         915,      915,     2882,     1715,     3212,     1784,   &
-        1784,     1580,      635,     2462,     1807,     5592,   &
-        1592,     2882,     1330,     1703,     3350,      833,   &
-        2507,      915,      704,     1784,     2334,      790,   &
-        3332,     2631,     3058,     1325,     2857,     5426,   &
-        3058,     1320,     2462,     2329,     2329,     2329,   &
-        3800,     1230,     1703,      635,     4276,     2552,   &
-        2060,     2891,     2847,     2568,     3350,     1413,   &
-        2568,     2568,     3726,     2549,     1784,      799,   &
-        1807,     1725,     3562,     1807,     1061,     1807,   &
-        1807,     1330,     1807,     1807,     1807,      815,   &
-        1784,     1784,     1807,     1807,     2507,     5426,   &
-        4835,      688,     2435,     1807,     1807,     1156,   &
-        1413,     1703,     2631,     1533,     1816,     2334,   &
-         790,      790,     2597,      815,     1592,      915,   &
-        2361,     1330,     1784,     5592,     1476,      354,   &
-        2381,     1730,     3332,     1700,     2507,     1442,   &
-        2381,      990,     2631,      564,     1490,     1413,   &
-        2361,     4276,     1496,     2882,     1252,     3350,   &
-        1784  &
-    /
-  data celev / &
-        9000,     9000,     9000,     6794,     9000,     1772,   &
-        9000,     5968,     9000,     3510,     3688,     9000,   &
-        1884,     9000,     3397,     3704,     9000,     9000,   &
-        3321,     9000,     9000,     1073,     9000,     4325,   &
-        1349,     3813,     7835,     5882,     9000,     6800,   &
-        9000,     2267,     7095,     7095,     4703,     7095,   &
-        6283,     5891,     9000,     9000,     3978,     4745,   &
-        4867,     6763,     4061,     1068,     1349,     9000,   &
-        3349,     3181,     9000,     9000,     3728,    18000,   &
-        8023,     2884,     8023,     8023,     1185,     2250,   &
-        3704,     6058,     6058,     7835,     6058,     3181,   &
-        3799,     9000,     9000,     9000,     9000,     5891,   &
-        5882,     4826,     3737,     8967,     4580,     9000,   &
-        5745,     7095,     1363,     4807,     3181,     9000,   &
-        5997,     3978,     5462,     5882,     8592,     7835,   &
-        3102,     1040,     9000,     9000,     2502,     9000,   &
-        3349,     1681,     9000,     2300,    18000,    18000,   &
-        1254,     1401,     5329,     5329,     5329,     9000,   &
-        9000,     9000,     9000,     9000,     9000,     3815,   &
-        9000,    18000,     6058,    18000,     3321,    18000,   &
-        6058,     3181,     5891,     1185,     9000,     9000,   &
-        9000,     9000,     2295,     6800,     1375,     9000,   &
-        3181,     6350,     1363,     9000,     9000,     9000,   &
-        8023,     8023,     5334,     1040,      711,     3147,   &
-        3291,     1920,     3102,     9000,     5334,     5882,   &
-        3900,     6763,     3181,     9000,     2680,     4020,   &
-        4020,     4816,     4580,     1383,     7835,     5334,   &
-        3704,     6470,     4330,     2295,     3102,     4826,   &
-        6332,     1040,     6058,     6058,     3349,     3140,   &
-        6058,     3394,     5334,     3057,    18000,    18000,   &
-       18000,     3688,     6470,     3012,     5334,     2253,   &
-        9000,     8592,     3900,     9000,     3900,    18000,   &
-        9000,     6470,     5665,     5665,     5665,     5631,   &
-        5631,     5631,    18000,     2985,     6470,     4580,   &
-        5882,     7835,     6470,     3118,     3704,     6470,   &
-        2985,     3900,     5462,     6125,     5334,     5334,   &
-        4816,     1040,     9000,     9000,     9000,     2357,   &
-        3397,     9000,     6470,     3181,     4703,     9000,   &
-        9000,     9000,     2795,     9000,     2295,     4592,   &
-        9000,     9000,     9000,     4715,     3762,     9000,   &
-        9000,     9000,      685,     2512,     2357,     6142,   &
-        2142,     9000,     4330,     2253,     3900,     3833,   &
-        5507,     9000,     3704,     4784,     5334,     9000,   &
-        6332,     2681,     6058,     1375,     3407,     8426,   &
-        6058,     4320,     3012,     5329,     5329,     5329,   &
-        6800,     1780,     4703,     1185,     9000,     3102,   &
-        2110,     5891,     3397,     5568,     3900,     4413,   &
-        5568,     5568,     6726,     5549,     9000,     3799,   &
-       18000,     9000,     6562,    18000,     1611,    18000,   &
-       18000,     4330,    18000,    18000,    18000,     1365,   &
-        9000,     9000,    18000,    18000,     5507,     8426,   &
-        7835,     3688,     5435,    18000,    18000,     4156,   &
-        4413,     2253,     2681,     2083,     2366,     5334,   &
-        9000,     9000,     5597,     1365,     2142,     3915,   &
-        5361,     4330,     4784,     9000,     4476,     3354,   &
-        2931,     4730,     6332,     4700,     3057,     9000,   &
-        9000,     1040,     2681,     3564,     9000,     4413,   &
-        9000,     7276,     4496,     5882,     1802,     3900,   &
-        2334  &
-    /
-  data vlon / &
-     127.880,  281.659,  112.920,  167.170,  148.420,  204.708,   &
-     269.399,  110.442,   15.004,   35.902,  152.203,  159.430,   &
-     168.120,  256.380,  288.070,  130.308,  168.346,  281.402,   &
-     177.180,  145.061,  297.820,  332.680,  261.378,  127.642,   &
-     129.716,  105.423,  160.638,  160.587,  196.030,  101.264,   &
-     125.400,  115.375,    9.170,    9.170,  122.775,    9.170,   &
-     161.360,  100.473,  196.030,  196.030,  109.208,  272.996,   &
-     215.980,  269.120,  273.155,  123.590,  129.716,  123.685,   &
-     114.242,   55.713,  297.820,  297.820,  273.298,  161.360,   &
-     281.558,  151.330,  281.558,  281.558,  273.839,  274.378,   &
-     130.308,   29.200,   29.200,  160.638,   29.200,   55.713,   &
-     129.716,  340.300,  340.300,  340.300,  177.180,  100.473,   &
-     160.587,  282.630,  140.843,  288.150,  124.792,  124.725,   &
-      73.513,    9.170,  105.423,  145.061,   55.713,  139.529,   &
-     288.830,  109.208,  123.685,  160.587,  292.270,  160.638,   &
-     269.399,  333.550,  139.529,  139.529,  102.620,  139.529,   &
-     114.242,  140.681,  139.529,  155.195,  151.330,  151.330,   &
-     130.308,  165.800,  112.950,  112.950,  112.950,  261.378,   &
-     261.378,  261.378,  129.716,  261.378,  123.685,  139.529,   &
-     151.330,  190.056,   29.200,  190.056,  177.180,  190.056,   &
-      29.200,   55.713,  100.473,  273.839,  261.378,  261.378,   &
-     151.330,  151.330,  272.996,  101.264,  127.642,  168.346,   &
-      55.713,   15.004,  105.423,  160.587,  297.820,  297.820,   &
-     281.558,  281.558,  151.330,  333.550,  141.290,  100.679,   &
-     158.830,  333.670,  269.399,  159.430,  281.402,  160.587,   &
-      15.004,  269.120,   55.713,  145.061,  271.731,   29.250,   &
-      29.250,  155.458,  124.792,  168.370,  160.638,  281.402,   &
-     130.308,   29.250,  148.420,  272.996,  269.399,  282.630,   &
-     114.042,  333.550,   29.200,   29.200,  114.242,  148.121,   &
-      29.200,  140.306,  151.330,  200.620,  125.425,  125.425,   &
-     125.425,  152.203,   29.250,  123.685,  281.402,  122.775,   &
-      15.004,  292.270,   15.004,   15.004,   15.004,  282.344,   &
-      15.004,   29.250,  107.730,  107.730,  107.730,   55.713,   &
-      55.713,   55.713,  282.344,  123.132,   29.250,  124.792,   &
-     160.587,  160.638,   29.250,  138.526,  130.308,   29.250,   &
-     123.132,   15.004,  123.685,  288.271,  151.330,  281.402,   &
-     155.458,  333.550,  145.670,  145.670,  145.670,  145.061,   &
-     288.070,  145.670,   29.250,   55.713,  122.775,  145.670,   &
-     168.346,  168.346,   73.513,  168.346,  272.996,  131.106,   &
-     297.820,  297.820,  160.587,  127.325,  288.623,  124.725,   &
-     124.725,  124.792,  273.839,  123.685,  145.061,  292.270,   &
-     131.106,  160.587,  148.420,  122.450,   15.004,  168.370,   &
-     200.620,  297.820,  130.308,  125.400,  151.330,  145.670,   &
-     114.042,   55.713,   29.200,  127.642,  196.030,  261.378,   &
-      29.200,  125.500,  123.685,  112.950,  112.950,  112.950,   &
-     101.264,   37.750,  122.450,  273.839,  282.630,  269.399,   &
-     347.720,  100.473,  288.070,  138.526,   15.004,  168.346,   &
-     138.526,  138.526,  116.470,  237.820,  124.725,  129.716,   &
-     145.061,  342.670,  282.344,  145.061,  273.155,  145.061,   &
-     145.061,  148.420,  145.061,  145.061,  145.061,  139.529,   &
-     124.725,  124.725,  145.061,  145.061,  200.620,  261.378,   &
-     160.638,  152.203,  123.132,  145.061,  145.061,  156.020,   &
-     168.346,  122.450,   55.713,  185.846,  155.458,  151.330,   &
-     145.670,  145.670,  100.679,  139.529,  131.106,  297.820,   &
-      43.380,  148.420,  124.725,  292.270,  268.450,   93.858,   &
-     270.370,  190.056,  114.042,  274.378,  200.620,   40.480,   &
-     270.370,  333.550,   55.713,  150.030,  268.830,  168.346,   &
-      43.380,  282.630,  167.830,  160.587,  206.570,   15.004,   &
-     124.725  &
-    /
-  data vlat / &
-       1.680,   -2.002,   -8.108,  -77.530,   -5.525,   19.425,   &
-      14.381,   -7.542,   37.734,   -2.751,   -4.271,   54.050,   &
-     -16.250,   19.514,  -39.420,   30.789,  -16.507,   -0.171,   &
-     -37.520,   -4.100,   16.720,   38.730,   19.023,    1.475,   &
-      29.635,   -6.102,   56.057,   55.978,   54.756,   -1.814,   &
-       2.780,   -8.242,    4.203,    4.203,   -8.530,    4.203,   &
-      56.653,   -0.381,   54.756,   54.756,   -7.242,   12.702,   &
-      62.000,   14.473,   12.602,   -8.540,   29.635,   13.257,   &
-      -8.058,  -21.229,   16.720,   16.720,   12.506,   56.653,   &
-      -1.467,   -5.050,   -1.467,   -1.467,   11.984,   11.538,   &
-      30.789,   -1.408,   -1.408,   56.057,   -1.408,  -21.229,   &
-      29.635,   63.980,   63.980,   63.980,  -37.520,   -0.381,   &
-      55.978,    1.220,   42.541,  -15.780,    1.358,    1.108,   &
-     -53.106,    4.203,   -6.102,   -4.100,  -21.229,   34.079,   &
-     -37.850,   -7.242,   13.257,   55.978,  -23.370,   56.057,   &
-      14.381,  -57.780,   34.079,   34.079,   -3.520,   34.079,   &
-      -8.058,   42.061,   34.079,   -6.140,   -5.050,   -5.050,   &
-      30.789,  -10.380,   -7.942,   -7.942,   -7.942,   19.023,   &
-      19.023,   19.023,   29.635,   19.023,   13.257,   34.079,   &
-      -5.050,   52.825,   -1.408,   52.825,  -37.520,   52.825,   &
-      -1.408,  -21.229,   -0.381,   11.984,   19.023,   19.023,   &
-      -5.050,   -5.050,   12.702,   -1.814,    1.475,  -16.507,   &
-     -21.229,   37.734,   -6.102,   55.978,   16.720,   16.720,   &
-      -1.467,   -1.467,   -5.050,  -57.780,   24.754,   -0.978,   &
-      53.255,  -58.420,   14.381,   54.050,   -0.171,   55.978,   &
-      37.734,   14.473,  -21.229,   -4.100,   13.434,   -1.520,   &
-      -1.520,   50.325,    1.358,  -16.680,   56.057,   -0.171,   &
-      30.789,   -1.520,   -5.525,   12.702,   14.381,    1.220,   &
-      -8.125,  -57.780,   -1.408,   -1.408,   -8.058,   -5.520,   &
-      -1.408,   30.480,   -5.050,   56.170,    2.280,    2.280,   &
-       2.280,   -4.271,   -1.520,   13.257,   -0.171,   -8.530,   &
-      37.734,  -23.370,   37.734,   37.734,   37.734,   -0.077,   &
-      37.734,   -1.520,   -7.320,   -7.320,   -7.320,  -21.229,   &
-     -21.229,  -21.229,   -0.077,   10.412,   -1.520,    1.358,   &
-      55.978,   56.057,   -1.520,   36.403,   30.789,   -1.520,   &
-      10.412,   37.734,   13.257,  -38.692,   -5.050,   -0.171,   &
-      50.325,  -57.780,   16.350,   16.350,   16.350,   -4.100,   &
-     -39.420,   16.350,   -1.520,  -21.229,   -8.530,   16.350,   &
-     -16.507,  -16.507,  -53.106,  -16.507,   12.702,   32.881,   &
-      16.720,   16.720,   55.978,    0.800,  -36.863,    1.108,   &
-       1.108,    1.358,   11.984,   13.257,   -4.100,  -23.370,   &
-      32.881,   55.978,   -5.525,   -8.670,   37.734,  -16.680,   &
-      56.170,   16.720,   30.789,    2.780,   -5.050,   16.350,   &
-      -8.125,  -21.229,   -1.408,    1.475,   54.756,   19.023,   &
-      -1.408,    3.670,   13.257,   -7.942,   -7.942,   -7.942,   &
-      -1.814,  -46.900,   -8.670,   11.984,    1.220,   14.381,   &
-     -37.092,   -0.381,  -39.420,   36.403,   37.734,  -16.507,   &
-      36.403,   36.403,   -8.420,   46.200,    1.108,   29.635,   &
-      -4.100,   64.420,   -0.077,   -4.100,   12.602,   -4.100,   &
-      -4.100,   -5.525,   -4.100,   -4.100,   -4.100,   34.079,   &
-       1.108,    1.108,   -4.100,   -4.100,   56.170,   19.023,   &
-      56.057,   -4.271,   10.412,   -4.100,   -4.100,   50.680,   &
-     -16.507,   -8.670,  -21.229,   52.381,   50.325,   -5.050,   &
-      16.350,   16.350,   -0.978,   34.079,   32.881,   16.720,   &
-     -11.750,   -5.525,    1.108,  -23.370,   -0.370,   12.278,   &
-      13.853,   52.825,   -8.125,   11.538,   56.170,   12.600,   &
-      13.853,  -57.780,  -21.229,   -5.450,   -0.830,  -16.507,   &
-     -11.750,    1.220,  -15.400,   55.978,   59.363,   37.734,   &
-       1.108  &
-    /
-
-!  Reorient the longitudes for GEOS-5
-   where(vlon > 180.) vlon = vlon-360.
-
-!  Count the number of volcanoes on your given day
-   nv = 0
-   do it = 1, nvolc
-    if(nymd .lt. startday(it) .or. nymd .gt. endday(it)) cycle
-    nv = nv + 1
-   end do
-
-!  Allocate space for the volcanoes
-   allocate(vLatP(nv), vLonP(nv), &
-            vSO2P(nv), vElevP(nv), &
-            vCloudP(nv))
-
-!  Accumulate the volcanoes
-   nv = 0
-   do it = 1, nvolc
-    if(nymd .lt. startday(it) .or. nymd .gt. endday(it)) cycle
-    nv = nv + 1
-    vLatP(nv) = vlat(it)
-    vLonP(nv) = vlon(it)
-    vSO2P(nv) = so2exp(it) * 1.e6 / 86400.   ! to kg SO2/sec
-    vElevP(nv) = velev(it)
-    vCloudP(nv) = celev(it)
-   enddo
-
-   nVolcExp = nv
-
-   rc = 0
-
-   end subroutine GetVolcExplosive
-
-!==================================================================================
 
   subroutine CombineVolcEmiss (nVolcE, vLatE, vLonE, vElevE, vCloudE, vSO2E, &
                                nVolcC, vLatC, vLonC, vElevC, vCloudC, vSO2C, &
@@ -5198,7 +3801,7 @@ K_LOOP: do k = km, 1, -1
 !  17July2020, Sherman - Refactored for GOCART2G. Only uses intrinsic Fortran
 
 ! !Local Variables
-   integer  ::  i, j, k, n
+   integer  ::  i, j, k
    integer  :: i1=1, j1=1, i2, j2
 
    real, dimension(:,:), allocatable :: srcSO2, srcSO4, srcDMS, srcSO4anthro, &
@@ -5431,7 +4034,7 @@ K_LOOP: do k = km, 1, -1
 
 ! !INOUT PARAMETERS:
    real, dimension(:,:,:), intent(inout)  :: dms ! dms [kg kg-1]
-   real, pointer, dimension(:,:,:)  :: SU_emis      ! SU emissions, kg/m2/s
+   real, pointer, dimension(:,:,:)  :: SU_emis   ! SU emissions, kg/m2/s
 
 ! !OUTPUT PARAMETERS:
    integer, optional, intent(out)   :: rc    ! Error return code:
@@ -5526,20 +4129,20 @@ K_LOOP: do k = km, 1, -1
 ! !INPUT PARAMETERS:
    integer, intent(in) :: nVolc     ! number of emissions
    integer, dimension(:), intent(in) :: vStart ! emission start time [sec]
-   integer, dimension(:), intent(in) :: vEnd  ! emission end time [sec]
-   real, dimension(:), intent(in) ::  vSO2  ! volcanic emission from file [kg]
-   real, dimension(:), intent(in) ::  vCloud ! top elevation of emissions [m]
+   integer, dimension(:), intent(in) :: vEnd   ! emission end time [sec]
+   real, dimension(:), intent(in)    :: vSO2   ! volcanic emission from file [kg]
+   real, dimension(:), intent(in)    :: vCloud ! top elevation of emissions [m]
    integer, dimension(:), intent(in) :: iPoint, jPoint ! sub-domain locations of volcanos
    integer, intent(in) :: nhms ! current model time [sec]
-   integer, intent(in) :: km ! number of model levels
-   real, intent(in) :: cdt ! model time step [sec]
+   integer, intent(in) :: km   ! number of model levels
+   real, intent(in)    :: cdt  ! model time step [sec]
    real, pointer, dimension(:,:,:) :: hghte     ! top of layer geopotential height [m]
-   real, intent(in) :: grav ! gravity [m sec-1]
+   real, intent(in)    :: grav ! gravity [m sec-1]
 !   real, dimension(:,:,:), intent(in) :: airdens ! layer air density [kg/m^3]
-   real, dimension(:,:,:), intent(in) :: delp   ! pressure thickness [Pa]
-   real, dimension(:,:), intent(in) :: area  ! area of grid cell [m^2]
-   real, dimension(:), intent(in) :: vLat
-   real, dimension(:), intent(in) :: vLon
+   real, dimension(:,:,:), intent(in) :: delp  ! pressure thickness [Pa]
+   real, dimension(:,:), intent(in)   :: area  ! area of grid cell [m^2]
+   real, dimension(:), intent(in)     :: vLat  ! latitude specified in file [degree]
+   real, dimension(:), intent(in)     :: vLon  ! longitude specified in file [degree]
 ! !INOUT PARAMETERS:
   real, pointer, dimension(:,:), intent(inout) :: SO2EMVN ! non-explosive volcanic emissions [kg m-2 s-1]
   real, pointer, dimension(:,:), intent(inout) :: SO2EMVE ! explosive volcanic emissions [kg m-2 s-1]
@@ -5686,9 +4289,6 @@ K_LOOP: do k = km, 1, -1
   end if
 
 
-
-
-
 #if 0
     allocate(emissions_point, mold=SO2)
     emissions_point = 0.0
@@ -5724,29 +4324,33 @@ end block
 !BOP
 ! !IROUTINE: SulfateUpdateOxidants
 
-   subroutine SulfateUpdateOxidants (using_GMI_OH, using_GMI_NO3, using_GMI_H2O2, &
-                                     nymd_current, nhms_current, lonRad, latRad, &
+!   subroutine SulfateUpdateOxidants (using_GMI_OH, using_GMI_NO3, using_GMI_H2O2, &
+!                                     nymd_current, nhms_current, lonRad, latRad, &
+!                                     rhoa, km, cdt, &
+!                                     nymd_last, undefval, &
+!                                     oh_clim, no3_clim, h2o2_clim, &
+!                                     xoh, xno3, xh2o2, recycle_h2o2, rc)
+
+   subroutine SulfateUpdateOxidants (nymd_current, nhms_current, lonRad, latRad, &
                                      rhoa, km, cdt, &
                                      nymd_last, undefval, &
                                      oh_clim, no3_clim, h2o2_clim, &
                                      xoh, xno3, xh2o2, recycle_h2o2, rc)
-
-
 ! !USES:
    implicit NONE
 
 ! !INPUT PARAMETERS:
-   logical, intent(in)    :: using_GMI_OH, & ! are these oxidants coming from GMI?
-                             using_GMI_NO3, &
-                             using_GMI_H2O2
+!   logical, intent(in)    :: using_GMI_OH, & ! are these oxidants coming from GMI?
+!                             using_GMI_NO3, &
+!                             using_GMI_H2O2
    integer, intent(in)    :: nymd_current, &   ! current model NYMD
                              nhms_current      ! current model NHMS
-   real, dimension(:,:), intent(in) :: lonRad, latRad   ! model grid lon and lat
-   real, dimension(:,:,:), intent(in) :: rhoa ! layer air density [kg/m^3]
-   integer, intent(in) :: km  ! number of model levels
-   real, intent(in)   :: cdt ! chemistry model time-step
-   integer, intent(inout) :: nymd_last         ! NYMD of last emission update
-   real, intent(in)   :: undefval ! value for undefined values
+   real, dimension(:,:), intent(in)   :: lonRad, latRad ! model grid lon and lat
+   real, dimension(:,:,:), intent(in) :: rhoa           ! layer air density [kg/m^3]
+   integer, intent(in)    :: km         ! number of model levels
+   real, intent(in)       :: cdt        ! chemistry model time-step
+   integer, intent(inout) :: nymd_last  ! NYMD of last emission update
+   real, intent(in)       :: undefval   ! value for undefined values
    real, pointer, dimension(:,:,:) :: oh_clim, &   ! climatological OH
                                       no3_clim, &  ! climatological NO3
                                       h2o2_clim  ! climatological H2O2
@@ -5768,7 +4372,7 @@ end block
 !
 ! !REVISION HISTORY:
 ! ???        ???       - Legacy code
-! 23July2020 E.Sherman - refactored for use in process library.
+! 23July2020 E.Sherman - ported/refactored for use in process library.
 !
 
 ! !Local Variables
@@ -5808,143 +4412,100 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !   volume mixing ratio from a file (so, like GMI would provide).
 !   Below, in the scaling by solar zenith angle, we convert from
 !   VMR to # cm-3 expected by the chemistry.
-    if (.not. using_GMI_OH) then
-       where(1.01*oh_clim(i1:i2,j1:j2,1:km) > undefval) oh_clim(i1:i2,j1:j2,1:km) = 0.
-       where(     oh_clim(i1:i2,j1:j2,1:km) < 0       ) oh_clim(i1:i2,j1:j2,1:km) = 0.
-    end if
+    where(1.01*oh_clim(i1:i2,j1:j2,1:km) > undefval) oh_clim(i1:i2,j1:j2,1:km) = 0.
+    where(     oh_clim(i1:i2,j1:j2,1:km) < 0       ) oh_clim(i1:i2,j1:j2,1:km) = 0.
 
-    if (.not. using_GMI_NO3) then
-       where(1.01*no3_clim(i1:i2,j1:j2,1:km) > undefval) no3_clim(i1:i2,j1:j2,1:km) = 0.
-       where(     no3_clim(i1:i2,j1:j2,1:km) < 0       ) no3_clim(i1:i2,j1:j2,1:km) = 0.
-    end if
+    where(1.01*no3_clim(i1:i2,j1:j2,1:km) > undefval) no3_clim(i1:i2,j1:j2,1:km) = 0.
+    where(     no3_clim(i1:i2,j1:j2,1:km) < 0       ) no3_clim(i1:i2,j1:j2,1:km) = 0.
 
-    if (.not. using_GMI_H2O2) then
-       where(1.01*h2o2_clim(i1:i2,j1:j2,1:km) > undefval) h2o2_clim(i1:i2,j1:j2,1:km) = 0.
-       where(     h2o2_clim(i1:i2,j1:j2,1:km) < 0       ) h2o2_clim(i1:i2,j1:j2,1:km) = 0.
-    end if
+    where(1.01*h2o2_clim(i1:i2,j1:j2,1:km) > undefval) h2o2_clim(i1:i2,j1:j2,1:km) = 0.
+    where(     h2o2_clim(i1:i2,j1:j2,1:km) < 0       ) h2o2_clim(i1:i2,j1:j2,1:km) = 0.
 
 !   The first time through the reads we will save the h2o2 monthly
 !   average in the instantaneous field
 !   ---------------------------------
-    if (nymd_last == nymd_current .and. (.not. using_GMI_H2O2)) then
+    if (nymd_last == nymd_current) then
        xh2o2 = h2o2_clim
        nymd_last = nymd_current
     end if
 
-!  Find the day number of the year and hour (needed for later doing sza)
-!  ----------------------------------
-   jday = idaynum(nymd_current)
-   xhour = (  real(nhms_current/10000)*3600. &
-            + real(mod(nhms_current,10000)/100)*60. &
-            + real(mod(nhms_current,100)) &
-           ) / 3600.
+!   Find the day number of the year and hour (needed for later doing sza)
+!   ----------------------------------
+    jday = idaynum(nymd_current)
+    xhour = (  real(nhms_current/10000)*3600. &
+             + real(mod(nhms_current,10000)/100)*60. &
+             + real(mod(nhms_current,100)) &
+             ) / 3600.
 
-!  Recycle H2O2 to input on 3 hour boundaries if not coupled to GMI
-!  ----------------------------------
-   if (.not. using_GMI_H2O2 .and. recycle_h2o2) then
-!print*,'SU2G xh2o2 updated!'
-      xh2o2 = h2o2_clim
-      recycle_h2o2 = .false.
-   end if
+!   Recycle H2O2 to input on 3 hour boundaries if not coupled to GMI
+!   ----------------------------------
+    if (recycle_h2o2) then
+       xh2o2 = h2o2_clim
+       recycle_h2o2 = .false.
+    end if
 
-!print*,'TEST 5'
+!   If not getting instantaneous values from GMI, update for time of day.
+!   ---------------------------------------------------------------------
+!   OH
+    xoh = oh_clim
+    cossza(:,:) = 0.
 
-!  If not getting instantaneous values from GMI, update for time of day.
-!  ---------------------------------------------------------------------
-!  OH
-   if (.not. using_GMI_OH) then
-      xoh = oh_clim
-      cossza(:,:) = 0.
+!   Want to find the sum of the cos(sza) for use in scaling OH diurnal variation
+!   tcosz is the sum of cossza over the whole day
+!   tday is the time of day spent in light
+!   Requires integrating over future times, so cannot use w_c%cosz
+    xHourUse = xHour
+    ndystep = 86400. / cdt
+    tcosz(:,:) = 0.
+    tday(:,:) = 0.
+    do n = 1, ndystep
+       call szangle(jday,xHourUse,lonRad,latRad,PI,radToDeg,sza,cossza, i2, j2)
+       tcosz = tcosz + cossza
+       xHourUse = xHourUse + cdt/3600.
+       if(xHourUse .gt. 24.) xHourUse = xHourUse - 24.
+!      Find the daylight portion of the day
+       do j = j1, j2
+          do i = i1, i2
+             if(cossza(i,j) .gt. 0.) tday(i,j) = tday(i,j) + cdt
+          end do
+       end do
+    end do
 
-!     Want to find the sum of the cos(sza) for use in scaling OH diurnal variation
-!     tcosz is the sum of cossza over the whole day
-!     tday is the time of day spent in light
-!     Requires integrating over future times, so cannot use w_c%cosz
-      xHourUse = xHour
-      ndystep = 86400. / cdt
-      tcosz(:,:) = 0.
-      tday(:,:) = 0.
-      do n = 1, ndystep
-         call szangle(jday,xHourUse,lonRad,latRad,PI,radToDeg,sza,cossza, i2, j2)
-         tcosz = tcosz + cossza
-         xHourUse = xHourUse + cdt/3600.
-         if(xHourUse .gt. 24.) xHourUse = xHourUse - 24.
-!        Find the daylight portion of the day
-         do j = j1, j2
-            do i = i1, i2
-               if(cossza(i,j) .gt. 0.) tday(i,j) = tday(i,j) + cdt
-            end do
-         end do
-      end do
+!   Find the cos(sza) now for use in scaling OH and NO3
+    call szangle(jday,xHour,lonRad,latRad,PI,radToDeg,sza,cossza, i2, j2)
 
-!print*,'TEST 6'
+    tnight(i1:i2,j1:j2) = (86400.-tday(i1:i2,j1:j2))
 
-!     Find the cos(sza) now for use in scaling OH and NO3
-      call szangle(jday,xHour,lonRad,latRad,PI,radToDeg,sza,cossza, i2, j2)
+    do k = 1, km
+       where (tcosz(i1:i2,j1:j2) > 0)
+          xoh(i1:i2,j1:j2,k) = oh_clim(i1:i2,j1:j2,k)*(86400./cdt)*cossza(i1:i2,j1:j2) / tcosz(i1:i2,j1:j2)
+       elsewhere
+          xoh(i1:i2,j1:j2,k) = 0.00
+       end where
+    end do
+    where(xoh(i1:i2,j1:j2,1:km) < 0.00) xoh(i1:i2,j1:j2,1:km) = 0.00
 
-      tnight(i1:i2,j1:j2) = (86400.-tday(i1:i2,j1:j2))
+!   To go from volume mixing ratio to # cm-3 (expected in chemistry)
+!   include the following line
+    xoh = xoh * 1000.*rhoa / airMolWght * nAvogadro * 1.e-6
 
-      do k = 1, km
-         where (tcosz(i1:i2,j1:j2) > 0)
-            xoh(i1:i2,j1:j2,k) = oh_clim(i1:i2,j1:j2,k)*(86400./cdt)*cossza(i1:i2,j1:j2) / tcosz(i1:i2,j1:j2)
-         elsewhere
-            xoh(i1:i2,j1:j2,k) = 0.00
-         end where
-      end do
-      where(xoh(i1:i2,j1:j2,1:km) < 0.00) xoh(i1:i2,j1:j2,1:km) = 0.00
-
-   endif ! (.not. using_GMI_OH)
-
-!print*,'TEST 7'
-
-!  To go from volume mixing ratio to # cm-3 (expected in chemistry)
-!  include the following line
-   xoh = xoh * 1000.*rhoa / airMolWght * nAvogadro * 1.e-6
-
-!  NO3
-   IF(.NOT. using_GMI_NO3) THEN
+!   NO3
     xno3 = no3_clim
     cossza(:,:) = 0.
     call szangle(jday,xHour,lonRad,latRad,PI,radToDeg,sza,cossza, i2, j2)
 
 !   If there is daylight then no3 is small (assume zero) and the
 !   average is distributed only over the night time portion
-!print*,'TEST 8'
 
-    DO k=1,km
-     WHERE(cossza(i1:i2,j1:j2) > 0 .OR. tnight(i1:i2,j1:j2) < tiny(1.0))
-      xno3(i1:i2,j1:j2,k) = 0.00
-     ELSEWHERE
-      xno3(i1:i2,j1:j2,k) = no3_clim(i1:i2,j1:j2,k) * 86400./ tnight(i1:i2,j1:j2)
-     END WHERE
-    END DO
-   END IF
+    do k=1,km
+       where(cossza(i1:i2,j1:j2) > 0 .OR. tnight(i1:i2,j1:j2) < tiny(1.0))
+          xno3(i1:i2,j1:j2,k) = 0.00
+       elsewhere
+          xno3(i1:i2,j1:j2,k) = no3_clim(i1:i2,j1:j2,k) * 86400./ tnight(i1:i2,j1:j2)
+       end where
+    end do
 
-#if 0
-!  If doing GMI, grab oxidants from GMICHEM if the pointers were found.
-!  Note: OH units must be cm^{-3}.
-!  --------------------------------------------------------------------
-   IF( using_GMI_NO3) THEN
-    xno3(i1:i2,j1:j2,1:km)  = GMI_NO3mr(i1:i2,j1:j2,1:km)
-    WHERE(xno3(i1:i2,j1:j2,1:km) < 0.00) xno3(i1:i2,j1:j2,1:km) = 0.00
-   END IF
-
-   IF(using_GMI_H2O2) THEN
-    xh2o2(i1:i2,j1:j2,1:km) = GMI_H2O2mr(i1:i2,j1:j2,1:km)
-    WHERE(xh2o2(i1:i2,j1:j2,1:km) < 0.00) xh2o2(i1:i2,j1:j2,1:km) = 0.00
-   END IF
-
-   IF(  using_GMI_OH) THEN
-    qmax = 17.01/airMolWght
-    xoh(i1:i2,j1:j2,1:km) =  GMI_OHmr(i1:i2,j1:j2,1:km)* &
-                             nAvogadro / airMolWght * 1000.* &
-                             rhoa(i1:i2,j1:j2,1:km)*1.00E-06
-    WHERE(xoh(i1:i2,j1:j2,1:km) < 0.00) xoh(i1:i2,j1:j2,1:km) = 0.00
-   END IF
-#endif
-
-   rc = 0
-
+    rc = 0
 
    end subroutine SulfateUpdateOxidants
 
@@ -5973,7 +4534,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !
 ! !REVISION HISTORY:
 ! 29July2004 P.Colarco - legacy code 
-! 23July2020 E.Sherman - refactored for use in process library.
+! 23July2020 E.Sherman - ported to process library.
 
 ! !Local Variables
    integer :: i, j, i1=1, j1=1
@@ -5998,39 +4559,25 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    dec = a0 - a1*cos(   r) + b1*sin(   r) &
             - a2*cos(2.*r) + b2*sin(2.*r) &
             - a3*cos(3.*r) + b3*sin(3.*r)
-!print*,'TEST A'
 
    do j = j1, j2
      do i = i1, i2
 !    timloc is the local time in hours
      xlon = lonRad(i,j)*radToDeg
-!print*,'TEST B'
      timloc = xhour + xlon/15.
-!print*,'TEST C'
      if(timloc .lt. 0.)  timloc = timloc+24.
      if(timloc .gt. 24.) timloc = timloc-24.
 !    ahr is the hour angle in radians
      ahr = abs(timloc - 12.)*15.*pi/180.
       rlat = latRad(i,j)
-!print*,'sin(rlat) = ',sin(rlat)
-!print*,'sin(dec) = ',sin(dec)
-!print*,'cos(rlat) = ',cos(rlat)
-!print*,'cos(dec) = ',cos(dec)
-!print*,'cos(ahr) = ',cos(ahr)
       cossza(i,j) =   sin(rlat)*sin(dec) &
                     + cos(rlat)*cos(dec)*cos(ahr)
 
-
-!print*,'TEST E'
       cossza(i,j)    = min(max(cossza(i,j),-1.0),1.0) !ALT make sure cos stays between -1.0 and 1.0
-!print*,'TEST F'
       sza(i,j)    = acos(cossza(i,j)) * radToDeg
-!print*,'TEST G'
       if(cossza(i,j) .lt. 0.) cossza(i,j) = 0.
-!print*,'TEST H'
      end do
    end do
-!print*,'TEST Z'
 
    end subroutine szangle
 
@@ -6117,10 +4664,10 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 ! !INPUT PARAMETERS:
 
    integer, intent(in) :: km, nbins  ! number of model levels and number of species respectively
-   real, intent(in)    :: cdt  ! chemisty model timestep
-   logical, intent(in) :: KIN                 ! true for aerosol
+   real, intent(in)    :: cdt   ! chemisty model timestep
+   logical, intent(in) :: KIN   ! true for aerosol
    real, intent(in)    :: grav  ! gravity [m/sec]
-   real, intent(in)    :: airMolWght
+   real, intent(in)    :: airMolWght ! air molecular weight [kg]
    real, dimension(:,:,:), intent(in) :: delp   ! pressure thickness [Pa]  
    real, intent(in) :: fMassSO4, fMassSO2
    real, pointer, dimension(:,:,:) :: h2o2_int
@@ -6128,14 +4675,14 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    real, pointer, dimension(:,:,:) :: rhoa    ! air density, [kg m-3]
    real, pointer, dimension(:,:)   :: precc   ! total convective precip, [mm day-1]
    real, pointer, dimension(:,:)   :: precl   ! total large-scale prec,  [mm day-1]
-   real, pointer, dimension(:,:,:) :: pfllsan ! 
-   real, pointer, dimension(:,:,:) :: pfilsan ! 
+   real, pointer, dimension(:,:,:) :: pfllsan ! 3D flux of liquid nonconvective precipitation [kg/(m^2 sec)] 
+   real, pointer, dimension(:,:,:) :: pfilsan ! 3D flux of ice nonconvective precipitation [kg/(m^2 sec)]
    real, pointer, dimension(:,:,:) :: tmpu    ! temperature, [K]
    integer, intent(in) :: nDMS, nSO2, nSO4, nMSA !index position of sulfates
-   real, dimension(:,:,:), intent(inout) :: DMS
-   real, dimension(:,:,:), intent(inout) :: SO2
-   real, dimension(:,:,:), intent(inout) :: SO4
-   real, dimension(:,:,:), intent(inout) :: MSA
+   real, dimension(:,:,:), intent(inout) :: DMS ! [kg/kg]
+   real, dimension(:,:,:), intent(inout) :: SO2 ! [kg/kg]
+   real, dimension(:,:,:), intent(inout) :: SO4 ! [kg/kg]
+   real, dimension(:,:,:), intent(inout) :: MSA ! [kg/kg]
 
 ! !OUTPUT PARAMETERS:
    real, pointer, dimension(:,:,:),intent(inout) :: fluxout
@@ -6185,7 +4732,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !   real :: c_h2o(i1:i2,j1:j2,km), cldliq(i1:i2,j1:j2,km), cldice(i1:i2,j1:j2,km)
    real, dimension(:,:,:), allocatable :: c_h2o, cldliq, cldice
    real, parameter :: kb = 1.3807e-23 ! Boltzmann constant [kg m2 s-1 K-1 mol-1]
-   real, parameter :: m_air = 4.8096e-26 ! Mass of <avg> air molecule [kg]
 
 !  Rain parameters (from where?)
    real, parameter :: B0_ls = 1.0e-4
@@ -6229,14 +4775,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    end do
    if( associated(pso4wet_colflux)) pso4wet_colflux(i1:i2,j1:j2) = 0.
    if( associated(pso4wet)) pso4wet(i1:i2,j1:j2,1:km) = 0.
-
-!   n1  = w_c%reg%i_SU
-!   n2  = w_c%reg%j_SU
-!   nDMS = gcSU%nDMS
-!   nSO2 = gcSU%nSO2
-!   nSO4 = gcSU%nSO4
-!   nMSA = gcSU%nMSA
-
 
 !  Allocate the dynamic arrays
    allocate(fd(km,nbins),stat=ios)
@@ -6306,7 +4844,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
        BT = B * Td_ls
        if (BT.gt.10.) BT = 10.               !< Avoid overflow >
 !      What is the soluble amount of SO2?
-!       SO2Soluble = min(fmr*w_c%qa(n1+nSO2-1)%data3d(i,j,k),gcSU%h2o2_int(i,j,k)*one)/fmr
        SO2Soluble = min(fmr*SO2(i,j,k),h2o2_int(i,j,k)*one)/fmr
        if(SO2Soluble .lt. 0.) SO2Soluble = 0.
 
@@ -6328,8 +4865,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
        do n = 1, nbins
         if (DC(n).lt.0.) DC(n) = 0.
-!        w_c%qa(n1+n-1)%data3d(i,j,k) = w_c%qa(n1+n-1)%data3d(i,j,k)-DC(n)
-!        if (w_c%qa(n1+n-1)%data3d(i,j,k) .lt. 1.0E-32) w_c%qa(n1+n-1)%data3d(i,j,k) = 1.0E-32
        end do
 
        call updateAerosol(DMS(i,j,k), DC(nDMS)) 
@@ -6384,7 +4919,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
         if (BT.gt.10.) BT = 10.
 
 !      What is the soluble amount of SO2?
-!       SO2Soluble = min(fmr*w_c%qa(n1+nSO2-1)%data3d(i,j,k),gcSU%h2o2_int(i,j,k)*one)/fmr
        SO2Soluble = min(fmr*SO2(i,j,k),h2o2_int(i,j,k)*one)/fmr
        if(SO2Soluble .lt. 0.) SO2Soluble = 0.
 
@@ -6407,8 +4941,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
         do n = 1, nbins
          if (DC(n).lt.0.) DC(n) = 0.
-!         w_c%qa(n1+n-1)%data3d(i,j,k) = w_c%qa(n1+n-1)%data3d(i,j,k)-DC(n)
-!         if (w_c%qa(n1+n-1)%data3d(i,j,k) .lt. 1.0E-32) w_c%qa(n1+n-1)%data3d(i,j,k) = 1.0E-32
         end do
 
        call updateAerosol(DMS(i,j,k), DC(nDMS))
@@ -6438,7 +4970,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
        if (BT.gt.10.) BT = 10.               !< Avoid overflow >
 
 !      Adjust SO2 for H2O2 oxidation
-!       SO2Soluble = min(fmr*w_c%qa(n1+nSO2-1)%data3d(i,j,k),gcSU%h2o2_int(i,j,k)*one)/fmr
        SO2Soluble = min(fmr*SO2(i,j,k),h2o2_int(i,j,k)*one)/fmr
        if(SO2Soluble .lt. 0.) SO2Soluble = 0.
 
@@ -6460,8 +4991,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
        do n = 1, nbins
         if (DC(n).lt.0.) DC(n) = 0.
-!        w_c%qa(n1+n-1)%data3d(i,j,k) = w_c%qa(n1+n-1)%data3d(i,j,k)-DC(n)
-!        if (w_c%qa(n1+n-1)%data3d(i,j,k) .lt. 1.0E-32) w_c%qa(n1+n-1)%data3d(i,j,k) = 1.0E-32
        end do
 
        call updateAerosol(DMS(i,j,k), DC(nDMS))
@@ -6516,7 +5045,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
         if (BT.gt.10.) BT = 10.
 
 !       Adjust SO2 for H2O2 oxidation
-!        SO2Soluble = min(fmr*w_c%qa(n1+nSO2-1)%data3d(i,j,k),gcSU%h2o2_int(i,j,k)*one)/fmr
         SO2Soluble = min(fmr*SO2(i,j,k),h2o2_int(i,j,k)*one)/fmr
         if(SO2Soluble .lt. 0.) SO2Soluble = 0.
 
@@ -6539,8 +5067,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
         do n = 1, nbins
          if (DC(n).lt.0.) DC(n) = 0.
-!         w_c%qa(n1+n-1)%data3d(i,j,k) = w_c%qa(n1+n-1)%data3d(i,j,k)-DC(n)
-!         if (w_c%qa(n1+n-1)%data3d(i,j,k) .lt. 1.0E-32) w_c%qa(n1+n-1)%data3d(i,j,k) = 1.0E-32
         end do
 
        call updateAerosol(DMS(i,j,k), DC(nDMS))
@@ -6607,12 +5133,6 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 
 !         Adjust the flux out of the bottom of the layer--remove SO2 here!
-!          do n = 1, nbins
-!           w_c%qa(n1+n-1)%data3d(i,j,k) = &
-!             max(w_c%qa(n1+n-1)%data3d(i,j,k),tiny(1.0))
-!           Fd(k,n)  = Fd(k,n) - DC(n)*pdog(i,j,k)
-!          end do
-
           DMS = max(DMS,tiny(1.0))
           Fd(k,nDMS) = Fd(k,nDMS) - DC(nDMS)*pdog(i,j,k)
           SO2 = max(SO2,tiny(1.0))
@@ -6695,20 +5215,20 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    real, dimension(:,:,:), intent(inout) :: SO2  ! sulfer dioxide [kg/kg]
    real, dimension(:,:,:), intent(inout) :: SO4  ! sulfate aerosol [kg/kg]
    real, dimension(:,:,:), intent(inout) :: MSA  ! methanesulphonic acid [kg/kg]
-   real, pointer, dimension(:,:),   intent(inout)  :: dmssfcmass ! sfc mass concentration kg/m3
-   real, pointer, dimension(:,:),   intent(inout)  :: dmscolmass ! col mass density kg/m2
-   real, pointer, dimension(:,:),   intent(inout)  :: msasfcmass ! sfc mass concentration kg/m3
-   real, pointer, dimension(:,:),   intent(inout)  :: msacolmass ! col mass density kg/m2
-   real, pointer, dimension(:,:),   intent(inout)  :: so2sfcmass ! sfc mass concentration kg/m3
-   real, pointer, dimension(:,:),   intent(inout)  :: so2colmass ! col mass density kg/m2
-   real, pointer, dimension(:,:),   intent(inout)  :: so4sfcmass ! sfc mass concentration kg/m3
-   real, pointer, dimension(:,:),   intent(inout)  :: so4colmass ! col mass density kg/m2
+   real, pointer, dimension(:,:),   intent(inout)  :: dmssfcmass ! sfc mass concentration [kg/m3]
+   real, pointer, dimension(:,:),   intent(inout)  :: dmscolmass ! col mass density [kg/m2]
+   real, pointer, dimension(:,:),   intent(inout)  :: msasfcmass ! sfc mass concentration [kg/m3]
+   real, pointer, dimension(:,:),   intent(inout)  :: msacolmass ! col mass density [kg/m2]
+   real, pointer, dimension(:,:),   intent(inout)  :: so2sfcmass ! sfc mass concentration [kg/m3]
+   real, pointer, dimension(:,:),   intent(inout)  :: so2colmass ! col mass density [kg/m2]
+   real, pointer, dimension(:,:),   intent(inout)  :: so4sfcmass ! sfc mass concentration [kg/m3]
+   real, pointer, dimension(:,:),   intent(inout)  :: so4colmass ! col mass density [kg/m2]
    real, pointer, dimension(:,:),   intent(inout)  :: exttau     ! ext. AOT at 550 nm
    real, pointer, dimension(:,:),   intent(inout)  :: scatau     ! sct. AOT at 550 nm
    real, pointer, dimension(:,:,:), intent(inout)  :: so4mass    ! 3D sulfate mass mr
-   real, pointer, dimension(:,:,:), intent(inout)  :: so4conc    ! 3D mass concentration, kg/m3
-   real, pointer, dimension(:,:,:), intent(inout)  :: extcoef    ! 3D ext. coefficient, 1/m
-   real, pointer, dimension(:,:,:), intent(inout)  :: scacoef    ! 3D scat.coefficient, 1/m
+   real, pointer, dimension(:,:,:), intent(inout)  :: so4conc    ! 3D mass concentration, [kg/m3]
+   real, pointer, dimension(:,:,:), intent(inout)  :: extcoef    ! 3D ext. coefficient, [1/m]
+   real, pointer, dimension(:,:,:), intent(inout)  :: scacoef    ! 3D scat.coefficient, [1/m]
    real, pointer, dimension(:,:),   intent(inout)  :: angstrom   ! 470-870 nm Angstrom parameter
    real, pointer, dimension(:,:),   intent(inout)  :: fluxu      ! Column mass flux in x direction
    real, pointer, dimension(:,:),   intent(inout)  :: fluxv      ! Column mass flux in y direction
@@ -6727,7 +5247,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  29july2020, E.Sherman - refactored for process library
 
 ! !Local Variables
-   integer :: i, j, k, n, i1=1, j1=1, i2, j2, nch
+   integer :: i, j, k, i1=1, j1=1, i2, j2, nch
    real :: tau, ssa
    real, dimension(:,:), allocatable :: tau470, tau870
    real    :: ilam550, ilam470, ilam870
@@ -7092,12 +5612,12 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !
 !  06Nov2003, Colarco
 !  Based on Ginoux
-!  30july2020 E.Sherman - Refactored for process library
+!  30july2020 E.Sherman - ported to process library
 !
 
 ! !Local Variables
    real, dimension(:,:), allocatable :: cossza, sza
-   integer :: k, n, jday, i2, j2
+   integer :: k, jday, i2, j2
    real, dimension(:,:,:), allocatable :: pSO2_DMS, pMSA_DMS, pSO4g_SO2, pSO4aq_SO2
 !   real, dimension(:,:), allocatable :: drydepositionfrequency
    real    :: xhour
@@ -7217,10 +5737,11 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
                                rc)
 
 !  MSA source and loss
-   call SulfateChemDriver_MSA (km, cdt, grav, msa, nMSA, delp, drydepositionfrequency, &
-                               pMSA_DMS, SU_dep, &
-                               rc)
-
+!   if (associated(msa)) then
+      call SulfateChemDriver_MSA (km, cdt, grav, msa, nMSA, delp, drydepositionfrequency, &
+                                  pMSA_DMS, SU_dep, &
+                                  rc)
+!   end if
 
 !  Save the h2o2 value after chemistry
    h2o2_init = xh2o2
@@ -7299,7 +5820,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  06Nov2003, Colarco
 !  Based on Ginoux
 !
-!  03Aug2020 E.Sherman - Refactored for process library
+!  03Aug2020 E.Sherman - ported to process library
 
 
 ! !Local Variables
@@ -7468,7 +5989,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  06Nov2003, Colarco
 !  Based on Ginoux
 !
-!  03Aug2020 E.Sherman - Refactored for process library
+!  03Aug2020 E.Sherman - ported to process library
 
 
 ! !Local Variables
@@ -7613,7 +6134,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    integer, intent(in) :: km     ! number of model levels
    real, intent(in)    :: cdt    ! chemisty model timestep [sec]
    real, intent(in)    :: grav   ! gravity [m/sec]
-   integer, intent(in) :: nSO4   !index position of sulfate
+   integer, intent(in) :: nSO4   ! index position of sulfate
    real, dimension(:,:,:), intent(in) :: delp   ! pressure thickness [Pa]  
    real, dimension(:,:), intent(in)   :: drydepf    ! dry deposition frequency [s-1]
    real, dimension(:,:,:), intent(in) :: pSO4g_SO2  ! SO4 production - gas phase [kg kg-1 s-1]
@@ -7639,7 +6160,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  06Nov2003, Colarco
 !  Based on Ginoux
 !
-!  03Aug2020 E.Sherman - 
+!  03Aug2020 E.Sherman - ported to process library
 !
 ! !Local Variables
    integer :: i, j, k, i2, j2
@@ -7740,7 +6261,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  06Nov2003, Colarco
 !  Based on Ginoux
 !
-!  03Aug2020 E.Sherman - Refactored for process library
+!  03Aug2020 E.Sherman - ported to process library
 
 ! !Local Variables
    integer :: i, j, k, i2, j2
@@ -8303,7 +6824,7 @@ loop2: DO l = 1,nspecies_HL
 !
 ! !REVISION HISTORY:
 !
-! 11Feb2020 E.Sherman - First attempt at refactor
+! Aug2020 E.Sherman - Refactored for process library
 !
 
 ! !Local Variables
@@ -9983,7 +8504,338 @@ loop2: DO l = 1,nspecies_HL
 
       end subroutine PrintError
 
-!------------------------------------------------------------------------
+!==================================================================================
+!BOP
+!
+! !IROUTINE:  Chem_UtilResVal --- returns resolution dependent value
+!
+! !INTERFACE:
+!
+   function Chem_UtilResVal( im_World, jm_World, res_value, rc ) result (val)
+
+! !USES:
+
+   implicit NONE
+
+   real :: val                                ! resolution dependent value
+
+! !INPUT/OUTPUT PARAMETERS:
+   integer, intent(in) :: im_World, jm_World  ! number of global grid cells
+   real,    intent(in) :: res_value(:)        ! array with the resolution dependent values:
+                                              ! the 'a', 'b', ..., 'e' resolution values have 
+                                              ! indexes 1, 2, ..., 5.
+
+! !OUTPUT PARAMETERS:
+   integer, intent(inout) :: rc               ! return code
+
+
+! !DESCRIPTION: 
+!
+! !REVISION HISTORY:
+!
+! 13 Feb2012   Anton Darmenov  First crack.
+! 25 Oct2012   Anton Darmenov  Added support for FV3 resolutions.
+! 19 Aug2020   E. Sherman - moved from Chem_UtilMod.F90 to process library
+!
+!EOP
+!-------------------------------------------------------------------------
+       character(len=*), parameter :: Iam = 'Chem_UtilResVal'
+
+       integer            :: i_res
+       integer, parameter :: res_a = 1  ! 'a' to 'e' resolution indexes
+       integer, parameter :: res_b = 2  !
+       integer, parameter :: res_c = 3  !
+       integer, parameter :: res_d = 4  !
+       integer, parameter :: res_e = 5  !
+       integer, parameter :: res_f = 6  !
+
+       i_res = 0
+
+       if ((im_World < 1) .or. (jm_World < 1)) then
+!           call die(Iam, 'incorrect model resolution')
+           print*,'GOCART2G_Process::Chem_UtilResVal - incorrect model resolution'
+           return
+       end if
+
+       if (jm_World == 6*im_World) then
+           if (im_World <= 24) then
+               i_res = res_a
+           else if (im_World <=  48) then
+               i_res = res_b
+           else if (im_World <=  90) then
+               i_res = res_c
+           else if (im_World <= 180) then
+               i_res = res_d
+           else if (im_World <= 360) then
+               i_res = res_e
+           else if (im_World <= 720) then
+               i_res = res_f
+           else
+               i_res = res_f
+           end if
+       else
+           if ((im_World <= 72) .and. (jm_World <= 46)) then
+               i_res = res_a
+           else if ((im_World <=  144) .and. (jm_World <=  91)) then
+               i_res = res_b
+           else if ((im_World <=  288) .and. (jm_World <= 181)) then
+               i_res = res_c
+           else if ((im_World <=  576) .and. (jm_World <= 361)) then
+               i_res = res_d
+           else if ((im_World <= 1152) .and. (jm_World <= 721)) then
+               i_res = res_e
+           else if ((im_World <= 2304) .and. (jm_World <=1441)) then
+               i_res = res_f
+           else
+               i_res = res_f
+           end if
+
+
+       end if
+
+       if ((i_res < 1) .or. (i_res > size(res_value))) then
+           val = 0.0
+           rc  = 42
+       else
+           val = res_value(i_res)
+           rc  = 0
+       end if
+
+   end function Chem_UtilResVal
+
+!==================================================================================
+
+   function Chem_UtilIdow(nymd) result (idow)
+     implicit NONE
+     integer, intent(in) :: nymd
+     integer :: idow ! day of the week: Sun=1, Mon=2, etc.
+     integer :: y, m, d
+     integer, parameter :: t(0:11) = (/ 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 /)
+     y = nymd / 10000
+     m = (nymd - y*10000)/100
+     d = nymd - (y*10000 + m*100)
+     if ( m<3 ) then
+        y = y - 1
+     end if
+     idow = 1+mod(y + y/4 - y/100 + y/400 + t(m-1) + d,7)
+     return
+   end function Chem_UtilIdow
+
+   function Chem_UtilCdow(nymd) result (cdow)
+     implicit NONE
+     integer, intent(in) :: nymd
+     character(len=3) :: cdow ! day of the week: Sun, Mon, etc.
+     character(len=3) :: cday(7) = (/ 'Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' /)
+     cdow = cday(Chem_UtilIdow(nymd))
+     return
+   end function Chem_UtilCdow
+
+
+!==================================================================================
+
+!BOP
+!
+! !ROUTINE:  Chem_BiomassDiurnal - Applies diurnal cycle to biomass emissions.
+!
+! !INTERFACE:
+!
+
+     subroutine Chem_BiomassDiurnal ( Eout, Ein, lons, lats, nhms, cdt)
+
+! !USES:
+
+  IMPLICIT NONE
+
+! !ARGUMENTS:
+
+       real, intent(out)   :: Eout(:,:) ! Emissions valid at NHMS
+       real, intent(in)    :: Ein(:,:)  ! Daily-mean emissions
+       real, intent(in)    :: lons(:,:) ! Latitudes in degrees
+       real, intent(in)    :: lats(:,:) ! Latitudes in degrees
+       integer, intent(in) :: nhms
+       real, intent(in)    :: cdt       ! time step in seconds
+
+! !DESCRIPTION: 
+!
+!      Applies diurnal cycle to biomass emissions.       
+!
+! !DESCRIPTION:
+!
+!  This module implements assorted odds & ends for fvChem.
+!
+! !REVISION HISTORY:
+!
+!  13nov2009  da Silva  First crack.
+!  19Aug2020  E. Sherman - moved from Chem_UtilMod.F90 to process library
+!
+!EOP
+!-------------------------------------------------------------------------
+
+!      Hardwired diurnal cycle (multiplied by 100)
+!      These numbers were derived from GOES-12
+!      fire counts for 2003-2007.
+!      -------------------------------------------
+       integer, parameter :: N = 240
+       real,    parameter :: DT = 86400. / N
+
+!      Apply flat diurnal cycle for boreal forests as a 
+!      temporary solution to prevent very high aerosol
+!      optical depth during the day
+       real,    parameter :: Boreal(N) = 1.0
+!      real,    parameter :: Boreal(N) = &
+!      (/ 0.0277, 0.0292, 0.0306, 0.0318, 0.0327, 0.0335, &
+!         0.0340, 0.0342, 0.0341, 0.0338, 0.0333, 0.0326, &
+!         0.0316, 0.0305, 0.0292, 0.0278, 0.0263, 0.0248, &
+!         0.0233, 0.0217, 0.0202, 0.0187, 0.0172, 0.0158, &
+!         0.0145, 0.0133, 0.0121, 0.0110, 0.0100, 0.0091, &
+!         0.0083, 0.0075, 0.0068, 0.0062, 0.0056, 0.0051, &
+!         0.0046, 0.0042, 0.0038, 0.0035, 0.0032, 0.0030, &
+!         0.0028, 0.0026, 0.0025, 0.0024, 0.0024, 0.0024, &
+!         0.0024, 0.0026, 0.0027, 0.0030, 0.0033, 0.0036, &
+!         0.0041, 0.0046, 0.0052, 0.0060, 0.0069, 0.0079, &
+!         0.0090, 0.0104, 0.0119, 0.0137, 0.0157, 0.0180, &
+!         0.0205, 0.0235, 0.0268, 0.0305, 0.0346, 0.0393, &
+!         0.0444, 0.0502, 0.0565, 0.0634, 0.0711, 0.0794, &
+!         0.0884, 0.0982, 0.1087, 0.1201, 0.1323, 0.1453, &
+!         0.1593, 0.1742, 0.1900, 0.2069, 0.2249, 0.2439, &
+!         0.2642, 0.2858, 0.3086, 0.3329, 0.3587, 0.3860, &
+!         0.4149, 0.4455, 0.4776, 0.5115, 0.5470, 0.5840, &
+!         0.6227, 0.6628, 0.7043, 0.7470, 0.7908, 0.8355, &
+!         0.8810, 0.9271, 0.9735, 1.0200, 1.0665, 1.1126, &
+!         1.1580, 1.2026, 1.2460, 1.2880, 1.3282, 1.3664, &
+!         1.4023, 1.4356, 1.4660, 1.4933, 1.5174, 1.5379, &
+!         1.5548, 1.5679, 1.5772, 1.5826, 1.5841, 1.5818, &
+!         1.5758, 1.5661, 1.5529, 1.5365, 1.5169, 1.4944, &
+!         1.4693, 1.4417, 1.4119, 1.3801, 1.3467, 1.3117, &
+!         1.2755, 1.2383, 1.2003, 1.1616, 1.1225, 1.0832, &
+!         1.0437, 1.0044, 0.9653, 0.9265, 0.8882, 0.8504, &
+!         0.8134, 0.7771, 0.7416, 0.7070, 0.6734, 0.6407, &
+!         0.6092, 0.5787, 0.5493, 0.5210, 0.4939, 0.4680, &
+!         0.4433, 0.4197, 0.3974, 0.3763, 0.3565, 0.3380, &
+!         0.3209, 0.3051, 0.2907, 0.2777, 0.2662, 0.2561, &
+!         0.2476, 0.2407, 0.2352, 0.2313, 0.2289, 0.2279, &
+!         0.2283, 0.2300, 0.2329, 0.2369, 0.2417, 0.2474, &
+!         0.2536, 0.2602, 0.2670, 0.2738, 0.2805, 0.2869, &
+!         0.2927, 0.2979, 0.3024, 0.3059, 0.3085, 0.3101, &
+!         0.3107, 0.3102, 0.3087, 0.3061, 0.3026, 0.2983, &
+!         0.2931, 0.2871, 0.2806, 0.2735, 0.2659, 0.2579, &
+!         0.2497, 0.2412, 0.2326, 0.2240, 0.2153, 0.2066, &
+!         0.1979, 0.1894, 0.1809, 0.1726, 0.1643, 0.1562, &
+!         0.1482, 0.1404, 0.1326, 0.1250, 0.1175, 0.1101, &
+!         0.1028, 0.0956, 0.0886, 0.0818, 0.0751, 0.0687 /)       
+       real,    parameter :: NonBoreal(N) = &
+       (/ 0.0121, 0.0150, 0.0172, 0.0185, 0.0189, 0.0184, &
+          0.0174, 0.0162, 0.0151, 0.0141, 0.0133, 0.0126, &
+          0.0121, 0.0117, 0.0115, 0.0114, 0.0114, 0.0116, &
+          0.0120, 0.0126, 0.0133, 0.0142, 0.0151, 0.0159, &
+          0.0167, 0.0174, 0.0180, 0.0184, 0.0187, 0.0189, &
+          0.0190, 0.0190, 0.0191, 0.0192, 0.0192, 0.0193, &
+          0.0194, 0.0194, 0.0193, 0.0192, 0.0190, 0.0187, &
+          0.0185, 0.0182, 0.0180, 0.0178, 0.0177, 0.0176, &
+          0.0174, 0.0172, 0.0169, 0.0166, 0.0162, 0.0158, &
+          0.0153, 0.0149, 0.0144, 0.0138, 0.0132, 0.0126, &
+          0.0118, 0.0109, 0.0101, 0.0092, 0.0085, 0.0081, &
+          0.0080, 0.0083, 0.0091, 0.0102, 0.0117, 0.0135, &
+          0.0157, 0.0182, 0.0210, 0.0240, 0.0273, 0.0308, &
+          0.0345, 0.0387, 0.0432, 0.0483, 0.0540, 0.0606, &
+          0.0683, 0.0775, 0.0886, 0.1022, 0.1188, 0.1388, &
+          0.1625, 0.1905, 0.2229, 0.2602, 0.3025, 0.3500, &
+          0.4031, 0.4623, 0.5283, 0.6016, 0.6824, 0.7705, &
+          0.8650, 0.9646, 1.0676, 1.1713, 1.2722, 1.3662, &
+          1.4491, 1.5174, 1.5685, 1.6014, 1.6173, 1.6200, &
+          1.6150, 1.6082, 1.6040, 1.6058, 1.6157, 1.6353, &
+          1.6651, 1.7045, 1.7513, 1.8024, 1.8541, 1.9022, &
+          1.9429, 1.9738, 1.9947, 2.0072, 2.0132, 2.0141, &
+          2.0096, 1.9994, 1.9829, 1.9604, 1.9321, 1.8977, &
+          1.8562, 1.8052, 1.7419, 1.6646, 1.5738, 1.4734, &
+          1.3693, 1.2676, 1.1724, 1.0851, 1.0052, 0.9317, &
+          0.8637, 0.8004, 0.7414, 0.6862, 0.6348, 0.5871, &
+          0.5434, 0.5037, 0.4682, 0.4368, 0.4097, 0.3864, &
+          0.3667, 0.3499, 0.3355, 0.3231, 0.3123, 0.3029, &
+          0.2944, 0.2862, 0.2773, 0.2670, 0.2547, 0.2402, &
+          0.2238, 0.2061, 0.1882, 0.1712, 0.1562, 0.1434, &
+          0.1332, 0.1251, 0.1189, 0.1141, 0.1103, 0.1071, &
+          0.1043, 0.1018, 0.0996, 0.0979, 0.0968, 0.0964, &
+          0.0966, 0.0970, 0.0973, 0.0970, 0.0959, 0.0938, &
+          0.0909, 0.0873, 0.0831, 0.0784, 0.0732, 0.0676, &
+          0.0618, 0.0565, 0.0521, 0.0491, 0.0475, 0.0473, &
+          0.0480, 0.0492, 0.0504, 0.0514, 0.0519, 0.0521, &
+          0.0520, 0.0517, 0.0513, 0.0510, 0.0507, 0.0507, &
+          0.0508, 0.0512, 0.0515, 0.0518, 0.0519, 0.0518, &
+          0.0513, 0.0506, 0.0496, 0.0482, 0.0465, 0.0443, &
+          0.0418, 0.0387, 0.0351, 0.0310, 0.0263, 0.0214 /)
+
+!      Fixed normalization factors; a more accurate normalization would take
+!      in consideration longitude and time step
+!      ---------------------------------------------------------------------
+       real*8, save :: fBoreal = -1., fNonBoreal = -1
+       real,   save :: fDT=-1
+
+       integer :: hh, mm, ss, ndt, i, j, k
+       integer :: NN
+       real :: secs, secs_local, aBoreal, aNonBoreal, alpha
+
+!                              -----
+
+!      Normalization factor depends on timestep
+!      ----------------------------------------
+       if ( fDT /= cdt ) then
+            fBoreal = 0.0
+            fNonBoreal = 0.0
+            NN = 0
+            ndt = max(1,nint(cdt/DT))
+
+            do k = 1, N, ndt
+               NN = NN + 1
+               fBoreal    = fBoreal    + Boreal(k)
+               fNonBoreal = fNonBoreal + NonBoreal(k)
+            end do
+
+            fBoreal    = fBoreal / NN
+            fnonBoreal = fnonBoreal / NN
+            fDT = cdt ! so it recalculates only if necessary
+       end if
+
+
+!      Find number of secs since begining of the day (GMT)
+!      ---------------------------------------------------
+       hh = nhms/10000
+       mm = (nhms - 10000*hh) / 100
+       ss = nhms - 10000*hh - 100*mm
+       secs = 3600.*hh + 60.*mm + ss
+
+!      Apply factors depending on latitude
+!      -----------------------------------
+       do j = lbound(Ein,2), ubound(Ein,2)
+         do i = lbound(Ein,1), ubound(Ein,1)
+
+!            Find corresponding index in hardwired diurnal cycle
+!            240 = 24 * 60 * 60 secs / 360 deg
+!            ---------------------------------------------------
+             secs_local = secs + 240. * lons(i,j)
+             k = 1 + mod(nint(secs_local/DT),N)
+             if ( k < 1 ) k = N + k
+
+!            Apply diurnal cycle
+!            -------------------
+             aBoreal = Boreal(k) / fBoreal
+             aNonBoreal = NonBoreal(k) / fNonBoreal
+
+                if ( lats(i,j) >= 50. ) then
+                   Eout(i,j) = aBoreal    * Ein(i,j)
+                else if ( lats(i,j) >= 30. ) then
+                   alpha = (lats(i,j) - 30. ) / 20.
+                   Eout(i,j) = (1-alpha) * aNonBoreal * Ein(i,j) + &
+                                  alpha  * aBoreal    * Ein(i,j)
+                else
+                   Eout(i,j) = aNonBoreal * Ein(i,j)
+                end if
+          end do
+       end do
+
+     end subroutine Chem_BiomassDiurnal
+!==================================================================================
+
 
 
 
