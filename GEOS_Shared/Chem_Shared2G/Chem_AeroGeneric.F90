@@ -27,7 +27,9 @@ module  Chem_AeroGeneric
    public add_aero
    public append_to_bundle
    public determine_data_driven
-!   public aerosol_optics1
+   public setZeroKlid
+   public setZeroKlid4d
+   public findKlid
 !
 ! !DESCRIPTION:
 !
@@ -152,168 +154,148 @@ contains
   end subroutine append_to_bundle
 
 !===================================================================================
-#if 0
-  subroutine aerosol_optics1(state, rc)
+!BOP
+! !IROUTINE: setZeroKlid
+   subroutine setZeroKlid(km, klid, int_ptr)
 
-    implicit none
+! !USES:
+   implicit NONE
 
-!   !ARGUMENTS:
-    type (ESMF_State)                                :: state
-    integer,            intent(out)                  :: rc
+! !INPUT PARAMETERS:
+   integer, intent(in) :: km   ! total model levels
+   integer, intent(in) :: klid ! index for pressure level
 
-!   !Local
-    integer, parameter                               :: DP=kind(1.0d0)
-    real, dimension(:,:,:), pointer                  :: ple, rh
-    real(kind=DP), dimension(:,:,:), pointer         :: var
-    real, dimension(:,:,:,:), pointer                :: q, q_4d
-    integer, allocatable                             :: opaque_self(:)
-    type(C_PTR)                                      :: address
-    type(SS2G_GridComp), pointer                     :: self
+! !INOUTPUT PARAMETERS:
+   real, dimension(:,:,:), intent(inout) :: int_ptr ! aerosol pointer
 
-    character (len=ESMF_MAXSTR)                      :: fld_name, int_fld_name
-    type(ESMF_Field)                                 :: fld
-    character (len=ESMF_MAXSTR)                      :: COMP_NAME
+! !DESCRIPTION: Set values to 0 where above klid
+!
+! !REVISION HISTORY:
+!
+! 25Aug2020 E.Sherman - Written 
+!
+! !Local Variables
+   integer :: k
 
-    real(kind=DP), dimension(:,:,:), allocatable     :: ext_s, ssa_s, asy_s  ! (lon:,lat:,lev:)
-    real, dimension(:,:,:), allocatable              :: x
-    integer                                          :: instance
-    integer                                          :: n, nbins, dims(4)
-    integer                                          :: i1, j1, i2, j2, km
-    integer                                          :: band, offset
-    integer, parameter                               :: n_bands = 1
+!EOP
+!----------------------------------------------------------------------------------
+!  Begin...
 
-    integer :: i, j, k
-
-    __Iam__('aerosol_optics1')
-
-!   Begin... 
-if(mapl_am_i_root()) print*,'aerosol_optics1 is working!'
-!   Mie Table instance/index
-!   ------------------------
-    call ESMF_AttributeGet(state, name='mie_table_instance', value=instance, __RC__)
-
-!   Radiation band
-!   --------------
-    band = 0
-    call ESMF_AttributeGet(state, name='band_for_aerosol_optics', value=band, __RC__)
-    offset = band - n_bands
-
-!   Pressure at layer edges 
-!   ------------------------
-    call ESMF_AttributeGet(state, name='air_pressure_for_aerosol_optics', value=fld_name, __RC__)
-    call MAPL_GetPointer(state, ple, trim(fld_name), __RC__)
-
-!    call MAPL_GetPointer (state, ple, 'PLE', __RC__)
-
-    i1 = lbound(ple, 1); i2 = ubound(ple, 1)
-    j1 = lbound(ple, 2); j2 = ubound(ple, 2)
-                         km = ubound(ple, 3)
-
-!   Relative humidity
-!   -----------------
-    call ESMF_AttributeGet(state, name='relative_humidity_for_aerosol_optics', value=fld_name, __RC__)
-    call MAPL_GetPointer(state, rh, trim(fld_name), __RC__)
-
-!    call MAPL_GetPointer (state, rh, 'RH2', __RC__)
-
-    allocate(ext_s(i1:i2, j1:j2, km), &
-             ssa_s(i1:i2, j1:j2, km), &
-             asy_s(i1:i2, j1:j2, km), &
-                 x(i1:i2, j1:j2, km), __STAT__)
-
-    call ESMF_AttributeGet(state, name='internal_varaible_name', value=int_fld_name, __RC__)
-    call ESMF_StateGet (state, trim(int_fld_name), field=fld, __RC__) !add as attribute - dont hard code?
-    call ESMF_FieldGet (fld, farrayPtr=q, __RC__)
-
-    nbins = size(q,4)
-
-    allocate(q_4d(i1:i2, j1:j2, km, nbins), __STAT__)
-
-    do n = 1, nbins
-       do k = 1, km
-          x(:,:,k) = ((PLE(:,:,k) - PLE(:,:,k-1))*0.01)*(100./MAPL_GRAV)
-          q_4d(:,:,k,n) = x(:,:,k) * q(:,:,k,n)
-       end do
+    do k = 1, km
+       if (k < klid) then
+          int_ptr(:,:,k) = 0.0
+       else if (k >= klid) then
+          exit
+       end if
     end do
 
-    call ESMF_AttributeGet(state, name='mieTable_pointer', itemCount=n, __RC__)
-    allocate (opaque_self(n), __STAT__)
-    call ESMF_AttributeGet(state, name='mieTable_pointer', valueList=opaque_self, __RC__)
+   end subroutine setZeroKlid
+!===================================================================================
+!BOP
+! !IROUTINE: setZeroKlid
+   subroutine setZeroKlid4d (km, klid, int_ptr)
 
-    address = transfer(opaque_self, address)
-    call c_f_pointer(address, self)
+! !USES:
+   implicit NONE
 
-    call mie_ (self%rad_MieTable(instance), nbins, n_bands, offset, q_4d, rh, ext_s, ssa_s, asy_s, __RC__)
-    call ESMF_AttributeGet(state, name='extinction_in_air_due_to_ambient_aerosol', value=fld_name, __RC__)
-    if (fld_name /= '') then
-        call MAPL_GetPointer(state, var, trim(fld_name), __RC__)
-        var = ext_s(:,:,:)
-    end if
+! !INPUT PARAMETERS:
+   integer, intent(in) :: km   ! total model levels
+   integer, intent(in) :: klid ! index for pressure level
 
-    call ESMF_AttributeGet(state, name='single_scattering_albedo_of_ambient_aerosol', value=fld_name, __RC__)
-    if (fld_name /= '') then
-        call MAPL_GetPointer(state, var, trim(fld_name), __RC__)
-        var = ssa_s(:,:,:)
-    end if
+! !INOUTPUT PARAMETERS:
+   real, dimension(:,:,:,:), intent(inout) :: int_ptr ! aerosol pointer
 
-   call ESMF_AttributeGet(state, name='asymmetry_parameter_of_ambient_aerosol', value=fld_name, __RC__)
-    if (fld_name /= '') then
-        call MAPL_GetPointer(state, var, trim(fld_name), __RC__)
-        var = asy_s(:,:,:)
-    end if
+! !DESCRIPTION: Set values to 0 where above klid
+!
+! !REVISION HISTORY:
+!
+! 25Aug2020 E.Sherman - Written 
+!
+! !Local Variables
+   integer :: k, n
 
-    deallocate(ext_s, ssa_s, asy_s, __STAT__)
+!EOP
+!----------------------------------------------------------------------------------
+!  Begin...
 
-    RETURN_(ESMF_SUCCESS)
+   do n = 1, ubound(int_ptr, 4)
+      do k = 1, km
+         if (k < klid) then
+            int_ptr(:,:,k,n) = 0.0
+         else if (k >= klid) then
+            exit
+         end if
+      end do
+   end do
 
-  contains
+   end subroutine setZeroKlid4d
 
-!    subroutine mie_(mie_table, aerosol_names, nb, offset, q, rh, bext_s, bssa_s, basym_s, rc)
-    subroutine mie_(mie_table, nbins, nb, offset, q, rh, bext_s, bssa_s, basym_s, rc)
-
-    implicit none
-
-    type(Chem_Mie),                intent(inout) :: mie_table        ! mie table
-    integer,                       intent(in   ) :: nbins            ! number of bins
-    integer,                       intent(in )   :: nb               ! number of bands
-    integer,                       intent(in )   :: offset           ! bands offset 
-    real,                          intent(in )   :: q(:,:,:,:)       ! aerosol mass mixing ratio, kg kg-1
-    real,                          intent(in )   :: rh(:,:,:)        ! relative humidity
-    real(kind=8), intent(  out) :: bext_s (size(ext_s,1),size(ext_s,2),size(ext_s,3))
-    real(kind=8), intent(  out) :: bssa_s (size(ext_s,1),size(ext_s,2),size(ext_s,3))
-    real(kind=8), intent(  out) :: basym_s(size(ext_s,1),size(ext_s,2),size(ext_s,3))
-    integer,           intent(out)  :: rc
-
-    ! local
-    integer                           :: l
-    real                              :: bext (size(ext_s,1),size(ext_s,2),size(ext_s,3))  ! extinction
-    real                              :: bssa (size(ext_s,1),size(ext_s,2),size(ext_s,3))  ! SSA
-    real                              :: gasym(size(ext_s,1),size(ext_s,2),size(ext_s,3))  ! asymmetry parameter
-
-    __Iam__('SS2G::aerosol_optics::mie_')
-
-     bext_s  = 0.0d0
-     bssa_s  = 0.0d0
-     basym_s = 0.0d0
-
-    do l = 1, nbins
-       call Chem_MieQuery(mie_table, l, real(offset+1.), q(:,:,:,l), rh, bext, gasym=gasym, ssa=bssa)
-
-       bext_s  = bext_s  +             bext     ! extinction
-       bssa_s  = bssa_s  +       (bssa*bext)    ! scattering extinction
-       basym_s = basym_s + gasym*(bssa*bext)    ! asymetry parameter multiplied by scatering extiction 
-    end do
-
-    RETURN_(ESMF_SUCCESS)
-
-    end subroutine mie_
-
-  end subroutine aerosol_optics1
-
-#endif
 
 !===================================================================================
+!BOP
+! !IROUTINE: findKlid
+   subroutine findKlid (klid, plid, ple, rc)
 
+! !USES:
+   implicit NONE
+
+! !INPUT PARAMETERS:
+   integer, intent(inout) :: klid ! index for pressure lid
+   real, intent(in)       :: plid ! pressure lid [hPa]
+   real, dimension(:,:,:), intent(in) :: ple  ! air pressure [Pa]
+
+! !OUTPUT PARAMETERS:
+   integer, intent(out) :: rc ! return code; 0 - all is good
+!                                            1 - bad
+
+! !DESCRIPTION: Finds corresponding vertical index for defined pressure lid
+!
+! !REVISION HISTORY:
+!
+! 25Aug2020 E.Sherman - Written 
+!
+! !Local Variables
+   integer :: k, j, i
+   real :: plid_, diff, refDiff
+   real, allocatable, dimension(:) :: pres  ! pressure at each model level [Pa]
+
+!EOP
+!----------------------------------------------------------------------------------
+!  Begin...
+   klid = 1
+   rc = 0
+
+!  convert from hPa to Pa
+   plid_ = plid*100.0
+
+   allocate(pres(ubound(ple,3)))
+
+!  find pressure at each model level
+   do k = 1, ubound(ple,3)
+      pres(k) = ple(1,1,k)
+   end do
+
+!  find smallest absolute difference between plid and average pressure at each model level
+   refDiff = 150000.0
+   do k = 1, ubound(ple,3)
+      diff = abs(pres(k) - plid_)
+      if (diff < refDiff) then
+         klid = k
+         refDiff = diff
+      end if
+   end do
+
+!  Check to make sure that all pressures at (i,j) were the same
+   do j = 1, ubound(ple,2)
+      do i = 1, ubound(ple,1)
+         if (pres(klid) /= ple(i,j,klid)) then
+            rc = 1
+            return
+         end if
+      end do
+   end do
+
+   end subroutine findKlid
 
 end module  Chem_AeroGeneric
 
