@@ -1,4 +1,10 @@
-
+#define __SUCCESS__ 0
+#define __VERIFY__(x) if(x/=0) then; if(present(rc)) rc=x; return; endif
+#define __RC__ rc=status); __VERIFY__(status
+#define __STAT__ stat=status); __VERIFY__(status
+#define __IOSTAT__ iostat=status); __VERIFY__(status
+#define __RETURN__(x) if (present(rc)) rc=x; return
+#define __ASSERT__(expr) if(.not. (expr)) then; if (present(rc)) rc=-1; return; endif
 !-------------------------------------------------------------------------
 !
 ! !MODULE: GOCART2G_Process -- GOCART2G process library
@@ -9,11 +15,9 @@
 ! !USES:
 !  Only instrinsic fortran types and functions are allowed.
    use Chem_MieTableMod2G
+   use, intrinsic :: iso_fortran_env, only: IOSTAT_END
 
    implicit none
-
-! !PUBLIC TYPES:
-!
    private
 
 !
@@ -51,11 +55,29 @@
    public Chem_UtilIdow
    public Chem_UtilCdow
    public Chem_BiomassDiurnal
-
+   public ReadPointEmissions
+   public EmissionReader
 
    real, parameter :: OCEAN=0.0, LAND = 1.0, SEA_ICE = 2.0
    integer, parameter     :: DP = kind(1.0d0)
 
+   type :: EmissionReader
+      private
+      integer, allocatable :: unit
+   contains
+      procedure :: open
+      procedure :: close
+      procedure :: rewind => rewind_reader
+      procedure :: is_end_marker
+      procedure :: read_table
+      procedure :: next_line
+      procedure :: count_words
+      procedure :: scan_to_label
+      procedure :: get_dims
+   end type EmissionReader
+
+   type KeywordEnforcer
+   end type KeywordEnforcer
 
 !
 ! !DESCRIPTION:
@@ -277,10 +299,12 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Begin
 
-    z(1:km) = hghte(0:km-1)
+!    z(1:km) = hghte(0:km-1)
+    z(1:km) = hghte(1:km)
 
     do k = km, 1, -1
-       dz(k) = hghte(k-1)-hghte(k)
+!       dz(k) = hghte(k-1)-hghte(k)
+       dz(k) = hghte(k)-hghte(k+1)
     end do
 
 !   find the bottom level
@@ -345,7 +369,7 @@ CONTAINS
 !BOP
 ! !IROUTINE: Chem_Settling2G
 
-   subroutine Chem_Settling2Gorig (km, flag, bin, int_qa, grav, delp, &
+   subroutine Chem_Settling2Gorig (km, klid, flag, bin, int_qa, grav, delp, &
                                    radiusInp, rhopInp, cdt, tmpu, rhoa, &
                                    rh, hghte, fluxout, vsettleOut, correctionMaring, rc)
 
@@ -354,6 +378,7 @@ CONTAINS
 
 ! !INPUT PARAMETERS:
    integer,    intent(in)    :: km     ! total model levels
+   integer,    intent(in)    :: klid   ! index for pressure lid
    integer,    intent(in)    :: flag   ! flag to control particle swelling (see note)
    integer,    intent(in)    :: bin    ! aerosol bin index
    real,       intent(in)    :: grav   ! gravity [m/sec^2]
@@ -490,7 +515,8 @@ CONTAINS
        return
     end if
 
-    do k = 1, km
+!    do k = 1, km
+    do k = klid, km
        do j = j1, j2
           do i = i1, i2
 !            Find the column dry mass before sedimentation
@@ -606,10 +632,14 @@ qa_temp = qa
     do iit = 1, nSubSteps
 
 !      Try a simple forward Euler scheme
-       qdel = qa(i1:i2,j1:j2,1)*dt_settle*vsd(i1:i2,j1:j2,1)/dzd(i1:i2,j1:j2,1)
-       qa(i1:i2,j1:j2,1) = qa(i1:i2,j1:j2,1) - qdel
+!       qdel = qa(i1:i2,j1:j2,1)*dt_settle*vsd(i1:i2,j1:j2,1)/dzd(i1:i2,j1:j2,1)
+!       qa(i1:i2,j1:j2,1) = qa(i1:i2,j1:j2,1) - qdel
 
-       do k = 2, km
+       qdel = qa(i1:i2,j1:j2,klid)*dt_settle*vsd(i1:i2,j1:j2,klid)/dzd(i1:i2,j1:j2,klid)
+       qa(i1:i2,j1:j2,klid) = qa(i1:i2,j1:j2,klid) - qdel
+
+!       do k = 2, km
+       do k = klid+1, km
           d_p   = delp(i1:i2,j1:j2,k)
           dpm1 = delp(i1:i2,j1:j2,k-1)
           qsrc = qdel * dpm1 / d_p
@@ -666,7 +696,7 @@ qa_temp = qa
 !
 
    subroutine Chem_CalcVsettle2Gorig ( radius, rhop, rhoa, tmpu, grav, &
-                                 diff_coef, vsettle )
+                                      diff_coef, vsettle )
 
 ! !USES:
 
@@ -759,7 +789,7 @@ qa_temp = qa
 !BOP
 ! !IROUTINE: Chem_SettlingSimpleOrig 
 
-   subroutine Chem_SettlingSimpleOrig ( km, flag, grav, cdt, radiusInp, rhopInp, &
+   subroutine Chem_SettlingSimpleOrig ( km, klid, flag, grav, cdt, radiusInp, rhopInp, &
                                         int_qa, tmpu, rhoa, rh, delp, hghte, &
                                         fluxout, rc, vsettleOut, correctionMaring )
 
@@ -769,6 +799,7 @@ qa_temp = qa
 
 ! !INPUT PARAMETERS:
    integer,    intent(in)  :: km        ! total model levels
+   integer,    intent(in)  :: klid      ! index for pressure level lid
    integer,    intent(in)  :: flag      ! flag to control particle swelling (see note)
    real,       intent(in)  :: grav      ! gravity [m/sec^2]
    real,       intent(in)  :: cdt       ! chemistry model time-step [sec]
@@ -873,7 +904,8 @@ qa_temp = qa
 !   If radius le 0 then get out of loop
     if(radius .le. 0.) return
 
-    do k = 1, km
+!    do k = 1, km
+    do k = klid, km
      do j = j1, j2
       do i = i1, i2
 
@@ -972,11 +1004,12 @@ qa_temp = qa
     do iit = 1, nSubSteps
 
 !     Try a simple forward Euler scheme
+     qdel = qa(i1:i2,j1:j2,klid)*dt_settle*vsd(i1:i2,j1:j2,klid)/dzd(i1:i2,j1:j2,klid)
+     qa(i1:i2,j1:j2,klid) = qa(i1:i2,j1:j2,klid) - qdel
+!     qdel = qa(i1:i2,j1:j2,1)*dt_settle*vsd(i1:i2,j1:j2,1)/dzd(i1:i2,j1:j2,1)
+!     qa(i1:i2,j1:j2,1) = qa(i1:i2,j1:j2,1) - qdel
 
-     qdel = qa(i1:i2,j1:j2,1)*dt_settle*vsd(i1:i2,j1:j2,1)/dzd(i1:i2,j1:j2,1)
-     qa(i1:i2,j1:j2,1) = qa(i1:i2,j1:j2,1) - qdel
-
-     do k = 2, km
+     do k = klid+1, km
       dp   = delp(i1:i2,j1:j2,k)
       dpm1 = delp(i1:i2,j1:j2,k-1)
       qsrc = qdel * dpm1 / dp
@@ -987,7 +1020,8 @@ qa_temp = qa
     end do  ! iit
 
 !   Find the column dry mass after sedimentation and thus the loss flux
-    do k = 1, km
+!    do k = 1, km
+    do k = klid, km
      do j = j1, j2
       do i = i1, i2
        cmass_after(i,j) = cmass_after(i,j) + qa(i,j,k)/ gravDP * delp(i,j,k)
@@ -1259,7 +1293,7 @@ qa_temp = qa
 
 ! !IROUTINE: WetRemovalGOCART2G 
 !#if 0
-   subroutine WetRemovalGOCART2G ( km, n1, n2, bin_ind, cdt, aero_type, kin, grav, fwet, &
+   subroutine WetRemovalGOCART2G ( km, klid, n1, n2, bin_ind, cdt, aero_type, kin, grav, fwet, &
                                    aerosol, ple, tmpu, rhoa, pfllsan, pfilsan, &
                                    precc, precl, fluxout, rc )
 
@@ -1268,6 +1302,7 @@ qa_temp = qa
 
 ! !INPUT PARAMETERS:
    integer, intent(in) :: km  ! total model levels
+   integer, intent(in) :: klid ! index for pressure lid
    integer, intent(in) :: n1  ! total number of bins (probably can be removed)
    integer, intent(in) :: n2  ! total number of bins (probably can be removed)
    integer, intent(in) :: bin_ind ! bin index (usually the loop iteration)
@@ -1427,7 +1462,8 @@ qa_temp = qa
 !    Find the highest model layer experiencing rainout.  Assumes no
 !    scavenging if T < 258 K
      LH = 0
-     do k = 1, km
+!     do k = 1, km
+     do k = klid, km
       if(dpfli(i,j,k) .gt. 0. ) then
        LH = k
        goto 15
@@ -1812,7 +1848,7 @@ qa_temp = qa
 ! !INTERFACE:
 !
 
-   subroutine Aero_Compute_Diags (mie_table, km, nbegin, nbins, rlow, rup, channels, &
+   subroutine Aero_Compute_Diags (mie_table, km, klid, nbegin, nbins, rlow, rup, channels, &
                                   aerosol, grav, tmpu, rhoa, rh, u, v, delp, &
                                   sfcmass, colmass, mass, exttau, scatau, &
                                   sfcmass25, colmass25, mass25, exttau25, scatau25, &
@@ -1826,6 +1862,7 @@ qa_temp = qa
 ! !INPUT PARAMETERS:
    type(Chem_Mie),  intent(in) :: mie_table        ! mie table
    integer, intent(in) :: km, nbegin, nbins
+   integer,    intent(in)    :: klid   ! index for pressure lid
    real, optional, dimension(:), intent(in)    :: rlow   ! bin radii - low bounds
    real, optional, dimension(:), intent(in)    :: rup    ! bin radii - upper bounds
    real, dimension(:), intent(in)    :: channels
@@ -1889,8 +1926,6 @@ qa_temp = qa
 !-------------------------------------------------------------------------
 !  Begin...
  
-!print*,'TEST 1'
-
 !  Initialize local variables
 !  --------------------------
    nch = size(channels)
@@ -1904,17 +1939,15 @@ qa_temp = qa
    ilam470 = 0.
    ilam870 = 0.
    if(nch .gt. 1) then
-    do i = 1, nch
-     if ( channels(i) .ge. 5.49e-7 .and. &
-          channels(i) .le. 5.51e-7) ilam550 = i
-     if ( channels(i) .ge. 4.69e-7 .and. &
-          channels(i) .le. 4.71e-7) ilam470 = i
-     if ( channels(i) .ge. 8.69e-7 .and. &
-          channels(i) .le. 8.71e-7) ilam870 = i
-    enddo
+      do i = 1, nch
+         if ( channels(i) .ge. 5.49e-7 .and. &
+              channels(i) .le. 5.51e-7) ilam550 = i
+         if ( channels(i) .ge. 4.69e-7 .and. &
+              channels(i) .le. 4.71e-7) ilam470 = i
+         if ( channels(i) .ge. 8.69e-7 .and. &
+              channels(i) .le. 8.71e-7) ilam870 = i
+      enddo
    endif
-
-!print*,'TEST 2'
 
 !  Determine if going to do Angstrom parameter calculation
 !  -------------------------------------------------------
@@ -1925,16 +1958,9 @@ qa_temp = qa
       ilam870 .ne. 0. .and. &
       ilam470 .ne. ilam870) do_angstrom = .true.
 
-!   if( present(angstrom) .and. associated(angstrom) .and. do_angstrom ) then
+   if( present(angstrom) .and. associated(angstrom) .and. do_angstrom ) then
       allocate(tau470(i1:i2,j1:j2), tau870(i1:i2,j1:j2))
-!   end if
-
-!print*,'SS2G ilam550 = ', ilam550
-!print*,'SS2G ilam470 = ', ilam470
-!print*,'SS2G ilam870 = ', ilam870
-!print*,'SS2G do_angstrom = ',do_angstrom
-
-!print*,'TEST 3'
+   end if
 
 !  Compute the fine mode (sub-micron) and PM2.5 bin-wise fractions
 !  ------------------------------------
@@ -1943,15 +1969,10 @@ qa_temp = qa
       call Aero_Binwise_PM_Fractions(fPM25, 1.25, rlow, rup, nbins)   ! 2*r < 2.5 um
    end if
 
-!print*,'TEST 4'
-
    if (present(aerindx) .and. associated(aerindx))  aerindx = 0.0  ! for now
-
-!print*,'TEST 5'
 
 !  Calculate the diagnostic variables if requested
 !  -----------------------------------------------
-
 !  Calculate the surface mass concentration
    if( present(sfcmass) .and. associated(sfcmass) ) then
       sfcmass(i1:i2,j1:j2) = 0.
@@ -1961,7 +1982,6 @@ qa_temp = qa
               + aerosol(i1:i2,j1:j2,km,n)*rhoa(i1:i2,j1:j2,km)
       end do
    endif
-!print*,'TEST a'
    if( present(sfcmass25) .and. associated(sfcmass25) ) then
       sfcmass25(i1:i2,j1:j2) = 0.
       do n = nbegin, nbins
@@ -1971,13 +1991,11 @@ qa_temp = qa
       end do
    endif
 
-!print*,'TEST 6'
-
 !  Calculate the aerosol column loading
    if( present(colmass) .and. associated(colmass) ) then
       colmass(i1:i2,j1:j2) = 0.
       do n = nbegin, nbins
-       do k = 1, km
+       do k = klid, km
         colmass(i1:i2,j1:j2) &
          =   colmass(i1:i2,j1:j2) &
            + aerosol(i1:i2,j1:j2,k,n)*delp(i1:i2,j1:j2,k)/grav
@@ -1987,27 +2005,23 @@ qa_temp = qa
    if( present(colmass25) .and. associated(colmass25)) then
       colmass25(i1:i2,j1:j2) = 0.
       do n = nbegin, nbins
-       do k = 1, km
-        colmass25(i1:i2,j1:j2) &
-         =   colmass25(i1:i2,j1:j2) &
-           + aerosol(i1:i2,j1:j2,k,n)*delp(i1:i2,j1:j2,k)/grav*fPM25(n)
+         do k = klid, km
+            colmass25(i1:i2,j1:j2) &
+             = colmass25(i1:i2,j1:j2) &
+             + aerosol(i1:i2,j1:j2,k,n)*delp(i1:i2,j1:j2,k)/grav*fPM25(n)
        end do
       end do
    endif
-
-!print*,'TEST 7'
 
 !  Calculate the total mass concentration
    if( associated(conc) ) then
       conc(i1:i2,j1:j2,1:km) = 0.
       do n = nbegin, nbins
-       conc(i1:i2,j1:j2,1:km) &
-         =   conc(i1:i2,j1:j2,1:km) &
-           + aerosol(i1:i2,j1:j2,1:km,n)*rhoa(i1:i2,j1:j2,1:km)
+         conc(i1:i2,j1:j2,1:km) &
+             = conc(i1:i2,j1:j2,1:km) &
+             + aerosol(i1:i2,j1:j2,1:km,n)*rhoa(i1:i2,j1:j2,1:km)
       end do
    endif
-
-!print*,'TEST 8'
 
 !  Calculate the total mass mixing ratio
    if( associated(mass) ) then
@@ -2027,17 +2041,15 @@ qa_temp = qa
       end do
    endif
 
-!print*,'TEST 9'
-
 !  Calculate the column mass flux in x direction
    if( present(fluxu) .and. associated(fluxu) ) then
       fluxu(i1:i2,j1:j2) = 0.
       do n = nbegin, nbins
-       do k = 1, km
-        fluxu(i1:i2,j1:j2) &
-         =   fluxu(i1:i2,j1:j2) &
-           + aerosol(i1:i2,j1:j2,k,n)*delp(i1:i2,j1:j2,k)/grav*u(i1:i2,j1:j2,k)
-       end do
+         do k = klid, km
+           fluxu(i1:i2,j1:j2) &
+            = fluxu(i1:i2,j1:j2) &
+            + aerosol(i1:i2,j1:j2,k,n)*delp(i1:i2,j1:j2,k)/grav*u(i1:i2,j1:j2,k)
+         end do
       end do
    endif
 
@@ -2045,15 +2057,13 @@ qa_temp = qa
    if( present(fluxv) .and. associated(fluxv) ) then
       fluxv(i1:i2,j1:j2) = 0.
       do n = nbegin, nbins
-       do k = 1, km
-        fluxv(i1:i2,j1:j2) &
-         =   fluxv(i1:i2,j1:j2) &
+         do k = klid, km
+           fluxv(i1:i2,j1:j2) &
+           = fluxv(i1:i2,j1:j2) &
            + aerosol(i1:i2,j1:j2,k,n)*delp(i1:i2,j1:j2,k)/grav*v(i1:i2,j1:j2,k)
-       end do
+         end do
       end do
    endif
-
-!print*,'TEST 10'
 
 !  Calculate the extinction and/or scattering AOD
    if( (present(exttau) .and. associated(exttau)) .or. &
@@ -2078,11 +2088,7 @@ qa_temp = qa
       do n = nbegin, nbins
 
 !      Select the name for species
-!       qname = trim(w_c%reg%vname(w_c%reg%i_DU+n-1))
-!       idx = Chem_MieQueryIdx(gcDU%mie_tables,qname,rc)
-!       if(rc .ne. 0) call die(myname, 'cannot find proper Mie table index')
-
-       do k = 1, km
+       do k = klid, km
         do j = j1, j2
          do i = i1, i2
           call Chem_MieQuery(mie_table, n, ilam550, &
@@ -2116,8 +2122,6 @@ qa_temp = qa
         enddo
        enddo
 
-!print*,'TEST 12'
-
       enddo  ! nbins
 
    endif
@@ -2133,14 +2137,9 @@ qa_temp = qa
       do n = nbegin, nbins
 
 !      Select the name for species
-!       qname = trim(w_c%reg%vname(w_c%reg%i_DU+n-1))
-!       idx = Chem_MieQueryIdx(gcDU%mie_tables,qname,rc)
-!       if(rc .ne. 0) call die(myname, 'cannot find proper Mie table index')
-
-       do k = 1, km
+       do k = klid, km
         do j = j1, j2
          do i = i1, i2
-
           call Chem_MieQuery(mie_table, n, ilam470, &
               aerosol(i,j,k,n)*delp(i,j,k)/grav, &
               rh(i,j,k), tau=tau)
@@ -2150,24 +2149,15 @@ qa_temp = qa
               aerosol(i,j,k,n)*delp(i,j,k)/grav, &
               rh(i,j,k), tau=tau)
           tau870(i,j) = tau870(i,j) + tau
-
-
          enddo
         enddo
        enddo
 
       enddo  ! nbins
 
-!print*,'SS2G sum(tau470) = ',sum(tau470)
-!print*,'SS2G sum(tau870) = ',sum(tau870)
-
       angstrom(i1:i2,j1:j2) = &
         -log(tau470(i1:i2,j1:j2)/tau870(i1:i2,j1:j2)) / &
          log(470./870.)
-!print*,'SS2G sum(angstrom) = ', sum(angstrom)
-
-!print*,'TEST 13'
-
    endif
 
    rc = 0
@@ -3345,7 +3335,7 @@ K_LOOP: do k = km, 1, -1
 ! !INTERFACE:
    subroutine NIheterogenousChem (NI_phet, xhno3, AVOGAD, AIRMW, PI, RUNIV, rhoa, tmpu, relhum, delp, &
                                   DU, SS, rmedDU, rmedSS, fnumDU, fnumSS, nbinsDU, nbinsSS, &
-                                  km, cdt, grav, fMassHNO3, fMassNO3, fmassair, nNO3an1, nNO3an2, & 
+                                  km, klid, cdt, grav, fMassHNO3, fMassNO3, fmassair, nNO3an1, nNO3an2, & 
                                   nNO3an3, HNO3_conc, HNO3_sfcmass, HNO3_colmass, rc)
 
 
@@ -3372,6 +3362,7 @@ K_LOOP: do k = km, 1, -1
    integer, intent(in)                 :: nbinsDU        ! number of dust bins
    integer, intent(in)                 :: nbinsSS        ! number of sea salt bins
    integer, intent(in)                 :: km             ! number of model levels
+   integer, intent(in)                 :: klid   ! index for pressure lid
    real, intent(in)                    :: cdt            ! chemistry model timestep (sec)
    real, intent(in)                    :: grav           ! gravity (m/sec)
    real, intent(in)                    :: fMassHNO3      ! gram molecular weight
@@ -3416,7 +3407,7 @@ K_LOOP: do k = km, 1, -1
    i1 = lbound(tmpu, 1)
    i2 = ubound(tmpu, 1)
 
-   do k = 1, km
+   do k = klid, km
     do j = j1, j2
      do i = i1, i2
       kan1 = 0.
@@ -3507,7 +3498,7 @@ K_LOOP: do k = km, 1, -1
 !  Calculate the HNO3 column loading
    if( associated(HNO3_colmass) ) then
       HNO3_colmass(i1:i2,j1:j2) = 0.
-      do k = 1, km
+      do k = klid, km
         HNO3_colmass(i1:i2,j1:j2) &
          =   HNO3_colmass(i1:i2,j1:j2) + xhno3(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav
       end do
@@ -4651,7 +4642,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !BOP
 ! !IROUTINE: SU_Wet_Removal 
 
-   subroutine SU_Wet_Removal ( km, nbins, cdt, kin, grav, airMolWght, delp, fMassSO4, fMassSO2, &
+   subroutine SU_Wet_Removal ( km, nbins, klid, cdt, kin, grav, airMolWght, delp, fMassSO4, fMassSO2, &
                                h2o2_int, ple, rhoa, precc, precl, pfllsan, pfilsan, tmpu, &
                                nDMS, nSO2, nSO4, nMSA, DMS, SO2, SO4, MSA, &
                                fluxout, pSO4_colflux, pSO4wet_colflux, &
@@ -4664,6 +4655,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 ! !INPUT PARAMETERS:
 
    integer, intent(in) :: km, nbins  ! number of model levels and number of species respectively
+   integer, intent(in) :: klid  ! index for pressure lid
    real, intent(in)    :: cdt   ! chemisty model timestep
    logical, intent(in) :: KIN   ! true for aerosol
    real, intent(in)    :: grav  ! gravity [m/sec]
@@ -4813,7 +4805,8 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !    Find the highest model layer experiencing rainout.  Assumes no
 !    scavenging if T < 258 K
      LH = 0
-     do k = 1, km
+!     do k = 1, km
+     do k = klid, km
       if(dpfli(i,j,k) .gt. 0. .and. tmpu(i,j,k) .gt. 258.) then
        LH = k
        goto 15
@@ -5180,7 +5173,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !BOP
 ! !IROUTINE: DustEmissionGOCART2G
 
-   subroutine SU_Compute_Diags ( km, rmed, sigma, rhop, grav, pi, nSO4, mie_table, channels, &
+   subroutine SU_Compute_Diags ( km, klid, rmed, sigma, rhop, grav, pi, nSO4, mie_table, channels, &
                                  tmpu, rhoa, delp, rh, u, v, &
                                  DMS, SO2, SO4, MSA, &
                                  dmssfcmass, dmscolmass, &
@@ -5195,6 +5188,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 ! !INPUT PARAMETERS:
    integer, intent(in) :: km    ! number of model levels
+   integer,    intent(in)    :: klid   ! index for pressure lid
    real, intent(in)    :: rmed  ! mean radius [um]
    real, intent(in)    :: sigma ! Sigma of lognormal number distribution
    real, intent(in)    :: rhop  ! dry particle density [kg m-3]
@@ -5324,7 +5318,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  Calculate the column loading
    if( associated(so4colmass) ) then
       so4colmass(i1:i2,j1:j2) = 0.
-      do k = 1, km
+      do k = klid, km
        so4colmass(i1:i2,j1:j2) &
         =   so4colmass(i1:i2,j1:j2) &
           + SO4(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav
@@ -5332,7 +5326,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    endif
    if( associated(so2colmass) ) then
       so2colmass(i1:i2,j1:j2) = 0.
-      do k = 1, km
+      do k = klid, km
        so2colmass(i1:i2,j1:j2) &
         =   so2colmass(i1:i2,j1:j2) &
           + SO2(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav
@@ -5340,7 +5334,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    endif
    if( associated(dmscolmass) ) then
       dmscolmass(i1:i2,j1:j2) = 0.
-      do k = 1, km
+      do k = klid, km
        dmscolmass(i1:i2,j1:j2) &
         =   dmscolmass(i1:i2,j1:j2) &
           + DMS(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav
@@ -5348,7 +5342,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    endif
    if( associated(msacolmass) ) then
       msacolmass(i1:i2,j1:j2) = 0.
-      do k = 1, km
+      do k = klid, km
        msacolmass(i1:i2,j1:j2) &
         =   msacolmass(i1:i2,j1:j2) &
           + MSA(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav
@@ -5371,7 +5365,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  Calculate the column mass flux in x direction
    if( associated(fluxu) ) then
       fluxu(i1:i2,j1:j2) = 0.
-       do k = 1, km
+       do k = klid, km
         fluxu(i1:i2,j1:j2) &
          =   fluxu(i1:i2,j1:j2) &
            + SO4(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav*u(i1:i2,j1:j2,k)
@@ -5381,7 +5375,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  Calculate the column mass flux in y direction
    if( associated(fluxv) ) then
       fluxv(i1:i2,j1:j2) = 0.
-       do k = 1, km
+       do k = klid, km
         fluxv(i1:i2,j1:j2) &
          =   fluxv(i1:i2,j1:j2) &
            + SO4(i1:i2,j1:j2,k)*delp(i1:i2,j1:j2,k)/grav*v(i1:i2,j1:j2,k)
@@ -5405,15 +5399,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
           scacoef(i1:i2,j1:j2,1:km) = 0.
       endif
 
-!     Note the binning is different for SO4
-!      do n = nSO4, nSO4
-
-!      Select the name for species
-!       qname = trim(w_c%reg%vname(w_c%reg%i_SU+n-1))
-!       idx = Chem_MieQueryIdx(gcSU%mie_tables,qname,rc)
-!       if(rc .ne. 0) call die(myname, 'cannot find proper Mie table index')
-
-       do k = 1, km
+       do k = klid, km
         do j = j1, j2
          do i = i1, i2
           call Chem_MieQuery(mie_table, 1, ilam550, & ! Only SO4 exists in the MieTable, so its index is 1
@@ -5455,14 +5441,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
       tau470(i1:i2,j1:j2) = tiny(1.0)
       tau870(i1:i2,j1:j2) = tiny(1.0)
 
-!      do n = nSO4, nSO4
-
-!      Select the name for species
-!       qname = trim(w_c%reg%vname(n+n1-1))
-!       idx = Chem_MieQueryIdx(gcSU%mie_tables,qname,rc)
-!       if(rc .ne. 0) call die(myname, 'cannot find proper Mie table index')
-
-       do k = 1, km
+       do k = klid, km
         do j = j1, j2
          do i = i1, i2
 
@@ -5493,7 +5472,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !        rmed   = w_c%reg%rmed(n1+nSO4-1)                    ! median radius, m
         if(rmed > 0.) then
 !         sigma  = w_c%reg%sigma(n1+nSO4-1)                  ! width of lognormal distribution
-         do k = 1, km
+         do k = klid, km
          do j = j1, j2
           do i = i1, i2
            rh_ = min(0.95,rh(i,j,k))
@@ -5520,7 +5499,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 ! !IROUTINE: SulfateChemDriver
 
 !#if 0
-   subroutine SulfateChemDriver (km, cdt, PI, radToDeg, von_karman, &
+   subroutine SulfateChemDriver (km, klid, cdt, PI, radToDeg, von_karman, &
                                  airMolWght, nAvogadro, cpd, grav, &
                                  fMassMSA, fMassDMS, fMassSO2, fMassSO4, &
                                  nymd, nhms, lonRad, latRad, &
@@ -5541,6 +5520,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 ! !INPUT PARAMETERS:  
    integer, intent(in) :: km     ! number of model levels
+   integer, intent(in) :: klid   ! index for pressure lid
    real, intent(in)    :: cdt    ! chemisty model timestep [sec]
    real, intent(in)    :: PI     ! pi constnat
    real, intent(in)    :: radToDeg ! radians to degree conversion
@@ -5680,7 +5660,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !  ----------------------------------
 
 !  DMS source and oxidation to SO2 and MSA
-   call SulfateChemDriver_DMS (km, cdt, airMolWght, nAvogadro, cpd,&
+   call SulfateChemDriver_DMS (km, klid, cdt, airMolWght, nAvogadro, cpd,&
                                fMassMSA, fMassDMS, fMassSO2, &
                                dms, nDMS, xoh, xno3, &
                                cossza, tmpu, rhoa, &
@@ -5689,20 +5669,20 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
    if( associated(pSO2) )  pSO2 = pSO2_DMS
    if( associated(su_pSO2)) then
-     do k = 1, km
+     do k = klid, km
       su_pSO2(:,:) = su_pSO2(:,:) + pSO2_DMS(:,:,k)*delp(:,:,k)/grav
      enddo
    endif
 
    if( associated(pMSA) )  pMSA = pMSA_DMS
    if( associated(su_pMSA)) then
-     do k = 1, km
+     do k = klid, km
       su_pMSA(:,:) = su_pMSA(:,:) + pMSA_DMS(:,:,k)*delp(:,:,k)/grav
      enddo
    endif
 
 !  SO2 source and oxidation to SO4
-   call SulfateChemDriver_SO2 (km, cdt, airMolWght, nAvogadro, cpd, grav, &
+   call SulfateChemDriver_SO2 (km, klid, cdt, airMolWght, nAvogadro, cpd, grav, &
                                fMassSO4, fMassSO2, &
                                so2, nSO2, xoh, xh2o2, &
                                tmpu, rhoa, delp, oro, cloud, drydepositionfrequency, &
@@ -5711,37 +5691,35 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
    if( associated(pSO4g) )  pSO4g = pSO4g_SO2
    if( associated(su_pSO4g)) then
-     do k = 1, km
+     do k = klid, km
       su_pSO4g(:,:) = su_pSO4g(:,:) + pSO4g_SO2(:,:,k)*delp(:,:,k)/grav
      enddo
    endif
 
    if( associated(pSO4aq) )  pSO4aq = pSO4aq_SO2
    if( associated(su_pSO4aq)) then
-     do k = 1, km
+     do k = klid, km
       su_pSO4aq(:,:) = su_pSO4aq(:,:) + pSO4aq_SO2(:,:,k)*delp(:,:,k)/grav
      enddo
    endif
 
    if( associated(pSO4) ) pSO4 = pSO4g_SO2 + pSO4aq_SO2
    if( associated(su_pSO4)) then
-     do k = 1, km
+     do k = klid, km
       su_pSO4(:,:) = su_pSO4(:,:) + pSO4g_SO2(:,:,k)*delp(:,:,k)/grav &
                      + pSO4aq_SO2(:,:,k)*delp(:,:,k)/grav
      enddo
    endif
 
 !  SO4 source and loss
-   call SulfateChemDriver_SO4 (km, cdt, grav, so4, nSO4, delp, &
+   call SulfateChemDriver_SO4 (km, klid, cdt, grav, so4, nSO4, delp, &
                                drydepositionfrequency, pSO4g_SO2, pSO4aq_SO2, SU_dep, &
                                rc)
 
 !  MSA source and loss
-!   if (associated(msa)) then
-      call SulfateChemDriver_MSA (km, cdt, grav, msa, nMSA, delp, drydepositionfrequency, &
-                                  pMSA_DMS, SU_dep, &
-                                  rc)
-!   end if
+   call SulfateChemDriver_MSA (km, klid, cdt, grav, msa, nMSA, delp, &
+                               drydepositionfrequency, pMSA_DMS, SU_dep, &
+                               rc)
 
 !  Save the h2o2 value after chemistry
    h2o2_init = xh2o2
@@ -5756,7 +5734,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !BOP
 ! !IROUTINE: SulfateChemDriver_DMS
 
-   subroutine SulfateChemDriver_DMS (km, cdt, airMolWght, nAvogadro, cpd, &
+   subroutine SulfateChemDriver_DMS (km, klid, cdt, airMolWght, nAvogadro, cpd, &
                                      fMassMSA, fMassDMS, fMassSO2, &
                                      qa, nDMS, xoh, xno3, &
                                      cossza, tmpu, rhoa, &
@@ -5768,6 +5746,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 ! !INPUT PARAMETERS:  
    integer, intent(in) :: km     ! number of model levels
+   integer, intent(in) :: klid   ! index for pressure lid
    real, intent(in)    :: cdt    ! chemisty model timestep [sec]
    real, intent(in)    :: nAvogadro  ! Avogadro's number [1/kmol]
    real, intent(in)    :: airMolWght ! molecular weight of air [kg/kmol]
@@ -5845,7 +5824,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    allocate(pMSA_DMS, mold=tmpu)
 
 !  spatial loop 
-   do k = 1, km
+   do k = klid, km
     do j = j1, j2
      do i = i1, i2
 
@@ -5924,7 +5903,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !BOP
 ! !IROUTINE: SulfateChemDriver_SO2
 
-   subroutine SulfateChemDriver_SO2 (km, cdt, airMolWght, nAvogadro, cpd, grav, &
+   subroutine SulfateChemDriver_SO2 (km, klid, cdt, airMolWght, nAvogadro, cpd, grav, &
                                      fMassSO4, fMassSO2, &
                                      qa, nSO2, xoh, xh2o2, &
                                      tmpu, rhoa, delp, oro, cloud, drydepf, &
@@ -5936,6 +5915,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 ! !INPUT PARAMETERS:  
    integer, intent(in) :: km     ! number of model levels
+   integer, intent(in) :: klid   ! index for pressure lid
    real, intent(in)    :: cdt    ! chemisty model timestep [sec]
    real, intent(in)    :: nAvogadro  ! Avogadro's number [1/kmol]
    real, intent(in)    :: airMolWght ! molecular weight of air [kg/kmol]
@@ -6019,7 +5999,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    fout = 0.
 
 !  spatial loop 
-   do k = 1, km
+   do k = klid, km
     do j = 1, j2
      do i = 1, i2
 
@@ -6124,7 +6104,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !BOP
 ! !IROUTINE: SulfateChemDriver_SO4
 
-   subroutine SulfateChemDriver_SO4 (km, cdt, grav, qa, nSO4, delp, drydepf, &
+   subroutine SulfateChemDriver_SO4 (km, klid, cdt, grav, qa, nSO4, delp, drydepf, &
                                      pSO4g_SO2, pSO4aq_SO2, SU_dep, &
                                      rc)
 ! !USES:
@@ -6132,6 +6112,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 ! !INPUT PARAMETERS:  
    integer, intent(in) :: km     ! number of model levels
+   integer, intent(in) :: klid   ! index for pressure lid
    real, intent(in)    :: cdt    ! chemisty model timestep [sec]
    real, intent(in)    :: grav   ! gravity [m/sec]
    integer, intent(in) :: nSO4   ! index position of sulfate
@@ -6182,7 +6163,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    fout = 0.
 
 !  spatial loop 
-   do k = 1, km
+   do k = klid, km
     do j = 1, j2
      do i = 1, i2
 
@@ -6226,7 +6207,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 !BOP
 ! !IROUTINE: SulfateChemDriver_MSA
 
-   subroutine SulfateChemDriver_MSA (km, cdt, grav, qa, nMSA, delp, drydepf, &
+   subroutine SulfateChemDriver_MSA (km, klid, cdt, grav, qa, nMSA, delp, drydepf, &
                                      pMSA_DMS, SU_dep, &
                                      rc)
 ! !USES:
@@ -6234,6 +6215,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
 
 ! !INPUT PARAMETERS:  
    integer, intent(in) :: km     ! number of model levels
+   integer, intent(in) :: klid   ! index for pressure lid
    real, intent(in)    :: cdt    ! chemisty model timestep [sec]
    real, intent(in)    :: grav   ! gravity [m/sec]
    integer, intent(in) :: nMSA   ! index position of sulfate
@@ -6279,7 +6261,7 @@ real, parameter :: airMolWght = 28.97 ! molecular weight of air
    allocate(fout(i2,j2))
 
 !  spatial loop 
-   do k = 1, km
+   do k = klid, km
     do j = 1, j2
      do i = 1, i2
 
@@ -6787,7 +6769,7 @@ loop2: DO l = 1,nspecies_HL
 !BOP
 ! !IROUTINE: NIthermo
 
-   subroutine NIthermo (km, cdt, grav, delp, rhoa, tmpu, rh, fMassHNO3, fMassAir, &
+   subroutine NIthermo (km, klid, cdt, grav, delp, rhoa, tmpu, rh, fMassHNO3, fMassAir, &
                         SO4, NH3, NO3an1, NH4a, xhno3, &
                         NI_pno3aq, NI_pnh4aq, NI_pnh3aq, rc)
 
@@ -6797,6 +6779,7 @@ loop2: DO l = 1,nspecies_HL
 
 ! !INPUT PARAMETERS:
    integer, intent(in) :: km    ! total model levels
+   integer, intent(in) :: klid   ! index for pressure lid
    real, intent(in)    :: cdt   ! model time step [sec]
    real, intent(in)    :: grav  ! gravity [m/sec]
    real, dimension(:,:,:)  :: delp  ! pressure thickness [Pa]
@@ -6836,7 +6819,7 @@ loop2: DO l = 1,nspecies_HL
 !-------------------------------------------------------------------------
 !  Begin...
 
-   do k = 1, km
+   do k = klid, km
     do j = 1, ubound(tmpu,2)
      do i = 1, ubound(tmpu,1)
 
@@ -8836,6 +8819,241 @@ loop2: DO l = 1,nspecies_HL
      end subroutine Chem_BiomassDiurnal
 !==================================================================================
 
+   subroutine ReadPointEmissions( nymd, filename, nPts, vLat, vLon, vBase, vTop, vEmis, vStart, vEnd, unusable, label, rc)
+      integer, intent(in)            :: nymd
+      character(*), intent(in) :: filename
+      integer, intent(out)           :: nPts
+      real, allocatable, dimension(:), intent(out)    :: vLat, vLon, vTop, vBase, vEmis
+      integer, allocatable, dimension(:), intent(out) :: vStart, vEnd
+
+      type(KeywordEnforcer), optional, intent(in) :: unusable
+      character(*), optional, intent(in) :: label
+      integer, optional, intent(out) :: rc
+
+      ! Local arguments
+      type(EmissionReader) :: reader
+      character(:), allocatable :: label_
+      real, allocatable :: table(:,:)
+      integer :: nCols
+      integer :: status
+
+      if (present(label)) then
+         label_ = trim(label)
+      else
+         label_ = 'source'
+      end if
+
+      reader = EmissionReader()
+      call reader%open(filename, __RC__)
+      table = reader%read_table(label=label_, __RC__)
+      call reader%close(__RC__)
+
+      nCols = size(table,1)
+      nPts = size(table,2)
+      vStart = spread(-1, 1, nPts)
+      vEnd = spread(-1, 1, nPts)
+
+      vLat  = table(1,:)
+      vLon  = table(2,:)
+      vEmis = table(3,:)
+      vBase = table(4,:)
+      vTop  = table(5,:)
+      if (nCols >= 6) vStart = table(6,:)
+      if (nCols >= 7) vEnd = table(7,:)
+
+      where(vStart < 0) vStart = 000000
+      where(vEnd < 0)   vEnd   = 240000
+      call reader%close()
+
+      __RETURN__(__SUCCESS__)
+   end subroutine ReadPointEmissions
+
+!==================================================================================
+   subroutine open(this, filename, rc)
+      class(EmissionReader), intent(inout) :: this
+      character(*), intent(in) :: filename
+      integer, optional, intent(out) :: rc
+
+      integer :: status
+
+      __ASSERT__(.not. allocated(this%unit))
+      allocate(this%unit)
+
+      open(newunit=this%unit, file=filename,  &
+           form='formatted', access = 'sequential', status='old', &
+           action='read', __IOSTAT__)
+
+      __RETURN__(__SUCCESS__)
+   end subroutine open
+
+
+   subroutine close(this, rc)
+      class(EmissionReader), intent(inout) :: this
+      integer, optional, intent(out) :: rc
+
+      integer :: status
+
+      __ASSERT__(allocated(this%unit))
+      close(this%unit, __IOSTAT__)
+      deallocate(this%unit)
+
+   end subroutine close
+
+
+   subroutine rewind_reader(this, rc)
+      class(EmissionReader), intent(in) :: this
+      integer, optional, intent(out) :: rc
+
+      integer :: status
+
+      __ASSERT__(allocated(this%unit))
+      rewind(this%unit, __IOSTAT__)
+
+      __RETURN__(__SUCCESS__)
+   end subroutine rewind_reader
+
+   function get_dims(this, label, rc) result(dims)
+      integer :: dims(2)
+      class(EmissionReader), intent(in) :: this
+      character(*), intent(in) :: label
+      integer, optional, intent(out) :: rc
+
+      integer :: status
+      logical :: eof
+      character(:), allocatable :: line
+      integer :: n_words
+
+      call this%rewind(__RC__)
+      call this%scan_to_label(label, __RC__)
+!      print*,__FILE__,__LINE__, ' found label'
+
+      dims = 0
+      do
+         line = this%next_line(eof=eof, __RC__)
+         __ASSERT__(.not. eof)
+         if (this%is_end_marker(line)) exit
+
+         dims(2) = dims(2) + 1
+
+         n_words = this%count_words(line)
+         dims(1) = max(dims(1), n_words)
+      end do
+
+      __RETURN__(__SUCCESS__)
+   end function get_dims
+
+   integer function count_words(this, line) result(n_words)
+      class(EmissionReader), intent(in) :: this
+      character(*), intent(in) :: line
+
+      integer :: idx, i0
+
+      n_words = 0
+      i0 = 0
+      do
+         ! scan to start of next word
+         idx = verify(line(i0+1:), ' ')
+
+         n_words = n_words + 1
+         i0 = i0 + idx
+
+         ! scan to end of current word
+         idx = index(line(i0+1:), ' ')
+         i0 = i0 + idx
+         if (idx == 0) exit
+
+      end do
+
+      return
+   end function count_words
+
+   logical function is_end_marker(this, line)
+      class(EmissionReader), intent(in) :: this
+      character(*), intent(in) :: line
+
+      is_end_marker = (line == '::')
+
+   end function is_end_marker
+
+   function read_table(this, label, rc) result(table)
+      class(EmissionReader), intent(in) :: this
+      real, allocatable :: table(:,:)
+      character(*), intent(in) :: label
+      integer, optional, intent(out) :: rc
+
+      integer :: i, j
+      integer :: dims(2)
+      integer :: status
+      logical :: eof
+      character(:), allocatable :: line
+
+      dims = this%get_dims(label, __RC__)
+      call this%scan_to_label(label, __RC__)
+
+      associate (n_words => dims(1), n_lines => dims(2))
+        allocate(table(n_words, n_lines), __STAT__)
+
+        do j = 1, n_lines
+           line = this%next_line(eof=eof)
+           __ASSERT__(.not. eof)
+
+           read(line,*, iostat=status) (table(i,j),i=1,n_words)
+           __VERIFY__(status)
+        end do
+
+      end associate
+
+   end function read_table
+
+   function next_line(this, eof, rc) result(line)
+      character(:), allocatable :: line
+      class(EmissionReader), intent(in) :: this
+      logical, intent(out) :: eof
+      integer, optional, intent(out) :: rc
+
+      integer, parameter :: MAX_LINE_LEN=1024
+      character(len=MAX_LINE_LEN) :: buffer
+      integer :: idx
+      integer :: status
+
+      eof = .false.
+      do
+
+         read(this%unit,'(a)', iostat=status) buffer
+         if (status == IOSTAT_END) then
+            eof = .true.
+            __RETURN__(__SUCCESS__)
+         end if
+         __VERIFY__(status)
+
+         idx = index(buffer, '#')
+         if (idx == 0) idx = len(buffer)
+
+         line = trim(buffer(:idx-1))
+         if (line /= '')  exit
+
+      end do
+
+      __RETURN__(__SUCCESS__)
+   end function next_line
+
+   subroutine scan_to_label(this, label, rc)
+      class(EmissionReader), intent(in) :: this
+      character(*), intent(in) :: label
+      integer, optional, intent(out) :: rc
+
+      integer :: status
+      logical :: eof
+      character(:), allocatable :: line
+
+      call this%rewind(__RC__)
+      do
+         line = this%next_line(eof=eof, __RC__)
+         if (line == label // '::') exit
+      end do
+
+      __RETURN__(__SUCCESS__)
+   end subroutine scan_to_label
 
 
 
