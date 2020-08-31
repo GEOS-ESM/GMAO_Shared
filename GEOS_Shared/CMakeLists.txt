@@ -1,7 +1,5 @@
 esma_set_this()
 
-add_subdirectory (Chem_Shared2G)
-
 set (srcs
   GEOS_Utilities.F90 DragCoefficients.F90 GEOS.F90
   tropovars.F90 surfacelayer.F90 GEOS_TopoGet.F90
