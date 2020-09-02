@@ -66,10 +66,14 @@ $im{"e"} = "1152"; $jm{"e"} = "721";
 
 # atmosphere levels
 #------------------
+$atmLevs{"71"}  = "071";
 $atmLevs{"72"}  = "072";
+$atmLevs{"91"}  = "091";
+$atmLevs{"127"} = "127";
 $atmLevs{"132"} = "132";
 $atmLevs{"137"} = "137";
 $atmLevs{"144"} = "144";
+$atmLevs{"181"} = "181";
 
 # ocean grids
 #------------

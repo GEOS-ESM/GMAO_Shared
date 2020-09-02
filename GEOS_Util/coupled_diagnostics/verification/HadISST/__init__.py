@@ -1,4 +1,4 @@
-from my_lib import dset
+from g5lib import dset
 import netCDF4 as nc
 import scipy as sp
 

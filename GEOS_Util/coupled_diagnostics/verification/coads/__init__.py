@@ -2,7 +2,7 @@ import os
 import scipy as sp
 import datetime
 import dateutil.rrule as rrule
-from my_lib import dset 
+from g5lib import dset 
 from vlist import vlist
 
 __all__=['ctl']

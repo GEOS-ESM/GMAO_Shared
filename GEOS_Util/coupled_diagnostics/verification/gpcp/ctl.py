@@ -1,4 +1,4 @@
-from my_lib import dset
+from g5lib import dset
 import scipy as sp
 import datetime
 import dateutil.rrule as rrule
