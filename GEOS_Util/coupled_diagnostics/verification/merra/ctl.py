@@ -1,6 +1,6 @@
 import os
 import scipy as sp
-from my_lib import dset
+from g5lib import dset
 import datetime
 import dateutil.rrule as rrule
 
