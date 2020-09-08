@@ -17,19 +17,18 @@ contains
 !  into an interface layer of typical depth = 2m, that is also called "depth of AOIL"
 
 ! !INTERFACE:
-  subroutine SIMPLE_SW_ABS(NT, USE_KPAR, depth, ZTH, SWN, PEN)
+  subroutine SIMPLE_SW_ABS(USE_KPAR, depth, ZTH, SWN, PEN)
 
 ! !ARGUMENTS:
 
-    integer, intent(IN)    :: NT        ! dimension of array
     integer, intent(IN)    :: USE_KPAR  ! absorption profile option
-    real,    intent(IN)    :: ZTH(:)    ! cosine of solar zenith angle
-    real,    intent(IN)    :: depth(:)  ! depth up to which shortwave needs to be absorbed
-    real,    intent(IN)    :: SWN(:)    ! net shortwave at surface of ocean, or @ top of air/sea interface
-    real,    intent(OUT)   :: PEN(:)    ! shortwave penetrated below the depth    
+    real,    intent(IN)    :: ZTH       ! cosine of solar zenith angle
+    real,    intent(IN)    :: depth     ! depth up to which shortwave needs to be absorbed
+    real,    intent(IN)    :: SWN       ! net shortwave at surface of ocean, or at top of air/sea interface
+    real,    intent(OUT)   :: PEN       ! shortwave penetrated below the depth    
 
 !  local variables
-    real, dimension(NT)  :: fW
+    real  :: fW
 
     fW  = 0.0
     PEN = 0.0                ! initialize to zero
@@ -57,5 +56,3 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module atmOcnIntlayer
-
-
