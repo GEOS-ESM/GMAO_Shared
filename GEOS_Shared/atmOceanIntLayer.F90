@@ -1,5 +1,3 @@
-#define _SUCCESS 0
-
 module atmOcnIntlayer
 
 ! !USES:
@@ -61,7 +59,6 @@ contains
     ALBVF = OCNALBVF
     ALBNF = OCNALBNF
 
-   RETURN
   end subroutine ALBSEA
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -107,7 +104,6 @@ contains
 
     PEN   = SWN * fW
 
-   RETURN
   end subroutine SIMPLE_SW_ABS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
