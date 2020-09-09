@@ -1,3 +1,5 @@
+#define _SUCCESS 0
+
 module atmOcnIntlayer
 
 ! !USES:
