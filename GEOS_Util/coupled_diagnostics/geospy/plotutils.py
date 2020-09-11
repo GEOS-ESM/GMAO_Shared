@@ -20,3 +20,16 @@ def quickmap(projection=ccrs.PlateCarree()):
 
 def drawstats(ax, mean='', std=''):
     pass
+
+def contour_both(da, axes, fill_opts={}, contour_opts={}, fmt='%1.0f'):
+    '''
+    Make a filled contour plot of data array with unfilled contours on top.
+    '''
+    
+    da.plot.contourf(ax=axes, transform=ccrs.PlateCarree(), **fill_opts)
+    cs=da.plot.contour(ax=axes, transform=ccrs.PlateCarree(), **contour_opts)
+    cs.clabel(fmt=fmt)
+
+    
+    
+

@@ -8,7 +8,7 @@ import geosdset
 
 def main(expid):
     
-    # Load metadata for obs and experiments to plot
+    # Load metadata for experiments to plot
     exps=geosdset.load_exps(expid)
 
     # Load ocean 2d data

@@ -74,7 +74,7 @@ def _get_loader(type):
 
 def load_exps(expid):
     '''
-    Returns a list of module withmeta data for experiment we want to plot (expid) and 
+    Returns a list of modules with meta data for experiment we want to plot (expid) and 
     all experiments we want to compare to.
     '''
     
