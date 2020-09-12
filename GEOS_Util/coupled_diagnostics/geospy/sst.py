@@ -9,18 +9,13 @@ import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
 import cartopy.crs as ccrs
-import geosdset
-from plotutils import (quickmap, 
-                       drawstats, 
-                       contour_both)
+import geosdset, plots
 
 def plot_clim(exp, ds):
     varid='TS'
     FREEZE=273.16
     var=ds[varid].sel(time=slice(*exp.dates)); var-=FREEZE
-
     clim=var.groupby('time.season').mean('time')
-    ann=clim.mean('season')
 
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,
@@ -36,22 +31,20 @@ def plot_clim(exp, ds):
     }
 
     projection=ccrs.PlateCarree(central_longitude=210.)
+    plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, contour_opts=contour_opts)
 
     ff=pl.figure(1) 
-    ax=quickmap(projection)
-    contour_both(clim.sel(season='DJF'), ax, fill_opts=fill_opts, contour_opts=contour_opts, fmt='%1.0f')
+    ax=plotmap.contour(clim.sel(season='DJF'))
     ax.set_title('SST, DJF')
     pl.savefig(exp.plot_path+'/sst_djf.png')
-
+    
     pl.figure(2)
-    ax=quickmap(projection)
-    contour_both(clim.sel(season='JJA'), ax, fill_opts=fill_opts, contour_opts=contour_opts, fmt='%1.0f')
+    ax=plotmap.contour(clim.sel(season='JJA'))
     ax.set_title('SST, JJA')
     pl.savefig(exp.plot_path+'/sst_jja.png')
 
     pl.figure(3)
-    ax=quickmap(projection)
-    contour_both(ann, ax, fill_opts=fill_opts, contour_opts=contour_opts, fmt='%1.0f')    
+    ax=plotmap.contour(clim.mean('season'))
     ax.set_title('SST, Annual Mean')
     pl.savefig(exp.plot_path+'/sst_am.png')
     pl.show()
@@ -59,7 +52,7 @@ def plot_clim(exp, ds):
 def plot_diff(exp, ds1, ds2):
     pass
 
-def plots(exps, dsets):
+def mkplots(exps, dsets):
     obs=['OISSTv2']
     plot_clim(exps[0] ,dsets[0])
 
@@ -73,5 +66,5 @@ if __name__=='__main__':
     import sys
     exps=geosdset.load_exps(sys.argv[1])
     dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
-    plots(exps,dsets)
+    mkplots(exps,dsets)
     
