@@ -6,9 +6,71 @@ use MAPL
 
 implicit none
 private SIMPLE_SW_ABS, AOIL_SST
-public  ALBSEA, COOL_SKIN, SKIN_SST
+public  ALBSEA, COOL_SKIN, SKIN_SST, AOIL_sfcLayer_T
 
 contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !IROUTINE: AOIL_sfcLayer_T - Connection to the surface layer: which "temperature" is to be passed from AOIL to sfclayer
+
+!  !DESCRIPTION:
+!        It is not exact "clear" which temperature is to be input to the sfclayer, that computes the bulk flux formulae 
+!        Hence it may be considered that the temperature that is input to sfclayer is a "tunable parameter"
+
+!        Based on:
+!        (i) Akella and Suarez, 2018 "The Atmosphere-Ocean Interface Layer of the NASA
+!         Goddard Earth Observing System Model and Data Assimilation System." GMAO Tech Memo, Vol 51.
+!
+!        Options for the temperatures are:
+!        Num.     Var name       Definition                                      Source
+!        --------------------------------------------------------------------------------
+!        1.       TF             Temperature at the bottom of AOIL               from ocean
+!        2.       TS             Temperature at the top of AOIL                  calculated from temperature profile in AOIL
+!        3.       TW             Depth averaged mean temperature in the AOIL     from internal state
+!        4.       TW             Depth averaged mean temperature in the AOIL     calculated from temperature profile in AOIL
+!        5.       T(z)           Temperature at specified depth (z) within AOIL  calculated from temperature profile in AOIL and input depth
+
+! !INTERFACE:
+  subroutine AOIL_sfcLayer_T (WHICH_OPTION, DO_DATASEA, MUSKIN, epsilon_d,  &
+                              TW, TS_FOUND, TWMTF, DELTC,                   &
+                              T_OUT)
+
+! !ARGUMENTS:
+
+    character(len=*), intent(IN) :: WHICH_OPTION   ! See above description of options for the temperature
+    integer,          intent(IN) :: DO_DATASEA     ! =1:uncoupled (AGCM); =0:coupled (AOGCM)
+    real,             intent(IN) :: MUSKIN         ! exponent in T(z) profile in warm layer, based on Zeng & Beljaars, 2005, typically <= 1.
+    real,             intent(IN) :: epsilon_d      ! (thickness of AOIL)/(thickness of OGCM top level), typically < 1.
+
+    real,             intent(IN) :: TW (:)         ! depth averaged mean temperature in the AOIL
+    real,             intent(IN) :: TS_FOUND(:)    ! temperature at the bottom of AOIL
+    real,             intent(IN) :: TWMTF(:)       ! difference: TW - TS_FOUND
+    real,             intent(IN) :: DELTC(:)       ! temperature drop due to cool skin layer
+    real,             intent(OUT):: T_OUT (:)      ! temperature that is to be input to the sfclayer
+
+    select case(trim(WHICH_OPTION))
+    case ('TF')
+      T_OUT = TS_FOUND
+    case ('TS')
+      if (DO_DATASEA == 1) then
+        T_OUT = TS_FOUND + ((1.+MUSKIN)/MUSKIN) * TWMTF            ! Eqn.(14) of Akella and Suarez, 2018
+      else
+        T_OUT = TS_FOUND + (1./MUSKIN + (1.-epsilon_d)) * TWMTF    ! RHS is from Eqn.(15) of Akella and Suarez, 2018
+      endif
+      T_OUT = T_OUT - DELTC                                        ! Eqn.(16) of Akella and Suarez, 2018
+    case ('TW_from_internal')
+      T_OUT = TW
+    case ('TW_from_Tprof', 'T_at_depth')
+      T_OUT = MAPL_UNDEF
+      print *, ' yet to be coded. Exiting.'
+      RETURN
+    case default
+      print *, ' Unknown option in AOIL_sfcLayer_T. Exiting.'
+      RETURN
+    end select
+
+  end subroutine AOIL_sfcLayer_T
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: SKIN_SST - Computes changes to SST in interface layer due to Cool Skin & Diurnal Warming 
@@ -84,12 +146,6 @@ contains
     real, parameter :: TherCond_WATER  = 0.563   ! Thermal conductivity of water [W/m/ K]
     real, parameter :: bigC            = &
           (16.0 * (MAPL_CAPWTR*MAPL_RHOWTR)**2 * NU_WATER**3) / TherCond_WATER**2
-
-!  !DESCRIPTION:
-!        Based on Fairall et al, 1996 for Cool Skin Layer and Takaya et al, 2010 for Warm Layer
-
-! Open water conditions, including computation of skin layer parameters
-!----------------------------------------------------------------------
 
     do N = 1, NT  ! N is now looping over all tiles (NOT sub-tiles).
 
