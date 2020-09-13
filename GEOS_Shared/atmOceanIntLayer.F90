@@ -5,10 +5,39 @@ module atmOcnIntlayer
 use MAPL
 
 implicit none
+
 private SIMPLE_SW_ABS, AOIL_SST
-public  ALBSEA, COOL_SKIN, SKIN_SST, AOIL_sfcLayer_T
+
+public  ALBSEA, COOL_SKIN, SKIN_SST,   &
+        AOIL_sfcLayer_T, water_RHO
 
 contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !IROUTINE: water_RHO - returns density of water: fresh/sea water from MAPL_Constants
+
+!  !DESCRIPTION:
+
+! !INTERFACE:
+  function water_RHO (WATER_TYPE)
+
+! !ARGUMENTS:
+
+    character(len=*), intent(IN) :: WATER_TYPE     ! 'fresh_water' or 'sea_water'
+    real                         :: water_RHO
+
+    select case(trim(WATER_TYPE))
+    case ('fresh_water')
+      water_RHO = MAPL_RHOWTR
+    case ('salt_water')
+      water_RHO = MAPL_RHO_SEAWATER
+    case default
+      water_RHO = MAPL_UNDEF
+      print *, ' Unknown option in water_RHO.'
+    end select
+    
+  end function
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: AOIL_sfcLayer_T - Connection to the surface layer: which "temperature" is to be passed from AOIL to sfclayer
@@ -62,11 +91,10 @@ contains
       T_OUT = TW
     case ('TW_from_Tprof', 'T_at_depth')
       T_OUT = MAPL_UNDEF
-      print *, ' yet to be coded. Exiting.'
-      RETURN
+      print *, ' Yet to be coded.'
     case default
-      print *, ' Unknown option in AOIL_sfcLayer_T. Exiting.'
-      RETURN
+      T_OUT = MAPL_UNDEF
+      print *, ' Unknown option in AOIL_sfcLayer_T.'
     end select
 
   end subroutine AOIL_sfcLayer_T
