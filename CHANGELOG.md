@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update `GEOS_Utilities.F90` to match `GEOSadas-5_27_0` (#115)
+
 ### Fixed
 
 ### Removed
