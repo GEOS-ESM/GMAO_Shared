@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+## [1.1.9] - 2020-09-15
+
+### Changed
+
+- All the subroutines that are called from within OPENWATERCORE of GEOS_OpenWaterGridComp.F90 have been moved to GMAO_Shared so they can be shared across applications and components.
+
 ## [1.1.8] - 2020-08-12
 
 ### Fixed

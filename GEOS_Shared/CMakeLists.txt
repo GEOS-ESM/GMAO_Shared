@@ -6,6 +6,7 @@ set (srcs
   GEOS_GmapMod.F90 GEOS_RemapMod.F90 G3_MPI_Util_Mod.F90 windfix.F90
   PWSSSP.F sphere.F calcdbz.F OVP.F90 
   getco2.F90 Lightning_mod.F90 lightning_toolbox_mod.F90
+  atmOceanIntLayer.F90
   )
 
 esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL)
