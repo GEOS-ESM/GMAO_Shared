@@ -6,11 +6,11 @@ use MAPL
 
 implicit none
 
-private SIMPLE_SW_ABS, AOIL_SST
+private SIMPLE_SW_ABS, AOIL_SST, COOL_SKIN
 
-public  ALBSEA, COOL_SKIN, SKIN_SST,   &
-        AOIL_sfcLayer_T, water_RHO,    &
-        AOIL_Shortwave_abs
+public  ALBSEA, SKIN_SST,   &
+        AOIL_sfcLayer_T,    &
+        water_RHO, AOIL_Shortwave_abs
 
 contains
 
