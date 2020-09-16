@@ -9,7 +9,8 @@ implicit none
 private SIMPLE_SW_ABS, AOIL_SST
 
 public  ALBSEA, COOL_SKIN, SKIN_SST,   &
-        AOIL_sfcLayer_T, water_RHO
+        AOIL_sfcLayer_T, water_RHO,    &
+        AOIL_Shortwave_abs
 
 contains
 
