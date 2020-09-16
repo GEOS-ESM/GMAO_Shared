@@ -14,6 +14,87 @@ public  ALBSEA, COOL_SKIN, SKIN_SST,   &
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !IROUTINE: AOIL_Shortwave_abs - shortwave radiation absorption in AOIL
+
+!  !DESCRIPTION:
+!        Computes the shortwave radiation that penetrates
+!        through the AOIL and also the ocean top layer
+
+! !INTERFACE:
+  subroutine AOIL_Shortwave_abs (NT, DO_SKIN_LAYER, DO_DATASEA, &
+                                 AOIL_depth, OGCM_top_thickness, HW, KUVR, KPAR, &
+                                 ALBVRO, ALBVFO, DRUVR, DFUVR, DRPAR, DFPAR, &
+                                 PEN, PEN_ocean)
+! !ARGUMENTS:
+
+    integer, intent(IN)    :: NT             ! number of tiles
+    integer, intent(IN)    :: DO_SKIN_LAYER  ! 0:No interface layer, 1:active, and accounts for change in SST
+    integer, intent(IN)    :: DO_DATASEA     ! 1:uncoupled (AGCM);   0:coupled (AOGCM)
+    real,    intent(IN)    :: AOIL_depth     ! depth of the AOIL
+    real,    intent(IN)    :: OGCM_top_thickness ! thickness of OGCM top layer
+
+    real,    intent(IN)    :: KUVR           ! UV radiation extinction_coefficient
+    real,    intent(IN)    :: KPAR(:)        ! PAR extinction_coefficient
+    real,    intent(IN)    :: HW(:)          ! mass  of skin layer
+
+    real,    intent(IN)    :: ALBVRO(:)      ! visible beam albedo
+    real,    intent(IN)    :: ALBVFO(:)      ! visible diffuse albedo
+    real,    intent(IN)    :: DRUVR(:)       ! surface_downwelling_uvr_beam_flux
+    real,    intent(IN)    :: DFUVR(:)       ! surface_downwelling_uvr_diffuse_flux
+    real,    intent(IN)    :: DRPAR(:)       ! surface_downwelling_par_beam_flux
+    real,    intent(IN)    :: DFPAR(:)       ! surface_downwelling_par_diffuse_flux
+
+    real,    intent(OUT)   :: PEN(:)         ! shortwave flux penetrated through AOIL_depth
+    real,    intent(OUT)   :: PEN_ocean(:)   ! shortwave flux penetrated through OGCM_top_thickness
+
+!  !LOCAL VARIABLES
+    real         :: PUR(NT), PUF(NT), PPR(NT), PPF(NT)
+
+!   init local variables
+    PUR   = 0.0; PUF   = 0.0; PPR   = 0.0; PPF   = 0.0
+
+    if (DO_SKIN_LAYER==0) then
+      PEN       = 0.0
+      PEN_ocean = 0.0
+      RETURN
+    endif
+
+!   UV penetration
+    if (DO_DATASEA /= 0) then                ! UNcoupled mode
+        PEN = exp(-(KUVR/water_RHO('fresh_water'))*HW)
+    else                                     ! coupled mode
+        PEN = exp(-KUVR*AOIL_depth)
+    endif
+    PUR = (1.-ALBVRO)*DRUVR*PEN
+    PUF = (1.-ALBVFO)*DFUVR*PEN
+
+!   near-IR ("blue light" 490nm?)
+    if (DO_DATASEA /= 0) then                ! UNcoupled mode
+        PEN = exp(-(KPAR/water_RHO('fresh_water'))*HW)
+    else                                     ! coupled mode
+        PEN = exp(-KPAR*AOIL_depth)                 
+    endif
+    PPR = (1.-ALBVRO)*DRPAR*PEN
+    PPF = (1.-ALBVFO)*DFPAR*PEN
+
+    PEN = PUR + PUF + PPR + PPF              ! penetrated flux through AOIL_depth
+
+    if (DO_DATASEA /= 0) then                ! UNcoupled mode
+      PEN_ocean = 0.0
+    else                                     ! coupled mode
+      PEN_ocean =  exp(-KUVR*OGCM_top_thickness)
+      PUR       =  (1.-ALBVRO)*DRUVR*PEN_ocean
+      PUF       =  (1.-ALBVFO)*DFUVR*PEN_ocean
+      PEN_ocean =  exp(-KPAR*OGCM_top_thickness)
+      PPR       =  (1.-ALBVRO)*DRPAR*PEN_ocean
+      PPF       =  (1.-ALBVFO)*DFPAR*PEN_ocean
+      PEN_ocean =  PUR + PUF + PPR + PPF    ! penetrated flux through OGCM_top_thickness
+    endif
+
+  end subroutine AOIL_Shortwave_abs
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: water_RHO - returns density of water: fresh/sea water from MAPL_Constants
 
 !  !DESCRIPTION:
