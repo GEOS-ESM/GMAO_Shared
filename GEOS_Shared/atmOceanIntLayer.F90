@@ -6,13 +6,42 @@ use MAPL
 
 implicit none
 
-private SIMPLE_SW_ABS, AOIL_SST, COOL_SKIN
+private SIMPLE_SW_ABS,      &
+        AOIL_SST,           &
+        COOL_SKIN
 
 public  ALBSEA, SKIN_SST,   &
         AOIL_sfcLayer_T,    &
-        water_RHO, AOIL_Shortwave_abs
+        water_RHO,          &
+        AOIL_Shortwave_abs, &
+        AOIL_v0_S
 
 contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !IROUTINE: AOIL_v0_S - update salinity in AOIL
+
+!  !DESCRIPTION:
+!        Computes an update to salinity (version 0)
+
+! !INTERFACE:
+  subroutine AOIL_v0_S (DT, HW, S_old, S_new)
+
+! !ARGUMENTS:
+
+    real,    intent(IN)    :: DT             ! time-step
+    real,    intent(IN)    :: HW(:)          ! mass of AOIL
+    real,    intent(IN)    :: S_old(:)       ! salinity * mass of AOIL
+    real,    intent(OUT)   :: S_new(:)       ! salinity * mass of AOIL
+
+!  !LOCAL VARIABLES
+    real         :: FSALT                    ! this should come from CICE as import: salt flux due to sea ice melt
+
+    FSALT = 0.
+    S_new = (S_old+DT*1.e3*FSALT)/HW         ! multiply by 1000 to account for g->kg conversion
+
+  end subroutine AOIL_v0_S
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: AOIL_Shortwave_abs - shortwave radiation absorption in AOIL
@@ -36,7 +65,7 @@ contains
 
     real,    intent(IN)    :: KUVR           ! UV radiation extinction_coefficient
     real,    intent(IN)    :: KPAR(:)        ! PAR extinction_coefficient
-    real,    intent(IN)    :: HW(:)          ! mass  of skin layer
+    real,    intent(IN)    :: HW(:)          ! mass of AOIL
 
     real,    intent(IN)    :: ALBVRO(:)      ! visible beam albedo
     real,    intent(IN)    :: ALBVFO(:)      ! visible diffuse albedo
@@ -206,7 +235,7 @@ contains
     real,    intent(IN)    :: VVA    (:)     ! meridional  wind
     real,    intent(IN)    :: UW     (:)     ! u-current
     real,    intent(IN)    :: VW     (:)     ! v-current
-    real,    intent(IN)    :: HW     (:)     ! mass  of skin layer
+    real,    intent(IN)    :: HW     (:)     ! mass of AOIL
     real,    intent(IN)    :: SWN    (:)     ! net shortwave radiation incident at surface
     real,    intent(IN)    :: LHF    (:)     ! latent   heat flux
     real,    intent(IN)    :: SHF    (:)     ! sensible heat flux
@@ -221,7 +250,7 @@ contains
     integer, intent(IN)    :: n_iter_cool    ! number of iterations to compute cool-skin layer 
     real,    intent(IN)    :: fr_ice_thresh  ! threshold on ice fraction, sort of defines Marginal Ice Zone
 
-    real,    intent(OUT)   :: DWARM_ (:)     ! depth of skin layer
+    real,    intent(OUT)   :: DWARM_ (:)     ! depth of AOIL
     real,    intent(OUT)   :: TBAR_  (:)     ! copy of TW (also internal state) to export out
     real,    intent(OUT)   :: USTARW_(:)     ! u_{*,w} 
     real,    intent(OUT)   :: DCOOL_ (:)     ! depth of cool-skin layer
