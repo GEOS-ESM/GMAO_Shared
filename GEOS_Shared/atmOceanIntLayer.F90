@@ -10,7 +10,8 @@ private SIMPLE_SW_ABS,      &
         AOIL_SST,           &
         COOL_SKIN
 
-public  ALBSEA, SKIN_SST,   &
+public  ALBSEA,             &
+        SKIN_SST,           &
         AOIL_sfcLayer_T,    &
         water_RHO,          &
         AOIL_Shortwave_abs, &
@@ -28,7 +29,7 @@ contains
 ! !INTERFACE:
   subroutine AOIL_v0_HW ( NT, DT, DO_DATASEA,           &
                           MaxWaterDepth, MinWaterDepth, &
-                          FRWATER, SNO, EVP, pRATE, HW)
+                          FRWATER, SNO, EVP, RAIN, HW)
 
 ! !ARGUMENTS:
 
@@ -39,9 +40,9 @@ contains
     real,    intent(IN)    :: MinWaterDepth  ! minimum depth of AOIL
 
     real,    intent(IN)    :: FRWATER(:)     ! fr of water
-    real,    intent(IN)    :: SNO(:)         ! snow fall     rate
-    real,    intent(IN)    :: EVP(:)         ! evaporation   rate
-    real,    intent(IN)    :: pRATE(:)       ! precipitation rate= liquid_water_convective_precipitation + liquid_water_large_scale_precipitation
+    real,    intent(IN)    :: SNO(:)         ! snow fall   rate
+    real,    intent(IN)    :: EVP(:)         ! evaporation rate
+    real,    intent(IN)    :: RAIN(:)        ! rain        rate= liquid_water_convective_precipitation + liquid_water_large_scale_precipitation
 
     real,    intent(INOUT) :: HW(:)          ! mass of AOIL
 
@@ -55,7 +56,7 @@ contains
     ! FRESHATM is useful for mass flux balance.
     ! freshwater flux from atmosphere needs to be added to HW here since it carries zero enthalpy 
     !---------------------------------------------------------------------------------------------
-    FRESHATM  = FRWATER*(SNO - EVP) + pRATE
+    FRESHATM  = FRWATER*(SNO - EVP) + RAIN 
 
     !HW   = HW + DT*(FRESHATM + FRESH)
     HW   = HW + DT*(FRESHATM)
