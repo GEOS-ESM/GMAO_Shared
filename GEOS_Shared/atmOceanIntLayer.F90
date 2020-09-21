@@ -271,14 +271,17 @@ contains
 !        https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.2988
 
 ! !INTERFACE:
-  subroutine SKIN_SST (DO_SKIN_LAYER,NT,CM,UUA,VVA,UW,VW,HW,SWN,LHF,SHF,LWDNSRF,                   &
-                       ALW,BLW,PEN,STOKES_SPEED,DT,MUSKIN,TS_FOUNDi,DWARM_,TBAR_,TXW,TYW,USTARW_,  &
+  subroutine SKIN_SST (DO_SKIN_LAYER, DO_DATASEA, NT,CM,UUA,VVA,UW,VW,HW,SWN,LHF,SHF,LWDNSRF,      &
+                       ALW,BLW,PEN, PEN_ocean, STOKES_SPEED,DT,MUSKIN,TS_FOUNDi,DWARM_,TBAR_,      &
+                       TXW,TYW,USTARW_,  &
                        DCOOL_,TDROP_,SWCOOL_,QCOOL_,BCOOL_,LCOOL_,TDEL_,SWWARM_,QWARM_,ZETA_W_,    &
-                       PHIW_,LANGM_,TAUTW_,uStokes_,TS,TWMTS,TW,WATER,FR,n_iter_cool,fr_ice_thresh)
+                       PHIW_,LANGM_,TAUTW_,uStokes_,TS,TWMTS,TW,WATER,FR,n_iter_cool,fr_ice_thresh,&
+                       epsilon_d)
 
 ! !ARGUMENTS:
 
     integer, intent(IN)    :: DO_SKIN_LAYER  ! 0: No interface layer,     1: active, and accounts for change in SST
+    integer, intent(IN)    :: DO_DATASEA     ! =1:uncoupled (AGCM); =0:coupled (AOGCM)
     integer, intent(IN)    :: NT             ! number of tiles
     real,    intent(IN)    :: FR     (:,:)   ! fraction of surface (water/ice)
     integer, intent(IN)    :: WATER          ! subtile  number assigned to surface type: "WATER" 
@@ -295,12 +298,14 @@ contains
     real,    intent(IN)    :: ALW    (:)     ! for linearized \sigma T^4
     real,    intent(IN)    :: BLW    (:)     ! for linearized \sigma T^4
     real,    intent(IN)    :: PEN    (:)     ! shortwave radiation that penetrates below interface layer
+    real,    intent(IN)    :: PEN_ocean(:)   ! shortwave radiation that penetrates below top ocean model layer
     real,    intent(IN)    :: STOKES_SPEED   ! scalar value set for Stokes speed- place holder for output from Wave model
     real,    intent(IN)    :: DT             ! time-step
     real,    intent(IN)    :: MUSKIN         ! exponent of temperature: T(z) profile in warm layer
     real,    intent(IN)    :: TS_FOUNDi(:)   ! bulk SST (temperature at base of warm layer)
     integer, intent(IN)    :: n_iter_cool    ! number of iterations to compute cool-skin layer 
     real,    intent(IN)    :: fr_ice_thresh  ! threshold on ice fraction, sort of defines Marginal Ice Zone
+    real,    intent(IN)    :: epsilon_d      ! (thickness of AOIL)/(thickness of OGCM top level), typically < 1.
 
     real,    intent(OUT)   :: DWARM_ (:)     ! depth of AOIL
     real,    intent(OUT)   :: TBAR_  (:)     ! copy of TW (also internal state) to export out
@@ -436,7 +441,12 @@ contains
 !--------------------------------------
 
              X1         = LHF(N) + SHF(N) - ( LWDNSRF(N) -(ALW(N) + BLW(N)*TS(N,WATER)))
-             SWWARM_(N) = SWN(N) - PEN(N)
+
+             if (DO_DATASEA == 0) then ! coupled   mode
+              SWWARM_(N) = SWN(N) - PEN(N) - (epsilon_d/(1.-epsilon_d))* (PEN(N)-PEN_ocean(N))
+             else                      ! uncoupled mode
+              SWWARM_(N) = SWN(N) - PEN(N)
+             endif
              QWARM_(N)  = SWWARM_(N) - X1
 
 ! Stability parameter & Similarity function
@@ -461,11 +471,17 @@ contains
              IF (fLA       <= 1.0) fLA = 1.0               ! Limit range of fLa to be >=1
              IF (ZETA_W_(N)<= 0.0) fLA = 1.0               ! Apply fLa to stable conditions only
 
-             TAUTW_(N)   = &
-                  (DWARM_(N)*PHIW_(N))/(MAPL_KARMAN*USTARW_(N)*fLA*(MUSKIN+1.))
-
-             X2          = DT * &
-                  ( (MAPL_KARMAN*USTARW_(N)*fLA*(MUSKIN+1.))/(DWARM_(N)*PHIW_(N)) )
+             if (DO_DATASEA == 0) then ! coupled   mode
+               TAUTW_(N)   = &
+                 ((1.-epsilon_d)*DWARM_(N)*PHIW_(N))/(MAPL_KARMAN*USTARW_(N)*fLA*(MUSKIN+1.))
+               X2          = DT * &
+                 ( (MAPL_KARMAN*USTARW_(N)*fLA*(MUSKIN+1.))/(DWARM_(N)*PHIW_(N) * (1.-epsilon_d)) )
+             else                      ! uncoupled mode
+               TAUTW_(N)   = &
+                 (DWARM_(N)*PHIW_(N))/(MAPL_KARMAN*USTARW_(N)*fLA*(MUSKIN+1.))
+               X2          = DT * &
+                 ( (MAPL_KARMAN*USTARW_(N)*fLA*(MUSKIN+1.))/(DWARM_(N)*PHIW_(N)) )
+             endif
 
 ! We DO NOT include cool-skin tdrop in TW, therefore, we now save TW
 
