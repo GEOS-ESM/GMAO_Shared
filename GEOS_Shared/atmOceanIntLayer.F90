@@ -3,6 +3,7 @@ module atmOcnIntlayer
 ! !USES:
 
 use MAPL
+use GEOS_UtilsMod ! for GEOS_DQSAT and GEOS_QSAT
 
 implicit none
 
@@ -16,7 +17,8 @@ public  ALBSEA,             &
         water_RHO,          &
         AOIL_Shortwave_abs, &
         AOIL_v0_S,          &
-        AOIL_v0_HW
+        AOIL_v0_HW,         &
+        surf_hflux_update
 
 contains
 
@@ -860,6 +862,108 @@ contains
     PEN   = SWN * fW
 
   end subroutine SIMPLE_SW_ABS
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !IROUTINE: SURFACE_FLUX_UPDATE - update using surface (atmospheric) fluxes only
+
+!  !DESCRIPTION:
+!        Computes an update using surface fluxes from atmospheric model
+
+! !INTERFACE:
+  subroutine surf_hflux_update (NT,DO_SKIN_LAYER,DO_DATASEA,MUSKIN,DT,epsilon_d,  &
+             CFT,CFQ,SH,EVAP,DSH,DEV,THATM,QHATM,PS,FRWATER,HW,SNO,               &
+             LWDNSRF,SWN,ALW,BLW,SHF,LHF,EVP,DTS,DQS,TS,QS,TWMTS,TWMTF)
+
+! !ARGUMENTS:
+
+    integer, intent(IN)    :: NT             ! number of tiles
+    integer, intent(IN)    :: DO_SKIN_LAYER  ! 0:No interface layer, 1:active, and accounts for change in SST
+    integer, intent(IN)    :: DO_DATASEA     ! 1:uncoupled (AGCM);   0:coupled (AOGCM)
+    real,    intent(IN)    :: MUSKIN         ! exponent of temperature: T(z) profile in warm layer
+    real,    intent(IN)    :: DT             ! time-step
+    real,    intent(IN)    :: epsilon_d      ! (thickness of AOIL)/(thickness of OGCM top level), typically < 1.
+
+    real,    intent(IN)    :: CFT(:)         ! sensible    heat transfer coefficient
+    real,    intent(IN)    :: CFQ(:)         ! evaporation heat transfer coefficient
+    real,    intent(IN)    :: SH(:)          ! upward_sensible_heat_flux 
+    real,    intent(IN)    :: EVAP(:)        ! evaporation
+    real,    intent(IN)    :: DSH(:)         ! derivative_of_upward_sensible_heat_flux
+    real,    intent(IN)    :: DEV(:)         ! derivative_of_evaporation
+    real,    intent(IN)    :: THATM(:)       ! effective_surface_skin_temperature
+    real,    intent(IN)    :: QHATM(:)       ! effective_surface_specific_humidity
+    real,    intent(IN)    :: PS(:)          ! surface pressure
+    real,    intent(IN)    :: FRWATER(:)     ! 1. - fr of sea ice
+    real,    intent(IN)    :: HW(:)          ! mass of AOIL
+    real,    intent(IN)    :: SNO(:)         ! snow fall 
+    real,    intent(IN)    :: LWDNSRF(:)     ! surface_downwelling_longwave_flux
+    real,    intent(IN)    :: SWN(:)         ! shortwave radiation absorbed in AOIL
+    real,    intent(IN)    :: ALW(:)         ! linearization_of_surface_upwelling_longwave_flux
+    real,    intent(IN)    :: BLW(:)         ! linearization_of_surface_upwelling_longwave_flux
+
+    real,    intent(OUT)   :: SHF (:)        ! sensible heat flux
+    real,    intent(OUT)   :: LHF (:)        ! latent   heat flux
+    real,    intent(OUT)   :: EVP (:)        ! evaporation `heat' flux
+    real,    intent(OUT)   :: DTS (:)        ! change in skin temperature
+    real,    intent(OUT)   :: DQS (:)        ! change in specific humidity
+
+    real,    intent(INOUT) :: TS  (:)        ! skin temperature
+    real,    intent(INOUT) :: QS  (:)        ! specific humidity
+    real,    intent(INOUT) :: TWMTS  (:)     ! "internal state" variable that has: TW - TS
+    real,    intent(INOUT) :: TWMTF  (:)     ! "internal state" variable that has: TW - TF
+
+!  !LOCAL VARIABLES
+    real         :: SHD(NT), EVD(NT), QFLX(NT), DTX(NT), DTY
+
+    EVP = CFQ* (EVAP + DEV * (QS-QHATM))   ! evaporation "flux"
+    SHF = CFT* (SH   + DSH * (TS-THATM))   ! sensible heat flux
+
+    SHD = CFT*DSH                                                 ! d (sensible heat flux)/d Ts
+    EVD = CFQ*DEV*GEOS_DQSAT(TS, PS, RAMP=0.0, PASCALS=.TRUE.)    ! d (evap)/ d Ts
+
+    QFLX = LWDNSRF - (ALW + BLW*TS) - SHF                         ! net longwave - sensible heat flux
+
+    ! FR accounts for fraction of water/ice
+    DTX = DT*FRWATER / (MAPL_CAPWTR*HW)
+
+    if (DO_SKIN_LAYER == 0) then
+      DTX = 0.
+    else
+      DTX = DTX*((MUSKIN+1.-MUSKIN*epsilon_d)/MUSKIN) ! note: epsilon_d is = 0. in uncoupled mode (DO_DATASEA == 1)
+    endif
+
+    ! DTY accounts for ice on top of water. Part of Shortwave is absorbed by ice and rest goes to warm water.
+    ! skin layer only absorbs the portion of SW radiation passing thru the bottom of ice MINUS the portion passing thru the skin layer    
+    ! Penetrated shortwave from sea ice bottom + associated ocean/ice heat flux
+    DTY = 0. ! Revisit above with CICE6 [Nov, 2019] and compute DTY = DT / (SALTWATERCAP*HW) * (PENICE * FI + FHOCN)
+
+    DTS = DTX * ( QFLX + SWN - EVP*MAPL_ALHL - MAPL_ALHF*SNO ) + DTY ! add net SW, minus latent heat flux to QFLX. Keep DTY (=0) for ZERO DIFF in OUTPUT.
+    DTS = DTS / (1.0 + DTX*(BLW+SHD+EVD*MAPL_ALHL))     ! implicit solution for an update in temperature: DTS. Tnew = Told + DTS
+
+    EVP = EVP + EVD * DTS                               ! update evaporation
+    SHF = SHF + SHD * DTS                               ! update sensible heat flux
+    LHF = EVP * MAPL_ALHL                               ! update latent   heat flux
+
+    ! update temperature, moisture and mass
+    TS   = TS + DTS
+    DQS  = GEOS_QSAT(TS, PS, RAMP=0.0, PASCALS=.TRUE.) - QS
+    QS   = QS + DQS
+
+    ! updated TS implies an update in TWMTS(=TW-TS) and TWMTF(=TW-TF)
+    if(DO_SKIN_LAYER == 0) then
+      TWMTS = 0.
+      TWMTF = 0.
+    else
+      TWMTS = TWMTS - (1.0/(MUSKIN+1.0))*DTS
+      if (DO_DATASEA == 0) then            ! coupled   mode
+         TWMTF = TWMTF + (MUSKIN/(1.+MUSKIN-MUSKIN*epsilon_d))*DTS
+      else                                 ! uncoupled mode
+         TWMTF = 0.
+!        TWMTF = TWMTF + (MUSKIN/(1.+MUSKIN))*DTS ! This will cause non-zero diff in internal/checkpoint, but ZERO DIFF in OUTPUT.
+      end if
+    end if         
+
+  end subroutine surf_hflux_update
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module atmOcnIntlayer
