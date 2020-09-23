@@ -269,6 +269,7 @@ contains
 !  !DESCRIPTION:
 !        Described in section 2 of
 !        https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.2988
+!        Zeng and Beljaars, 2005
 
 ! !INTERFACE:
   subroutine SKIN_SST (DO_SKIN_LAYER, DO_DATASEA, NT,CM,UUA,VVA,UW,VW,HW,SWN,LHF,SHF,LWDNSRF,      &
@@ -276,7 +277,7 @@ contains
                        TXW,TYW,USTARW_,  &
                        DCOOL_,TDROP_,SWCOOL_,QCOOL_,BCOOL_,LCOOL_,TDEL_,SWWARM_,QWARM_,ZETA_W_,    &
                        PHIW_,LANGM_,TAUTW_,uStokes_,TS,TWMTS,TW,WATER,FR,n_iter_cool,fr_ice_thresh,&
-                       epsilon_d)
+                       epsilon_d, do_grad_decay)
 
 ! !ARGUMENTS:
 
@@ -306,6 +307,7 @@ contains
     integer, intent(IN)    :: n_iter_cool    ! number of iterations to compute cool-skin layer 
     real,    intent(IN)    :: fr_ice_thresh  ! threshold on ice fraction, sort of defines Marginal Ice Zone
     real,    intent(IN)    :: epsilon_d      ! (thickness of AOIL)/(thickness of OGCM top level), typically < 1.
+    character(len=*), intent(IN) :: do_grad_decay   ! simulate a gradual decay of diurnal warming? yes or no. Follows Zeng and Beljaars, 2005.
 
     real,    intent(OUT)   :: DWARM_ (:)     ! depth of AOIL
     real,    intent(OUT)   :: TBAR_  (:)     ! copy of TW (also internal state) to export out
@@ -335,7 +337,7 @@ contains
 !  !LOCAL VARIABLES
 
     integer         :: N, iter_cool
-    real            :: ALPH, Qb, fC, fLA, X1, X2
+    real            :: ALPH, Qb, fC, fLA, X1, X2, dTw
 
     real, parameter :: RHO_SEAWATER    = 1022.0  ! sea water density             [kg/m^3]    ! Replace Usage of RHO_SEAWATER with MAPL_RHO_SEAWATER
     real, parameter :: NU_WATER        = 1.0E-6  ! kinematic viscosity of water  [m^2/s]
@@ -452,8 +454,19 @@ contains
 ! Stability parameter & Similarity function
 !------------------------------------------
 
-             ZETA_W_(N)  = (DWARM_(N)*MAPL_KARMAN*MAPL_GRAV*ALPH*QWARM_(N)) / &           ! zeta_w = dwarm/obukhov length
-                           (RHO_SEAWATER*MAPL_CAPWTR*USTARW_(N)**3)                       ! replace RHO_SEAWATER with MAPL_RHO_SEAWATER
+             if ( trim(do_grad_decay) == 'yes') then
+               dTw = ((1.+MUSKIN)/MUSKIN) * (TBAR_(N)-TS_FOUNDi(N))
+               if ( (dTw > 0.) .and. (QWARM_(N)<0.)) then
+                 ZETA_W_(N)  = (sqrt(DWARM_(N)*dTw*MUSKIN*MAPL_GRAV*ALPH)*MAPL_KARMAN)/ & ! F_d formulation
+                               (sqrt(5.) * USTARW_(N))
+               else
+                 ZETA_W_(N)  = (DWARM_(N)*MAPL_KARMAN*MAPL_GRAV*ALPH*QWARM_(N)) / & ! zeta_w = dwarm/obukhov length
+                               (RHO_SEAWATER*MAPL_CAPWTR*USTARW_(N)**3)             ! replace RHO_SEAWATER with MAPL_RHO_SEAWATER
+               endif
+             else
+               ZETA_W_(N)  = (DWARM_(N)*MAPL_KARMAN*MAPL_GRAV*ALPH*QWARM_(N)) / & ! zeta_w = dwarm/obukhov length
+                             (RHO_SEAWATER*MAPL_CAPWTR*USTARW_(N)**3)             ! replace RHO_SEAWATER with MAPL_RHO_SEAWATER
+             endif 
 
              if ( ZETA_W_(N) >= 0.0) then   ! Takaya: Eqn(5)
                 PHIW_(N) = 1. + (5*ZETA_W_(N) + 4.*ZETA_W_(N)**2)/(1+3.*ZETA_W_(N)+0.25*ZETA_W_(N)**2)
