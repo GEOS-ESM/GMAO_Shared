@@ -61,6 +61,7 @@
 !  09Apr2018   Todling    Add vertically-varying additive inflation mechanism
 !  11Apr2018   Todling    Additive inflation only applied over ocean for ps/delp
 !  09May2018   Todling    Ability to vertically interpolate central ana to mem res
+!  12Jul2019   Todling    Ability to vertically interpolate inflation perturbation
 !
 ! !See Also:
 !
@@ -261,14 +262,9 @@
 !     Get mean to recenter ensemble around
 !     -------------------------------------
       call dyn_getdim ( trim(dyn_inflate), imm, jmm, kmm, lmm, rc )
-      if(km/=kmm) then ! ignore diff in lm for now
-         print *, trim(myname), ': km/lm members     = ', km ,lm
-         print *, trim(myname), ': km/lm perturbation= ', kmm,lmm
-         call die(myname,'inconsistent km/lm')
-      endif
-      lm_pert=lmm
 
-      if(im/=imm.or.jm/=jmm) then
+      lm_pert=lmm
+      if(im/=imm.or.jm/=jmm.or.km/=kmm) then
  
 !        Read full resolution perturbation
 !        ---------------------------------
@@ -281,27 +277,53 @@
 
 !        Initialize dimension of output (interpolated) vector
 !        ----------------------------------------------------
-         call dyn_init ( im, jm, km, x_x%grid%lm, x_m, rc, &
-                         x_e%grid%ptop, x_e%grid%ks, x_e%grid%ak, x_e%grid%bk, vectype=dyntype )
+         if (km/=kmm) then
+            allocate(ak(kmm+1),bk(kmm+1))
+            call set_eta ( kmm,ks,ptop,pint,ak,bk )
+            call dyn_init ( im, jm, kmm, x_x%grid%lm, x_m, rc, &
+                            ptop, ks, ak, bk, vectype=dyntype )
+         else
+            call dyn_init ( im, jm, km, x_x%grid%lm, x_m, rc, &
+                            x_e%grid%ptop, x_e%grid%ks, x_e%grid%ak, x_e%grid%bk, vectype=dyntype )
+         endif
               if ( rc/=0 ) then
                    call die (myname, ': Error initializing dyn vector(x_e)')
               endif
    
-!        Interpolate to required resolution
-!        ----------------------------------
-!_RT     x_m%grid%lm=min(lm_pert,lm) ! only interp minimal set of fields (others are zero) 
+!        Interpolate to required horizontal resolution (at vertical resolution of input perturbation
+!        -------------------------------------------------------------------------------------------
          call h_map_pert ( x_x, x_m, rc )
               if ( rc/=0 ) then
                    call dyn_clean ( x_x )
                    call dyn_clean ( x_m )
                    print *, 'h_map error code = ', rc
                    call die(myname,' failed in h_map')
-              else
-                   call dyn_clean ( x_x )
               endif
-!_RT     x_m%grid%lm = lm ! reset lm-dim(x_m)
-         print*, myname, ': interpolated additive perturbation to member resolution'
-         print*, myname, ': from ', imm, 'x', jmm, ' to ', im, 'x', jm
+
+!        Interpolate vertically when required ...
+!        ----------------------------------------
+         if (km/=kmm) then
+            call dyn_clean ( x_x )
+            call dyn_init ( x_m, x_x, rc, copy=.true., vectype=dyntype ) 
+            call dyn_clean ( x_m )
+            call dyn_init ( im, jm, km, x_x%grid%lm, x_m, rc, &
+                            x_e%grid%ptop, x_e%grid%ks, x_e%grid%ak, x_e%grid%bk, vectype=dyntype )
+            call vinter_pert_ ( x_x, x_m, ak, bk, dyntype, rc )
+              if ( rc/=0 ) then
+                   call dyn_clean ( x_x )
+                   call dyn_clean ( x_m )
+                   print *, 'vinter_pert_ error code = ', rc
+                   call die(myname,' failed in vinter_pert')
+              endif
+            deallocate(ak,bk)
+            print*, myname, ': interpolated additive perturbation to member resolution'
+            print*, myname, ': from ', imm, 'x', jmm, 'x', kmm, ' to ', im, 'x', jm, 'x', km
+         else ! if vertical interpolation not required, we are done
+            print*, myname, ': interpolated additive perturbation to member resolution'
+            print*, myname, ': from ', imm, 'x', jmm, ' to ', im, 'x', jm
+         endif
+
+         call dyn_clean ( x_x )
 
       else
 
@@ -623,7 +645,13 @@ CONTAINS
       ainf_ps = alpha
       ainf_ts = alpha
 
-      if ( nfiles .lt. 1 ) call usage()
+      if ( nfiles .lt. 1 ) then
+         call usage()
+      else
+         do i=1,nfiles
+            write(6,'(a,i4,2a)') 'Reading file (',i,'): ', trim(files(i))
+         enddo
+      endif
 
 !     Load resources: some of these will overwrite command line settings
 !     --------------
@@ -1134,5 +1162,42 @@ CONTAINS
    endif
 
    end function getphis_
+
+   subroutine vinter_pert_ (xpi,xpo,ak,bk,dyntype,rc)
+
+   use m_set_eta, only: set_eta
+   use m_mapz_pert, only: mapz_pert_set
+   use m_mapz_pert, only: mapz_pert_interp
+   implicit none
+
+   type(dyn_vect) :: xpi  ! input vector
+   type(dyn_vect) :: xpo  ! output vector
+   real(8), intent(in) :: ak(:),bk(:)
+   integer,intent(in)  :: dyntype
+   integer,intent(out) :: rc
+
+   integer kmi,kmo,ier
+   real,allocatable,dimension(:) :: plevi,plevo
+
+   kmo=xpo%grid%km
+   kmi=xpi%grid%km
+   rc =0
+
+!  set pressure levels
+   allocate(plevi(kmi),plevo(kmo))
+   call mapz_pert_set (kmi,plevi)
+   call mapz_pert_set (kmo,plevo)
+
+!  interpolate vertically
+   call mapz_pert_interp ( plevi, plevo, xpi, xpo, ier)
+   if (ier/=0) then
+      print *,  'main: Error from mapz_pert_interp(xpo), rc=', rc
+      rc=ier ! return error code
+   endif
+
+!  clean up
+   deallocate(plevi,plevo)
+
+   end subroutine vinter_pert_
 
   end program dyn_recenter

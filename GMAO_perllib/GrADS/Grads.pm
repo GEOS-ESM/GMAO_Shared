@@ -104,8 +104,9 @@ sub new {                                                   # Constructor
 
 #   Complement argv with env variables
 #   ----------------------------------
-    for my $att qw ( Bin Echo Verb Port Window Opts 
-                  TransferFile expTransferFile impTransferFile ) {
+    
+    my @temparray = qw ( Bin Echo Verb Port Window Opts TransferFile expTransferFile impTransferFile );
+    foreach my $att (@temparray) {
         my $evar = "GA_" . uc $att;
  #      print qq(env var = $evar = <$ENV{$evar}>\n);
         $argv->{$att} = "$ENV{$evar}" 
@@ -272,7 +273,8 @@ sub Open {                                    # generic file opener
     my $opener = "open";
     if ( $FTYPE eq "DEFAULT" ) {
         $_ = uc $fname;
-        $opener = "sdfopen" if ( ?^HTTP\://? || /\.HDF$/ || /\.NC.*$/ );
+#       $opener = "sdfopen" if ( ?^HTTP\://? || /\.HDF$/ || /\.NC.*$/ );
+        $opener = "sdfopen" if ( /^HTTP\:\/\// || /\.HDF$/ || /\.NC.*$/ );
         $opener = "xdfopen" if ( /\.DDF$/ );
     }
     elsif ( "$FTYPE" eq "SDF" ) {

@@ -91,7 +91,7 @@ use File::Basename;
       $param_value = "";
       while ( <CFILE> ) {
          chop;
-         if ( m/$requested_param/ ) { $param_value = ( split( /=/ ) )[1]; }
+	 if ( m/$requested_param/ ) { $param_value = ( split( /=/, $_, 2 ) )[1]; }
       }
 
       close( CFILE );
