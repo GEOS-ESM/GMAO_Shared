@@ -21,9 +21,9 @@ if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
    string (REPLACE "${ALIGN_ALL}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
    string (REPLACE "${NO_ALIAS}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
 endif ()
+
 esma_add_library (${this}
-  SRCS ${SRCS}
+   SRCS ${SRCS}
+   INCLUDES
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   )
-
-
-target_include_directories (${this} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
