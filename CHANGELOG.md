@@ -8,14 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+### Fixed
+### Removed
+### Added
+
+## [1.2.0] - 2020-09-25
+
+### Changed
 
 - Update `GEOS_Utilities.F90` to match `GEOSadas-5_27_0` (#115)
 
-### Fixed
+## [1.1.10] - 2020-09-25
 
-### Removed
+### Changed
 
-### Added
+- Updated the CircleCI Image
 
 ## [1.1.9] - 2020-09-15
 
