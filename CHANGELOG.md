@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 ### Fixed
+
+- Undo the change to `GEOS_Utilities.F90` in v1.2.0. This has a bug at the end of the table (#123)
+
 ### Removed
 ### Added
 
