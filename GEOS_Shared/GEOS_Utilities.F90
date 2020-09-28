@@ -535,7 +535,7 @@
        end if
 
        TI = (TI - TMINTBL)*DEGSUBS+1
-       IT = nint(TI)
+       IT = int(TI)
 
        if(URAMP==TMIX) then
           DQ    = ESTBLX(IT+1) - ESTBLX(IT)
@@ -724,7 +724,7 @@
          end if
 
          TT = (TI - TMINTBL)*DEGSUBS+1
-         IT = nint(TT)
+         IT = int(TT)
 
          if(URAMP==TMIX) then
             DQQ =  ESTBLX(IT+1) - ESTBLX(IT)
