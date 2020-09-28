@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed regrid_forcing.x and regrid_forcing_esmf.x so they will work with MAPL2.2 and beyond
+
 ### Removed
 
 ### Added
