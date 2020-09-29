@@ -21,6 +21,9 @@ output  = subwrd(args,7)
 'run getenv "ORADSWAVE"'
 'define oradswave = 'result
 
+'set dfile 1'
+'sett'
+
 'getinfo tmin'
          tmin = result
 'getinfo tmax'
@@ -80,22 +83,22 @@ radmin = radave - raddif
 'set cmark  0'
 'set cstyle 1'
 'set ccolor 2'
-'set cthick 6'
+'set cthick 3'
 'd radlwg'
 'set cmark  0'
 'set cstyle 1'
 'set ccolor 4'
-'set cthick 6'
+'set cthick 3'
 'd radswg'
 'set cmark  0'
 'set cstyle 1'
 'set ccolor 2'
-'set cthick 1'
+'set cthick 10'
 'd radlwave'
 'set cmark  0'
 'set cstyle 1'
 'set ccolor 4'
-'set cthick 1'
+'set cthick 10'
 'd radswave'
 
 'set dfile 'obsfile
@@ -105,23 +108,23 @@ radmin = radave - raddif
 'set cmark  0'
 'set cstyle 3'
 'set ccolor 2'
-'set cthick 6'
+'set cthick 3'
 'd oradlwg'
 'set cmark  0'
 'set cstyle 3'
 'set ccolor 4'
-'set cthick 6'
+'set cthick 3'
 'd oradswg'
 
 'set cmark  0'
 'set cstyle 3'
 'set ccolor 2'
-'set cthick 1'
+'set cthick 10'
 'd oradlwave'
 'set cmark  0'
 'set cstyle 3'
 'set ccolor 4'
-'set cthick 1'
+'set cthick 10'
 'd oradswave'
 
 
@@ -131,35 +134,86 @@ radmin = radave - raddif
 'getinfo date'
          date = result
 
-'d radlwave'
-   radlwave = subwrd(result,4)
-'d radswave'
-   radswave = subwrd(result,4)
+'d  radlwave'
+    radlwave = subwrd(result,4)
+'d  radswave'
+    radswave = subwrd(result,4)
+'d oradlwave'
+   oradlwave = subwrd(result,4)
+'d oradswave'
+   oradswave = subwrd(result,4)
 
 'q w2xy 'date' 'radlwave
-    ylwg = subwrd(result,6)
+                ymlwg = subwrd(result,6)
+                x.1   = radlwave
+                y.1   = ymlwg
+                c.1   = 2
+                L.1   = "(Solid)"
 'q w2xy 'date' 'radswave
-    yswg = subwrd(result,6)
-say 'ylwg: 'ylwg
-say 'yswg: 'yswg
-    ydif = ( ylwg-yswg )
-if( ydif < 0 ) ; ydif = -ydif ; endif
+                ymswg = subwrd(result,6)
+                x.2   = radswave
+                y.2   = ymswg
+                c.2   = 4
+                L.2   = "(Solid)"
+'q w2xy 'date' 'oradlwave
+                yolwg = subwrd(result,6)
+                x.3   = oradlwave
+                y.3   = yolwg
+                c.3   = 2
+                L.3   = "(Dash)"
+'q w2xy 'date' 'oradswave
+                yoswg = subwrd(result,6)
+                x.4   = oradswave
+                y.4   = yoswg
+                c.4   = 4
+                L.4   = "(Dash)"
 
-if( ydif < 0.1 )
-if( ylwg <= yswg )
-    yswg  = ylwg + 0.1
+say 'ymlwg: 'ymlwg' 'L.1
+say 'yolwg: 'yolwg' 'L.3
+say 'ymswg: 'ymswg' 'L.2
+say 'yoswg: 'yoswg' 'L.4
+
+* Sort Mean End-Point Values
+* --------------------------
+m = 1
+while( m<=4 )
+  n = m+1
+  while( n<=4 )
+  if( y.n < y.m )
+      dum = x.m ; x.m = x.n ; x.n = dum
+      dum = y.m ; y.m = y.n ; y.n = dum
+      dum = c.m ; c.m = c.n ; c.n = dum
+      dum = L.m ; L.m = L.n ; L.n = dum
+  endif
+  n = n+1
+  endwhile
+m = m+1
+endwhile
+
+m = 1
+say 'm: 'm' y: 'y.m' L: 'L.m
+m = m+1
+while( m<=4 )
+k = m-1
+if( y.m - y.k < 0.1 )
+    y.m = y.k + 0.1
 endif
-if( yswg <= ylwg )
-    ylwg  = yswg + 0.1
-endif
-endif
+say 'm: 'm' y: 'y.m' L: 'L.m
+m = m+1
+endwhile
 
 'set strsiz .08'
 
-'set string 2 r 5'
-'draw string 1.4 'ylwg ' 'radlwave
-'set string 4 r 5'
-'draw string 1.4 'yswg ' 'radswave
+'set string 'c.1' r 5'
+'draw string 1.4 'y.1' 'x.1' 'L.1
+'set string 'c.2' r 5'
+'draw string 1.4 'y.2' 'x.2' 'L.2
+
+'set string 'c.3' r 5'
+'draw string 1.4 'y.3' 'x.3' 'L.3
+'set string 'c.4' r 5'
+'draw string 1.4 'y.4' 'x.4' 'L.4
+
 
 
 * Plot NET
@@ -185,24 +239,24 @@ endif
 'set cmark  0'
 'set cstyle 1'
 'set ccolor 3'
-'set cthick 6'
+'set cthick 3'
 'd net'
 'set cmark  0'
 'set cstyle 3'
 'set ccolor 3'
-'set cthick 6'
+'set cthick 3'
 'd onet'
 'define radave = radswave-radlwave'
 'set cmark  0'
 'set cstyle 1'
 'set ccolor 3'
-'set cthick 1'
+'set cthick 10'
 'd radave'
 'define oradave = oradswave-oradlwave'
 'set cmark  0'
 'set cstyle 3'
 'set ccolor 3'
-'set cthick 1'
+'set cthick 10'
 'd oradave'
 
 'set t 'tmin
@@ -211,12 +265,19 @@ endif
 'd radave'
    radave = subwrd(result,4)
 'q w2xy 'date' 'radave
-    yrad = subwrd(result,6)
+    ymrad = subwrd(result,6)
+'d oradave'
+   oradave = subwrd(result,4)
+'q w2xy 'date' 'oradave
+    yorad = subwrd(result,6)
 
 'set strsiz .08'
 
 'set string 3 r 5'
-'draw string 1.4 'yrad ' 'radave
+'draw string 1.4 'ymrad ' 'radave' (Solid)'
+'set string 3 r 5'
+'draw string 1.4 'yorad ' 'oradave' (Dash)'
+
 'set t 'tmin' 'tmax
 
 
@@ -224,7 +285,7 @@ endif
 'set vpage off'
 'set string 1 c 6'
 'set strsiz .14'
-'draw string 6.15 8.35 'expid'  vs.  'obsnam
+'draw string 6.15 8.35 'expid' (Solid)  vs.  'obsnam' (Dash)'
 'draw string 6.15 7.80 Globally Averaged TOA Radiation Budget (W/m`a2`n)'
 'set strsiz .12'
 'draw string 6.15 8.12 'expdsc

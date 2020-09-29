@@ -1,7 +1,7 @@
 import os,datetime
 from dateutil import rrule
 import scipy as sp
-from my_lib import dset
+from g5lib import dset
 
 __all__=['tctl','sctl','rhoctl']
 

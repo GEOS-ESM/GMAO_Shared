@@ -1,5 +1,5 @@
 import os, pickle
-import my_lib.domain as domain
+from g5lib import domain
 import scipy as sp
 
 path=os.environ['NOBACKUP']+'/verification/merra'

@@ -3,7 +3,7 @@ import matplotlib.pyplot as pl
 import matplotlib.dates as mdates
 import scipy as sp
 from mpl_toolkits.basemap.cm import sstanom
-import my_lib.plotters as pltrs
+from g5lib import plotters as pltrs
 from datetime import datetime
 
 dsetname='merra'

@@ -376,8 +376,10 @@
 
          if (trim(grid_format) == 'nc') then
 
-            call ice_open_nc(grid_file,fid_grid)
-            call ice_open_nc(kmt_file,fid_kmt)
+            if (my_task == master_task) then
+               call ice_open_nc(grid_file,fid_grid)
+               call ice_open_nc(kmt_file,fid_kmt)
+            endif
 
             fieldname='ulat'
             call ice_read_global_nc(fid_grid,1,fieldname,work_g1,.true.)
@@ -391,8 +393,10 @@
 
          else
 
-            call ice_open(nu_grid,grid_file,64) ! ULAT
-            call ice_open(nu_kmt, kmt_file, 32) ! KMT
+            if (my_task == master_task) then
+               call ice_open(nu_grid,grid_file,64) ! ULAT
+               call ice_open(nu_kmt, kmt_file, 32) ! KMT
+            endif
 
             call ice_read_global(nu_grid,1,work_g1,'rda8',.true.)  ! ULAT
             call ice_read_global(nu_kmt, 1,work_g2,'ida4',.true.)  ! KMT
@@ -406,7 +410,9 @@
 
       elseif (trim(grid_type) == 'panarctic') then
 
-         call ice_open(nu_grid,grid_file,64) ! ULAT, KMT
+         if (my_task == master_task) then
+            call ice_open(nu_grid,grid_file,64) ! ULAT, KMT
+         endif
 
          call ice_read_global(nu_grid,1,work_g2,'ida8',.true.)  ! KMT
          call ice_read_global(nu_grid,2,work_g1,'rda8',.true.)  ! ULAT
@@ -809,8 +815,10 @@
       type (block) :: &
          this_block           ! block information for current block
 
-      call ice_open(nu_grid,grid_file,64)
-      call ice_open(nu_kmt,kmt_file,32)
+      if (my_task == master_task) then
+         call ice_open(nu_grid,grid_file,64)
+         call ice_open(nu_kmt,kmt_file,32)
+      endif
 
       diag = .true.       ! write diagnostic info
 
@@ -982,8 +990,10 @@
       type (block) :: &
          this_block           ! block information for current block
 
-      call ice_open_nc(grid_file,fid_grid)
-      call ice_open_nc(kmt_file,fid_kmt)
+      if (my_task == master_task) then
+         call ice_open_nc(grid_file,fid_grid)
+         call ice_open_nc(kmt_file,fid_kmt)
+      endif
 
       diag = .true.       ! write diagnostic info
 
@@ -1122,7 +1132,9 @@
       type (block) :: &
          this_block           ! block information for current block
 
-      call ice_open(nu_grid,grid_file,64)
+      if (my_task == master_task) then
+         call ice_open(nu_grid,grid_file,64)
+      endif
 
       diag = .true.       ! write diagnostic info
 

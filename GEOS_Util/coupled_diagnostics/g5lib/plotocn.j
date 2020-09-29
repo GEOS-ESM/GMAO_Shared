@@ -4,24 +4,18 @@
 #SBATCH --time=12:00:00 
 #SBATCH -o plotocn.out
 
-if ( $HOSTNAME =~ "discover"* ) then
-    source /usr/share/modules/init/csh
-    module purge
-    module load other/comp/gcc-5.3-sp3
-    module load other/SSSO_Ana-PyD/SApd_4.2.0_py2.7_gcc-5.3-sp3
-    set SCRDIR=/home/yvikhlia
-    set G5LIBDIR=$SCRDIR/python
-    set ANADIR=$SCRDIR/geos5/ana
-    set VERIFICATION=$SCRDIR/verification
+source /usr/share/modules/init/csh
+module purge
+module load python/GEOSpyD/Ana2019.10_py2.7
+set SCRDIR=@GEOSDIR/coupled_diagnostics
+set G5LIBDIR=$SCRDIR
+set ANADIR=$SCRDIR/analysis
+set VERIFICATION=$SCRDIR/verification
+
+if (($HOSTNAME =~ discover*) || ($HOSTNAME =~ borg*)) then
     setenv OCEANVAL /discover/nobackup/projects/gmao/oceanval/verification
 else if ( $HOSTNAME =~ "pfe"* ) then
-    module purge
-    module load python/GEOSpyD/Ana2018.12_py2.7
-    set SCRDIR=/nobackup/gmao_SIteam/Utilities/ocean-scripting
-    set G5LIBDIR=$SCRDIR/python
-    set ANADIR=$SCRDIR/geos5/ana
-    set VERIFICATION=$SCRDIR/verification
-    setenv OCEANVAL /nobackup/gmao_SIteam/ModelData/oceanval/verificarion
+    setenv OCEANVAL /nobackup/gmao_SIteam/ModelData/oceanval/verification
 endif 
 
 set EXPID=@EXPID

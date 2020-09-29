@@ -1,7 +1,7 @@
 import scipy as sp
 from datetime import date
 import scipy as sp
-from my_lib import dset
+from g5lib import dset
 
 __all__=['mask']
 
