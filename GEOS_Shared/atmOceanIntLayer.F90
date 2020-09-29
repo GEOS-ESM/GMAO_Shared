@@ -334,7 +334,7 @@ contains
     real,    intent(INOUT) :: TYW    (:)     ! meridional stress
     real,    intent(INOUT) :: TWMTS  (:)     ! "internal state" variable that has: TW - TS
     real,    intent(INOUT) :: TW     (:)     ! "internal state" variable that has: TW
-    real,    intent(INOUT) :: TS     (:,:)   ! skin temperature
+    real,    intent(INOUT) :: TS     (:)     ! skin temperature
 
 !  !LOCAL VARIABLES
 
@@ -361,7 +361,7 @@ contains
 !----------------------------------------------
 
           DWARM_(N) = HW(N)/MAPL_RHOWTR                                                   ! replace MAPL_RHOWTR with MAPL_RHO_SEAWATER
-          TBAR_(N)  = TS(N,WATER) + TWMTS(N)
+          TBAR_(N)  = TS(N) + TWMTS(N)
 
 ! Ustar in water has a floor of 2 \mu m/s
 !----------------------------------------
@@ -387,7 +387,7 @@ contains
 ! Heat loss at top of skin (cool) layer
 !--------------------------------------
 
-             X1 = LHF(N) + SHF(N) - ( LWDNSRF(N) -(ALW(N) + BLW(N)*( TS(N,WATER)-TDROP_(N))))
+             X1 = LHF(N) + SHF(N) - ( LWDNSRF(N) -(ALW(N) + BLW(N)*( TS(N)-TDROP_(N))))
              QCOOL_(N)  = X1 - SWCOOL_(N)
 
 ! Bouyancy production in cool layer depends on surface cooling
@@ -423,8 +423,8 @@ contains
 
           WARM_LAYER: if(DO_SKIN_LAYER==0) then   ! Warm layer temperature increase calculated based on definition of mean interface temperature.
 
-             TDEL_(N)    = TS(N,WATER) + TDROP_(N)
-             TWMTS(N)    = TBAR_(N)    - TS(N,WATER)
+             TDEL_(N)    = TS(N) + TDROP_(N)
+             TWMTS(N)    = TBAR_(N)    - TS(N)
 
 !            fill up with mapl_undef - so that LocStreamMod does NOT die while exporting
              SWWARM_(N)  = MAPL_UNDEF
@@ -444,7 +444,7 @@ contains
 ! Short wave absorbed in the warm layer.
 !--------------------------------------
 
-             X1         = LHF(N) + SHF(N) - ( LWDNSRF(N) -(ALW(N) + BLW(N)*TS(N,WATER)))
+             X1         = LHF(N) + SHF(N) - ( LWDNSRF(N) -(ALW(N) + BLW(N)*TS(N)))
 
              if (DO_DATASEA == 0) then ! coupled   mode
               SWWARM_(N) = SWN(N) - PEN(N) - (epsilon_d/(1.-epsilon_d))* (PEN(N)-PEN_ocean(N))
@@ -500,14 +500,14 @@ contains
 
 ! We DO NOT include cool-skin tdrop in TW, therefore, we now save TW
 
-             TW(N)       = TS_FOUNDi(N) + ( 1.0/(1.+X2))        *    (TBAR_(N) - TS_FOUNDi(N))
-             TS(N,WATER) = TS(N,WATER)  + ((1.0+MUSKIN)/MUSKIN) *    (TW(N)    - TBAR_(N))
+             TW(N) = TS_FOUNDi(N) + ( 1.0/(1.+X2))  *    (TBAR_(N) - TS_FOUNDi(N))
+             TS(N) = TS(N)  + ((1.0+MUSKIN)/MUSKIN) *    (TW(N)    - TBAR_(N))
 
              TDEL_(N)    = TS_FOUNDi(N) + ((1.0+MUSKIN)/MUSKIN) * MAX(TW(N)    - TS_FOUNDi(N), 0.0)
              TBAR_(N)    = TW(N)
 
-             TS(N,WATER) = TDEL_(N) - TDROP_(N)
-             TWMTS(N)    = TW(N) - TS(N,WATER)
+             TS(N)    = TDEL_(N) - TDROP_(N)
+             TWMTS(N) = TW(N)    - TS(N)
           end if WARM_LAYER
 
        else            ! FR(N) <= fr_ice_thresh
