@@ -286,7 +286,7 @@ contains
     integer, intent(IN)    :: DO_SKIN_LAYER  ! 0: No interface layer,     1: active, and accounts for change in SST
     integer, intent(IN)    :: DO_DATASEA     ! =1:uncoupled (AGCM); =0:coupled (AOGCM)
     integer, intent(IN)    :: NT             ! number of tiles
-    real,    intent(IN)    :: FR     (:,:)   ! fraction of surface (water/ice)
+    real,    intent(IN)    :: FR     (:)     ! fraction of surface water
     integer, intent(IN)    :: WATER          ! subtile  number assigned to surface type: "WATER" 
     real,    intent(IN)    :: CM     (:,:)   ! transfer coefficient for wind
     real,    intent(IN)    :: UUA    (:)     ! zonal       wind
@@ -355,7 +355,7 @@ contains
        TXW(N) = CM(N,WATER)*(UUA(N) - UW(N))
        TYW(N) = CM(N,WATER)*(VVA(N) - VW(N))
 
-       if( FR(N, WATER) > fr_ice_thresh) then 
+       if( FR(N) > fr_ice_thresh) then 
 
 ! Depth and mean temperature of interface layer
 !----------------------------------------------
@@ -510,7 +510,7 @@ contains
              TWMTS(N)    = TW(N) - TS(N,WATER)
           end if WARM_LAYER
 
-       else            ! FR(N, WATER) <= fr_ice_thresh
+       else            ! FR(N) <= fr_ice_thresh
           DCOOL_ (N)     = MAPL_UNDEF
           LCOOL_ (N)     = MAPL_UNDEF
           DWARM_ (N)     = MAPL_UNDEF
