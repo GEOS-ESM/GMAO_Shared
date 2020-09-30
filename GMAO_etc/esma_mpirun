@@ -36,6 +36,7 @@
 #                       deeper. The correct fix is an environment variable
 #                       which is not something to be set in esma_mpirun. But
 #                       a fat comment is added for future reference.
+# 02Jun2020  Todling/MT Per Matt, perhost exception now only on SLES11
 #============================================================================
 use strict;
 use warnings;
@@ -252,9 +253,9 @@ sub get_xtraflags {
     if ($mpi_type eq "intel") {
        if ($perhost) {
 
-          # Detect if we are on slurm
-          # -------------------------
-          if ($ENV{SLURM_JOB_ID}) {
+          # Detect if we are on slurm on SLES 11
+          # ------------------------------------
+          if ($ENV{SLURM_JOB_ID} && ! -e "/etc/os-release" ) {
 
              #############################################################
              # Intel MPI on SLURM handles -perhost in a possibly         #

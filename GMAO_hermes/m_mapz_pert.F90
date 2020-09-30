@@ -18,8 +18,8 @@ end interface
 contains
 
 subroutine mapz_pert_ ( plevi, plevo, xpi, xpo, rc )
-real(8),intent(in) :: plevi(:)
-real(8),intent(in) :: plevo(:)
+real,intent(in) :: plevi(:)
+real,intent(in) :: plevo(:)
 type(dyn_vect) :: xpi
 type(dyn_vect) :: xpo
 integer, intent(out) :: rc
@@ -71,10 +71,10 @@ xpo%ps = xpi%ps
 end subroutine mapz_pert_
 subroutine set_ (nlevs,plevs)
 integer,intent(in) :: nlevs
-real(8),intent(inout) :: plevs(nlevs)
+real,intent(inout) :: plevs(nlevs)
 
-real(8), allocatable:: ak(:),bk(:)
-real(8):: ptop, pint
+real, allocatable:: ak(:),bk(:)
+real:: ptop, pint
 integer :: ks
 
 allocate(ak(nlevs+1),bk(nlevs+1))
@@ -85,10 +85,10 @@ deallocate(ak,bk)
 end subroutine set_
 
 subroutine vinterp_ ( plevi, plevo, yi, yo, rc)
-real(8),intent(in)   :: plevi(:)
-real(8),intent(in)   :: plevo(:)
-real(8),intent(in)   :: yi(:,:,:)
-real(8),intent(inout):: yo(:,:,:)
+real,intent(in)   :: plevi(:)
+real,intent(in)   :: plevo(:)
+real,intent(in)   :: yi(:,:,:)
+real,intent(inout):: yo(:,:,:)
 integer,intent(out)  :: rc
 
 integer imi,jmi,kmi

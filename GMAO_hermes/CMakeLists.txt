@@ -46,7 +46,7 @@ ecbuild_add_executable (TARGET dyn_boot.x       SOURCES dyn_boot.f90       LIBS 
 ecbuild_add_executable (TARGET dyn2prs.x        SOURCES dyn2prs.f90        LIBS ${this})
 ecbuild_add_executable (TARGET dyn2rs5.x        SOURCES dyn2rs5.f90        LIBS ${this})
 ecbuild_add_executable (TARGET dyn52dyn.x       SOURCES dyn52dyn.f90       LIBS ${this})
-ecbuild_add_executable (TARGET dyndiff.x        SOURCES dyndiff.f90        LIBS ${this})
+ecbuild_add_executable (TARGET dyndiff.x        SOURCES dyndiff.f90        LIBS ${this} GEOS_Shared)
 ecbuild_add_executable (TARGET dyndims.x        SOURCES dyndims.f          LIBS ${this})
 ecbuild_add_executable (TARGET dynp.x           SOURCES dynp.f90           LIBS ${this})
 ecbuild_add_executable (TARGET echorc.x         SOURCES echorc.f90         LIBS ${this})

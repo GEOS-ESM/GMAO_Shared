@@ -6,6 +6,7 @@
 !
 !   06Jul2007  Todling  - Wrapped up as module
 !      
+      use m_realkinds, only : r8 => kind_r8
       implicit none
       
       private
@@ -61,11 +62,11 @@
       integer, intent(in)    :: im1, jm1, km1    ! dim of input vector
       integer, intent(in)    :: im2, jm2, km2    ! dim to interpolate to
       integer, intent(out)   :: rc
-      real,    intent(in)    ::      f(im1,jm1,km1)
-      real,    intent(inout) ::   ad_f(im1,jm1,km1)
-      real,    intent(in)    :: adfint(im2,jm2,km2)
-      real,    intent(in), optional :: lon0
-      real,    intent(in), optional :: fill
+      real(r8),intent(in)    ::      f(im1,jm1,km1)
+      real(r8),intent(inout) ::   ad_f(im1,jm1,km1)
+      real(r8),intent(in)    :: adfint(im2,jm2,km2)
+      real(r8),intent(in), optional :: lon0
+      real(r8),intent(in), optional :: fill
                                                                                                                                    
       integer k
                                                                                                                                    
@@ -89,17 +90,17 @@
 
       integer, intent(in)    :: im1, jm1
       integer, intent(in)    :: im2, jm2
-      real,    intent(in)    ::      f(im1,jm1)
-      real,    intent(inout) ::   ad_f(im1,jm1)
-      real,    intent(in)    :: adfint(im2,jm2)
-      real,    intent(in), optional :: lon0
-      real,    intent(in), optional :: fill
+      real(r8),intent(in)    ::      f(im1,jm1)
+      real(r8),intent(inout) ::   ad_f(im1,jm1)
+      real(r8),intent(in)    :: adfint(im2,jm2)
+      real(r8),intent(in), optional :: lon0
+      real(r8),intent(in), optional :: fill
 
       integer  i,j,ij,len
       real     lon0_
-      real, allocatable :: aux(:)
-      real, allocatable :: lats(:)
-      real, allocatable :: lons(:)
+      real(r8), allocatable :: aux(:)
+      real(r8), allocatable :: lats(:)
+      real(r8), allocatable :: lons(:)
 
       lon0_ = LON0_DEF
       if(present(lon0)) lon0_ = lon0
@@ -152,13 +153,13 @@ C==============================================
       integer len
       integer im
       integer jnp
-      real, intent(inout) :: adfint(len)
-      real, intent(in) :: deglat(len)
-      real, intent(in) :: deglon(len)
-      real, intent(in) ::     f(im,jnp)
-      real, intent(inout)::ad_f(im,jnp)
-      real, intent(in), optional :: deglon0
-      real, intent(in), optional :: fill
+      real(r8), intent(inout) :: adfint(len)
+      real(r8), intent(in) :: deglat(len)
+      real(r8), intent(in) :: deglon(len)
+      real(r8), intent(in) ::     f(im,jnp)
+      real(r8), intent(inout)::ad_f(im,jnp)
+      real(r8), intent(in), optional :: deglon0
+      real(r8), intent(in), optional :: fill
 
 C==============================================
 C define local variables
@@ -578,17 +579,17 @@ C----------------------------------------------
 !
       integer,intent(in) ::  len
       integer,intent(in) ::  IM, JNP
-      real,intent(in)    ::  DEGLAT(LEN)
-      real,intent(in)    ::  DEGLON(LEN)
-      real,intent(in)    ::  F(IM,JNP)
+      real(r8),intent(in)    ::  DEGLAT(LEN)
+      real(r8),intent(in)    ::  DEGLON(LEN)
+      real(r8),intent(in)    ::  F(IM,JNP)
 !     real,intent(in)    ::  FINT(LEN)
-      real,intent(inout) ::  ad_FINT(LEN)
-      real,intent(in),optional :: deglon0
-      real,intent(in),optional :: fill
+      real(r8),intent(inout) ::  ad_FINT(LEN)
+      real(r8),intent(in),optional :: deglon0
+      real(r8),intent(in),optional :: fill
 
 ! !OUTPUT PARAMETERS:
 
-      real,intent(inout) ::  ad_F(IM,JNP)
+      real(r8),intent(inout) ::  ad_F(IM,JNP)
 !
 ! !DESCRIPTION: This routine performs bilinear interpolation of a field, 
 !               f, to a set of lat/lon locations. Notice that

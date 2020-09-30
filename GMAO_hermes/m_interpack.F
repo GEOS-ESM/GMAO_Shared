@@ -28,6 +28,7 @@
 !EOI
 !-------------------------------------------------------------------------
 
+      use m_realkinds, only : r8 => kind_r8
       implicit none
       
       private
@@ -83,10 +84,10 @@
       integer, intent(in)    :: im1, jm1, km1    ! dim of input vector
       integer, intent(in)    :: im2, jm2, km2    ! dim to interpolate to
       integer, intent(out)   :: rc
-      real,    intent(in)    ::    f(im1,jm1,km1)
-      real,    intent(inout) :: fint(im2,jm2,km2)
-      real,    intent(in), optional :: lon0
-      real,    intent(in), optional :: fill
+      real(r8),intent(in)    ::    f(im1,jm1,km1)
+      real(r8),intent(inout) :: fint(im2,jm2,km2)
+      real(r8),intent(in), optional :: lon0
+      real(r8),intent(in), optional :: fill
 
       character(len=*), parameter :: myname_ = myname//'*terpv3d_'
       integer k
@@ -115,14 +116,14 @@
       real, intent(in), optional :: lon0
       real, intent(in), optional :: fill
 
-      real, allocatable, dimension(:,:) :: f_r8, fint_r8
+      real(r8), allocatable, dimension(:,:) :: f_r8, fint_r8
     
       allocate(f_r8(im1,jm1))
       allocate(fint_r8(im2,jm2))
 
       f_r8=f
       call terpv2d_ ( im1, jm1, f_r8, im2, jm2, fint_r8,
-     &                lon0=lon0, fill=fill )
+     &                lon0=real(lon0,8), fill=real(fill,8) )
       fint=fint_r8
       deallocate(fint_r8)
       deallocate(f_r8)
@@ -136,15 +137,15 @@
 
       integer, intent(in)    :: im1, jm1     ! dim of input vector
       integer, intent(in)    :: im2, jm2     ! dim to interpolate to
-      real,    intent(in)    ::    f(im1,jm1)
-      real,    intent(inout) :: fint(im2,jm2)
-      real,    intent(in), optional :: lon0
-      real,    intent(in), optional :: fill
+      real(r8),intent(in)    ::    f(im1,jm1)
+      real(r8),intent(inout) :: fint(im2,jm2)
+      real(r8),intent(in), optional :: lon0
+      real(r8),intent(in), optional :: fill
 
       integer  i,j,ij,len
-      real, allocatable :: aux(:)
-      real, allocatable :: lats(:)
-      real, allocatable :: lons(:)
+      real(r8), allocatable :: aux(:)
+      real(r8), allocatable :: lats(:)
+      real(r8), allocatable :: lons(:)
       real lon0_
 
       len = im2*jm2
@@ -162,7 +163,7 @@
          enddo
       enddo
 
-      call terpv_ ( lats, lons, aux, len, f, im1, jm1, deglon0=lon0_, fill=fill ) 
+      call terpv_ ( lats, lons, aux, len, f, im1, jm1, deglon0=real(lon0_,8), fill=fill ) 
 
       fint = reshape(aux(1:len),(/im2,jm2/))
 
@@ -190,15 +191,15 @@
  
       integer, intent(in)  :: len
       integer, intent(in)  :: IM, JNP
-      real,    intent(in)  :: DEGLAT(LEN)
-      real,    intent(in)  :: DEGLON(LEN)
-      real,    intent(in)  :: F(IM,JNP)
-      real,    intent(in), optional  :: DEGLON0     ! starting longitude
-      real,    intent(in), optional  :: FILL        ! undefined value
+      real(r8),intent(in)  :: DEGLAT(LEN)
+      real(r8),intent(in)  :: DEGLON(LEN)
+      real(r8),intent(in)  :: F(IM,JNP)
+      real(r8),intent(in), optional  :: DEGLON0     ! starting longitude
+      real(r8),intent(in), optional  :: FILL        ! undefined value
       
 ! !OUTPUT PARAMETERS:
 
-      real,    intent(inout) :: FINT(LEN)
+      real(r8),intent(inout) :: FINT(LEN)
 
 ! !DESCRIPTION: This routine performs bilinear interpolation of a field, 
 !               f, to a set of lat/lon locations. Notice that

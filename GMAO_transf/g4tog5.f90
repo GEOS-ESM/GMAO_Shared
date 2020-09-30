@@ -64,6 +64,8 @@ end program  main
   use m_dyn
   use m_set_eta
   use m_remap, only: d2a => remap_d2a
+! use m_const, only: o3_ppmv2gpg
+! use m_const, only: grav
 
   implicit NONE
 
@@ -86,10 +88,6 @@ end program  main
 !-------------------------------------------------------------------------
 
    integer :: im, jm, km, lm,l, ks, km1
-!  real, parameter :: kappa = 287.04/1004.64  ! r/cp
-!  real, parameter :: zvir  =  0.61           ! rh2o/rair - 1.
-   real, parameter :: grav  =  9.806          ! accel. of gravity
-   real, parameter :: ppmv2du =  1.657e-6     ! ppmv to Dobson units
    real, parameter :: kPa_per_Pa=.001         ! converts Pa to kPa
    real, allocatable :: tmpu(:,:,:)
    real, allocatable :: ak(:), bk(:)
@@ -182,7 +180,7 @@ end program  main
 
 ! w_f%ps = (w_f%ps/1000.0)                    ! ps to cb
 ! w_f%phis = w_f%phis/grav                    ! geopot to m
-! w_f%q(:,:,:,2) = ppmv2du * w_f%q(:,:,:,2)   ! ozone in D.U.
+! w_f%q(:,:,:,2) = o3_ppmv2gpg * w_f%q(:,:,:,2)  ! ozone in g/g
 
    deallocate(ua,va,coslon,sinlon)
 !  All done

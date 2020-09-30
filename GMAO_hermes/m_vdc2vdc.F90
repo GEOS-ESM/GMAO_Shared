@@ -12,8 +12,6 @@
 
 !USES:
 
-      use m_realkinds, only : r8 => kind_r8
-      
       use m_const, only : Cp     => cpm
       use m_const, only : R      => rgas
       use m_const, only : kappa
@@ -103,7 +101,7 @@
 
 
                                                 ! The following array unfortunately works as a common block
-     real(r8), save, allocatable, target, dimension(:,:,:,:) :: coef  ! upper and lower diagonal elements 
+     real, save, allocatable, target, dimension(:,:,:,:) :: coef  ! upper and lower diagonal elements 
                                                                       !   of matrix used in vdiff@fvgcm 
 
       CONTAINS
@@ -129,15 +127,15 @@
       integer,  intent(in) :: ks_new
       
       integer,  intent(in) :: nymd, nhms            ! date/time
-      real(r8), intent(in) :: ptop_old              ! original pressure at top
-      real(r8), intent(in) ::   pt_old(im,jm,km)    ! virt. pot. temp. on old grid
-      real(r8), intent(in) :: delp_old(im,jm,km)    ! interface p-thicknesses on old grid 
+      real, intent(in) :: ptop_old              ! original pressure at top
+      real, intent(in) ::   pt_old(im,jm,km)    ! virt. pot. temp. on old grid
+      real, intent(in) :: delp_old(im,jm,km)    ! interface p-thicknesses on old grid 
 
-      real(r8), intent(in) ::   ak_new(km+1)
-      real(r8), intent(in) ::   bk_new(km+1)
-      real(r8), intent(in) :: ptop_new              ! target pressure at top
-      real(r8), intent(in) ::   pt_new(in,jn,kn)    ! virt. pot. temp. on new grid
-      real(r8), intent(in) :: delp_new(in,jn,kn)    ! interface p-thicknesses on new grid
+      real, intent(in) ::   ak_new(km+1)
+      real, intent(in) ::   bk_new(km+1)
+      real, intent(in) :: ptop_new              ! target pressure at top
+      real, intent(in) ::   pt_new(in,jn,kn)    ! virt. pot. temp. on new grid
+      real, intent(in) :: delp_new(in,jn,kn)    ! interface p-thicknesses on new grid
 
       integer,          intent(in), optional :: prec    ! precision of traj file
       logical,          intent(in), optional :: verbose ! controls print out of info
@@ -165,8 +163,8 @@
 
       character(len=*), parameter :: myname_ = myname//'::vdc2vdc_'
       
-      real(r8), pointer     :: coef_old(:,:,:,:)     ! matrix elements on old grid
-      real(r8), allocatable :: coef_new(:,:,:,:)     ! matrix elements on old grid
+      real, pointer     :: coef_old(:,:,:,:)     ! matrix elements on old grid
+      real, allocatable :: coef_new(:,:,:,:)     ! matrix elements on old grid
 
       character(len=255) :: fname_old, fname_new
       logical :: verb, valid
@@ -298,22 +296,22 @@
       logical, intent(in) :: verbose       ! controls print out of info
 
 
-      real(r8), intent(in)  :: pt_new(  in,jn,kn)    ! virt. pot. temp. on new grid
-      real(r8), intent(in)  :: delp_new(in,jn,kn)    ! interface p-thicknesses on new grid
+      real, intent(in)  :: pt_new(  in,jn,kn)    ! virt. pot. temp. on new grid
+      real, intent(in)  :: delp_new(in,jn,kn)    ! interface p-thicknesses on new grid
 
-      real(r8), intent(in) :: ptop_old              ! original pressure at top
-      real(r8), intent(in) :: ptop_new              ! target  pressure at top
-      real(r8), intent(in) :: pt_old  (im,jm,km)   ! virt. pot. temp. on old grid
-      real(r8), intent(in) :: delp_old(im,jm,km)   ! interface p-thicknesses on old grid 
+      real, intent(in) :: ptop_old              ! original pressure at top
+      real, intent(in) :: ptop_new              ! target  pressure at top
+      real, intent(in) :: pt_old  (im,jm,km)   ! virt. pot. temp. on old grid
+      real, intent(in) :: delp_old(im,jm,km)   ! interface p-thicknesses on old grid 
 
 ! !INPUT/OUTPUT PARAMETERS:
 
-      real(r8), intent(inout)  :: coef_old(im,jm,km,nvars)! matrix elements on old grid
+      real, intent(inout)  :: coef_old(im,jm,km,nvars)! matrix elements on old grid
 
 
 ! !OUTPUT PARAMETERS:
 
-      real(r8), intent(out) :: coef_new(in,jn,kn,nvars)  ! matrix elements on new grid
+      real, intent(out) :: coef_new(in,jn,kn,nvars)  ! matrix elements on new grid
 
 ! !DESCRIPTION:  Program to map vertical diffusion matrix elements used by the 
 !  TLM and ADM simplified physics codes from one grid to another.
@@ -356,12 +354,12 @@
 ! surface drag coefficients stored in cam
 !
 
-      real(r8), allocatable  :: fac(:,:,:,:)
+      real, allocatable  :: fac(:,:,:,:)
 
 ! half-transformed matrix elements defined for new horiz. but old vert. grid       
 
-      real(r8)  :: coef_half(in,jn,km,nvars) 
-      real(r8)  :: delp_half(in,jn,km) 
+      real  :: coef_half(in,jn,km,nvars) 
+      real  :: delp_half(in,jn,km) 
 
 !  Remove field-dependent factor from matrix elements
      
@@ -424,14 +422,14 @@
 ! !INPUT PARAMETERS:
 
       integer,  intent(in)  :: im,jm,km        ! original grid dimensions
-      real(r8), intent(in)  :: ptop            ! top pressure
-      real(r8), intent(in)  :: kappa           ! R/Cp
-      real(r8), intent(in)  :: delp(im,jm,km)  ! delta_p between interfaces
-      real(r8), intent(in)  :: pt(im,jm,km)    ! virt pot. temp. on data levels
+      real, intent(in)  :: ptop            ! top pressure
+      real, intent(in)  :: kappa           ! R/Cp
+      real, intent(in)  :: delp(im,jm,km)  ! delta_p between interfaces
+      real, intent(in)  :: pt(im,jm,km)    ! virt pot. temp. on data levels
 
 ! !OUTPUT PARAMETERS:
       
-      real(r8), intent(out) :: fac(im,jm,km,2) ! field-dependent factor
+      real, intent(out) :: fac(im,jm,km,2) ! field-dependent factor
    
 ! !DESCRIPTION: Determine field-dependent factor that multiplies vertical 
 !     eddy diffusion coefficients to form diffusion matrix elements.
@@ -463,12 +461,12 @@
 
 ! Local variables:
       integer  :: i,j,k
-      real(r8) :: delpe(km)  ! same as delp; p-thickness between interfaces
-      real(r8) :: delpd(km)  ! p-thickness between data levels
-      real(r8) :: pe(km+1)   ! p at interfaces
-      real(r8) :: pkd(km)    ! p**kappa at data levels
-      real(r8) :: ptfac   
-      real(r8) :: t(km)      ! temperature derived from pt
+      real :: delpe(km)  ! same as delp; p-thickness between interfaces
+      real :: delpd(km)  ! p-thickness between data levels
+      real :: pe(km+1)   ! p at interfaces
+      real :: pkd(km)    ! p**kappa at data levels
+      real :: ptfac   
+      real :: t(km)      ! temperature derived from pt
 !
       do j=1,jm
         do i=1,im 
@@ -503,15 +501,15 @@
 ! !INPUT PARAMETERS:
            
       integer,  intent(in)  :: nl         ! vertical dimension of grid
-      real(r8), intent(in)  :: delpe(nl)  ! delta p between interfaces
-      real(r8), intent(in)  :: ptop       ! grid top p
-      real(r8), intent(in)  :: kappa      ! R/Cp
+      real, intent(in)  :: delpe(nl)  ! delta p between interfaces
+      real, intent(in)  :: ptop       ! grid top p
+      real, intent(in)  :: kappa      ! R/Cp
  
 ! !OUTPUT PARAMETERS:
  
-      real(r8), intent(out) :: delpd(nl)  ! delta p between data levels
-      real(r8), intent(out) :: pe(nl+1)   ! p at layer interfaces
-      real(r8), intent(out) :: pkd(nl)    ! p at data levels
+      real, intent(out) :: delpd(nl)  ! delta p between data levels
+      real, intent(out) :: pe(nl+1)   ! p at layer interfaces
+      real, intent(out) :: pkd(nl)    ! p at data levels
 
 ! !DESCRIPTION: calculates p to the kappa and delp.
 !
@@ -529,9 +527,9 @@
 !  Local variables
 
       integer               :: k
-      real(r8)              :: pd(nl)     ! p at data levels
-      real(r8)              :: pke(nl+1)  ! p**kappa at interfaces
-      real(r8)              :: peln(nl+1) ! ln(p)  at interfaces
+      real              :: pd(nl)     ! p at data levels
+      real              :: pke(nl+1)  ! p**kappa at interfaces
+      real              :: peln(nl+1) ! ln(p)  at interfaces
      
 !
 !  pkd, delpd, pd are computed like pk, 1/rdelp1, pmid1 in NCAR physics 
@@ -578,15 +576,15 @@
    integer,  intent(in) :: im ! number of E-W points of old grid
    integer,  intent(in) :: jm ! number of S-N points of old grid
    integer,  intent(in) :: km ! number of vertical points of old
-   real(r8), intent(in)  :: coef_old(im,jm,km,4)  ! coefs on old grid
-   real(r8), intent(in)  :: delp_old(im,jm,km)  ! delp  on old grid
+   real, intent(in)  :: coef_old(im,jm,km,4)  ! coefs on old grid
+   real, intent(in)  :: delp_old(im,jm,km)  ! delp  on old grid
 
 ! !OUTPUT PARAMETERS:
 
-   real(r8), intent(out) :: coef_half(in,jn,km,4) 
+   real, intent(out) :: coef_half(in,jn,km,4) 
                                       ! coefs on new horizontal grid
                                       ! but still on old vertical grid 
-   real(r8), intent(out) :: delp_half(in,jn,km) ! delp on new horizontal grid
+   real, intent(out) :: delp_half(in,jn,km) ! delp on new horizontal grid
                                       ! but still on old vertical grid 
 
 ! !DESCRIPTION: Perform horizontal interpolation using bilinear interpolation, 
@@ -716,17 +714,17 @@
    integer,  intent(in) :: kn ! number of vertical points of new grid
    integer,  intent(in) :: km ! number of vertical points of old grid
    integer,  intent(in) :: icah, icam, icch, iccm
-   real(r8), intent(in) :: delp_new(in,jn,kn)  ! delp on new grid
-   real(r8), intent(in) :: ptop_old  ! pressure at top of old grid 
-   real(r8), intent(in) :: ptop_new  ! pressure at top of new grid 
-   real(r8), intent(in) :: delp_half(in,jn,km) ! delp on new horizontal grid
+   real, intent(in) :: delp_new(in,jn,kn)  ! delp on new grid
+   real, intent(in) :: ptop_old  ! pressure at top of old grid 
+   real, intent(in) :: ptop_new  ! pressure at top of new grid 
+   real, intent(in) :: delp_half(in,jn,km) ! delp on new horizontal grid
                                      ! but still on old vertical grid 
-   real(r8), intent(in) :: coef_half(in,jn,km,4) 
+   real, intent(in) :: coef_half(in,jn,km,4) 
                                      ! coefs on new horizontal grid
                                      ! but still on old vertical grid 
 ! !OUPUT PARAMETERS:
 
-   real(r8), intent(out) :: coef_new(in,jn,kn,4) ! coefs on new grid
+   real, intent(out) :: coef_new(in,jn,kn,4) ! coefs on new grid
  
 ! !DESCRIPTION: Vertically interpolates vertical diffusion coefficients to the
 !  new vertical grid from half-transformed values defined for the new
@@ -852,7 +850,7 @@
 ! !INPUT PARAMETERS:
 
       integer, intent(in) :: im,jm,km,num,numc,iform
-      real(r8), intent(in) :: coefs(im,jm,km,num)
+      real, intent(in) :: coefs(im,jm,km,num)
       character(len=*), intent(in) :: caption
 
 !
@@ -910,7 +908,7 @@
       
 ! !OUTPUT PARAMETERS:
       
-      real(r8), intent(out)  :: vcoef3d(im,jm,km,4)  ! vert. diff. coeffs.
+      real, intent(out)  :: vcoef3d(im,jm,km,4)  ! vert. diff. coeffs.
       integer,  intent(out)  :: rc                   ! returned error code
 !
 ! !REVISION HISTORY:
@@ -962,10 +960,10 @@
       integer,  intent(in) :: im, jm, km        ! 3d field resolution
       integer,  intent(in) :: ks
       
-      real(r8), intent(in) :: ptop
-      real(r8), intent(in) :: ak(km+1)
-      real(r8), intent(in) :: bk(km+1)
-      real(r8), intent(in) :: vcoef3d(im,jm,km,4)  ! vert. diff. coeffs.
+      real, intent(in) :: ptop
+      real, intent(in) :: ak(km+1)
+      real, intent(in) :: bk(km+1)
+      real, intent(in) :: vcoef3d(im,jm,km,4)  ! vert. diff. coeffs.
 
       integer,  intent(in), optional :: prec       ! precision of output
       
