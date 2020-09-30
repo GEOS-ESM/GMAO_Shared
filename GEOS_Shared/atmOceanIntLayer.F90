@@ -328,9 +328,9 @@ contains
     real,    intent(OUT)   :: LANGM_ (:)     ! Langmuir number
     real,    intent(OUT)   :: TAUTW_ (:)     ! time-scale of relaxation to bulk SST (i.e., TS_FOUND)
     real,    intent(OUT)   :: uStokes_(:)    ! Stokes speed
+    real,    intent(OUT)   :: TXW    (:)     ! zonal      stress
+    real,    intent(OUT)   :: TYW    (:)     ! meridional stress
 
-    real,    intent(INOUT) :: TXW    (:)     ! zonal      stress
-    real,    intent(INOUT) :: TYW    (:)     ! meridional stress
     real,    intent(INOUT) :: TWMTS  (:)     ! "internal state" variable that has: TW - TS
     real,    intent(INOUT) :: TW     (:)     ! "internal state" variable that has: TW
     real,    intent(INOUT) :: TS     (:)     ! skin temperature
