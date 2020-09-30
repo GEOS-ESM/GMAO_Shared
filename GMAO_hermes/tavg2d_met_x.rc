@@ -207,11 +207,11 @@ V2M:        Northward (meridional) wind at 2 m above the displacement height
 Z0H:        Roughness length, sensible heat
 Z0M:        Roughness length, momentum
 
-history:        @CVSTAG
+history:        @CVSTAG@
 convention:     CF-1.0
 institution:    Global Modeling and Assimilation Office (GMAO), NASA Goddard Space Flight Center, Greenbelt, MD 20771
 references:     http://gmao.gsfc.nasa.gov
 comment:        This HDF-4 file uses gzip. 
-source:         @PUBLICTAG
-title:          @PUBLICTAG forward-processing
+source:         @PUBLICTAG@
+title:          @PUBLICTAG@ forward-processing
 contact:        data@gmao.gsfc.nasa.gov

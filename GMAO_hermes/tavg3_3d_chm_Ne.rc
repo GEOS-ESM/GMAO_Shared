@@ -71,7 +71,7 @@ convention:     CF-1.0
 institution:    Global Modeling and Assimilation Office, NASA Goddard Space Flight Center, Greenbelt, MD 20771
 references:     http://gmao.gsfc.nasa.gov
 comment:        First CFIO GEOS version
-source:         Global Modeling and Assimilation Office. @CVSTAG
-title:          File written by CFIO. @CVSTAG
+source:         Global Modeling and Assimilation Office. @CVSTAG@
+title:          File written by CFIO. @CVSTAG@
 contact:        data@gmao.gsfc.nasa.gov
 

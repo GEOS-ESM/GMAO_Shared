@@ -131,11 +131,11 @@ StandardName:V10M:      Northward (meridional) wind at 10 m above displacement h
 StandardName:V50M:      Northward (meridional) wind at 50 m above displacement height
 StandardName:V2M:       Northward (meridional) wind at 2 m above displacement height
 
-history:        @CVSTAG
+history:        @CVSTAG@
 convention:     CF-1.0
 institution:    Global Modeling and Assimilation Office (GMAO), NASA Goddard Space Flight Center, Greenbelt, MD 20771
 references:     http://gmao.gsfc.nasa.gov
 comment:        This HDF-4 file uses gzip. 
-source:         @PUBLICTAG
-title:          @PUBLICTAG forward-processing
+source:         @PUBLICTAG@
+title:          @PUBLICTAG@ forward-processing
 contact:        data@gmao.gsfc.nasa.gov

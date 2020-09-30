@@ -74,8 +74,8 @@ history:        File written by CFIO
 convention:     CF-1.0
 institution:    Global Modeling and Assimilation Office, NASA Goddard Space Flight Center, Greenbelt, MD 20771
 references:     http://gmao.gsfc.nasa.gov/research/merra/
-comment:        @PUBLICTAG
+comment:        @PUBLICTAG@
 source:         Global Modeling and Assimilation Office. GEOSops_5_2_0
-title:          MERRA reanalysis.  @PUBLICTAG
+title:          MERRA reanalysis.  @PUBLICTAG@
 contact:        http://gmao.gsfc.nasa.gov/
 

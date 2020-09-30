@@ -76,15 +76,111 @@ if ( NOT HERMES_LIGHT )
    install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
 
 else ()
-
    set (srcs
      m_set_eta.F90 shared_topo_remap.F90
      )
-   
    esma_add_library(${this} SRCS ${srcs} )
    target_compile_options(${this} PRIVATE ${flags})
-
 endif ()
 
-file(GLOB resource_files *.rc)
-install(FILES ${resource_files} DESTINATION etc)
+set(plain_resource_files
+   ana.prs.rc
+   dyn2dyn.rc
+   dyn2prs.rc
+   fcst_fv2prs.lcv.rc
+   fcst_fv2prs.rc
+   fv2prs.lcv.rc
+   fv2prs.rc
+   )
+
+foreach (rcfile ${plain_resource_files})
+   install(FILES ${rcfile} DESTINATION etc)
+endforeach ()
+
+set(resource_files_needing_processing
+   const_2d_asm_Nx.rc
+   const_2d_chm_Fx.rc
+   inst1_2d_int_Nx.rc
+   inst1_2d_int_NxDM.rc
+   inst1_2d_int_NxMM.rc
+   inst2d_met_x.rc
+   inst3_3d_asm_Cp.rc
+   inst3_3d_asm_CpDM.rc
+   inst3_3d_asm_CpMM.rc
+   inst3_3d_chm_Ne.rc
+   inst3_3d_chm_Nv.rc
+   inst3d_met_p.rc
+   inst6_3d_ana_Np.rc
+   inst6_3d_ana_NpDM.rc
+   inst6_3d_ana_NpMM.rc
+   inst6_3d_ana_Nv.rc
+   tavg1_2d_flx_Nx.rc
+   tavg1_2d_flx_NxDM.rc
+   tavg1_2d_flx_NxMM.rc
+   tavg1_2d_int_Nx.rc
+   tavg1_2d_int_NxDM.rc
+   tavg1_2d_int_NxMM.rc
+   tavg1_2d_lnd_Nx.rc
+   tavg1_2d_lnd_NxDM.rc
+   tavg1_2d_lnd_NxMM.rc
+   tavg1_2d_rad_Nx.rc
+   tavg1_2d_rad_NxDM.rc
+   tavg1_2d_rad_NxMM.rc
+   tavg1_2d_slv_Nx.rc
+   tavg1_2d_slv_NxDM.rc
+   tavg1_2d_slv_NxMM.rc
+   tavg2d_met_x.rc
+   tavg3_2d_chm_Fx.rc
+   tavg3_2d_chm_FxDM.rc
+   tavg3_2d_chm_FxMM.rc
+   tavg3_2d_chm_Nx.rc
+   tavg3_3d_chm_Fe.rc
+   tavg3_3d_chm_Fv.rc
+   tavg3_3d_chm_Ne.rc
+   tavg3_3d_chm_Nv.rc
+   tavg3_3d_cld_Cp.rc
+   tavg3_3d_cld_CpDM.rc
+   tavg3_3d_cld_CpMM.rc
+   tavg3_3d_mst_Cp.rc
+   tavg3_3d_mst_CpDM.rc
+   tavg3_3d_mst_CpMM.rc
+   tavg3_3d_odt_Cp.rc
+   tavg3_3d_odt_CpDM.rc
+   tavg3_3d_odt_CpMM.rc
+   tavg3_3d_qdt_Cp.rc
+   tavg3_3d_qdt_CpDM.rc
+   tavg3_3d_qdt_CpMM.rc
+   tavg3_3d_rad_Cp.rc
+   tavg3_3d_rad_CpDM.rc
+   tavg3_3d_rad_CpMM.rc
+   tavg3_3d_tdt_Cp.rc
+   tavg3_3d_tdt_CpDM.rc
+   tavg3_3d_tdt_CpMM.rc
+   tavg3_3d_trb_Cp.rc
+   tavg3_3d_trb_CpDM.rc
+   tavg3_3d_trb_CpMM.rc
+   tavg3_3d_udt_Cp.rc
+   tavg3_3d_udt_CpDM.rc
+   tavg3_3d_udt_CpMM.rc
+   tavg3d_cld_p.rc
+   tavg3d_cld_v.rc
+   tavg3d_dyn_p.rc
+   tavg3d_dyn_v.rc
+   tavg3d_met_e.rc
+   tavg3d_mis_e.rc
+   tavg3d_mst_p.rc
+   tavg3d_mst_v.rc
+   tavg3d_prs_v.rc
+   tavg3d_tmp_p.rc
+   tavg3d_tmp_v.rc
+   tavg3d_trp_e.rc
+   tavg3d_wnd_p.rc
+   tavg3d_wnd_v.rc
+   )
+
+set(PUBLICTAG "GEOS-${CMAKE_PROJECT_VERSION}")
+set(CVSTAG ${PUBLICTAG})
+foreach (rcfile ${resource_files_needing_processing})
+   configure_file(${rcfile} ${rcfile} @ONLY)
+   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${rcfile} DESTINATION etc)
+endforeach ()

@@ -120,9 +120,12 @@ file(GLOB obsys_rc obsys*.rc)
 file(GLOB templates *.tmpl)
 
 install (
-   FILES ${obsys_rc} ${templates} pesto.arc PUBLICTAG
+   FILES ${obsys_rc} ${templates} pesto.arc
    DESTINATION etc
    )
+
+configure_file(PUBLICTAG PUBLICTAG @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PUBLICTAG DESTINATION etc)
 
 ## grads ##
 
