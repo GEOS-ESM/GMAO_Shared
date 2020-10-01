@@ -225,8 +225,8 @@ contains
 !        5.       T(z)           Temperature at specified depth (z) within AOIL  calculated from temperature profile in AOIL and input depth
 
 ! !INTERFACE:
-  subroutine AOIL_sfcLayer_T (WHICH_OPTION, DO_DATASEA, MUSKIN, epsilon_d,  &
-                              TW, TS_FOUND, TWMTF, DELTC,                   &
+  subroutine AOIL_sfcLayer_T (WHICH_OPTION, depth, DO_DATASEA, MUSKIN, epsilon_d,  &
+                              AOIL_depth, TW, TS_FOUND, TWMTF, DELTC,              &
                               T_OUT)
 
 ! !ARGUMENTS:
@@ -235,6 +235,8 @@ contains
     integer,          intent(IN) :: DO_DATASEA     ! =1:uncoupled (AGCM); =0:coupled (AOGCM)
     real,             intent(IN) :: MUSKIN         ! exponent in T(z) profile in warm layer, based on Zeng & Beljaars, 2005, typically <= 1.
     real,             intent(IN) :: epsilon_d      ! (thickness of AOIL)/(thickness of OGCM top level), typically < 1.
+    real,             intent(IN) :: depth          ! specified depth (z) used in above option 5
+    real,             intent(IN) :: AOIL_depth     ! depth of AOIL
 
     real,             intent(IN) :: TW (:)         ! depth averaged mean temperature in the AOIL
     real,             intent(IN) :: TS_FOUND(:)    ! temperature at the bottom of AOIL
@@ -254,9 +256,21 @@ contains
       T_OUT = T_OUT - DELTC                                        ! Eqn.(16) of Akella and Suarez, 2018
     case ('TW_from_internal')
       T_OUT = TW
-    case ('TW_from_Tprof', 'T_at_depth')
-      T_OUT = MAPL_UNDEF
-      print *, ' Yet to be coded.'
+    case ('TW_from_Tprof')
+      T_OUT = TWMTF + TS_FOUND                                     ! Eqn.(5) of Akella and Suarez, 2018
+    case ('T_at_depth')
+!     ! T_{\delta} : top of warm layer or base of cool layer
+      if (DO_DATASEA == 1) then
+        T_OUT = TS_FOUND + ((1.+MUSKIN)/MUSKIN) * TWMTF            ! Eqn.(14) of Akella and Suarez, 2018
+      else
+        T_OUT = TS_FOUND + (1./MUSKIN + (1.-epsilon_d)) * TWMTF    ! RHS is from Eqn.(15) of Akella and Suarez, 2018
+      endif
+
+      where ( depth <= DELTC)    ! within cool layer
+        T_OUT = T_OUT - ( 1.-depth/(DELTC + 1.e-6)) * DELTC        ! Eqn.(16) of Akella and Suarez, 2018; avoiding divide by zero.
+      elsewhere                  !     in warm layer
+        T_OUT = T_OUT - ( (depth/AOIL_depth)**MUSKIN) * ((1.+MUSKIN)/MUSKIN) * TWMTF ! neglect \delta/d since it is \ll 1.
+      endwhere
     case default
       T_OUT = MAPL_UNDEF
       print *, ' Unknown option in AOIL_sfcLayer_T.'
