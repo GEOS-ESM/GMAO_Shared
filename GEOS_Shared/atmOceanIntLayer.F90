@@ -278,7 +278,7 @@ contains
                        ALW,BLW,PEN, PEN_ocean, STOKES_SPEED,DT,MUSKIN,TS_FOUNDi,DWARM_,TBAR_,      &
                        TXW,TYW,USTARW_,  &
                        DCOOL_,TDROP_,SWCOOL_,QCOOL_,BCOOL_,LCOOL_,TDEL_,SWWARM_,QWARM_,ZETA_W_,    &
-                       PHIW_,LANGM_,TAUTW_,uStokes_,TS,TWMTS,TW,FR,n_iter_cool,fr_ice_thresh,      &
+                       PHIW_,LANGM_,TAUTW_,uStokes_,TS,TWMTS,TWMTF,DELTC,TW,FR,n_iter_cool,fr_ice_thresh, &
                        epsilon_d, do_grad_decay)
 
 ! !ARGUMENTS:
@@ -331,7 +331,9 @@ contains
     real,    intent(OUT)   :: TXW    (:)     ! zonal      stress
     real,    intent(OUT)   :: TYW    (:)     ! meridional stress
 
+    real,    intent(OUT)   :: DELTC  (:)     ! "internal state" variable that has: TDROP_
     real,    intent(INOUT) :: TWMTS  (:)     ! "internal state" variable that has: TW - TS
+    real,    intent(INOUT) :: TWMTF  (:)     ! "internal state" variable that has: TW - bulk SST
     real,    intent(INOUT) :: TW     (:)     ! "internal state" variable that has: TW
     real,    intent(INOUT) :: TS     (:)     ! skin temperature
 
@@ -507,6 +509,8 @@ contains
 
              TS(N)    = TDEL_(N) - TDROP_(N)
              TWMTS(N) = TW(N)    - TS(N)
+             TWMTF(N) = 0.0
+!            TWMTF(N) = TW(N)    - TS_FOUNDi(N)  ! This will cause non-zero diff in internal/checkpoint, but ZERO DIFF in OUTPUT.
           end if WARM_LAYER
 
        else            ! FR(N) <= fr_ice_thresh
@@ -521,6 +525,7 @@ contains
           BCOOL_ (N)     = MAPL_UNDEF
           TDEL_  (N)     = MAPL_UNDEF
           TWMTS  (N)     = 0.0
+          TWMTF  (N)     = 0.0
           QWARM_ (N)     = MAPL_UNDEF
           SWWARM_(N)     = MAPL_UNDEF
           PHIW_  (N)     = MAPL_UNDEF
@@ -529,6 +534,9 @@ contains
           ZETA_W_(N)     = MAPL_UNDEF
        end if
     end do
+
+    DELTC = 0.0
+!   DELTC = TDROP_   ! This will cause non-zero diff in internal/checkpoint, but ZERO DIFF in OUTPUT.
 
   end subroutine SKIN_SST
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
