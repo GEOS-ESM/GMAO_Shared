@@ -9,16 +9,18 @@ implicit none
 
 private SIMPLE_SW_ABS,      &
         AOIL_SST,           &
-        COOL_SKIN
-
-public  ALBSEA,             &
+        COOL_SKIN,          &
         SKIN_SST,           &
-        AOIL_sfcLayer_T,    &
-        water_RHO,          &
-        AOIL_Shortwave_abs, &
         AOIL_v0_S,          &
         AOIL_v0_HW,         &
         surf_hflux_update
+
+
+public  ALBSEA,             &
+        AOIL_sfcLayer_T,    &
+        water_RHO,          &
+        AOIL_Shortwave_abs, &
+        AOIL_v0
 
 contains
 
@@ -438,10 +440,14 @@ contains
 
           WARM_LAYER: if(DO_SKIN_LAYER==0) then   ! Warm layer temperature increase calculated based on definition of mean interface temperature.
 
-             TDEL_(N)    = TS(N) + TDROP_(N)
-             TWMTS(N)    = TBAR_(N)    - TS(N)
+             TDEL_(N)    = TS_FOUNDi(N)
+             TS(N)       = TS_FOUNDi(N)
+             TW(N)       = TS_FOUNDi(N)
+             TBAR_(N)    = TS_FOUNDi(N)
+             TWMTS(N)    = 0.
+             TWMTF(N)    = 0.
+             DELTC(N)    = 0.
 
-!            fill up with mapl_undef - so that LocStreamMod does NOT die while exporting
              SWWARM_(N)  = MAPL_UNDEF
              QWARM_ (N)  = MAPL_UNDEF
              ZETA_W_(N)  = MAPL_UNDEF
@@ -985,6 +991,176 @@ contains
     end if         
 
   end subroutine surf_hflux_update
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !IROUTINE: AOIL_V1 - version number: 1 of the Atmosphere Ocean Interface Layer (AOIL)
+
+!  !DESCRIPTION:
+!        Wraps the sequence of steps involved in updating the internal (state) variables
+
+! !INTERFACE:
+  subroutine AOIL_v0 (NT, DO_SKIN_LAYER, DO_DATASEA, n_iter_cool, fr_ice_thresh, do_grad_decay,                 &
+                      DT, MUSKIN, epsilon_d, MaxWaterDepth, MinWaterDepth, MaxSalinity, MinSalinity,            &
+                      STOKES_SPEED, CM, CFT, CFQ, SH, EVAP, DSH, DEV, THATM, QHATM, PS, SNO, RAIN, UUA, VVA,    &
+                      UW, VW, FRWATER, SWN, SWN_surf, PEN, PEN_ocean, LWDNSRF, ALW, BLW,                        &
+                      HH_in, TS_in, SS_in, QS_in, TS_FOUND,                                                     &
+                      DWARM, TBAR, USTARW, DCOOL, TDROP, SWCOOL, QCOOL, BCOOL, LCOOL,                           &
+                      TDEL, SWWARM, QWARM, ZETA_W, PHIW, LANGM, TAUTW, uStokes, TXW, TYW,                       &
+                      SHF, LHF, EVP, DTS, DQS, DELTC, HW, TW, SW, TWMTS, TWMTF,                                 &
+                      do_update_fluxes_AOIL_second_step)
+
+! !ARGUMENTS:
+
+    integer, intent(IN)    :: NT             ! number of tiles
+    integer, intent(IN)    :: DO_SKIN_LAYER  ! 0: No interface layer, 1: active, and accounts for change in SST
+    integer, intent(IN)    :: DO_DATASEA     ! =1:uncoupled (AGCM); =0:coupled (AOGCM)
+    integer, intent(IN)    :: n_iter_cool    ! number of iterations to compute cool-skin layer
+    real,    intent(IN)    :: fr_ice_thresh  ! threshold on ice fraction, sort of defines Marginal Ice Zone
+
+    character(len=*), intent(IN) :: do_grad_decay   ! simulate a gradual decay of diurnal warming? yes or no. Follows Zeng and Beljaars, 2005.
+    character(len=*), intent(IN) :: do_update_fluxes_AOIL_second_step   ! update DTS, DQS, EVP, SHF, LHF after 2nd implicit update of temperature
+
+    real,    intent(IN)    :: DT             ! time-step
+    real,    intent(IN)    :: MUSKIN         ! exponent of temperature: T(z) profile in warm layer
+    real,    intent(IN)    :: epsilon_d      ! (thickness of AOIL)/(thickness of OGCM top level), typically < 1.
+    real,    intent(IN)    :: MaxWaterDepth  ! maximum depth of AOIL
+    real,    intent(IN)    :: MinWaterDepth  ! minimum depth of AOIL
+    real,    intent(IN)    :: MaxSalinity    ! maximum salinity in AOIL
+    real,    intent(IN)    :: MinSalinity    ! minimum salinity in AOIL
+    real,    intent(IN)    :: STOKES_SPEED   ! scalar value set for Stokes speed- place holder for output from Wave model
+
+    real,    intent(IN)    :: CM(:)          ! transfer coefficient for wind
+    real,    intent(IN)    :: CFT(:)         ! sensible    heat transfer coefficient
+    real,    intent(IN)    :: CFQ(:)         ! evaporation heat transfer coefficient
+    real,    intent(IN)    :: SH(:)          ! upward_sensible_heat_flux
+    real,    intent(IN)    :: EVAP(:)        ! evaporation    
+    real,    intent(IN)    :: DSH(:)         ! derivative_of_upward_sensible_heat_flux
+    real,    intent(IN)    :: DEV(:)         ! derivative_of_evaporation 
+    real,    intent(IN)    :: THATM(:)       ! effective_surface_skin_temperature
+    real,    intent(IN)    :: QHATM(:)       ! effective_surface_specific_humidity
+    real,    intent(IN)    :: PS(:)          ! surface pressure 
+    real,    intent(IN)    :: SNO(:)         ! snow fall
+    real,    intent(IN)    :: RAIN(:)        ! rain = PCU+PLS = liquid_water_convective_precipitation + liquid_water_large_scale_precipitation
+    real,    intent(IN)    :: UUA    (:)     ! zonal       wind
+    real,    intent(IN)    :: VVA    (:)     ! meridional  wind
+    real,    intent(IN)    :: UW     (:)     ! u-current
+    real,    intent(IN)    :: VW     (:)     ! v-current
+
+    real,    intent(IN)    :: FRWATER(:)     ! 1. - fr of sea ice
+    real,    intent(IN)    :: SWN(:)         ! shortwave radiation absorbed in AOIL
+    real,    intent(IN)    :: SWN_surf(:)    ! net shortwave radiation incident at surface
+    real,    intent(IN)    :: PEN    (:)     ! shortwave radiation that penetrates below interface layer
+    real,    intent(IN)    :: PEN_ocean(:)   ! shortwave radiation that penetrates below top ocean model layer 
+    real,    intent(IN)    :: LWDNSRF(:)     ! surface_downwelling_longwave_flux
+    real,    intent(IN)    :: ALW    (:)     ! for linearized \sigma T^4
+    real,    intent(IN)    :: BLW    (:)     ! for linearized \sigma T^4 
+
+    real,    intent(IN)    :: TS_FOUND(:)    ! bulk SST (temperature at base of warm layer)
+
+    real,    intent(OUT)   :: DWARM (:)      ! depth of AOIL
+    real,    intent(OUT)   :: TBAR  (:)      ! copy of TW (also internal state) to export out
+    real,    intent(OUT)   :: USTARW(:)      ! u_{*,w} 
+    real,    intent(OUT)   :: DCOOL (:)      ! depth of cool-skin layer
+    real,    intent(OUT)   :: TDROP (:)      ! temperature drop across cool-skin
+    real,    intent(OUT)   :: SWCOOL(:)      ! shortwave radiation absorbed in cool-skin 
+    real,    intent(OUT)   :: QCOOL (:)      ! net heat flux in cool layer
+    real,    intent(OUT)   :: BCOOL (:)      ! bouyancy in cool layer
+    real,    intent(OUT)   :: LCOOL (:)      ! Saunder's parameter in cool layer
+
+    real,    intent(OUT)   :: TDEL  (:)      ! temperature at top of warm layer
+    real,    intent(OUT)   :: SWWARM(:)      ! shortwave radiation absorbed in warm layer
+    real,    intent(OUT)   :: QWARM (:)      ! net heat flux in warm layer
+    real,    intent(OUT)   :: ZETA_W(:)      ! stability parameter = dwarm/(Obukhov length)
+    real,    intent(OUT)   :: PHIW  (:)      ! similarity function
+    real,    intent(OUT)   :: LANGM (:)      ! Langmuir number
+    real,    intent(OUT)   :: TAUTW (:)      ! time-scale of relaxation to bulk SST (i.e., TS_FOUND)
+    real,    intent(OUT)   :: uStokes(:)     ! Stokes speed
+    real,    intent(OUT)   :: TXW    (:)     ! zonal      stress
+    real,    intent(OUT)   :: TYW    (:)     ! meridional stress
+
+    real,    intent(OUT)   :: SHF (:)        ! sensible heat flux
+    real,    intent(OUT)   :: LHF (:)        ! latent   heat flux
+    real,    intent(OUT)   :: EVP (:)        ! evaporation `heat' flux
+    real,    intent(OUT)   :: DTS (:)        ! change in skin temperature
+    real,    intent(OUT)   :: DQS (:)        ! change in specific humidity
+
+    real,    intent(OUT)   :: DELTC  (:)     ! "internal state" variable that has: TDROP_
+
+    real,    intent(INOUT) :: HH_in(:)       ! initial mass of AOIL, will be updated
+    real,    intent(INOUT) :: TS_in(:)       ! initial skin temperature, will be updated
+    real,    intent(INOUT) :: SS_in(:)       ! initial salinity * mass of AOIL, will be updated
+    real,    intent(INOUT) :: QS_in(:)       ! initial specific humidity, will be updated
+
+    real,    intent(INOUT) :: HW     (:)     ! "internal state" variable that has: HW  (analog of HH)
+    real,    intent(INOUT) :: TW     (:)     ! "internal state" variable that has: TW  (analog of TS)
+    real,    intent(INOUT) :: SW     (:)     ! "internal state" variable that has: SW  (analog of SS)
+    real,    intent(INOUT) :: TWMTS  (:)     ! "internal state" variable that has: TW - TS
+    real,    intent(INOUT) :: TWMTF  (:)     ! "internal state" variable that has: TW - TF
+
+!  !LOCAL VARIABLES
+    real         :: SHD(NT), EVD(NT), TS0(NT), QS0(NT)!, HH0(NT), SS0(NT)
+
+    TS0 = TS_in
+    QS0 = QS_in
+!   HH0 = HH_in
+!   SS0 = SS_in
+
+!   Update TS, QS, DTS, DQS; fluxes (EVP, SHF, LHF), internals (TWMTS, TWMTF) due to surface fluxes from atmosphere
+!   ---------------------------------------------------------------------------------------------------------------
+    call surf_hflux_update (NT,DO_SKIN_LAYER,DO_DATASEA,MUSKIN,DT,epsilon_d,  &
+             CFT,CFQ,SH,EVAP,DSH,DEV,THATM,QHATM,PS,FRWATER,HH_in,SNO,           &
+             LWDNSRF,SWN,ALW,BLW,SHF,LHF,EVP,DTS,DQS,TS_in,QS_in,TWMTS,TWMTF)
+
+!   Update mass of AOIL using fresh water flux from atmosphere
+!   ----------------------------------------------------------
+    call AOIL_v0_HW (NT,DT,DO_DATASEA,MaxWaterDepth,MinWaterDepth, &
+                      FRWATER,SNO,EVP,RAIN,HH_in)
+
+!   Copy back to internal variables
+!   -------------------------------
+    TW = TS_in + TWMTS
+    HW = HH_in
+
+!   Update salinity
+!   ---------------
+    call AOIL_v0_S (DT,HW,SS_in,SW)
+    where (.not. (abs(UW) > 0.0 .or. abs(VW) > 0.0))
+       SW = max(min(SW,MAXSALINITY),MINSALINITY)
+    endwhere
+
+!   Cool-skin and diurnal warm layer, latter uses ocean variables (TS_FOUND)
+!   it updates temperatures: TS, TW, DELTC and differences: TWMTF, TWMTS but
+!   not the associated turbulent heat fluxes
+!   ------------------------------------------------------------------------
+    call SKIN_SST (DO_SKIN_LAYER,DO_DATASEA,NT,CM,UUA,VVA,UW,VW,HW,SWN_surf,LHF,SHF,LWDNSRF,          &
+                   ALW,BLW,PEN,PEN_OCEAN,STOKES_SPEED,DT,MUSKIN,TS_FOUND,DWARM,TBAR,TXW,TYW,USTARW,   &
+                   DCOOL,TDROP,SWCOOL,QCOOL,BCOOL,LCOOL,TDEL,SWWARM,QWARM,ZETA_W,                     &
+                   PHIW,LANGM,TAUTW,uStokes,TS_in,TWMTS,TWMTF,DELTC,TW,FRWATER,n_iter_cool,           &
+                   fr_ice_thresh,epsilon_d,do_grad_decay)
+
+
+!   Following updates variables/fluxes using the final temperature from cool-skin and warm-layer effects
+!   In coupled mode, this is really important
+!   ----------------------------------------------------------------------------------------------------
+    if (trim(do_update_fluxes_AOIL_second_step) == 'yes') then 
+      DTS = TS_in - TS0                                            ! final change in TS
+      DQS  = GEOS_QSAT(TS_in, PS, RAMP=0.0, PASCALS=.TRUE.) - QS0  ! final change in QS
+      QS_in= QS0 + DQS
+!     DHH  = HW - HH0
+!     DSS  = SW - SS0
+
+!     Updating variables in a sequence of two (implicit) updates is not desirable, as one can see, 
+!     DSH and DEV are _out of sync_. The next version of AOIL will implement a single implicit update
+!     -----------------------------------------------------------------------------------------------
+      SHD = CFT*DSH                                                 ! d (sensible heat flux)/d Ts
+      EVD = CFQ*DEV*GEOS_DQSAT(TS_in, PS, RAMP=0.0, PASCALS=.TRUE.) ! d (evap)/ d Ts
+      EVP = EVP + EVD * DTS                                         ! update evaporation
+      SHF = SHF + SHD * DTS                                         ! update sensible heat flux
+      LHF = EVP * MAPL_ALHL                                         ! update latent   heat flux
+    endif
+
+  end subroutine AOIL_v0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module atmOcnIntlayer
