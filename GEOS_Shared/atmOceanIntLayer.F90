@@ -3,24 +3,16 @@ module atmOcnIntlayer
 ! !USES:
 
 use MAPL
-use GEOS_UtilsMod ! for GEOS_DQSAT and GEOS_QSAT
+use GEOS_UtilsMod, only: GEOS_QSAT, GEOS_DQSAT
 
 implicit none
+private
 
-private SIMPLE_SW_ABS,      &
-        AOIL_SST,           &
-        COOL_SKIN,          &
-        SKIN_SST,           &
-        AOIL_v0_S,          &
-        AOIL_v0_HW,         &
-        surf_hflux_update
-
-
-public  ALBSEA,             &
-        AOIL_sfcLayer_T,    &
-        water_RHO,          &
-        AOIL_Shortwave_abs, &
-        AOIL_v0
+public  ALBSEA
+public  AOIL_sfcLayer_T
+public  water_RHO
+public  AOIL_Shortwave_abs
+public  AOIL_v0
 
 contains
 
