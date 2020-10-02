@@ -1,0 +1,4 @@
+proc_singleDay.csh <year> <month> <day> OSTIA 'yes'
+
+example:
+proc_singleDay.csh 2020 3 1 OSTIA 'yes'
