@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Added
 
+- Update `atmOceanIntLayer.F90` add AVOIL_v0 which wraps the update of surface skin variables (temperature, water mass, salinity, etc) into a single call.
+
 ## [1.3.0] - 2020-09-28
 
 ### Fixed
