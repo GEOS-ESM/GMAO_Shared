@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Removed
 ### Added
+1. Modify plots to display new constraint diagnostics
 
 - Update `atmOceanIntLayer.F90` add AVOIL_v0 which wraps the update of surface skin variables (temperature, water mass, salinity, etc) into a single call.
 
