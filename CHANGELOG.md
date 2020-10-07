@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Removed
 ### Added
+1. Modify plots to display new constraint diagnostics
 
 ## [1.3.0] - 2020-09-28
 

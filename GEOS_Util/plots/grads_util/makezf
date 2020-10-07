@@ -150,7 +150,20 @@ tag   = subwrd(args,3)
    'getinfo month'
             month = result
             month = getnum(month)
-    fname = alias''tag'.'year''month'.nc4'
+
+   'getinfo tunit'
+            tunit = result
+   if( tunit = 'day' | tunit = 'hour' )
+    'getinfo date'
+             day = substr( result,4,2 )
+            hour = substr( result,1,2 )
+           fname = alias''tag'.'year''month''day'_'hour'z.nc4'
+          tstamp = '%y4%m2%d2_%h2z'
+   else
+           fname = alias''tag'.'year''month'.nc4'
+          tstamp = '%y4%m2'
+   endif
+
    'set sdfwrite -5d 'fname
    'set undef 'undef
    'sdfwrite  tempz'
@@ -164,7 +177,7 @@ tag   = subwrd(args,3)
 '!echo "s?@DT?"'dt'?g >> sedfile'
 '!echo "s?@TDIM?"'tdim'?g >> sedfile'
 '!echo "s?@BDATE?"'begdate'?g >> sedfile'
-'!echo "s?qz.data?"'alias''tag'.%y4%m2.nc4?g >> sedfile'
+'!echo "s?qz.data?"'alias''tag'.'tstamp'.nc4?g >> sedfile'
 '!/bin/cp 'geosutil'/plots/grads_util/makez.tmpl .'
 '!sed -f   sedfile makez.tmpl > 'alias''tag'.ddf'
 
