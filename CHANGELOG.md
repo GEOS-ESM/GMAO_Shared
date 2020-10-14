@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
+### Fixed
+### Removed
+### Added
 
-- Updated the NCPUs detection in various post scripts to be SLURM-aware
+## [1.3.2] - 2020-10-14
 
 ### Fixed
 
 - Fixed regrid_forcing.x and regrid_forcing_esmf.x so they will work with MAPL2.2 and beyond
 
-### Removed
-### Added
+### Changed
+
+- Updated the NCPUs detection in various post scripts to be SLURM-aware
 
 ## [1.3.1] - 2020-10-13
 
