@@ -5,17 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
 ### Changed
-
 ### Fixed
 
 - Fixed regrid_forcing.x and regrid_forcing_esmf.x so they will work with MAPL2.2 and beyond
 
 ### Removed
+### Added
+
+## [1.3.1] - 2020-10-13
+
+### Changed
+
+- Updated `changelog-enforcer.yml` to v1.4.0
 
 ### Added
+
+- Modify plots to display new constraint diagnostics
+- Update `atmOceanIntLayer.F90` add AVOIL_v0 which wraps the update of surface skin variables (temperature, water mass, salinity, etc) into a single call.
+
+## [1.3.0] - 2020-09-28
+
+### Fixed
+
+- Undo the change to `GEOS_Utilities.F90` in v1.2.0. This has a bug at the end of the table (#123)
+
+## [1.2.0] - 2020-09-25
+
+### Changed
+
+- Update `GEOS_Utilities.F90` to match `GEOSadas-5_27_0` (#115)
+
+## [1.1.10] - 2020-09-25
+
+### Changed
+
+- Updated the CircleCI Image
 
 ## [1.1.9] - 2020-09-15
 
