@@ -244,13 +244,11 @@ endif
 # Determine Number of Nodes if running in BATCH
 # ---------------------------------------------
 if( $NCPUS == "NULL"  ) then
-  if ($?PBS_NODEFILE & $?BATCHNAME) then
-     set BATCHJOB  = `qstat | grep $BATCHNAME | grep $LOGNAME | cut -d' ' -f1`
-     set  numjobs  = $#BATCHJOB
-     if( $numjobs != 0 ) then
-        set  NCPUS = `cat $PBS_NODEFILE | wc -l`
-     endif
-  endif
+   if ($?SLURM_NTASKS) then
+      set  NCPUS = $SLURM_NTASKS
+   else if ($?PBS_NODEFILE) then
+      set  NCPUS = `cat $PBS_NODEFILE | wc -l`
+   endif
 endif
 echo Use: NCPUS = $NCPUS
 
