@@ -10,6 +10,8 @@
 ! !USES:
 
   use MAPL_ConstantsMod
+  use pFlogger
+  use ieee_arithmetic
 
 ! #include "qsatlqu.code"
 ! #include "qsatice.code"
@@ -149,6 +151,8 @@
 
       real, save :: TMINLQU    =  ZEROC - 40.0
       real, save :: TMINICE    =  ZEROC + TMINSTR
+
+      class(Logger), pointer :: lgr
 
   contains
 
@@ -503,6 +507,9 @@
     real    :: URAMP, DD, QQ, TI, DQ, PP
     integer :: IT
 
+    if (ieee_is_nan(TL)) call lgr%warning(' QSAT0: TL contains NaN')
+    if (ieee_is_nan(PL)) call lgr%warning(' QSAT0: PL contains NaN')
+
     if(present(RAMP)) then
        URAMP = -abs(RAMP)
     else
@@ -583,6 +590,10 @@
       real,    optional, intent(OUT):: DQSAT(:)
       real :: QSAT(size(TL,1))
       integer :: I
+
+      if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT1: TL contains NaN')
+      if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT1: PL contains NaN')
+
       do I=1,SIZE(TL,1)
          if (present(DQSAT)) then
             QSAT(I) = QSAT0(TL(I),PL(I),RAMP,PASCALS,DQSAT(I))
@@ -599,6 +610,10 @@
       real,    optional, intent(OUT):: DQSAT(:,:)
       real :: QSAT(size(TL,1),size(TL,2))
       integer :: I, J
+
+      if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT2: TL contains NaN')
+      if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT2: PL contains NaN')
+
       do J=1,SIZE(TL,2)
          do I=1,SIZE(TL,1)
             if (present(DQSAT)) then
@@ -617,6 +632,10 @@
       real,    optional, intent(OUT):: DQSAT(:,:,:)
       real :: QSAT(size(TL,1),size(TL,2),size(TL,3))
       integer :: I, J, K
+
+      if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT3: TL contains NaN')
+      if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT3: PL contains NaN')
+
       do K=1,SIZE(TL,3)
          do J=1,SIZE(TL,2)
             do I=1,SIZE(TL,1)
@@ -691,6 +710,9 @@
       real    :: DQSAT
       real    :: URAMP, TT, DD, DQQ, QQ, TI, DQI, QI, PP
       integer :: IT
+
+      if (ieee_is_nan(TL)) call lgr%warning('DQSAT0: TL contains NaN')
+      if (ieee_is_nan(PL)) call lgr%warning('DQSAT0: PL contains NaN')
 
       if(present(RAMP)) then
          URAMP = -abs(RAMP)
@@ -772,6 +794,10 @@
       real,    optional, intent(OUT):: QSAT(:)
       real :: DQSAT(size(TL,1))
       integer :: I
+
+      if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT1: TL contains NaN')
+      if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT1: PL contains NaN')
+
       do I=1,SIZE(TL,1)
          if (present(QSAT)) then
             DQSAT(I) = DQSAT0(TL(I),PL(I),RAMP,PASCALS,QSAT(I))
@@ -788,6 +814,10 @@
       real,    optional, intent(OUT):: QSAT(:,:)
       real :: DQSAT(size(TL,1),size(TL,2))
       integer :: I, J
+
+      if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT2: TL contains NaN')
+      if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT2: PL contains NaN')
+
       do J=1,SIZE(TL,2)
          do I=1,SIZE(TL,1)
             if (present(QSAT)) then
@@ -806,6 +836,10 @@
       real,    optional, intent(OUT):: QSAT(:,:,:)
       real :: DQSAT(size(TL,1),size(TL,2),size(TL,3))
       integer :: I, J, K
+
+      if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT3: TL contains NaN')
+      if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT3: PL contains NaN')
+
       do K=1,SIZE(TL,3)
          do J=1,SIZE(TL,2)
             do I=1,SIZE(TL,1)
@@ -881,6 +915,8 @@
 
           UT = UTBL
           UTBL=.false.
+
+          lgr => logging%get_logger('SHARED.GMAOSHARED.GEOSSHARED.QSAT')
 
           do I=1,TABLESIZE
 
