@@ -153,6 +153,7 @@
       real, save :: TMINICE    =  ZEROC + TMINSTR
 
       class(Logger), pointer :: lgr
+      logical :: debugIsEnabled
 
   contains
 
@@ -507,8 +508,10 @@
     real    :: URAMP, DD, QQ, TI, DQ, PP
     integer :: IT
 
-    if (ieee_is_nan(TL)) call lgr%warning(' QSAT0: TL contains NaN')
-    if (ieee_is_nan(PL)) call lgr%warning(' QSAT0: PL contains NaN')
+    if (debugIsEnabled) then
+      if (ieee_is_nan(TL)) call lgr%warning(' QSAT0: TL contains NaN')
+      if (ieee_is_nan(PL)) call lgr%warning(' QSAT0: PL contains NaN')
+    end if
 
     if(present(RAMP)) then
        URAMP = -abs(RAMP)
@@ -526,11 +529,12 @@
        PP = PL*100.
     end if
 
-    if(URAMP==TMIX .OR. URAMP==0. .and. UTBL) then
+    if((URAMP==TMIX .OR. URAMP==0.) .and. UTBL) then
 
        if(FIRST) then
           FIRST = .false.
           call ESINIT
+          call LOGGER_INIT
        end if
 
        if    (TL<=TMINTBL) then
@@ -565,6 +569,11 @@
 
     else
 
+       if(FIRST) then
+          FIRST = .false.
+          call LOGGER_INIT
+       end if
+
        TI = TL - ZEROC
 
        if    (TI <= URAMP) then
@@ -591,8 +600,10 @@
       real :: QSAT(size(TL,1))
       integer :: I
 
-      if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT1: TL contains NaN')
-      if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT1: PL contains NaN')
+      if (debugIsEnabled) then
+         if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT1: TL contains NaN')
+         if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT1: PL contains NaN')
+      end if
 
       do I=1,SIZE(TL,1)
          if (present(DQSAT)) then
@@ -611,8 +622,10 @@
       real :: QSAT(size(TL,1),size(TL,2))
       integer :: I, J
 
-      if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT2: TL contains NaN')
-      if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT2: PL contains NaN')
+      if (debugIsEnabled) then
+         if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT2: TL contains NaN')
+         if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT2: PL contains NaN')
+      end if
 
       do J=1,SIZE(TL,2)
          do I=1,SIZE(TL,1)
@@ -633,8 +646,10 @@
       real :: QSAT(size(TL,1),size(TL,2),size(TL,3))
       integer :: I, J, K
 
-      if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT3: TL contains NaN')
-      if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT3: PL contains NaN')
+      if (debugIsEnabled) then
+         if (any(ieee_is_nan(TL))) call lgr%warning(' QSAT3: TL contains NaN')
+         if (any(ieee_is_nan(PL))) call lgr%warning(' QSAT3: PL contains NaN')
+      end if
 
       do K=1,SIZE(TL,3)
          do J=1,SIZE(TL,2)
@@ -711,8 +726,10 @@
       real    :: URAMP, TT, DD, DQQ, QQ, TI, DQI, QI, PP
       integer :: IT
 
-      if (ieee_is_nan(TL)) call lgr%warning('DQSAT0: TL contains NaN')
-      if (ieee_is_nan(PL)) call lgr%warning('DQSAT0: PL contains NaN')
+      if (debugIsEnabled) then
+         if (ieee_is_nan(TL)) call lgr%warning('DQSAT0: TL contains NaN')
+         if (ieee_is_nan(PL)) call lgr%warning('DQSAT0: PL contains NaN')
+      end if
 
       if(present(RAMP)) then
          URAMP = -abs(RAMP)
@@ -730,11 +747,12 @@
          PP = PL*100.
       end if
 
-      if(URAMP==TMIX .OR. URAMP==0. .and. UTBL) then
+      if((URAMP==TMIX .OR. URAMP==0.) .and. UTBL) then
 
          if(FIRST) then
             FIRST = .false.
             call ESINIT
+            call LOGGER_INIT
          end if
 
          if    (TL<=TMINTBL) then
@@ -767,6 +785,11 @@
 
       else
 
+         if(FIRST) then
+            FIRST = .false.
+            call LOGGER_INIT
+         end if
+
          TI = TL - ZEROC
 
          if    (TI <= URAMP) then
@@ -795,8 +818,10 @@
       real :: DQSAT(size(TL,1))
       integer :: I
 
-      if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT1: TL contains NaN')
-      if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT1: PL contains NaN')
+      if (debugIsEnabled) then
+         if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT1: TL contains NaN')
+         if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT1: PL contains NaN')
+      end if
 
       do I=1,SIZE(TL,1)
          if (present(QSAT)) then
@@ -815,8 +840,10 @@
       real :: DQSAT(size(TL,1),size(TL,2))
       integer :: I, J
 
-      if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT2: TL contains NaN')
-      if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT2: PL contains NaN')
+      if (debugIsEnabled) then
+         if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT2: TL contains NaN')
+         if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT2: PL contains NaN')
+      end if
 
       do J=1,SIZE(TL,2)
          do I=1,SIZE(TL,1)
@@ -837,8 +864,10 @@
       real :: DQSAT(size(TL,1),size(TL,2),size(TL,3))
       integer :: I, J, K
 
-      if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT3: TL contains NaN')
-      if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT3: PL contains NaN')
+      if (debugIsEnabled) then
+         if (any(ieee_is_nan(TL))) call lgr%warning('DQSAT3: TL contains NaN')
+         if (any(ieee_is_nan(PL))) call lgr%warning('DQSAT3: PL contains NaN')
+      end if
 
       do K=1,SIZE(TL,3)
          do J=1,SIZE(TL,2)
@@ -896,7 +925,10 @@
             TMINICE    =  ZEROC + TMINSTR
          endif
 
-         if(UTBL) call ESINIT
+         if(UTBL) then
+            call ESINIT
+            call LOGGER_INIT
+         end if
 
          return
        end subroutine GEOS_QsatSet
@@ -915,8 +947,6 @@
 
           UT = UTBL
           UTBL=.false.
-
-          lgr => logging%get_logger('SHARED.GMAOSHARED.GEOSSHARED.QSAT')
 
           do I=1,TABLESIZE
 
@@ -947,6 +977,14 @@
 
        end subroutine ESINIT
 
+       subroutine LOGGER_INIT
+
+          implicit none
+
+          lgr => logging%get_logger('SHARED.GMAOSHARED.GEOSSHARED.QSAT')
+          debugIsEnabled = lgr%isEnabledFor(DEBUG)
+
+       end subroutine LOGGER_INIT
 
 
 
