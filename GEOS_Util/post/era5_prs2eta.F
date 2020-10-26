@@ -47,6 +47,7 @@ c ----------------------------------
       real    :: phibg, phifg, thbr1, thbr2, delth, cp
 
       integer    nymd,nhms
+      integer    kymd,khms
       integer    Lbeg,Lend
 
 c fv restart variables and topography
@@ -190,6 +191,7 @@ C **********************************************************************
              if( trim(arg(n)).eq.'-tag'    )      tag = trim(arg(n+1))
              if( trim(arg(n)).eq.'-i0'     ) read(arg(n+1), * ) i0
              if( trim(arg(n)).eq.'-j0'     ) read(arg(n+1), * ) j0
+             if( trim(arg(n)).eq.'-lm'     ) read(arg(n+1), * ) lm
              if( trim(arg(n)).eq.'-norecon') norecon =.true.
           enddo
       endif
@@ -213,18 +215,6 @@ C **********************************************************************
 
       if( im.eq.-999 ) im = imana
       if( jm.eq.-999 ) jm = jmana
-
-C **********************************************************************
-C ****                       Read PHIS Data                         ****
-C **********************************************************************
-
-      allocate ( phis_ana(im,jm) )
-      call gfio_get ( trim(phisdata),id=id2,nymdb=nymd,nhmsb=nhms,rc=rc )
-
-      if( root ) print *, 'Reading EC_PHIS for date: ',nymd,nhms,' on UNIT: ',id2
-
-      call mpi_gfio_getvar ( id2,'z',nymd,nhms,imana,jmana,0,1 ,phis_ana,rc,lattice )
-      call gfio_close ( id2,rc )
 
 C **********************************************************************
 
@@ -264,6 +254,7 @@ C **********************************************************************
           print *, '  ERA5 Analysis File: ',trim(prsdata)
           print *, '                rslv: ',imglobal,jmglobal,lmana
           print *, '              lon(1): ',lon(1)
+          print *, '              LZFLIP: ',Lzflip
           print *
           print *, ' Number of Variables: ',nvars
           print *
@@ -303,6 +294,7 @@ C **********************************************************************
       allocate (   h_ana(im,jm,lmana) )
       allocate (   q_ana(im,jm,lmana) )
       allocate (  ps_ana(im,jm) )
+      allocate (phis_ana(im,jm) )
 
       if( root ) then
       print *, 'Reading ERA5 Pressure Level Analysis for Date: ',nymd,' Time: ',nhms
@@ -312,6 +304,19 @@ C **********************************************************************
      .                     im,jm,lmana,nymd,nhms,
      .                     imana,jmana,lmana,undef,plevs,Lzflip,lattice )
       t_ec = t_ana
+
+C **********************************************************************
+C ****                       Read PHIS Data                         ****
+C **********************************************************************
+
+      if( phis_ana(1,1).eq.undef ) then
+          call gfio_get ( trim(phisdata),id=id2,nymdb=kymd,nhmsb=khms,rc=rc )
+
+          if( root ) print *, 'Reading Topography for date: ',kymd,khms,' on UNIT: ',id2
+
+          call mpi_gfio_getvar ( id2,'z',kymd,khms,imana,jmana,0,1 ,phis_ana,rc,lattice )
+          call gfio_close ( id2,rc )
+      endif
 
 ! Construct Pressure Variables
 ! ----------------------------
@@ -423,11 +428,16 @@ C **********************************************************************
                  print *, 'GEOS5 PHIS/grav: ',phis(i,j)/grav,' ps: ',ps(i,j)/100
                  print *, 'ANA   PHIS/grav: ',phis_ana(i,j)/grav,' ps: ',ps_ana(i,j)/100
                  print *
+                 do L=1,lm
+                 print *, 'L: ',L,' dp: ',dp_ana(i0,j0,L),' u: ',u_ana(i0,j0,L),' v: ',v_ana(i0,j0,L),
+     .                    ' t: ',t_ana(i0,j0,L),' q: ',q_ana(i0,j0,L)*1000
+                 enddo
              endif
           enddo
           enddo
       endif
 
+c     call my_barrier (lattice%comm)
       if( lattice%myid.eq.0 ) print *, 'Calling Remap'
       call remap  ( ps,    dp,    u,    v,    thv,  q,    lm,
      .              ps_ana,dp_ana,u_ana,v_ana,t_ana,q_ana,lm,im,jm,1 )
@@ -568,7 +578,7 @@ C **********************************************************************
       real zana (im,jm,lmana)
       real erana(im,jm,lmana)
       real logpl(im,jm,lmana)
-      character*8 name
+      character*4 name
 
       integer i,j,L,n
 
@@ -605,9 +615,9 @@ c -----------------------------------------
 #ifdef DEBUG
           call writit (q,im,jm,lm,66)
 #endif
+c         Interpolate GEOS Model Back to EC Levels and Compute Error
+c         ----------------------------------------------------------
           do n=1,niter
-c            Interpolate GEOS Model Back to EC Levels and Compute Error
-c            ----------------------------------------------------------
              do L=1,lmana
              do j=1,jm
              do i=1,im
@@ -662,17 +672,21 @@ c            ----------------------------------------------
       return
       end
 
-      subroutine get_ana_data  ( id,ps,u,v,t,q,h,
-     .                           im,jm,lm,nymd,nhms,
+      subroutine get_ana_data  ( id,ps,u,v,t,q,h,phis,
+     .                           im,jm,lm,nymd,nhms,nvars,vname,
      .                           imana,jmana,lmana,undef,plevs,Lzflip,lattice )
       use MAPL_ConstantsMod
       use dynamics_lattice_module
       implicit none
+      include 'alias.com'
       type ( dynamics_lattice_type ) lattice
       integer  id,im,jm,lm,nymd,nhms,rc
-      integer  imana,jmana,lmana
+      integer  imana,jmana,lmana,nvars,n
       logical  Lzflip
+      logical  match
+      character*256 vname(nvars)
 
+      real   phis(im,jm)
       real     ps(im,jm)
       real      u(im,jm,lm)
       real      v(im,jm,lm)
@@ -680,7 +694,6 @@ c            ----------------------------------------------
       real      h(im,jm,lm)
       real     rh(im,jm,lm)
       real      q(im,jm,lm)
-    ! real   phis(im,jm)
       real  plevs(lm)
       real     slp(im,jm)
 
@@ -693,35 +706,48 @@ c            ----------------------------------------------
       cp    = MAPL_CP
       beta  = 6.5e-3
 
+      phis  = undef
+
 c Read ANA Variables
 c ------------------
-      call mpi_gfio_getvar ( id,'msl',nymd,nhms,imana,jmana,0,1 ,slp,rc,lattice )
-
-      call mpi_gfio_getvar ( id,'sp',nymd,nhms,imana,jmana,0,1 ,ps ,rc,lattice )
+      do n=1,nvars
+         if( lattice%myid.eq.0 ) print *, 'Looking for ',trim(vname(n))
+         if( match(c_phis,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,0,1 ,phis,rc,lattice )
+         if( match(c_slp ,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,0,1 ,slp ,rc,lattice )
+         if( match(c_ps  ,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,0,1 ,ps  ,rc,lattice )
 
 c Heights
 c -------
-      call mpi_gfio_getvar ( id,'z',nymd,nhms,imana,jmana,1,lmana,h,rc,lattice )
-      if( Lzflip )  call zflip( h,imana,jmana,lmana )
+         if( match(c_gz,vname(n)) ) then
+             call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,1,lmana,h,rc,lattice )
                     h = h / grav
+         endif
+         if( match(c_h,vname(n)) ) then
+             call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,1,lmana,h,rc,lattice )
+         endif
 
 c Winds
 c -----
-      call mpi_gfio_getvar ( id,'u',nymd,nhms,imana,jmana,1,lmana,u,rc,lattice )
-      if( Lzflip )  call zflip( u,imana,jmana,lmana )
-
-      call mpi_gfio_getvar ( id,'v',nymd,nhms,imana,jmana,1,lmana,v,rc,lattice )
-      if( Lzflip )  call zflip( v,imana,jmana,lmana )
+         if( match(c_u,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,1,lmana,u,rc,lattice )
+         if( match(c_v,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,1,lmana,v,rc,lattice )
 
 c Temperature
 c -----------
-      call mpi_gfio_getvar ( id,'t',nymd,nhms,imana,jmana,1,lmana,t,rc,lattice )
-      if( Lzflip )  call zflip( t,imana,jmana,lmana )
+         if( match(c_t,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,1,lmana,t,rc,lattice )
 
 c Specific Humidity
 c -----------------
-      call mpi_gfio_getvar ( id,'q',nymd,nhms,imana,jmana,1,lmana,q,rc,lattice )
-      if( Lzflip )  call zflip( q,imana,jmana,lmana )
+         if( match(c_q,vname(n)) ) call mpi_gfio_getvar ( id,trim(vname(n)),nymd,nhms,imana,jmana,1,lmana,q,rc,lattice )
+
+      enddo
+
+      if( Lzflip ) then
+          call zflip( h,imana,jmana,lmana )
+          call zflip( u,imana,jmana,lmana )
+          call zflip( v,imana,jmana,lmana )
+          call zflip( t,imana,jmana,lmana )
+          call zflip( q,imana,jmana,lmana )
+      endif
 
 c Compute PHIS
 c ------------
@@ -1989,9 +2015,11 @@ c ------------
       enddo
       pref    = ptop + 0.5*dpref(1)
       levs(1) = pref
+c     levs(1) = 1
       do L=2,lm
       pref    = pref + 0.5*( dpref(L)+dpref(L-1) )
       levs(L) = pref
+c     levs(L) = L
       enddo
       levs(:) = levs(:)/100
 

@@ -79,6 +79,8 @@
 # 2017.07.06 RT/for/Sienkiewicz Add ncep_acftpfl_bufr
 # 2020.02.13 RT/for/JJin     Add gmao_amsr2_bufr
 # 2020.06.09 Todling         Set final dates for GOESFV and CrIS as in FP
+# 2020.09.30 Mohar           Historical AVHRR (N15,16,17)
+# 2020.10.14 McCarty         COSMIC-2 single file for period before early Mar 2020
 #
 #+BEGIN obclass data set description
 #+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
@@ -216,7 +218,9 @@ END
 
 BEGIN ncep_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
 # 20080811_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
-  20010519_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20010519_00z-20190930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20191001_00z-20200316_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1_w_C2.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20200316_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
 BEGIN ncep_mtiasi_bufr => gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d.ublk
@@ -257,6 +261,21 @@ BEGIN ncep_avcspm_bufr => gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
   20120207_00z-20140731_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
   20140801_00z-20160226_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
   20160228_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+END
+BEGIN ncep_avcsam_n15_bufr => gdas1_n15.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  19981101_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n15.bufr_d
+END
+BEGIN ncep_avcspm_n16_bufr => gdas1_n16.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
+  20010301_00z-20050430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.n16.bufr_d
+END
+BEGIN ncep_avcsam_n17_bufr => gdas1_n17.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  20021101_00z-20100131_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n17.bufr_d
+END
+BEGIN ncep_avcspm_n18_bufr => gdas1_n18.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
+  20050701_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.n18.bufr_d
+END
+BEGIN ncep_avcsam_metopa_bufr => gdas1_metopa.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  20070601_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.metopA.bufr_d
 END
 BEGIN ncep_aura_omi_bufr => gdas1.%y4%m2%d2.t%h2z.omi.tm00.bufr_d.ublk
 # 20091212_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
@@ -338,7 +357,8 @@ END
 BEGIN gmao_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
   20171101_00z-20180228_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
   20180401_00z-20180909_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
-  20181001_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20181001_06z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20200616_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
 END
 
 # OMPS-NPP
