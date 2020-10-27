@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Added
 
+- Add warning-level loggers to `GEOS_Utilities` (D)QSAT code for NaN detection
+
 ## [1.3.2] - 2020-10-14
 
 ### Fixed
