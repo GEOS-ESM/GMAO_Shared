@@ -18,7 +18,6 @@ endif ()
 
 set (plots_progs
    quickplot
-   configure
    landscape.script
    portrait.script
    moveplot
@@ -26,7 +25,7 @@ set (plots_progs
    get_exports
    chckhist.new
    chckhist.old
-	chckrc
+   chckrc
    zonal
    )
 
@@ -61,3 +60,8 @@ install (
    USE_SOURCE_PERMISSIONS
    MESSAGE_NEVER
    )
+
+# Run this last!
+configure_file(configure configure @ONLY)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/configure DESTINATION plots)
+install(CODE "execute_process(COMMAND ${CMAKE_INSTALL_PREFIX}/plots/configure WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/plots)")

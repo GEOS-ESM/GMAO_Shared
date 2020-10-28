@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Docker authentication for CI
 
 ### Fixed
+
+- Updates to `plots/configure` so that it is run at install time. This
+  should allow others to then run plots on another person's build
+
 ### Removed
 ### Added
 
