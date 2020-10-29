@@ -4,9 +4,162 @@ module GEOS_GmapMod
 private
 public gmap
 interface gmap; module procedure &
-          gmap4_
+          gmap4_logp
 end interface
+real, parameter:: r3 = 1./3., r23 = 2./3., r12 = 1./12.
+real, parameter:: t_min= 184. !< below which applies stricter constraint
 contains
+
+!****6***0*********0*********0*********0*********0*********0**********72
+      subroutine gmap4_logp(im, jm, nq,  akap, &
+               km,  pk3d_m,  pe3d_m, u_m,  v_m,  pt_m,  q_m, &
+               kn,  pk3d_n,  pe3d_n, u_n,  v_n,  pt_n,  q_n  )
+!****6***0*********0*********0*********0*********0*********0**********72
+
+      implicit none
+
+      integer im, jm
+      integer km, kn, nq
+
+! Input:
+! original data km-level
+
+      real      u_m(im,jm,km)
+      real      v_m(im,jm,km)
+      real     pt_m(im,jm,km)
+      real      q_m(im,jm,km,nq)
+      real   pk3d_m(im,jm,km+1)
+      real   pe3d_m(im,jm,km+1)
+
+      real   pk3d_n(im,jm,kn+1)
+      real   pe3d_n(im,jm,kn+1)
+
+! Output:
+! New data (kn-level)
+      real      u_n(im,jm,kn)
+      real      v_n(im,jm,kn)
+      real     pt_n(im,jm,kn)
+      real      q_n(im,jm,kn,nq)
+
+! local (private)
+      integer i, j, k, n
+! local (shared)
+
+      real lpe1(im,km+1) ,lpe2(im,kn+1)
+      real  pe1(im,km+1) , pe2(im,kn+1)
+      real  pk1(im,km+1) , pk2(im,kn+1)
+      real  dp1(im,km)   , dp2(im,kn)
+      real   u1(im,km)   ,  u2(im,kn)
+      real   v1(im,km)   ,  v2(im,kn)
+      real   t1(im,km)   ,  t2(im,kn)
+      real   q1(im,km,nq),  q2(im,kn,nq)
+      real   gz(im)
+
+      real akap
+      real undef
+      real big
+      parameter ( undef = 1.e15 )
+      parameter (   big = 1.e10 )
+
+      integer :: kord = 9
+
+#if   (openmp)
+!$omp  parallel do
+!$omp& default (shared)
+!$omp& private (i,j,k,lpe1,lpe2,pe1,pe2,pk1,pk2,dp1,dp2,u1,v1,t1,q1)
+!$omp& private (u2,v2,t2,q2)
+#endif
+      do 2000 j=1,jm
+
+! Copy original data to local 2D arrays.
+
+      do k=1,km+1
+      do i=1,im
+      lpe1(i,k) = log(pe3d_m(i,j,k))
+       pe1(i,k) = pe3d_m(i,j,k)
+       pk1(i,k) = pk3d_m(i,j,k)
+      enddo
+      enddo
+
+      do k=1,kn+1
+      do i=1,im
+      lpe2(i,k) = log(pe3d_n(i,j,k))
+       pe2(i,k) = pe3d_n(i,j,k)
+       pk2(i,k) = pk3d_n(i,j,k)
+      enddo
+      enddo
+
+      do k=1,km
+      do i=1,im
+       u1(i,k) =  u_m(i,j,k)
+       v1(i,k) =  v_m(i,j,k)
+       t1(i,k) = pt_m(i,j,k)*((pk1(i,k+1)-pk1(i,k))/(akap*(lpe1(i,k+1)-lpe1(i,k))))
+      enddo
+      enddo
+      do n=1,nq
+      do k=1,km
+      do i=1,im
+       q1(i,k,n) =  q_m(i,j,k,n)
+      enddo
+      enddo
+      enddo
+
+      do k=1,km
+      do i=1,im
+      dp1(i,k) = lpe1(i,k+1)-lpe1(i,k)
+      enddo
+      enddo
+
+      do k=1,kn
+      do i=1,im
+      dp2(i,k) = lpe2(i,k+1)-lpe2(i,k)
+      enddo
+      enddo
+
+! map virtual t in logp
+! ---------------------
+      call mappm_ ( km, lpe1, dp1, t1, kn, lpe2, dp2, t2, im, 1, kord )
+
+      do k=1,km
+      do i=1,im
+      dp1(i,k) = pe1(i,k+1)-pe1(i,k)
+      enddo
+      enddo
+
+      do k=1,kn
+      do i=1,im
+      dp2(i,k) = pe2(i,k+1)-pe2(i,k)
+      enddo
+      enddo
+
+! map u,v,q,oz
+! ------------
+      do n=1,nq
+      call mappm_ ( km, pe1, dp1, q1(1,1,n), kn, pe2, dp2, q2(1,1,n), im,  0, kord )
+      enddo
+      call mappm_ ( km, pe1, dp1, u1, kn, pe2, dp2, u2, im, -1, kord )
+      call mappm_ ( km, pe1, dp1, v1, kn, pe2, dp2, v2, im, -1, kord )
+
+      do k=1,kn
+      do i=1,im
+        u_n(i,j,k) = u2(i,k)
+        v_n(i,j,k) = v2(i,k)
+       pt_n(i,j,k) = t2(i,k)/((pk2(i,k+1)-pk2(i,k))/(akap*(lpe2(i,k+1)-lpe2(i,k))))
+      enddo
+      enddo
+      do n=1,nq
+      do k=1,kn
+      do i=1,im
+        q_n(i,j,k,n) = q2(i,k,n)
+      enddo
+      enddo
+      enddo
+
+2000  continue
+
+      return
+      end subroutine gmap4_logp
+
 
 !****6***0*********0*********0*********0*********0*********0**********72
       subroutine gmap4_(im, jm, nq,  akap, &
