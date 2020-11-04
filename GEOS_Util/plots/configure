@@ -71,16 +71,19 @@ endif
 
 # Set GRADS Environment Variables
 # -------------------------------
+setenv  GEOSUTIL @CMAKE_INSTALL_PREFIX@
 setenv  GASCRP $GEOSUTIL/plots/grads_util
 setenv  GAUDFT $GEOSUTIL/plots/grads_util/udft_$arch.tools
 setenv  GAUDXT $GEOSUTIL/plots/grads_util/udxt
 
-if(  -e sedfile ) /bin/rm  sedfile
-cat >   sedfile << EOF
+if(! -e $GAUDFT) then
+set SEDFILE=`mktemp`
+cat > $SEDFILE << EOF
 s?GEOSUTIL?$GEOSUTIL?g
 s?ARCH?$arch?g
 EOF
-sed -f sedfile $GASCRP/udft.template > $GAUDFT
+sed -f $SEDFILE $GASCRP/udft.template > $GAUDFT
+endif
 
 # Link VERIFICATION Directories
 # -----------------------------------------------------------------------------------
@@ -92,7 +95,7 @@ set dirs = `echo olrc olrcf radnetg radnetgc radswt tpw cldtt albedo            
             swgnet swgnetc swgnetcf swgup swgupc swgupcf swgdwn swgdwnc swgdwncf `
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.SRB.rc  .
+if (! -l VERIFICATION.SRB.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.SRB.rc  .
 end
 
 # VERIFICATION.ERBE
@@ -100,7 +103,7 @@ end
 set dirs = `echo osr osrc osrcf olr olrc olrcf nettoa nettoac toacf`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ERBE.rc  .
+if (! -l VERIFICATION.ERBE.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ERBE.rc  .
 end
 
 # VERIFICATION.CERES_EBAF-TOA_Ed4.0
@@ -108,7 +111,7 @@ end
 set dirs = `echo toacf tseries osrcf osrc osr radswt olrc olr olrcf nettoac nettoa`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.CERES_EBAF-TOA_Ed4.0.rc  .
+if (! -l VERIFICATION.CERES_EBAF-TOA_Ed4.0.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.CERES_EBAF-TOA_Ed4.0.rc  .
 end
 
 # VERIFICATION.CERES_EBAF
@@ -116,7 +119,7 @@ end
 set dirs = `echo toacf olrc olrcf nettoac tseries nettoa olr osrcf osrc osr radswt`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.CERES_EBAF.rc  .
+if (! -l VERIFICATION.CERES_EBAF.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.CERES_EBAF.rc  .
 end
 
 # VERIFICATION.COADS
@@ -124,7 +127,7 @@ end
 set dirs = `echo emp speed eflux hflux cldtt taux tauy`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.COADS.rc  .
+if (! -l VERIFICATION.COADS.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.COADS.rc  .
 end
 
 # VERIFICATION.ISCCP
@@ -132,7 +135,7 @@ end
 set dirs = `echo cldhi cldlo cldmd cldtt`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ISCCP.rc  .
+if (! -l VERIFICATION.ISCCP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ISCCP.rc  .
 end
 
 # VERIFICATION.GSSTF
@@ -140,7 +143,7 @@ end
 set dirs = `echo eflux hflux speed taux tauy tpw`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GSSTF.rc  .
+if (! -l VERIFICATION.GSSTF.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GSSTF.rc  .
 end
 
 # VERIFICATION.ECINTERIM
@@ -148,7 +151,7 @@ end
 set dirs = `echo hcmp lcmp zcmp zcmp1 tseries precip`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECINTERIM.rc  .
+if (! -l VERIFICATION.ECINTERIM.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECINTERIM.rc  .
 end
 
 # VERIFICATION.ECANA
@@ -156,7 +159,7 @@ end
 set dirs = `echo hcmp lcmp zcmp`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECANA.rc  .
+if (! -l VERIFICATION.ECANA.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ECANA.rc  .
 end
 
 # VERIFICATION.ERA5
@@ -166,7 +169,7 @@ set dirs = `echo lwgdwnc lwgdwn lwgnetc lwgnet lwgupc lwgup \
                  precipcn precipls precip `
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ERA5.rc  .
+if (! -l VERIFICATION.ERA5.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.ERA5.rc  .
 end
 
 # VERIFICATION.GDAS1
@@ -174,7 +177,7 @@ end
 set dirs = `echo hcmp lcmp zcmp`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GDAS1.rc  .
+if (! -l VERIFICATION.GDAS1.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GDAS1.rc  .
 end
 
 # VERIFICATION.NCEP
@@ -182,7 +185,7 @@ end
 set dirs = `echo hcmp lcmp zcmp`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.NCEP.rc  .
+if (! -l VERIFICATION.NCEP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.NCEP.rc  .
 end
 
 # VERIFICATION.GPCP
@@ -190,7 +193,7 @@ end
 set dirs = `echo precip tseries`
 foreach dir ($dirs)
 cd $GEOSUTIL/plots/$dir
-/bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GPCP.rc  .
+if (! -l VERIFICATION.GPCP.rc) /bin/ln -sf  ../VERIFICATION_RCS/VERIFICATION.GPCP.rc  .
 end
 
 
@@ -212,14 +215,14 @@ if(! -e toacf_cc5    ) /bin/ln -sf toacf toacf_cc5
 # Link Cubed-Sphere FRAC Dataset for dc.gs Utility and CONST_2d Dataset for TopoShade
 # -----------------------------------------------------------------------------------
 cd $GEOSUTIL/plots/grads_util
-/bin/ln -sf $TOPODIR/TOPO_CF0720x6C/FRAC_720x4320.nc4 .
-/bin/ln -sf $TOPODIR/TOPO_CF0720x6C/CONST_2D.2880x1441.nc4 .
-/bin/ln -sf $TOPODIR/TOPO_CF1440x6C/CONST_2D.5760x2881.nc4 .
+if(! -l FRAC_720x4320.nc4)      /bin/ln -sf $TOPODIR/TOPO_CF0720x6C/FRAC_720x4320.nc4 .
+if(! -l CONST_2D.2880x1441.nc4) /bin/ln -sf $TOPODIR/TOPO_CF0720x6C/CONST_2D.2880x1441.nc4 .
+if(! -l CONST_2D.5760x2881.nc4) /bin/ln -sf $TOPODIR/TOPO_CF1440x6C/CONST_2D.5760x2881.nc4 .
 cd $cdir
 
 # Create .cshrc for QuickPlot (Note: unsetenv GAUDXT to removed Arlindo Setup Conflicts)
 # --------------------------------------------------------------------------------------
-if( -e .quickplotrc ) /bin/rm .quickplotrc
+#if( -e .quickplotrc ) /bin/rm .quickplotrc
 echo \#\!/bin/csh                                                >  .quickplotrc
 echo   setenv VERIFICATION $VERIFICATION                         >> .quickplotrc
 echo   setenv LOCHOST $host                                      >> .quickplotrc
