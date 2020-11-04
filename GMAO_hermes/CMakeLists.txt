@@ -13,7 +13,7 @@ if ( NOT HERMES_LIGHT )
    set (srcs
      m_ana2dyn.F m_const.f90 m_dyn.f90 m_dyn2dyn.f90 m_dynp.F90
      m_insitu.F m_interp.F90 m_lp.F m_maph.F90 m_maph_pert.F90 m_mapz.F m_mapz_pert.F90
-     m_qsat.F m_remap.f90 m_set_eta.F90 m_vdc2vdc.F90 progsig.f90 m_topo_remap.F90
+     m_qsat.F m_remap.f90 m_set_eta.F90 m_vdc2vdc.F90 progsig.f90 shared_topo_remap.F90 m_topo_remap.F90
      m_interpack.F m_interpack_ad.F m_ec_set_eta.F90 m_ecdyn.f90 m_tick.f90
      m_dyn_util.F90 m_spline.f90
      )
@@ -76,12 +76,18 @@ if ( NOT HERMES_LIGHT )
    install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
 
 else ()
+
    set (srcs
      m_set_eta.F90 shared_topo_remap.F90
      )
+   
    esma_add_library(${this} SRCS ${srcs} )
    target_compile_options(${this} PRIVATE ${flags})
+
 endif ()
+
+ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
+
 
 set(plain_resource_files
    ana.prs.rc
