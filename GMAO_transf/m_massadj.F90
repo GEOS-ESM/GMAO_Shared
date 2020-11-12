@@ -143,7 +143,7 @@
       real(r_kind)    :: lambda(im,jm)
       real(r_kind)    :: ps_corr, delp_min
 
-      real(r_kind)    :: gmean_
+      !real(r_kind)    :: gmean_
 
 
 
@@ -246,7 +246,7 @@
     real(r_kind)    :: qmax, qmin, gps_a
     real(r_kind)    :: lambda(im,jm)
     real(r_kind)    :: ps_corr, delp_min
-    real(r_kind)    :: gmean_
+    !real(r_kind)    :: gmean_
     real(r_kind)    :: delpmin_
 
     rc = 0
