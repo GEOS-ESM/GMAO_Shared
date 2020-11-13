@@ -35,7 +35,7 @@ ptop   = subwrd(args,5)
    'draw string 5.5 5 Not Exported'
  endif
 'cbarn -xmid 6.0'
-'draw title Temperature Tendency from Total GWD (K/day)'
+'draw title Total Temperature Tendency (ORO+BKG+Rayleigh)  (K/day)'
 'draw ylab Pressure (mb)'
 
 

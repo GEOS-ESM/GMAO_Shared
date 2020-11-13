@@ -1,0 +1,111 @@
+function aeroplot (args)
+                                                                                                                            
+'numargs  'args
+ numargs = result
+
+        num = 0
+while ( num < numargs )
+        num = num + 1
+
+if( subwrd(args,num) = '-output' ) ; output = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-type'   ) ; type   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-mplots' ) ; mplots = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-amax'   ) ; amax   = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-amin'   ) ; amin   = subwrd(args,num+1) ; endif
+
+* -----------------------------------------
+if( subwrd(args,num) = '-expids' )
+               n  = 1
+        while( n <= mplots )
+         expid.n = subwrd(args,num+n   )
+               n = n + 1
+        endwhile
+endif
+
+if( subwrd(args,num) = '-expdscs' )
+               n  = 1
+        while( n <= mplots )
+        expdsc.n = subwrd(args,num+n   )
+               n = n + 1
+        endwhile
+endif
+
+endwhile
+
+say 'INPUT:   type = 'type
+say 'INPUT: mplots = 'mplots
+say 'INPUT:   amax = 'amax
+say 'INPUT:   amin = 'amin
+
+* -----------------------------------------
+
+if( type = 1 ) ;  Aerosol = 'Dust'           ; endif
+if( type = 2 ) ;  Aerosol = 'Sea-Salt'       ; endif
+if( type = 3 ) ;  Aerosol = 'Sulfates'       ; endif
+if( type = 4 ) ;  Aerosol = 'Black-Carbon'   ; endif
+if( type = 5 ) ;  Aerosol = 'Organic-Carbon' ; endif
+if( type = 6 ) ;  Aerosol = 'Nitrates'       ; endif
+
+    'set vpage off'
+    'set parea off'
+    'set grads off'
+    'set parea 1.7 10 1.0 7.5'
+
+     legend_end    = 8.48
+     legend_beg    = 7.88
+     legend_height = legend_end - legend_beg
+     legend_delta  = legend_height / mplots
+     say 'legend_height = 'legend_height
+     say 'legend_delta  = 'legend_delta 
+
+             m = 1
+     while(  m<=mplots )
+
+     if(       m = 1 )          ; color = 4 ; endif
+     if(       m = 2 )          ; color = 2 ; endif
+     if(       m = 3 )          ; color = 3 ; endif
+     if(       m = 4 )          ; color = 5 ; endif
+     if(       m = 5 )          ; color = 6 ; endif
+     if(       m = 6 )          ; color = 8 ; endif
+     if( expid.m = 'MERRA-2' )  ; color = 1 ; endif
+
+             k = type + (m-1)*6
+            pls = amin + amax
+           'set axlim 0 'pls
+           'set xlopts 1 3 0.14'
+           'set ylopts 1 3 0.14'
+           'set ylab %.4f'
+           'set cstyle 1'
+           'set cmark  0'
+           'set cthick 6'
+           'set ccolor 'color
+            say 'd VAR'k'g'
+           'd VAR'k'g'
+
+            legend_yloc  = legend_beg + (m-1)*legend_delta
+            say 'm = 'm'   legend_yloc = 'legend_yloc 
+           'set strsiz 0.10'
+           'set string 'color' r 5'
+           'draw string 3.7 'legend_yloc' 'expid.m
+           'set string 'color' l 5'
+           'draw string 3.8 'legend_yloc' :  'expdsc.m
+
+     m = m + 1
+     endwhile
+
+    'set string 1 l 6'
+    'set strsiz 0.20'
+    'draw string 1.72 7.7 'Aerosol
+
+    'myprint -name 'output'/AEROSOL_'Aerosol'_TIME_SERIES'
+
+return
+
+* To Prevent Problem with BIT: E
+* ------------------------------
+function checkbit (word)
+      bit = substr(word,1,1)
+      dum = bit'TEST'
+      if( dum = "ETEST" ) ; bit = A ; endif
+return bit
+

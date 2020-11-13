@@ -56,7 +56,7 @@
 
 !     Local variables
 !     ---------------
-      logical :: log_transf = .true.
+      logical :: log_transf = .false.
       integer nfiles, ifile, lf, isyn, ksyn, nymd, nhms, nkt, nkx, nlv, ncfound
       integer i, j, ic, nc, nt, ierr, nobs, nsel, synhour, nop, nops
       integer nymdb, nhmsb
