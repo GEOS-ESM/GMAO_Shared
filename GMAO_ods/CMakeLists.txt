@@ -85,6 +85,7 @@ if (NOT CMAKE_Fortran_COMPILER_ID MATCHES Intel)
    set_target_properties (odsstats    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
    set_target_properties (odsemean    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
 endif ()
+
 install(
    PROGRAMS unique_instruments.csh obimp_summary.pl diag2ods
    DESTINATION bin
