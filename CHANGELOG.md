@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Added Docker authentication for CI
+- Update CI images for Baselibs 6.0.22
 
 ### Fixed
 
