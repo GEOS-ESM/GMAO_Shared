@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added Docker authentication for CI
 - Update CI images for Baselibs 6.0.22
+- Update plots consistent with latest cvs tags
 
 ### Fixed
 
