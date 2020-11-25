@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 ### Fixed
+### Removed
+### Added
+
+## [1.3.4] - 2020-11-25
+
+### Fixed
 
 - Updates for DSO work
 
-### Removed
-### Added
+### Changed
+
+- Update plots consistent with latest cvs tags
 
 ## [1.3.3] - 2020-10-28
 
@@ -21,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added Docker authentication for CI
 - Update CI images for Baselibs 6.0.22
-- Update plots consistent with latest cvs tags
 
 ### Fixed
 
