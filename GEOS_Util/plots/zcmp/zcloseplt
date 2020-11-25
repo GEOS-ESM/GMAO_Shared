@@ -113,6 +113,10 @@ if( EXPORT = "U"   )
    'getresource 'PLOTRC' U_DYN_Z'scale'_DCOLS'  ; dcols = result
    'getresource 'PLOTRC' U_DYN_Z_'LEVTYPE'LEVS' ; dlevs = result
    'getresource 'PLOTRC' U_DYN_Z'scale'_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' U_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' U_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' U_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' U_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "V"   )
     oname = "/horiz_"cmpnam"_vwnd_"zid"_closeness_"obsnam
@@ -121,6 +125,10 @@ if( EXPORT = "V"   )
    'getresource 'PLOTRC' V_DYN_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' V_DYN_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' V_DYN_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' V_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' V_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' V_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' V_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "T"   )
     oname = "/horiz_"cmpnam"_tmpu_"zid"_closeness_"obsnam
@@ -129,6 +137,10 @@ if( EXPORT = "T"   )
    'getresource 'PLOTRC' T_DYN_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' T_DYN_Z_'LEVTYPE'COLS' ; dcols = result
    'getresource 'PLOTRC' T_DYN_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' T_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' T_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' T_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' T_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "Q"   )
     oname = "/horiz_"cmpnam"_sphu_"zid"_closeness_"obsnam
@@ -137,6 +149,10 @@ if( EXPORT = "Q"   )
    'getresource 'PLOTRC' Q_MOIST_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' Q_MOIST_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' Q_MOIST_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' Q_MOIST_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' Q_MOIST_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' Q_MOIST_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' Q_MOIST_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "QLTOT"   )
     oname = "/horiz_"cmpnam"_ql_"zid"_closeness_"obsnam
@@ -145,6 +161,10 @@ if( EXPORT = "QLTOT"   )
    'getresource 'PLOTRC' QLTOT_AGCM_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' QLTOT_AGCM_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' QLTOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' QLTOT_AGCM_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' QLTOT_AGCM_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' QLTOT_AGCM_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' QLTOT_AGCM_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "QITOT"   )
     oname = "/horiz_"cmpnam"_qi_"zid"_closeness_"obsnam
@@ -153,6 +173,10 @@ if( EXPORT = "QITOT"   )
    'getresource 'PLOTRC' QITOT_AGCM_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' QITOT_AGCM_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' QITOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' QITOT_AGCM_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' QITOT_AGCM_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' QITOT_AGCM_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' QITOT_AGCM_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "RH2" )
     oname = "/horiz_"cmpnam"_rh_"zid"_closeness_"obsnam
@@ -161,6 +185,10 @@ if( EXPORT = "RH2" )
    'getresource 'PLOTRC' RH2_MOIST_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' RH2_MOIST_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' RH2_MOIST_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' RH2_MOIST_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' RH2_MOIST_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' RH2_MOIST_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' RH2_MOIST_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "ZLE"   )
     oname = "/horiz_"cmpnam"_hght_"zid"_closeness_"obsnam
@@ -169,6 +197,10 @@ if( EXPORT = "ZLE"   )
    'getresource 'PLOTRC' ZLE_DYN_Z_CCOLS'                ; ccols = result
    'getresource 'PLOTRC' ZLE_DYN_Z'scale'_'LEVTYPE'COLS' ; dcols = result
    'getresource 'PLOTRC' ZLE_DYN_Z'scale'_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' ZLE_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' ZLE_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' ZLE_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' ZLE_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "OMEGA"   )
     oname = "/horiz_"cmpnam"_omega_"zid"_closeness_"obsnam
@@ -177,6 +209,10 @@ if( EXPORT = "OMEGA"   )
    'getresource 'PLOTRC' OMEGA_DYN_CCOLS'           ; ccols = result
    'getresource 'PLOTRC' OMEGA_DYN_'LEVTYPE'COLS'   ; dcols = result
    'getresource 'PLOTRC' OMEGA_DYN_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' OMEGA_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' OMEGA_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' OMEGA_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' OMEGA_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "O3"   )
     oname = "/horiz_"cmpnam"_o3_"zid"_closeness_"obsnam
@@ -185,6 +221,10 @@ if( EXPORT = "O3"   )
    'getresource 'PLOTRC' O3_CHEMISTRY_Z_DCOLS'                  ; dcols = result
    'getresource 'PLOTRC' O3_CHEMISTRY_Z'scale'_CLEVS'           ; clevs = result
    'getresource 'PLOTRC' O3_CHEMISTRY_Z'scale'_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 say ' TITLE: 'title
 say ' CLEVS: 'clevs
@@ -303,6 +343,20 @@ else
             source_cint = comparison_cint
        endif
 
+* Set Hardwired Values for Consistent Plots
+* -----------------------------------------
+       if( fixpltfact != NULL )
+       'd 'fixpltfact
+        source_n = subwrd(result,4)
+       endif
+       say 'Diff Scaling Factor: 'source_n
+
+       if( fixpltcint != NULL )
+       'd 'fixpltcint
+           fixpltcint = subwrd(result,4)
+           source_cint = fixpltcint
+       endif
+
 * -----------------------------------------------------------------
 
       'shades 'source_cint
@@ -393,14 +447,23 @@ if( scale = LOG ) ; 'setlevs' ; endif
            n = n+2
         endif
    endif
-   say 'Diff Scaling Factor: 'n
-   'd 'qmax'/1e'n
-   cint = subwrd(result,4)
 
 * Set Hardwired Values for Consistent Plots
 * -----------------------------------------
-*         n = -2
-*      cint = 1
+   if( clspltfact != NULL )
+   'd 'clspltfact
+    n = subwrd(result,4)
+   endif
+   say 'Diff Scaling Factor: 'n
+
+   if( clspltcint != NULL )
+   'd 'clspltcint
+       clspltcint = subwrd(result,4)
+       cint = clspltcint
+   else
+      'd 'qmax'/1e'n
+       cint = subwrd(result,4)
+   endif
 
       'shades 'cint
       'define qzplt = absdifz/1e'n

@@ -56,6 +56,11 @@
           if( trim(alias) == 'HGT'     ) match = .true.
       endif
 
+      if(     trim(name)  == 'gz'      ) then
+          if( trim(alias) == 'gz'      ) match = .true.
+          if( trim(alias) == 'GZ'      ) match = .true.
+      endif
+
       if(     trim(name)  == 'th'      ) then
           if( trim(alias) == 'th'      ) match = .true.
           if( trim(alias) == 'TH'      ) match = .true.
@@ -78,6 +83,8 @@
       if(     trim(name)  == 'ps'      ) then
           if( trim(alias) == 'ps'      ) match = .true.
           if( trim(alias) == 'PS'      ) match = .true.
+          if( trim(alias) == 'sp'      ) match = .true.
+          if( trim(alias) == 'SP'      ) match = .true.
       endif
 
       if(     trim(name)  == 'dp'      ) then
@@ -112,6 +119,8 @@
           if( trim(alias) == 'PRMSLMSL') match = .true.
           if( trim(alias) == 'prmsl'   ) match = .true.
           if( trim(alias) == 'PRMSL'   ) match = .true.
+          if( trim(alias) == 'msl'     ) match = .true.
+          if( trim(alias) == 'MSL'     ) match = .true.
       endif
 
       return
