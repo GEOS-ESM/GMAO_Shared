@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
+### Fixed
+
+- Updates for DSO work
+
+### Removed
+### Added
+
+## [1.3.3] - 2020-10-28
+
+### Changed
 
 - Added Docker authentication for CI
 - Update CI images for Baselibs 6.0.22
