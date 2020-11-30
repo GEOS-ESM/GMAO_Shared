@@ -43,6 +43,7 @@ jobs:
       - run:
           name: "Mepo checkout-if-exists GEOS_Shared branch"
           command: |
+            cd ${CIRCLE_WORKING_DIRECTORY}/GEOSgcm
             echo "${CIRCLE_BRANCH}"
             if [ "${CIRCLE_BRANCH}" != "develop" ] && [ "${CIRCLE_BRANCH}" != "master" ] && [ "${CIRCLE_BRANCH}" != "main" ]
             then
@@ -52,6 +53,7 @@ jobs:
       - run:
           name: "CMake"
           command: |
+            cd ${CIRCLE_WORKING_DIRECTORY}/GEOSgcm
             mkdir build
             cd build
             cmake .. -DBASEDIR=$BASEDIR/Linux -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_BUILD_TYPE=Debug
