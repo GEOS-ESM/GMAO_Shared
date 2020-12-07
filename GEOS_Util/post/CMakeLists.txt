@@ -35,7 +35,7 @@ endif ()
 set_target_properties (stats.x PROPERTIES COMPILE_FLAGS "${BIG_ENDIAN}")
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 
-file(GLOB perlscripts *.pl)
+file(GLOB perlscripts CONFIGURE_DEPENDS *.pl)
 install(
    PROGRAMS ${perlscripts} ec2grd.csh
    DESTINATION bin)
