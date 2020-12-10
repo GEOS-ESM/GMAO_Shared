@@ -11,9 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Use `CONFIGURE_DEPENDS` with `file(GLOB)` calls
+- Fix OpenMP in GMAO_stoch
 
 ### Removed
 ### Added
+
+- Add support for `Aggressive` build type
 
 ## [1.3.4] - 2020-11-25
 
