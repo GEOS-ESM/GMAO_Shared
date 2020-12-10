@@ -40,7 +40,7 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/quickstat DESTINATION plots)
 # From https://stackoverflow.com/questions/7787823/cmake-how-to-get-the-name-of-all-subdirectories-of-a-directory
 
 MACRO(SUBDIRLIST result curdir)
-  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  FILE(GLOB children CONFIGURE_DEPENDS RELATIVE ${curdir} ${curdir}/*)
   SET(dirlist "")
   FOREACH(child ${children})
     IF(IS_DIRECTORY ${curdir}/${child})
