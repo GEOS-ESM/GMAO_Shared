@@ -88,5 +88,5 @@ endif ()
 
 ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
 
-file(GLOB resource_files *.rc)
+file(GLOB resource_files CONFIGURE_DEPENDS *.rc)
 install(FILES ${resource_files} DESTINATION etc)
