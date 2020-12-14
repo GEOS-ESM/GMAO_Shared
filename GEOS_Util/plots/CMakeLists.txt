@@ -1,3 +1,8 @@
+if (CMAKE_Fortran_COMPILER_ID MATCHES Intel AND CMAKE_BUILD_TYPE MATCHES Release)
+   set( CMAKE_Fortran_FLAGS_RELEASE "${FOPT2} ${PP}")
+   message(STATUS "CMAKE_Fortran_FLAGS_RELEASE: ${CMAKE_Fortran_FLAGS_RELEASE}")
+endif ()
+
 set (zonal_prog_name
    zonal_${CMAKE_SYSTEM_NAME}.x
    )
