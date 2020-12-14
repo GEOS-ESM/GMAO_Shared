@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 ### Fixed
+
+- Fixed compilation flags for `zonal.f`
+- Fixed bug in `res/zonal.gs` for `zonal.x` location
+
 ### Removed
 ### Added
 
