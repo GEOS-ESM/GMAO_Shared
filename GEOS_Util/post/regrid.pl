@@ -1056,8 +1056,8 @@ sub check_inputs {
     #-----------------------------------------
     if ($outdir =~ /archive/ and $CS{$grOUT} and $upairFLG) {
         warn "\n=======\nWARNING\n=======\n"
-            ."> CS upper-air restarts are created with a PBS job.\n"
-            ."> PBS jobs cannot write to the archive directories.\n"
+            ."> CS upper-air restarts are created with a batch job.\n"
+            ."> Batch jobs cannot write to the archive directories.\n"
             ."> Your OUTPUT directory appears to be in the archives.\n\n"
             ."outdir: $outdir\n\n";
         $ans = query("Quit (y/n)", "y");
@@ -2257,7 +2257,7 @@ sub copy_upperair_rsts {
 
 #=======================================================================
 # name - regrid_upperair_rsts_CS
-# purpose - set up and submit PBS job to perform conversion to
+# purpose - set up and submit batch job to perform conversion to
 #           cubed-sphere upper-air restarts
 #=======================================================================
 sub regrid_upperair_rsts_CS {
@@ -2505,7 +2505,7 @@ EOF
 
         system_("$regridj 1>$qcmdlog 2>&1") && die "Error with $regridj;";
     } else {
-        print_("\nThe CS regridding is MPI based; submitting job to PBS\n");
+        print_("\nThe CS regridding is MPI based; submitting job to batch system\n");
         system_("$qcmd $qwaitFLG -o $qcmdlog $regridj");
     }
     chdir_($workdir, $verbose);
