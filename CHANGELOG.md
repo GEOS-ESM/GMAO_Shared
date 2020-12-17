@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Fixed
 
-- Fixed compilation flags for `zonal.f`
+- Fixed compilation flags for `zonal.f` to match that of CVS
 - Fixed bug in `res/zonal.gs` for `zonal.x` location
 - Added flag to regrid_forcing_esmf.x to force a 0 to 1 range when regridding files that should fractions
 
