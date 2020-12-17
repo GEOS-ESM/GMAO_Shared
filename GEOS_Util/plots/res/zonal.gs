@@ -13,6 +13,9 @@ function zonal (args)
 'run getvar T DYN'
         tname  = subwrd(result,1)
         tfile  = subwrd(result,2)
+'run getvar U DYN'
+        uname  = subwrd(result,1)
+        ufile  = subwrd(result,2)
 
 say ' EXPID: 'expid
 say 'EXPDSC: 'expdsc
@@ -78,6 +81,9 @@ if(  vfile != "NULL" ) ; 'set dfile 'vfile ; else ; 'chckname 'vname ; endif
 if(  tfile != "NULL" ) ; 'set dfile 'tfile ; else ; 'chckname 'tname ; endif
 'makezf 'tname' 'tname' z' 
 
+if(  ufile != "NULL" ) ; 'set dfile 'ufile ; else ; 'chckname 'uname ; endif
+'makezf 'uname' 'uname' z' 
+
 
 * Assume VSTS Quadratic is in TFILE
 * ---------------------------------
@@ -90,6 +96,29 @@ else
     'makezf vsts vsts z' 
 endif
 
+* Assume USVS Quadratic is in UFILE
+* ---------------------------------
+if(  ufile != "NULL" ) 
+    'set dfile ' ufile 
+    'chckname  usvs'
+    'makezf usvs usvs z' 
+else
+    'chckname  usvs'
+    'makezf usvs usvs z' 
+endif
+
+* Assume USWS Quadratic is in UFILE
+* ---------------------------------
+if(  ufile != "NULL" ) 
+    'set dfile ' ufile 
+    'chckname  usws'
+    'makezf usws usws z' 
+else
+    'chckname  usws'
+    'makezf usws usws z' 
+endif
+
+
 
 * Define Pressure Variables
 * -------------------------
@@ -99,7 +128,7 @@ endif
 'setz'
 'set t '1
 
-'define pl = lev'
+'define pl = lat-lat + lev'
 'define pk = pow(pl,2/7)'
 
 'set gxout fwrite'
@@ -110,8 +139,9 @@ endif
 t=1
 while(t<=tdim)
   'set t 't
-   say 'Writing Data T = 't'  zdim = 'zdim
+   say 'Writing Data Time = 't'  zdim = 'zdim'  EXPID = 'expid
 
+   say '          Writing VZ'
    z=1
    while(z<=zdim)
   'set z 'z
@@ -119,6 +149,7 @@ while(t<=tdim)
    z=z+1
    endwhile
 
+   say '          Writing TZ'
    z=1
    while(z<=zdim)
   'set z 'z
@@ -126,13 +157,15 @@ while(t<=tdim)
    z=z+1
    endwhile
 
+   say '          Writing VSTSZ'
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd     vstsz' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd    vstsz' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
+   say '          Writing PL'
    z=1
    while(z<=zdim)
   'set z 'z
@@ -140,12 +173,38 @@ while(t<=tdim)
    z=z+1
    endwhile
 
+   say '          Writing PK'
    z=1
    while(z<=zdim)
   'set z 'z
   'd pk'
    z=z+1
    endwhile
+
+   say '          Writing UZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  ufile != "NULL" ) ; 'd ' uname'z' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+
+   say '          Writing USVSZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  ufile != "NULL" ) ; 'd     usvsz' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+
+   say '          Writing USWSZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  ufile != "NULL" ) ; 'd     uswsz' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+   say ' '
 
 t=t+1
 endwhile
@@ -214,6 +273,9 @@ say 'GETVAR output: 'result
 'run getvar T DYN 'exp
         tname  = subwrd(result,1)
         tfile  = subwrd(result,2)
+'run getvar U DYN 'exp
+        uname  = subwrd(result,1)
+        ufile  = subwrd(result,2)
 
 say 'Comparison   ID: 'obsid
 say 'Comparison Desc: 'obsdsc
@@ -276,6 +338,9 @@ if(  vfile != "NULL" ) ; 'set dfile 'vfile ; else ; 'chckname 'vname ; endif
 if(  tfile != "NULL" ) ; 'set dfile 'tfile ; else ; 'chckname 'tname ; endif
 'makezf 'tname' 'tname' z'
 
+if(  ufile != "NULL" ) ; 'set dfile 'ufile ; else ; 'chckname 'uname ; endif
+'makezf 'uname' 'uname' z'
+
 
 * Assume VSTS Quadratic is in TFILE
 * ---------------------------------
@@ -286,6 +351,28 @@ if(  tfile != "NULL" )
 else
     'chckname vsts'
     'makezf   vsts vsts z'
+endif
+
+* Assume USVS Quadratic is in UFILE
+* ---------------------------------
+if(  ufile != "NULL" ) 
+    'set dfile ' ufile 
+    'chckname  usvs'
+    'makezf usvs usvs z' 
+else
+    'chckname  usvs'
+    'makezf usvs usvs z' 
+endif
+
+* Assume USWS Quadratic is in UFILE
+* ---------------------------------
+if(  ufile != "NULL" ) 
+    'set dfile ' ufile 
+    'chckname  usws'
+    'makezf usvs usws z' 
+else
+    'chckname  usws'
+    'makezf usvs usws z' 
 endif
 
 
@@ -308,8 +395,9 @@ endif
 t=tmin
 while(t<=tmax)
   'set t 't
-   say 'Writing Data T = 't'  zdim = 'zdim
+   say 'Writing Data Time = 't'  zdim = 'zdim'  CMPID = 'obsid
 
+   say '          Writing VZ'
    z=1
    while(z<=zdim)
   'set z 'z
@@ -317,6 +405,7 @@ while(t<=tmax)
    z=z+1
    endwhile
 
+   say '          Writing TZ'
    z=1
    while(z<=zdim)
   'set z 'z
@@ -324,13 +413,15 @@ while(t<=tmax)
    z=z+1
    endwhile
 
+   say '          Writing VSTSZ'
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd     vstsz' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd    vstsz' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
+   say '          Writing PL'
    z=1
    while(z<=zdim)
   'set z 'z
@@ -338,12 +429,39 @@ while(t<=tmax)
    z=z+1
    endwhile
 
+   say '          Writing PK'
    z=1
    while(z<=zdim)
   'set z 'z
   'd pk'
    z=z+1
    endwhile
+
+   say '          Writing UZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  ufile != "NULL" ) ; 'd ' uname'z' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+
+   say '          Writing USVSZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  ufile != "NULL" ) ; 'd     usvsz' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+
+   say '          Writing USWSZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  ufile != "NULL" ) ; 'd     uswsz' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+   say ' '
+
 
 t=t+1
 endwhile

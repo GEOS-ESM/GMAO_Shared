@@ -51,6 +51,6 @@ if (F2PY_FOUND)
    add_dependencies(read_ops_bcs ${this})
 endif (F2PY_FOUND)
 
-file(GLOB cshscripts *.csh)
-file(GLOB perlscripts *.pl)
+file(GLOB cshscripts CONFIGURE_DEPENDS *.csh)
+file(GLOB perlscripts CONFIGURE_DEPENDS *.pl)
 install(PROGRAMS ${cshscripts} ${perlscripts} DESTINATION bin)

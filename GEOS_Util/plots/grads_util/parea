@@ -1,8 +1,8 @@
-function vpage (args)
+function parea (args)
 
 *************************************************************
 *****                                                   *****
-*****  Usage:  vpage xloc yloc xmax ymax <ytop>         *****
+*****  Usage:  parea xloc yloc xmax ymax <ytop>         *****
 *****                                                   *****
 *************************************************************
 
@@ -14,13 +14,13 @@ yloc = subwrd(args,2)
 xmax = subwrd(args,3)
 ymax = subwrd(args,4)
 
-   top = 0.5
    bot = 0.4
   left = 0.5
  right = 0.2
 
 scalex = 1.0
 scaley = 1.0
+   top = 0.5
 
        num = 0
 while( num < numargs )
@@ -30,11 +30,17 @@ if( subwrd(args,num)='-scaley' ) ; scaley = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-top'    ) ; top    = subwrd(args,num+1) ; endif
 endwhile
 
-'set vpage off'
+say ' parea: 'xloc' 'yloc' 'xmax' 'ymax
+say 'scalex: 'scalex
+say 'scaley: 'scaley
+say '   top: 'top
+
+*'set vpage off'
+
+'set parea off'
 'getinfo page'
 pagex = subwrd(result,1)
 pagey = subwrd(result,2)
-
 sizex = pagex
 sizey = pagey
 
@@ -76,28 +82,31 @@ if( yloc != 1 & yloc != ymax )
       y1 = y2 - dely
 endif
 
-if( x1 < 0 )
-x1 = 0
-endif
-if( y1 < 0 )
-y1 = 0
-endif
-if( x2 > sizex )
-x2 = sizex
-endif
-if( y2 > sizey )
-y2 = sizey
-endif
+ if( x1 < 0 )
+ x1 = 0
+ endif
+ if( y1 < 0 )
+ y1 = 0
+ endif
+ if( x2 > sizex )
+ x2 = sizex
+ endif
+ if( y2 > sizey )
+ y2 = sizey
+ endif
 
-'set  vpage 0 'sizex' 0 'sizey
+*'set  vpage 0 'sizex' 0 'sizey
 'set  mproj scaled'
  say 'parea 'x1' 'x2' (dx: 'x2-x1') 'y1' 'y2' (dy: 'y2-y1')'
 'set  parea 'x1' 'x2' 'y1' 'y2
 'set  grads off'
 
-xmid = ( x1 + x2 )/2
+xmid   = ( x1 + x2 )/2
+xleft  = x1 - 0.20*delx
+xright = x2 + 0.10*delx
 ybot =   y1 - 0.12*dely
 ytop =   y2 + 0.03*dely
+ymid = ( ybot + ytop )/2
 
-return xmid' 'ybot' 'ytop
+return xmid' 'ybot' 'ytop' 'ymid' 'xleft' 'xright
 
