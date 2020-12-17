@@ -34,6 +34,7 @@ module GenESMFGridCompMod
      type(ESMF_Time)           :: start_time
      type(ESMF_Time)           :: end_time
      logical                   :: select_time
+     logical                   :: fix_fraction
   end type T_PrivateState
 
   type :: T_PrivateState_Wrap
@@ -220,6 +221,8 @@ contains
        call ESMF_TimeSet(privateState%end_time,yy=yy,mm=mm,dd=dd,rc=status)
        VERIFY_(STATUS)
     end if
+    call ESMF_ConfigGetAttribute(cf,privateState%fix_fraction,label='FIX_FRACTION: ',default=.false.,rc=status)
+    VERIFY_(STATUS)
     privateState%select_time = ( (stat1 == ESMF_SUCCESS) .and. (stat2 == ESMF_SUCCESS) )
 
 ! Create grid for this component
@@ -484,6 +487,10 @@ contains
       ! transform data from ocean (tripolar or Reynolds) to mit-cubed
       call privateState%regridder%regrid(odata,pdata,rc=status)
       VERIFY_(status) 
+      if (privateState%fix_fraction) then
+         where(pdata > 1.0) pdata = 1.0
+         where(pdata < 0.0) pdata = 0.0
+      end if
    !   write(unit_w) pdata
       if (doWrite) then
          call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
