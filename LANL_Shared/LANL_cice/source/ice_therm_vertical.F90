@@ -2761,6 +2761,53 @@
 
       end subroutine conductivity
 
+
+!=======================================================================
+!BOP
+!
+! !ROUTINE: calculate_ki_from_Tin  - calculate ice thermal conductivity
+!
+! !DESCRIPTION:
+!
+!  Compute the ice thermal conductivity
+!
+! !REVISION HISTORY:
+!
+! !INTERFACE:
+!
+      function calculate_ki_from_Tin (Tink, salink) &
+               result(ki)
+!
+! !USES:
+!
+! !INPUT PARAMETERS:
+!
+      real (kind=dbl_kind), intent(in) :: &
+         Tink   , &             ! ice layer temperature
+         salink                 ! salinity at one level
+!
+! !OUTPUT PARAMETERS
+!
+     real (kind=dbl_kind) :: &
+         ki                     ! ice conductivity
+!
+!EOP
+!
+      if (conduct == 'MU71') then
+         ! Maykut and Untersteiner 1971 form (with Wettlaufer 1991 constants)
+         ki = kice + betak*salink/min(-puny,Tink)
+      else
+         ! Pringle et al JGR 2007 'bubbly brine'
+         ki = (2.11_dbl_kind - 0.011_dbl_kind*Tink &
+             + 0.09_dbl_kind*salink/min(-puny,Tink)) &
+             * rhoi / 917._dbl_kind
+      endif
+
+      ki = max (ki, kimin)
+
+      end function calculate_ki_from_Tin
+
+
 !=======================================================================
 !BOP
 !
