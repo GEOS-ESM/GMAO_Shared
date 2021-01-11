@@ -26,6 +26,7 @@ Usage:
       echo "         [-gradsx   GRADSX]"
       echo "         [-batch          ]"
       echo "         [-partition PARTITION]"
+      echo "         [-model   MODEL]"
       echo "         [-qos       QOS]"
       echo "         [-debug        ]"
       echo " "
@@ -35,6 +36,9 @@ Usage:
       echo "            FIELDS: Fields to plot (e.g., p u v )            (Default: p u v t q h)                 "
       echo "             PLOTS: Plot Types (corcmp, sys, syscmp)         (Default: ALL)                         "
       echo "            OUTPUT: Output directory to contain plots        (Default: STATS_RC directory)          "
+      echo "            GRADSX: GrADS executable to use for processing   (Default: grads)                       "
+      echo "         PARTITION: Partition to use                         (Default: compute)                     "
+      echo "             MODEL: Processor model to use                   (Default: hasw)                        "
       echo "            GRADSX: GrADS executable to use for processing   (Default: grads)                       "
       echo " "
       echo "Note:    Plots will be located in experiment sub-directories under OUTPUT                           "
@@ -46,8 +50,9 @@ endif
 
 # Set Variables
 # -------------
-set QUEUE     = partition
+set QOS       = ''
 set PARTITION = compute
+set MODEL     = hasw
 set debug     = FALSE
 set batch     = NULL
 set statsrc   = NULL
@@ -85,10 +90,13 @@ while( $n <= $nmax )
                     @ n = $n + 1
              set PARTITION = $argv[$n]
        endif
+       if( "$argv[$n]" == "-model" ) then
+                    @ n = $n + 1
+             set MODEL = $argv[$n]
+       endif
        if( "$argv[$n]" == "-qos" ) then
                     @ n = $n + 1
-             set PARTITION = $argv[$n]
-             set QUEUE     = 'qos'
+                set QOS = '#SBATCH --qos='$argv[$n]
        endif
        if( "$argv[$n]" == "-gradsx"   ) then
                     @ n = $n + 1
@@ -399,7 +407,8 @@ if( $#quickstat_syscmp > 1 ) then
       echo " "                                                                    >> $SOURCE/gcm_quickstat.tmpl
 endif
 
-@ NTASKS = $IDX - 1
+@ NTASKS =   $IDX - 1
+@ NODES  = ( $NTASKS - 1 ) / 28 + 1
 
 /bin/rm -f $SOURCE/gcm_quickstat.j
 /bin/rm -f $SOURCE/sedfile
@@ -408,8 +417,9 @@ cat >      $SOURCE/sedfile << EOF
 s?@GEOSBIN?$GEOSBIN?g
 s?@GEOSSRC?$GEOSSRC?g
 s?@NTASKS?$NTASKS?g
+s?@NODES?$NODES?g
 s?@PARTITION?$PARTITION?g
-s?@QUEUE?$QUEUE?g
+s?@QOS?$QOS?g
 EOF
 sed -f $SOURCE/sedfile $SOURCE/gcm_quickstat.tmpl > $SOURCE/gcm_quickstat.j
 
@@ -540,7 +550,7 @@ if( "$plots" =~ *pltsys* ) then
             endif
         else
                                       set levels =  $level
-            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 7 5 3 1`
+            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 50 30 10 7 5 3 1`
             if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
             foreach level  ( $levels )
@@ -600,7 +610,7 @@ if( "$plots" =~ *syscmp* ) then
                endif
            else
                                          set levels =  $level
-               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 7 5 3 1`
+               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 50 30 10 7 5 3 1`
                if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
                foreach level  ( $levels )

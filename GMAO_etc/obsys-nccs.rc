@@ -358,7 +358,7 @@ BEGIN gmao_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
   20171101_00z-20180228_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
   20180401_00z-20180909_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
   20181001_06z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
-  20200616_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20200616_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
 END
 
 # OMPS-NPP

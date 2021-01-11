@@ -35,7 +35,7 @@ require Exporter;
 
 $DEFAULT_RSH = "/usr/bin/ssh";
 $DEFAULT_RCP = "/usr/bin/scp";
-$DEFAULT_WGET = "/usr/local/other/SLES11.3/wget/1.18/bin/wget --no-check-certificate";
+$DEFAULT_WGET = "wget --no-check-certificate";
 
 #===================== Global Variables =============================#
 
@@ -586,7 +586,6 @@ ENDOFHELP
              print "remote file = $remote_file\n";
              print "clean = $clean\n";
         }
-        unlink($remote_file) if -e $remote_file;
         if ( -l $local_file ) {
                 $trans_retcode = copy( $local_file, $remote_file);
                 $chmod_retcode = chmod( oct(${mode}), ${remote_file});
@@ -1057,7 +1056,6 @@ my ( $LOCAL, $local_host_name, $local_domain_name,
 # Else if this is a local transfer (on the same machine), use the copy function.
 
    } else {
-      unlink($remote_file) if -e $remote_file;
       print "cmd= copy( $local_file, $remote_file )\n" if ($debug);
       $rcp_ok = copy( $local_file, $remote_file );
       if( (-e $dmftag) && $rcp_ok ) {
@@ -1892,7 +1890,7 @@ sub rflist {
 
    if ( $remote_machine eq "http" || $remote_machine eq "https" ) {
 # Reconstruct URL without extra : characters.
-      $url         = "http:${remote_file}${extra}";
+      $url         = "${remote_machine}:${remote_file}${extra}";
       $dir         = dirname ("$url");
       $regex_raw   = basename ("$url");
       $regex_raw   =~s/\*/\.\*/g;

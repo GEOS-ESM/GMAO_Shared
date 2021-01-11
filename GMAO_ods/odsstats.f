@@ -37,7 +37,8 @@
 !     24Feb2014 Todling  Revisit Write_AccumStats (now to file and/or screen)
 !     05Aug2014 Todling  - Replace oma * xvec w/ amo * xvec (more meaningful)
 !                        - Ability to write out R-scaling factors based on amo*xvec 
-!     11Dec1018 Todling Add DFS as in Lupu et al. 2011; eq. (10) - see also odsmatch
+!     11Dec2018 Todling Add DFS as in Lupu et al. 2011; eq. (10) - see also odsmatch
+!     18Dec2020 Todling Add ncf opt to allow running from diag-bin files
 !
 !EOP
 !BOC
@@ -91,7 +92,7 @@
       character*255 infile (NFILES_MAX) ! input filenames
       character*255 fileout, outfile, outodsfn   ! output filename
       character*80  ftype
-      logical       anotherclass, allkxs, allevs, lrms
+      logical       anotherclass, allkxs, allevs, lrms, ncf
 
 !     storage for ODS:
 !     ---------------
@@ -111,7 +112,7 @@
 !     Parse in command line
 !     ---------------------
       call init ( infile, nfiles_max, nfiles, RCfile, outfile, trange, 
-     .            latrange, lonrange, verb, aodsigofix )
+     .            latrange, lonrange, verb, aodsigofix, ncf )
 
 !     Read in resource file
 !     ---------------------
@@ -137,6 +138,7 @@
       obsgms = 0.0
       nymdb = -1
       nhmsb = -1
+      if(ncf) ksyn = 1
 
 !     Loop over input files
 !     ---------------------
@@ -159,7 +161,7 @@
 	  
           if(verb) print *, 'calling ODS_Get'
 
-          call ODS_Get ( trim(infile(ifile)), nymd, nhms, ftype, ods, ierr )
+          call ODS_Get ( trim(infile(ifile)), nymd, nhms, ftype, ods, ierr, ncf=ncf )
 
           if(verb) print *, 'completed ODS_Get'
 
@@ -247,7 +249,9 @@
                 igood(i) = i
              enddo
 !            igood = ((/i/),i=1,nsel)
-             if(trim(obvar)/='xvec')  call no_outliers (odss,nsel,log_transf,igood) !  sigo must be available in this case
+             if (.not. ncf) then
+                if(trim(obvar)/='xvec')  call no_outliers (odss,nsel,log_transf,igood) !  sigo must be available in this case
+             endif
 
              obsnum(nc,nt) = nsel
              nymda(nt)     = nymd
@@ -257,8 +261,11 @@
                 if(opers(nop)=='numneg') call negattr ( verb, odss, nsel, igood, obvar, negsum(nc,nt) )
                 if(opers(nop)=='numneu') call neuattr ( verb, odss, nsel, igood, obvar, neusum(nc,nt) )
                 if(opers(nop)=='rms')  then
-                   call gmsattr ( verb, odss, nsel, igood, obvar, obsgms(nc,nt) )
+                   call gmsattr ( verb, odss, nsel, 1, igood, obvar, obsgms(nc,nt) )
                    lrms = .true.
+                 endif
+                if(opers(nop)=='stddev')  then
+                   call gmsattr ( verb, odss, nsel, 2, igood, obvar, obsgms(nc,nt) )
                  endif
              enddo
              deallocate(igood)
@@ -722,7 +729,7 @@
              ods%data%oma = max(0.0,exp(ods%data%obs-ods%data%oma) - aodeps)
              ods%data%omf = max(0.0,exp(ods%data%obs-ods%data%omf) - aodeps)
              ods%data%obs = max(0.0,exp(ods%data%obs))
-          ods%data%omf = ods%data%obs-ods%data%omf
+             ods%data%omf = ods%data%obs-ods%data%omf
              ods%data%oma = ods%data%obs-ods%data%oma
          endwhere
       else
@@ -754,6 +761,11 @@
       if ( trim(attr) == 'omf' ) then
          do i=1,nobs
             rsum=rsum+ods%data%omf(i)
+         enddo
+      endif
+      if ( trim(attr) == 'bbcomf' ) then
+         do i=1,nobs
+            rsum=rsum+ods%data%omf(i)+ods%data%xm(i)
          enddo
       endif
       if ( trim(attr) == 'oma' ) then
@@ -951,52 +963,96 @@
 
       end subroutine neuattr
 
-      subroutine gmsattr ( verb, ods, nobs, igood, attr, rsum )
+      subroutine gmsattr ( verb, ods, nobs, iopt, igood, attr, rsum )
       use m_ods
       use m_die, only: die
       implicit none
       type(ods_vect) ods
       integer, intent(in) :: nobs
+      integer, intent(in) :: iopt  ! 1=rms; 2=stdev
       integer, intent(in):: igood(nobs)
       character(len=*), intent(in) :: attr 
       real,    intent(inout) ::  rsum
       logical, intent(in) :: verb
 
       character(len=*), parameter :: myname_ = "gmsattr"
-      real dfs
+      real dfs,mean
       integer  i,ii
 
-      rsum = 0.0 
+      rsum = 0.0; mean = 0.0
       if (nobs==0) return ! nothing to do
+
+      if (iopt==2) then
+         select case (trim(attr))
+          case ( 'obs' )
+            do i=1,nobs
+               mean=mean+ods%data%obs(i)
+            enddo
+          case ( 'omf' )
+            do i=1,nobs
+               mean=mean+ods%data%omf(i)
+            enddo
+          case ( 'bbcomf' )
+            do i=1,nobs
+               mean=mean+ods%data%omf(i)+ods%data%xm(i)
+            enddo
+          case ( 'oma' )
+            do i=1,nobs
+               mean=mean+ods%data%oma(i)
+            enddo
+          case ( 'xm' )
+            do i=1,nobs
+               mean=mean+ods%data%xm(i)
+            enddo
+          case ( 'dfs' )
+            do ii=1,nobs
+               i=igood(ii)
+               dfs = ((ods%data%omf(i)-ods%data%oma(i))*ods%data%oma(i))/(ods%data%xvec(i))**2
+               mean=mean+dfs
+            enddo
+          case ( 'xvec' )
+            do i=1,nobs
+               mean=mean+ ods%data%xvec(i)
+            enddo
+          case default
+            call die(myname_,'Cannot find attr ' // trim(attr) // ' aborting ...',99)
+         end select
+         mean = mean/nobs
+      endif ! mean calculation done
+
       select case (trim(attr))
        case ( 'obs' )
          do i=1,nobs
-            rsum=rsum+(ods%data%obs(i))**2
+            rsum=rsum+(ods%data%obs(i)-mean)**2
          enddo
        case ( 'omf' )
          do i=1,nobs
-            rsum=rsum+(ods%data%omf(i))**2
+            rsum=rsum+(ods%data%omf(i)-mean)**2
+         enddo
+       case ( 'bbcomf' )
+         do i=1,nobs
+            rsum=rsum+(ods%data%omf(i)+ods%data%xm(i)-mean)**2
          enddo
        case ( 'oma' )
          do i=1,nobs
-            rsum=rsum+(ods%data%oma(i))**2
+            rsum=rsum+(ods%data%oma(i)-mean)**2
          enddo
        case ( 'xm' )
          do i=1,nobs
-            rsum=rsum+(ods%data%xm(i))**2
+            rsum=rsum+(ods%data%xm(i)-mean)**2
          enddo
        case ( 'dfs' )
          do ii=1,nobs
             i=igood(ii)
             dfs = ((ods%data%omf(i)-ods%data%oma(i))*ods%data%oma(i))/(ods%data%xvec(i))**2
-            rsum=rsum+dfs*dfs
+            rsum=rsum+(dfs-mean)*(dfs-mean)
          enddo
        case ( 'xvec' )
          do i=1,nobs
 !           rsum=rsum+(ods%data%xvec(i))**2
-            rsum=rsum+(max(1.e-15,abs(ods%data%xvec(i))))**2 ! hack: "-fp-model precise" flag
-                                                             ! of intel compiler version 11 gives
-                                                             ! underflow here in some cases - non-sense
+            rsum=rsum+(max(1.e-15,abs(ods%data%xvec(i)-mean)))**2 ! hack: "-fp-model precise" flag
+                                                                  ! of intel compiler version 11 gives
+                                                                  ! underflow here in some cases - non-sense
          enddo
        case default
          call die(myname_,'Cannot find attr ' // trim(attr) // ' aborting ...',99)
@@ -1005,6 +1061,9 @@
           print *, 'MS of impacts (', trim(attr), '): ', rsum
       endif
 
+      if (iopt==2) then
+         if(nobs>1) rsum = sqrt(rsum/(nobs-1.0))
+      endif
       end subroutine gmsattr
 
       subroutine Write_Stats ( outfile, obssum, obsnum, oclass, ncfound, ncmax, nt, nymd, nhms, verb, stat ) 
@@ -1281,7 +1340,7 @@
 ! !INTERFACE:
 !
       subroutine init ( infile, nfiles_max, nfiles, RCfile, outfile, 
-     .                  trange, latrange, lonrange, verb, aodsigofix )
+     .                  trange, latrange, lonrange, verb, aodsigofix, ncf )
 
 ! !USES:
 
@@ -1301,6 +1360,7 @@
       real,             intent(out) :: lonrange(2)
       logical,          intent(out) :: verb
       logical,          intent(out) :: aodsigofix
+      logical,          intent(out) :: ncf
 !
 !
 ! !REVISION HISTORY:
@@ -1325,6 +1385,7 @@
       lonrange  = (/-180.,+180./) ! Default: includes obs in all longitude ranges 
       verb = .false.
       aodsigofix = .false.
+      ncf  = .false.
 
 !     Parse command line
 !     ------------------
@@ -1343,6 +1404,8 @@
             call GetArg ( iArg, outfile )
          else if (index(argv,'-verbose' ) .gt. 0 ) then
             verb = .true.
+         else if (index(argv,'-ncf' ) .gt. 0 ) then
+            ncf = .true.
          else if (index(argv,'-aodsigofix' ) .gt. 0 ) then
             aodsigofix = .true.
          else if (index(argv,'-rc' ) .gt. 0 ) then
@@ -1464,6 +1527,7 @@
       print *
       print *, '  1. Known OBS*Operations: (default: sum)'
       print *, '     sum     - sum all variables '
+      print *, '     rms     - root mean square '
       print *, '     stddev  - stdandard deviation from mean of variables '
       print *, '     numneg  - sum all non-negative variables '
       print *

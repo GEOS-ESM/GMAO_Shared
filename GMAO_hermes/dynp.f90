@@ -608,7 +608,7 @@
       print *, '   dynp.x -s dyn_s -p dyn_p -a pcoef'
       print *, '          [-pick nymd nhms] [-os dyn_os] [-op dyn_op]'
       print *, '          [-stats] [-strict] [-realp] [-pureadd]'
-      print *, '          [-res RES] [-strict] [-realp] [-pureadd]'
+      print *, '          [-res RES] [-strict] [-realp]'
       print *
       print *, 'where'
       print *
@@ -618,7 +618,7 @@
       print *
       print *, '   -a pcoef          perturbation coefficient (default: 1.0)'
       print *
-      print *, '   -scal  scale      scaling factor for the output perturbation (default: 1.0)'
+      print *, '   -scale  scale     scaling factor for the output perturbation (default: 1.0)'
       print *
       print *, '   -pick nymd nhms   date and time'
       print *, '                    (default: use latest on file)'
