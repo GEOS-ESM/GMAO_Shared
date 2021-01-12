@@ -465,7 +465,8 @@
        days_per_year = 365
        ice_ic        = 'none'          ! latitude and sst-dependent
        grid_type     = 'tripole'       ! for use in GEOS global
-       calc_Tsfc     = .true.          ! calculate surface temperature
+       ! set to false to enable explicit coupling
+       calc_Tsfc     = .false.          ! calculate surface temperature
        heat_capacity = .true.          ! nonzero heat capacity (F => 0-layer thermo)
        kcatbound     = 0               ! category boundary formula (0 = old, 1 = new)
        kitd          = merge(tsource = 1, fsource = 0, mask = (ncat > 1)) ! type of itd conversions (0 = delta, 1 = linear)
