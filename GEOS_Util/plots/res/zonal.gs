@@ -212,8 +212,8 @@ endwhile
 
 * Run Fortran Code to Produce StreamFunction and Residual Circulation
 * -------------------------------------------------------------------
-say ' 'geosutil'/plots/zonal_'arch'.x -tag 'expid' -desc 'descm
-'!    'geosutil'/plots/zonal_'arch'.x -tag 'expid' -desc 'descm
+say ' 'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
+'!    'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
 
 '!remove sedfile'
 '!touch  sedfile'
@@ -469,8 +469,8 @@ endwhile
 
 * Run Fortran Code to Produce StreamFunction and Residual Circulation
 * -------------------------------------------------------------------
-say ' 'geosutil'/plots/zonal_'arch'.x -tag 'obsid' -desc 'desco
-'!    'geosutil'/plots/zonal_'arch'.x -tag 'obsid' -desc 'desco
+say ' 'geosutil'/bin/zonal_'arch'.x -tag 'obsid' -desc 'desco
+'!    'geosutil'/bin/zonal_'arch'.x -tag 'obsid' -desc 'desco
 
 '!remove sedfile'
 '!touch  sedfile'

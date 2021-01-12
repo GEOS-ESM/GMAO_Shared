@@ -1,3 +1,7 @@
+if (CMAKE_Fortran_COMPILER_ID MATCHES Intel AND CMAKE_BUILD_TYPE MATCHES Release)
+   set( CMAKE_Fortran_FLAGS_RELEASE "${FOPT2} ${PP}")
+endif ()
+
 set (zonal_prog_name
    zonal_${CMAKE_SYSTEM_NAME}.x
    )
