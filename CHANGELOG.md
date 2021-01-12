@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
+### Fixed
+### Removed
+### Added
+
+## [1.3.6] - 2021-01-12
+
+### Changed
 
 - Added `-partition` option to `regrid.pl`
 
@@ -15,10 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed compilation flags for `zonal.f` to match that of CVS
 - Fixed bug in `res/zonal.gs` for `zonal.x` location
-- Added flag to regrid_forcing_esmf.x to force a 0 to 1 range when regridding files that should fractions
+- Added flag to regrid_forcing_esmf.x to force a 0 to 1 range when regridding files that should use fractions
 
-### Removed
 ### Added
+
+- Allows PRs with "0-diff trivial" labels to skip updating `CHANGELOG.md`
 
 ## [1.3.5] - 2020-12-10
 
