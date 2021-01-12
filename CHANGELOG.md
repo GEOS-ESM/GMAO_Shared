@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
+
+- Added `-partition` option to `regrid.pl`
+
 ### Fixed
 
 - Fixed compilation flags for `zonal.f` to match that of CVS

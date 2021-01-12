@@ -30,7 +30,7 @@ my ($grOUT, $grOUTocean, $grouplist, $grpID, $hr, $interactive);
 my ($interp_restartsX, $landIceDT, $lblFLG, $lcvFLG, $levsIN, $levsOUT);
 my ($logfile, $merra, $mk_RestartsX, $mk_catch, $mk_catchcn, $mk_route);
 my ($mkdrstdateX, $month, $newid, $node, $noprompt, $outdir, $outdir_save);
-my ($qos, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
+my ($qos, $partition, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
 my ($rstIN_template, $rstIN_templateB, $rst_tarfile, $rst_template);
 my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
@@ -280,6 +280,7 @@ sub init {
                "gcm"             => \$gcmFLG,
                "grpid=s"         => \$grpID,
                "qos=s"           => \$qos,
+               "partition=s"     => \$partition,
                "altbcs:s{,1}"    => \$bcsALT,
                "zoom=i"          => \$zoom,
                "db|debug|nc"     => \$debug,
@@ -292,6 +293,7 @@ sub init {
     $dbHash  = 1 if $debug;
     $verbose = 0 unless $verbose;
     $qos = 0 unless $qos;
+    $partition = 0 unless $partition;
 
     usage() if $help;
     setprompt(0) if $noprompt;
@@ -1054,8 +1056,8 @@ sub check_inputs {
     #-----------------------------------------
     if ($outdir =~ /archive/ and $CS{$grOUT} and $upairFLG) {
         warn "\n=======\nWARNING\n=======\n"
-            ."> CS upper-air restarts are created with a PBS job.\n"
-            ."> PBS jobs cannot write to the archive directories.\n"
+            ."> CS upper-air restarts are created with a batch job.\n"
+            ."> Batch jobs cannot write to the archive directories.\n"
             ."> Your OUTPUT directory appears to be in the archives.\n\n"
             ."outdir: $outdir\n\n";
         $ans = query("Quit (y/n)", "y");
@@ -2255,11 +2257,11 @@ sub copy_upperair_rsts {
 
 #=======================================================================
 # name - regrid_upperair_rsts_CS
-# purpose - set up and submit PBS job to perform conversion to
+# purpose - set up and submit batch job to perform conversion to
 #           cubed-sphere upper-air restarts
 #=======================================================================
 sub regrid_upperair_rsts_CS {
-    my ($qcmdlog, $im, $NPE, $QOS, $QOSline, $MEMPERCPU, $nwrit);
+    my ($qcmdlog, $im, $NPE, $QOS, $QOSline, $PART, $PARTline, $MEMPERCPU, $nwrit);
     my ($type, $src, $dest, $input_nml, $FH);
     my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
@@ -2288,6 +2290,10 @@ sub regrid_upperair_rsts_CS {
     
     if ($QOS) { $QOSline = "SBATCH --qos=$QOS" }
     else      { $QOSline = "" }        
+
+    $PART = $partition;
+    if ($PART) { $PARTline = "SBATCH --partition=$PART" }
+    else       { $PARTline = "" }
 
     if ($im >= "2880") { $MEMPERCPU = "--mem-per-cpu=4G"}
     else               { $MEMPERCPU = ""                }
@@ -2388,6 +2394,7 @@ EOF
 #SBATCH --job-name=regrid
 #SBATCH --constraint=$mynodes
 #$QOSline
+#$PARTline
 
 unlimit
 
@@ -2498,7 +2505,7 @@ EOF
 
         system_("$regridj 1>$qcmdlog 2>&1") && die "Error with $regridj;";
     } else {
-        print_("\nThe CS regridding is MPI based; submitting job to PBS\n");
+        print_("\nThe CS regridding is MPI based; submitting job to batch system\n");
         system_("$qcmd $qwaitFLG -o $qcmdlog $regridj");
     }
     chdir_($workdir, $verbose);
@@ -2740,6 +2747,7 @@ sub regrid_surface_rsts {
         $flags .= " -grpID $grpID"     if ($mk_catch or $mk_catchcn) and $grpID;
         $flags .= " -rsttime $ymd$hr"  if $mk_catchcn or $mk_route;
         $flags .= " -qos $qos"         if ($mk_catch or $mk_catchcn) and $qos;
+        $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
     }
     $flags .= " -zoom $zoom" if $zoom;
 
@@ -2898,6 +2906,7 @@ sub regrid_surface_rsts {
         $flags .= " -rescale"           if $mk_catch or $mk_catchcn;
         $flags .= " -zoom $zoom"        if $zoom;
         $flags .= " -qos $qos"          if ($mk_catch or $mk_catchcn) and $qos;
+        $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
         #--$flags .= " -walltime 2:00:00"  if $mk_catchcn;
         #--$flags .= " -ntasks 112"        if $mk_catchcn;
 
@@ -3873,6 +3882,7 @@ OTHER OPTIONS
                       \'-qos debug\' will not work unless these conditions are met
                            -> numtasks <= 532
                            -> walltime le \'1:00:00\'
+   -partition val     use \'SBATCH --partition=val directive\' for batch jobs
    -db                (debug mode) Do not clean work directory after running programs;
    -dbh               (debug hash) Show contents of hashes: \%IN and \%OUT
    -v                 verbose mode
