@@ -399,6 +399,12 @@
          worki       , & ! local work array
          works           ! local work array
 
+      real (kind=dbl_kind), dimension (icells) :: &
+         fcondtopn_save
+
+      logical (kind=log_kind), dimension (icells) :: &
+         flag_mixed
+
       real (kind=dbl_kind), dimension (icells,nilyr) :: &
          qin         , & ! ice layer enthalpy, qin < 0 (J m-3)
          Tin             ! internal ice layer temperatures
@@ -537,6 +543,8 @@
                                   fswsfc,        fswint,   &
                                   fswthrun,      Sswabs,   &
                                   Iswabs,                  &
+                                  fcondtopn_save,          &
+                                  flag_mixed,              &
                                   hilyr,         hslyr,    &
                                   qin,           Tin,      &
                                   qsn,           Tsn,      &
@@ -1582,6 +1590,8 @@
                                       fswsfc,   fswint,   &
                                       fswthrun, Sswabs,   &
                                       Iswabs,             &
+                                      fcondtopn_save,     &
+                                      flag_mixed,         &
                                       hilyr,    hslyr,    &
                                       qin,      Tin,      &
                                       qsn,      Tsn,      &
@@ -1643,6 +1653,9 @@
       real (kind=dbl_kind), dimension (nx_block,ny_block,nilyr), &
          intent(inout) :: &
          Iswabs          ! SW radiation absorbed in ice layers (W m-2)
+
+      real (kind=dbl_kind), dimension (icells), intent(out) :: &
+         fcondtopn_save   ! save initial top conductive flux 
 
       real (kind=dbl_kind), dimension (nx_block,ny_block), intent(inout):: &
          fsurfn      , & ! net flux to top surface, excluding fcondtopn
@@ -1929,6 +1942,8 @@
       do ij = 1, icells
           i = indxi(ij)
           j = indxj(ij)
+          fcondtopn_save(ij) = fcondtopn(i,j) 
+          flag_mixed(ij) = .false. 
           isolve = isolve + 1
           indxii(isolve) = i
           indxjj(isolve) = j
@@ -2531,6 +2546,7 @@
             if (.not. calc_Tsfc .and. top_bc == 'mixed') then
                if (tbc_type(m) == NEUMANN .and. niter > 10) then
                   tbc_type(m) = DIRICHLET
+                  flag_mixed(ij) = .true.
                endif
             endif
 
