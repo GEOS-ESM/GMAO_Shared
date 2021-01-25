@@ -376,7 +376,7 @@
 !EOP
 !
       integer (kind=int_kind) :: &
-         i, j        , & ! horizontal indices
+         i, j, m     , & ! horizontal indices
          ij          , & ! horizontal index, combines i and j loops
          ilo,ihi,jlo,jhi, & ! beginning and end of physical domain
          k           , & ! ice layer index
@@ -404,6 +404,9 @@
 
       logical (kind=log_kind), dimension (icells) :: &
          flag_mixed
+
+      real (kind=dbl_kind) :: &
+         tmp
 
       real (kind=dbl_kind), dimension (icells,nilyr) :: &
          qin         , & ! ice layer enthalpy, qin < 0 (J m-3)
@@ -603,6 +606,18 @@
 
 #ifdef GEOS
       fcondbotl(1,1) = fcondbot(1)
+
+      if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+          do ij = 1, icells
+              i = indxi(ij)
+              j = indxj(ij)
+              if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
+                  tmp =  fcondtopn(i,j)
+                  fcondtopn(i,j) = fcondtopn_save(ij)
+                  fcondtopn_save(ij) = tmp
+              endif
+          enddo
+      endif
 #endif
 
       !-----------------------------------------------------------------
@@ -637,6 +652,18 @@
       ! to the net energy input
       !-----------------------------------------------------------------
 
+      if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+          do ij = 1, icells
+              i = indxi(ij)
+              j = indxj(ij)
+              if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
+                  tmp =  fcondtopn(i,j)
+                  fcondtopn(i,j) = fcondtopn_save(ij)
+                  fcondtopn_save(ij) = tmp
+              endif
+          enddo
+      endif
+
       call conservation_check_vthermo(nx_block, ny_block, &
                                       my_task,  istep1,   &
                                       dt,       icells,   &
@@ -647,6 +674,9 @@
                                       einit,    efinal,   &
 #ifdef GEOS
                                       observe,            & 
+                                      fcondtopn,          & 
+                                      Tsf,                & 
+                                      flag_mixed,         &         
 #endif
                                       l_stop,             &
                                       istop,    jstop)
@@ -1657,6 +1687,9 @@
       real (kind=dbl_kind), dimension (icells), intent(out) :: &
          fcondtopn_save   ! save initial top conductive flux 
 
+      logical (kind=log_kind), dimension (icells), intent(out) :: &
+         flag_mixed   ! 
+
       real (kind=dbl_kind), dimension (nx_block,ny_block), intent(inout):: &
          fsurfn      , & ! net flux to top surface, excluding fcondtopn
          fcondtopn   , & ! downward cond flux at top surface (W m-2)
@@ -2179,7 +2212,7 @@
                   i = indxii(ij)
                   j = indxjj(ij)
                   m = indxij(ij)
-                  if (Tsf(m) <= -puny) then
+                  if (Tsf(m) < c0) then
                      l_cold(m) = .true.
                   else
                      l_cold(m) = .false.
@@ -5304,6 +5337,9 @@
                                             einit,    efinal,   &
 #ifdef GEOS
                                             observe,            &
+                                            fcondtopn,          &
+                                            Tsf,                &  
+                                            flag_mixed,         &   
 #endif
                                             l_stop,             &
                                             istop,    jstop)
@@ -5332,6 +5368,9 @@
          fswint      , & ! SW absorbed in ice interior, below surface (W m-2)
          fsnow           ! snowfall rate (kg m-2 s-1)
 
+      real (kind=dbl_kind), dimension (nx_block,ny_block), intent(in) :: &
+         fcondtopn
+
 
       real (kind=dbl_kind), dimension (icells), intent(in) :: &
          einit       , & ! initial energy of melting (J m-2)
@@ -5344,6 +5383,12 @@
       logical (kind=log_kind), dimension (nx_block,ny_block), & 
           intent(in) :: &
          observe
+
+      real (kind=dbl_kind), dimension (icells), intent(in) :: &
+         Tsf
+
+      logical (kind=log_kind), dimension (icells), intent(in) :: &
+         flag_mixed
 #endif
 
       integer (kind=int_kind), intent(inout) :: &
@@ -5368,9 +5413,13 @@
       do ij = 1, icells
          i = indxi(ij)
          j = indxj(ij)
-
-         einp = (fsurfn(i,j) - flatn(i,j) + fswint(i,j) - fhocnn(i,j) &
-               - fsnow(i,j)*Lfresh) * dt
+         if (flag_mixed(ij) .and. Tsf(ij) < c0) then
+            einp = (fcondtopn(i,j) - flatn(i,j) + fswint(i,j) - fhocnn(i,j) &
+                    - fsnow(i,j)*Lfresh) * dt
+         else  
+            einp = (fsurfn(i,j) - flatn(i,j) + fswint(i,j) - fhocnn(i,j) &
+                    - fsnow(i,j)*Lfresh) * dt
+         endif  
          ferr = abs(efinal(ij)-einit(ij)-einp) / dt
 #ifdef GEOS
 #ifdef DEBUG
