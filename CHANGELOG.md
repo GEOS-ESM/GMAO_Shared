@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Fixed
 ### Removed
+
+Eliminated references to MAPL_COMM - these are no longer used and will
+be deleted in future releases of MAPL
+
 ### Added
 
 ## [1.3.6] - 2021-01-12
