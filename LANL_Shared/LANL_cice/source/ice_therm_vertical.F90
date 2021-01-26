@@ -725,6 +725,23 @@
                                 eicen(:,:,:), esnon(:,:,:))
 
       !-----------------------------------------------------------------
+      !  Repartition surplus top conduvtive flux (if any) to the base
+      !  of the ice and added to ice-ocean heat flux  
+      !  This is done also in HadGEM3-GC3.1
+      !-----------------------------------------------------------------
+
+      if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+          do ij = 1, icells
+              i = indxi(ij)
+              j = indxj(ij)
+              if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
+                  fhocnn(i,j) =  fhocnn(i,j) + fcondtopn_save(ij) &
+                                 - fcondtopn(i,j)
+              endif
+          enddo
+      endif
+
+      !-----------------------------------------------------------------
       ! Reload tracer array
       !-----------------------------------------------------------------
 
@@ -1892,7 +1909,7 @@
       !       has already computed fsurf.  (Unless we adjust fsurf here)
       !-----------------------------------------------------------------
 !mclaren: Should there be an if calc_Tsfc statement here then?? 
-
+      if ( calc_Tsfc ) then
       !frac = c1 - puny
       !dTemp = p01
       frac = 0.9_dbl_kind    !from CICE 5.0
@@ -1948,7 +1965,7 @@
             endif
          enddo
       enddo
-!#endif
+      endif
 
 !lipscomb - This could be done in the shortwave module instead.
 !           (Change zerolayer routine also)
