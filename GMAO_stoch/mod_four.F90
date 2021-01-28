@@ -194,11 +194,11 @@
             indev2 = indlsev(jcap  ,l)
             indod2 = indlsod(jcap+1,l)
          endif
-!$omp parallel do shared(fm,fp,workr,ipt_wr)
-!$omp+shared(plnev,plnod,flnev,flnod)
-!$omp+shared(indev1,indev2,indod1,indod2,jbasev,jbasod)
-!$omp+shared(j,l,lat1,nvar_thread_max)
-!$omp+private(thread,k,lat,nvar_1,nvar_2,ip1,ip2,ip3,ip4)
+!$omp parallel do shared(fm,fp,workr,ipt_wr) &
+!$omp shared(plnev,plnod,flnev,flnod) &
+!$omp shared(indev1,indev2,indod1,indod2,jbasev,jbasod) &
+!$omp shared(j,l,lat1,nvar_thread_max) &
+!$omp private(thread,k,lat,nvar_1,nvar_2,ip1,ip2,ip3,ip4)
 !
          do thread=1,num_threads   ! start of thread loop ..............
            nvar_1 = (thread-1)*nvar_thread_max+1
@@ -317,11 +317,11 @@
 
  
       if ( kind_evod .eq. 8 ) then !------------------------------------
-!$omp parallel do shared(syn_gr_a_1,syn_gr_a_2,lons_lat)
-!$omp+shared(lon_dim_coef,lon_dim_grid)
-!$omp+shared(lot,num_threads,nvar_thread_max)
-!$omp+shared(ibmsign,scale_ibm)
-!$omp+private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
+!$omp parallel do shared(syn_gr_a_1,syn_gr_a_2,lons_lat) &
+!$omp shared(lon_dim_coef,lon_dim_grid) &
+!$omp shared(lot,num_threads,nvar_thread_max) &
+!$omp shared(ibmsign,scale_ibm) &
+!$omp private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
  
          do thread=1,num_threads   ! start of thread loop ..............
             nvar_1=(thread-1)*nvar_thread_max+1
@@ -347,11 +347,11 @@
  
          enddo  ! fin thread loop ......................................
       else !------------------------------------------------------------
-!$omp parallel do shared(syn_gr_a_1,syn_gr_a_2,lons_lat)
-!$omp+shared(lon_dim_coef,lon_dim_grid)
-!$omp+shared(lot,num_threads,nvar_thread_max)
-!$omp+shared(ibmsign,scale_ibm)
-!$omp+private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
+!$omp parallel do shared(syn_gr_a_1,syn_gr_a_2,lons_lat) &
+!$omp shared(lon_dim_coef,lon_dim_grid) &
+!$omp shared(lot,num_threads,nvar_thread_max) &
+!$omp shared(ibmsign,scale_ibm) &
+!$omp private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
  
          do thread=1,num_threads   ! start of thread loop ..............
             nvar_1=(thread-1)*nvar_thread_max+1
@@ -414,11 +414,11 @@
       nvar_thread_max=(lot+num_threads-1)/num_threads
  
       if ( kind_evod .eq. 8 ) then !------------------------------------
-!$omp parallel do shared(anl_gr_a_1,anl_gr_a_2,lons_lat)
-!$omp+shared(lon_dim_coef,lon_dim_grid)
-!$omp+shared(lot,num_threads,nvar_thread_max)
-!$omp+shared(ibmsign,scale_ibm,rone)
-!$omp+private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
+!$omp parallel do shared(anl_gr_a_1,anl_gr_a_2,lons_lat) &
+!$omp shared(lon_dim_coef,lon_dim_grid) &
+!$omp shared(lot,num_threads,nvar_thread_max) &
+!$omp shared(ibmsign,scale_ibm,rone) &
+!$omp private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
  
          do thread=1,num_threads   ! start of thread loop ..............
             nvar_1=(thread-1)*nvar_thread_max+1
@@ -444,11 +444,11 @@
  
          enddo  ! fin thread loop ......................................
       else !------------------------------------------------------------
-!$omp parallel do shared(anl_gr_a_1,anl_gr_a_2,lons_lat)
-!$omp+shared(lon_dim_coef,lon_dim_grid)
-!$omp+shared(lot,num_threads,nvar_thread_max)
-!$omp+shared(ibmsign,scale_ibm,rone)
-!$omp+private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
+!$omp parallel do shared(anl_gr_a_1,anl_gr_a_2,lons_lat) &
+!$omp shared(lon_dim_coef,lon_dim_grid) &
+!$omp shared(lot,num_threads,nvar_thread_max) &
+!$omp shared(ibmsign,scale_ibm,rone) &
+!$omp private(thread,nvar_1,nvar_2,lot_thread,init,aux1crs)
  
          do thread=1,num_threads   ! start of thread loop ..............
             nvar_1=(thread-1)*nvar_thread_max+1
