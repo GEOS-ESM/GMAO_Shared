@@ -880,12 +880,12 @@ sub check_inputs {
     else          { $mk_catch = 0; $mk_catchcn = 0; $mk_route = 0 }
 
     # get minimum snow water equivalent threshold
-    # (WEmin = 13 mm is newer value, from SMAP Nature Run 7.2, and Icarus-NL*
+    # (WEmin = 13 mm is newer value, from SMAP Nature Run 7.2, and Icarus-NL*;  was also used in (original) MERRA
     #  WEmin = 26 mm is older value, used in MERRA-2)
     #-----------------------------------------------
     if ($mk_catch or $mk_catchcn) {
-        print "\nRegridding of Catch[CN] restarts requires specification of minimum snow water\n"
-            .   "equivalent values (WEmin) for the source (input) and target (output) restarts.\n"
+        print "\nRegridding of Catch[CN] restarts requires specification of minimum snow water equivalent\n"
+            .   "values (WEmin) for the runs associated with the source (input) and target (output) restarts.\n"
             .   "FYI, the following values are used in existing GEOS systems:\n"
             .   "  WEmin = 26 kg/m2 : FP 5.13-5.22, MERRA-2, MERRA-Land, (Fortuna, Ganymed [G40], Icarus [ICA])\n"
             .   "  WEmin = 13 kg/m2 : FP 5.25-    , MERRA,               (Icarus-NewLand [INL])\n"
