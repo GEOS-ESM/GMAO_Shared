@@ -389,7 +389,8 @@ if( $#quickstat_syscmp > 1 ) then
       echo " "                                                                    >> $SOURCE/gcm_quickstat.tmpl
 endif
 
-@ NTASKS = $IDX - 1
+@ NTASKS =   $IDX - 1
+@ NODES  = ( $NTASKS - 1 ) / 28 + 1
 
 /bin/rm -f $SOURCE/gcm_quickstat.j
 /bin/rm -f $SOURCE/sedfile
@@ -398,6 +399,7 @@ cat >      $SOURCE/sedfile << EOF
 s?@GEOSBIN?$GEOSBIN?g
 s?@GEOSSRC?$GEOSSRC?g
 s?@NTASKS?$NTASKS?g
+s?@NODES?$NODES?g
 s?@PARTITION?$PARTITION?g
 s?@MODEL?$MODEL?g
 s?@QUEUE?$QUEUE?g

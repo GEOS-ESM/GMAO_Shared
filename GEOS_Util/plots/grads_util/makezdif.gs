@@ -57,6 +57,24 @@ endwhile
                  tmin = result
                  tmax = result
      endif
+    'q ctlinfo'
+       ctlinfo = result
+            n = 1
+     while( n > 0 )
+             line = sublin(ctlinfo,n)
+             word = subwrd(line,1)
+         if( word = 'tdef' )
+             tinc = subwrd(line,5)
+                n = 0
+          else
+                n = n + 1
+          endif
+     endwhile
+say 'tmin: 'tmin'  tmax: 'tmax'  tinc: 'tinc
+'set t 'tmin
+'run getinfo date'
+     begdate = result
+say 'BEGDATE = 'begdate
 
 'getinfo lonmin'
          lonbeg = result
@@ -116,7 +134,18 @@ else
 endif
 'set lat -90 90'
 
+* Loop over Time
+* --------------
 '!remove 'name'.data'
+    tdim = tmax-tmin+1
+       t = tmin
+while( t<= tmax )
+'set dfile 'file1
+'set t 't
+'run getinfo date'
+     curdate = result
+say 'CURRENT DATE = 'curdate
+
  z = 1
 while( z<=nlev )
        say 'Checking for: 'level.z
@@ -126,7 +155,7 @@ while( z<=nlev )
       'define qtmp = 'q2' + lon-lon'
       'define qobs = regrid2( qtmp,0.25,0.25,bs_p1,0,-90)'
     'undefine qtmp'
-       if( z=1 )
+       if( z=1 & t=tmin )
           'set gxout stat'
           'd 'q2
            undef = sublin(result,6)
@@ -191,6 +220,8 @@ while( z<=nlev )
              say ' '
 z = z + 1
 endwhile
+t = t + 1
+endwhile
 'disable fwrite'
 
 '!remove sedfile'
@@ -198,21 +229,23 @@ endwhile
 '!echo "s@GRADSDATA@"'name'.data@g > sedfile'
 '!echo "s@UNDEF@"'undef'@g        >> sedfile'
 '!echo "s@ZDIM2@"'nlev'@g         >> sedfile'
+'!echo "s@TDIM@"'tdim'@g          >> sedfile'
 '!echo "s@LEVS@"'levs'@g          >> sedfile'
+'!echo "s@BEGDATE@"'begdate'@g    >> sedfile'
+'!echo "s@TINC@"'tinc'@g          >> sedfile'
 '!sed -f  sedfile 'geosutil'/plots/grads_util/zdiff.template > 'name'.ctl'
 
 'open 'name'.ctl'
 'getinfo    numfiles'
             newfile = result
 'set dfile 'newfile
-'set t 1'
 'setx'
 'sety'
 'setlons'
 'setlats'
 'setz'
-'makez q z'
-'define 'name'z = qz'
+'sett'
+'makezf q 'name' z'
 
 maxval = -1e15
 minval =  1e15
@@ -220,7 +253,7 @@ minval =  1e15
  z = 1
  while( z <= nlev )
 'set z 'z
-'minmax.simple qz'
+'minmax.simple 'name'z'
 
  qmax = subwrd(result,1)
  qmin = subwrd(result,2)
