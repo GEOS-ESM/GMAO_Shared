@@ -197,6 +197,7 @@ wetmin = wetave - 0.6* ddif
 
 'set t 1 'tdim
 'set axlim 'drymin' 'drymax
+*'set axlim 982.9999 983.2001'
 
 'set ylpos 0 l'
 'set ylopts 4 3 0.11'
@@ -212,7 +213,19 @@ wetmin = wetave - 0.6* ddif
 'set cthick 1'
 'd qdryave'
 
+'set t 1'
+'getinfo date'
+         date = result
+'q w2xy 'date' 'qdryave
+   ydry = subwrd(result,6)
+'set  strsiz .08'
+'set  string 4 l 6'
+'draw string 0.78 'ydry ' 'qdryave
+
+
+'set t 1 'tdim
 'set axlim 'wetmin' 'wetmax
+*'set axlim 2.23999 2.40001'
 'set ylopts 2 3 0.11'
 'set ylpos 0 r'
 'set grid off'
@@ -222,22 +235,25 @@ wetmin = wetave - 0.6* ddif
 'set cthick 6'
 'd qwet'
 'set cmark  0'
-'set cstyle 3'
-'set ccolor 1'
+'set cstyle 1'
+'set ccolor 2'
 'set cthick 1'
 'd qwetave'
 
+'q w2xy 'date' 'qwetave
+   ywet = subwrd(result,6)
+   ydif = math_abs( ydry - ywet )
+if(ydif<0.2 )
+   if( ydry >= ywet ) ; ywet = ydry - 0.2 ; endif
+   if( ydry <  ywet ) ; ywet = ydry + 0.2 ; endif
+endif
+'set  string 2 l 6'
+'draw string 0.78 'ywet ' 'qwetave
 
-* Plot Time-Average Values
-* ------------------------
- 'set  strsiz .08'
- 'set  string 4 l 6'
- 'draw string 0.78 'ytot ' 'qdryave
-                    ytot =  ytot-0.2
- 'set  string 2 l 6'
- 'draw string 0.78 'ytot ' 'qwetave
-                    ytot =  ytot-0.4
 
+
+* Plot Titles and Labels
+* ----------------------
  'set  string 1 c 6'
  'set  strsiz .12'
  if( delqdry < 0 )
@@ -255,8 +271,9 @@ wetmin = wetave - 0.6* ddif
 
 'set vpage off'
 'set string 1 c 6'
-'set strsiz .14'
+'set strsiz .12'
 'draw string 6.15 8.25 'expid': 'expdsc
+'set strsiz .14'
 'draw string 6.15 7.95 Globally Integrated Total (Dry + QV+QL+QI) Surface Pressure (mb)'
 
     wetname = "QV"
