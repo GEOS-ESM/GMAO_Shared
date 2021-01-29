@@ -83,6 +83,11 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CBSCALE' ; end
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FACTOR' ; endif
                                                                   fact = result
 
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_FACTOR'
+                                                                  fixpltfact = result
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_FIXED_PLOT_CINT'
+                                                                  fixpltcint = result
+
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'level'_TITLE'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_TITLE' ; endif
                                                                   title = result
@@ -371,15 +376,27 @@ endif
            n = n+2
         endif
    endif
+
+   if( fixpltfact != NULL )
+       'd 'fixpltfact
+        n =subwrd(result,4)
+   endif
+
    say 'Diff Scaling Factor: 'n
+
+   if( fixpltcint != NULL )
+      'd  'fixpltcint
+           fixpltcint =subwrd(result,4)
+       cint = fixpltcint
+   else
       'd 'qmax'/1e'n
        cint = subwrd(result,4)
+   endif
+
       'shades 'cint
       'define qdif = (qmod-qobs)/1e'n
       'd qdif'
-*     'cbarn -snum 0.55'
-'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
-
+      'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
 
 'stats maskout(qdif,abs(qobs))'
  avgdif = subwrd(result,1)
