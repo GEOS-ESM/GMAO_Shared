@@ -187,7 +187,7 @@ say 'Months Used in Forecasts: 'months
 
 * Define TOPLEV, NDAY and NDAYMAX across ALL Experiments
 * ------------------------------------------------------
- toplev  = 1000
+ toplev  = 0
  ndaymax = 999
        m = 0
 while( m<=mexps )
@@ -200,7 +200,7 @@ while( m<=mexps )
         'set z 'zdim
         'getinfo level'
                  level = result
-             if( level < toplev )
+             if( level > toplev )
                  toplev = level
              endif
 
