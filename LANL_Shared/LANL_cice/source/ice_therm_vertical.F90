@@ -228,6 +228,7 @@
                                   DFSDT,DSHDT,DLHDT,DLWDT,&
                                   tlat, tlon, observe,    &
                                   fcondbotl,  sblx,       &            
+                                  fcondtopn_repar,        &
 #endif
                                   mlt_onset,   frz_onset, &
                                   yday,        l_stop,    &
@@ -348,7 +349,9 @@
       logical, dimension (nx_block,ny_block), intent(in):: &
          observe
       real (kind=dbl_kind), dimension (nx_block,ny_block), intent(out):: &
-         fcondbotl, sblx
+         fcondbotl,             &
+         fcondtopn_repar,       &  
+         sblx
       logical (kind=log_kind), optional, intent(in) :: &
          datm
 #endif
@@ -465,6 +468,8 @@
          freshn (i,j) = c0
          fsaltn (i,j) = c0
          fhocnn (i,j) = c0
+
+         fcondtopn_repar (i,j) = c0
 
          meltt  (i,j) = c0
          meltb  (i,j) = c0
@@ -737,6 +742,8 @@
               if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
                   fhocnn(i,j) =  fhocnn(i,j) + fcondtopn_save(ij) &
                                  - fcondtopn(i,j)
+                  fcondtopn_repar(i,j) = fcondtopn_save(ij) &
+                                         - fcondtopn(i,j) 
               endif
           enddo
       endif
