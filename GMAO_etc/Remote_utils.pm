@@ -1890,7 +1890,7 @@ sub rflist {
 
    if ( $remote_machine eq "http" || $remote_machine eq "https" ) {
 # Reconstruct URL without extra : characters.
-      $url         = "${remote_machine}:${remote_file}${extra}";
+      $url         = "http:${remote_file}${extra}";
       $dir         = dirname ("$url");
       $regex_raw   = basename ("$url");
       $regex_raw   =~s/\*/\.\*/g;
