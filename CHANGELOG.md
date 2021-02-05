@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Added
 
+## [??] - 2021-02-05
+
+### Added 
+
+- protections to AOIL v0 in atmOcnIntlayer
+
 ## [1.3.6] - 2021-01-12
 
 ### Changed
