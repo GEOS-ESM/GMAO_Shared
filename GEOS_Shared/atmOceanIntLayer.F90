@@ -422,7 +422,9 @@ contains
                 DCOOL_(N)  = min( LCOOL_(N)*NU_WATER/USTARW_(N), 1.e-2)  ! Prevent very thick cool layer depth
              end if
 
-             TDROP_(N)    = max( 0.0, DCOOL_(N)*QCOOL_(N)/TherCond_WATER ) ! Eqn(4) & (13) of F96
+! Note: that if QCOOL gets to be excessively large due to non-solar fluxes (i.e., downwelling longwave, latent and sensible), say over sea ice,
+! TDROP gets to be unrealistically large. From measurements we know it is typically less than 1.0K. So threshold it be less than 1.
+             TDROP_(N)    = min( max(0.0, DCOOL_(N)*QCOOL_(N)/TherCond_WATER), 1.0) ! Eqn(4) & (13) of F96
 
           end do COOL_SKIN
 
@@ -512,11 +514,13 @@ contains
              endif
 
 ! We DO NOT include cool-skin tdrop in TW, therefore, we now save TW
+! Also limit diurnal warming contribution to be < 5K: based on observations
+! -------------------------------------------------------------------
 
-             TW(N) = TS_FOUNDi(N) + ( 1.0/(1.+X2))  *    (TBAR_(N) - TS_FOUNDi(N))
+             TW(N) = TS_FOUNDi(N) + min( (1.0/(1.+X2))*(TBAR_(N) - TS_FOUNDi(N)), 5.)
              TS(N) = TS(N)  + ((1.0+MUSKIN)/MUSKIN) *    (TW(N)    - TBAR_(N))
 
-             TDEL_(N)    = TS_FOUNDi(N) + ((1.0+MUSKIN)/MUSKIN) * MAX(TW(N)    - TS_FOUNDi(N), 0.0)
+             TDEL_(N)    = TS_FOUNDi(N) + min( ((1.0+MUSKIN)/MUSKIN)*MAX(TW(N)- TS_FOUNDi(N), 0.0), 5.)
              TBAR_(N)    = TW(N)
 
              TS(N)    = TDEL_(N) - TDROP_(N)
