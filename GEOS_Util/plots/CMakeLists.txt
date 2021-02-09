@@ -8,7 +8,7 @@ set (zonal_prog_name
 
 ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL)
 if (EXTENDED_SOURCE)
-  set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
+  set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS "${EXTENDED_SOURCE} ${BYTERECLEN}")
 endif ()
 
 set (regrid2_prog_name

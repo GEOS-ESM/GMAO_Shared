@@ -37,22 +37,9 @@ say 'EXPDSC: 'expdsc
 * Initialize Environment using V-Wind File
 * ----------------------------------------
 'set dfile 'vfile
-'setdates'
 'set y 1'
 'getinfo lat'
          lat0 = result
-'setx'
-'sety'
-'setz'
-
-* Create Environment Variables for Seasonal Utility
-* -------------------------------------------------
-'setdates'
-'run getenv "BEGDATE"'
-             begdate  = result
-'run getenv "ENDDATE"'
-             enddate  = result
-'sett'
 
 'getinfo xdim'
          xdim = result
@@ -63,6 +50,10 @@ say 'EXPDSC: 'expdsc
 'getinfo tdim'
          tdim = result
 
+'set t '1
+'getinfo date'
+      begdate = result
+
 'run setenv    "LAT0.'expid'" 'lat0
 'run setenv    "XDIM.'expid'" 'xdim
 'run setenv    "YDIM.'expid'" 'ydim
@@ -70,54 +61,67 @@ say 'EXPDSC: 'expdsc
 'run setenv    "TDIM.'expid'" 'tdim
 'run setenv "BEGDATE.'expid'" 'begdate
 
+'setx'
+'sety'
+'setz'
+'set t '1' 'tdim
+
 'makezf lev-lev zeros z'
 
 * Create Zonal Means
 * ------------------
 
-if(  vfile != "NULL" ) ; 'set dfile 'vfile ; else ; 'chckname 'vname ; endif
-'makezf 'vname' 'vname' z' 
+    'set dfile 'vfile
+    'makezf    'vname' 'vname' z0'
 
-if(  tfile != "NULL" ) ; 'set dfile 'tfile ; else ; 'chckname 'tname ; endif
-'makezf 'tname' 'tname' z' 
+    'set dfile 'tfile
+    'makezf    'tname' 'tname' z0'
 
-if(  ufile != "NULL" ) ; 'set dfile 'ufile ; else ; 'chckname 'uname ; endif
-'makezf 'uname' 'uname' z' 
+    'set dfile 'ufile
+    'makezf    'uname' 'uname' z0'
 
 
 * Assume VSTS Quadratic is in TFILE
 * ---------------------------------
-if(  tfile != "NULL" ) 
     'set dfile ' tfile 
-    'chckname  vsts'
-    'makezf vsts vsts z' 
+         rc=checkname(vsts)
+     if( rc=0 )
+       'makezf vsts vsts z0'
 else
-    'chckname  vsts'
-    'makezf vsts vsts z' 
+       'set x 1'
+       'sety'
+       'setz'
+       'set t '1' 'tdim
+       'define vstsz0 = zerosz'
 endif
 
 * Assume USVS Quadratic is in UFILE
 * ---------------------------------
-if(  ufile != "NULL" ) 
     'set dfile ' ufile 
-    'chckname  usvs'
-    'makezf usvs usvs z' 
+         rc=checkname(usvs)
+     if( rc=0 )
+       'makezf usvs usvs z0'
 else
-    'chckname  usvs'
-    'makezf usvs usvs z' 
+       'set x 1'
+       'sety'
+       'setz'
+       'set t '1' 'tdim
+       'define usvsz0 = zerosz'
 endif
 
 * Assume USWS Quadratic is in UFILE
 * ---------------------------------
-if(  ufile != "NULL" ) 
     'set dfile ' ufile 
-    'chckname  usws'
-    'makezf usws usws z' 
+         rc=checkname(usws)
+     if( rc=0 )
+       'makezf usws usws z0'
 else
-    'chckname  usws'
-    'makezf usws usws z' 
+       'set x 1'
+       'sety'
+       'setz'
+       'set t '1' 'tdim
+       'define uswsz0 = zerosz'
 endif
-
 
 
 * Define Pressure Variables
@@ -131,11 +135,12 @@ endif
 'define pl = lat-lat + lev'
 'define pk = pow(pl,2/7)'
 
-'set gxout fwrite'
-'set fwrite grads.'expid'.fwrite'
 
 * Write data
 * ----------
+'set gxout fwrite'
+'set fwrite grads.'expid'.fwrite'
+
 t=1
 while(t<=tdim)
   'set t 't
@@ -145,7 +150,7 @@ while(t<=tdim)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  vfile != "NULL" ) ; 'd ' vname'z' ; else ; 'd zerosz' ; endif
+   if(  vfile != "NULL" ) ; 'd ' vname'z0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -153,7 +158,7 @@ while(t<=tdim)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd ' tname'z' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd ' tname'z0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -161,7 +166,7 @@ while(t<=tdim)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd    vstsz' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd    vstsz0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -185,7 +190,7 @@ while(t<=tdim)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd ' uname'z' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd ' uname'z0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -193,7 +198,7 @@ while(t<=tdim)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     usvsz' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     usvsz0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -201,7 +206,7 @@ while(t<=tdim)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     uswsz' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     uswsz0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
    say ' '
@@ -234,6 +239,10 @@ say ' 'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
 *'!remove YDIM.txt'
 *'!remove ZDIM.txt'
 *'!remove TDIM.txt'
+
+* -----------------------------------------------------
+
+'run setdates'
 
 * Loop over Possible Experiment Datasets for Comparison
 * -----------------------------------------------------
@@ -295,7 +304,7 @@ say 'Comparison Desc: 'obsdsc
 'sety'
 'setz'
 
-'getdates'
+'run getdates'
  begdateo = subwrd(result,1)
  enddateo = subwrd(result,2)
 
@@ -332,47 +341,55 @@ say 'Comparison Desc: 'obsdsc
 * Create Zonal Means
 * ------------------
 
-if(  vfile != "NULL" ) ; 'set dfile 'vfile ; else ; 'chckname 'vname ; endif
-'makezf 'vname' 'vname' z'
+    'set dfile 'vfile
+    'makezf    'vname' 'vname' z'num
 
-if(  tfile != "NULL" ) ; 'set dfile 'tfile ; else ; 'chckname 'tname ; endif
-'makezf 'tname' 'tname' z'
+    'set dfile 'tfile
+    'makezf    'tname' 'tname' z'num
 
-if(  ufile != "NULL" ) ; 'set dfile 'ufile ; else ; 'chckname 'uname ; endif
-'makezf 'uname' 'uname' z'
-
+    'set dfile 'ufile
+    'makezf    'uname' 'uname' z'num
 
 * Assume VSTS Quadratic is in TFILE
 * ---------------------------------
-if(  tfile != "NULL" ) 
     'set dfile ' tfile 
-    'chckname vsts'
-    'makezf   vsts vsts z'
+         rc=checkname(vsts)
+     if( rc=0 )
+       'makezf vsts vsts z'num
 else
-    'chckname vsts'
-    'makezf   vsts vsts z'
+       'set x 1'
+       'sety'
+       'setz'
+       'set t 'tmin' 'tmax
+       'define vstsz'num' = zerosz'
 endif
 
 * Assume USVS Quadratic is in UFILE
 * ---------------------------------
-if(  ufile != "NULL" ) 
     'set dfile ' ufile 
-    'chckname  usvs'
-    'makezf usvs usvs z' 
+         rc=checkname(usvs)
+     if( rc=0 )
+       'makezf usvs usvs z'num
 else
-    'chckname  usvs'
-    'makezf usvs usvs z' 
+       'set x 1'
+       'sety'
+       'setz'
+       'set t 'tmin' 'tmax
+       'define usvsz'num' = zerosz'
 endif
 
 * Assume USWS Quadratic is in UFILE
 * ---------------------------------
-if(  ufile != "NULL" ) 
     'set dfile ' ufile 
-    'chckname  usws'
-    'makezf usvs usws z' 
+         rc=checkname(usws)
+     if( rc=0 )
+       'makezf usws usws z'num
 else
-    'chckname  usws'
-    'makezf usvs usws z' 
+       'set x 1'
+       'sety'
+       'setz'
+       'set t 'tmin' 'tmax
+       'define uswsz'num' = zerosz'
 endif
 
 
@@ -387,11 +404,12 @@ endif
 'define pl = lev'
 'define pk = pow(pl,2/7)'
 
-'set gxout fwrite'
-'set fwrite grads.'obsid'.fwrite'
 
 * Write data
 * ----------
+'set gxout fwrite'
+'set fwrite grads.'obsid'.fwrite'
+
 t=tmin
 while(t<=tmax)
   'set t 't
@@ -401,7 +419,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  vfile != "NULL" ) ; 'd ' vname'z' ; else ; 'd zerosz' ; endif
+   if(  vfile != "NULL" ) ; 'd ' vname'z'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -409,7 +427,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd ' tname'z' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd ' tname'z'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -417,7 +435,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  tfile != "NULL" ) ; 'd    vstsz' ; else ; 'd zerosz' ; endif
+   if(  tfile != "NULL" ) ; 'd    vstsz'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -441,7 +459,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd ' uname'z' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd ' uname'z'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -449,7 +467,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     usvsz' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     usvsz'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
 
@@ -457,7 +475,7 @@ while(t<=tmax)
    z=1
    while(z<=zdim)
   'set z 'z
-   if(  ufile != "NULL" ) ; 'd     uswsz' ; else ; 'd zerosz' ; endif
+   if(  ufile != "NULL" ) ; 'd     uswsz'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
    say ' '
@@ -529,3 +547,28 @@ endif
 endwhile
 return length
 
+  function checkname (args)
+                name = subwrd(args,1)
+  'lowercase   'name
+                name = result
+
+  say 'Inside checkname, name = 'name
+
+  'query file'
+  numvar = sublin(result,6)
+  numvar = subwrd(numvar,5)
+
+  rc = -1
+  n  = 1
+  while ( n<numvar+1 )
+  field = sublin(result,6+n)
+  field = subwrd(field,1)
+        if( name=field )
+          rc = 0
+           n = numvar
+        endif
+  say 'n: 'n' name: 'name' File_field: 'field' rc = 'rc
+  n = n+1
+  endwhile
+
+  return rc

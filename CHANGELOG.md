@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
+
+- Plot and stats updates
+
 ### Fixed
+
+- Fix flags for `zonal.f` compilation
+
 ### Removed
 ### Added
 

@@ -203,7 +203,7 @@ say 'Months Used in Forecasts: 'months
 
 * Define TOPLEV, NDAY and NDAYMAX across ALL Experiments
 * ------------------------------------------------------
- toplev  = 1000
+ toplev  = 0
  ndaymax = 999
        m = 0
 while( m<=mexps )
@@ -216,7 +216,7 @@ while( m<=mexps )
         'set z 'zdim
         'getinfo level'
                  level = result
-             if( level < toplev )
+             if( level > toplev )
                  toplev = level
              endif
 
@@ -1057,6 +1057,31 @@ if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
 
 say '        DCINT for plots: 'dcint
 say 'MIN_THICKNESS for plots: 'min_thickness
+
+************************************************************************
+****        To hardwire contour levels within Montage plots     ********
+************************************************************************
+* if( field = 'h' )
+* say 'Hardwire values for plots,         dcint = '350 ; dcint = 350
+* say 'Hardwire values for plots, min_thickness = '100 ; min_thickness = 100
+* endif
+* if( field = 't' )
+* say 'Hardwire values for plots,         dcint = '35 ; dcint = 35
+* say 'Hardwire values for plots, min_thickness = '7 ; min_thickness = 7
+* endif
+* if( field = 'u' )
+* say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
+* say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
+* endif
+* if( field = 'v' )
+* say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
+* say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
+* endif
+* if( field = 'q' )
+* say 'Hardwire values for plots,         dcint = '20 ; dcint = 20
+* say 'Hardwire values for plots, min_thickness = '0.05 ; min_thickness = 0.05
+* endif
+************************************************************************
 
 flag = ''
 while( flag = '' )
