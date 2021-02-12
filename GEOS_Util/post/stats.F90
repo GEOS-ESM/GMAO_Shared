@@ -1220,7 +1220,7 @@
 
  5001 format('DSET    ^',a)
  5002 format('TITLE   Stats',/,'FORMAT  sequential big_endian')
- 5003 format('UNDEF  ',g13.6)
+ 5003 format('UNDEF  ',g12.6)
  5004 format('XDEF  ',i3,' LINEAR  1 1')
  8004 format('XDEF  ',i3,' LINEAR  -180 ',f8.5)
  5005 format('YDEF    1 LINEAR  1 1')
