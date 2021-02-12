@@ -9,6 +9,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plot and stats updates
+
+### Fixed
+
+- Fix flags for `zonal.f` compilation
+
+### Removed
+### Added
+
+## [1.3.6] - 2021-01-12
+
+### Changed
+
+- Added `-partition` option to `regrid.pl`
+
+### Fixed
+
+- Fixed compilation flags for `zonal.f` to match that of CVS
+- Fixed bug in `res/zonal.gs` for `zonal.x` location
+- Added flag to regrid_forcing_esmf.x to force a 0 to 1 range when regridding files that should use fractions
+
+### Added
+
+- Allows PRs with "0-diff trivial" labels to skip updating `CHANGELOG.md`
+
+## [1.3.5] - 2020-12-10
+
+### Fixed
+
+- Use `CONFIGURE_DEPENDS` with `file(GLOB)` calls
+- Fix OpenMP in GMAO_stoch
+
+### Added
+
+- Add support for `Aggressive` build type
+
+## [1.3.4] - 2020-11-25
+
+### Fixed
+
+- Updates for DSO work
+
+### Changed
+
+- Update plots consistent with latest cvs tags
+
+## [1.3.3] - 2020-10-28
+
+### Changed
+
 - Added Docker authentication for CI
 - Update CI images for Baselibs 6.0.22
 

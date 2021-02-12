@@ -1,10 +1,14 @@
+if (CMAKE_Fortran_COMPILER_ID MATCHES Intel AND CMAKE_BUILD_TYPE MATCHES Release)
+   set( CMAKE_Fortran_FLAGS_RELEASE "${FOPT2} ${PP}")
+endif ()
+
 set (zonal_prog_name
    zonal_${CMAKE_SYSTEM_NAME}.x
    )
 
 ecbuild_add_executable (TARGET ${zonal_prog_name} SOURCES zonal.f LIBS MAPL)
 if (EXTENDED_SOURCE)
-  set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
+  set_source_files_properties(zonal.f PROPERTIES COMPILE_FLAGS "${EXTENDED_SOURCE} ${BYTERECLEN}")
 endif ()
 
 set (regrid2_prog_name
@@ -40,7 +44,7 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/quickstat DESTINATION plots)
 # From https://stackoverflow.com/questions/7787823/cmake-how-to-get-the-name-of-all-subdirectories-of-a-directory
 
 MACRO(SUBDIRLIST result curdir)
-  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  FILE(GLOB children CONFIGURE_DEPENDS RELATIVE ${curdir} ${curdir}/*)
   SET(dirlist "")
   FOREACH(child ${children})
     IF(IS_DIRECTORY ${curdir}/${child})
