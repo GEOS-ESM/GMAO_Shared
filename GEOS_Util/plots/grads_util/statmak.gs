@@ -139,184 +139,158 @@ say 'Default File DIMS: 'result
 ****        F Variance         =>  FVAR =   1/N * SUM[ (F-FBAR)**2 ]        ****
 ****        A Variance         =>  AVAR =   1/N * SUM[ (A-ABAR)**2 ]        ****
 ****        CoVariance         =>  COV  =   1/N * SUM[ (F-FBAR)*(A-ABAR) ]  ****
+****                                                                        ****
+****        BIAS      Error    =>  BIA  = [ FBAR - ABAR ]**2                ****
 ****        Amplitude Error    =>  AMP  = [ FSTD - ASTD ]**2                ****
-****                                    + [ FBAR - ABAR ]**2                ****
 ****        Phase     Error    =>  PHZ  = 2*[ FSTD*ASTD - COV ]             ****
 ****                                                                        ****
-****        Mean Square Error  =   BIAS**2         + Variance               ****
-****                           =   Amplitude Error + Phase Error            ****
-****                      MSE  =   VAR + MES                                ****
-****                           =   AMP + PHZ                                ****
+****        Mean Square Error  =   BIAS      Error                          ****
+****                           +   Amplitude Error                          ****
+****                           +   Phase     Error                          ****
+****                                                                        ****
+****                      MSE  =   BIA + AMP + PHZ                          ****
 ****                                                                        ****
 ********************************************************************************
 
 * Compute forecast statistics
 * ---------------------------
 *  fma: forecast minus analysis
-*  fmc: forecast minus climatology
 *  mes: mean error squared
 *  mse: mean square error
 *  rms: root mean square error
 *  std: standard deviation
 * --------------------------------------------------
 
-* Define FMA variables
-* --------------------
-say 'Defining FMA variables for Field: 'field' and tag: 'tag
-say '--------------------------------- '
- 
-        n  = 1
+* Compute 2D Fields
+* -----------------
+'setlons'
+'sety'
+
+'define 'field'fm'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'am'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'fma'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'mse'tag' = lat-lat + lon-lon + lev-lev'
+
+n = 1
 while ( n <= numfiles )
+say 'Processing Field: 'field' for File: 'n'  Tag: 'tag
 
 * Note: Add and Subtract uf & vf to force similar UNDEF locations
 * ---------------------------------------------------------------
    if( field = chi )
-       'define  uaa    = ua.'n'+uf.'n'-uf.'n
-       'define  vaa    = va.'n'+vf.'n'-vf.'n
+       'define  uaa'n' = ua.'n'+uf.'n'-uf.'n
+       'define  vaa'n' = va.'n'+vf.'n'-vf.'n
        'define chif'n' = fish_chi(uf.'n',vf.'n')'
-       'define chia'n' = fish_chi(uaa,vaa)'
+       'define chia'n' = fish_chi(uaa'n',vaa'n')'
        'define chif'n' = chif'n'-aave(chif'n',g)'
        'define chia'n' = chia'n'-aave(chia'n',g)'
    endif
    if( field = psi )
-       'define  uaa    = ua.'n'+uf.'n'-uf.'n
-       'define  vaa    = va.'n'+vf.'n'-vf.'n
+       'define  uaa'n' = ua.'n'+uf.'n'-uf.'n
+       'define  vaa'n' = va.'n'+vf.'n'-vf.'n
        'define psif'n' = fish_psi(uf.'n',vf.'n')'
-       'define psia'n' = fish_psi(uaa,vaa)'
+       'define psia'n' = fish_psi(uaa'n',vaa'n')'
        'define psif'n' = psif'n'-aave(psif'n',g)'
        'define psia'n' = psia'n'-aave(psia'n',g)'
    endif
+
    if( field  = chi | field  = psi )
-       'define f = 'field'f'n
-       'define a = 'field'a'n
+       'define 'field'fm'tag'  = 'field'fm'tag'  +     'field'f'n
+       'define 'field'am'tag'  = 'field'am'tag'  +     'field'a'n
+       'define 'field'fma'tag' = 'field'fma'tag' +     'field'f'n'-'field'a'n
+       'define 'field'mse'tag' = 'field'mse'tag' + pow('field'f'n'-'field'a'n',2)'
+       'define 'field'mse'tag''n' = pow('field'f'n'-'field'a'n',2)'
    else
-       'define f = 'field'f.'n
-       'define a = 'field'a.'n
+       'define 'field'fs  = 'field'f.'n'*'scale
+       'define 'field'as  = 'field'a.'n'*'scale
+       'define 'field'cs  = 'field'c.'n'*'scale
+
+       'define 'field'fm'tag'  = 'field'fm'tag'  +     'field'fs'
+       'define 'field'am'tag'  = 'field'am'tag'  +     'field'as'
+       'define 'field'fma'tag' = 'field'fma'tag' +     'field'fs-'field'as'
+       'define 'field'mse'tag' = 'field'mse'tag' + pow('field'fs-'field'as,2)'
+       'define 'field'mse'tag''n' = pow('field'fs-'field'as,2)'
    endif
 
-  'define 'field'f'tag''n'    =   f  *'scale
-  'define 'field'a'tag''n'    =   a  *'scale
-  'define 'field'fma'tag''n'  = (f-a)*'scale
-
-  'define 'field'Xmse'tag''n' = pow( 'field'fma'tag''n',2 )'
-
-   n = n + 1
+n = n + 1
 endwhile
 
+'define 'field'fm'tag'  = 'field'fm'tag' /'numfiles
+'define 'field'am'tag'  = 'field'am'tag' /'numfiles
+'define 'field'fma'tag' = 'field'fma'tag'/'numfiles
+'define 'field'mse'tag' = 'field'mse'tag'/'numfiles
 
-* Compute MeanErrorSquared MES and MeanSquareError MSE for f, a, and fma
-* ----------------------------------------------------------------------
-*               fbar  =  1/N * SUM[   F      ]
-*               abar  =  1/N * SUM[   A      ]
-*               fma1  =  1/N * SUM[ (F-A)    ]
-*               fma2  =  1/N * SUM[ (F-A)**2 ]
-* ----------------------------------------------------------------------
-       'define 'field'fma1'tag' = lat-lat+lon-lon'
-       'define 'field'fma2'tag' = lat-lat+lon-lon'
-       'define 'field'fbar'tag' = lat-lat+lon-lon'
-       'define 'field'abar'tag' = lat-lat+lon-lon'
-        n  = 1
+'undefine 'field'fs'
+'undefine 'field'as'
+
+
+
+'define 'field'mes'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'varf'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'vara'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'cov'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'rnd'tag'  = lat-lat + lon-lon + lev-lev'
+n = 1
 while ( n <= numfiles )
-       'define 'field'fbar'tag' = 'field'fbar'tag' +      'field'f'tag''n
-       'define 'field'abar'tag' = 'field'abar'tag' +      'field'a'tag''n
-       'define 'field'fma1'tag' = 'field'fma1'tag' +      'field'fma'tag''n
-       'define 'field'fma2'tag' = 'field'fma2'tag' + pow( 'field'fma'tag''n',2 )'
-        n = n + 1
+'define 'field'mes'tag'  = 'field'mes'tag'  + pow(  'field'fm'tag'-'field'am'tag',2)'
+'define 'field'varf'tag' = 'field'varf'tag' + pow(  'field'f.'n'*'scale'-'field'fm'tag',2)'
+'define 'field'vara'tag' = 'field'vara'tag' + pow(  'field'a.'n'*'scale'-'field'am'tag',2)'
+'define 'field'cov'tag'  = 'field'cov'tag'  +      ('field'f.'n'*'scale'-'field'fm'tag') * ('field'a.'n'*'scale'-'field'am'tag')'
+'define 'field'rnd'tag'  = 'field'rnd'tag'  + pow( ('field'f.'n'*'scale'-'field'fm'tag') - ('field'a.'n'*'scale'-'field'am'tag') , 2)'
+n = n + 1
 endwhile
-       'define 'field'fbar'tag' = 'field'fbar'tag' / 'numfiles
-       'define 'field'abar'tag' = 'field'abar'tag' / 'numfiles
-       'define 'field'fma1'tag' = 'field'fma1'tag' / 'numfiles
-       'define 'field'fma2'tag' = 'field'fma2'tag' / 'numfiles
-
-* ----------------------------------------------------------------------
-*               Xmes  =  { 1/N * SUM[ (F-A)    ] }**2  =  [ fbar-abar ]**2
-*               Xmse  =  { 1/N * SUM[ (F-A)**2 ] }
-* ----------------------------------------------------------------------
-       'define 'field'Xmes'tag' = pow( 'field'fma1'tag',2 )'
-       'define 'field'Xmse'tag' =      'field'fma2'tag
+'define 'field'mes'tag'  = 'field'mes'tag' /'numfiles
+'define 'field'varf'tag' = 'field'varf'tag'/'numfiles
+'define 'field'vara'tag' = 'field'vara'tag'/'numfiles
+'define 'field'cov'tag'  = 'field'cov'tag' /'numfiles
+'define 'field'rnd'tag'  = 'field'rnd'tag' /'numfiles
 
 
-* Compute Variance VAR for f, a, and fma
-* --------------------------------------
-*               fvar  =  1/N * SUM[ (F-FBAR)**2 ]
-*               avar  =  1/N * SUM[ (A-ABAR)**2 ]
-*               cvar  =  1/N * SUM[ (F-FBAR)*(A-ABAR ]
-*               Xvar  =  1/N * SUM[ ( (F-A)-(FBAR-ABAR) )**2 ] 
-*               fstd  =  SQRT[ fvar ]
-*               astd  =  SQRT[ avar ]
-* ----------------------------------------------------------------------
-        n  = 1
-while ( n <= numfiles )
-       'define 'field'fvar'tag''n' =  pow( 'field'f'tag''n'  -'field'fbar'tag',2 )'
-       'define 'field'avar'tag''n' =  pow( 'field'a'tag''n'  -'field'abar'tag',2 )'
-       'define 'field'cvar'tag''n' =     ( 'field'f'tag''n'  -'field'fbar'tag') * ( 'field'a'tag''n'  -'field'abar'tag') '
-       'define 'field'Xvar'tag''n' =  pow( 'field'fma'tag''n'-'field'fma1'tag',2 )'
-       'define 'field'fstd'tag''n' = sqrt( 'field'fvar'tag''n' )'
-       'define 'field'astd'tag''n' = sqrt( 'field'avar'tag''n' )'
-*      'define 'field'ampl'tag''n' =  pow( 'field'fstd'tag''n'-'field'astd'tag''n',2 ) + pow( 'field'fbar'tag'-'field'abar'tag',2 )'
-       'define 'field'ampl'tag''n' =  pow( 'field'fstd'tag''n'-'field'astd'tag''n',2 ) '
-       'define 'field'phaz'tag''n' =   2*( 'field'fstd'tag''n'*'field'astd'tag''n' - 'field'cvar'tag''n' )'
+'define 'field'stdf'tag' = sqrt('field'varf'tag')'
+'define 'field'stda'tag' = sqrt('field'vara'tag')'
 
-       'undefine 'field'f'tag''n
-       'undefine 'field'a'tag''n
-       'undefine 'field'fma'tag''n
-       'undefine 'field'fstd'tag''n
-       'undefine 'field'astd'tag''n
-        n = n + 1
-endwhile
+'define 'field'ampl'tag' = pow( 'field'stdf'tag'-'field'stda'tag',2 )'
+'define 'field'phaz'tag' =  2*( 'field'stdf'tag'*'field'stda'tag' - 'field'cov'tag')'
+'define 'field'ramp'tag' = sqrt( 'field'ampl'tag' )'
+'define 'field'rphz'tag' = sqrt( 'field'phaz'tag' )'
+'define 'field'rrnd'tag' = sqrt( 'field'rnd'tag' )'
 
-       'define 'field'fvar'tag' = lat-lat+lon-lon'
-       'define 'field'avar'tag' = lat-lat+lon-lon'
-       'define 'field'cvar'tag' = lat-lat+lon-lon'
-       'define 'field'Xvar'tag' = lat-lat+lon-lon'
-        n  = 1
-while ( n <= numfiles )
-       'define 'field'fvar'tag' = 'field'fvar'tag' + 'field'fvar'tag''n
-       'define 'field'avar'tag' = 'field'avar'tag' + 'field'avar'tag''n
-       'define 'field'cvar'tag' = 'field'cvar'tag' + 'field'cvar'tag''n
-       'define 'field'Xvar'tag' = 'field'Xvar'tag' + 'field'Xvar'tag''n
-        n = n + 1
-endwhile
-       'define 'field'fvar'tag' = 'field'fvar'tag' / 'numfiles
-       'define 'field'avar'tag' = 'field'avar'tag' / 'numfiles
-       'define 'field'cvar'tag' = 'field'cvar'tag' / 'numfiles
-       'define 'field'Xvar'tag' = 'field'Xvar'tag' / 'numfiles
+'define 'field'rmes'tag' = sqrt('field'mes'tag')'
+'define 'field'rms'tag'  = sqrt('field'mse'tag')'
+'define 'field'var'tag'  =      'field'mse'tag'-'field'mes'tag
+'define 'field'std'tag'  = sqrt('field'mse'tag'-'field'mes'tag')'
 
-       'define 'field'fstd'tag' = sqrt( 'field'fvar'tag' )'
-       'define 'field'astd'tag' = sqrt( 'field'avar'tag' )'
+* -----------------------------------------------------------------
 
-*      'define 'field'ampl'tag' = pow( 'field'fstd'tag'-'field'astd'tag',2 ) + pow( 'field'fbar'tag'-'field'abar'tag',2 )'
-       'define 'field'ampl'tag' = pow( 'field'fstd'tag'-'field'astd'tag',2 ) '
-       'define 'field'phaz'tag' =  2*( 'field'fstd'tag'*'field'astd'tag' - 'field'cvar'tag' )'
 
-* --------------------------------------------------------------
-* --------------------------------------------------------------
+'define 'field'rmes'tag' = sqrt('field'mes'tag')'
+'define 'field'ramp'tag' = sqrt('field'ampl'tag')'
+'define 'field'rphz'tag' = sqrt('field'phaz'tag')'
 
-* Define Zonal-Mean F, A, and FMA variables
-* -----------------------------------------
+
+* -----------------------------------------------------------------
+
 if( zfreq = 'varying' )
-    say 'Defining Zonal-Mean FMA variables for Field: 'field' and tag: 'tag
-    say '-------------------------------------------- '
-
-   'makez 'field'Xmes'tag' z'
-   'makez 'field'Xmse'tag' z'
-   'makez 'field'fvar'tag' z'
-   'makez 'field'avar'tag' z'
-   'makez 'field'cvar'tag' z'
-   'makez 'field'Xvar'tag' z'
-   'makez 'field'ampl'tag' z'
-   'makez 'field'phaz'tag' z'
-
-else
-    say 'Skipping: Defining Zonal-Mean FMA variables for Field: 'field' and tag: 'tag
-    say '------------------------------------------------------ '
+   'makez  'field'fm'tag'   z'
+   'makez  'field'am'tag'   z'
+   'makez  'field'fma'tag'  z'
+   'makez  'field'mes'tag'  z'
+   'makez  'field'mse'tag'  z'
+   'makez  'field'ampl'tag' z'
+   'makez  'field'phaz'tag' z'
+   'define 'field'rmes'tag'z = sqrt('field'mes'tag'z)'
+   'define 'field'ramp'tag'z = sqrt('field'ampl'tag'z)'
+   'define 'field'rphz'tag'z = sqrt('field'phaz'tag'z)'
+   'define 'field'rms'tag'z  = sqrt('field'mse'tag'z)'
+   'define 'field'var'tag'z  =      'field'mse'tag'z-'field'mes'tag'z'
+   'define 'field'std'tag'z  = sqrt('field'mse'tag'z-'field'mes'tag'z)'
 endif
 
-* --------------------------------------------------------------
 
 * Compute TAG & CTL Variables: X & Y, and Diff Variable: Z = X-Y
 * For: mean-error-squared(mes), mean-square-error(mse), variance(var)
 * -------------------------------------------------------------------
+
 if( tag != ctl )
     say 'Computing Difference Variables for Field: 'field' and TAGs: 'tag' and 'ctl
     say '----------------------------------------- '
@@ -332,64 +306,21 @@ if( tag != ctl )
 * AMP:    Damp  =  ampl_tag - ampl_ctl
 * PHZ:    Dphz  =  phaz_tag - phaz_ctl
 * ----------------------------------------------------------------------
+
+          'define 'field'Dmse'tag' = 'field'mse'tag'  - 'field'mse'ctl
+          'define 'field'Dmes'tag' = 'field'mes'tag'  - 'field'mes'ctl
+          'define 'field'Damp'tag' = 'field'ampl'tag' - 'field'ampl'ctl
+          'define 'field'Dphz'tag' = 'field'phaz'tag' - 'field'phaz'ctl
+
            n  = 1
    while ( n <= numfiles )
-          'define 'field'Dmse'tag''n' = 'field'Xmse'tag''n' - 'field'Xmse'ctl''n
-          'define 'field'Dfvr'tag''n' = 'field'fvar'tag''n' - 'field'fvar'ctl''n
-          'define 'field'Davr'tag''n' = 'field'avar'tag''n' - 'field'avar'ctl''n
-          'define 'field'Dcvr'tag''n' = 'field'cvar'tag''n' - 'field'cvar'ctl''n
-          'define 'field'Dvar'tag''n' = 'field'Xvar'tag''n' - 'field'Xvar'ctl''n
-          'define 'field'Dmes'tag''n' = 'field'Xmes'tag'    - 'field'Xmes'ctl
-          'define 'field'Damp'tag''n' = 'field'ampl'tag''n' - 'field'ampl'ctl''n
-          'define 'field'Dphz'tag''n' = 'field'phaz'tag''n' - 'field'phaz'ctl''n
+          'define 'field'Dmse'tag''n' = 'field'mse'tag''n' - 'field'mse'ctl''n
            n = n + 1
    endwhile
-
-* Define D-Variable Means
-* ----------------------
-          'define 'field'Dmse'tag' = lat-lat+lon-lon'
-          'define 'field'Dfvr'tag' = lat-lat+lon-lon'
-          'define 'field'Davr'tag' = lat-lat+lon-lon'
-          'define 'field'Dcvr'tag' = lat-lat+lon-lon'
-          'define 'field'Dvar'tag' = lat-lat+lon-lon'
-          'define 'field'Dmes'tag' = lat-lat+lon-lon'
-          'define 'field'Damp'tag' = lat-lat+lon-lon'
-          'define 'field'Dphz'tag' = lat-lat+lon-lon'
-           n  = 1
-   while ( n <= numfiles )
-          'define 'field'Dmse'tag' = 'field'Dmse'tag' + 'field'Dmse'tag''n
-          'define 'field'Dfvr'tag' = 'field'Dfvr'tag' + 'field'Dfvr'tag''n
-          'define 'field'Davr'tag' = 'field'Davr'tag' + 'field'Davr'tag''n
-          'define 'field'Dcvr'tag' = 'field'Dcvr'tag' + 'field'Dcvr'tag''n
-          'define 'field'Dvar'tag' = 'field'Dvar'tag' + 'field'Dvar'tag''n
-          'define 'field'Dmes'tag' = 'field'Dmes'tag' + 'field'Dmes'tag''n
-          'define 'field'Damp'tag' = 'field'Damp'tag' + 'field'Damp'tag''n
-          'define 'field'Dphz'tag' = 'field'Dphz'tag' + 'field'Dphz'tag''n
-
-          'undefine 'field'Dfvr'tag''n
-          'undefine 'field'Davr'tag''n
-          'undefine 'field'Dcvr'tag''n
-          'undefine 'field'Dvar'tag''n
-          'undefine 'field'Dmes'tag''n
-          'undefine 'field'Damp'tag''n
-          'undefine 'field'Dphz'tag''n
-           n = n + 1
-   endwhile
-          'define 'field'Dmse'tag' = 'field'Dmse'tag' / 'numfiles
-          'define 'field'Dfvr'tag' = 'field'Dfvr'tag' / 'numfiles
-          'define 'field'Davr'tag' = 'field'Davr'tag' / 'numfiles
-          'define 'field'Dcvr'tag' = 'field'Dcvr'tag' / 'numfiles
-          'define 'field'Dvar'tag' = 'field'Dvar'tag' / 'numfiles
-          'define 'field'Dmes'tag' = 'field'Dmes'tag' / 'numfiles
-          'define 'field'Damp'tag' = 'field'Damp'tag' / 'numfiles
-          'define 'field'Dphz'tag' = 'field'Dphz'tag' / 'numfiles
-
-*         'define 'field'Damp'tag' = 'field'ampl'tag' - 'field'ampl'ctl
-*         'define 'field'Dphz'tag' = 'field'phaz'tag' - 'field'phaz'ctl
 
 * Define Variances of MSE Differences
 * -----------------------------------
-          'define 'field'DDmse'tag' = lat-lat+lon-lon'
+          'define 'field'DDmse'tag' = lat-lat + lon-lon + lev-lev'
            n  = 1
    while ( n <= numfiles )
           'define 'field'DDmse'tag' = 'field'DDmse'tag' + pow( 'field'Dmse'tag''n'-'field'Dmse'tag',2 )'
@@ -405,7 +336,6 @@ if( zfreq = 'varying' )
    say '------------------------------------------------------ '
    'makez 'field'Dmes'tag'  z'
    'makez 'field'Dmse'tag'  z'
-   'makez 'field'Dvar'tag'  z'
    'makez 'field'Damp'tag'  z'
    'makez 'field'Dphz'tag'  z'
 
@@ -416,7 +346,7 @@ if( zfreq = 'varying' )
    endwhile
 
           'set lon 0'
-          'define 'field'DDmse'tag'z = lat-lat'
+          'define 'field'DDmse'tag'z = lat-lat + lev-lev'
            n  = 1
    while ( n <= numfiles )
           'define 'field'DDmse'tag'z = 'field'DDmse'tag'z + pow( 'field'Dmse'tag''n'z-'field'Dmse'tag'z,2 )'
