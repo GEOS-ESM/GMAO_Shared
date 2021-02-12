@@ -614,7 +614,6 @@ Subroutine do_regrid_forcing(rc)
   type(ESMF_Config)            :: cf_root
   type(ESMF_Config)            :: cf_hist
   character(len=ESMF_MAXSTR), parameter :: CF_FILE='REGRID_FORCING.rc'
-  type(MAPL_Communicators) :: mapl_comm
 !                                -----
 
 !  Initialize framework
@@ -637,9 +636,6 @@ Subroutine do_regrid_forcing(rc)
   call MAPL_Set(MAPLOBJ, CF=CF_ROOT, RC=STATUS)
   VERIFY_(STATUS)
 
-  mapl_comm%esmf%comm=MPI_COMM_WORLD
-  call MAPL_Set(MAPLOBJ, mapl_comm = mapl_Comm, rc = status)
-  _VERIFY(STATUS)
   ROOT = MAPL_AddChild ( MAPLOBJ,     &
        name       = "INPUT",        &
        SS         = ROOT_SetServices, &
