@@ -7,10 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Changed
 ### Fixed
-### Removed
+### Changed
 ### Added
+### Removed
+
+## [1.3.8] - 2021-02-12
+
+### Changed
+
+- Plot and stats updates
+
+### Removed
+
+- Eliminated references to MAPL_COMM - these are no longer used and will
+be deleted in future releases of MAPL
+
+## [1.3.7] - 2021-01-29
+
+### Changed
+
+- Plot and stats updates
+
+### Fixed
+
+- Fix flags for `zonal.f` compilation
 
 ## [1.3.6] - 2021-01-12
 

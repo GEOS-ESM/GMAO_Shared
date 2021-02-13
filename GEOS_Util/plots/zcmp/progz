@@ -609,6 +609,11 @@ say 'Processing Season: 'season
        n  = 1
 while( n <= numexp )
 
+say 'Checking  plot between  exp: 'qtag
+say '                       cexp: 'ctag.n
+say '                        obs: 'obsnam
+say ''
+
 if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != "NULL" & type.n != V & ofile.n != "NULL" )
 
 say 'Closeness plot between  exp: 'qtag
