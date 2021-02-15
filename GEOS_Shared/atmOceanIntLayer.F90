@@ -512,7 +512,6 @@ contains
              endif
 
 ! We DO NOT include cool-skin tdrop in TW, therefore, we now save TW
-! Also limit diurnal warming contribution to be < 5K: based on observations
 ! -------------------------------------------------------------------
 
              TW(N) = TS_FOUNDi(N) + (1.0/(1.+X2))*(TBAR_(N) - TS_FOUNDi(N))
