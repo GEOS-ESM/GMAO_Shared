@@ -515,10 +515,10 @@ contains
 ! Also limit diurnal warming contribution to be < 5K: based on observations
 ! -------------------------------------------------------------------
 
-             TW(N) = TS_FOUNDi(N) + min( (1.0/(1.+X2))*(TBAR_(N) - TS_FOUNDi(N)), 5.)
+             TW(N) = TS_FOUNDi(N) + (1.0/(1.+X2))*(TBAR_(N) - TS_FOUNDi(N))
              TS(N) = TS(N)  + ((1.0+MUSKIN)/MUSKIN) *    (TW(N)    - TBAR_(N))
 
-             TDEL_(N)    = TS_FOUNDi(N) + min( ((1.0+MUSKIN)/MUSKIN)*MAX(TW(N)- TS_FOUNDi(N), 0.0), 5.)
+             TDEL_(N)    = TS_FOUNDi(N) + ((1.0+MUSKIN)/MUSKIN)*MAX(TW(N)- TS_FOUNDi(N), 0.0)
              TBAR_(N)    = TW(N)
 
              TS(N)    = TDEL_(N) - TDROP_(N)
