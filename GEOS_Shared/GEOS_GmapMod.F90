@@ -337,8 +337,8 @@ contains
 
 ! Compute vertical subgrid distribution
       if ( kord >7 ) then
+        qs(:) = 0.0 ! iqnore qs+qr contributions in remap
         if (iv==1) then
-          qs(:) = -1.e9
           call scalar_profile( qs, a4, dp1, km, 1, im, iv, kord, t_min )
         else
           call     cs_profile( qs, a4, dp1, km, 1, im, iv, kord )
