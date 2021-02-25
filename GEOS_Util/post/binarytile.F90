@@ -7,15 +7,17 @@ Program binarytile
   integer, parameter :: NumGlobalVars=4
   integer, parameter :: NumGridVars=3
   integer            :: N
-  integer            :: NT
+  integer            :: NT, NPFAF, line_size
   integer            :: IM
   integer            :: JM
-  integer            :: N_GRIDS
+  integer            :: N_GRIDS,pfaf_number
+  integer            :: grid_info(2),status
   real, allocatable  :: AVR(:,:)
   real               :: DUMMY
   character(len=128) :: NAME 
   character(len=128) :: filenameIN 
-  character(len=128) :: filenameOUT 
+  character(len=128) :: filenameOUT
+  integer, parameter :: max_rec=2 
 
   call getarg(1,filenameIN)
   if (filenameIN == "") filenameIN = 'input'
@@ -24,13 +26,29 @@ Program binarytile
 
   open(unit=unitR, file=filenameIN, form='FORMATTED')
   open(unit=unitW, file=filenameOUT,form='UNFORMATTED')
-  READ (unitR, *) NT
-  WRITE(unitW   ) NT
+  !READ (unitR, *) NT, NPFAF
+  !WRITE(unitW   ) NT, NPFAF
+
+! Number of grids that can be attached
+!-------------------------------------
+
+  grid_info(2)=-1
+  do n=1,max_rec
+     rewind(unitR)
+     read(unitR,*,iostat=status)grid_info(1:n)
+     write(*,*)"bmaa binary tile ",grid_info(1:n)
+     if (status<0) exit
+  enddo
+  nt=grid_info(1)
+  !pfaf_number=grid_info(2)
+  write(*,*)'bmaa grid ',grid_info
+  WRITE (unitW) grid_info
 
 ! Number of grids that can be attached
 !-------------------------------------
 
   READ (unitR, *) N_GRIDS
+  write(*,*)'bmaa ngr ',n_grids
   WRITE(unitW   ) N_GRIDS
 
 ! The names and sizes of the grids to be tiled
@@ -38,6 +56,7 @@ Program binarytile
 
   do N=1,N_GRIDS
      READ (unitR, *) NAME
+     write(*,*)'bmaa grn: ',trim(name)
      WRITE(unitW   ) NAME
      READ (unitR, *) IM
      WRITE(unitW   ) IM
