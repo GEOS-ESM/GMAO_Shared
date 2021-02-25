@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Changed
 ### Added
+
+- Extend binary tile to supprot future river route component development
+
 ### Removed
 
 ## [1.3.8] - 2021-02-12
