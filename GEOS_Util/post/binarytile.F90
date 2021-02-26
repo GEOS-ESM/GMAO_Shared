@@ -36,19 +36,16 @@ Program binarytile
   do n=1,max_rec
      rewind(unitR)
      read(unitR,*,iostat=status)grid_info(1:n)
-     write(*,*)"bmaa binary tile ",grid_info(1:n)
      if (status<0) exit
   enddo
   nt=grid_info(1)
   !pfaf_number=grid_info(2)
-  write(*,*)'bmaa grid ',grid_info
   WRITE (unitW) grid_info
 
 ! Number of grids that can be attached
 !-------------------------------------
 
   READ (unitR, *) N_GRIDS
-  write(*,*)'bmaa ngr ',n_grids
   WRITE(unitW   ) N_GRIDS
 
 ! The names and sizes of the grids to be tiled
@@ -56,7 +53,6 @@ Program binarytile
 
   do N=1,N_GRIDS
      READ (unitR, *) NAME
-     write(*,*)'bmaa grn: ',trim(name)
      WRITE(unitW   ) NAME
      READ (unitR, *) IM
      WRITE(unitW   ) IM
