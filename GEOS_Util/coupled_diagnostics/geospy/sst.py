@@ -48,7 +48,7 @@ def plot_clim(exp, da):
     pl.savefig(exp.plot_path+'/sst_am.png')
     pl.show()
 
-def plot_diff(exp, da1, da2):
+def plot_diff(exp, da1, da2, ftype='dif'):
     clim1=da1.groupby('time.season').mean('time')
     clim2=da2.groupby('time.season').mean('time')
     rr=xesmf.Regridder(da2,da1,'bilinear',periodic=True)
@@ -72,18 +72,18 @@ def plot_diff(exp, da1, da2):
 
     pl.figure(1); pl.clf() 
     ax=plotmap.contour(dif.sel(season='DJF'))
-    ax.set_title('SST, DJF')
-#    pl.savefig(exp.plot_path+'/sst_djf.png')
+    ax.set_title('SST-'+ftype+', DJF')
+    pl.savefig(exp.plot_path+'/sst-'+ftype+'_djf.png')
     
     pl.figure(2); pl.clf()
     ax=plotmap.contour(dif.sel(season='JJA'))
-    ax.set_title('SST, JJA')
-#    pl.savefig(exp.plot_path+'/sst_jja.png')
+    ax.set_title('SST-'+ftype+', JJA')
+    pl.savefig(exp.plot_path+'/sst-'+ftype+'_jja.png')
 
     pl.figure(3); pl.clf()
     ax=plotmap.contour(dif.mean('season'))
-    ax.set_title('SST, Annual Mean')
-#    pl.savefig(exp.plot_path+'/sst_am.png')
+    ax.set_title('SST-'+ftype+', Annual Mean')
+    pl.savefig(exp.plot_path+'/sst-'+ftype+'_am.png')
     pl.show()
 
     rr.clean_weight_file()
@@ -97,13 +97,13 @@ def mkplots(exps, dsets):
 
     for ds in dsets[1:]:
         da1=ds[varname]; da1-=TFREEZE
-        plot_diff(exps[0], da, da1)
+        plot_diff(exps[0], da, da1, ftype='dif')
         
     obs=['OISSTv2']
     for name in obs:
         obsvarname='sst'
         da1=importlib.import_module('verification.'+name).ds[obsvarname]
-        plot_diff(exps[0], da, da1)
+        plot_diff(exps[0], da, da1, ftype='obs')
 
 if __name__=='__main__':
     import sys
