@@ -15,9 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix flags for `zonal.f` compilation
 
-### Removed
-
-### Added 
+### [version ??] - 2021-02-28 
 
 - Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
 
