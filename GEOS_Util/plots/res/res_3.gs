@@ -116,6 +116,7 @@ say 'ZDIFILE: 'result
 'sety'
 'setz'
 
+'set lev 900 1' 
 'minmax resdifz'
         dqmax = subwrd(result,1)
         dqmin = subwrd(result,2)

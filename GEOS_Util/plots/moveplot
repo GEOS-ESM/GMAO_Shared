@@ -151,9 +151,11 @@ endif
      endif
 
   set rcfiles  = `/bin/ls -1         $homdir | grep .rc`
-if( $#rcfiles != 0      ) rsync -avx $homdir/*.rc         $webid@${server}:${www}/$expid/RC     
-if(-e $homdir/RC        ) rsync -avx $homdir/RC/          $webid@${server}:${www}/$expid/RC/RC/  
-if(-e $homdir/gcm_run.j ) rsync -avx $homdir/gcm_run.j    $webid@${server}:${www}/$expid/RC     
+if( $#rcfiles != 0      ) rsync -avx $homdir/*.rc         $webid@${server}:${www}/${expid}/RC     
+if(-e $homdir/RC        ) rsync -avx $homdir/RC/          $webid@${server}:${www}/${expid}/RC/RC/  
+if(-e $homdir/gcm_run.j ) rsync -avx $homdir/gcm_run.j    $webid@${server}:${www}/${expid}/RC     
+                                                  ssh $webid@${server} "cd ${www}/${expid}/RC ; find . -type d -exec chmod 755 {} \; "
+                                                  ssh $webid@${server} "cd ${www}/${expid}/RC ; find . -type f -exec chmod 644 {} \; "
 
 if( -e $source/src ) then
      set srcfiles  = `/bin/ls -1 $source/src`
@@ -165,6 +167,8 @@ if( -e $source/src ) then
          if( $#TAGNAME != 0 ) then
              if( -e $source/src/$TAGNAME ) scp $source/src/$TAGNAME $webid@${server}:${www}/$expid/TAG
          endif
+         ssh $webid@${server} "cd ${www}/${expid}/SRC ; find . -type d -exec chmod 755 {} \; "
+         ssh $webid@${server} "cd ${www}/${expid}/SRC ; find . -type f -exec chmod 644 {} \; "
    endif
 endif
 
