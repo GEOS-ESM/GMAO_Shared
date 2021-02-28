@@ -423,7 +423,7 @@ contains
                 DCOOL_(N)  = min( LCOOL_(N)*NU_WATER/USTARW_(N), 1.e-2)  ! Prevent very thick cool layer depth
              end if
 
-             TDROP_(N)    = max(0.0, DCOOL_(N)*QCOOL_(N)/TherCond_WATER) ! Eqn(4) & (13) of F96
+             TDROP_(N)    = max( 0.0, DCOOL_(N)*QCOOL_(N)/TherCond_WATER ) ! Eqn(4) & (13) of F96
 
           end do COOL_SKIN
 
