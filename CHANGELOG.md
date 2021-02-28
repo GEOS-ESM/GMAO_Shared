@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added 
 
-- safeguards on TSKINWTR over sea ice (AOIL version: v0) in atmOcnIntlayer
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
 
 ## [1.3.6] - 2021-01-12
 
