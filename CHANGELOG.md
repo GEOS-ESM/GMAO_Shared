@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Fix for out-of-bounds error in lightning module (#99)
+
+### Changed
+### Added
+
+- Extend binary tile to supprot future river route component development
+
+### Removed
+
+- Remove `CMIP_1977_1982` directory in `GEOS_Util/pre/NSIDC-OSTIA_SST-ICE_blend`
+
+## [1.3.8] - 2021-02-12
+
+### Changed
+
+- Plot and stats updates
+
+### Removed
+
+- Eliminated references to MAPL_COMM - these are no longer used and will
+be deleted in future releases of MAPL
+
+## [1.3.7] - 2021-01-29
+
 ### Changed
 
 - Plot and stats updates
@@ -14,9 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix flags for `zonal.f` compilation
-
-### Removed
-### Added
 
 ## [1.3.6] - 2021-01-12
 

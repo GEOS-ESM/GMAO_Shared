@@ -58,6 +58,7 @@ sub get_siteID {
         else       { $siteID = "nas" }
     }
     $siteID = "nas"  if $site =~ /^r\d+i\d+n\d+/;
+    $siteID = "nas"  if $site =~ /^r\d+c\d+t\d+n\d+/;
 
     # NCCS sites
     #-----------

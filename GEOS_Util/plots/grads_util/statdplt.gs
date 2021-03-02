@@ -17,14 +17,14 @@ function stdiff (args)
 ****        F Variance         =>  FVAR =   1/N * SUM[ (F-FBAR)**2 ]        ****
 ****        A Variance         =>  AVAR =   1/N * SUM[ (A-ABAR)**2 ]        ****
 ****        CoVariance         =>  COV  =   1/N * SUM[ (F-FBAR)*(A-ABAR) ]  ****
+****                                                                        ****
+****        BIAS      Error    =>  BIA  = [ FBAR - ABAR ]**2                ****
 ****        Amplitude Error    =>  AMP  = [ FSTD - ASTD ]**2                ****
-****                                    + [ FBAR - ABAR ]**2                ****
 ****        Phase     Error    =>  PHZ  = 2*[ FSTD*ASTD - COV ]             ****
 ****                                                                        ****
-****        Mean Square Error  =   BIAS**2         + Variance               ****
-****                           =   Amplitude Error + Phase Error            ****
-****                      MSE  =   VAR + MES                                ****
-****                           =   AMP + PHZ                                ****
+****        Mean Square Error  =   BIAS- + Amplitude- + Phase-Error         ****
+****                                                                        ****
+****                      MSE  =   BIA + AMP + PHZ                          ****
 ****                                                                        ****
 ********************************************************************************
 
@@ -135,8 +135,8 @@ if( tipe = Dres )
 else
 *   To Unify Contour Interval and Scaling, use: delDmse , otherwise use: del'type'
 *   ------------------------------------------------------------------------------
-*  'define dumm = regrid2(  delDmse,  .25, .25, bs_p1, 0, -90 )'
-   'define dumm = regrid2(  del'type',.25, .25, bs_p1, 0, -90 )'
+   'define dumm = regrid2(  delDmse,  .25, .25, bs_p1, 0, -90 )'
+*  'define dumm = regrid2(  del'type',.25, .25, bs_p1, 0, -90 )'
 endif
 
        dummy  = getstuff( 'dumm' )
