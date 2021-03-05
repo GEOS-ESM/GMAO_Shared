@@ -44,7 +44,7 @@ class Plot2d(Plot):
             ax=pl.gca()
 
         if mode in ('filled', 'both'):
-            da.plot.contourf(ax=ax,**self.fill_opts)
+            cs=da.plot.contourf(ax=ax,**self.fill_opts)
         
         if mode in ('contour', 'both'):
             cs=da.plot.contour(ax=ax,**self.contour_opts)
