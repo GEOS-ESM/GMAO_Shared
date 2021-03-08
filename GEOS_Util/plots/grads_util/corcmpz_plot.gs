@@ -887,57 +887,58 @@ if( level >= levmin )
 zcnt = zcnt + 1
 
 'minmax rave0'
-maxval = subwrd(result,1)
+if( subwrd(result,1) != 1e+15 )
+    maxval = subwrd(result,1)
 minval = subwrd(result,2)
 
-axmax  =   1.08 * maxval
+    axmax  =   1.08 * maxval
 axmin  = 0.92 * minval
 
-'set vpage off'
-'set parea off'
-'set grads off'
-'set parea 2.25 9.75 4.0 7.5'
-'set axlim 'axmin' 'axmax
-'d rave0'
-'d rave1'
+    'set vpage off'
+    'set parea off'
+    'set grads off'
+    'set parea 2.25 9.75 4.0 7.5'
+    'set axlim 'axmin' 'axmax
+    'd rave0'
+    'd rave1'
 'q gr2xy 1 1'
- xval = subwrd(result,3)
- yval = subwrd(result,6)
-
-  if( xval != environment )
-
-    say 'xval = 'xval
-    say 'yval = 'yval
-    say 'GR2XY Result, xval:yval = 'result
-   'set line 2 1 3'
-   'draw line 'xval' 'yval' 4 'yval
+     xval = subwrd(result,3)
+     yval = subwrd(result,6)
+    
+      if( xval != environment )
+        say 'xval = 'xval
+        say 'yval = 'yval
+        say 'GR2XY Result, xval:yval = 'result
+       'set line 2 1 3'
+       'draw line 'xval' 'yval' 4 'yval
     yval = yval - 0.03
-    say 'New yval = 'yval
-   'q xy2gr 'xval' 'yval
-    say 'XY2GR Result: 'result
+        say 'New yval = 'yval
+       'q xy2gr 'xval' 'yval
+        say 'XY2GR Result: 'result
     thickness.xpos.z = 1.0 - subwrd(result,6)
-    thickness.xpos.z = thickness.xpos.z * 1000
-    zsum = zsum + thickness.xpos.z
-    if( thickness.xpos.z > zmax ) ; zmax = thickness.xpos.z ; endif
-    if( thickness.xpos.z < zmin ) ; zmin = thickness.xpos.z ; endif
-   'set line 3 1 3'
-   'draw line 3.5 'yval' 7.5 'yval
-    say ' '
-    say 'z = 'z'  Level: 'level'  LEVMIN: 'levmin'  LINE_THICKNESS x 1000 = 'thickness.xpos.z
-    say 'zmin = 'zmin'  zmax = 'zmax'  zsum = 'zsum
-    say ' '
-    say 'Hit Enter to Continue ...'
-    pull flag
-   'c'
+        thickness.xpos.z = thickness.xpos.z * 1000
+        zsum = zsum + thickness.xpos.z
+        if( thickness.xpos.z > zmax ) ; zmax = thickness.xpos.z ; endif
+        if( thickness.xpos.z < zmin ) ; zmin = thickness.xpos.z ; endif
+       'set line 3 1 3'
+       'draw line 3.5 'yval' 7.5 'yval
+        say ' '
+        say 'z = 'z'  Level: 'level'  LEVMIN: 'levmin'  LINE_THICKNESS x 1000 = 'thickness.xpos.z
+        say 'zmin = 'zmin'  zmax = 'zmax'  zsum = 'zsum
+        say ' '
+        say 'Hit Enter to Continue ...'
+        pull flag
+       'c'
+      else
+        zsum = 0
+        zmin = 0
+      endif
 
-  else
-    zsum = 0
-    zmin = 0
-  endif
-
+endif
 endif
 z = z + 1
 endwhile
+
    zsum = zsum / zcnt
    say 'Average zthick = 'zsum
 
