@@ -43,6 +43,7 @@
 !  07nov2002  Dee       Initial code.
 !  08apr2004  Todling   Added add_surf routine to handle real perturbations
 !  12Dec2004  Todling   Allow adding two perturbations fields
+!  10Mar2021  Zhu       Add pblh
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -96,7 +97,7 @@ CONTAINS
 !  vector {\tt w}. For now, the data structure (type(dyn_vect)) used
 !  for a perturbation is identical to that used for a dynamics state.
 !
-!  Perturbation fields are u, v, pt, q (3D), and Ts, ps (2D).
+!  Perturbation fields are u, v, pt, q (3D), and Ts, ps (2D), PBLH (2D).
 !  Coordinates are inherited from the reference state. In particular,
 !  the vertical coordinate is pressure as defined by the reference ptop
 !  and delp.
@@ -128,6 +129,7 @@ CONTAINS
    dw%v    = 0.0
    dw%pt   = 0.0
    dw%phis = 0.0
+   dw%PBLH = 0.0
    dw%q    = 0.0
 
 !  Set meaningless fields to UNDEF
@@ -515,6 +517,8 @@ CONTAINS
                                               !  0 - all is well
                                               !  1 - zero thickness in w
                                               !  2 - w and dw coordinates differ
+   integer :: i,j
+
 !
 ! !DESCRIPTION: This routine computes w = w '+' a*dw,
 !               where '+' includes mass adjustment.
@@ -571,6 +575,7 @@ CONTAINS
 !  Add all fields
 !  --------------
    w%ts   = w%ts + a * dw%ts
+   w%PBLH = w%PBLH + a * dw%PBLH
    w%u    = w%u  + a * dw%u
    w%v    = w%v  + a * dw%v
    w%pt   = w%pt + a * dw%pt
@@ -580,6 +585,12 @@ CONTAINS
    endif
    mlm  = min(w%grid%lm,dw%grid%lm)
    w%q(:,:,:,1:mlm)  = w%q(:,:,:,1:mlm) + a * dw%q(:,:,:,1:mlm)
+
+   do i = 1, w%grid%im
+      do j = 1, w%grid%jm
+         w%PBLH(i,j) = max ( 0.0, w%PBLH(i,j) )
+      end do
+   end do
 
 !  Add/subtract mass from lowest layers ('shaving method'),
 !                                and ensure non-negative q
@@ -904,6 +915,7 @@ CONTAINS
    dw%delp = value * dw%delp
    dw%ps   = value * dw%ps
    dw%ts   = value * dw%ts
+   dw%PBLH = value * dw%PBLH
    print *, 'dynp_set: scaled field by: ', value
 
    end subroutine dynp_scale
