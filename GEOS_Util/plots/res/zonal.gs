@@ -87,13 +87,14 @@ say 'EXPDSC: 'expdsc
          rc=checkname(vsts)
      if( rc=0 )
        'makezf vsts vsts z0'
-else
+     else
+        say '[Vstar Tstar] not found, setting to zero'
        'set x 1'
        'sety'
        'setz'
        'set t '1' 'tdim
        'define vstsz0 = zerosz'
-endif
+     endif
 
 * Assume USVS Quadratic is in UFILE
 * ---------------------------------
@@ -101,13 +102,14 @@ endif
          rc=checkname(usvs)
      if( rc=0 )
        'makezf usvs usvs z0'
-else
+     else
+        say '[Ustar Vstar] not found, setting to zero'
        'set x 1'
        'sety'
        'setz'
        'set t '1' 'tdim
        'define usvsz0 = zerosz'
-endif
+     endif
 
 * Assume USWS Quadratic is in UFILE
 * ---------------------------------
@@ -115,13 +117,14 @@ endif
          rc=checkname(usws)
      if( rc=0 )
        'makezf usws usws z0'
-else
+     else
+        say '[Ustar Wstar] not found, setting to zero'
        'set x 1'
        'sety'
        'setz'
        'set t '1' 'tdim
        'define uswsz0 = zerosz'
-endif
+     endif
 
 
 * Define Pressure Variables
