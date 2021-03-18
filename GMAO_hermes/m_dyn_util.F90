@@ -19,12 +19,14 @@
 ! !REVISION HISTORY:
 !
 !  30Aug2017   Todling    Initial wrap from collected utils
+!  10Jun2020   Todling    Add two versions of qsat
 !
 !-------------------------------------------------------------------------
 !EOP
 
    public :: dyn_util_tv2t
    public :: Dyn_Scale_by_TotEne
+   public :: Dyn_Qsat
 
    interface Dyn_Util_Tv2T
       module procedure tv2t_
@@ -37,6 +39,10 @@
    end interface
    interface Dyn_TotEne_Dotp
       module procedure dotp_
+   end interface
+   interface Dyn_Qsat
+      module procedure becov_qsat_
+      module procedure gsi_qsat_
    end interface
 
 CONTAINS
@@ -433,8 +439,8 @@ CONTAINS
         tlat=tlat+rlat
         glats(j,1)=pi180*ulat
         glats(j,2)=pi180*tlat
-        slats(j,1)=sin(ulat)
-        slats(j,2)=sin(tlat)
+        slats(j,1)=dsin(real(ulat,8))
+        slats(j,2)=dsin(real(tlat,8))
       enddo
 !
        jweights(1,1)=0.d0  ! not used
@@ -475,6 +481,371 @@ CONTAINS
          close (lu)
       endif
       end subroutine dotp_
+
+!.................................................................
+
+  subroutine becov_qsat_(qsat,temp,pmk,lat2,lon2,icesat)
+!
+!   input argument list:
+!     temp     - virtual temperature (K)
+!     pmk      - mean-layer pressure (Pa)
+!     lat2     - number of in the sub-domain array
+!     lon2     - number of longitudes in the sub-domain array
+!     icesat   - logical flag:  T=include ice and ice-water effects,
+!                depending on t, in qsat and esat calcuations.
+!                otherwise, compute esat and qsat with respect to water surface
+!                depending on t, in qsat and esat calcuations.
+!                otherwise, compute esat and qsat with respect to water surface
+!
+!   output argument list:
+!     qsat     - specific humidity (input), saturation specific humidity (output)
+!  10Jun2020 Todling  pulled it from NCEP_bkgecov into here
+!                     (a) 3d into 2d
+!                     (b) note that routine is invariant to lat/lon and lon/lat 
+!                     (c) note that routine is invariant wrt vertical grid
+!                     orientation
+!
+  use m_realkinds, only : fp_kind => kind_r4 
+! use m_const, only: fv=>zvir 
+! use m_const, only: rv=>rvap
+! use m_const, only: rd=>rgas
+! use m_const, only: cvap=>cpv
+! use m_const, only: hvap=>alhl
+  implicit none
+
+  logical,intent(in):: icesat
+  integer,intent(in):: lat2,lon2
+  real(fp_kind),intent(inout),dimension(:,:):: qsat
+  real(fp_kind),intent(in),dimension(:,:):: temp
+  real(fp_kind),intent(in),dimension(:,:):: pmk
+
+  real,parameter :: rd     = 2.8705e+2_fp_kind              !  gas constant of dry air (J/kg/K)
+  real,parameter :: rv     = 4.6150e+2_fp_kind              !  gas constant of h2o vapor (J/kg/K)
+  real,parameter :: fv     = rv/rd-1._fp_kind               !  used in virtual temp.  equation (adim)
+  real,parameter :: cvap   = 1.8460e+3_fp_kind              !  specific heat of h2o vapor      (J/kg/K)
+  real,parameter :: hvap   = 2.5000e+6_fp_kind              !  latent heat of h2o condensation (J/kg)
+
+  real,parameter :: cliq   = 4.1855e+3_fp_kind              !  specific heat of liquid h2o     (J/kg/K)
+  real,parameter :: psat   = 6.1078e+2_fp_kind              !  pressure at h2o triple point    (Pa)
+  real,parameter :: csol   = 2.1060e+3_fp_kind              !  specific heat of solid h2o (ice)(J/kg/K)
+  real,parameter :: ttp    = 2.7316e+2_fp_kind              !  temperature at h2o triple point (K)
+  real,parameter :: hfus   = 3.3358e+5_fp_kind              !  latent heat of h2o fusion       (J/kg)
+
+  real,parameter :: zero=0.0_fp_kind
+  real,parameter :: one=1.0_fp_kind
+
+  real,parameter :: dldt=cvap-cliq
+  real,parameter :: xa=-dldt/rv
+  real,parameter :: xb=xa+hvap/(rv*ttp)
+  real,parameter :: hsub=hvap+hfus
+  real,parameter :: dldti=cvap-csol 
+  real,parameter :: xai=-dldti/rv
+  real,parameter :: xbi=xai+hsub/(rv*ttp)
+  real,parameter :: tmix=ttp-20.0_fp_kind
+  real,parameter :: eps=rd/rv
+  real,parameter :: omeps = 1._fp_kind-eps
+  integer k,j,i
+  real(fp_kind) pw,q,tdry,tr,es,qs,esi,esw
+  real(fp_kind) w,pscl,esmax
+!
+  pscl = 1.00_fp_kind ! input pressure in Pa as required
+
+  if (icesat) then
+!    do k = 1,nsig
+        do j = 1,lon2
+           do i = 1,lat2
+
+              pw  = pmk(i,j)
+              pw  = pscl*pw
+! maximum vapor pressure 5% of atmospheric pressure
+              esmax=0.05*pw
+
+              q  = qsat(i,j)
+              if (q.lt.zero) q=zero
+
+              tdry = temp(i,j)/(one+fv*q)
+              tr = ttp/tdry
+              if (tdry >= ttp) then
+                 es = psat * (tr**xa) * exp(xb*(one-tr))
+              elseif (tdry < tmix) then
+                 es = psat * (tr**xai) * exp(xbi*(one-tr))
+              else
+                 w  = (tdry - tmix) / (ttp - tmix)
+                 es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
+                      + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
+              endif
+
+              es = min(es,esmax)
+              qs = eps * es / (pw - omeps * es)
+
+              if (qs.lt.qsat(i,j)) then
+                 tdry = temp(i,j)/(one+fv*qs)
+                 tr = ttp/tdry
+                 if (tdry >= ttp) then
+                    es = psat * (tr**xa) * exp(xb*(one-tr))
+                 elseif (tdry < tmix) then
+                    es = psat * (tr**xai) * exp(xbi*(one-tr))
+                 else
+                    w  = (tdry - tmix) / (ttp - tmix)
+                    es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
+                         + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
+                 endif
+
+                 es = min(es,esmax)
+                 qs = eps * es / (pw - omeps * es)
+
+                 tdry = temp(i,j)/(one+fv*qs)
+                 tr = ttp/tdry
+                 if (tdry >= ttp) then
+                    es = psat * (tr**xa) * exp(xb*(one-tr))
+                 elseif (tdry < tmix) then
+                    es = psat * (tr**xai) * exp(xbi*(one-tr))
+                 else
+                    w  = (tdry - tmix) / (ttp - tmix)
+                    es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
+                         + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
+                 endif
+                 es = min(es,esmax)
+                 qs = eps * es / (pw - omeps * es)
+
+              end if
+
+              qsat(i,j) = qs
+
+           end do
+        end do
+!    end do
+
+!
+!     Compute saturation values with respect to water surface
+  else
+!    do k = 1,nsig
+        do j = 1,lon2
+           do i = 1,lat2
+
+              pw = pmk(i,j)
+              pw  = pscl*pw
+! maximum vapor pressure 5% of atmospheric pressure
+              esmax=0.05*pw
+
+              q  = qsat(i,j)
+              if (q.lt.zero) q=zero
+
+              tdry = temp(i,j)/(one+fv*q)
+              tr = ttp/tdry
+              es = psat * (tr**xa) * exp(xb*(one-tr))
+              es = min(es,esmax)
+              qs = eps * es / (pw - omeps * es)
+
+              if (qs.lt.qsat(i,j)) then
+                 tdry = temp(i,j)/(one+fv*qs)
+                 tr = ttp/tdry
+                 es = psat * (tr**xa) * exp(xb*(one-tr))
+                 es = min(es,esmax)
+                 qs = eps * es / (pw - omeps * es)
+                 tdry = temp(i,j)/(one+fv*qs)
+                 tr = ttp/tdry
+                 es = psat * (tr**xa) * exp(xb*(one-tr))
+                 es = min(es,esmax)
+                 qs = eps * es / (pw - omeps * es)
+
+              end if
+              qsat(i,j) = qs
+
+
+           end do
+        end do
+!    end do
+
+  endif
+
+  return
+  end subroutine becov_qsat_
+
+!.................................................................
+
+  subroutine gsi_qsat_(qsat,tsen,prsl,lat2,lon2,nsig,ice,ntop)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    genqsat
+!   prgmmr: derber           org: np23                date: 1998-01-14
+!
+! abstract: obtain saturation specific humidity for given temperature.
+!
+! program history log:
+!   1998-01-14  derber
+!   1998-04-05  weiyu yang
+!   1999-08-24  derber, j., treadon, r., yang, w., first frozen mpp version
+!   1903-10-07  Wei Gu, bug fixes,if qs<0,then set qs=0; merge w/ GSI by R Todling
+!   2003-12-23  kleist, use guess pressure, adapt module framework
+!   2004-05-13  kleist, documentation
+!   2004-06-03  treadon, replace ggrid_g3 array with ges_* arrays
+!   2005-02-23  wu, output dlnesdtv
+!   2005-11-21  kleist, derber  add dmax array to decouple moisture from temp and
+!               pressure for questionable qsat
+!   2006-02-02  treadon - rename prsl as ges_prsl
+!   2006-09-18  derber - modify to limit saturated values near top
+!   2006-11-22  derber - correct bug:  es<esmax should be es<=esmax
+!   2008-06-04  safford - rm unused vars
+!   2010-03-23  derber - simplify and optimize
+!   2010-03-24  derber - generalize so that can be used for any lat,lon,nsig and any tsen and prsl (for hybrid)
+!   2010-12-17  pagowski - add cmaq
+!   2011-08-15  gu/todling - add pseudo-q2 options
+!   2014-12-03  derber - add additional threading
+!   2018-02-15  wu - add code for fv3_regional option
+!   2020-05-14  todling - opt arg ntop to accommodate flipped pressure levels wrt to GSI
+!                       - update top mid-pressure to 0 Pa
+!
+!   input argument list:
+!     tsen      - input sensibile temperature field (lat2,lon2,nsig)
+!     prsl      - input layer mean pressure field (lat2,lon2,nsig)
+!     lat2      - number of latitudes                              
+!     lon2      - number of longitudes                             
+!     nsig      - number of levels                              
+!     ice       - logical flag:  T=include ice and ice-water effects,
+!                 depending on t, in qsat calcuations.
+!                 otherwise, compute qsat with respect to water surface
+!     ntop      - index of top level (optional)
+!
+!   output argument list:
+!     qsat      - saturation specific humidity (output)
+!
+! remarks: see modules used
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+!$$$
+  use m_realkinds, only : r_kind => kind_r4
+  use m_const, only: fv=>zvir
+  use m_const, only: rv=>rvap
+  use m_const, only: rd=>rgas
+  use m_const, only: cvap=>cpv
+  use m_const, only: hvap=>alhl
+  use m_const, only: hfus=>alhf
+  use m_const, only: cliq=>capwtr
+  use m_const, only: csol=>capice
+! use constants, only: xai,tmix,xb,omeps,eps,xbi,one,xa,psat,ttp
+  implicit none
+
+  logical                      ,intent(in   ) :: ice
+  integer                      ,intent(in   ) :: lat2,lon2,nsig
+  real(r_kind),dimension(lat2,lon2,nsig),intent(  out) :: qsat
+  real(r_kind),dimension(lat2,lon2,nsig),intent(in   ) :: tsen,prsl
+  integer,optional             ,intent(in   ) :: ntop
+
+! real,parameter :: rd     = 2.8705e+2_r_kind              !  gas constant of dry air (J/kg/K)
+! real,parameter :: rv     = 4.6150e+2_r_kind              !  gas constant of h2o vapor (J/kg/K)
+! real,parameter :: fv     = rv/rd-1._r_kind               !  used in virtual temp.  equation (adim)
+! real,parameter :: cvap   = 1.8460e+3_r_kind              !  specific heat of h2o vapor      (J/kg/K)
+! real,parameter :: hvap   = 2.5000e+6_r_kind              !  latent heat of h2o condensation (J/kg)
+
+! real,parameter :: cliq   = 4.1855e+3_r_kind              !  specific heat of liquid h2o     (J/kg/K)
+  real,parameter :: psat   = 6.1078e+2_r_kind              !  pressure at h2o triple point    (Pa)
+! real,parameter :: csol   = 2.1060e+3_r_kind              !  specific heat of solid h2o (ice)(J/kg/K)
+  real,parameter :: ttp    = 2.7316e+2_r_kind              !  temperature at h2o triple point (K)
+! real,parameter :: hfus   = 3.3358e+5_r_kind              !  latent heat of h2o fusion       (J/kg)
+
+  real,parameter :: zero=0.0_r_kind
+  real,parameter :: one=1.0_r_kind
+
+  real,parameter :: dldt=cvap-cliq
+  real,parameter :: xa=-dldt/rv
+  real,parameter :: xb=xa+hvap/(rv*ttp)
+  real,parameter :: hsub=hvap+hfus
+  real,parameter :: dldti=cvap-csol
+  real,parameter :: xai=-dldti/rv
+  real,parameter :: xbi=xai+hsub/(rv*ttp)
+  real,parameter :: tmix=ttp-20.0_r_kind
+  real,parameter :: eps=rd/rv
+  real,parameter :: omeps = 1._r_kind-eps
+
+! Declare local parameters
+  integer         k,j,i,nbot,ntop_
+  real(r_kind) pw,tdry,tr,es,es2
+  real(r_kind) w,onep3,esmax
+  real(r_kind) esi,esw
+  real(r_kind),dimension(lat2):: mint,estmax
+  integer,dimension(lat2):: lmint
+
+  onep3 = 1.0_r_kind
+  ntop_ = nsig ! GSI top level index
+  if(present(ntop)) then
+    ntop_ = ntop
+  endif
+  nbot = nsig-ntop_+1
+
+  do j=1,lon2
+     do i=1,lat2
+        mint(i)=340._r_kind
+        lmint(i)=ntop_
+     end do
+     do k=1,nsig
+        do i=1,lat2
+           if((prsl(i,j,k) < 30._r_kind  .and.  &
+               prsl(i,j,k) >  0._r_kind) .and.  &
+               tsen(i,j,k) < mint(i))then
+              lmint(i)=k
+              mint(i)=tsen(i,j,k)
+           end if
+        end do
+     end do
+     do i=1,lat2
+        tdry = mint(i)
+        if( abs(tdry) < 1.0e-8_r_kind ) tdry = 1.0e-8_r_kind
+        tr = ttp/tdry
+        if (tdry >= ttp .or. .not. ice) then
+           estmax(i) = psat * (tr**xa) * exp(xb*(one-tr))
+        elseif (tdry < tmix) then
+           estmax(i) = psat * (tr**xai) * exp(xbi*(one-tr))
+        else
+           w  = (tdry - tmix) / (ttp - tmix)
+           estmax(i) =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
+                   + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
+        endif
+     end do
+
+     do k = 1,nsig
+        do i = 1,lat2
+           tdry = tsen(i,j,k)
+           if( abs(tdry) < 1.0e-8_r_kind ) tdry = 1.0e-8_r_kind
+           tr = ttp/tdry
+           if (tdry >= ttp .or. .not. ice) then
+              es = psat * (tr**xa) * exp(xb*(one-tr))
+           elseif (tdry < tmix) then
+              es = psat * (tr**xai) * exp(xbi*(one-tr))
+           else
+              esw = psat * (tr**xa) * exp(xb*(one-tr)) 
+              esi = psat * (tr**xai) * exp(xbi*(one-tr)) 
+              w  = (tdry - tmix) / (ttp - tmix)
+!             es =  w * esw + (one-w) * esi
+              es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
+                       + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
+
+           endif
+
+           pw = onep3*prsl(i,j,k)
+           esmax = es
+           if (nbot==1) then
+              if(lmint(i) < k)then
+                 esmax=0.1_r_kind*pw
+                 esmax=min(esmax,estmax(i))
+              end if
+           else
+              if(lmint(i) > k)then
+                 esmax=0.1_r_kind*pw
+                 esmax=min(esmax,estmax(i))
+              end if
+           end if
+           es2=min(es,esmax)
+           qsat(i,j,k) = eps * es2 / (pw - omeps * es2)
+
+        end do
+     end do
+  end do
+  return
+  end subroutine gsi_qsat_
 
 !.................................................................
 

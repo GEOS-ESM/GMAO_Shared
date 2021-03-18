@@ -14,6 +14,7 @@
 #   11Nov2009 Todling  Initial code (very simple minded)
 #   04Dec2009 Todling  Add purge and sfx opts
 #   02Dec2011 Todling  Add opt clean
+#   24Feb2020 Todling  Allow for high freq background (up to 1mn)
 #
 #--------------------------------------------------
 use Env;                 # make env vars readily available
@@ -43,7 +44,11 @@ use lib ( "$FindBin::Bin", "$FVROOT/bin", "$ESMADIR/$ARCH/bin" );
 # Special-handle first file
 # -------------------------
 $nymd = $nymdb;  $nhms = $nhmsb;
-$hh   = substr($nhms,0,2);
+if ( $type =~ "internal" ) {
+  $hh   = substr($nhms,0,2);
+} else {
+  $hh   = substr($nhms,0,4);
+}
 $sfname = "$expid.$type.${nymd}_${hh}z.$suffix";
 $efname = "$expid.$type.${nymd}_${hh}z.iter${idx}.$suffix";
 if ( $idx >= 99 ) {
@@ -73,7 +78,11 @@ if ( ! $opt_clean ) {
 # ----------------------------------
 while ( $nymd != $nymde || $nhms != $nhmse ) {
    ($nymd,$nhms) = tick($nymd,$nhms,$dtmin*60);
-   $hh     = substr($nhms,0,2);
+   if ( $type =~ "internal" ) {
+      $hh     = substr($nhms,0,2);
+   } else {
+      $hh     = substr($nhms,0,4);
+   }
    $sfname = "$expid.$type.${nymd}_${hh}z.$suffix";
    $efname = "$expid.$type.${nymd}_${hh}z.iter${idx}.$suffix";
    if ( $idx >= 99 ) {

@@ -31,7 +31,8 @@ my ($colons, $wait, %ids, $qstat);
     while (1) {
         # get qstat output
         #-----------------
-        $qstatStr = `qstat -u $ENV{"USER"}`;
+        #--$qstatStr = `qstat -u $ENV{"USER"}`;
+        $qstatStr = `squeue -u $ENV{"USER"}`;
 
         # which IDs are found in qstat output
         #------------------------------------
@@ -101,7 +102,8 @@ sub init {
 
     # get qstat command
     #------------------
-    $qstat = `which qstat` or exit 1;
+    #--$qstat = `which qstat` or exit 1;
+    $qstat = `which squeue` or exit 1;
 }
 
 #=======================================================================
