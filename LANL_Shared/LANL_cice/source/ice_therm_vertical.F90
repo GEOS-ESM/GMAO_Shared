@@ -1890,6 +1890,11 @@
          enddo
       enddo
 
+      if(observe(1,1)) then
+          write(nu_diag,*) 'in t_c a:', fsurfn(1,1)
+          write(nu_diag,*) 'in t_c b:', fcondtopn(1,1)
+      endif
+
       !-----------------------------------------------------------------
       ! Compute thermal conductivity at interfaces (held fixed during
       !  subsequent iterations).
@@ -2241,6 +2246,7 @@
                   else
                      l_cold(m) = .false.
                      tbc_type(m) = DIRICHLET
+                     flag_mixed(ij) = .true.
                   endif
                enddo
             endif
@@ -5488,6 +5494,12 @@
                           'fhocnn = ',fhocnn(i,j) 
          write(nu_diag,*) 'flatn =', flatn(i,j), 'fswint = ',fswint(i,j)
          write(nu_diag,*) 'fsurfn =', fsurfn(i,j)
+         write(nu_diag,*) 'fcondtopn =', fcondtopn(i,j)
+         write(nu_diag,*) 'Tsf =', Tsf(ij)
+         if(flag_mixed(ij)) then
+            write(nu_diag,*) 'Dirichelet BC used'
+         endif 
+
          return
          endif
       enddo
