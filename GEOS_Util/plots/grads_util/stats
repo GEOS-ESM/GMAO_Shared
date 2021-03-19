@@ -2,6 +2,10 @@ function stats (args)
 name = subwrd(args,1)
 pi = 3.141592654
 
+'getinfo    undef'
+            undef = result
+'set undef 'undef
+
 'getinfo xfreq'
          xfreq = result
 'getinfo zfreq'
@@ -42,35 +46,142 @@ if( xfreq = 'fixed' & zfreq = 'varying' )
      if( zlev2 < zlev1 )
          zmin  = zlev2
          zmax  = zlev1
-      endif
-      n = 0
-      z = zmin
-     'set z 'z
-     'define avg = lat-lat'
-     'define rms = lat-lat'
-     while( z<=zmax )
-        'set z 'z
-        'define avg = avg + ave('name'        *cos(lat*'pi'/180),lat='lat1',lat='lat2')'
-        'define rms = rms + ave( pow('name',2)*cos(lat*'pi'/180),lat='lat1',lat='lat2')'
-         n = n + 1
-         z = z + 1
-     endwhile
-        'define avg = avg / 'n
-        'define rms = rms / 'n
-        'set z 'zmin' 'zmax
-        'define varz = ('name')*('name') - avg*avg'
+     endif
+
+     'set lat 'lat1
+     'getinfo  ypos'
+               ypos1=result
+     'set lat 'lat2
+     'getinfo  ypos'
+               ypos2=result
 
       n = 0
       z = zmin
      'set z 'z
-     'define var = lat-lat'
+     'set lat 'lat1
+     'define avg = 0'
+     'define rms = 0'
      while( z<=zmax )
         'set z 'z
-        'define var = var + ave(varz*cos(lat*'pi'/180),lat='lat1',lat='lat2')'
-         n = n + 1
+
+*       Old Method (Fails where UNDEF)
+*       ------------------------------
+*       'define avg = avg + ave('name'        ,lat='lat1',lat='lat2')'
+*       'define rms = rms + ave( pow('name',2),lat='lat1',lat='lat2')'
+*                 n = n + 1
+
+*       New Method (Accounts for UNDEF)
+*       -------------------------------
+        sumave = 0
+        sumrms = 0
+        sumcos = 0
+
+               y =ypos1
+        while( y<=ypos2 )
+        'set y 'y
+        'd 'name
+             value = subwrd(result,4)
+         if( value != undef )
+            'd 'name'*cos(lat*'pi'/180)'
+             value = subwrd(result,4)
+             sumave = sumave + value
+            'd pow('name',2)*cos(lat*'pi'/180)'
+             value = subwrd(result,4)
+             sumrms = sumrms + value
+            'd cos(lat*'pi'/180)'
+             value = subwrd(result,4)
+             sumcos = sumcos + value
+         endif
+         y = y + 1
+         endwhile
+
+         if( sumcos != 0 )
+            'd 'sumave'/'sumcos
+             ratave = subwrd(result,4)
+            'define avg = avg + 'ratave
+            'd 'sumrms'/'sumcos
+             ratrms = subwrd(result,4)
+            'define rms = rms + 'ratrms
+             n = n + 1
+         endif
+
          z = z + 1
      endwhile
+        'define avg = avg / 'n
+        'define rms = rms / 'n
+
+* Prints for Old vs New Methods
+* -----------------------------
+*    'd avg'
+*       avg  = subwrd(result,4)
+*    'd avg2'
+*       avg2 = subwrd(result,4)
+*    'd rms'
+*       rms  = subwrd(result,4)
+*    'd rms2'
+*       rms2 = subwrd(result,4)
+*    say 'AVG1 = 'avg '  RMS1 = 'rms
+*    say 'AVG2 = 'avg2'  RMS2 = 'rms2
+* -----------------------------
+
+     'set z   'zmin' 'zmax
+     'set lat 'lat1' 'lat2
+     'define varz = ('name')*('name') - avg*avg'
+
+      n = 0
+      z = zmin
+     'set z 'z
+     'set lat 'lat1
+     'define var  = 0'
+     while( z<=zmax )
+        'set z 'z
+
+*       Old Method (Fails where UNDEF)
+*       ------------------------------
+*       'define var = var + ave(varz,lat='lat1',lat='lat2')'
+*        n = n + 1
+
+*       New Method (Accounts for UNDEF)
+*       -------------------------------
+        sumvar = 0
+        sumcos = 0
+               y =ypos1
+        while( y<=ypos2 )
+        'set y 'y
+        'd varz'
+             value = subwrd(result,4)
+         if( value != undef )
+            'd varz*cos(lat*'pi'/180)'
+             value = subwrd(result,4)
+             sumvar = sumvar + value
+            'd cos(lat*'pi'/180)'
+             value = subwrd(result,4)
+             sumcos = sumcos + value
+         endif
+         y = y + 1
+         endwhile
+
+         if( sumcos != 0 )
+            'd 'sumvar'/'sumcos
+             ratvar = subwrd(result,4)
+            'define var = var + 'ratvar
+             n = n + 1
+         endif
+         z = z + 1
+     endwhile
+
         'define var = var / 'n
+
+* Prints for Old vs New Methods
+* -----------------------------
+*    'd var'
+*       var  = subwrd(result,4)
+*    'd var2'
+*       var2 = subwrd(result,4)
+*    say 'VAR1 = 'var
+*    say 'VAR2 = 'var2
+* -----------------------------
+
 endif
 
 'set lon 'lon1

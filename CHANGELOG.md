@@ -8,9 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+
+- Fix for out-of-bounds error in lightning module (#99)
+
 ### Changed
+
+- Stats plot updates
+
 ### Added
+
+- Extend binary tile to supprot future river route component development
+
 ### Removed
+
+- Remove `CMIP_1977_1982` directory in `GEOS_Util/pre/NSIDC-OSTIA_SST-ICE_blend`
 
 ## [1.3.8] - 2021-02-12
 
