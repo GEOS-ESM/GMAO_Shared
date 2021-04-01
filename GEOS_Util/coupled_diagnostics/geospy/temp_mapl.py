@@ -21,6 +21,10 @@ def plot_clim(exp, ds):
     var=ds[varname].sel(time=slice(*exp.dates)).mean('time')-TFREEZE
     var=var.assign_coords({'lev': -var.lev})
     mask=1.0-np.isnan(var)
+    wght=mask*ds.dx
+    zonal=utils.average(var,'lon',wght)
+    wght=mask*ds.dy
+    equatorial=utils.average(var.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
 
     cbar_kwargs={'label': '$^0C$',
     }
@@ -34,39 +38,38 @@ def plot_clim(exp, ds):
                   'colors': 'black',
                   'yincrease': False}
 
-    plot=plots.Plot2d(fill_opts=fill_opts, contour_opts=contour_opts)
+    clab_opts={'fmt': '%1.0f'}
+
+    plot=plots.Plot2d(fill_opts=fill_opts, contour_opts=contour_opts, clab_opts=clab_opts)
 
     '''
     Plot zonal mean.
     '''
-
     pl.figure(1); pl.clf()
-    wght=mask*ds.dx
-    plot_var=utils.average(var,'lon',wght)
-    ax=plot.contour(plot_var)
-    ax.set_ylim(1500.0,0.0)
-    ax.set_title('T, zonal mean')
+    ax=plot.contour(zonal)
+    ax.set_ylim(1400.0,0.0)
+    ax.set_xlim(-85.0,65.0)
+    ax.set_title(f'{varname}, zonal mean')
     ax.set_xlabel('latitude')
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(exp.plot_path+'/T_lat_depth.png')
+    pl.savefig(f'{exp.plot_path}/{varname}_lat_depth.png')
 
     '''
     Plot equatoral profile (-2S -- 2N).
     '''
-
     pl.figure(2); pl.clf()
-    wght=mask*ds.dy
-    plot_var=utils.average(var.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
-    ax=plot.contour(plot_var)
+    plot.fill_opts['levels']=np.arange(8.0,33.0,2.0)
+    plot.contour_opts['levels']=np.arange(8.0,33.0,4.0)
+    ax=plot.contour(equatorial)
     ax.set_ylim(500.0,0.0)
-    ax.set_title('T, equatorial')
+    ax.set_title(f'{varname}, equatorial')
     ax.set_xlabel('longitude')
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(exp.plot_path+'/T_eq_depth.png')
+    pl.savefig(f'{exp.plot_path}/{varname}_eq_depth.png')
 
     pl.show()
     
@@ -106,7 +109,9 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
                   'colors': 'black',
                   'yincrease': False}
 
-    plot=plots.Plot2d(fill_opts=fill_opts, contour_opts=contour_opts)
+    clab_opts={'fmt': '%1.0f'}
+
+    plot=plots.Plot2d(fill_opts=fill_opts, contour_opts=contour_opts, clab_opts=clab_opts)
 
     '''
     Plot zonal mean profile.
@@ -114,13 +119,14 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
     pl.figure(1); pl.clf()
     dif=zonal1-zonal2.interp_like(zonal1)
     ax=plot.contour(dif)
-    ax.set_ylim(1500.0,0.0)
-    ax.set_title('T-'+ftype+', zonal mean')
+    ax.set_ylim(1400.0,0.0)
+    ax.set_xlim(-85.0,65.0)
+    ax.set_title(f'{varname}-{ftype}, zonal mean')
     ax.set_xlabel('latitude')
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(exp.plot_path+'/T_'+ftype+'_lat_depth.png')
+    pl.savefig(f'{exp.plot_path}/{varname}-{ftype}_lat_depth.png')
     pl.show()
 
     '''
@@ -131,16 +137,16 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
     ax=plot.contour(dif)
     ax=pl.gca()
     ax.set_ylim(500.0,0.0)
-    ax.set_title('T-'+ftype+', equatorial')
+    ax.set_title(f'{varname}-{ftype}, equatorial')
     ax.set_xlabel('longitude')
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(exp.plot_path+'/T_'+ftype+'_eq_depth.png')
+    pl.savefig(f'{exp.plot_path}/{varname}-{ftype}_eq_depth.png')
     pl.show()
 
 def mkplots(exps, dsets):
-#    plot_clim(exps[0], dsets[0])
+    plot_clim(exps[0], dsets[0])
 
     for ds in dsets[1:]:
         plot_diff(exps[0], dsets[0], ds, ftype='dif')

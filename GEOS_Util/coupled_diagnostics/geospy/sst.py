@@ -29,23 +29,26 @@ def plot_clim(exp, da):
                   'colors': 'black'
     }
 
+    clab_opts={'fmt': '%1.0f'}
+
     projection=ccrs.PlateCarree(central_longitude=210.)
-    plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, contour_opts=contour_opts)
+    plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, 
+                          contour_opts=contour_opts, clab_opts=clab_opts)
 
     pl.figure(1); pl.clf() 
     ax=plotmap.contour(clim.sel(season='DJF'))
     ax.set_title('SST, DJF')
-    pl.savefig(exp.plot_path+'/sst_djf.png')
+    pl.savefig(f'{exp.plot_path}/sst_djf.png')
     
     pl.figure(2); pl.clf()
     ax=plotmap.contour(clim.sel(season='JJA'))
     ax.set_title('SST, JJA')
-    pl.savefig(exp.plot_path+'/sst_jja.png')
+    pl.savefig(f'{exp.plot_path}/sst_jja.png')
 
     pl.figure(3); pl.clf()
     ax=plotmap.contour(clim.mean('season'))
     ax.set_title('SST, Annual Mean')
-    pl.savefig(exp.plot_path+'/sst_am.png')
+    pl.savefig(f'{exp.plot_path}/sst_am.png')
     pl.show()
 
 def plot_diff(exp, da1, da2, ftype='dif'):
@@ -67,23 +70,26 @@ def plot_diff(exp, da1, da2, ftype='dif'):
                   'colors': 'black'
     }
 
+    clab_opts={'fmt': '%1.0f'}
+
     projection=ccrs.PlateCarree(central_longitude=210.)
-    plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, contour_opts=contour_opts)
+    plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, 
+                          contour_opts=contour_opts, clab_opts=clab_opts)
 
     pl.figure(1); pl.clf() 
     ax=plotmap.contour(dif.sel(season='DJF'))
-    ax.set_title('SST-'+ftype+', DJF')
-    pl.savefig(exp.plot_path+'/sst-'+ftype+'_djf.png')
+    ax.set_title(f'SST-{ftype}, DJF')
+    pl.savefig(f'{exp.plot_path}/sst-{ftype}_djf.png')
     
     pl.figure(2); pl.clf()
     ax=plotmap.contour(dif.sel(season='JJA'))
-    ax.set_title('SST-'+ftype+', JJA')
-    pl.savefig(exp.plot_path+'/sst-'+ftype+'_jja.png')
+    ax.set_title(f'SST-{ftype}, JJA')
+    pl.savefig(f'{exp.plot_path}/sst-{ftype}_jja.png')
 
     pl.figure(3); pl.clf()
     ax=plotmap.contour(dif.mean('season'))
-    ax.set_title('SST-'+ftype+', Annual Mean')
-    pl.savefig(exp.plot_path+'/sst-'+ftype+'_am.png')
+    ax.set_title(f'SST-{ftype}, Annual Mean')
+    pl.savefig(f'{exp.plot_path}/sst-{ftype}_am.png')
     pl.show()
 
     rr.clean_weight_file()

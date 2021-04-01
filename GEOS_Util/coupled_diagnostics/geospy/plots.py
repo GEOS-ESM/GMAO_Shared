@@ -23,12 +23,14 @@ class Plot2d(Plot):
     Class for general 2d plots.
     '''
 
-    def __init__(self, fill_opts={}, contour_opts={}):
+    def __init__(self, fill_opts={}, contour_opts={}, clab_opts={}):
         super(Plot2d,self).__init__()
         self.fill_opts=fill_opts
         self.contour_opts=contour_opts
+        self.clab_opts={'fmt': '%1.1f'}
+        self.clab_opts.update(clab_opts)
         
-    def contour(self, da, ax=None, mode='both', clab_fmt='%1.0f'):
+    def contour(self, da, ax=None, mode='both'):
         '''
         Makes contour plot of data array.
         
@@ -48,7 +50,7 @@ class Plot2d(Plot):
         
         if mode in ('contour', 'both'):
             cs=da.plot.contour(ax=ax,**self.contour_opts)
-            cs.clabel(fmt=clab_fmt)
+            cs.clabel(**self.clab_opts)
         
         return ax
         
@@ -57,8 +59,8 @@ class PlotMap(Plot2d):
     Class for map plots.
     '''
     
-    def __init__(self, projection=ccrs.PlateCarree(), fill_opts={}, contour_opts={}):
-        super(PlotMap,self).__init__(fill_opts, contour_opts)
+    def __init__(self, projection=ccrs.PlateCarree(), fill_opts={}, contour_opts={}, clab_opts={}):
+        super(PlotMap,self).__init__(fill_opts, contour_opts, clab_opts)
         self.projection=projection
         self.fill_opts['transform']=ccrs.PlateCarree()
         self.contour_opts['transform']=ccrs.PlateCarree()
@@ -75,7 +77,7 @@ class PlotMap(Plot2d):
         
         return ax
 
-    def contour(self, da, ax=None, mode='both', clab_fmt='%1.0f'):
+    def contour(self, da, ax=None, mode='both'):
         '''
         Makes contour plot of data array.
         
@@ -89,6 +91,6 @@ class PlotMap(Plot2d):
         if ax is None:
             ax=self.plot_map()
 
-        super(PlotMap,self).contour(da, ax=ax, mode=mode, clab_fmt=clab_fmt)
+        super(PlotMap,self).contour(da, ax=ax, mode=mode)
         
         return ax
