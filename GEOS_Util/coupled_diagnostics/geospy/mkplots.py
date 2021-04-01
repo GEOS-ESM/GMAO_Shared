@@ -18,12 +18,20 @@ def main(expid):
     import sst
     sst.mkplots(exps, ocn2d)
 
+    # Plot SSS
+    import sss
+    sss.mkplots(exps, ocn2d)
+
     # Load ocean 3d data
-    ocn3d=geosdset.load_collection(exps, 'prog_z', type='MOM')
+    ocn3d=geosdset.load_collection(exps, 'geosgcm_ocn3d')
 
     # Plot T profiles
-    import temp
-    temp.mkplots(exps, ocn3d)
+    import temp_mapl
+    temp_mapl.mkplots(exps, ocn3d)
+
+    # Plot S profiles
+    import salt_mapl
+    salt_mapl.mkplots(exps, ocn3d)
 
     # Add more plots....
     
