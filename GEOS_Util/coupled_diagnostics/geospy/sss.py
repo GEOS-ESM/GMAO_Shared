@@ -13,7 +13,7 @@ import xesmf
 import geosdset, plots
 
 def plot_clim(exp, da):
-    var=da.sel(time=slice(*exp.dates))
+    var=da.sel(time=slice(*exp['dates']))
     clim=var.groupby('time.season').mean('time')
 
     cbar_kwargs={'orientation': 'horizontal',
@@ -35,17 +35,17 @@ def plot_clim(exp, da):
     pl.figure(1); pl.clf() 
     ax=plotmap.contour(clim.sel(season='DJF'))
     ax.set_title('SSS, DJF')
-    pl.savefig(f'{exp.plot_path}/sss_djf.png')
+    pl.savefig(f'{exp["plot_path"]}/sss_djf.png')
     
     pl.figure(2); pl.clf()
     ax=plotmap.contour(clim.sel(season='JJA'))
     ax.set_title('SSS, JJA')
-    pl.savefig(f'{exp.plot_path}/sss_jja.png')
+    pl.savefig(f'{exp["plot_path"]}/sss_jja.png')
 
     pl.figure(3); pl.clf()
     ax=plotmap.contour(clim.mean('season'))
     ax.set_title('SSS, Annual Mean')
-    pl.savefig(f'{exp.plot_path}/sss_am.png')
+    pl.savefig(f'{exp["plot_path"]}/sss_am.png')
     pl.show()
 
 def plot_diff(exp, da1, da2, ftype='dif'):
@@ -73,17 +73,17 @@ def plot_diff(exp, da1, da2, ftype='dif'):
     pl.figure(1); pl.clf() 
     ax=plotmap.contour(dif.sel(season='DJF'))
     ax.set_title(f'SSS-{ftype}, DJF')
-    pl.savefig(f'{exp.plot_path}/sss-{ftype}_djf.png')
+    pl.savefig(f'{exp["plot_path"]}/sss-{ftype}_djf.png')
     
     pl.figure(2); pl.clf()
     ax=plotmap.contour(dif.sel(season='JJA'))
     ax.set_title(f'SSS-{ftype}, JJA')
-    pl.savefig(f'{exp.plot_path}/sss-{ftype}_jja.png')
+    pl.savefig(f'{exp["plot_path"]}/sss-{ftype}_jja.png')
 
     pl.figure(3); pl.clf()
     ax=plotmap.contour(dif.mean('season'))
     ax.set_title(f'SSS-{ftype}, Annual Mean')
-    pl.savefig(f'{exp.plot_path}/sss-{ftype}_am.png')
+    pl.savefig(f'{exp["plot_path"]}/sss-{ftype}_am.png')
     pl.show()
 
     rr.clean_weight_file()

@@ -17,7 +17,7 @@ obs=['woa13']
 obsvarname='s_an'
 
 def plot_clim(exp, ds):
-    var=ds[varname].sel(time=slice(*exp.dates)).mean('time')
+    var=ds[varname].sel(time=slice(*exp['dates'])).mean('time')
     var=var.assign_coords({'lev': -var.lev})
     mask=1.0-np.isnan(var)
     wght=mask*ds.dx
@@ -51,7 +51,7 @@ def plot_clim(exp, ds):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(f'{exp.plot_path}/{varname}_lat_depth.png')
+    pl.savefig(f'{exp["plot_path"]}/{varname}_lat_depth.png')
 
     '''
     Plot equatoral profile (-2S -- 2N).
@@ -64,12 +64,12 @@ def plot_clim(exp, ds):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(f'{exp.plot_path}/{varname}_eq_depth.png')
+    pl.savefig(f'{exp["plot_path"]}/{varname}_eq_depth.png')
 
     pl.show()
     
 def plot_diff(exp, ds1, ds2, ftype='dif'):
-    var1=ds1[varname].sel(time=slice(*exp.dates)).mean('time')
+    var1=ds1[varname].sel(time=slice(*exp['dates'])).mean('time')
     var1=var1.assign_coords({'lev': -var1.lev})
     mask=1.0-np.isnan(var1)
     wght=mask*ds1.dx
@@ -78,7 +78,7 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
     equatorial1=utils.average(var1.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
 
     if ftype=='dif':
-        var2=ds2[varname].sel(time=slice(*exp.dates)).mean('time')
+        var2=ds2[varname].sel(time=slice(*exp['dates'])).mean('time')
         var2=var1.assign_coords({'lev': -var1.lev})
         mask=1.0-np.isnan(var2)
         wght=mask*ds2.dx
@@ -119,7 +119,7 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(f'{exp.plot_path}/{varname}-{ftype}_lat_depth.png')
+    pl.savefig(f'{exp["plot_path"]}/{varname}-{ftype}_lat_depth.png')
     pl.show()
 
     '''
@@ -135,7 +135,7 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
-    pl.savefig(f'{exp.plot_path}/{varname}-{ftype}_eq_depth.png')
+    pl.savefig(f'{exp["plot_path"]}/{varname}-{ftype}_eq_depth.png')
     pl.show()
 
 def mkplots(exps, dsets):

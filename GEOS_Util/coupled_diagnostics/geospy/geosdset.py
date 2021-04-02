@@ -11,8 +11,8 @@ import xarray as xr
 R=6378e3 # Earth radius
 
 def _load_geos(exp,collection):
-    path=pathlib.Path(f'{exp.data_path}/{collection}')
-    flist=list(path.glob(f'{exp.expid}.{collection}.monthly.?????[0-9].nc4')) 
+    path=pathlib.Path(f'{exp["data_path"]}/{collection}')
+    flist=list(path.glob(f'{exp["expid"]}.{collection}.monthly.?????[0-9].nc4')) 
     flist.sort()
     ds=xr.open_mfdataset(flist,combine='by_coords')
 
@@ -38,8 +38,8 @@ def _load_geos(exp,collection):
     return ds
         
 def _load_tripolar(exp, collection):
-    path=pathlib.Path(f'{exp.data_path}/{collection}')
-    flist=list(path.glob(f'{exp.expid}.{collection}.monthly.?????[0-9].nc4')) 
+    path=pathlib.Path(f'{exp["data_path"]}/{collection}')
+    flist=list(path.glob(f'{exp["expid"]}.{collection}.monthly.?????[0-9].nc4')) 
     flist.sort()
     ds=xr.open_mfdataset(flist,combine='by_coords')
     ds=ds.assign_coords({'LON': ds['LON'],
@@ -47,11 +47,11 @@ def _load_tripolar(exp, collection):
     return ds
 
 def _load_mom(exp, collection):
-    path=pathlib.Path(f'{exp.data_path}/MOM_Output')
+    path=pathlib.Path(f'{exp["data_path"]}/MOM_Output')
     flist=list(path.glob(f'{collection}.e*_00z.nc'))
     flist.sort()
     ds=xr.open_mfdataset(flist,combine='by_coords')
-    ds_static=xr.open_dataset(exp.ocean_static)
+    ds_static=xr.open_dataset(exp["ocean_static"])
     ds=ds.assign_coords({'geolon': ds_static['geolon'],
                          'geolat': ds_static['geolat'],
                          'geolon_c': ds_static['geolon_c'],
@@ -81,18 +81,18 @@ def load_exps(exp_conf):
     
     exps=[]
     with open(exp_conf) as ff:
-        exps.append(SimpleNamespace(**yaml.safe_load(ff)))
+        exps.append(yaml.safe_load(ff))
         
-    for exp in exps[0].cmpexp:
+    for exp in exps[0]['cmpexp']:
         with open(exp,'r') as ff:
-            exps.append(SimpleNamespace(**yaml.safe_load(ff)))
+            exps.append(yaml.safe_load(ff))
 
     for exp in exps:
-        exp.dates=[date if date!='None' else None for date in exp.dates]
+        exp['dates']=[date if date!='None' else None for date in exp['dates']]
 
     # Make directory for plots if it does not exists
     try:
-        os.makedirs(exps[0].plot_path)
+        os.makedirs(exps[0]['plot_path'])
     except OSError:
         pass
 
