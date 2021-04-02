@@ -52,8 +52,17 @@ def plot_clim(exp, da):
     pl.show()
 
 def plot_diff(exp, da1, da2, ftype='dif'):
-    clim1=da1.groupby('time.season').mean('time')
-    clim2=da2.groupby('time.season').mean('time')
+    var1=da1.sel(time=slice(*exp['dates']))
+    clim1=var1.groupby('time.season').mean('time')
+    
+    if ftype=='dif':
+        var2=da2.sel(time=slice(*exp['dates']))
+    elif ftype=='obs':
+        var2=da2
+    else:
+        raise Exception('Wrong plot type. Type should be eighter "dif" or "obs"')
+    clim2=var2.groupby('time.season').mean('time')
+
     rr=xesmf.Regridder(da2,da1,'bilinear',periodic=True)
     dif=clim1-rr(clim2)
 

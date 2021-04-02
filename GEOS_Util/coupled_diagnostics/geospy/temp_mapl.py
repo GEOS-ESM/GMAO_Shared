@@ -95,7 +95,7 @@ def plot_diff(exp, ds1, ds2, ftype='dif'):
         zonal2=var2.mean('lon').rename({'depth':'lev'})
         equatorial2=var2.sel(lat=slice(-2.1,2.1)).mean('lat').rename({'depth':'lev'})
     else:
-        print('Wrong plot type. Type should be eighter "dif" or "obs"'); raise
+        raise Exception('Wrong plot type. Type should be eighter "dif" or "obs"')
 
     cbar_kwargs={'label': '$^0C$',
     }
