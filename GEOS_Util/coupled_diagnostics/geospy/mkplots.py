@@ -29,12 +29,12 @@ def main(exp_conf):
         ocn3d=geosdset.load_collection(exps,'prog_z',type='MOM')
 
     # Plot T profiles
-    import temp_mapl
-    temp_mapl.mkplots(exps, ocn3d)
+    import temp
+    temp.mkplots(exps, ocn3d)
 
     # Plot S profiles
-    import salt_mapl
-    salt_mapl.mkplots(exps, ocn3d)
+    import salt
+    salt.mkplots(exps, ocn3d)
 
     # Add more plots....
     
