@@ -86,6 +86,16 @@ be deleted in future releases of MAPL
 
 ### Changed
 
+- Update remapping to be consistent with FV3
+
+### Fixed
+### Removed
+### Added
+
+## [1.3.3] - 2020-10-28
+
+### Changed
+
 - Added Docker authentication for CI
 - Update CI images for Baselibs 6.0.22
 
@@ -94,7 +104,6 @@ be deleted in future releases of MAPL
 - Updates to `plots/configure` so that it is run at install time. This
   should allow others to then run plots on another person's build
 
-### Removed
 ### Added
 
 - Add warning-level loggers to `GEOS_Utilities` (D)QSAT code for NaN detection
