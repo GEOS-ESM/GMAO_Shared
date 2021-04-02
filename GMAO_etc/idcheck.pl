@@ -108,7 +108,7 @@ sub check_semperpy_dbs {
     # look for expid in each logical database
     #----------------------------------------
     @ldb_found = ();
-    foreach $logical_db qw( fc_exp fc_ops im_exp im_ops ) {
+    foreach $logical_db (qw( fc_exp fc_ops im_exp im_ops )) {
         chomp($which_pdb = `python $bindir/whichdb.py $logical_db`);
         $physical_db = (split /\s+/, $which_pdb)[0];
 
