@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix for out-of-bounds error in lightning module (#99)
 
 ### Changed
+
+- Stats plot updates
+- Multiple updates brought over from GEOSadas work (see #166)
+
 ### Added
 
 - Extend binary tile to supprot future river route component development

@@ -18,24 +18,22 @@ use Cwd qw(abs_path cwd);
 use File::Basename qw(basename dirname);
 use File::Copy qw(copy);
 use File::Path qw(mkpath rmtree);
-use Getopt::Long;
-
 use FindBin qw($Bin);
-use lib "$FindBin::Bin";
-use Query qw(query yes);
+use Getopt::Long;
 
 # global variables
 #-----------------
 my ($bindiff, $bwiFLG, $debug, $cdoX, $delim, $diffFLGs, $dir1, $dir2);
 my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
 my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
-my ($subdir, $tmpdir, $verbose);
+my ($subdir, $tarfile_dirA, $tarfile_dirB, $tdirfile, $tmpdir, $verbose);
 my (%different, %diffsBIN, %diffsTXT, %dir_display, %filesize, %found);
 my (%identical, %ignore, %opts, %patterns, %vopts);
-my (@exclude, @extINC, @fileIDs, @files, @files1, @files2);
+my (@exclude, @extEXCL, @extINC, @fileIDs, @files, @files1, @files2);
 my (@p1, @p2, @subdirs, @unmatched1, @unmatched2);
 
 $delim = "="; # character to use when defining diffs to ignore
+$tdirfile = "tarfile_directory_locationXXX"; # used when comparing tarfiles
 
 # main program
 #-------------
@@ -58,12 +56,14 @@ $delim = "="; # character to use when defining diffs to ignore
 # purpose  - get input parameters and initialize global variables
 #=======================================================================
 sub init {
-    my ($etcflg, $fcstflg, $help, $rsflg, $runflg);
+    my ($binX, $etcflg, $fcstflg, $help, $rsflg, $runflg);
     my ($arrAddr, $val, @values, @vlist);
 
     # get runtime flags
     #------------------
-    GetOptions("db|debug" => \$debug,
+    GetOptions("binX"     => \$binX,
+               "db|debug" => \$debug,
+               "extX=s"   => \@extEXCL,
                "ext=s"    => \@extINC,
                "etc"      => \$etcflg,
                "fcst"     => \$fcstflg,
@@ -93,6 +93,7 @@ sub init {
     #-------------------------------------------
     push @exclude, ".";
     push @exclude, "..";
+    push @exclude, $tdirfile;
 
     # verbose option in %opts, if verbose mode
     #-----------------------------------------
@@ -105,7 +106,7 @@ sub init {
 
     # extract comma-separated option values
     #--------------------------------------
-    foreach $arrAddr (\@exclude, \@extINC, \@fileIDs, \@p1, \@p2) {
+    foreach $arrAddr (\@exclude, \@extEXCL, \@extINC, \@fileIDs, \@p1, \@p2) {
         @vlist = ();
         foreach (@$arrAddr) {
             @values = split ',', $_;
@@ -113,13 +114,22 @@ sub init {
             foreach $val (@values) {
 
                 # remove leading '.' from extension
-                if ($arrAddr == \@extINC) {
+                #----------------------------------
+                if ($arrAddr == \@extEXCL or $arrAddr == \@extINC) {
                     while (index($val, ".") == 0) { $val = substr($val, 1) }
                 }
                 push @vlist, $val if $val;
             }
         }
         @$arrAddr = @vlist;
+    }
+
+    # extensions to exclude with -binX flag
+    #--------------------------------------
+    if ($binX) {
+        foreach (qw(a d mod o pyc so x )) {
+            push @extEXCL, $_;
+        }
     }
 
     # shortcuts for checking etc, fcst, run, or rs directory 
@@ -256,8 +266,8 @@ sub init_dirmode {
     @files1 = ();
     @files2 = ();
 
-    get_filelist($dir1, \@files1);
-    get_filelist($dir2, \@files2);
+    $tarfile_dirA = get_filelist($dir1, \@files1);
+    $tarfile_dirB = get_filelist($dir2, \@files2);
     if ($list) { cmp_lists(); return }
 
     show_file_counts(1);
@@ -400,13 +410,17 @@ sub cdo_diff {
 #=======================================================================
 sub get_filelist {
     my ($dirname, $flAddr);
-    my (@dirs, $dir, @names, $name);
+    my (@dirs, $dir, @names, $name, $tardirfile, $tarfile_dir);
 
     $dirname = shift @_;
     $flAddr = shift @_;
 
     die "Error. $dirname is not a directory;" unless -d abs_path($dirname);
     die "Error. file list array address not given;" unless $flAddr;
+
+    $tarfile_dir = "";
+    $tardirfile = "$dirname/$tdirfile";
+    chomp($tarfile_dir = `cat $tardirfile`) if -e $tardirfile;
 
     push @$flAddr, $dirname if $list;
 
@@ -420,6 +434,7 @@ sub get_filelist {
     if ($recurse) {
         foreach $dir (sort(@dirs)) { get_filelist($dir, $flAddr) }
     }
+    return $tarfile_dir;
 }
 
 #=======================================================================
@@ -686,7 +701,8 @@ sub show_binary_diffs {
 
         while ($dflt) {
             unless ( $diffs{$dflt} ) { $dflt = 0; last }
-            last if $diffs{$dflt} =~ /\.tar$/;
+            last if $diffs{$dflt} =~ /\.tar$/
+                or  $diffs{$dflt} =~ /\.png$/;
 
             if ($cdoX) {
                 last if $diffs{$dflt} =~ /\.hdf$/
@@ -741,6 +757,16 @@ sub show_binary_diffs {
             $show_menu = 1;
         }
 
+        # display Portable Network Graphic files
+        #---------------------------------------
+        if ($ext1 eq "png" and $ext2 eq "png") {
+            system("display $file1 &");
+            sleep(1);
+            system("display $file2 &");
+            $num++;
+            $show_menu = 1;
+        }
+
         # compare binary files
         #---------------------
         else { cmp_binary_files($num, $file1, $file2) }
@@ -784,10 +810,13 @@ sub cmp_binary_files {
 # purpose - recursively call cmpdir.pl to compare contents of tarfiles
 #=======================================================================
 sub cmp_tarfiles {
-    my  (@tarfile, @tmptardir);
+    my  (@tarfile, @tmptardir, @tdir, $tardirfile);
 
     $tarfile[1] = shift @_;
     $tarfile[2] = shift @_;
+
+    $tdir[1] = "$dirA\n";
+    $tdir[2] = "$dirB\n";
 
     # untar into temporary directories
     #---------------------------------
@@ -798,6 +827,13 @@ sub cmp_tarfiles {
 
         system_("tar xf $tarfile[$_] -C $tmptardir[$_]")
             && die "Error untarring $tmptardir[$_];";
+
+        # write tarfile directory location to file in tmpdir
+        #---------------------------------------------------
+        $tardirfile = "$tmptardir[$_]/$tdirfile";
+        open tD, "> $tardirfile" or die "Error opening $tardirfile;";
+        print tD $tdir[$_];
+        close tD;
     }
 
     # use cmpdir.pl to compare temporary directories
@@ -816,7 +852,7 @@ sub cmp_tarfiles {
 #=======================================================================
 sub show_text_diffs {
     my (%diffs, @tempArr, $max, $fmt0, $fmt1, $fmtT, $num);
-    my ($file1, $base1, $base2, $dflt, $sel);
+    my ($file1, $base1, $base2, $dflt, $sel, $ncount);
 
     if (@_) { %diffs = @_ }
     else    { %diffs = %diffsTXT }
@@ -854,8 +890,16 @@ sub show_text_diffs {
         print "\n";
         printf $fmt1, "0", "previous menu\n";
         if (keys %diffs > 1) {
-            printf $fmt0, "a", "cycle thru all";
+            printf $fmt0, "a", "cycle thru all diffs";
             if ($dflt) { print " (starting from $dflt)\n" } else { print "\n" }
+
+            unless ($ignoreFLG or $sortFLG) {
+                printf $fmt0, "A", "display all diffs at once";
+                if ($dflt) { print " (starting from $dflt)\n" } else { print "\n" }
+
+                printf $fmt1, "nN", "display next N (int value) differences";
+            }
+            print "\n";
         }
         if ($diffFLGs) { printf $fmt1, "b", "turn OFF -bwi diff flag" }
         else           { printf $fmt1, "b", "turn ON -bwi diff flag"  }
@@ -865,9 +909,10 @@ sub show_text_diffs {
         if ($ignoreFLG) { printf $fmt1, "i", "turn OFF ignore diffs"  }
         else            { printf $fmt1, "i", "turn ON ignore diffs "  }
 
-        if ($sortFLG) { printf $fmt1, "s", "turn OFF sorted diff\n" }
-        else          { printf $fmt1, "s", "turn ON sorted diff\n"  }
+        if ($sortFLG) { printf $fmt1, "s", "turn OFF sorted diff" }
+        else          { printf $fmt1, "s", "turn ON sorted diff"  }
 
+        print "\n";
         print "Make Selection: [$dflt] ";
         chomp($sel = <STDIN>);
         $sel =~ s/\s//g;
@@ -875,23 +920,26 @@ sub show_text_diffs {
         
         return if $sel eq "0";
 
-        # show differences for all remaining files starting with current index
-        #-----------------------------------------------------------------------
-        # *** unadvertised "A" option will display all at once ***
-        # Change "A" option to "a" if either $ignoreFLG or $sortFLG is on.
+        # show multiple diffs starting with current index
+        #------------------------------------------------
+        # Change "A" or "n$m" to "a" if either $ignoreFLG or $sortFLG is on.
         #-----------------------------------------------------------------
         # Use $diffs{"wait"} to signal not to display all at once if $sel eq "a".
         #-----------------------------------------------------------------------
-        if ($sel eq "a" or $sel eq "A") {
+        if ($sel eq "a" or $sel eq "A" or $sel =~ m/^n(\d*)$/) {
+            $ncount = $1;
+            $ncount = 1 if $sel eq "n";
             $sel = "a" if $ignoreFLG or $sortFLG;
             $diffs{"wait"} = 1 if $sel eq "a";
             $num = 1 unless $diffs{$num};
             while ($diffs{$num}) {
                 display_text_diffs($num, %diffs);
+                last if $ncount and --$ncount <= 0;
                 $num++;
             }
             delete $diffs{"wait"} if $diffs{"wait"};
-            $num = -1; next;
+            $num = -1 if lc($sel) eq "a";
+            next;
         }
 
         # toggle diff -bwi flag
@@ -1446,6 +1494,10 @@ sub show_file_counts {
     $fmt = "%s: %-${max}s (%d files)\n";
 
     underline("Directory file counts");
+    if ($tarfile_dirA and $tarfile_dirB) {
+        print "dirA: $tarfile_dirA\n";
+        print "dirB: $tarfile_dirB\n\n";
+    }
     printf $fmt, "dir1", $dir1, scalar(@files1);
     printf $fmt, "dir2", $dir2, scalar(@files2);
     print "\n";
@@ -1458,7 +1510,7 @@ sub show_file_counts {
 # purpose - display list of files in the two directories being compared
 #=======================================================================
 sub list_files {
-    my ($fmt, $num, $base);
+    my ($fmt, $cnt, $num, $base);
 
     $fmt = "%2d. %s\n";
 
@@ -1466,9 +1518,15 @@ sub list_files {
     #------------------------
     if (@files1) {
         underline("dir1: " .$dir1);
+        print "$tarfile_dirA\n" if $tarfile_dirA;
+        $cnt = 0;
         $num = 0;
         foreach (sort @files1) {
             printf $fmt, ++$num, branch($_, "1");
+            if (++$cnt == 50) {
+                pause();
+                $cnt = 0;
+            }
         }
     } else {
         print "\nNo files in dir1: $dir1\n";
@@ -1479,9 +1537,15 @@ sub list_files {
     #------------------------
     if (@files2) {
         underline("dir2: " .$dir2);
+        print "$tarfile_dirB\n" if $tarfile_dirB;
+        $cnt = 0;
         $num = 0;
         foreach (sort @files2) {
             printf $fmt, ++$num, branch($_, "2");
+            if (++$cnt == 50) {
+                pause();
+                $cnt = 0;
+            }
         }
     } else {
         print "\nNo files in dir2: $dir2\n";
@@ -2052,13 +2116,102 @@ sub underline {
 # => 1 : do not include $name
 #=======================================================================
 sub Xcluded {
-    my ($name, $xname);
+    my ($name, $ext, $xname);
     $name = shift @_;
 
+    foreach $ext (@extEXCL) {
+        return 1 if (split(/\./, $name))[-1] eq $ext;
+    }
     foreach $xname (@exclude) {
         return 1 if basename($name) eq $xname;
     }
     return 0;
+}
+
+#=======================================================================
+# name - query
+# purpose - query user for a response and return the response
+#
+# input parameters
+# => $str: use this line to prompt for a response
+# => $dflt: (optional) default value to use for <cr> response
+# 
+#=======================================================================
+sub query {
+    my ($str, $dflt, $prompt, $ans);
+
+    $str  = shift @_;
+    $dflt = shift @_;
+
+    # prepare prompt
+    #---------------
+    $prompt  = "$str ";
+    $prompt .= "[$dflt] " unless blank($dflt);
+
+    # get user response
+    #------------------
+    print $prompt;
+    chomp($ans = <STDIN>);
+    $ans =~ s/^\s+|\s+$//g;     # remove leading/trailing blanks from response
+    $ans = expand_EnvVars($ans);
+    if ( blank($ans) ) { $ans = $dflt unless blank($dflt) }
+
+    return $ans;
+}
+
+#=======================================================================
+# name - expand_EnvVars
+# purpose - expand Environment Variables within a string
+#=======================================================================
+sub expand_EnvVars {
+    my ($string, $cnt, $var, $name);
+
+    $string = shift @_;
+    $cnt = 0;
+
+    # look for ${var} format
+    #-----------------------
+    while ($string =~ m/(\${(\w+)})/)   {
+        $var = $1; $name = $2;
+        $var =~ s/\$/\\\$/;
+        $string =~ s/$var/$ENV{$name}/;
+        die "Error. Infinite loop condition;" if ++$cnt > 100;
+    }
+
+    # look for $var format
+    #---------------------
+    while ($string =~ m/(\$\b(\w+)\b)/) {
+        $var = $1; $name = $2;
+        $var =~ s/\$/\\\$/;
+        $string =~ s/$var/$ENV{$name}/;
+        die "Error. Infinite loop condition;" if ++$cnt > 200;
+    }
+    return $string;
+}
+
+#=======================================================================
+sub yes {
+    my $str;
+    $str = shift @_;
+    $str = lc $str;           # make lowercase
+    $str =~ s/^\s*|\s*$//g;   # remove leading/trailing blanks
+    return 1 if $str eq "y" or $str eq "yes"
+}
+
+#=======================================================================
+sub neg {
+    my $str;
+    $str = shift @_;
+    $str = lc $str;           # make lowercase
+    $str =~ s/^\s*|\s*$//g;   # remove leading/trailing blanks
+    return 1 if $str eq "n" or $str eq "no"
+}
+
+#=======================================================================
+sub blank {
+    my $str;
+    $str = shift @_;
+    return 1 if $str =~ /^\s*$/;
 }
 
 #=======================================================================
@@ -2088,6 +2241,8 @@ where
   dir2 = second directory being compared
 
 options
+  -binX              exclude extensions: a, d, mod, o, pyc, so, x
+  -extX extension    exclude all files with this extension (see Note 1)
   -ext extension     compare all files with this extension (see Note 1)
   -etc               shortcut for "-subdir etc -r"
   -fcst              shortcut for "-subdir fcst -r"
@@ -2113,9 +2268,9 @@ or
   -p pattern1=pattern2
 
 Notes:
-1. Multiple values can be given for extension (-ext), fileID (-id), pattern1 (-p1),
-   pattern2 (-p2), and str (-X) by separating values with a comma (no space) or by
-   multiple use of the option flag.
+1. Multiple values can be given for extension (-ext, -extX), fileID (-id),
+   pattern1 (-p1), pattern2 (-p2), and str (-X) by separating values with
+   a comma (no space) or by multiple use of the option flag.
 2. Multiple pattern1=pattern2 values can be given by multiple uses of the -p flag
 3. There must be a matching pattern2 for each pattern1, and vice versa.
 
