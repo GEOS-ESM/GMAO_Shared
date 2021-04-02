@@ -81,19 +81,34 @@
 !  GPS KX are assigned by satellite ID
         3      MetOp-B GRAS
         4      MetOp-A GRAS
+        5      MetOp-C GRAS
        41      CHAMP      
        42      TerraSAR-X
        43      TanDEM-X
+       44      PAZ      
       421      Oceansat-2
       440      Megha-Tropiques
       722      GRACE-A
       723      GRACE-B
+      724      COSMIC-2 P1
+      725      COSMIC-2 P2
+      726      COSMIC-2 P3
+      727      COSMIC-2 P4
+      728      COSMIC-2 P5
+      729      COSMIC-2 P6
       740      COSMIC-1
       741      COSMIC-2
       742      COSMIC-3
       743      COSMIC-4
       744      COSMIC-5
       745      COSMIC-6
+      750      COSMIC-2 E1
+      751      COSMIC-2 E2
+      752      COSMIC-2 E3
+      753      COSMIC-2 E4
+      754      COSMIC-2 E5
+      755      COSMIC-2 E6
       786      C/NOFS CORISS
       820      SAC-C
       821      SAC-D
+      825      KOMPSAT-5

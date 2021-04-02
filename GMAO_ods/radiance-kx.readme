@@ -72,6 +72,7 @@
  amsua       n19         amsua_n19                     19         319
  amsua       metop-a     amsua_metop-a                 25         325
  amsua       metop-b     amsua_metop-b                 26         326
+ amsua       metop-c     amsua_metop-c                 27         327
  ssu         tirosn      ssu_tirosn                     5         355
  ssu         n06         ssu_n06                        6         356
  ssu         n07         ssu_n07                        7         357
@@ -110,6 +111,7 @@
  mhs         n19         mhs_n19                       19         819
  mhs         metop-a     mhs_metop-a                   25         825
  mhs         metop-b     mhs_metop-b                   26         826
+ mhs         metop-c     mhs_metop-c                   27         827
  iasi        metop-a     iasi_metop-a                  25         875
  iasi        metop-b     iasi_metop-b                  26         876
  iasi        metop-c     iasi_metop-c                  27         877
