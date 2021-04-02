@@ -14,7 +14,7 @@ set VERIFICATION=$SCRDIR/verification
 
 if (($HOSTNAME =~ discover*) || ($HOSTNAME =~ borg*)) then
     setenv OCEANVAL /discover/nobackup/projects/gmao/oceanval/verification
-else if ( $HOSTNAME =~ "pfe"* ) then
+else if ( ($HOSTNAME =~ "pfe"*) || ($HOSTNAME =~ r[0-9]*i[0-9]*n[0-9]*) || ($HOSTNAME =~ r[0-9]*c[0-9]*t[0-9]*n[0-9]*) ) then
     setenv OCEANVAL /nobackup/gmao_SIteam/ModelData/oceanval/verification
 endif 
 

@@ -1,0 +1,65 @@
+version: 2.1
+
+executors:
+  gcc-build-env:
+    docker:
+      - image: gmao/ubuntu20-geos-env-mkl:v6.0.27-openmpi_4.0.5-gcc_10.2.0
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_AUTH_TOKEN
+    environment:
+      OMPI_ALLOW_RUN_AS_ROOT: 1
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+      OMPI_MCA_btl_vader_single_copy_mechanism: none
+    #XLARGE# resource_class: xlarge
+    resource_class: medium
+
+workflows:
+  version: 2.1
+  build-test:
+    jobs:
+      - build-GEOSgcm:
+          context:
+            - docker-hub-creds
+
+jobs:
+  build-GEOSgcm:
+    executor: gcc-build-env
+    working_directory: /root/project
+    steps:
+      - run:
+          name: "GEOS_Shared branch"
+          command: echo ${CIRCLE_BRANCH}
+      - checkout
+      - run:
+          name: "Checkout GEOSgcm fixture"
+          command: |
+            cd ${CIRCLE_WORKING_DIRECTORY}
+            git clone git@github.com:GEOS-ESM/GEOSgcm.git
+            cd GEOSgcm
+            mepo clone
+            mepo develop GEOSgcm_GridComp GEOSgcm_App
+            mepo status
+      - run:
+          name: "Mepo checkout-if-exists GEOS_Shared branch"
+          command: |
+            cd ${CIRCLE_WORKING_DIRECTORY}/GEOSgcm
+            echo "${CIRCLE_BRANCH}"
+            if [ "${CIRCLE_BRANCH}" != "develop" ] && [ "${CIRCLE_BRANCH}" != "master" ] && [ "${CIRCLE_BRANCH}" != "main" ]
+            then
+               mepo checkout-if-exists ${CIRCLE_BRANCH}
+            fi
+            mepo status
+      - run:
+          name: "CMake"
+          command: |
+            cd ${CIRCLE_WORKING_DIRECTORY}/GEOSgcm
+            mkdir build
+            cd build
+            cmake .. -DBASEDIR=$BASEDIR/Linux -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_BUILD_TYPE=Debug
+      - run:
+          name: "Build"
+          command: |
+            cd ${CIRCLE_WORKING_DIRECTORY}/GEOSgcm/build
+            #XLARGE# make -j"$(nproc)" install
+            make -j4 install

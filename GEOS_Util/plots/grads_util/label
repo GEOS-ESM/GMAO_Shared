@@ -96,6 +96,7 @@ xtspot = (xlow + xhigh)/2
 hsize = 0.95*(xhigh-xlow)/maxlength
 
 'set string 1 l 6'
+'set string 1 l 3'
 xtspot = xlow + space
 hsize = 0.95*(xhigh-space-xlow-space)/maxlength
 

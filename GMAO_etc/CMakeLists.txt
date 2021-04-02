@@ -50,15 +50,15 @@ ecbuild_add_executable (
 
 ## bin ##
 
-file(GLOB perl_files *.pl)
+file(GLOB perl_files CONFIGURE_DEPENDS *.pl)
 # We must remove two files because of DASPERL
 list(REMOVE_ITEM perl_files
    ${CMAKE_CURRENT_SOURCE_DIR}/Err_Log.pl 
    ${CMAKE_CURRENT_SOURCE_DIR}/fndate.pl
    )
 
-file(GLOB perl_packages *.pm)
-file(GLOB python_files *.py)
+file(GLOB perl_packages CONFIGURE_DEPENDS *.pm)
+file(GLOB python_files CONFIGURE_DEPENDS *.py)
 
 set(perlscripts
    acquire
@@ -116,8 +116,8 @@ endforeach ()
 
 ## etc ##
 
-file(GLOB obsys_rc obsys*.rc)
-file(GLOB templates *.tmpl)
+file(GLOB obsys_rc CONFIGURE_DEPENDS obsys*.rc)
+file(GLOB templates CONFIGURE_DEPENDS *.tmpl)
 
 install (
    FILES ${obsys_rc} ${templates} pesto.arc PUBLICTAG

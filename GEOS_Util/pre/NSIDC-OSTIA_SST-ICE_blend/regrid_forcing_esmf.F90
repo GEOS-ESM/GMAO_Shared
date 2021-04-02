@@ -34,6 +34,7 @@ module GenESMFGridCompMod
      type(ESMF_Time)           :: start_time
      type(ESMF_Time)           :: end_time
      logical                   :: select_time
+     logical                   :: fix_fraction
   end type T_PrivateState
 
   type :: T_PrivateState_Wrap
@@ -220,6 +221,8 @@ contains
        call ESMF_TimeSet(privateState%end_time,yy=yy,mm=mm,dd=dd,rc=status)
        VERIFY_(STATUS)
     end if
+    call ESMF_ConfigGetAttribute(cf,privateState%fix_fraction,label='FIX_FRACTION: ',default=.false.,rc=status)
+    VERIFY_(STATUS)
     privateState%select_time = ( (stat1 == ESMF_SUCCESS) .and. (stat2 == ESMF_SUCCESS) )
 
 ! Create grid for this component
@@ -484,6 +487,10 @@ contains
       ! transform data from ocean (tripolar or Reynolds) to mit-cubed
       call privateState%regridder%regrid(odata,pdata,rc=status)
       VERIFY_(status) 
+      if (privateState%fix_fraction) then
+         where(pdata > 1.0) pdata = 1.0
+         where(pdata < 0.0) pdata = 0.0
+      end if
    !   write(unit_w) pdata
       if (doWrite) then
          call MAPL_VarWrite(unit_w, grid=pgrid, a=pdata, rc=status)
@@ -523,6 +530,7 @@ end Program regrid_forcing
 Subroutine do_regrid_forcing(rc)
   use ESMF
   use MAPL
+  use MPI
 
   use GenESMFGridCompMod,          only : Root_SetServices => SetServices
 
@@ -571,13 +579,15 @@ Subroutine do_regrid_forcing(rc)
   type(ESMF_Config)            :: cf_root
   type(ESMF_Config)            :: cf_hist
   character(len=ESMF_MAXSTR), parameter :: CF_FILE='REGRID_FORCING.rc'
-  logical                      :: frwd
+
 !                                -----
 
 !  Initialize framework
 !  --------------------
   call ESMF_Initialize(vm=vm, logKindFlag=ESMF_LOGKIND_NONE,rc=STATUS)
   VERIFY_(STATUS)
+  call MAPL_Initialize(rc=status)
+  VERIFY_(status)
 
 !  Setup config
 !  ------------
@@ -591,6 +601,7 @@ Subroutine do_regrid_forcing(rc)
    !-------------------
   call MAPL_Set(MAPLOBJ, CF=CF_ROOT, RC=STATUS)
   VERIFY_(STATUS)
+
 
   ROOT = MAPL_AddChild ( MAPLOBJ,     &
        name       = "INPUT",        &
@@ -628,6 +639,8 @@ Subroutine do_regrid_forcing(rc)
 !  Finalize
 !  --------
 
+  call MAPL_Finalize(rc=status)
+  VERIFY_(status)
   call ESMF_Finalize(rc=STATUS)
   VERIFY_(STATUS)
 

@@ -50,10 +50,7 @@ endif
 
 'set dfile 1'
 'set t 1'
-'setlons'
-'sety'
 'set z 'zmin' 'zmax
-
 
 * Define Number of Forecast Days and Time Interval (hrs)
 * ------------------------------------------------------
@@ -85,23 +82,17 @@ endif
 *  std: standard deviation
 * --------------------------------------------------
 
-'define 'field'fm  = lat-lat+lon-lon'
-'define 'field'am  = lat-lat+lon-lon'
-'define 'field'cm  = lat-lat+lon-lon'
-'define 'field'fma = lat-lat+lon-lon'
-'define 'field'fmc = lat-lat+lon-lon'
-'define 'field'mes = lat-lat+lon-lon'
-'define 'field'mse = lat-lat+lon-lon'
-'define 'field'rms = lat-lat+lon-lon'
-'define 'field'std = lat-lat+lon-lon'
-'define 'field'var = lat-lat+lon-lon'
+* Compute 2D Fields
+* -----------------
+'setlons'
+'sety'
 
-'define 'field'varf = lat-lat+lon-lon'
-'define 'field'vara = lat-lat+lon-lon'
-'define 'field'stdf = lat-lat+lon-lon'
-'define 'field'stda = lat-lat+lon-lon'
-'define 'field'cov  = lat-lat+lon-lon'
-'define 'field'rnd  = lat-lat+lon-lon'
+'define 'field'fm'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'am'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'cm'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'fma'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'fmc'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'mse'tag' = lat-lat + lon-lon + lev-lev'
 
 n = 1
 while ( n <= numfiles )
@@ -131,95 +122,199 @@ say 'Processing Field: 'field' for File: 'n'  Tag: 'tag
    endif
 
    if( field  = chi | field  = psi )
-       'define 'field'fm  = 'field'fm  +     'field'f'n
-       'define 'field'am  = 'field'am  +     'field'a'n
-       'define 'field'cm  = 'field'cm  +     'field'c'n
-       'define 'field'fma = 'field'fma +     'field'f'n'-'field'a'n
-       'define 'field'fmc = 'field'fmc +     'field'f'n'-'field'c'n
-       'define 'field'mse = 'field'mse + pow('field'f'n'-'field'a'n',2)'
-   endif
-   if( field != chi & field != psi )
+       'define 'field'fm'tag'  = 'field'fm'tag'  +     'field'f'n
+       'define 'field'am'tag'  = 'field'am'tag'  +     'field'a'n
+       'define 'field'cm'tag'  = 'field'cm'tag'  +     'field'c'n
+       'define 'field'fma'tag' = 'field'fma'tag' +     'field'f'n'-'field'a'n
+       'define 'field'fmc'tag' = 'field'fmc'tag' +     'field'f'n'-'field'c'n
+       'define 'field'mse'tag' = 'field'mse'tag' + pow('field'f'n'-'field'a'n',2)'
+   else
        'define 'field'fs  = 'field'f.'n'*'scale
        'define 'field'as  = 'field'a.'n'*'scale
        'define 'field'cs  = 'field'c.'n'*'scale
 
-       'define 'field'fm  = 'field'fm  +     'field'fs'
-       'define 'field'am  = 'field'am  +     'field'as'
-       'define 'field'cm  = 'field'cm  +     'field'cs'
-       'define 'field'fma = 'field'fma +     'field'fs-'field'as'
-       'define 'field'fmc = 'field'fmc +     'field'fs-'field'cs'
-       'define 'field'mse = 'field'mse + pow('field'fs-'field'as,2)'
+       'define 'field'fm'tag'  = 'field'fm'tag'  +     'field'fs'
+       'define 'field'am'tag'  = 'field'am'tag'  +     'field'as'
+       'define 'field'cm'tag'  = 'field'cm'tag'  +     'field'cs'
+       'define 'field'fma'tag' = 'field'fma'tag' +     'field'fs-'field'as'
+       'define 'field'fmc'tag' = 'field'fmc'tag' +     'field'fs-'field'cs'
+       'define 'field'mse'tag' = 'field'mse'tag' + pow('field'fs-'field'as,2)'
    endif
 
 n = n + 1
 endwhile
 
-'define 'field'fm'tag'  = 'field'fm /'numfiles
-'define 'field'am'tag'  = 'field'am /'numfiles
-'define 'field'cm'tag'  = 'field'cm /'numfiles
-'define 'field'fma'tag' = 'field'fma/'numfiles
-'define 'field'fmc'tag' = 'field'fmc/'numfiles
-'define 'field'mse'tag' = 'field'mse/'numfiles
+'define 'field'fm'tag'  = 'field'fm'tag' /'numfiles
+'define 'field'am'tag'  = 'field'am'tag' /'numfiles
+'define 'field'cm'tag'  = 'field'cm'tag' /'numfiles
+'define 'field'fma'tag' = 'field'fma'tag'/'numfiles
+'define 'field'fmc'tag' = 'field'fmc'tag'/'numfiles
+'define 'field'mse'tag' = 'field'mse'tag'/'numfiles
 
 'undefine 'field'fs'
 'undefine 'field'as'
 'undefine 'field'cs'
-'undefine 'field'fm'
-'undefine 'field'am'
-'undefine 'field'cm'
-'undefine 'field'fmc'
-'undefine 'field'mse'
 
+
+
+'define 'field'mes'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'varf'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'vara'tag' = lat-lat + lon-lon + lev-lev'
+'define 'field'cov'tag'  = lat-lat + lon-lon + lev-lev'
+'define 'field'rnd'tag'  = lat-lat + lon-lon + lev-lev'
 n = 1
 while ( n <= numfiles )
-'define 'field'mes  = 'field'mes  + pow(  'field'fm'tag'-'field'am'tag',2)'
-'define 'field'varf = 'field'varf + pow(  'field'f.'n'*'scale'-'field'fm'tag',2)'
-'define 'field'vara = 'field'vara + pow(  'field'a.'n'*'scale'-'field'am'tag',2)'
-'define 'field'cov  = 'field'cov  +      ('field'f.'n'*'scale'-'field'fm'tag') * ('field'a.'n'*'scale'-'field'am'tag')'
-'define 'field'rnd  = 'field'rnd  + pow( ('field'f.'n'*'scale'-'field'fm'tag') - ('field'a.'n'*'scale'-'field'am'tag') , 2)'
+'define 'field'mes'tag'  = 'field'mes'tag'  + pow(  'field'fm'tag'-'field'am'tag',2)'
+'define 'field'varf'tag' = 'field'varf'tag' + pow(  'field'f.'n'*'scale'-'field'fm'tag',2)'
+'define 'field'vara'tag' = 'field'vara'tag' + pow(  'field'a.'n'*'scale'-'field'am'tag',2)'
+'define 'field'cov'tag'  = 'field'cov'tag'  +      ('field'f.'n'*'scale'-'field'fm'tag') * ('field'a.'n'*'scale'-'field'am'tag')'
+'define 'field'rnd'tag'  = 'field'rnd'tag'  + pow( ('field'f.'n'*'scale'-'field'fm'tag') - ('field'a.'n'*'scale'-'field'am'tag') , 2)'
 n = n + 1
 endwhile
+'define 'field'mes'tag'  = 'field'mes'tag' /'numfiles
+'define 'field'varf'tag' = 'field'varf'tag'/'numfiles
+'define 'field'vara'tag' = 'field'vara'tag'/'numfiles
+'define 'field'cov'tag'  = 'field'cov'tag' /'numfiles
+'define 'field'rnd'tag'  = 'field'rnd'tag' /'numfiles
 
-'define 'field'cov'tag'   =     'field'cov /'numfiles
-'define 'field'rnd'tag'   =     'field'rnd /'numfiles
-'define 'field'varf'tag'  =     'field'varf/'numfiles
-'define 'field'vara'tag'  =     'field'vara/'numfiles
-'define 'field'stdf'tag'  = sqrt('field'varf'tag')'
-'define 'field'stda'tag'  = sqrt('field'vara'tag')'
 
-* Original AMPL definition (includes both Mean and STD diffs)
-* -----------------------------------------------------------
-*'define 'field'ampl'tag'  = pow( 'field'stdf'tag'-'field'stda'tag',2 ) + pow( 'field'fm'tag'-'field'am'tag',2 )' 
+'define 'field'stdf'tag' = sqrt('field'varf'tag')'
+'define 'field'stda'tag' = sqrt('field'vara'tag')'
 
-'define 'field'ampl'tag'  = pow( 'field'stdf'tag'-'field'stda'tag',2 )' 
-'define 'field'phaz'tag'  =  2*( 'field'stdf'tag'*'field'stda'tag' - 'field'cov'tag')' 
-'define 'field'ramp'tag'  = sqrt( 'field'ampl'tag' )'
-'define 'field'rphz'tag'  = sqrt( 'field'phaz'tag' )'
-'define 'field'rrnd'tag'  = sqrt( 'field'rnd'tag' )'
+'define 'field'ampl'tag' = pow( 'field'stdf'tag'-'field'stda'tag',2 )' 
+'define 'field'phaz'tag' =  2*( 'field'stdf'tag'*'field'stda'tag' - 'field'cov'tag')' 
+'define 'field'ramp'tag' = sqrt( 'field'ampl'tag' )'
+'define 'field'rphz'tag' = sqrt( 'field'phaz'tag' )'
+'define 'field'rrnd'tag' = sqrt( 'field'rnd'tag' )'
 
-'define 'field'mes'tag'  =      'field'mes/'numfiles
 'define 'field'rmes'tag' = sqrt('field'mes'tag')'
 'define 'field'rms'tag'  = sqrt('field'mse'tag')'
 'define 'field'var'tag'  =      'field'mse'tag'-'field'mes'tag
 'define 'field'std'tag'  = sqrt('field'mse'tag'-'field'mes'tag')'
 
-if( zfreq = 'varying' )
-'makez 'field'fm'tag'  z'
-'makez 'field'am'tag'  z'
-'makez 'field'cm'tag'  z'
-'makez 'field'fma'tag' z'
-'makez 'field'fmc'tag' z'
-'makez 'field'mes'tag' z'
-'makez 'field'mse'tag' z'
-'makez 'field'ampl'tag' z'
-'makez 'field'phaz'tag' z'
+* -----------------------------------------------------------------
 
-'define 'field'rmes'tag'z = sqrt('field'mes'tag'z)'
-'define 'field'ramp'tag'z = sqrt('field'ampl'tag'z)'
-'define 'field'rphz'tag'z = sqrt('field'phaz'tag'z)'
-'define 'field'rms'tag'z  = sqrt('field'mse'tag'z)'
-'define 'field'var'tag'z  =      'field'mse'tag'z-'field'mes'tag'z'
-'define 'field'std'tag'z  = sqrt('field'mse'tag'z-'field'mes'tag'z)'
+
+'define 'field'rmes'tag' = sqrt('field'mes'tag')'
+'define 'field'ramp'tag' = sqrt('field'ampl'tag')'
+'define 'field'rphz'tag' = sqrt('field'phaz'tag')'
+
+
+* -----------------------------------------------------------------
+
+if( zfreq = 'varying' )
+   'makez  'field'fm'tag'   z'
+   'makez  'field'am'tag'   z'
+   'makez  'field'cm'tag'   z'
+   'makez  'field'fma'tag'  z'
+   'makez  'field'fmc'tag'  z'
+   'makez  'field'mes'tag'  z'
+   'makez  'field'mse'tag'  z'
+   'makez  'field'ampl'tag' z'
+   'makez  'field'phaz'tag' z'
+   'define 'field'rmes'tag'z = sqrt('field'mes'tag'z)'
+   'define 'field'ramp'tag'z = sqrt('field'ampl'tag'z)'
+   'define 'field'rphz'tag'z = sqrt('field'phaz'tag'z)'
+   'define 'field'rms'tag'z  = sqrt('field'mse'tag'z)'
+   'define 'field'var'tag'z  =      'field'mse'tag'z-'field'mes'tag'z'
+   'define 'field'std'tag'z  = sqrt('field'mse'tag'z-'field'mes'tag'z)'
 endif
 
 return
+
+function region(args)
+
+reg = subwrd(args,1)
+
+       'set dfile 1'
+
+   if( reg = 'GLO'   )
+       'setx'
+       'sety'
+       'run getinfo xdim'
+                    xend = result
+                    xbeg = 1
+       'run getinfo ydim'
+                    yend = result
+                    ybeg = 1
+   endif
+   if( reg = 'NHE'   )
+       'setx'
+       'set lat 20 90'
+       'run getinfo xdim'
+                    xend = result
+                    xbeg = 1
+       'run getinfo ymax'
+                    yend = result
+       'run getinfo ymin'
+                    ybeg = result
+   endif
+   if( reg = 'TRO'   )
+       'setx'
+       'set lat -20 20'
+       'run getinfo xdim'
+                    xend = result
+                    xbeg = 1
+       'run getinfo ymax'
+                    yend = result
+       'run getinfo ymin'
+                    ybeg = result
+   endif
+   if( reg = 'SHE'   )
+       'setx'
+       'set lat -90 -20'
+       'run getinfo xdim'
+                    xend = result
+                    xbeg = 1
+       'run getinfo ymax'
+                    yend = result
+       'run getinfo ymin'
+                    ybeg = result
+   endif
+
+return xbeg' 'xend' 'ybeg' 'yend
+
+function masks (name,latbeg,latend)
+'set dfile 1'
+'set lon -180 360'
+'sety'
+'setz'
+'define masc = maskout( 1    ,lat-'latbeg' )'
+'define masc = maskout( masc,'latend'-lat )'
+'set sdfwrite -4d mask.nc4'
+'set undef 0.0'
+'sdfwrite masc'
+
+'sdfopen mask.nc4'
+'getinfo  numfiles'
+          newfile = result
+'set dfile 'newfile
+
+'q ctlinfo'
+   ctlinfo = result
+
+          fname = mask.ctl
+'!remove 'fname
+             n = 1
+             line = sublin(ctlinfo,n)
+             write(fname,line)
+      while( line != 'endvars' )
+             n = n + 1
+             line = sublin(ctlinfo,n)
+             word = subwrd(line,1)
+         if( word = 'undef' )
+             line = 'undef 1e15'
+         endif
+             write(fname,line,append)
+      endwhile
+      close = close(fname)
+
+'close 'newfile
+'open  'fname
+'getinfo numfiles'
+         newfile = result
+'set dfile 'newfile
+'define 'name' = masc.'newfile
+'close 'newfile
+return
+

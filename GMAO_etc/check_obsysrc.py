@@ -3,7 +3,7 @@
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from glob     import glob
-from os.path  import abspath, basename
+from os.path  import abspath, basename, exists, getsize
 from re       import compile
 from sys      import stdout
 from time     import strftime
@@ -57,6 +57,7 @@ def check(filename="obsys.rc",
    indefinite = "21001231_1800"
 
    misfile_list = []
+   zfile_list = []
 
    # open output files
    #------------------
@@ -175,7 +176,7 @@ def check(filename="obsys.rc",
 
             # get list of datetimes for data (plus other info)
             #-------------------------------------------------
-            (datetime_list, hhmm_list, misfiles) = get_data_info(template)
+            (datetime_list, hhmm_list, misfiles, zfiles) = get_data_info(template)
             got_data_info[template] = 1
 
             if hhmm_list == {}:
@@ -185,6 +186,7 @@ def check(filename="obsys.rc",
                continue
 
             misfile_list.extend(misfiles)
+            zfile_list.extend(zfiles)
 
             # determine actual data interval
             #-------------------------------
@@ -369,11 +371,21 @@ def check(filename="obsys.rc",
             # write misfile info to errfile
             #------------------------------
             if misfiles:
-                msg  = "  # MISFILES\n"
+                msg  = "  # MISLABELED, MISPLACED, and BROKEN-LINK files\n"
                 errfl.write(border2+msg+border1)
                 misfiles.sort()
                 for mis in misfiles:
                     errfl.write("  #"+mis+"\n")
+                errfl.write(border1+"\n")
+
+            # write zero length file info to errfile
+            #---------------------------------------
+            if zfiles:
+                msg  = "  # ZERO-LENGTH FILES\n"
+                errfl.write(border2+msg+border1)
+                zfiles.sort()
+                for zf in zfiles:
+                    errfl.write("  #"+zf+"\n")
                 errfl.write(border1+"\n")
 
       # write zeros for templates which found no data
@@ -396,12 +408,22 @@ def check(filename="obsys.rc",
    # write misfile summary to stdout
    #--------------------------------
    if misfile_list:
-       msg  = "\n# MISLABELED and MISPLACED files\n" \
-           +    "#-------------------------------\n"
+       msg  = "\n# MISLABELED, MISPLACED, and BROKEN-LINK files\n" \
+           +    "#---------------------------------------------\n"
        stdout.write(msg)
        misfile_list.sort()
        for mis in misfile_list:
            stdout.write(mis+"\n")
+
+   # write zero length file summary to stdout
+   #-----------------------------------------
+   if zfile_list:
+       msg  = "\n# ZERO-LENGTH files\n" \
+           +    "#------------------\n"
+       stdout.write(msg)
+       zfile_list.sort()
+       for zf in zfile_list:
+           stdout.write(zf+"\n")
 
 #.......................................................................
 def get_data_info(template):
@@ -435,6 +457,7 @@ def get_data_info(template):
    hhmm_list = {}
    datetime_list = []
    misfiles = []
+   zfiles = []
 
    if filepath_list:
       for fpath in filepath_list:
@@ -490,6 +513,15 @@ def get_data_info(template):
             msg = "Cannot extract date/time from filename in fpath: {0}"
             raise Exception(msg.format(fpath))
 
+         # check for broken-link and zero-length files
+         #--------------------------------------------
+         if not exists(fpath):
+            misfiles.append("(BROKEN-LINK) "+fpath)
+            continue
+
+         if getsize(fpath) == 0:
+            zfiles.append("(ZERO-LENGTH) "+fpath)
+
          # check for misplaced or mislabeled files
          #----------------------------------------
          if pattern["YYYY_JJJ"].search(fpath):
@@ -544,7 +576,7 @@ def get_data_info(template):
    else:
       datetime_list = [zeros]
 
-   return (datetime_list, hhmm_list, misfiles)
+   return (datetime_list, hhmm_list, misfiles, zfiles)
 
 #.......................................................................
 def get_start_stop_tuples(datetime_list, intervalMins):

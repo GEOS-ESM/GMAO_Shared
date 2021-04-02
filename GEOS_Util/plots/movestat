@@ -155,11 +155,12 @@ if( $pltdir == 'NULL' ) set pltdir = `pwd`
      end
 
 echo " "
-echo EXPID: $expid
-echo SOURCE: $source
-echo PLTDIR: $pltdir
-echo WEBDIR: $webdir
-echo DSCS: $DSCS
+echo " EXPID: $expid"
+echo "  YEAR: $year"
+echo "SOURCE: $source"
+echo "PLTDIR: $pltdir"
+echo "WEBDIR: $webdir"
+echo "  DSCS: $DSCS"
 echo " "
 
 # Copy Plots to Web Directory
@@ -170,8 +171,11 @@ echo " "
      if( -e $pltdir/corcmp & ( $plots == NULL | $plots == corcmp ) ) then
          cd $pltdir/corcmp
          if( $season == 'NULL' ) then
-         set files = `/bin/ls -1 stats*gif`
-         set season = `echo $files[1] | cut -d. -f1 | cut -d_ -f6`
+           set files = `/bin/ls -1 *stats*gif`
+           set fname = `echo $files[1] | cut -d. -f1`
+           set fsize = `echo $fname | awk '{print length($0)}'`
+             @ fsize = $fsize - 2
+          set season = `echo $fname | cut -b${fsize}-`
          endif
          ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/corcmp
          echo Syncing ${season} Files from $pltdir/corcmp to $webid@${server}:${www}/${webdir}/${season}/corcmp
@@ -184,8 +188,11 @@ echo " "
          if( -e $pltdir/$DSC & ( $plots == NULL | $plots == sys ) ) then
              cd $pltdir/$DSC
              if( $season == 'NULL' ) then
-             set files = `/bin/ls -1 stats*gif`
-             set season = `echo $files[1] | cut -d. -f1 | cut -d_ -f6`
+               set files = `/bin/ls -1 *stats*gif`
+               set fname = `echo $files[1] | cut -d. -f1`
+               set fsize = `echo $fname | awk '{print length($0)}'`
+                 @ fsize = $fsize - 2
+              set season = `echo $fname | cut -b${fsize}-`
              endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSC
              echo Syncing ${season} Files from $pltdir/$DSC to $webid@${server}:${www}/${webdir}/${season}/$DSC
@@ -201,8 +208,11 @@ echo " "
          if( -e $pltdir/$DSCS[1].$DSC & ( $plots == NULL | $plots == syscmp ) ) then
              cd $pltdir/$DSCS[1].$DSC
              if( $season == 'NULL' ) then
-             set files = `/bin/ls -1 stats*gif`
-             set season = `echo $files[1] | cut -d. -f1 | cut -d_ -f6`
+               set files = `/bin/ls -1 *stats*gif`
+               set fname = `echo $files[1] | cut -d. -f1`
+               set fsize = `echo $fname | awk '{print length($0)}'`
+                 @ fsize = $fsize - 2
+              set season = `echo $fname | cut -b${fsize}-`
              endif
              ssh $webid@${server} mkdir -p ${www}/${webdir}/${season}/$DSCS[1].$DSC
 

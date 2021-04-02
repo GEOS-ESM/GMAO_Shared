@@ -565,6 +565,7 @@ end Program regrid_forcing
 Subroutine do_regrid_forcing(rc)
   use ESMF
   use MAPL
+  use MPI
 
   use GenGridCompMod,          only : Root_SetServices => SetServices
 
@@ -613,13 +614,14 @@ Subroutine do_regrid_forcing(rc)
   type(ESMF_Config)            :: cf_root
   type(ESMF_Config)            :: cf_hist
   character(len=ESMF_MAXSTR), parameter :: CF_FILE='REGRID_FORCING.rc'
-  logical                      :: frwd
 !                                -----
 
 !  Initialize framework
 !  --------------------
   call ESMF_Initialize(vm=vm, logKindFlag=ESMF_LOGKIND_NONE,rc=STATUS)
   VERIFY_(STATUS)
+  call MAPL_Initialize(rc=status)
+  VERIFY_(status)
 
 !  Setup config
 !  ------------
@@ -670,6 +672,8 @@ Subroutine do_regrid_forcing(rc)
 !  Finalize
 !  --------
 
+  call MAPL_Finalize(rc=status)
+  VERIFY_(status)
   call ESMF_Finalize(rc=STATUS)
   VERIFY_(STATUS)
 

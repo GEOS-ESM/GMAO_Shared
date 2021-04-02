@@ -112,6 +112,14 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CBSCALE' ; endi
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FACTOR' ; endif
                                                                 factor = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FIXED_PLOT_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FIXED_PLOT_FACTOR' ; endif
+                                                                 fixpltfact = result
+
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CLOSE_PLOT_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLOSE_PLOT_FACTOR' ; endif
+                                                                 clspltfact = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_TITLE'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_TITLE' ; endif
                                                                 title = result
@@ -119,6 +127,14 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_TITLE' ; endif
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CINT'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CINT' ; endif
                                                                 ccint = result
+
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FIXED_PLOT_CINT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FIXED_PLOT_CINT' ; endif
+                                                                 fixpltcint = result
+
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CLOSE_PLOT_CINT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLOSE_PLOT_CINT' ; endif
+                                                                 clspltcint = result
 
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
@@ -242,14 +258,27 @@ else
            ntop = ntop+2
         endif
    endif
+
+   if( fixpltfact != NULL )
+    'd 'fixpltfact
+     ntop = subwrd(result,4)
+   endif
    say 'Diff Scaling Factor: 'ntop
+
+   if( fixpltcint != NULL )
+    'd 'fixpltcint
+        fixpltcint = subwrd(result,4)
+        cint = fixpltcint
+   else
       if( ntop < 0 )
           ztop = -1 * ntop
          'd 'qmax'*1e'ztop
       else
       '   d 'qmax'/1e'ntop
       endif
-       cint = subwrd(result,4)
+        cint = subwrd(result,4)
+   endif
+
        say 'TOP CINT: 'cint
       'shades 'cint
       if( ntop < 0 )
@@ -309,15 +338,29 @@ endif
            n = n+2
         endif
    endif
+
+   if( clspltfact != NULL )
+    'd 'clspltfact
+     n = subwrd(result,4)
+   endif
    say 'Diff Scaling Factor: 'n
+
+   if( clspltcint != NULL )
+    'd 'clspltcint
+        clspltcint = subwrd(result,4)
+        cint = clspltcint
+   else
       if( n < 0 )
           ztop = -1 * n
          'd 'qmax'*1e'ztop
       else
          'd 'qmax'/1e'n
       endif
-       cint = subwrd(result,4)
+        cint = subwrd(result,4)
+   endif
+
       'shades 'cint
+
       if( n < 0 )
           ztop = -1 * n
          'define closeness = closeness*1e'ztop
