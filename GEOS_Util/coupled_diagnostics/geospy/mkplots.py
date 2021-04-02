@@ -23,7 +23,10 @@ def main(exp_conf):
     sss.mkplots(exps, ocn2d)
 
     # Load ocean 3d data
-    ocn3d=geosdset.load_collection(exps, 'geosgcm_ocn3d')
+    try:
+        ocn3d=geosdset.load_collection(exps,'geosgcm_ocn3d')
+    except OSError:
+        ocn3d=geosdset.load_collection(exps,'prog_z',type='MOM')
 
     # Plot T profiles
     import temp_mapl

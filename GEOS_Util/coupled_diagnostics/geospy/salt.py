@@ -150,6 +150,11 @@ def mkplots(exps, dsets):
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn3d')
+
+    try:
+        dsets=geosdset.load_collection(exps,'geosgcm_ocn3d')
+    except OSError:
+        dsets=geosdset.load_collection(exps,'prog_z',type='MOM')
+
     mkplots(exps,dsets)
     
