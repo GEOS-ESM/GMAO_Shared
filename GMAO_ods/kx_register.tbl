@@ -337,7 +337,7 @@
    325  gsi_diag    metop-a     amsua                     25    # amsua_metop-a         -- conflict 325
    326  gsi_diag    metop-b     amsua                     26    # amsua_metop-b
    330  gsi_diag    aura        mls55                      0    #
-   335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    #
+   335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    # ???
    355  gsi_diag    tirosn      ssu                        5    # ssu_tirosn
    356  gsi_diag    n06         ssu                        6    # ssu_n06
    357  gsi_diag    n07         ssu                        7    # ssu_n07
@@ -359,6 +359,14 @@
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
    421  gsi_conv    421         "gps_bnd,gps_ref"          0    # Oceansat-2 (gps)
+
+# see gsi.rc: OBS_INPUT::
+#  kx   source      dplat       dtype                   isat
+   427  gsi_diag    npp         ompsnm                     0    # 
+   437  gsi_diag    npp         ompsnp                     0    # 
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
    440  gsi_conv    440         "gps_bnd,gps_ref"          0    # Megha-Tropiques (gps) -- conflict 440
    440  gsi_conv    440         toms                       0    #                       -- conflict 440
 
