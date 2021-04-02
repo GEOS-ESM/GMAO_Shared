@@ -3,13 +3,13 @@
 '''
 This module runs different plotting modules. Can be used as script.
 '''
-
+import sys
 import geosdset
 
-def main(expid):
+def main(exp_conf):
     
     # Load metadata for experiments to plot
-    exps=geosdset.load_exps(expid)
+    exps=geosdset.load_exps(exp_conf)
 
     # Load ocean 2d data
     ocn2d=geosdset.load_collection(exps, 'geosgcm_ocn2d')
@@ -36,5 +36,4 @@ def main(expid):
     # Add more plots....
     
 if __name__ == "__main__":
-    import sys
     main(sys.argv[1])

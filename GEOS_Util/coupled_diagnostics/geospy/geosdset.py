@@ -3,7 +3,8 @@ This modules provides utilities for reading different GEOS collections.
 '''
 
 import os
-import pathlib, importlib
+import pathlib, yaml
+from types import SimpleNamespace
 import numpy as np
 import xarray as xr
 
@@ -72,23 +73,28 @@ def _get_loader(type):
              'MOM': _load_mom}
     return loaders[type]
 
-def load_exps(expid):
+def load_exps(exp_conf):
     '''
-    Returns a list of modules with meta data for experiment we want to plot (expid) and 
+    Returns a list of name spaces with meta data for experiment we want to plot and 
     all experiments we want to compare to.
     '''
     
     exps=[]
-    exps.append(importlib.import_module(expid))
+    with open(exp_conf) as ff:
+        exps.append(SimpleNamespace(**yaml.safe_load(ff)))
+        
     for exp in exps[0].cmpexp:
-        exps.append(importlib.import_module(exp))
+        with open(exp,'r') as ff:
+            exps.append(SimpleNamespace(**yaml.safe_load(ff)))
+
+    for exp in exps:
+        exp.dates=[date if date!='None' else None for date in exp.dates]
 
     # Make directory for plots if it does not exists
     try:
         os.makedirs(exps[0].plot_path)
     except OSError:
         pass
-
 
     return exps
 

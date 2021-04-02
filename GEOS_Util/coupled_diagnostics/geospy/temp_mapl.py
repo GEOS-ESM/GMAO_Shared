@@ -4,7 +4,7 @@
 Plots zonal/meridional depth profiles.
 '''
 
-import importlib
+import sys,importlib
 import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
@@ -156,7 +156,6 @@ def mkplots(exps, dsets):
         plot_diff(exps[0], dsets[0], ds, ftype='obs')
 
 if __name__=='__main__':
-    import sys
     exps=geosdset.load_exps(sys.argv[1])
     dsets=geosdset.load_collection(exps,'geosgcm_ocn3d')
     mkplots(exps,dsets)

@@ -4,7 +4,7 @@
 Plots SSS.
 '''
 
-import importlib
+import sys, importlib
 import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
@@ -105,7 +105,6 @@ def mkplots(exps, dsets):
         plot_diff(exps[0], da, da1, ftype='obs')
 
 if __name__=='__main__':
-    import sys
     exps=geosdset.load_exps(sys.argv[1])
     dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
     mkplots(exps,dsets)
