@@ -49,10 +49,11 @@ include_directories (${BASEDIR}/lib)
 include_directories (${include_${this}})
 include_directories (${INC_NETCDF})
 
-if (F2PY_FOUND)
+if (USE_F2PY)
    if (precision STREQUAL "r4")
-   add_f2py_module(GFIO_ SOURCES GFIO_py.F90
-      DESTINATION lib/Python
+   find_package(F2PY2)
+   esma_add_f2py2_module(GFIO_ SOURCES GFIO_py.F90
+      DESTINATION lib/Python2
       ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
       gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
       gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
@@ -62,7 +63,7 @@ if (F2PY_FOUND)
       )
    add_dependencies(GFIO_ ${this})
    endif ()
-endif (F2PY_FOUND)
+endif ()
 
 ecbuild_add_executable(TARGET GFIO_mean_${precision}.x SOURCES GFIO_mean.f90 LIBS GMAO_gfio_${precision} )
 
