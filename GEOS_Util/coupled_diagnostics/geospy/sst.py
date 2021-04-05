@@ -12,10 +12,100 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots
 
-def plot_clim(exp, da):
-    var=da.sel(time=slice(*exp['dates']))
-    clim=var.groupby('time.season').mean('time')
+def mkclim(exp,dset):
+    '''
+    Computes climatology for given experiment.
+    '''
+    varname='TS'
+    TFREEZE=273.16    
+    var=dset[varname].sel(time=slice(*exp['dates']))-TFREEZE
+    return var.groupby('time.season').mean('time')
+    
+def plot_clim(plotter, exp, clim):
+    '''
+    Makes climaology plots.
+    '''
+    print(exp["weight"])
+    pl.figure(1); pl.clf() 
+    ax=plotter.contour(clim.sel(season='DJF'))
+    ax.set_title(f'{exp["expid"]} SST, DJF')
+    pl.savefig(f'{exp["plot_path"]}/sst_djf.png')
+    
+    pl.figure(2); pl.clf()
+    ax=plotter.contour(clim.sel(season='JJA'))
+    ax.set_title(f'{exp["expid"]} SST, JJA')
+    pl.savefig(f'{exp["plot_path"]}/sst_jja.png')
 
+    pl.figure(3); pl.clf()
+    ax=plotter.contour(clim.mean('season'))
+    ax.set_title(f'{exp["expid"]} SST, Annual Mean')
+    pl.savefig(f'{exp["plot_path"]}/sst_am.png')
+    pl.show()
+
+def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
+    '''
+    Plots climatology difference between two experiments.
+    '''
+
+    rr=xesmf.Regridder(cmpclim,clim,'bilinear',periodic=True)
+    dif=clim-rr(cmpclim)
+
+    pl.figure(1); pl.clf() 
+    ax=plotter.contour(dif.sel(season='DJF'))
+    ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, DJF')
+    pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_djf.png')
+    
+    pl.figure(2); pl.clf()
+    ax=plotter.contour(dif.sel(season='JJA'))
+    ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, JJA')
+    pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_jja.png')
+
+    pl.figure(3); pl.clf()
+    ax=plotter.contour(dif.mean('season'))
+    ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, Annual Mean')
+    pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_am.png')
+    pl.show()
+
+    rr.clean_weight_file()
+
+def plot_diffobs(plotter, exp, clim, obsclim, obsname):
+    '''
+    Plots climatology difference against observations
+    '''
+    rr=xesmf.Regridder(obsclim,clim,'bilinear',periodic=True)
+    dif=clim-rr(obsclim)
+
+    pl.figure(1); pl.clf() 
+    ax=plotter.contour(dif.sel(season='DJF'))
+    ax.set_title(f'{exp["expid"]}-{obsname} SST, DJF')
+    pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_djf.png')
+    pl.savefig(f'{exp["plot_path"]}/sst-obs_djf.png')
+    
+    pl.figure(2); pl.clf()
+    ax=plotter.contour(dif.sel(season='JJA'))
+    ax.set_title(f'{exp["expid"]}-{obsname} SST, JJA')
+    pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_jja.png')
+    pl.savefig(f'{exp["plot_path"]}/sst-obs_jja.png')
+
+    pl.figure(3); pl.clf()
+    ax=plotter.contour(dif.mean('season'))
+    ax.set_title(f'{exp["expid"]}-{obsname} SST, Annual Mean')
+    pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_am.png')
+    pl.savefig(f'{exp["plot_path"]}/sst-obs_am.png')
+    pl.show()
+
+    rr.clean_weight_file()
+
+def mkplots(exps, dsets):
+# Calculate climatologies for experiments to comapre
+    clims=[]
+    for exp,dset in zip(exps,dsets):
+        clims.append(mkclim(exp,dset))
+
+    mask=1-np.isnan(clims[0][0])
+    exps[0]["weight"]=mask*dsets[0]["dx"]*dsets[0]["dy"]
+
+# Plot parameters
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,
                  'label': '$^0C$'}
@@ -35,90 +125,21 @@ def plot_clim(exp, da):
     plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, 
                           contour_opts=contour_opts, clab_opts=clab_opts)
 
-    pl.figure(1); pl.clf() 
-    ax=plotmap.contour(clim.sel(season='DJF'))
-    ax.set_title('SST, DJF')
-    pl.savefig(f'{exp["plot_path"]}/sst_djf.png')
-    
-    pl.figure(2); pl.clf()
-    ax=plotmap.contour(clim.sel(season='JJA'))
-    ax.set_title('SST, JJA')
-    pl.savefig(f'{exp["plot_path"]}/sst_jja.png')
+    plot_clim(plotmap, exps[0], clims[0]) 
 
-    pl.figure(3); pl.clf()
-    ax=plotmap.contour(clim.mean('season'))
-    ax.set_title('SST, Annual Mean')
-    pl.savefig(f'{exp["plot_path"]}/sst_am.png')
-    pl.show()
+    plotmap.fill_opts['levels']=np.arange(-10.,10.1,1.0)
+    plotmap.fill_opts['cmap']=cmocean.cm.diff
+    plotmap.contour_opts['levels']=np.arange(-10.,10.1,2.0)
 
-def plot_diff(exp, da1, da2, ftype='dif'):
-    var1=da1.sel(time=slice(*exp['dates']))
-    clim1=var1.groupby('time.season').mean('time')
-    
-    if ftype=='dif':
-        var2=da2.sel(time=slice(*exp['dates']))
-    elif ftype=='obs':
-        var2=da2
-    else:
-        raise Exception('Wrong plot type. Type should be eighter "dif" or "obs"')
-    clim2=var2.groupby('time.season').mean('time')
-
-    rr=xesmf.Regridder(da2,da1,'bilinear',periodic=True)
-    dif=clim1-rr(clim2)
-
-    cbar_kwargs={'orientation': 'horizontal',
-                 'shrink': 0.8,
-                 'label': '$^0C$'}
-    
-    fill_opts={'cmap': cmocean.cm.diff, 
-              'levels': np.arange(-10.,10.1,1.0),
-               'cbar_kwargs': cbar_kwargs
-    }
-
-    contour_opts={'levels': np.arange(-10.,10.1,2.0),
-                  'colors': 'black'
-    }
-
-    clab_opts={'fmt': '%1.0f'}
-
-    projection=ccrs.PlateCarree(central_longitude=210.)
-    plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, 
-                          contour_opts=contour_opts, clab_opts=clab_opts)
-
-    pl.figure(1); pl.clf() 
-    ax=plotmap.contour(dif.sel(season='DJF'))
-    ax.set_title(f'SST-{ftype}, DJF')
-    pl.savefig(f'{exp["plot_path"]}/sst-{ftype}_djf.png')
-    
-    pl.figure(2); pl.clf()
-    ax=plotmap.contour(dif.sel(season='JJA'))
-    ax.set_title(f'SST-{ftype}, JJA')
-    pl.savefig(f'{exp["plot_path"]}/sst-{ftype}_jja.png')
-
-    pl.figure(3); pl.clf()
-    ax=plotmap.contour(dif.mean('season'))
-    ax.set_title(f'SST-{ftype}, Annual Mean')
-    pl.savefig(f'{exp["plot_path"]}/sst-{ftype}_am.png')
-    pl.show()
-
-    rr.clean_weight_file()
-
-def mkplots(exps, dsets):
-
-    varname='TS'
-    TFREEZE=273.16
-    da=dsets[0][varname]; da-=TFREEZE
-    plot_clim(exps[0] ,da)
-
-    for ds in dsets[1:]:
-        da1=ds[varname]; da1-=TFREEZE
-        plot_diff(exps[0], da, da1, ftype='dif')
+    for exp,clim in zip(exps[1:],dsets[1:]):
+        plot_diff(plotmap, exps[0], exp, clims[0], clim)
         
-    obs=['OISSTv2']
-    for name in obs:
-        obsvarname='sst'
-        da1=importlib.import_module('verification.'+name).ds[obsvarname]
-        plot_diff(exps[0], da, da1, ftype='obs')
+    obs={'OISSTv2': 'sst'} # Names of observational data set and SST variable in this data set.
+    for obsname in obs:
+        obsvarname=obs[obsname]
+        da=importlib.import_module('verification.'+obsname).ds[obsvarname]
+        obsclim=da.groupby('time.season').mean('time')
+        plot_diffobs(plotmap, exps[0], clims[0], obsclim, obsname)
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])

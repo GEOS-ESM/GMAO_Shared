@@ -39,7 +39,6 @@ class Plot2d(Plot):
         da: DataArray
         ax: axes
         mode: 'filled', 'contour' or 'both'
-        clab_fmt: format for contour labels
         '''
         
         if ax is None:
@@ -86,7 +85,6 @@ class PlotMap(Plot2d):
         da: DataArray
         ax: axes
         mode: 'filled', 'contour' or 'both'
-        clab_fmt: format for contour labels
         '''
         if ax is None:
             ax=self.plot_map()
