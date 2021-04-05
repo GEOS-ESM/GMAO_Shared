@@ -22,7 +22,7 @@
 #ifdef HERMES
 
       module m_set_eta
-         use, intrinsic :: iso_fortran_env, only: REAL32, REAL64
+      use, intrinsic :: iso_fortran_env, only: REAL32, REAL64
       PRIVATE
       PUBLIC set_eta
       PUBLIC get_ref_plevs

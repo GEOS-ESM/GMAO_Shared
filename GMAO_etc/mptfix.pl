@@ -5,6 +5,7 @@
 #  11May2016 Thompson  Adaptations for using MPT
 #  24Jun2016 Thompson  Changes that use the machinefile to calculate number of
 #                      tasks per node. No longer requires that as an input 
+#  04Jun2020 Todling   Allow for parallelizaton of serial calls
 #
 #-----------------------------------------------------------------------------------------------------
 
@@ -60,6 +61,7 @@ sub main {
    my ($modulo, $nodelist);
    my (@joblines, $fragment, $command);
    my (%counts, $test_for_equal_nodes);
+   my ($fvroot);
 
    if ( $#ARGV  <  2 ) {
      print STDERR " Missing arguments; see usage:\n";
@@ -72,7 +74,7 @@ sub main {
 
 # FVROOT is where the binaries have been installed
 # ------------------------------------------------
-
+   $fvroot  = $ENV{FVROOT};
    
    if ( $queue eq "datamove" ) {
         $ntasks          = 1;
@@ -158,8 +160,15 @@ sub main {
 
    foreach $command (@joblines) {
 
+
       if ( $command =~ /mpirun/ ) {
+         if ($debug) {
+            print "command before: $command\n";
+         }
          $fragment =  substr $command, index($command, 'mpirun'), 6, "mpiexec -machinefile";
+         if ($debug) {
+            print "command after: $command\n";
+         }
       }
 
       if ( $command =~ /mpiexec_mpt/ ) {
@@ -185,6 +194,19 @@ sub main {
             print "command after: $command\n";
          }
       }
+  
+      if ( $command =~ /serial_run/ ) {
+         if ($debug) {
+            print "command before: $command\n";
+         }
+
+         $fragment =  substr $command, index($command, 'serial_run'), 10, "ssh -nf $nodelist source $fvroot/bin/g5_modules; ";
+
+         if ($debug) {
+            print "command after: $command\n";
+         }
+      } 
+
       print JOBOUTPUT $command;
    }
 
