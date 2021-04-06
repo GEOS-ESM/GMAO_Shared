@@ -144,8 +144,7 @@ def mkplots(exps, dsets):
         plot_diff(plotmap, exps[0], exp, clims[0], clim)
         
     obs={'OISSTv2': 'sst'} # Names of observational data set and SST variable in this data set.
-    for obsname in obs:
-        obsvarname=obs[obsname]
+    for obsname,obsvarname in obs.items():
         da=importlib.import_module('verification.'+obsname).ds[obsvarname]
         obsclim=da.groupby('time.season').mean('time')
         plot_diffobs(plotmap, exps[0], clims[0], obsclim, obsname)

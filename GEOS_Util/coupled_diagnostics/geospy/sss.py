@@ -115,7 +115,7 @@ def mkplots(exps, dsets):
 # Plot parameters
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,
-                 'label': '$^0C$'}
+                 'label': 'PSU'}
     
     fill_opts={'cmap': cmocean.cm.haline, 
               'levels': np.arange(32.0,38.1,0.4),
@@ -126,11 +126,9 @@ def mkplots(exps, dsets):
                   'colors': 'black'
     }
 
-    clab_opts={'fmt': '%1.0f'}
-
     projection=ccrs.PlateCarree(central_longitude=210.)
     plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, 
-                          contour_opts=contour_opts, clab_opts=clab_opts)
+                          contour_opts=contour_opts)
 
     # Plots
     plot_clim(plotmap, exps[0], clims[0]) 
@@ -143,8 +141,7 @@ def mkplots(exps, dsets):
         plot_diff(plotmap, exps[0], exp, clims[0], clim)
         
     obs={'woa13': 's_an'} # Names of observational data set and SST variable in this data set.
-    for obsname in obs:
-        obsvarname=obs[obsname]
+    for obsname,obsvarname in obs.items():
         ds=importlib.import_module('verification.'+obsname).ds_s
         da=ds[obsvarname].sel(depth=slice(0.,10.)).mean('depth')
         obsclim=da.groupby('time.season').mean('time')
