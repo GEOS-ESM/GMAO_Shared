@@ -666,6 +666,12 @@
                   fcondtopn(i,j) = fcondtopn_save(ij)
                   fcondtopn_save(ij) = tmp
               endif
+              if (Tsf(ij) == c0 .and. flag_mixed(ij)) then
+                   if (fsurfn(i,j) < fcondtopn(i,j)) then
+                      fhocnn(i,j) = fhocnn(i,j) -   &
+                                (fcondtopn(i,j)-fsurfn(i,j)) 
+                   endif
+              endif
           enddo
       endif
 
