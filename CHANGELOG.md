@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Stats plot updates
 - Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
 
 ### Added
 
