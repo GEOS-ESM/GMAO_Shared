@@ -10,7 +10,7 @@ import matplotlib.pyplot as pl
 import cmocean
 import cartopy.crs as ccrs
 import xesmf
-import geosdset, plots
+import geosdset, plots, utils
 
 def mkclim(exp,dset):
     '''
@@ -25,19 +25,21 @@ def plot_clim(plotter, exp, clim):
     '''
     Makes climaology plots.
     '''
-    print(exp["weight"])
     pl.figure(1); pl.clf() 
-    ax=plotter.contour(clim.sel(season='DJF'))
+    var=clim.sel(season='DJF')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]} SST, DJF')
     pl.savefig(f'{exp["plot_path"]}/sst_djf.png')
     
     pl.figure(2); pl.clf()
-    ax=plotter.contour(clim.sel(season='JJA'))
+    var=clim.sel(season='JJA')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]} SST, JJA')
     pl.savefig(f'{exp["plot_path"]}/sst_jja.png')
 
     pl.figure(3); pl.clf()
-    ax=plotter.contour(clim.mean('season'))
+    var=clim.mean('season')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst_am.png')
     pl.show()
@@ -51,17 +53,20 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     dif=clim-rr(cmpclim)
 
     pl.figure(1); pl.clf() 
-    ax=plotter.contour(dif.sel(season='DJF'))
+    var=dif.sel(season='DJF')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, DJF')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_djf.png')
     
     pl.figure(2); pl.clf()
-    ax=plotter.contour(dif.sel(season='JJA'))
+    var=dif.sel(season='JJA')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, JJA')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_jja.png')
 
     pl.figure(3); pl.clf()
-    ax=plotter.contour(dif.mean('season'))
+    var=dif.mean('season')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_am.png')
     pl.show()
@@ -76,19 +81,22 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     dif=clim-rr(obsclim)
 
     pl.figure(1); pl.clf() 
-    ax=plotter.contour(dif.sel(season='DJF'))
+    var=dif.sel(season='DJF')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SST, DJF')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_djf.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_djf.png')
     
     pl.figure(2); pl.clf()
-    ax=plotter.contour(dif.sel(season='JJA'))
+    var=dif.sel(season='JJA')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SST, JJA')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_jja.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_jja.png')
 
     pl.figure(3); pl.clf()
-    ax=plotter.contour(dif.mean('season'))
+    var=dif.mean('season')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_am.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_am.png')
@@ -125,6 +133,7 @@ def mkplots(exps, dsets):
     plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts, 
                           contour_opts=contour_opts, clab_opts=clab_opts)
 
+    # Plots
     plot_clim(plotmap, exps[0], clims[0]) 
 
     plotmap.fill_opts['levels']=np.arange(-10.,10.1,1.0)

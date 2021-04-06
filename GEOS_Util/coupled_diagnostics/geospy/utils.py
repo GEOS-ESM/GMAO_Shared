@@ -19,3 +19,11 @@ def average(da, dim, weight):
     '''
     
     return (da*weight).sum(dim)/weight.sum(dim)
+
+def print_stat(da, dim, weight):
+    '''
+    Returns a string with da mean and standard deviation.
+    '''
+    mean=average(da, dim, weight)
+    std=np.sqrt(average((da-mean)**2,dim,weight))
+    return f'mean: {mean.values:.2f}\nstd: {std.values:.2f}'

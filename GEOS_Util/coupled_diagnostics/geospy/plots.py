@@ -30,7 +30,7 @@ class Plot2d(Plot):
         self.clab_opts={'fmt': '%1.1f'}
         self.clab_opts.update(clab_opts)
         
-    def contour(self, da, ax=None, mode='both'):
+    def contour(self, da, ax=None, mode='both',stat=None):
         '''
         Makes contour plot of data array.
         
@@ -50,6 +50,11 @@ class Plot2d(Plot):
         if mode in ('contour', 'both'):
             cs=da.plot.contour(ax=ax,**self.contour_opts)
             cs.clabel(**self.clab_opts)
+
+        if stat is not None:
+            ylim=ax.get_ylim(); dely=(max(ylim)-min(ylim))/20
+            xlim=ax.get_xlim(); delx=(max(xlim)-min(xlim))/10
+            ax.text(min(xlim)-delx,max(ylim)+dely,stat)
         
         return ax
         
@@ -76,7 +81,7 @@ class PlotMap(Plot2d):
         
         return ax
 
-    def contour(self, da, ax=None, mode='both'):
+    def contour(self, da, ax=None, mode='both', stat=None):
         '''
         Makes contour plot of data array.
         
@@ -89,6 +94,6 @@ class PlotMap(Plot2d):
         if ax is None:
             ax=self.plot_map()
 
-        super(PlotMap,self).contour(da, ax=ax, mode=mode)
+        super(PlotMap,self).contour(da, ax=ax, mode=mode, stat=stat)
         
         return ax
