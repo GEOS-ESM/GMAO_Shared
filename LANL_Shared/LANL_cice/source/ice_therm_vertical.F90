@@ -1899,6 +1899,7 @@
       if(observe(1,1)) then
           write(nu_diag,*) 'in t_c a:', fsurfn(1,1)
           write(nu_diag,*) 'in t_c b:', fcondtopn(1,1)
+          write(nu_diag,*) 'in t_c c:', flatn(1,1)
       endif
 
       !-----------------------------------------------------------------
@@ -2622,11 +2623,11 @@
          enddo                  ! ij
 
 #ifdef GEOS
-      if(.not. atmos_forcing_specified .or. calc_Tsfc) then
-         flwoutn(1,1) = flwoutn(1,1) + dflwout_dT(1)*dTsf(1)
-         fsensn(1,1)  = fsensn(1,1)  + dfsens_dT(1)*dTsf(1)
-         flatn(1,1)   = flatn(1,1)   + dflat_dT(1)*dTsf(1)
-      endif
+      !if(.not. atmos_forcing_specified .or. calc_Tsfc) then
+      !   flwoutn(1,1) = flwoutn(1,1) + dflwout_dT(1)*dTsf(1)
+      !   fsensn(1,1)  = fsensn(1,1)  + dfsens_dT(1)*dTsf(1)
+      !   flatn(1,1)   = flatn(1,1)   + dflat_dT(1)*dTsf(1)
+      !endif
          !*** TODO, the follow should be uncommented?
          !*** should fsurfn be updated in each iteration?  
          !*** it turns out that the following should never be done here
@@ -2675,9 +2676,9 @@
 #endif
 
 !#ifdef GEOS
-!         if(observe(1,1)) then
-!            write(nu_diag,*) ' Tin(m,nilyr) = ', Tin(1,nilyr)
-!          endif
+      if(observe(1,1)) then
+            write(nu_diag,*) 't_c: flatn: ', flatn(i,j)
+      endif
 !#endif
       if (.not.all_converged) then
 
