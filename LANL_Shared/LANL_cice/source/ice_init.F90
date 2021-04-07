@@ -404,6 +404,7 @@
       use ice_therm_vertical, only: calc_Tsfc, heat_capacity, conduct, &
 #ifdef GEOS
                                     ksno,  &
+                                    top_bc, &  
 #endif
                                     ustar_min
       use ice_restoring
@@ -465,7 +466,9 @@
        days_per_year = 365
        ice_ic        = 'none'          ! latitude and sst-dependent
        grid_type     = 'tripole'       ! for use in GEOS global
-       calc_Tsfc     = .true.          ! calculate surface temperature
+       ! set to false to enable explicit coupling
+       calc_Tsfc     = .false.         ! not calculating surface temperature
+       top_bc        = 'mixed'         ! 
        heat_capacity = .true.          ! nonzero heat capacity (F => 0-layer thermo)
        kcatbound     = 0               ! category boundary formula (0 = old, 1 = new)
        kitd          = merge(tsource = 1, fsource = 0, mask = (ncat > 1)) ! type of itd conversions (0 = delta, 1 = linear)

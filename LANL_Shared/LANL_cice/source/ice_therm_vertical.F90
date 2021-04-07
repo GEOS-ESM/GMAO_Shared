@@ -106,6 +106,19 @@
          ksno
 #endif
 
+      integer (kind=int_kind), parameter :: &
+         DIRICHLET = 1,                     &
+         NEUMANN   = 2
+
+      character (char_len)  ::              &
+         top_bc  = 'flux'  ! default: 'flux', i.e., Neumann BC, this
+                           !          turns on the old behavior when
+                           !          calc_Tsfc = .false. 
+                           !          'mixed', mixed Dirichlet/Neumann BC
+                           !          when not converging or Tsfc = 0C
+                           !          switch to Dirichlet BC      
+
+
 !=======================================================================
 
       contains
@@ -215,6 +228,7 @@
                                   DFSDT,DSHDT,DLHDT,DLWDT,&
                                   tlat, tlon, observe,    &
                                   fcondbotl,  sblx,       &            
+                                  fcondtopn_repar,        &
 #endif
                                   mlt_onset,   frz_onset, &
                                   yday,        l_stop,    &
@@ -335,7 +349,9 @@
       logical, dimension (nx_block,ny_block), intent(in):: &
          observe
       real (kind=dbl_kind), dimension (nx_block,ny_block), intent(out):: &
-         fcondbotl, sblx
+         fcondbotl,             &
+         fcondtopn_repar,       &  
+         sblx
       logical (kind=log_kind), optional, intent(in) :: &
          datm
 #endif
@@ -363,7 +379,7 @@
 !EOP
 !
       integer (kind=int_kind) :: &
-         i, j        , & ! horizontal indices
+         i, j, m     , & ! horizontal indices
          ij          , & ! horizontal index, combines i and j loops
          ilo,ihi,jlo,jhi, & ! beginning and end of physical domain
          k           , & ! ice layer index
@@ -385,6 +401,15 @@
          hsn_new     , & ! thickness of new snow (m)
          worki       , & ! local work array
          works           ! local work array
+
+      real (kind=dbl_kind), dimension (icells) :: &
+         fcondtopn_save
+
+      logical (kind=log_kind), dimension (icells) :: &
+         flag_mixed
+
+      real (kind=dbl_kind) :: &
+         tmp
 
       real (kind=dbl_kind), dimension (icells,nilyr) :: &
          qin         , & ! ice layer enthalpy, qin < 0 (J m-3)
@@ -443,6 +468,8 @@
          freshn (i,j) = c0
          fsaltn (i,j) = c0
          fhocnn (i,j) = c0
+
+         fcondtopn_repar (i,j) = c0
 
          meltt  (i,j) = c0
          meltb  (i,j) = c0
@@ -524,6 +551,8 @@
                                   fswsfc,        fswint,   &
                                   fswthrun,      Sswabs,   &
                                   Iswabs,                  &
+                                  fcondtopn_save,          &
+                                  flag_mixed,              &
                                   hilyr,         hslyr,    &
                                   qin,           Tin,      &
                                   qsn,           Tsn,      &
@@ -582,6 +611,18 @@
 
 #ifdef GEOS
       fcondbotl(1,1) = fcondbot(1)
+
+      if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+          do ij = 1, icells
+              i = indxi(ij)
+              j = indxj(ij)
+              if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
+                  tmp =  fcondtopn(i,j)
+                  fcondtopn(i,j) = fcondtopn_save(ij)
+                  fcondtopn_save(ij) = tmp
+              endif
+          enddo
+      endif
 #endif
 
       !-----------------------------------------------------------------
@@ -616,6 +657,24 @@
       ! to the net energy input
       !-----------------------------------------------------------------
 
+      if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+          do ij = 1, icells
+              i = indxi(ij)
+              j = indxj(ij)
+              if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
+                  tmp =  fcondtopn(i,j)
+                  fcondtopn(i,j) = fcondtopn_save(ij)
+                  fcondtopn_save(ij) = tmp
+              endif
+              if (Tsf(ij) == c0 .and. flag_mixed(ij)) then
+                   if (fsurfn(i,j) < fcondtopn(i,j)) then
+                      fhocnn(i,j) = fhocnn(i,j) -   &
+                                (fcondtopn(i,j)-fsurfn(i,j)) 
+                   endif
+              endif
+          enddo
+      endif
+
       call conservation_check_vthermo(nx_block, ny_block, &
                                       my_task,  istep1,   &
                                       dt,       icells,   &
@@ -626,6 +685,9 @@
                                       einit,    efinal,   &
 #ifdef GEOS
                                       observe,            & 
+                                      fcondtopn,          & 
+                                      Tsf,                & 
+                                      flag_mixed,         &         
 #endif
                                       l_stop,             &
                                       istop,    jstop)
@@ -672,6 +734,25 @@
                                 vicen(:,:),   vsnon(:,:), &
                                 Tsfcn(:,:),               &
                                 eicen(:,:,:), esnon(:,:,:))
+
+      !-----------------------------------------------------------------
+      !  Repartition surplus top conduvtive flux (if any) to the base
+      !  of the ice and added to ice-ocean heat flux  
+      !  This is done also in HadGEM3-GC3.1
+      !-----------------------------------------------------------------
+
+      if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+          do ij = 1, icells
+              i = indxi(ij)
+              j = indxj(ij)
+              if (Tsf(ij) < c0 .and. flag_mixed(ij)) then
+                  fhocnn(i,j) =  fhocnn(i,j) + fcondtopn_save(ij) &
+                                 - fcondtopn(i,j)
+                  fcondtopn_repar(i,j) = fcondtopn_save(ij) &
+                                         - fcondtopn(i,j) 
+              endif
+          enddo
+      endif
 
       !-----------------------------------------------------------------
       ! Reload tracer array
@@ -730,6 +811,8 @@
       else
          l_brine = .false.
       endif
+      
+      write(nu_diag,*) 'top surface BC type: ', trim(top_bc)
 
       !-----------------------------------------------------------------
       ! Prescibe vertical profile of salinity and melting temperature.
@@ -1567,6 +1650,8 @@
                                       fswsfc,   fswint,   &
                                       fswthrun, Sswabs,   &
                                       Iswabs,             &
+                                      fcondtopn_save,     &
+                                      flag_mixed,         &
                                       hilyr,    hslyr,    &
                                       qin,      Tin,      &
                                       qsn,      Tsn,      &
@@ -1628,6 +1713,12 @@
       real (kind=dbl_kind), dimension (nx_block,ny_block,nilyr), &
          intent(inout) :: &
          Iswabs          ! SW radiation absorbed in ice layers (W m-2)
+
+      real (kind=dbl_kind), dimension (icells), intent(out) :: &
+         fcondtopn_save   ! save initial top conductive flux 
+
+      logical (kind=log_kind), dimension (icells), intent(out) :: &
+         flag_mixed   ! 
 
       real (kind=dbl_kind), dimension (nx_block,ny_block), intent(inout):: &
          fsurfn      , & ! net flux to top surface, excluding fcondtopn
@@ -1704,6 +1795,9 @@
          l_snow      , & ! true if snow temperatures are computed
          l_cold          ! true if surface temperature is computed
 
+      integer (kind=int_kind), dimension (icells) :: &
+         tbc_type        ! Neumann or Dirichlet
+
       real (kind=dbl_kind), dimension (:), allocatable :: &
          Tsf_start   , & ! Tsf at start of iteration
          dTsf        , & ! Tsf - Tsf_start
@@ -1771,6 +1865,7 @@
          converged (ij) = .false.
          l_snow    (ij) = .false.
          l_cold    (ij) = .true.
+         tbc_type  (ij) = NEUMANN ! default Neumann
          fcondbot  (ij) = c0
          dTsf_prev (ij) = c0
          dTi1_prev (ij) = c0
@@ -1801,6 +1896,11 @@
          enddo
       enddo
 
+      if(observe(1,1)) then
+          write(nu_diag,*) 'in t_c a:', fsurfn(1,1)
+          write(nu_diag,*) 'in t_c b:', fcondtopn(1,1)
+      endif
+
       !-----------------------------------------------------------------
       ! Compute thermal conductivity at interfaces (held fixed during
       !  subsequent iterations).
@@ -1827,7 +1927,7 @@
       !       has already computed fsurf.  (Unless we adjust fsurf here)
       !-----------------------------------------------------------------
 !mclaren: Should there be an if calc_Tsfc statement here then?? 
-
+      if ( calc_Tsfc ) then
       !frac = c1 - puny
       !dTemp = p01
       frac = 0.9_dbl_kind    !from CICE 5.0
@@ -1883,7 +1983,7 @@
             endif
          enddo
       enddo
-!#endif
+      endif
 
 !lipscomb - This could be done in the shortwave module instead.
 !           (Change zerolayer routine also)
@@ -1910,6 +2010,8 @@
       do ij = 1, icells
           i = indxi(ij)
           j = indxj(ij)
+          fcondtopn_save(ij) = fcondtopn(i,j) 
+          flag_mixed(ij) = .false. 
           isolve = isolve + 1
           indxii(isolve) = i
           indxjj(isolve) = j
@@ -2139,6 +2241,22 @@
 #endif
 #endif
          else
+
+             if (top_bc == 'mixed') then
+               do ij = 1, isolve
+                  i = indxii(ij)
+                  j = indxjj(ij)
+                  m = indxij(ij)
+                  if (Tsf(m) < c0) then
+                     l_cold(m) = .true.
+                  else
+                     l_cold(m) = .false.
+                     tbc_type(m) = DIRICHLET
+                     flag_mixed(ij) = .true.
+                  endif
+               enddo
+            endif
+ 
             call get_matrix_elements_know_Tsfc &
                                   (nx_block, ny_block,         &
                                    isolve,   icells,           &
@@ -2150,6 +2268,7 @@
                                    etai,     etas,             &
                                    sbdiag,   diag,             &
                                    spdiag,   rhs,              &
+                                   tbc_type, Tsf,              &
                                    fcondtopn)
          endif  ! calc_Tsfc
 
@@ -2464,6 +2583,20 @@
             j = indxjj(ij)
             m = indxij(ij)
 
+
+            if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+               if (tbc_type(m) == DIRICHLET) then
+                  if (l_snow(m)) then
+                     fcondtopn(i,j) = kh(m,1) * (Tsf(m)-Tsn(m,1))
+                 !    print*, 'iter, snow temp at k = 1 ', niter, Tsn(m,1), kh(m,1)
+                  else
+                     fcondtopn(i,j) = kh(m,1+nslyr) * (Tsf(m)-Tin(m,1))
+                 !    print*, 'iter, ice temp at k = 1 ', niter, Tin(m,1), kh(m,1+nslyr)
+                  endif
+                 ! print*, 'iter, Fcond, Fsurf: ', niter, fcondtopn(1,1), fsurfn(1,1)
+               endif
+            endif
+
             fcondbot(m) = kh(m,1+nslyr+nilyr) * &
                            (Tin(m,nilyr)   - Tbot(i,j))
 
@@ -2479,11 +2612,17 @@
                all_converged = .false.
             endif
 
+            if (.not. calc_Tsfc .and. top_bc == 'mixed') then
+               if (tbc_type(m) == NEUMANN .and. niter > 10) then
+                  tbc_type(m) = DIRICHLET
+                  flag_mixed(ij) = .true.
+               endif
+            endif
+
          enddo                  ! ij
 
 #ifdef GEOS
-!#ifndef DATAATM
-      if(.not. atmos_forcing_specified) then
+      if(.not. atmos_forcing_specified .or. calc_Tsfc) then
          flwoutn(1,1) = flwoutn(1,1) + dflwout_dT(1)*dTsf(1)
          fsensn(1,1)  = fsensn(1,1)  + dfsens_dT(1)*dTsf(1)
          flatn(1,1)   = flatn(1,1)   + dflat_dT(1)*dTsf(1)
@@ -2493,7 +2632,6 @@
          !*** it turns out that the following should never be done here
          !*** otherwise, cice will fail with energy conservation error
          !fsurfn(1,1)  = fsurfn(1,1)  + dfsurf_dT(1)*dTsf(1)
-!#endif
 #ifdef DEBUG
          if(observe(1,1)) then
             write(nu_diag,*) 'iter = ', niter, 'dTsf = ', dTsf(1)
@@ -2760,6 +2898,53 @@
       enddo                     ! nilyr
 
       end subroutine conductivity
+
+
+!=======================================================================
+!BOP
+!
+! !ROUTINE: calculate_ki_from_Tin  - calculate ice thermal conductivity
+!
+! !DESCRIPTION:
+!
+!  Compute the ice thermal conductivity
+!
+! !REVISION HISTORY:
+!
+! !INTERFACE:
+!
+      function calculate_ki_from_Tin (Tink, salink) &
+               result(ki)
+!
+! !USES:
+!
+! !INPUT PARAMETERS:
+!
+      real (kind=dbl_kind), intent(in) :: &
+         Tink   , &             ! ice layer temperature
+         salink                 ! salinity at one level
+!
+! !OUTPUT PARAMETERS
+!
+     real (kind=dbl_kind) :: &
+         ki                     ! ice conductivity
+!
+!EOP
+!
+      if (conduct == 'MU71') then
+         ! Maykut and Untersteiner 1971 form (with Wettlaufer 1991 constants)
+         ki = kice + betak*salink/min(-puny,Tink)
+      else
+         ! Pringle et al JGR 2007 'bubbly brine'
+         ki = (2.11_dbl_kind - 0.011_dbl_kind*Tink &
+             + 0.09_dbl_kind*salink/min(-puny,Tink)) &
+             * rhoi / 917._dbl_kind
+      endif
+
+      ki = max (ki, kimin)
+
+      end function calculate_ki_from_Tin
+
 
 !=======================================================================
 !BOP
@@ -3291,6 +3476,7 @@
                                       etai,     etas,             &
                                       sbdiag,   diag,             &
                                       spdiag,   rhs,              &
+                                      bnd_type, Tsf,              &
                                       fcondtopn)
 !
 ! !USES:
@@ -3350,6 +3536,16 @@
          spdiag      , & ! super-diagonal matrix elements
          rhs             ! rhs of tri-diagonal matrix eqn.
 
+      integer (kind=int_kind), dimension (icells), &
+         intent(in), optional ::                   &
+         bnd_type          ! top boundary condition type
+                           ! 1: Dirichlet
+                           ! 2: Neumann (default)
+
+      real (kind=dbl_kind), dimension (icells), intent(in),  &
+         optional :: &
+         Tsf             ! ice/snow top surface temp (deg C)
+
       real (kind=dbl_kind), dimension (nx_block,ny_block), intent(in),  &
          optional :: &
          fcondtopn       ! conductive flux at top sfc, positive down (W/m^2)
@@ -3360,6 +3556,9 @@
          i, j        , & ! horizontal indices
          ij, m       , & ! horizontal indices, combine i and j loops
          k, ks, ki, kr   ! vertical indices and row counters
+
+      integer (kind=int_kind), dimension(icells) :: &
+         bnd_typ
 
       !-----------------------------------------------------------------
       ! Initialize matrix elements.
@@ -3376,6 +3575,13 @@
             rhs   (ij,k) = c0
          enddo
       enddo
+
+      if (present(bnd_type)) then
+         bnd_typ(:) = bnd_type(:)
+      else
+         bnd_typ(:) = NEUMANN
+      endif
+
             
       !-----------------------------------------------------------------
       ! Compute matrix elements
@@ -3401,11 +3607,19 @@
             if (l_snow(m)) then
                sbdiag(ij,2) = c0
                spdiag(ij,2) = -etas(m,1) * kh(m,2)
-               diag  (ij,2) = c1                                 &
+               if(bnd_typ(m) == NEUMANN) then
+                  diag  (ij,2) = c1                                 &
                              + etas(m,1) * kh(m,2)
-               rhs   (ij,2) = Tsn_init(m,1)                      &
+                  rhs   (ij,2) = Tsn_init(m,1)                      &
                              + etas(m,1) * Sswabs(i,j,1)         &
                              + etas(m,1) * fcondtopn(i,j)
+               elseif(bnd_typ(m) == DIRICHLET) then    ! melting surface or not converging
+                  diag  (ij,2) = c1 &
+                                 + etas(m,1) * (kh(m,1) + kh(m,2))
+                  rhs   (ij,2) = Tsn_init(m,1) &
+                                 + etas(m,1)*kh(m,1)*Tsf(m) &
+                                 + etas(m,1) * Sswabs(i,j,1)
+               endif   
             endif   ! l_snow
          enddo   ! ij
 
@@ -3460,7 +3674,7 @@
                                  + etai(ij,ki) * (kh(m,k) + kh(m,k+1))
                   rhs   (ij,kr) = Tin_init(m,ki)                    &
                                  + etai(ij,ki) * Iswabs(i,j,ki)
-               else                  
+               elseif(bnd_typ(m) == NEUMANN) then
                   sbdiag(ij,kr) = c0
                   spdiag(ij,kr) = -etai(ij,ki) * kh(m,k+1)
                   diag  (ij,kr) = c1                                &
@@ -3468,6 +3682,15 @@
                   rhs   (ij,kr) = Tin_init(m,ki)                    &
                                  + etai(ij,ki) * Iswabs(i,j,ki)       &
                                  + etai(ij,ki) * fcondtopn(i,j)
+               elseif(bnd_typ(m) == DIRICHLET) then     ! no snow, warm surface
+                  sbdiag(ij,kr) = c0
+                  spdiag(ij,kr) = -etai(ij,ki) * kh(m,k+1)
+                  diag  (ij,kr) = c1 &
+                                 + etai(ij,ki) * (kh(m,k) + kh(m,k+1))
+                  rhs   (ij,kr) = Tin_init(m,ki) &
+                                 + etai(ij,ki)*Iswabs(i,j,ki) &
+                                 + etai(ij,ki)*kh(m,k)*Tsf(m)
+
                endif  ! l_snow
             enddo   ! ij
 
@@ -5150,6 +5373,9 @@
                                             einit,    efinal,   &
 #ifdef GEOS
                                             observe,            &
+                                            fcondtopn,          &
+                                            Tsf,                &  
+                                            flag_mixed,         &   
 #endif
                                             l_stop,             &
                                             istop,    jstop)
@@ -5178,6 +5404,9 @@
          fswint      , & ! SW absorbed in ice interior, below surface (W m-2)
          fsnow           ! snowfall rate (kg m-2 s-1)
 
+      real (kind=dbl_kind), dimension (nx_block,ny_block), intent(in) :: &
+         fcondtopn
+
 
       real (kind=dbl_kind), dimension (icells), intent(in) :: &
          einit       , & ! initial energy of melting (J m-2)
@@ -5190,6 +5419,12 @@
       logical (kind=log_kind), dimension (nx_block,ny_block), & 
           intent(in) :: &
          observe
+
+      real (kind=dbl_kind), dimension (icells), intent(in) :: &
+         Tsf
+
+      logical (kind=log_kind), dimension (icells), intent(in) :: &
+         flag_mixed
 #endif
 
       integer (kind=int_kind), intent(inout) :: &
@@ -5214,9 +5449,13 @@
       do ij = 1, icells
          i = indxi(ij)
          j = indxj(ij)
-
-         einp = (fsurfn(i,j) - flatn(i,j) + fswint(i,j) - fhocnn(i,j) &
-               - fsnow(i,j)*Lfresh) * dt
+         if (flag_mixed(ij) .and. Tsf(ij) < c0) then
+            einp = (fcondtopn(i,j) - flatn(i,j) + fswint(i,j) - fhocnn(i,j) &
+                    - fsnow(i,j)*Lfresh) * dt
+         else  
+            einp = (fsurfn(i,j) - flatn(i,j) + fswint(i,j) - fhocnn(i,j) &
+                    - fsnow(i,j)*Lfresh) * dt
+         endif  
          ferr = abs(efinal(ij)-einit(ij)-einp) / dt
 #ifdef GEOS
 #ifdef DEBUG
@@ -5261,6 +5500,12 @@
                           'fhocnn = ',fhocnn(i,j) 
          write(nu_diag,*) 'flatn =', flatn(i,j), 'fswint = ',fswint(i,j)
          write(nu_diag,*) 'fsurfn =', fsurfn(i,j)
+         write(nu_diag,*) 'fcondtopn =', fcondtopn(i,j)
+         write(nu_diag,*) 'Tsf =', Tsf(ij)
+         if(flag_mixed(ij)) then
+            write(nu_diag,*) 'Dirichelet BC used'
+         endif 
+
          return
          endif
       enddo
