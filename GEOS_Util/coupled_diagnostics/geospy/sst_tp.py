@@ -21,10 +21,11 @@ def mkclim(exp,ds):
 def plot_equatorial(exps,clims):
     pl.figure(1); pl.clf()
     for exp,clim in zip(exps,clims):
-        clim.mean('month').plot()
+        clim.mean('month').plot.line(label=exp['expid'])
     ax=pl.gca()
     ax.legend()
     pl.grid()
+    pl.tight_layout()
     pl.show()
 
 def mkplots(exps,dsets):

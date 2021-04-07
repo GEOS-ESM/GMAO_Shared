@@ -42,6 +42,7 @@ def plot_zonal(plotter, exp, zonal):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
+    pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}_lat_depth.png')
     pl.show()
 
@@ -57,6 +58,7 @@ def plot_equatorial(plotter, exp, equatorial):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
+    pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}_eq_depth.png')
     pl.show()
     
@@ -74,6 +76,7 @@ def plot_zonal_diff(plotter, exp, cmpexp, zonal, cmpzonal):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
+    pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{cmpexp["expid"]}_lat_depth.png')
     pl.show()
 
@@ -91,6 +94,7 @@ def plot_equatorial_diff(plotter, exp, cmpexp, eq, cmpeq):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
+    pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{cmpexp["expid"]}_eq_depth.png')
     pl.show()
 
@@ -108,6 +112,7 @@ def plot_zonal_diffobs(plotter, exp, zonal, obszonal, obsname):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
     ax.grid()
+    pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{obsname}_lat_depth.png')
     pl.savefig(f'{exp["plot_path"]}/{varname}-obs_lat_depth.png')
     pl.show()
@@ -126,6 +131,7 @@ def plot_equatorial_diffobs(plotter, exp, eq, obseq, obsname):
     ax.set_ylabel('depth')
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.grid()
+    pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{obsname}_eq_depth.png')
     pl.savefig(f'{exp["plot_path"]}/{varname}-obs_eq_depth.png')
     pl.show()
