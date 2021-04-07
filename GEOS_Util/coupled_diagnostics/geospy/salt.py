@@ -26,7 +26,8 @@ def mkequatorial(exp,ds):
     var=var.assign_coords({'lev': -var.lev})
     mask=1.0-np.isnan(var)
     wght=mask*ds.dy
-    return utils.average(var.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
+    var=utils.average(var.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
+    return utils.shift_lon(var,30)
 
 def plot_zonal(plotter, exp, zonal):
     '''
@@ -174,7 +175,7 @@ def mkplots(exps, dsets):
         ds=importlib.import_module('verification.'+obsname).ds_s
         var=ds[obsvarname].mean('time').rename({'depth':'lev'})
         obszonal=var.mean('lon')
-        obsequatorial=var.sel(lat=slice(-2.1,2.1)).mean('lat')
+        obsequatorial=utils.shift_lon(var.sel(lat=slice(-2.1,2.1)).mean('lat'),30)
         plot_zonal_diffobs(plotter,exps[0],zonals[0],obszonal,obsname)
         plot_equatorial_diffobs(plotter,exps[0],equatorials[0],obsequatorial,obsname)
 

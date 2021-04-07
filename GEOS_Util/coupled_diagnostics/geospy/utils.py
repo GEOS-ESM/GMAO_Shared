@@ -1,5 +1,5 @@
 '''
-This module provides different diagnostics utilities.
+This module provides different diagnostic utilities.
 '''
 
 import numpy as np
@@ -27,3 +27,17 @@ def print_stat(da, dim, weight):
     mean=average(da, dim, weight)
     std=np.sqrt(average((da-mean)**2,dim,weight))
     return f'mean: {mean.values:.2f}\nstd: {std.values:.2f}'
+
+def shift_lon(da, lon0, lon_name='lon'):
+    '''
+    Shifts the reference longitude of field da to lon0.
+    '''
+    dlon=int(da[lon_name][0]-lon0)
+    var=da.roll(lon=dlon, roll_coords=True)
+    return var.assign_coords(
+        {
+            lon_name: var[lon_name].where(var[lon_name]>=var[lon_name][0],var[lon_name]+360)
+        }
+    )
+
+
