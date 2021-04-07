@@ -83,7 +83,7 @@ def plot_equatorial_diff(plotter, exp, cmpexp, eq, cmpeq):
     '''
     pl.figure(2); pl.clf()
     dif=eq-cmpeq.interp_like(eq)
-    ax=plot.contour(dif)
+    ax=plotter.contour(dif)
     ax=pl.gca()
     ax.set_ylim(500.0,0.0)
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} {varname}, equatorial')
@@ -169,8 +169,10 @@ def mkplots(exps, dsets):
     plotter.contour_opts['levels']=np.arange(-5.0,5.1,1.0)
 
     for exp,zonal in zip(exps[1:],zonals[1:]):
-        plot_zonal_diff(plotter,exp[0],exp,zonals[0],zonal)
-        plot_equatorial_diff(plotter,exp[0],exp,zonals[0],zonal)
+        plot_zonal_diff(plotter,exps[0],exp,zonals[0],zonal)
+
+    for exp,eq in zip(exps[1:],equatorials[1:]):
+        plot_equatorial_diff(plotter,exps[0],exp,equatorials[0],eq)
 
     obs={'woa13':'t_an'}
     for obsname,obsvarname in obs.items():

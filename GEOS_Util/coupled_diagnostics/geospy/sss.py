@@ -137,7 +137,7 @@ def mkplots(exps, dsets):
     plotmap.fill_opts['cmap']=cmocean.cm.diff
     plotmap.contour_opts['levels']=np.arange(-5.,5.1,1.0)
 
-    for exp,clim in zip(exps[1:],dsets[1:]):
+    for exp,clim in zip(exps[1:],clims[1:]):
         plot_diff(plotmap, exps[0], exp, clims[0], clim)
         
     obs={'woa13': 's_an'} # Names of observational data set and SST variable in this data set.
