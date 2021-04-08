@@ -3,8 +3,9 @@ Some classes for standard plots.
 '''
 
 import matplotlib.pyplot as pl
+import matplotlib.ticker as mticker
 import cartopy.crs as ccrs
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+#from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 class Plot(object):
     '''
@@ -16,7 +17,16 @@ class Plot1d(Plot):
     '''
     Class for 1d plots.
     '''
-    pass
+    def __init__(self, line_opts={}):
+        super(Plot1d,self).__init__()
+        self.line_opts=line_opts
+
+    def line(self, da, fmt='-',ax=None):
+        if ax is None:
+            ax=pl.gca()
+
+        da.plot.line(fmt,ax=ax,**self.line_opts)
+        return ax
 
 class Plot2d(Plot):
     '''
@@ -97,3 +107,30 @@ class PlotMap(Plot2d):
         super(PlotMap,self).contour(da, ax=ax, mode=mode, stat=stat)
         
         return ax
+
+
+# Longitude and Latitude formatters 
+def format_lon(lon,pos=None):
+    if (lon >= -360.) and (lon < -180.):
+        lon+=360.
+    elif (lon > 180.) and (lon <= 360.):
+        lon-=360.
+    if lon == -180.:
+        return '%i' %-lon
+    elif (lon > -180.) and (lon < 0.):
+        return '%iW' %-lon
+    elif (lon == 0.) or (lon == 180.):
+        return '%i' %lon
+    else:
+        return '%iE' %lon
+    
+def format_lat(lat,pos=None):
+    if lat < 0:
+        return f'{-lat:g}S'
+    elif lat > 0:
+        return f'{lat:g}N'
+    else:
+        return 'EQ'
+
+LONGITUDE_FORMATTER=mticker.FuncFormatter(format_lon)
+LATITUDE_FORMATTER=mticker.FuncFormatter(format_lat)
