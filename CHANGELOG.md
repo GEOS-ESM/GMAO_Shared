@@ -9,12 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+### Changed
+
+### Added
+
+### Removed
+
+## [1.3.10] - 2021-04-02
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+
+## [1.3.9] - 2021-03-17
+
+### Fixed
+
 - Fix for out-of-bounds error in lightning module (#99)
 
 ### Changed
 
 - Stats plot updates
-- Multiple updates brought over from GEOSadas work (see #166)
 
 ### Added
 
