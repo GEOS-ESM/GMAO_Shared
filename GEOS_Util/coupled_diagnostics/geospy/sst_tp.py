@@ -6,7 +6,7 @@ Plots tropical Pacific SST
 import sys, importlib
 import numpy as np
 import matplotlib.pyplot as pl
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER
+import cmocean
 import geosdset, plots, utils
 
 def mkequatorial(exp,ds):
@@ -40,7 +40,7 @@ def plot_equatorial(exps,das,obs,obsdas):
 
     ax.legend()
     ax.set_title(f'SST equatorial')
-    ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     ax.set_ylim(20,33)
     ax.set_ylabel('$^0C$')
     ax.set_xlabel('')
@@ -66,7 +66,7 @@ def plot_equatorial(exps,das,obs,obsdas):
 
     ax.legend()
     ax.set_title(f'SST std, equatorial')
-    ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     ax.set_ylim(0,3)
     ax.set_ylabel('$^0C$')
     ax.set_xlabel('')
@@ -74,6 +74,35 @@ def plot_equatorial(exps,das,obs,obsdas):
     pl.tight_layout()
     pl.show()
     pl.savefig(f'{exps[0]["plot_path"]}/sst_eq_std.png')
+
+def plot_equatorial_ac(plotter,exp,da):
+    ac=da.groupby('time.month').mean('time')-da.mean('time')
+
+    pl.figure(3); pl.clf()
+    ax=plotter.contour(ac)
+    ax.set_title(f'{exp["expid"]} SST, eq. annual cycle anom.')
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
+    ax.set_xlabel('')
+    ax.yaxis.set_major_locator(plots.MONTH_LOCATOR)        
+    ax.yaxis.set_major_formatter(plots.MONTH_FORMATTER)    
+    ax.set_ylabel('')
+    pl.grid()
+    pl.tight_layout()
+    pl.show()
+    pl.savefig(f'{exp["plot_path"]}/sst_eq_ac.png')
+
+def plot_hovm(plotter,exp,da):
+    anom=da-da.groupby('time.season').mean('time')
+    print(anom)
+    pl.figure(4); pl.clf()
+    ax=plotter.contour(anom)
+    ax.set_title(f'{exp["expid"]} SST anom.')
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+    pl.grid()
+    pl.tight_layout()
+    pl.show()
+    pl.savefig(f'{exp["plot_path"]}/hov_tp.png')
 
 def mkplots(exps,dsets):
     # Calculate seasonal equatorial means
@@ -88,6 +117,23 @@ def mkplots(exps,dsets):
 
     # Plots
     plot_equatorial(exps,equatorials,obs,obsequatorials)
+
+    cbar_kwargs={'label': '$^0C$'}
+    
+    fill_opts={'cmap': cmocean.cm.thermal, 
+              'levels': np.arange(-2.4,2.5,0.3),
+               'cbar_kwargs': cbar_kwargs
+    }
+
+    contour_opts={'levels': np.arange(-2.4,2.5,0.6),
+                  'colors': 'black'
+    }
+
+    plotter=plots.Plot2d(fill_opts=fill_opts, contour_opts=contour_opts)
+
+    plot_equatorial_ac(plotter, exps[0],equatorials[0])
+
+#    plot_hovm(plotter, exps[0],equatorials[0])    
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])

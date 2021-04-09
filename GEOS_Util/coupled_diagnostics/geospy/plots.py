@@ -5,7 +5,6 @@ Some classes for standard plots.
 import matplotlib.pyplot as pl
 import matplotlib.ticker as mticker
 import cartopy.crs as ccrs
-#from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 class Plot(object):
     '''
@@ -111,26 +110,22 @@ class PlotMap(Plot2d):
 
 # Longitude and Latitude formatters 
 def format_lon(lon,pos=None):
-    if (lon >= -360.) and (lon < -180.):
-        lon+=360.
-    elif (lon > 180.) and (lon <= 360.):
-        lon-=360.
+    lon = lon+360 if lon<-180 else lon-360 if lon>180 else lon
+
     if lon == -180.:
-        return '%i' %-lon
+        return f'{-lon:g}'
     elif (lon > -180.) and (lon < 0.):
-        return '%iW' %-lon
+        return f'{-lon:g}W'
     elif (lon == 0.) or (lon == 180.):
-        return '%i' %lon
+        return f'{lon:g}'
     else:
-        return '%iE' %lon
+        return f'{lon:g}E'
     
 def format_lat(lat,pos=None):
-    if lat < 0:
-        return f'{-lat:g}S'
-    elif lat > 0:
-        return f'{lat:g}N'
-    else:
-        return 'EQ'
+    return f'{-lat:g}S' if lat<0 else f'{lat:g}N' if lat>0 else 'EQ'
 
 LONGITUDE_FORMATTER=mticker.FuncFormatter(format_lon)
 LATITUDE_FORMATTER=mticker.FuncFormatter(format_lat)
+
+MONTH_LOCATOR=mticker.LinearLocator(12)
+MONTH_FORMATTER=mticker.FixedFormatter(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'))

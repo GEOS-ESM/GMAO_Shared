@@ -8,7 +8,6 @@ import sys,importlib
 import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import geosdset, plots, utils
 
 # Globals

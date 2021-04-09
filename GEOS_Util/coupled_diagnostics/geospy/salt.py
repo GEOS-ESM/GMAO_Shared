@@ -8,7 +8,6 @@ import sys,importlib
 import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import geosdset, plots, utils
 
 # Globals
@@ -40,7 +39,7 @@ def plot_zonal(plotter, exp, zonal):
     ax.set_title(f'{exp["expid"]} {varname}, zonal mean')
     ax.set_xlabel('latitude')
     ax.set_ylabel('depth')
-    ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LATITUDE_FORMATTER)
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}_lat_depth.png')
@@ -56,7 +55,7 @@ def plot_equatorial(plotter, exp, equatorial):
     ax.set_title(f'{exp["expid"]} {varname}, equatorial')
     ax.set_xlabel('longitude')
     ax.set_ylabel('depth')
-    ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}_eq_depth.png')
@@ -74,7 +73,7 @@ def plot_zonal_diff(plotter, exp, cmpexp, zonal, cmpzonal):
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} {varname}, zonal mean')
     ax.set_xlabel('latitude')
     ax.set_ylabel('depth')
-    ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LATITUDE_FORMATTER)
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{cmpexp["expid"]}_lat_depth.png')
@@ -92,7 +91,7 @@ def plot_equatorial_diff(plotter, exp, cmpexp, eq, cmpeq):
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} {varname}, equatorial')
     ax.set_xlabel('longitude')
     ax.set_ylabel('depth')
-    ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{cmpexp["expid"]}_eq_depth.png')
@@ -110,7 +109,7 @@ def plot_zonal_diffobs(plotter, exp, zonal, obszonal, obsname):
     ax.set_title(f'{exp["expid"]}-{obsname} {varname}, zonal mean')
     ax.set_xlabel('latitude')
     ax.set_ylabel('depth')
-    ax.xaxis.set_major_formatter(LATITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LATITUDE_FORMATTER)
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{obsname}_lat_depth.png')
@@ -129,7 +128,7 @@ def plot_equatorial_diffobs(plotter, exp, eq, obseq, obsname):
     ax.set_title(f'{exp["expid"]}-{obsname} {varname}, equatorial')
     ax.set_xlabel('longitude')
     ax.set_ylabel('depth')
-    ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{obsname}_eq_depth.png')
