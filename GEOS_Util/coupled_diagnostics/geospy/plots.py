@@ -127,5 +127,5 @@ def format_lat(lat,pos=None):
 LONGITUDE_FORMATTER=mticker.FuncFormatter(format_lon)
 LATITUDE_FORMATTER=mticker.FuncFormatter(format_lat)
 
-MONTH_LOCATOR=mticker.LinearLocator(12)
+MONTH_LOCATOR=mticker.FixedLocator(range(1,13))
 MONTH_FORMATTER=mticker.FixedFormatter(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'))

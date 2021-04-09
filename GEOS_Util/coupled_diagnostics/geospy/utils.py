@@ -20,12 +20,20 @@ def average(da, dim, weight):
     
     return (da*weight).sum(dim)/weight.sum(dim)
 
+def standard_deviation(da, dim, weight):
+    '''
+    Computes weighted average of DataArray along axis.
+    Note: weight should have the same land mask as da.
+    '''
+    mean=average(da, dim, weight)
+    return np.sqrt(average((da-mean)**2,dim,weight))
+
 def print_stat(da, dim, weight):
     '''
     Returns a string with da mean and standard deviation.
     '''
     mean=average(da, dim, weight)
-    std=np.sqrt(average((da-mean)**2,dim,weight))
+    std=standard_deviation(da, dim, weight)
     return f'mean: {mean.values:.2f}\nstd: {std.values:.2f}'
 
 def shift_lon(da, lon0, lon_name='lon'):

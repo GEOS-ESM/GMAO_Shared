@@ -54,15 +54,11 @@ def plot_equatorial(exps,das,obs,obsdas):
     ax=pl.gca()
     for exp,da in zip(exps,das):
         plotter.line_opts['label']=exp['expid']
-        mean=da.mean('time')
-        std=np.sqrt(((da-mean)**2).mean('time'))
-        plotter.line(std,ax=ax)
+        plotter.line(da.std('time'),ax=ax)
 
     for obsname,obsda in zip(obs,obsdas):
         plotter.line_opts['label']=obsname
-        mean=obsda.mean('time')
-        std=np.sqrt(((obsda-mean)**2).mean('time'))
-        plotter.line(std,'--',ax=ax)
+        plotter.line(obsda.std('time'),'--',ax=ax)
 
     ax.legend()
     ax.set_title(f'SST std, equatorial')
@@ -92,8 +88,7 @@ def plot_equatorial_ac(plotter,exp,da):
     pl.savefig(f'{exp["plot_path"]}/sst_eq_ac.png')
 
 def plot_hovm(plotter,exp,da):
-    anom=da-da.groupby('time.season').mean('time')
-    print(anom)
+    anom=da.groupby('time.month')-da.groupby('time.month').mean('time')
     pl.figure(4); pl.clf()
     ax=plotter.contour(anom)
     ax.set_title(f'{exp["expid"]} SST anom.')
@@ -120,7 +115,7 @@ def mkplots(exps,dsets):
 
     cbar_kwargs={'label': '$^0C$'}
     
-    fill_opts={'cmap': cmocean.cm.thermal, 
+    fill_opts={'cmap': cmocean.cm.diff, 
               'levels': np.arange(-2.4,2.5,0.3),
                'cbar_kwargs': cbar_kwargs
     }
@@ -133,7 +128,7 @@ def mkplots(exps,dsets):
 
     plot_equatorial_ac(plotter, exps[0],equatorials[0])
 
-#    plot_hovm(plotter, exps[0],equatorials[0])    
+    plot_hovm(plotter, exps[0],equatorials[0])    
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
