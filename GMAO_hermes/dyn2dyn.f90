@@ -74,6 +74,7 @@
 !     Locals
 !     ------
       character(len=255) msg
+      character(len=255), pointer :: xtrnames(:)
       integer, parameter :: READ_ONLY = 1
       integer fid, nvars, ngatts
       integer ier, ifile
@@ -95,7 +96,8 @@
                                 prec, in, jn, kn, pick, nymd, nhms, myfreq,  &
                                 fakedate, nymdf, nhmsf, &
                                 dophys, expid, RCfile, verbose, oldana, force, &
-                                vectype, dgrid, ncep72, ncf, pncf, indxlevs )
+                                vectype, dgrid, ncep72, ncf, pncf, indxlevs, &
+                                xtrnames )
 
 
 !  Loop over input eta files
@@ -126,18 +128,18 @@
 !        --------------------------
          if ( oldana ) then
               if ( pick ) then
-                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=0, freq=freq, vectype=vectype, ncf=ncf, pncf=pncf )
+                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=0, freq=freq, vectype=vectype, ncf=ncf, pncf=pncf, xtrnames=xtrnames )
                  if ( myfreq/=0 ) freq = myfreq  ! reset frequency to whatever user's want
               else
-                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=n, freq=freq, vectype=vectype, ncf=ncf, pncf=pncf )
+                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=n, freq=freq, vectype=vectype, ncf=ncf, pncf=pncf, xtrnames=xtrnames )
               endif
               nstep = mynstep
          else
               if ( pick ) then
-                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=0, freq=freq, nstep=nstep, vectype=vectype, ncf=ncf, pncf=pncf )
+                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=0, freq=freq, nstep=nstep, vectype=vectype, ncf=ncf, pncf=pncf, xtrnames=xtrnames )
                  if ( myfreq/=0 ) freq = myfreq  ! reset frequency to whatever user's want
               else
-                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=n, freq=freq, nstep=nstep, vectype=vectype, ncf=ncf, pncf=pncf )
+                 call dyn_get ( etafile, nymd, nhms, w_e, ier, timidx=n, freq=freq, nstep=nstep, vectype=vectype, ncf=ncf, pncf=pncf, xtrnames=xtrnames )
               endif
          endif
          if ( ier .ne. 0 ) then
@@ -189,6 +191,7 @@
 
 !  All done
 !  --------
+   if(associated(xtrnames)) deallocate(xtrnames)
    call exit(0)
 
 CONTAINS
@@ -207,7 +210,8 @@ CONTAINS
                          prec, in, jn, kn, pick, nymd, nhms, myfreq, &
                          fakedate, nymdf, nhmsf,                     &
                          dophys, expid, RCfile, verbose, oldana, force, &
-                         vectype, dgrid, ncep72, ncf, pncf, indxlevs )
+                         vectype, dgrid, ncep72, ncf, pncf, indxlevs, &
+                         xtrnames )
 
       implicit NONE
 
@@ -240,6 +244,7 @@ CONTAINS
       logical,       intent(out) :: ncf     ! non-complaint dyn-file knob
       logical,       intent(out) :: pncf    ! non-complaint dyn-perturbation file knob
       logical,       intent(out) :: indxlevs! index levels (in place of pressure levs)
+      character(len=*), pointer  :: xtrnames(:)
       
 !
 ! !REVISION HISTORY:
@@ -259,10 +264,12 @@ CONTAINS
       character*4, parameter :: myname = 'init'
 
       integer iret, i, iarg, argc, iargc
+      integer ii,jj,ie,il
       integer uprec, iprec, ires, jcapusr
       logical verb, setres, geos4res, setjcap
       character(len=255) :: etafile, argv, res
       character*10 str
+      character(len=255) trnames
 
       integer, dimension(6), parameter :: IMS4 = (/ 72, 144, 288, 576, 1152, 2304 /)
       integer, dimension(6), parameter :: IMS5 = (/ 72, 144, 288, 576, 1152, 2304 /)
@@ -306,6 +313,7 @@ CONTAINS
       ncf     = .false.    ! default: handle usual dyn-complaint file
       pncf    = .false.    ! default: handle usual dyn-complaint file
       indxlevs= .false.    ! default: put pressure levels in lev attribute
+      trnames = 'NONE'
 
 !     Parse command line
 !     ------------------
@@ -403,6 +411,10 @@ CONTAINS
                 print *, 'Cannot handle this vertical number of levels'
                 call exit(1)
             endif
+           case ('-tracers')
+             if ( iarg+1 .gt. argc ) call usage()
+             iarg = iarg + 1
+             call GetArg ( iarg, trnames )
            case ('-pick')
                if ( iarg+2 .gt. argc ) call usage()
                iarg = iarg + 1
@@ -482,6 +494,22 @@ CONTAINS
           jn = jmsn(ires)
       endif
 
+      if (trnames/='NONE') then
+         ie=len_trim(trnames)
+         ii=index(trnames,',')
+         allocate(xtrnames(ii+1))
+         jj=1
+         do while (ii>0)
+            ie=ii-1
+            xtrnames(jj)=trim(trnames(1:ie))
+            print *, xtrnames(jj)
+            il=len_trim(trnames)
+            trnames=trnames(ii+1:il)
+            ii=index(trnames,',')
+            jj=jj+1
+         enddo
+         xtrnames(jj)=trim(trnames)
+      endif
       if (verbose) then
       print *
       print *, '  -----------------------------------------------------------'
@@ -550,6 +578,7 @@ CONTAINS
       print *, '              (default: GEOS-4 vector-type)'
       print *, '-ncf          non-compliant dyn-vector (see NOTES)'
       print *, '-pncf         non-compliant dyn-vector perturbation (see NOTES)'
+      print *, '-tracers N,M  read/write extra tracers of name N and M from ori file to new'
       print *
       print *, ' NOTES:'
       print *, '   1)  For the time being, in order to do horizontal'

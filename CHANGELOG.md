@@ -8,10 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Fixed
+- Fixed build for directories that are built as part of the GEOSdas
+
+### Changed
+
+### Added
+
+### Removed
+
+## [1.3.10] - 2021-04-02
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+
+## [1.3.9] - 2021-03-17
+
+### Fixed
 
 - Fix for out-of-bounds error in lightning module (#99)
 
 ### Changed
+
+- Stats plot updates
+
 ### Added
 
 - Extend binary tile to supprot future river route component development

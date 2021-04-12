@@ -126,7 +126,11 @@ totmin = totave - 0.6*ddif
 
 * Convert delqdry to mb/decade
 * ----------------------------
-   delqdry = delqdry * 120
+'getinfo tunit'
+         tunit = result
+if( tunit = 'month' ) ; delqdry = delqdry *    12     * 10 ; endif
+if( tunit = 'day'   ) ; delqdry = delqdry *    365.25 * 10 ; endif
+if( tunit = 'hour'  ) ; delqdry = delqdry * 24*365.25 * 10 ; endif
 
 say '       QDYRBEG: 'qdrybeg
 say '       QDYREND: 'qdryend

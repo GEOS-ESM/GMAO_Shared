@@ -25,5 +25,4 @@ esma_add_library (${this}
   SRCS ${SRCS}
   )
 
-
-target_include_directories (${this} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories (${this} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
