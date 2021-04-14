@@ -104,7 +104,7 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     rr.clean_weight_file()
 
 def mkplots(exps, dsets):
-# Calculate climatologies for experiments to comapre
+    # Calculate climatologies for experiments to comapre
     clims=[]
     for exp,dset in zip(exps,dsets):
         clims.append(mkclim(exp,dset))
@@ -112,7 +112,7 @@ def mkplots(exps, dsets):
     mask=1-np.isnan(clims[0][0])
     exps[0]["weight"]=mask*dsets[0]["dx"]*dsets[0]["dy"]
 
-# Plot parameters
+    # Plot parameters
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,
                  'label': 'PSU'}

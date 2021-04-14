@@ -9,19 +9,30 @@ import matplotlib.pyplot as pl
 import cmocean
 import geosdset, plots, utils
 
+varname='TS'
+TFREEZE=273.16
+
 def mkequatorial(exp,ds):
-    varname='TS'
-    TFREEZE=273.16
     var=ds[varname].sel(time=slice(*exp['dates']))-TFREEZE
-    mask=1.0-np.isnan(var)
+    mask=1.0-np.isnan(var[0])
     wght=mask*ds.dy
-    var=utils.average(var.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
+    eq_region={'lat':slice(-2.1,2.1)}
+    var=utils.average(var.sel(**eq_region),'lat',wght.sel(**eq_region))
     return utils.shift_lon(var,30).sel(lon=slice(130,280))
 
 def mkequatorial_obs(obsname,obsvarname):
     var=importlib.import_module('verification.'+obsname).ds[obsvarname]
     var=var.sel(lat=slice(2.1,-2.1)).mean('lat')
     return utils.shift_lon(var,30).sel(lon=slice(130,280))
+
+def mknino3(exp,ds):
+    var=ds[varname]-TFREEZE
+    mask=1.0-np.isnan(var[0])
+    wght=mask*ds.dy*ds.dx
+    n3region={'lat':slice(-5.1,5.1),
+              'lon':slice(-150,-90)}
+    return utils.average(var.sel(**n3region),('lat','lon'),
+                         wght.sel(**n3region))
 
 def plot_equatorial(exps,das,obs,obsdas):
     plotter=plots.Plot1d()
@@ -94,10 +105,23 @@ def plot_hovm(plotter,exp,da):
     ax.set_title(f'{exp["expid"]} SST anom.')
     ax.set_xlabel('')
     ax.set_ylabel('')
+    ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     pl.grid()
     pl.tight_layout()
     pl.show()
     pl.savefig(f'{exp["plot_path"]}/hov_tp.png')
+
+def plot_nino3(exp,da):
+    anom=da.groupby('time.month')-da.groupby('time.month').mean('time')
+    plotter=plots.Plot1d()
+    pl.figure(5); pl.clf()
+    ax=plotter.line(anom)
+    ax.set_title('Nino3 SST anomaly')
+    ax.set_ylabel('$^0C$')
+    pl.grid()
+    pl.tight_layout()
+    pl.show()
+    pl.savefig(f'{exp["plot_path"]}/n3.png')
 
 def mkplots(exps,dsets):
     # Calculate seasonal equatorial means
@@ -109,6 +133,8 @@ def mkplots(exps,dsets):
     obsequatorials=[]
     for obsname,obsvarname in obs.items():
         obsequatorials.append(mkequatorial_obs(obsname,obsvarname))
+
+    nino3=mknino3(exps[0],dsets[0])
 
     # Plots
     plot_equatorial(exps,equatorials,obs,obsequatorials)
@@ -128,7 +154,9 @@ def mkplots(exps,dsets):
 
     plot_equatorial_ac(plotter, exps[0],equatorials[0])
 
-    plot_hovm(plotter, exps[0],equatorials[0])    
+    plot_hovm(plotter, exps[0],equatorials[0]) 
+
+    plot_nino3(exps[0],nino3)
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])

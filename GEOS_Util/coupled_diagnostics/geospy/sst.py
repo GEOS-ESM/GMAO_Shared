@@ -12,14 +12,21 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots, utils
 
+varname='TS'
+TFREEZE=273.16    
+
 def mkclim(exp,dset):
     '''
     Computes climatology for given experiment.
     '''
-    varname='TS'
-    TFREEZE=273.16    
     var=dset[varname].sel(time=slice(*exp['dates']))-TFREEZE
     return var.groupby('time.season').mean('time')
+
+def mkglobal(exp,ds):
+    var=ds[varname]-TFREEZE
+    mask=1.0-np.isnan(var[0])
+    wght=mask*ds.dy*ds.dx
+    return utils.average(var,('lat','lon'),wght)
     
 def plot_clim(plotter, exp, clim):
     '''
@@ -104,8 +111,19 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
 
     rr.clean_weight_file()
 
+def plot_gm(exp,da):
+    plotter=plots.Plot1d()
+    pl.figure(4); pl.clf()
+    ax=plotter.line(da)
+    ax.set_title('Global SST')
+    ax.set_ylabel('$^0C$')
+    pl.grid()
+    pl.tight_layout()
+    pl.show()
+    pl.savefig(f'{exp["plot_path"]}/sst_gm.png')
+
 def mkplots(exps, dsets):
-# Calculate climatologies for experiments to comapre
+    # Calculate climatologies for experiments to comapre
     clims=[]
     for exp,dset in zip(exps,dsets):
         clims.append(mkclim(exp,dset))
@@ -113,7 +131,9 @@ def mkplots(exps, dsets):
     mask=1-np.isnan(clims[0][0])
     exps[0]["weight"]=mask*dsets[0]["dx"]*dsets[0]["dy"]
 
-# Plot parameters
+    gm=mkglobal(exps[0],dsets[0])
+
+    # Plot parameters
     cbar_kwargs={'orientation': 'horizontal',
                  'shrink': 0.8,
                  'label': '$^0C$'}
@@ -148,6 +168,8 @@ def mkplots(exps, dsets):
         da=importlib.import_module('verification.'+obsname).ds[obsvarname]
         obsclim=da.groupby('time.season').mean('time')
         plot_diffobs(plotmap, exps[0], clims[0], obsclim, obsname)
+
+    plot_gm(exps[0],gm)
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])

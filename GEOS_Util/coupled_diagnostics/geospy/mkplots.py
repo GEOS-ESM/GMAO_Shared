@@ -18,6 +18,10 @@ def main(exp_conf):
     import sst
     sst.mkplots(exps, ocn2d)
 
+    # Tropical Pacific SST plots
+    import sst_tp
+    sst_tp.mkplots(exps, ocn2d)    
+
     # Plot SSS
     import sss
     sss.mkplots(exps, ocn2d)
