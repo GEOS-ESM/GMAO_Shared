@@ -13,7 +13,7 @@ exp=g5dset.read_exp(sys.argv[1])
 varname='TS'
 exp.ctl=g5dset.Ctl(exp,'geosgcm_ocn2d')
 
-exp.n3=exp.ctl(varname,lats=(-5,5),lons=(-150,-120)).aave();
+exp.n3=exp.ctl(varname,lats=(-5,5),lons=(-150,-90)).aave();
 exp.n3.clim(12,anom=True)
 
 # Plot
