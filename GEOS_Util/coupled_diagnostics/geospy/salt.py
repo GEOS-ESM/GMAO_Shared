@@ -193,4 +193,4 @@ if __name__=='__main__':
         dsets=geosdset.load_collection(exps,'prog_z',type='MOM')
 
     mkplots(exps,dsets)
-    
+    geosdset.close(dsets)    

@@ -109,3 +109,7 @@ def load_collection(exps, colname, type='GEOS'):
         dsets.append(_get_loader(type)(exp, colname))
 
     return dsets
+
+def close(dsets):
+    for ds in dsets:
+        ds.close()

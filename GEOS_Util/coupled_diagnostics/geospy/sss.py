@@ -151,4 +151,4 @@ if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
     dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
     mkplots(exps,dsets)
-    
+    geosdset.close(dsets)    

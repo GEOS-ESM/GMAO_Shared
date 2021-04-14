@@ -26,6 +26,8 @@ def main(exp_conf):
     import sss
     sss.mkplots(exps, ocn2d)
 
+    geosdset.close(ocn2d)
+
     # Load ocean 3d data
     try:
         ocn3d=geosdset.load_collection(exps,'geosgcm_ocn3d')
@@ -39,6 +41,8 @@ def main(exp_conf):
     # Plot S profiles
     import salt
     salt.mkplots(exps, ocn3d)
+
+    geosdset.close(ocn3d)
 
     # Add more plots....
     
