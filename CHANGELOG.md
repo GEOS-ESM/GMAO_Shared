@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+ 
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
 
 ### Fixed
 - Fixed build for directories that are built as part of the GEOSdas
