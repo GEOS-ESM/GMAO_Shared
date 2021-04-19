@@ -28,6 +28,15 @@ def main(exp_conf):
 
     geosdset.close(ocn2d)
 
+    # Load surface data
+    surf=geosdset.load_collection(exps, 'geosgcm_surf')
+
+    # Plot precip
+    import precip
+    precip.mkplots(exps, surf)
+
+    geosdset.close(surf)
+
     # Load ocean 3d data
     try:
         ocn3d=geosdset.load_collection(exps,'geosgcm_ocn3d')

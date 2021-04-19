@@ -3,7 +3,7 @@
 '''
 Plots precipitation
 '''
-import sys
+import sys, importlib
 import numpy as np
 import matplotlib.pyplot as pl
 import cmocean
@@ -15,7 +15,7 @@ def mkclim(exp,dset):
     '''
     Computes climatology for given experiment.
     '''
-    varname='RAIN'
+    varname='TPREC'
     factor=3600*24 # converts from kg/m^2/sec to mm/day
     var=dset[varname].sel(time=slice(*exp['dates']))*factor
     return var.groupby('time.season').mean('time')
@@ -43,6 +43,66 @@ def plot_clim(plotter, exp, clim):
     pl.savefig(f'{exp["plot_path"]}/precip_am.png')
     pl.show()
 
+def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
+    '''
+    Plots climatology difference between two experiments.
+    '''
+
+    rr=xesmf.Regridder(cmpclim,clim,'bilinear',periodic=True)
+    dif=clim-rr(cmpclim)
+
+    pl.figure(1); pl.clf() 
+    var=dif.sel(season='DJF')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']), mode='filled')
+    ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} PRECIP, DJF')
+    pl.savefig(f'{exp["plot_path"]}/precip-{cmpexp["expid"]}_djf.png')
+    
+    pl.figure(2); pl.clf()
+    var=dif.sel(season='JJA')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']), mode='filled')
+    ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} PRECIP, JJA')
+    pl.savefig(f'{exp["plot_path"]}/precip-{cmpexp["expid"]}_jja.png')
+
+    pl.figure(3); pl.clf()
+    var=dif.mean('season')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']), mode='filled')
+    ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} PRECIP, Annual Mean')
+    pl.savefig(f'{exp["plot_path"]}/precip-{cmpexp["expid"]}_am.png')
+    pl.show()
+
+    rr.clean_weight_file()
+
+def plot_diffobs(plotter, exp, clim, obsclim, obsname):
+    '''
+    Plots climatology difference against observations
+    '''
+    rr=xesmf.Regridder(obsclim,clim,'bilinear',periodic=True)
+    dif=clim-rr(obsclim)
+
+    pl.figure(1); pl.clf() 
+    var=dif.sel(season='DJF')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']), mode='filled')
+    ax.set_title(f'{exp["expid"]}-{obsname} PRECIP, DJF')
+    pl.savefig(f'{exp["plot_path"]}/precip-{obsname}_djf.png')
+    pl.savefig(f'{exp["plot_path"]}/precip-obs_djf.png')
+    
+    pl.figure(2); pl.clf()
+    var=dif.sel(season='JJA')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']), mode='filled')
+    ax.set_title(f'{exp["expid"]}-{obsname} PRECIP, JJA')
+    pl.savefig(f'{exp["plot_path"]}/precip-{obsname}_jja.png')
+    pl.savefig(f'{exp["plot_path"]}/precip-obs_jja.png')
+
+    pl.figure(3); pl.clf()
+    var=dif.mean('season')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']), mode='filled')
+    ax.set_title(f'{exp["expid"]}-{obsname} PRECIP, Annual Mean')
+    pl.savefig(f'{exp["plot_path"]}/precip-{obsname}_am.png')
+    pl.savefig(f'{exp["plot_path"]}/precip-obs_am.png')
+    pl.show()
+
+    rr.clean_weight_file()
+
 def mkplots(exps,dsets):
     # Calculate climatologies for experiments to comapre
     clims=[]
@@ -69,8 +129,21 @@ def mkplots(exps,dsets):
     # Plots
     plot_clim(plotmap, exps[0], clims[0]) 
 
+    plotmap.fill_opts['levels']=(-8, -7, -6, -5, -4, -3, -2, -1, -.5, 0., 
+                                 .5, 1, 2, 3, 4, 5, 6, 7, 8)
+    plotmap.fill_opts['cmap']=cmocean.cm.diff
+
+    for exp,clim in zip(exps[1:],clims[1:]):
+        plot_diff(plotmap, exps[0], exp, clims[0], clim)
+
+    obs={'GPCP': 'precip'} # Names of observational data set and SST variable in this data set.
+    for obsname,obsvarname in obs.items():
+        da=importlib.import_module('verification.'+obsname).ds[obsvarname].sel(lev=0.0)
+        obsclim=da.groupby('time.season').mean('time')
+        plot_diffobs(plotmap, exps[0], clims[0], obsclim, obsname)
+
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
+    dsets=geosdset.load_collection(exps,'geosgcm_surf')
     mkplots(exps,dsets)
     geosdset.close(dsets)
