@@ -42,10 +42,7 @@ def shift_lon(da, lon0, lon_name='lon'):
     '''
     dlon=int(da[lon_name][0]-lon0)
     var=da.roll(lon=dlon, roll_coords=True)
-    return var.assign_coords(
-        {
-            lon_name: var[lon_name].where(var[lon_name]>=var[lon_name][0],var[lon_name]+360)
-        }
-    )
+    var[lon_name]=var[lon_name].where(var[lon_name]>=var[lon_name][0],var[lon_name]+360)
+    return var
 
 

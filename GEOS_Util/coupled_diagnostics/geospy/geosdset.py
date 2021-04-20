@@ -11,10 +11,7 @@ import xarray as xr
 R=6378e3 # Earth radius
 
 def _load_geos(exp,collection):
-    path=pathlib.Path(f'{exp["data_path"]}/{collection}')
-    flist=list(path.glob(f'{exp["expid"]}.{collection}.monthly.?????[0-9].nc4')) 
-    flist.sort()
-    ds=xr.open_mfdataset(flist,combine='by_coords')
+    ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
 
     IM=ds.dims['lon']
     JM=ds.dims['lat']
@@ -31,39 +28,32 @@ def _load_geos(exp,collection):
     area[0,:]*=0.5*(dx[0,:]+dx[1,:])
     area[-1,:]*=0.5*(dx[-2,:]+dx[-1,:])
         
-    ds=ds.assign({'dx': (('lat','lon'), dx),
-                  'dy': (('lat','lon'), dy),
-                  'area': (('lat','lon'), area)})
+    ds.update({'dx': (('lat','lon'), dx),
+               'dy': (('lat','lon'), dy),
+               'area': (('lat','lon'), area)})
     
     return ds
         
 def _load_tripolar(exp, collection):
-    path=pathlib.Path(f'{exp["data_path"]}/{collection}')
-    flist=list(path.glob(f'{exp["expid"]}.{collection}.monthly.?????[0-9].nc4')) 
-    flist.sort()
-    ds=xr.open_mfdataset(flist,combine='by_coords')
-    ds=ds.assign_coords({'LON': ds['LON'],
-                         'LAT': ds['LAT']})
+    ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
+    ds=ds.set_coords(['LON','LAT'])
     return ds
 
 def _load_mom(exp, collection):
-    path=pathlib.Path(f'{exp["data_path"]}/MOM_Output')
-    flist=list(path.glob(f'{collection}.e*_00z.nc'))
-    flist.sort()
-    ds=xr.open_mfdataset(flist,combine='by_coords')
+    ds=xr.open_mfdataset(f'{exp["data_path"]}/MOM_Output/{collection}.e??????01_00z.nc')
     ds_static=xr.open_dataset(exp["ocean_static"])
-    ds=ds.assign_coords({'geolon': ds_static['geolon'],
-                         'geolat': ds_static['geolat'],
-                         'geolon_c': ds_static['geolon_c'],
-                         'geolat_c': ds_static['geolat_c'],
-                         'geolon_u': ds_static['geolon_u'],
-                         'geolat_u': ds_static['geolat_u'],
-                         'geolon_v': ds_static['geolon_v'],
-                         'geolat_v': ds_static['geolat_v']})
+    ds.coords.update({'geolon': ds_static['geolon'],
+                      'geolat': ds_static['geolat'],
+                      'geolon_c': ds_static['geolon_c'],
+                      'geolat_c': ds_static['geolat_c'],
+                      'geolon_u': ds_static['geolon_u'],
+                      'geolat_u': ds_static['geolat_u'],
+                      'geolon_v': ds_static['geolon_v'],
+                      'geolat_v': ds_static['geolat_v']})
     
-    ds=ds.assign({'dx': (('yh','xh'), ds_static['dxt']),
-                  'dy': (('yh','xh'), ds_static['dyt']),
-                  'area': (('yh','xh'), ds_static['area_t'])})
+    ds.update({'dx': (('yh','xh'), ds_static['dxt']),
+               'dy': (('yh','xh'), ds_static['dyt']),
+               'area': (('yh','xh'), ds_static['area_t'])})
 
     return ds 
 

@@ -15,14 +15,14 @@ varname='S'
 
 def mkzonal(exp,ds):
     var=ds[varname].sel(time=slice(*exp['dates'])).mean('time')
-    var=var.assign_coords({'lev': -var.lev})
+    var.coords['lev']=-var['lev']
     mask=1.0-np.isnan(var)
     wght=mask*ds.dx
     return utils.average(var,'lon',wght)
 
 def mkequatorial(exp,ds):
     var=ds[varname].sel(time=slice(*exp['dates'])).mean('time')
-    var=var.assign_coords({'lev': -var.lev})
+    var.coords['lev']=-var['lev']
     mask=1.0-np.isnan(var)
     wght=mask*ds.dy
     var=utils.average(var.sel(lat=slice(-2.1,2.1)),'lat',wght.sel(lat=slice(-2.1,2.1)))
