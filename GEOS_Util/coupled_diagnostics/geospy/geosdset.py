@@ -71,14 +71,16 @@ def load_exps(exp_conf):
     
     exps=[]
     with open(exp_conf) as ff:
-        exps.append(yaml.safe_load(ff))
+        exp=yaml.safe_load(ff)
+        exp.setdefault('cmpexp',[])
+        exp.setdefault('dates',[None,None])
+        exps.append(exp)
         
-    for exp in exps[0]['cmpexp']:
-        with open(exp,'r') as ff:
-            exps.append(yaml.safe_load(ff))
-
-    for exp in exps:
-        exp['dates']=[date if date!='None' else None for date in exp['dates']]
+    for expconf in exps[0]['cmpexp']:
+        with open(expconf,'r') as ff:
+            exp=yaml.safe_load(ff)
+            exp.setdefault('dates',[None,None])
+            exps.append(exp)
 
     # Make directory for plots if it does not exists
     try:
