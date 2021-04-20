@@ -3,7 +3,7 @@ This modules provides utilities for reading different GEOS collections.
 '''
 
 import os
-import pathlib, yaml
+import yaml
 from types import SimpleNamespace
 import numpy as np
 import xarray as xr
