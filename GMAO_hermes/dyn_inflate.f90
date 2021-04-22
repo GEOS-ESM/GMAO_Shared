@@ -56,7 +56,7 @@ call init_(dyntype,files)
 
   if(.not.allocated(ainf)) then
     print *, 'ainf not defined, aborting ...'
-    call exit(99)
+    error stop 99
   endif
   do iv=1,size(vars)
      if(trim(vars(iv))=='u')then
@@ -189,7 +189,7 @@ contains
       character(len=*),intent(out) :: files(:)
 
       character(len=*), parameter :: myname='init_'
-      integer iret, i, iarg, argc, iargc
+      integer iret, i, iarg, argc
       integer irow,nlevs, ier, nfiles, iv, nivars
       character(len=255) :: argv
       character(len=255) :: token
@@ -204,14 +204,14 @@ contains
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
       nfiles=0
       iarg=0
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
 
          select case (argv)
            case ("-g4")
@@ -219,11 +219,11 @@ contains
            case ("-o")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, ofile )
+             call get_command_argument ( iArg, ofile )
            case ("-rc")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, RCfile )
+             call get_command_argument ( iArg, RCfile )
            case default
              nfiles = nfiles + 1
              if ( nfiles .gt. mfiles ) call usage()
@@ -253,7 +253,7 @@ contains
            nlevs = I90_GInt(iret)
         else
            write(stderr,'(2a,i5)') trim(myname),': cannot determine no. of levels, aborting ... '
-           call exit(1)
+           error stop 1
         end if
         write(stdout,'(2a,i5)') trim(myname),': number of inflation vertical levels = ', nlevs 
 
@@ -287,7 +287,7 @@ contains
            if (iret/=0) then
               write(stderr,'(2a,i5,2a)') myname, ': I90_label error, iret=', iret, &
                                                  ': trying to read ', trim(tablename)
-              call exit(2)
+              error stop 2
            end if
            irow = 0
            write(stdout,'(3a)') ' Reading vertically varying inflation ', trim(vars(iv)), '...'
@@ -299,19 +299,19 @@ contains
                   call I90_GToken(token, ier )
                   if(ier/=0) then
                     write(stderr,'(2a,i5)') trim(myname),': cannot read 1st entry in table, aborting ...'
-                    call exit(3)
+                    error stop 3
                   endif
                   call I90_GToken(token, ier )
                   if(ier/=0) then
                     write(stderr,'(2a,i5)') trim(myname),': cannot read 2nd entry in table, aborting ...'
-                    call exit(4)
+                    error stop 4
                   endif
                   read(token,*) ainf(irow,iv) 
               end if
            end do
            if(irow/=nlevs) then
              write(stderr,'(2a,i5)') trim(myname),': inconsistent number of levels in table, aborting ...'
-             call exit(4)
+             error stop 4
            endif
         end do ! iv
 
@@ -322,7 +322,7 @@ contains
            ainf_ps = I90_GFloat(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot addinf_coeff(ps), aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get addinf_coeff(ps) from RC, using default ... '
@@ -336,7 +336,7 @@ contains
            ainf_ts = I90_GFloat(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot addinf_coeff(ts), aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get addinf_coeff(ts) from RC, using default ... '
@@ -350,7 +350,7 @@ contains
            pkthresh = I90_GFloat(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot pkthresh, aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get pthreshold from RC, using default ... '
@@ -377,7 +377,7 @@ contains
            m_star = I90_GInt(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot adaptive_smooth_factor(), aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get adaptive_smooth_factor() from RC, no smoothing ... '
@@ -399,7 +399,7 @@ contains
          print *
       else
          print *, 'not enough input files, aborting ...'
-         call exit(1)
+         error stop 1
       endif
   end subroutine init_
 
@@ -471,7 +471,7 @@ subroutine usage()
    print *, '  xm_a    - ensemble mean analysis file'
    print *, '  xs_b    - ensemble background spread file'
    print *
-   call exit(1)
+   error stop 1
 end subroutine usage
       
 

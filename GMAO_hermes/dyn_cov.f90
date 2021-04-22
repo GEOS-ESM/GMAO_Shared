@@ -259,7 +259,7 @@ contains
 subroutine init_()
  implicit none
 
- integer i, iarg, argc, iargc
+ integer i, iarg, argc
  integer ncount,nc
  character(len=255) :: argv
  real corrlen
@@ -272,7 +272,7 @@ subroutine init_()
  adrate  = -9999.
  corrlen = 800.        ! to be read from file
 
- argc =  iargc()
+ argc =  command_argument_count()
  if ( argc .lt. 1 ) call usage()
 
  iarg=0
@@ -280,43 +280,43 @@ subroutine init_()
  do i = 1, 32767
     iarg = iarg + 1
     if ( iarg .gt. argc ) exit
-    call GetArg ( iarg, argv )
+    call get_command_argument ( iarg, argv )
     select case (argv)
 
       case ('-fcstlen')
           if ( iarg+1 .gt. argc ) call usage()
           iarg = iarg + 1
-          call GetArg ( iarg, argv )
+          call get_command_argument ( iarg, argv )
           read(argv,*) fcstlen           
 
       case ('-mem')
           if ( iarg+1 .gt. argc ) call usage()
           iarg = iarg + 1
-          call GetArg ( iarg, argv )
+          call get_command_argument ( iarg, argv )
           read(argv,*) members           
 
       case ('-adrate')
           if ( iarg+1 .gt. argc ) call usage()
           iarg = iarg + 1
-          call GetArg ( iarg, argv )
+          call get_command_argument ( iarg, argv )
           read(argv,*) adrate           
 
       case ('-corrlen')
           if ( iarg+1 .gt. argc ) call usage()
           iarg = iarg + 1
-          call GetArg ( iarg, argv )
+          call get_command_argument ( iarg, argv )
           read(argv,*) corrlen           
 
       case ("-o")
          if ( iarg+1 .gt. argc ) call usage()
          iarg = iarg + 1
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          ofile(1) = trim(argv)
 
       case ("-ox")
          if ( iarg+1 .gt. argc ) call usage()
          iarg = iarg + 1
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          ofile(2) = trim(argv)
 
       case ('-nolocal')
@@ -328,10 +328,10 @@ subroutine init_()
       case default
         ncount = ncount + 1
         if (ncount==1) then
-           call GetArg ( iarg, argv )
+           call get_command_argument ( iarg, argv )
            read(argv,*) nymd(1)
         else if (ncount==2 ) then
-           call GetArg ( iarg, argv )
+           call get_command_argument ( iarg, argv )
            read(argv,*) nhms(1)
         else 
            nc=nc+1
@@ -396,7 +396,7 @@ subroutine usage()
      print *, ' 1. This program requires error files to have been generated'
      print *, '    prior to attempting to run it. E.g., see dyndiff.x'
      print *
-     call exit(1)
+     error stop 1
 end subroutine usage
 
 subroutine globeloc (aloc,lat,lon)

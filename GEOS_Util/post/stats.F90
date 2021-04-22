@@ -26,6 +26,7 @@
       program stats
       use stats_mod
       use ESMF
+      use iso_fortran_env
       implicit none
 
       type(ESMF_Config) :: config
@@ -54,7 +55,7 @@
 
       real, allocatable ::  corr(:,:,:,:)      ! Note: Hardwired for 100 time periods (Max)
       real, allocatable ::   rms(:,:,:,:,:)    ! Note: Hardwired for 100 time periods (Max)
-      real*4 dum(nr)
+      real(kind=REAL32) dum(nr)
 
 !     Original Levels
 !     ---------------
@@ -1632,7 +1633,9 @@
       end
 
       subroutine read_clim_bin ( nymd,nhms,p,u,v,t,q,h,idim,jdim,ldim,undef )
- 
+
+        use iso_fortran_env
+        implicit none 
 !***********************************************************************
 !*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 !*    Note:  Climatology Data is in Grads Format from the files:       *
@@ -1640,12 +1643,14 @@
 !*                          ncep_1x1_clim.data                         *
 !*    Climatology Data is stored:  January through December            *
 !***********************************************************************
- 
+
+      integer :: IM, JM, LM
+      integer :: idim, jdim, ldim
       PARAMETER   ( IM = 360 )                                                 
       PARAMETER   ( JM = 181 )                                                 
       PARAMETER   ( LM =  10 )                                                 
 
-      real*4 bum(IM,JM)
+      real(kind=REAL32) bum(IM,JM)
       real   dum(IM,JM)
 
       real p ( IDIM,JDIM      )                                                  
@@ -1678,6 +1683,13 @@
       
       INTEGER   DAYS(12)
       DATA      DAYS /31,28,31,30,31,30,31,31,30,31,30,31/
+
+      integer :: N, SEC, MONTH, DAY, MIDMON
+      integer :: imnm, imnp, i, j, l
+      integer :: ISC, ISCM, ISCP, MONTH2, KU, IMONM, IMONP, MONTH1
+      real :: FACP, FACM
+
+      INTEGER :: NSECF, NMONF, NDAYF, NHMS, NYMD
 
       NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
       NMONF(N) = MOD(N,10000)/100
@@ -2361,10 +2373,10 @@
       subroutine read_anal( nymd,nhms,fields_2d,fields_3d,n2d,n3d,idim,jdim,nl,zlev,ana_files,num_ana_files,undef )
       use stats_mod
       implicit none
+      integer       nymd,nhms,n2d,n3d
       type(fields) :: fields_2d(n2d)
       type(fields) :: fields_3d(n3d)
 
-      integer       nymd,nhms,n2d,n3d
       integer       idim,jdim,nl,num_ana_files
       real          zlev(nl)
 
@@ -3159,11 +3171,12 @@
       END
 
       subroutine writit ( q,im,jm,lm,qundef,undef )
+      use iso_fortran_env
       implicit none
       integer    im,jm,lm
       real     q(im,jm,lm)
-      real*4 dum(im,jm)
-      real*4 qundef, undef
+      real(kind=REAL32) dum(im,jm)
+      real(kind=REAL32) qundef, undef
       logical defined
       integer i,j,L
       do L=1,lm

@@ -57,9 +57,6 @@
 
       character(len=255) :: vars, str     ! vars
 
-      logical upd 
-      upd ( str ) = ( index((vars),(str)) .gt. 0 )
-
 !.......................................................................
 
       call zeit_ci ( 'ibc_upd' )
@@ -141,12 +138,12 @@
 !     Estimate bias
 !     -------------
       a = alpha
-      if ( upd('ts') )   b_f%Ts   = b_f%Ts   - a * (w_e%Ts   - w_f%Ts)
-      if ( upd('u') )    b_f%u    = b_f%u    - a * (w_e%u    - w_f%u)
-      if ( upd('v') )    b_f%v    = b_f%v    - a * (w_e%v    - w_f%v)
-      if ( upd('pt') )   b_f%pt   = b_f%pt   - a * (w_e%pt   - w_f%pt)
-      if ( upd('q') )    b_f%q    = b_f%q    - a * (w_e%q    - w_f%q)
-      if ( upd('delp') ) b_f%delp = b_f%delp - a * (w_e%delp - w_f%delp)
+      if ( upd('ts',vars) )   b_f%Ts   = b_f%Ts   - a * (w_e%Ts   - w_f%Ts)
+      if ( upd('u',vars) )    b_f%u    = b_f%u    - a * (w_e%u    - w_f%u)
+      if ( upd('v',vars) )    b_f%v    = b_f%v    - a * (w_e%v    - w_f%v)
+      if ( upd('pt',vars) )   b_f%pt   = b_f%pt   - a * (w_e%pt   - w_f%pt)
+      if ( upd('q',vars) )    b_f%q    = b_f%q    - a * (w_e%q    - w_f%q)
+      if ( upd('delp',vars) ) b_f%delp = b_f%delp - a * (w_e%delp - w_f%delp)
 
 !     Write out the updated bias
 !     --------------------------
@@ -178,7 +175,7 @@
 
       print *, 'ibc_upd: successfully completed'
 
-      call exit(0)
+      stop
 
 !...................................................................................
 
@@ -224,7 +221,7 @@
 
       character(len=*), parameter :: myname = 'init'
 
-      integer i, iarg, argc, iargc, n
+      integer i, iarg, argc, n
       character(len=255) argv, prefix
 
       print *
@@ -246,7 +243,7 @@
       alpha = 0.1
       out_a = 'undef'
 
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage_()
 
       iarg = 0
@@ -254,11 +251,11 @@
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          if (index(argv,'-b' ) .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_b )
+            call get_command_argument ( iArg, dyn_b )
          else if (index(argv,'-noremap' ) .gt. 0 ) then
             remap = .false.
          else if (index(argv,'-nors' ) .gt. 0 ) then
@@ -266,23 +263,23 @@
          else if (index(argv,'-a' ) .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, out_a )
+            call get_command_argument ( iArg, out_a )
          else if (index(argv,'-vars' ) .gt. 0 ) then
             if ( iarg+2 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, vars )
+            call get_command_argument ( iArg, vars )
          else if (index(argv,'-alpha' ) .gt. 0 ) then
             if ( iarg+2 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) alpha
          else if (index(argv,'-pick' ) .gt. 0 ) then
             if ( iarg+2 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) nymd_f
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) nhms_f
             pick = .true.
          else
@@ -290,7 +287,7 @@
             call FileResolv ( trim(prefix), nymd_f, nhms_f, argv, dyn_f )
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             n = n + 1
             call FileResolv ( trim(prefix), nymd_f, nhms_f, argv, dyn_a )
          end if
@@ -335,9 +332,21 @@
       print *, '          Alpha: ', alpha
       print *
 
+
+      contains
+
       end subroutine Init_
 
 !.......................................................................
+
+      logical function upd(str,vars)
+
+         character(len=*), intent(in) :: str
+         character(len=*), intent(in) :: vars
+
+         upd = index(vars,str) .gt. 0
+
+      end function upd
 
       subroutine usage_()
       print *

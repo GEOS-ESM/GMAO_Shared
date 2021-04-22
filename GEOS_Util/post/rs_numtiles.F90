@@ -32,7 +32,7 @@ program rs_numtiles
      write (output_unit,*) "         This program looks at the first record of a binary restart. If"
      write (output_unit,*) "         that record has subtiles, it will be a multiple of the number"
      write (output_unit,*) "         of tiles."
-     call exit(2)
+     error stop 2
   end if
 
   call get_command_argument(1, fname1)

@@ -6,7 +6,7 @@
        integer            :: ndummy, nymd, nhms, n
 
        do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
        enddo
        drst = trim(arg(1))
 

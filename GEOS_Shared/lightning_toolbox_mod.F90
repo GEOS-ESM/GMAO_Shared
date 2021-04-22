@@ -31,6 +31,8 @@ MODULE Lightning_Toolbox_Mod
 !
 ! !USES:
 !
+
+  use iso_fortran_env
   IMPLICIT NONE
   PRIVATE
 !
@@ -56,18 +58,18 @@ MODULE Lightning_Toolbox_Mod
 !
 ! !DEFINED PARAMETERS:
 !
-  INTEGER, PARAMETER :: hp = KIND( REAL( 0.0, 8 ) )
+  INTEGER, PARAMETER :: hp = KIND( REAL( 0.0, REAL64 ) )
 
   ! Parameter for LFR calculation
-  REAL*8,  PARAMETER            :: RFLASH_MIDLAT = 3.011d26   ! 500 mol/flash
-  REAL*8,  PARAMETER            :: RFLASH_TROPIC = 1.566d26   ! 260 mol/flash
-  REAL*8,  PARAMETER            :: EAST_WEST_DIV = -30d0
-  REAL*8,  PARAMETER            :: WEST_NS_DIV   =  35d0
-  REAL*8,  PARAMETER            :: EAST_NS_DIV   =  35d0
-  REAL*8,  PARAMETER            :: T_NEG_BOT     = 273.0d0    !   0 C 
-  REAL*8,  PARAMETER            :: T_NEG_CTR     = 258.0d0    ! -15 C
-  REAL*8,  PARAMETER            :: T_NEG_TOP     = 233.0d0    ! -40 C
-  REAL*8,  PARAMETER            :: Rdg0          = 287.0e+0_hp / 9.80665e+0_hp ! Rd/g0 
+  real(kind=REAL64),  PARAMETER            :: RFLASH_MIDLAT = 3.011d26   ! 500 mol/flash
+  real(kind=REAL64),  PARAMETER            :: RFLASH_TROPIC = 1.566d26   ! 260 mol/flash
+  real(kind=REAL64),  PARAMETER            :: EAST_WEST_DIV = -30d0
+  real(kind=REAL64),  PARAMETER            :: WEST_NS_DIV   =  35d0
+  real(kind=REAL64),  PARAMETER            :: EAST_NS_DIV   =  35d0
+  real(kind=REAL64),  PARAMETER            :: T_NEG_BOT     = 273.0d0    !   0 C 
+  real(kind=REAL64),  PARAMETER            :: T_NEG_CTR     = 258.0d0    ! -15 C
+  real(kind=REAL64),  PARAMETER            :: T_NEG_TOP     = 233.0d0    ! -40 C
+  real(kind=REAL64),  PARAMETER            :: Rdg0          = 287.0e+0_hp / 9.80665e+0_hp ! Rd/g0 
 
 CONTAINS
 !EOC
@@ -139,13 +141,13 @@ CONTAINS
     INTEGER           :: I,         J,           L,        LCHARGE
     INTEGER           :: LMAX,      LTOP,        LBOTTOM,  A_KM2
     INTEGER           :: LTOP1,     LTOP2
-    REAL*8            :: XMID,      YMID,        CC,       DLNP
-    REAL*8            :: DZ,        FLASHRATE,   H0,       HBOTTOM
-    REAL*8            :: HCHARGE,   IC_CG_RATIO, Z_CG,     ZUP
-    REAL*8            :: RATE_SAVE, REDIST,      T1,       T2
-    REAL*8            :: TOTAL,     TOTAL_CG,    TOTAL_IC, X
-    REAL*8            :: P1,        P2,          P3,       RATE
-    REAL*8            :: Z_IC
+    real(kind=REAL64)            :: XMID,      YMID,        CC,       DLNP
+    real(kind=REAL64)            :: DZ,        FLASHRATE,   H0,       HBOTTOM
+    real(kind=REAL64)            :: HCHARGE,   IC_CG_RATIO, Z_CG,     ZUP
+    real(kind=REAL64)            :: RATE_SAVE, REDIST,      T1,       T2
+    real(kind=REAL64)            :: TOTAL,     TOTAL_CG,    TOTAL_IC, X
+    real(kind=REAL64)            :: P1,        P2,          P3,       RATE
+    real(kind=REAL64)            :: Z_IC
     INTEGER           :: SFCTYPE
 
     !=================================================================
@@ -769,12 +771,12 @@ CONTAINS
 !
     INTEGER, INTENT(IN)  :: I           ! Longitude index
     INTEGER, INTENT(IN)  :: J           ! Latitude index
-    REAL*8,  INTENT(IN)  :: HEIGHT      ! Height of conv cloud top [m]
+    real(kind=REAL64),  INTENT(IN)  :: HEIGHT      ! Height of conv cloud top [m]
     INTEGER, INTENT(IN)  :: SFCTYPE     ! Surface type (0=land, 1=water, 2=ice)
 !
 ! !OUTPUT PARAMETERS:
 !
-    REAL*8,  INTENT(OUT) :: FLASHRATE   ! LightNOX flash rate [flashes/min]
+    real(kind=REAL64),  INTENT(OUT) :: FLASHRATE   ! LightNOX flash rate [flashes/min]
 !
 ! !REVISION HISTORY: 
 !  10 May 2006 - L. Murray - Initial version
@@ -849,11 +851,11 @@ CONTAINS
 !
 ! !INPUT PARAMETERS: 
 !
-    REAL*8,  INTENT(IN) :: CCTHICK       ! Cold cloud thickness [m]
+    real(kind=REAL64),  INTENT(IN) :: CCTHICK       ! Cold cloud thickness [m]
 !
 ! !RETURN VALUE:
 !
-    REAL*8              :: IC_CG_RATIO   ! Intra-cloud/cloud-ground ratio
+    real(kind=REAL64)              :: IC_CG_RATIO   ! Intra-cloud/cloud-ground ratio
 !
 ! !REVISION HISTORY: 
 !  11 Dec 2006 - R. Yantosca - Initial version
@@ -869,7 +871,7 @@ CONTAINS
 !
 ! !LOCAL VARIABLES:
 !
-    REAL*8 :: CC, F_CG
+    real(kind=REAL64) :: CC, F_CG
 
     !=================================================================
     ! GET_IC_CG_RATIO begins here!
@@ -969,17 +971,17 @@ CONTAINS
     INTEGER,         INTENT(IN)  :: NNLIGHT        ! Dimension 1 of profile array
     INTEGER,         INTENT(IN)  :: NLTYPE         ! Dimension 2 of profile array 
     INTEGER,         INTENT(IN)  :: LTOP           ! Level of conv cloud top
-    REAL*8,          INTENT(IN)  :: H0             ! Conv cloud top height [m]
-    REAL*8,          INTENT(IN)  :: XLAT           ! Latitude value [degrees]
-    REAL*8,          INTENT(IN)  :: TOTAL          ! Column Total # of LNOx molec 
+    real(kind=REAL64),          INTENT(IN)  :: H0             ! Conv cloud top height [m]
+    real(kind=REAL64),          INTENT(IN)  :: XLAT           ! Latitude value [degrees]
+    real(kind=REAL64),          INTENT(IN)  :: TOTAL          ! Column Total # of LNOx molec 
     REAL(hp),        INTENT(IN)  :: BXHEIGHT_M(NZ) ! Boxheights in meter 
     INTEGER,         INTENT(IN)  :: SFCTYPE        ! Surface type 
     INTEGER,         INTENT(IN)  :: cMt            ! Current month 
-    REAL*8,          INTENT(IN)  :: PROFILE(NNLIGHT, NLTYPE ) ! Profile tables
+    real(kind=REAL64),          INTENT(IN)  :: PROFILE(NNLIGHT, NLTYPE ) ! Profile tables
 !
 ! !OUTPUT PARAMETERS:
 !
-    REAL*8,          INTENT(OUT) :: VERTPROF(NZ)   ! Vertical profile 
+    real(kind=REAL64),          INTENT(OUT) :: VERTPROF(NZ)   ! Vertical profile 
     INTEGER,         INTENT(OUT) :: MTYPE          ! lightning type 
 !
 ! !REMARKS:
@@ -1029,8 +1031,8 @@ CONTAINS
 ! !LOCAL VARIABLES:
 !
     INTEGER :: L
-    REAL*8  :: ZHEIGHT, YMID
-    REAL*8  :: FRAC(NZ)
+    real(kind=REAL64)  :: ZHEIGHT, YMID
+    real(kind=REAL64)  :: FRAC(NZ)
 
       !=================================================================
       ! LIGHTDIST begins here!

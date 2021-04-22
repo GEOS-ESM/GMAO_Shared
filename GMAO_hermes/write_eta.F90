@@ -31,14 +31,14 @@ program write_eta
   nxt = 1
   filename = 'eta.rc'
 
-  call getarg(nxt,arg)
+  call get_command_argument(nxt,arg)
 
   do while(arg(1:1)=='-')
 
      opt=arg(2:2)
      if(len(trim(arg))==2) then
         nxt = nxt + 1
-        call getarg(nxt,arg)
+        call get_command_argument(nxt,arg)
      else
         arg = arg(3:)
      end if
@@ -58,7 +58,7 @@ program write_eta
         stop Usage
      end select
      nxt = nxt + 1
-     call getarg(nxt,arg)
+     call get_command_argument(nxt,arg)
   end do
 
   if (use_sigma /=0 ) then
@@ -85,7 +85,7 @@ program write_eta
 
   write(unit,'(A)') "ak-bk:  "
   do k = 1,levels+1
-     write(unit,'(2ES23.15)'), ak(k), bk(k)
+     write(unit,'(2ES23.15)') ak(k), bk(k)
   enddo
  
   write(unit,'(A, ES23.15)') "REF_PRESSURE: ",p0

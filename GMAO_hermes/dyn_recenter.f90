@@ -28,6 +28,8 @@
       use m_inpak90
       use m_stdio, only : stdout,stderr
 
+      use iso_fortran_env
+
       implicit NONE
 
 ! !DESCRIPTION: Used in context of ensemble DAS to recenter dyn-vector
@@ -111,8 +113,8 @@
       integer ks
       integer lm_mean,lm_pert,lm_central
       real    pabove,pbelow,pkthresh,alpha
-      real(8) ptop,pint
-      real(8),allocatable:: ak(:),bk(:)
+      real(REAL64) ptop,pint
+      real(REAL64),allocatable:: ak(:),bk(:)
       real,allocatable:: phis(:,:)
       real,pointer:: frocean(:,:)
       real,pointer:: ainf(:,:)
@@ -511,7 +513,7 @@
    close(999)
    open (999,file='DYNRECENTER_EGRESS',form='formatted')
    close(999)
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -557,7 +559,7 @@ CONTAINS
 
       character*4, parameter :: myname = 'init'
 
-      integer iret, i, iarg, argc, iargc
+      integer iret, i, iarg, argc
       integer irow,nlevs, ier, iv, nivars
       character(len=255) :: argv
       character(len=255) :: token
@@ -590,7 +592,7 @@ CONTAINS
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
 
       iarg = 0
@@ -599,7 +601,7 @@ CONTAINS
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          
          select case (argv)
            case ("-g5")
@@ -607,16 +609,16 @@ CONTAINS
            case ("-o")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, dyn_out )
+             call get_command_argument ( iArg, dyn_out )
            case ("-a")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) alpha
            case ("-inflate")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, dyn_inflate )
+             call get_command_argument ( iArg, dyn_inflate )
            case ("-h")
              if ( iarg+1 .gt. argc ) call usage()
            case ("-verbose")
@@ -633,7 +635,7 @@ CONTAINS
            case ("-rc")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, RCfile )
+             call get_command_argument ( iArg, RCfile )
            case default
              nfiles = nfiles + 1
              if ( nfiles .gt. mfiles ) call usage()
@@ -675,7 +677,7 @@ CONTAINS
            nlevs = I90_GInt(iret)
         else
            write(stderr,'(2a,i5)') trim(myname),': cannot determine no. of levels, aborting ... '
-           call exit(1)
+           error stop 1
         end if
 
 !       Read in ocean-only option
@@ -721,7 +723,7 @@ CONTAINS
            if (iret/=0) then
               write(stderr,'(2a,i5,2a)') myname, ': I90_label error, iret=', iret, &
                                                  ': trying to read ', trim(tablename)
-              call exit(2)
+              error stop 2
            end if
            irow = 0
            write(stdout,'(a)') ' Reading vertically varying inflation ...'
@@ -733,19 +735,19 @@ CONTAINS
                   call I90_GToken(token, ier )
                   if(ier/=0) then
                     write(stderr,'(2a,i5)') trim(myname),': cannot read 1st entry in table, aborting ...'
-                    call exit(3)
+                    error stop 3
                   endif
                   call I90_GToken(token, ier )
                   if(ier/=0) then
                     write(stderr,'(2a,i5)') trim(myname),': cannot read 2nd entry in table, aborting ...'
-                    call exit(4)
+                    error stop 4
                   endif
                   read(token,*) ainf(irow,iv) 
               end if
            end do
            if(irow/=nlevs) then
              write(stderr,'(2a,i5)') trim(myname),': inconsistent number of levels in table, aborting ...'
-             call exit(4)
+             error stop 4
            endif
         end do ! iv
 
@@ -756,7 +758,7 @@ CONTAINS
            ainf_ps = I90_GFloat(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot addinf_coeff(ps), aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get addinf_coeff(ps) from RC, using default ... '
@@ -770,7 +772,7 @@ CONTAINS
            ainf_ts = I90_GFloat(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot addinf_coeff(ts), aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get addinf_coeff(ts) from RC, using default ... '
@@ -784,7 +786,7 @@ CONTAINS
            pkthresh = I90_GFloat(ier)
            if(ier/=0) then
               write(stderr,'(2a,i5)') trim(myname),': cannot pkthresh, aborting ...'
-              call exit(5)
+              error stop 5
            endif
         else
            write(stderr,'(2a)') trim(myname),': cannot get pthreshold from RC, using default ... '
@@ -870,7 +872,7 @@ CONTAINS
       print *, '     for this - indeed one might need to do this using ESMF'
       print *, '     to better handle high-resolution fields.'
       print *
-      call exit(1)
+      error stop 1
       end subroutine usage
       
 !.................................................................
@@ -1065,7 +1067,7 @@ CONTAINS
       subroutine die ( myname, msg )
       character(len=*) :: myname, msg
       write(*,'(a)') trim(myname) // ': ' // trim(msg)
-      call exit(1)
+      error stop 1
       end subroutine die
 
 !.................................................................
@@ -1172,7 +1174,7 @@ CONTAINS
 
    type(dyn_vect) :: xpi  ! input vector
    type(dyn_vect) :: xpo  ! output vector
-   real(8), intent(in) :: ak(:),bk(:)
+   real(REAL64), intent(in) :: ak(:),bk(:)
    integer,intent(in)  :: dyntype
    integer,intent(out) :: rc
 

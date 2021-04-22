@@ -10,7 +10,6 @@
       INTEGER fdate, fhhmmss_beg, finc
       character(len=256)  fileName
       character(len=256)  argv
-      integer :: iargc
       integer hh, mm, ss
       character(len=2)  chh, cmm, css
       integer yyyy, mon, day
@@ -18,7 +17,7 @@
       character(len=2)  cmon, cday
       character*80 timeUnits 
 
-      argc = iargc()
+      argc = command_argument_count()
       if ( argc < 1 ) then 
          print *, "Usage: reset_time.x fname yyyymmdd hhmmss time_inc"
          print *, "   "
@@ -34,18 +33,18 @@
       end if
 
       iarg = 1
-      call GetArg ( iarg, fileName )
+      call get_command_argument ( iarg, fileName )
 !      print * , "fileName: ", trim(fileName)
       iarg = iarg + 1
-      call GetArg ( iarg, argv )
+      call get_command_argument ( iarg, argv )
       read(argv,*) date
 !      print * , "date: ", date
       iarg = iarg + 1
-      call GetArg ( iarg, argv )
+      call get_command_argument ( iarg, argv )
       read(argv,*) hhmmss_beg
 !      print * , "hhmmss_beg: ", hhmmss_beg
       iarg = iarg + 1
-      call GetArg ( iarg, argv )
+      call get_command_argument ( iarg, argv )
       read(argv,*) inc
 !      print * , "inc: ", inc
 

@@ -22,7 +22,7 @@
 
       character*512 dynrst
       character*512, allocatable :: arg(:)
-      integer   nargs,iargc,n
+      integer   nargs,n
       logical   HEADER
       integer :: filetype,rc
       type(Netcdf4_fileformatter) :: fmt
@@ -30,12 +30,12 @@
 
       HEADER = .false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) stop
 
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
          if( trim(arg(n)).eq.'-h' ) HEADER = .true.
