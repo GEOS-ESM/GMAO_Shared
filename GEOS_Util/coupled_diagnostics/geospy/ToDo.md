@@ -1,7 +1,9 @@
 # ToDo list
 
 * Work on mkexp.py.
-* Set default values for cmpexp and dates if not present.
+* Continue working on surf stress
+* Figure out a better way to pass weights for statistics
+
 
 
 
