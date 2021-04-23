@@ -26,7 +26,7 @@ type(dyn_vect) :: xi
 type(dyn_vect) :: yi
 type(dyn_vect) :: zi
 logical, parameter :: pncf=.true.
-character(len=*), parameter :: ovars(11)=(/'    u','    v',' delp','   tv','   ps','   ts', ' sphu','qitot','qltot','qrtot','qstot'/)
+character(len=*), parameter :: ovars(12)=(/'    u','    v',' delp','   tv','   ps','   ts', ' PBLH', ' sphu','qitot','qltot','qrtot','qstot'/)
 
 rscale = -1.0e15
 
