@@ -26,6 +26,10 @@ def main(exp_conf):
     import sss
     sss.mkplots(exps, ocn2d)
 
+    # Plot surface wind stress
+    import surf_stress
+    surf_stress.mkplots(exps, ocn2d)
+
     geosdset.close(ocn2d)
 
     # Load surface data

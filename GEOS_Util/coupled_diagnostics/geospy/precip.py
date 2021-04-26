@@ -136,7 +136,7 @@ def mkplots(exps,dsets):
     for exp,clim in zip(exps[1:],clims[1:]):
         plot_diff(plotmap, exps[0], exp, clims[0], clim)
 
-    obs={'GPCP': 'precip'} # Names of observational data set and SST variable in this data set.
+    obs={'GPCP': 'precip'} # Names of observational data set and variable in this data set.
     for obsname,obsvarname in obs.items():
         da=importlib.import_module('verification.'+obsname).ds[obsvarname].sel(lev=0.0)
         obsclim=da.groupby('time.season').mean('time')

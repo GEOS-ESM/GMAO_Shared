@@ -19,7 +19,7 @@ class Plot1d(Plot):
     '''
     def __init__(self, **kwargs):
         super(Plot1d,self).__init__()
-        self.line_opts=kwagrs.get('line_opts',{})
+        self.line_opts=kwargs.get('line_opts',{})
 
     def line(self, da, fmt='-',ax=None):
         if ax is None:
@@ -69,7 +69,7 @@ class Plot2d(Plot):
         
         return ax
 
-    def quiver(self, ds, x, y, u, v, ax=None):
+    def quiver(self, ds, x, y, u, v, amplitude=True, ax=None):
         '''
         Makes quiver plot of vector data.
         
@@ -80,11 +80,16 @@ class Plot2d(Plot):
         y: name of y axis
         u: name of U component
         v: name of V component
+        amplitude: plot amplitude in shades
         ax: axes
         '''
         
         if ax is None:
             ax=pl.gca()
+
+        if amplitude:
+            da=np.sqrt(ds[u]**2+ds[v]**2)
+            cs=da.plot.contourf(ax=ax,**self.fill_opts)
 
         skip=int(ds[u].shape[0]/20)
         if ds[x].ndim==1:
