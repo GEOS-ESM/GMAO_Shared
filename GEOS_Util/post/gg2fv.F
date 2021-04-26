@@ -117,7 +117,7 @@ c ------------------
       logical :: lwiflag = .false.
 
       integer precision
-      integer L,n,nargs,iargc,ks
+      integer L,n,nargs,ks
 
 c NCEP Grads CTL File Variables
 c -----------------------------
@@ -162,13 +162,13 @@ C **********************************************************************
       precision = 0       ! 32-bit
         ctlfile = 'xxx'
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-rslv' ) read(arg(n+1),600) hres,lm
@@ -272,7 +272,7 @@ C **********************************************************************
               print *, 'NCEP Gridded Data:  ',imncep,jmncep
               print *, ' BKG Gridded Data:  ',im,jm
               print *
-              call exit(7)
+              error stop 7
           endif
           if( mlev.ne.lmncep ) then
               print *
@@ -280,7 +280,7 @@ C **********************************************************************
               print *, 'LMNCEP:  ',lmncep
               print *, '  MLEV:  ',mlev
               print *
-              call exit(7)
+              error stop 7
           endif
 
 C **********************************************************************
@@ -363,7 +363,7 @@ c --------------
               if( rc.ne.0 ) then
                   print *, 'Reading: ',trim(fv_data)
                   print *, 'Surface Land Fractions not Available!'
-                  call exit(7)
+                  error stop 7
               endif
                                                      lwi = 1  ! Land
               where (  frocean+frlake >= 0.6       ) lwi = 0  ! Water
@@ -878,7 +878,7 @@ c ----------------------------
  1002     continue
           print *, 'ERROR!!  File: ',trim(filename)
           print *, 'ERROR!!  is neither BIG nor LITTLE ENDIAN'
-          call exit(7)
+          error stop 7
 
       endif
       end
@@ -2460,7 +2460,7 @@ C***********************************************************************
       print *, "  -tag          tag:  Optional Prefix tag for output files"
       print *, "  -ozone              Optional Flag to add ozone"
       print *
-      call exit(7)
+      error stop 7
       end
 
       subroutine interp_h ( q_cmp,im,jm,lm,

@@ -78,7 +78,7 @@
       character*256, allocatable :: arg(:)
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,L,ID,rc,method
+      integer n,nargs,L,ID,rc,method
 
       logical   agrid_ana
       logical   dgrid_ana
@@ -133,12 +133,12 @@ C **********************************************************************
       nhms     = -999
       method   = -999
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs.eq.0) call usage(myid)
       allocate ( arg(nargs) )
 
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage(myid)
@@ -171,7 +171,7 @@ C **********************************************************************
      .    trim(moistrst).eq.'x' ) then
           if( myid.eq.0 ) print *, 'You must supply DYNRST, MOISTRST, and ANARST Files!'
           call my_finalize
-          call exit (7)
+          error stop 7
           stop
       endif
 
@@ -426,7 +426,7 @@ C **********************************************************************
       if( trim(topofile).eq.'x' ) then
           if( myid.eq.0 ) print *, 'You must supply TOPO File at Model Resolution!'
           call my_finalize
-          call exit (7)
+          error stop 7
           stop
       else
           if( myid.eq.0 ) print *, 'Reading  ',trim(topofile),' from PE: ',myid
@@ -759,7 +759,7 @@ C **********************************************************************
          else if( rc.gt.0 ) then
              if( lattice%myid.eq.0 ) print *, 'Error Reading File: ',trim(filename)
              call my_finalize
-             call exit (7)
+             error stop 7
          endif
       enddo
       deallocate ( a,glo )

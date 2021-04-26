@@ -106,7 +106,7 @@ c ------------------
       character*256, allocatable :: arg(:)
 
       integer precision
-      integer i,j,k,L,n,nargs,iargc,ks
+      integer i,j,k,L,n,nargs,ks
       integer nt,nv,ng,imphis,jmphis,lmphis
       logical norecon
       logical Lzflip
@@ -176,13 +176,13 @@ C **********************************************************************
             tag = ''
         norecon =.false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-ecmwf'  )  prsdata = trim(arg(n+1))
@@ -568,7 +568,7 @@ C **********************************************************************
       real zana (im,jm,lmana)
       real erana(im,jm,lmana)
       real logpl(im,jm,lmana)
-      character*8 name
+      character*4 name
 
       integer i,j,L,n
 
@@ -756,7 +756,7 @@ c ------------
           call gfio_getvar ( id,trim(name),nymd,nhms,img,jmg,lbeg,lm,glo,rc )
           if( rc.ne.0 ) then
           print *, 'Could not find ECMWF ',trim(name),' RC = ',rc
-          call exit(7)
+          error stop 7
           endif
       endif
       do L=1,lm
@@ -1073,7 +1073,7 @@ c ------------------------------------
       print *, "  -j0            j0:  Optional Global J-Gridpoint for Diagnostics"
       print *, "  -norecon            Optional Flag to Turn OFF H for Diagnostics"
       print *
-      call exit(7)
+      error stop 7
       end
 
       subroutine hinterp ( qin,iin,jin,qout,iout,jout,mlev,undef )

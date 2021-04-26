@@ -5,14 +5,14 @@
       integer nargs
       character*256, allocatable ::   arg(:)
 
-      nargs = iargc()
+      nargs = command_argument_count()
       if( nargs .lt.1 .or. nargs .gt.3 ) then
           call usage
       else
 
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
 
       read( arg(1),*) nymd

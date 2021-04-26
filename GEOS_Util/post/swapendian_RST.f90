@@ -9,19 +9,16 @@ program endian_convert
   integer*4 :: ftell
   external  :: ftell
 
-  integer*4 :: iargc
-  external  :: iargc
-
 ! Begin
 
-  if (iargc() /= 2) then
-     call getarg(0,str)
+  if (command_argument_count() /= 2) then
+     call get_command_argument(0,str)
      write(*,*) "Usage:",trim(str)," <big_endian_in> <native_out>"
-     call exit(2)
+     error stop 2
   end if
 
-  call getarg(1,f_in)
-  call getarg(2,f_out)
+  call get_command_argument(1,f_in)
+  call get_command_argument(2,f_out)
 
   open(unit=10, file=trim(f_in),  form='unformatted', convert="big_endian")
   open(unit=20, file=trim(f_out), form='unformatted', convert="native")
@@ -40,7 +37,7 @@ program endian_convert
      allocate(var(rsize), stat=status)
      if (status  /= 0) then
         print *, 'Error: allocation ', rsize, ' failed!'
-        call exit(11)
+        error stop 11
      end if
 
      read (10) var
@@ -54,6 +51,6 @@ program endian_convert
   stop
 
 200 print *,'Error reading file ',trim(f_in)
-    call exit(11)
+    error stop 11
 
 end

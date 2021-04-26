@@ -128,7 +128,7 @@
       character*256, allocatable :: arg(:)
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,L,ID,rc,method
+      integer n,nargs,L,ID,rc,method
 
       real, parameter :: tauana = 21600.0
 
@@ -170,12 +170,12 @@ C **********************************************************************
       imoglobal = -999
       jmoglobal = -999
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs.eq.0) call usage(myid)
       allocate ( arg(nargs) )
 
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage(myid)
@@ -220,7 +220,7 @@ C **********************************************************************
           print *, 'You must supply BOTH parameters: IMOUT & JMOUT!'
           endif
           call my_finalize
-          call exit (7)
+          error stop 7
           stop
       endif
 
@@ -306,7 +306,7 @@ C **********************************************************************
           print *, 'thv_flag: ',thvflag_ana
           endif
           call my_finalize
-          call exit (7)
+          error stop 7
           stop
       endif
 

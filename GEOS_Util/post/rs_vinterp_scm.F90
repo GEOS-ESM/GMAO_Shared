@@ -69,7 +69,7 @@
       character*256, allocatable :: arg(:)
       character*1    char
       character*4    cim,cjm,clm
-      integer m,n,nargs,iargc,L
+      integer m,n,nargs,L
       integer num,num_other_rst,nbeg,nend
       integer, allocatable :: nt_other(:)
       logical  verbose
@@ -87,11 +87,11 @@
       moistrst = 'moist_internal_rst'
       num_other_rst = 0
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs == 0 ) call usage()
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage()
@@ -1298,5 +1298,5 @@
       write (*,1001) "---------------------------------------------"
       write (*,1001)
 1001 format (A)
-      call exit(7)
+      error stop 7
       end

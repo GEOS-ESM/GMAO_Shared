@@ -781,8 +781,8 @@ c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      .                                 imN,jmN,fieldin,fieldscm)
       implicit none
       real latbegin,lonbegin,latend,lonend
-      real lats(jmN),lons(imN)
       integer imN,jmN
+      real lats(jmN),lons(imN)
       real fieldin(imN,jmN),fieldscm
 
       real dlat, dlon
@@ -811,8 +811,8 @@ c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      .                                 imC,jmC,lmC,fieldin,undef,fieldscm)
       implicit none
       real latbegin,lonbegin,latend,lonend
-      real lats(jmC),lons(imC)
       integer n,imC,jmC,lmC
+      real lats(jmC),lons(imC)
       real fieldin(imC,jmC,lmC),fieldscm(1000,100)
       real undef
 
@@ -912,86 +912,86 @@ c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
       zeros = 0.
 
-      write(20,*),"Number of Multi-Level Fields: "
-      write(20,*),"         11"
+      write(20,*) "Number of Multi-Level Fields: "
+      write(20,*) "         11"
 
-      write(20,*), 1,  " & Temp_(K)"
-      write(20,*),"K"
+      write(20,*)  1,  " & Temp_(K)"
+      write(20,*) "K"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(tscm(kk,ii),ii=1,numlev)
       enddo
 
-c      write(20,*), 2,  " & H2O_Mixing_Ratio_(g/kg)"
-      write(20,*), 2,  " & H2O_Mixing_Ratio_(kg/kg)"
-      write(20,*),"g/kg"
+c      write(20,*)  2,  " & H2O_Mixing_Ratio_(g/kg)"
+      write(20,*)  2,  " & H2O_Mixing_Ratio_(kg/kg)"
+      write(20,*) "g/kg"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
 c       write(20,2000)(qvscm(kk,ii)*1000.,ii=1,numlev)
        write(20,2000)(qvscm(kk,ii),ii=1,numlev)
       enddo
 
-      write(20,*),  3,  " & U_wind_(m/sec)"
-      write(20,*),"m/sec"
+      write(20,*)   3,  " & U_wind_(m/sec)"
+      write(20,*) "m/sec"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(uscm(kk,ii),ii=1,numlev)
       enddo
 
-      write(20,*),  4,  " & V_wind_(m/sec)"
-      write(20,*),"m/sec"
+      write(20,*)   4,  " & V_wind_(m/sec)"
+      write(20,*) "m/sec"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(vscm(kk,ii),ii=1,numlev)
       enddo
 
-      write(20,*), 5,  " & Omega_(mb/hour)"
-      write(20,*),"mb/hour"
+      write(20,*)  5,  " & Omega_(mb/hour)"
+      write(20,*) "mb/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(omegascm(kk,ii)*36.,ii=1,numlev)
       enddo
 
-      write(20,*), 6,  " & Horizontal_Temp_Advec_(K/hour) dtdtdynscm"
-      write(20,*),"K/hour"
+      write(20,*)  6,  " & Horizontal_Temp_Advec_(K/hour) dtdtdynscm"
+      write(20,*) "K/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(dtdtdynscm(kk,ii)*3600.,ii=1,numlev)
       enddo
 
-      write(20,*), 7,  " & Vertical_Temp_Advec_(K/hour)"
-      write(20,*),"K/hour"
+      write(20,*)  7,  " & Vertical_Temp_Advec_(K/hour)"
+      write(20,*) "K/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(zeros(kk,ii),ii=1,numlev)
       enddo
 
-      write(20,*), 8,  " & Horizontal_q_Advec_(g/kg/hour)dqvdtdynscm"
-      write(20,*),"K/hour"
+      write(20,*)  8,  " & Horizontal_q_Advec_(g/kg/hour)dqvdtdynscm"
+      write(20,*) "K/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(dqvdtdynscm(kk,ii)*3600000.,ii=1,numlev)
       enddo
 
-      write(20,*), 9,  " & Vertical_q_Advec_(g/kg/hour)"
-      write(20,*),"K/hour"
+      write(20,*)  9,  " & Vertical_q_Advec_(g/kg/hour)"
+      write(20,*) "K/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(zeros(kk,ii),ii=1,numlev)
       enddo
 
 c---------------SVETA-------------
-      write(20,*), 10,  " & Horizontal_Temp_Advec_(K/hour) dtdtanascm"
-      write(20,*),"K/hour"
+      write(20,*)  10,  " & Horizontal_Temp_Advec_(K/hour) dtdtanascm"
+      write(20,*) "K/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(dtdtanascm(kk,ii)*3600.,ii=1,numlev)
       enddo
 
-      write(20,*), 11,  " & Horizontal_q_Advec_(g/kg/hour)dqvdtanascm"
-      write(20,*),"K/hour"
+      write(20,*)  11,  " & Horizontal_q_Advec_(g/kg/hour)dqvdtanascm"
+      write(20,*) "K/hour"
       do kk=1,numtim
-       write(20,*), "nt=", kk
+       write(20,*)  "nt=", kk
        write(20,2000)(dqvdtanascm(kk,ii)*3600.,ii=1,numlev)
       enddo
  
@@ -1011,36 +1011,36 @@ c %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !      write(20,1000)
 !      write(20,1001)
 !      write(20,1002)
-      write(20,*),'Number of Single-Level Fields:'     
-      write(20,*), 5     
+      write(20,*) 'Number of Single-Level Fields:'     
+      write(20,*)  5     
 
 
-      write(20,*), 1,  " & SH_(W/m**2)"
-      write(20,*),"W/m**2"
+      write(20,*)  1,  " & SH_(W/m**2)"
+      write(20,*) "W/m**2"
       do ii = 1,n
        write(20,2000)hfluxscm(ii)
       enddo
 
-      write(20,*), 2,  " & LH_(W/m**2)"
-      write(20,*),"W/m**2"
+      write(20,*)  2,  " & LH_(W/m**2)"
+      write(20,*) "W/m**2"
       do ii = 1,n
        write(20,2000)efluxscm(ii)
       enddo
 
-      write(20,*), 3,  " & TS_(K)"
-      write(20,*),"K"
+      write(20,*)  3,  " & TS_(K)"
+      write(20,*) "K"
       do ii = 1,n
        write(20,2000)tsscm(ii)
       enddo
 
-      write(20,*), 4,  " & PS_(mb)"
-      write(20,*),"mb"
+      write(20,*)  4,  " & PS_(mb)"
+      write(20,*) "mb"
       do ii = 1,n
        write(20,2000)psscm(ii)/100.
       enddo
 
-      write(20,*), 5,  " & Prec_(mm/hour)"
-      write(20,*),"mm/hour"
+      write(20,*)  5,  " & Prec_(mm/hour)"
+      write(20,*) "mm/hour"
       do ii = 1,n
        write(20,2000)prectotscm(ii)*3600.
       enddo

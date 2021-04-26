@@ -63,7 +63,7 @@
       character*8    date
       character*2    hour
       character*4    xdim ,ydim
-      integer m,n,nmax,nargs,iargc,i,j,L,rc
+      integer m,n,nmax,nargs,i,j,L,rc
       integer nlots,nrem,num,num_other_rst
       integer :: filetype,dimSizes(3),counter,nVars
 
@@ -94,12 +94,12 @@
 
         num_other_rst = 0
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) call usage()
 
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-dyn'      ) then
@@ -2658,6 +2658,6 @@ C *********************************************************
      .         "  -jm          JM_OUT:  JM Dimension for Output"                                                        ,/
      .                                                                                                                  ,/
      .         )
-      call exit(7)
+      error stop 7
       end subroutine usage
 

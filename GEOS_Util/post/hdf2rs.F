@@ -104,7 +104,7 @@
       character*120, allocatable :: arg(:)
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,L,ID,rc,method
+      integer n,nargs,L,ID,rc,method
       logical increment,ihaveth,doremap,do_o3,showdiv
 
 C **********************************************************************
@@ -156,12 +156,12 @@ C **********************************************************************
       method   = -999
       doremap  = .false.
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs.eq.0) call usage(myid)
       allocate ( arg(nargs) )
 
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage(myid)
@@ -214,7 +214,7 @@ C **********************************************************************
      .    trim(inceta)  .eq.'x' ) then
           if( myid.eq.0 ) print *, 'You must supply either ANAETA or INCETA Files!'
           call my_finalize
-          call exit (7)
+          error stop 7
           stop
       else if ( trim(anaeta) .eq. 'x' ) then ! increment is provided as input
           increment = .true.
@@ -227,7 +227,7 @@ C **********************************************************************
      .        trim(bkgsfc)  .eq.'x' ) then
               if( myid.eq.0 ) print *, 'You must supply DYNRST, MOISTRST, PCHEMRST, and BKGSFC Files!'
               call my_finalize
-              call exit (7)
+              error stop 7
               stop
           endif
       else                                   ! analyis is provided as input
@@ -235,14 +235,14 @@ C **********************************************************************
      .        trim(moistrst).eq.'x' ) then
               if( myid.eq.0 ) print *, 'You must supply at least DYNRST, and MOISTRST Files!'
               call my_finalize
-              call exit (7)
+              error stop 7
               stop
           endif
           do_o3 = trim(pchemrst).ne.'x' .and. trim(bkgsfc).eq.'x'
           if ( bkgeta .ne. 'x' ) then
               if( myid.eq.0 ) print *, 'Opt not available: ANA BKG cannot be updated w/o INCs!'
               call my_finalize
-              call exit (7)
+              error stop 7
               stop         
           endif
       endif
@@ -540,7 +540,7 @@ C **********************************************************************
           if ( imxglobal.ne.imaglobal .and. jmxglobal.ne.jmaglobal ) then
                if( myid.eq.0 ) print *, 'Dimension of ANA background incompatible w/ INCs!'
                call my_finalize
-               call exit (7)
+               error stop 7
                stop
           endif
 
@@ -574,7 +574,7 @@ C **********************************************************************
           if( lon(1) .eq. 0.0 ) then
               if( myid.eq.0 ) print *, 'Longitudes in BKG file incompatible with INC file!'
               call my_finalize
-              call exit (7)
+              error stop 7
               stop              
           endif
 
@@ -680,7 +680,7 @@ C **********************************************************************
       if (imxglobal.ne.imaglobal .or. jmxglobal.ne.jmaglobal ) then
           if( myid.eq.0 ) print *, 'Dimension of BKG SFC file inconsistent w/ that of ANA ETA'
           call my_finalize
-          call exit (7)
+          error stop 7
       endif
 
       allocate ( cosza(ima,jma) )
@@ -718,7 +718,7 @@ C **********************************************************************
           if( trim(topofile).eq.'x' ) then
               if( myid.eq.0 ) print *, 'You must supply TOPO File at Model Resolution!'
               call my_finalize
-              call exit (7)
+              error stop 7
               stop
           else
               if( myid.eq.0 ) print *, 'Reading  ',trim(topofile),' from PE: ',myid
@@ -1310,7 +1310,7 @@ C **********************************************************************
 #endif
       if ( rc.ne.0 ) then
          call my_finalize
-         call exit (7)
+         error stop 7
       endif
       call timebeg ('   Scatter')
       do L=1,lm
@@ -1377,7 +1377,7 @@ C **********************************************************************
          else if( rc.gt.0 ) then
              if( lattice%myid.eq.0 ) print *, 'Error Reading File: ',trim(filename)
              call my_finalize
-             call exit (7)
+             error stop 7
          endif
       enddo
       deallocate ( a,glo )

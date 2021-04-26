@@ -49,7 +49,7 @@ c -----------------------------
       character*1    char
       data output  /'eta2prs'/
 
-      integer n,m,nargs,iargc,L,nbeg,nfiles,mlev
+      integer n,m,nargs,L,nbeg,nfiles,mlev
       integer ny,nm,nd
 
       real*8   lonbeg
@@ -121,13 +121,13 @@ C **********************************************************************
       hdf     =  .true.
       quad    =  .false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-im'   ) read(arg(n+1),*) im_out
@@ -600,5 +600,5 @@ C **********************************************************************
       print *
       print *, "  -eta eta_fname(s):  Filename(s) in eta HDF format"
       print *
-      call exit(7)
+      error stop 7
       end subroutine usage

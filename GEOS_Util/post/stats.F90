@@ -139,7 +139,6 @@
 
       integer  ndates
       integer  dates(3,1000)
-      integer  iargc
 
       logical  isPresent
 
@@ -197,13 +196,13 @@
       fcsource="NULL"
       averify ="NULL"
  
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
                                                                                                           
@@ -338,7 +337,7 @@
              print* ,'        -fcsrc FORECAST     (e.g., gmao)'
              print* ,'        -verif VERIFICATION (e.g., ncep)'
              print* ,' Aborting ...'
-             call exit(1)
+             error stop 1
           endif
           gmaopy=.true.
       endif
@@ -1091,7 +1090,7 @@
 
       close(51)
       datafile = trim(tag) // 'globl.' // bdate // bhour // "." // edate // ehour // ".data"
-      call system ("/bin/mv " // trim(statfile) // " " // trim(datafile) )
+      call execute_command_line ("/bin/mv " // trim(statfile) // " " // trim(datafile) )
 
       statfile = trim(tag) // 'stats.' // bdate // bhour // "." // edate // ehour // ".data"
       open (85,file=trim(statfile),form='unformatted',access='sequential')
@@ -1357,9 +1356,6 @@
       DATA      DAYS /31,28,31,30,31,30,31,31,30,31,30,31/
 
       INTEGER    NSECF, NMONF, NDAYF
-      NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
-      NMONF(N) = MOD(N,10000)/100
-      NDAYF(N) = MOD(N,100)
        
 !*********************************************************************
 !****     Find Proper Month Boundaries from INPUT Date and Time   ****
@@ -1691,10 +1687,6 @@
 
       INTEGER :: NSECF, NMONF, NDAYF, NHMS, NYMD
 
-      NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
-      NMONF(N) = MOD(N,10000)/100
-      NDAYF(N) = MOD(N,100)
-       
       if( first ) then
       open  (90,file='ncep_1x1_clim.data',                    &
                 form='unformatted',access='direct',recl=im*jm )
@@ -3139,7 +3131,6 @@
 
       REAL MNDY(12,4), DUM(48)
       DATA MNDY /0,31,60,91,121,152,182,213,244,274,305,335,366,397,34*0/
-      NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
       EQUIVALENCE ( DUM(1), MNDY(1,1) )
 
       DO   I=15,48
@@ -3227,7 +3218,7 @@
       print *, "Tag_Name.stats.b{YYYYMMDD}.e{YYYYMMDD}.ctl1"
       print *, "Tag_Name.stats.b{YYYYMMDD}.e{YYYYMMDD}.ctl2"
       print *
-      call exit(7)
+      error stop 7
       end subroutine usage
 
       subroutine tick (nymd,nhms,ndt)
@@ -3350,6 +3341,34 @@
       nsecf =  nhms/10000*3600 + mod(nhms,10000)/100*60 + mod(nhms,100)
       return
       end function nsecf
+
+      function nmonf (nymd)
+!***********************************************************************
+!  Purpose
+!     Converts NYMD format to month
+!
+!***********************************************************************
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+!***********************************************************************
+      implicit none
+      integer  nymd, nmonf
+      nmonf =  mod(nymd,10000)/100
+      return
+      end function nmonf
+
+      function ndayf (nymd)
+!***********************************************************************
+!  Purpose
+!     Converts NYMD format to day
+!
+!***********************************************************************
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+!***********************************************************************
+      implicit none
+      integer  nymd, ndayf
+      ndayf =  mod(nymd,100)
+      return
+      end function ndayf
 
       function nhmsf (nsec)
 !***********************************************************************

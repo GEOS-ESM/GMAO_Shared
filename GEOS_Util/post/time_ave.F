@@ -3,6 +3,7 @@
       use ESMF
 
       use dynamics_lattice_module
+      use ieee_arithmetic, only: isnan => ieee_is_nan
       implicit none
       type ( dynamics_lattice_type ) lattice
 
@@ -54,7 +55,7 @@ c **********************************************************************
       data doutput /'NULL'/
       data template/'NULL'/
 
-      integer n,m,nargs,iargc,L,nfiles,nv,km,mvars,mv,ndvars
+      integer n,m,nargs,L,nfiles,nv,km,mvars,mv,ndvars
 
       real     plev,qming,qmaxg
       real     undef
@@ -108,7 +109,6 @@ c **********************************************************************
       logical,       allocatable :: lzstar(:)
 
       integer NSECF, ntmin, ntcrit, nhmsf, nc
-              NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
 
 C **********************************************************************
 C ****                       Initialization                         ****
@@ -147,7 +147,7 @@ c ---------------------------
             ndt = -999
            ntod = -999
           ntmin = -999
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage(root)
       else
@@ -158,7 +158,7 @@ c ---------------------------
           ignore_nan = .FALSE.
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-template'   )  template = arg(n+1)
@@ -1129,8 +1129,8 @@ C **********************************************************************
 
       subroutine check_quad ( quad,vname,nvars,aliases,nalias,qloc )
       implicit none
-      character*256  quad(2), aliases(2,nalias), vname(nvars)
       integer  nvars, nalias, qloc(2)
+      character*256  quad(2), aliases(2,nalias), vname(nvars)
       integer  m,n
 
 c Initialize Location of Quadratics

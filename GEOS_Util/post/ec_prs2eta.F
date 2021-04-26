@@ -95,7 +95,7 @@ c ------------------
       character*256, allocatable :: arg(:)
 
       integer precision
-      integer i,j,k,L,n,nargs,iargc,ks
+      integer i,j,k,L,n,nargs,ks
       logical gmaoprs
       logical norecon
 
@@ -133,13 +133,13 @@ C **********************************************************************
         gmaoprs =.false.
         norecon =.false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-ecmwf' ) prsdata = trim(arg(n+1))
@@ -475,7 +475,7 @@ C **********************************************************************
       real zana (im,jm,lmana)
       real erana(im,jm,lmana)
       real logpl(im,jm,lmana)
-      character*8 name
+      character*4 name
 
       integer i,j,L,n
 
@@ -603,7 +603,7 @@ c ------------------
       call gfio_getvar ( id,'Mean_sea_level_pressure',nymd,nhms,imana,jmana,0,1 ,dum2d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find ECMWF SLP variable'
-          call exit(7)
+          error stop 7
       endif
       if( im.ne.imana .or. jm.ne.jmana ) then
               call hinterp ( dum2d,imana,jmana,slp,im,jm,1,undef )
@@ -618,7 +618,7 @@ c ------------------
               dum2d = exp(dum2d)
           else
               print *, 'Could not find ECMWF Surface Pressure variable'
-              call exit(7)
+              error stop 7
           endif
       endif
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -630,7 +630,7 @@ c ------------------
       call gfio_getvar ( id,'Height',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find ECMWF Height variable'
-          call exit(7)
+          error stop 7
       endif
                           call zflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -644,12 +644,12 @@ c -----
       call gfio_getvar ( id,'U_velocity',nymd,nhms,imana,jmana,1,lmana,dumu,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find ECMWF U-Wind variable'
-          call exit(7)
+          error stop 7
       endif
       call gfio_getvar ( id,'V_velocity',nymd,nhms,imana,jmana,1,lmana,dumv,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find ECMWF V-Wind variable'
-          call exit(7)
+          error stop 7
       endif
 
                           call zflip( dumu,imana,jmana,lmana )
@@ -671,7 +671,7 @@ c -----------
       call gfio_getvar ( id,'Temperature',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find ECMWF Temperature variable'
-          call exit(7)
+          error stop 7
       endif
                           call zflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -685,7 +685,7 @@ c -----------------
       call gfio_getvar ( id,'Relative_humidity',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find ECMWF Rel.Hum. variable'
-          call exit(7)
+          error stop 7
       endif
                           call zflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -1005,7 +1005,7 @@ c ------------------------------------
       print *, "  -tag          tag:  Optional Prefix tag            for Output (Default: ec_prs2eta)"
       print *, "  -gmaoprs         :  Indicates input is really GMAO prs file (used for test only)"
       print *
-      call exit(7)
+      error stop 7
       end
 
       subroutine hinterp ( qin,iin,jin,qout,iout,jout,mlev,undef )
@@ -2010,7 +2010,7 @@ c ------------------
       call gfio_getvar ( id,'slp',nymd,nhms,imana,jmana,0,1 ,dum2d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO SLP variable'
-          call exit(7)
+          error stop 7
       endif
       if( im.ne.imana .or. jm.ne.jmana ) then
               call hinterp ( dum2d,imana,jmana,slp,im,jm,1,undef )
@@ -2021,7 +2021,7 @@ c ------------------
       call gfio_getvar     ( id,'ps',nymd,nhms,imana,jmana,0,1 ,dum2d ,rc )  ! New ECMWF Format 2011/05/11 06z
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO Surface Pressure variable'
-          call exit(7)
+          error stop 7
       endif
       if( im.ne.imana .or. jm.ne.jmana ) then
               call hinterp ( dum2d,imana,jmana,ps,im,jm,1,undef )
@@ -2032,7 +2032,7 @@ c ------------------
       call gfio_getvar ( id,'hght',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO Height variable'
-          call exit(7)
+          error stop 7
       endif
                  call zflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -2046,12 +2046,12 @@ c -----
       call gfio_getvar ( id,'u',nymd,nhms,imana,jmana,1,lmana,dumu,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO U-Wind variable'
-          call exit(7)
+          error stop 7
       endif
       call gfio_getvar ( id,'v',nymd,nhms,imana,jmana,1,lmana,dumv,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO V-Wind variable'
-          call exit(7)
+          error stop 7
       endif
 
                  call zflip( dumu,imana,jmana,lmana )
@@ -2073,7 +2073,7 @@ c -----------
       call gfio_getvar ( id,'tmpu',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO Temperature variable'
-          call exit(7)
+          error stop 7
       endif
                  call zflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -2087,7 +2087,7 @@ c -----------------
       call gfio_getvar ( id,'rh',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find GMAO Rel.Hum. variable'
-          call exit(7)
+          error stop 7
       endif
                  call zflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
