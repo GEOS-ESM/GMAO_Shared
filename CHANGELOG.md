@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+### Fixed
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
+
+### Removed
+
+## [1.4.0] - 2021-04-15
+
+### Fixed
+
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
+- Fixed build for directories that are built as part of the GEOSdas
+
+## [1.3.10] - 2021-04-02
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+
+## [1.3.9] - 2021-03-17
+
 ### Fixed
 
 - Fix for out-of-bounds error in lightning module (#99)
@@ -14,8 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Stats plot updates
-- Multiple updates brought over from GEOSadas work (see #166)
-- Update F2PY module calls to support both Python2 and Python3 loaded at same time
 
 ### Added
 
