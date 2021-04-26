@@ -12,33 +12,36 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots, utils
 
+varname='SS'
+
 def mkclim(exp,dset):
     '''
     Computes climatology for given experiment.
     '''
-    varname='SS'
-    var=dset[varname].sel(time=slice(*exp['dates']))
-    return var.groupby('time.season').mean('time')
+    ds=dset[[varname]].sel(time=slice(*exp['dates']))
+    ds=ds.groupby('time.season').mean('time')
+    ds['weight']=dset['MASKO'][0]*dset['dx']*dset['dy']
+    return ds
     
 def plot_clim(plotter, exp, clim):
     '''
     Makes climaology plots.
     '''
     pl.figure(1); pl.clf() 
-    var=clim.sel(season='DJF')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    var=clim[varname].sel(season='DJF')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SSS, DJF')
     pl.savefig(f'{exp["plot_path"]}/sss_djf.png')
     
     pl.figure(2); pl.clf()
-    var=clim.sel(season='JJA')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    var=clim[varname].sel(season='JJA')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SSS, JJA')
     pl.savefig(f'{exp["plot_path"]}/sss_jja.png')
 
     pl.figure(3); pl.clf()
-    var=clim.mean('season')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    var=clim[varname].mean('season')
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SSS, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sss_am.png')
     pl.show()
@@ -48,24 +51,24 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     Plots climatology difference between two experiments.
     '''
 
-    rr=xesmf.Regridder(cmpclim,clim,'bilinear',periodic=True)
-    dif=clim-rr(cmpclim)
+    rr=xesmf.Regridder(cmpclim[varname],clim[varname],'bilinear',periodic=True)
+    dif=clim[varname]-rr(cmpclim[varname])
 
     pl.figure(1); pl.clf() 
     var=dif.sel(season='DJF')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SSS, DJF')
     pl.savefig(f'{exp["plot_path"]}/sss-{cmpexp["expid"]}_djf.png')
     
     pl.figure(2); pl.clf()
     var=dif.sel(season='JJA')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SSS, JJA')
     pl.savefig(f'{exp["plot_path"]}/sss-{cmpexp["expid"]}_jja.png')
 
     pl.figure(3); pl.clf()
     var=dif.mean('season')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SSS, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sss-{cmpexp["expid"]}_am.png')
     pl.show()
@@ -76,26 +79,26 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     '''
     Plots climatology difference against observations
     '''
-    rr=xesmf.Regridder(obsclim,clim,'bilinear',periodic=True)
-    dif=clim-rr(obsclim)
+    rr=xesmf.Regridder(obsclim,clim[varname],'bilinear',periodic=True)
+    dif=clim[varname]-rr(obsclim)
 
     pl.figure(1); pl.clf() 
     var=dif.sel(season='DJF')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SSS, DJF')
     pl.savefig(f'{exp["plot_path"]}/sss-{obsname}_djf.png')
     pl.savefig(f'{exp["plot_path"]}/sss-obs_djf.png')
     
     pl.figure(2); pl.clf()
     var=dif.sel(season='JJA')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SSS, JJA')
     pl.savefig(f'{exp["plot_path"]}/sss-{obsname}_jja.png')
     pl.savefig(f'{exp["plot_path"]}/sss-obs_jja.png')
 
     pl.figure(3); pl.clf()
     var=dif.mean('season')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),exp['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SSS, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sss-{obsname}_am.png')
     pl.savefig(f'{exp["plot_path"]}/sss-obs_am.png')
@@ -108,9 +111,6 @@ def mkplots(exps, dsets):
     clims=[]
     for exp,dset in zip(exps,dsets):
         clims.append(mkclim(exp,dset))
-
-    mask=1-np.isnan(clims[0][0])
-    exps[0]["weight"]=mask*dsets[0]["dx"]*dsets[0]["dy"]
 
     # Plot parameters
     cbar_kwargs={'orientation': 'horizontal',
