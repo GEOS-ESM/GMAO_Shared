@@ -44,12 +44,14 @@ ecbuild_add_executable (
 
 if (USE_F2PY)
    find_package(F2PY2)
-   esma_add_f2py2_module(read_ops_bcs
-      SOURCES read_bin.f90
-      DESTINATION bin
-      INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
-      )
-   add_dependencies(read_ops_bcs ${this})
+   if (F2PY2_FOUND)
+      esma_add_f2py2_module(read_ops_bcs
+         SOURCES read_bin.f90
+         DESTINATION bin
+         INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
+         )
+      add_dependencies(read_ops_bcs ${this})
+   endif ()
 endif ()
 
 file(GLOB cshscripts CONFIGURE_DEPENDS *.csh)
