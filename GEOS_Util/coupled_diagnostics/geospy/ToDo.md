@@ -1,7 +1,9 @@
 # ToDo list
 
 * Work on mkexp.py.
-* Work on zonal stress equatorial profile
+* Work on AMOC plots
+* Work on sea ice plots
+
 
 
 

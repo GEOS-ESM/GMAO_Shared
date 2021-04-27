@@ -14,8 +14,7 @@ TFREEZE=273.16
 
 def mkequatorial(exp,ds):
     var=ds[varname].sel(time=slice(*exp['dates']))-TFREEZE
-    mask=1.0-np.isnan(var[0])
-    wght=mask*ds.dy
+    wght=ds['MASKO'][0]*ds['dy']
     eq_region={'lat':slice(-2.1,2.1)}
     var=utils.average(var.sel(**eq_region),'lat',wght.sel(**eq_region))
     return utils.shift_lon(var,30).sel(lon=slice(130,280))
@@ -27,8 +26,7 @@ def mkequatorial_obs(obsname,obsvarname):
 
 def mknino3(exp,ds):
     var=ds[varname]-TFREEZE
-    mask=1.0-np.isnan(var[0])
-    wght=mask*ds.dy*ds.dx
+    wght=ds['MASKO'][0]*ds['dy']*ds['dx']
     n3region={'lat':slice(-5.1,5.1),
               'lon':slice(-150,-90)}
     return utils.average(var.sel(**n3region),('lat','lon'),
@@ -124,7 +122,7 @@ def plot_nino3(exp,da):
     pl.savefig(f'{exp["plot_path"]}/n3.png')
 
 def mkplots(exps,dsets):
-    # Calculate seasonal equatorial means
+    # Calculate equatorial means
     equatorials=[]
     for exp,dset in zip(exps,dsets):
         equatorials.append(mkequatorial(exp,dset))
