@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed build for directories that are built as part of the GEOSdas
+- Protect against double mpi_initialization in m_psas.F90
 
 ### Changed
 
