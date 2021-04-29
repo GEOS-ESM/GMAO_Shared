@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU
+  Make days
+
 ### Fixed
 
 ### Changed
