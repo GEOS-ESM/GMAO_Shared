@@ -38,6 +38,7 @@ set (srcs
    mpi_comm_split.F90
    m_mpi0.F
    Const_MPItype.H
+   ../get_zeits.c
    )
 
 esma_add_library(${this} SRCS ${srcs})
