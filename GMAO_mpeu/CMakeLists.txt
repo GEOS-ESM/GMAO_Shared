@@ -44,12 +44,10 @@ set(srcs
   m_fpe.F90
   )
 
-esma_add_library(${this} SRCS ${srcs})
-target_link_libraries(${this} PUBLIC ${MPI_Fortran_LIBRARIES})
-target_include_directories(${this} PUBLIC ${MPI_Fortran_INCLUDE_PATH})
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MPI::MPI_Fortran)
 
 esma_add_library(GMAO_eu SRCS ${srcs} DEPENDENCIES mpi0)
-target_include_directories (GMAO_eu PUBLIC $<BUILD_INTERFACE:${MPI_Fortran_INCLUDE_PATH}>)
+target_include_directories (GMAO_eu PRIVATE $<BUILD_INTERFACE:${MPI_Fortran_INCLUDE_PATH}>)
 file (MAKE_DIRECTORY ${esma_include}/GMAO_eu)
 file (MAKE_DIRECTORY ${esma_etc}/GMAO_eu)
 
