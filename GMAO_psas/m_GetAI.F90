@@ -388,8 +388,8 @@ Contains
     if(npes < 1) Call die(myname_,'invalid PSAS_NUM_MPI: ', npes)
 
     mpirun = ' '
-    call getenv('MPIRUN',mpirun)             ! Unix binding
-    if(mpirun.eq.' ') Call die(myname_,'env var MPIRUN not set', 99)
+    !call getenv('MPIRUN',mpirun)             ! Unix binding
+    !if(mpirun.eq.' ') Call die(myname_,'env var MPIRUN not set', 99)
 
 !   Invoke 'solve.x'
 !   ----------------
