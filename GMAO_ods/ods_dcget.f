@@ -375,7 +375,8 @@
      &	       trim(satype)/='acos'.and. trim(satype)/='mopitt' .and.
      &         trim(satype)/='gome'  .and. trim(satype)/='ompslpuv' .and.
      &         trim(satype)/='ompslpvis' .and. trim(satype)/='ompsnm'.and.
-     &         trim(satype)/='ompsnp' ) then
+     &         trim(satype)/='ompsnp' .and. trim(satype)/='ompsnmeff' .and.
+     &         trim(satype)/='ompsnpnc') then
       
 !        Radiance data:
 !        -------------
