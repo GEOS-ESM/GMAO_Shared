@@ -78,6 +78,7 @@
 # 2015.07.28 Sienkiewicz     End date for ncep_sptrmm_bufr
 # 2017.07.06 RT/for/Sienkiewicz Add ncep_acftpfl_bufr
 # 2020.02.13 RT/for/JJin     Add gmao_amsr2_bufr
+# 2021.04.29 j.jin           Add gmao_amsre_bufr and gmao_tmi_bufr
 #
 #+BEGIN obclass data set description
 #+  upabufr_val:      NCEP Upper Air BUFR
@@ -149,6 +150,8 @@
 #+  ncep_cris_bufr:	CrIS NPP
 #+  ncep_crisfsr_bufr:	CrIS NOAA-20
 #+  gmao_amsr2_bufr:	AMSR2
+#+  gmao_tmi_bufr:     TMI TRMM
+#   gmao_amsre_bufr:   AMSRE AQUA
 #+END
 #
 
@@ -741,4 +744,16 @@ END
 # GMAO AMSR2
 BEGIN gmao_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
   20190101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+END
+
+# TRMM TMI Level 1B brightness temperature
+#-------------------------
+BEGIN gmao_tmi_bufr => tmi.%y4%m2%d2.t%h2z.bufr
+ 19980101_00z-20140930_18z 240000  /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/TRMM/tmi/bufr/Y%y4/M%m2/tmi.V05A.%y4%m2%d2.t%h2z.bufr
+END
+
+# GMAO AMSRE-AQUA Level 1B brightness temperature
+#-------------------------
+BEGIN gmao_amsre_bufr => gmao_amsre.%y4%m2%d2.t%h2z.bufr
+ 20020901_00z-20111004_06z 240000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/amsre/Y%y4/M%m2/gmao.amsre_aqua.%y4%m2%d2.t%h2z.bufr
 END

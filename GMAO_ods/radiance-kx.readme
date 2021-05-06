@@ -83,6 +83,7 @@
  amsub       n16         amsub_n16                     16         416
  amsub       n17         amsub_n17                     17         417
  hsb         aqua        hsb_aqua                       0         450
+ amsre       aqua        amsre_aqua                     0         546
  amsre_low   aqua        amsre_aqua(low)                0         547
  amsre_mid   aqua        amsre_aqua(mid)                0         548
  amsre_hig   aqua        amsre_aqua(hi)                 0         549

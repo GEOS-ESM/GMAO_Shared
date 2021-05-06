@@ -81,6 +81,7 @@
 # 2020.06.09 Todling         Set final dates for GOESFV and CrIS as in FP
 # 2020.09.30 Mohar           Historical AVHRR (N15,16,17)
 # 2020.10.14 McCarty         COSMIC-2 single file for period before early Mar 2020
+# 2021.04.29 j.jin           Add gmao_amsre_bufr and gmao_tmi_bufr
 #
 #+BEGIN obclass data set description
 #+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
@@ -117,6 +118,8 @@
 #+  mls_nrt_nc:        GMAO MLS near-real-time (nc4 format)
 #+  npp_ompsnm_bufr:   OMPS AM bufr format
 #+  npp_ompsnp_bufr:   OMPS PM bufr format
+#+  gmao_tmi_bufr:     TMI TRMM
+#   gmao_amsre_bufr:   AMSRE AQUA
 #+END
 #
 
@@ -376,4 +379,16 @@ END
 BEGIN ncep_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
 # 20160511_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
   20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+END
+
+# TRMM TMI Level 1B brightness temperature
+#-------------------------
+BEGIN gmao_tmi_bufr => tmi.%y4%m2%d2.t%h2z.bufr
+ 19980101_00z-20140930_18z 240000  /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/TRMM/tmi/bufr/Y%y4/M%m2/tmi.V05A.%y4%m2%d2.t%h2z.bufr
+END
+
+# GMAO AMSRE-AQUA Level 1B brightness temperature
+#-------------------------
+BEGIN gmao_amsre_bufr => gmao_amsre.%y4%m2%d2.t%h2z.bufr
+ 20020901_00z-20111004_06z 240000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/amsre/Y%y4/M%m2/gmao.amsre_aqua.%y4%m2%d2.t%h2z.bufr
 END
