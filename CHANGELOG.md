@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
+
 ### Removed
 
 ## [1.4.0] - 2021-04-15
