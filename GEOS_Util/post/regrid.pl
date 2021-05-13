@@ -272,8 +272,8 @@ sub init {
                "catch"           => \$mk_catch,
                "catchcn"         => \$mk_catchcn,
                "route"           => \$mk_route,
-               "wemin"           => \$wemIN,
-               "wemout"          => \$wemOUT,
+               "wemin=i"         => \$wemIN,
+               "wemout=i"        => \$wemOUT,
                "bkg!"            => \$bkgFLG,
                "lbl!"            => \$lblFLG,
                "lcv!"            => \$lcvFLG,
@@ -465,7 +465,7 @@ sub init_tag_arrays_and_hashes {
 
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-    @INL  = qw( INL Icarus-NL Icarus-NLv3 );
+    @INL  = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
 
     foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0" }
