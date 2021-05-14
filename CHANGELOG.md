@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+### Changed
+
+### Removed
+
+## [1.4.1] - 2021-05-14
+
+- Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+
+### Fixed
+
 - In `regrid.pl`: Fixed the -wemin and -wemout options so that they will accept integer values; Also added Jason-NL BCS tag choice
 - Fixes for PSAS code and Intel MPI
 
@@ -21,8 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Multiple updates brought over from GEOSadas work (see #166)
 - Update F2PY module calls to support both Python2 and Python3 loaded at same time
-
-### Removed
 
 ## [1.4.0] - 2021-04-15
 
