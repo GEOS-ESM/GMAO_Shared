@@ -1,2 +1,2 @@
-add_subdirectory (LANL_cice)
+add_subdirectory (CICE4)
   

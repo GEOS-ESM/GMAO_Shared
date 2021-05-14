@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- [version number??] 2021-04-16 
+  Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+   
 ### Added
 
 ### Fixed
