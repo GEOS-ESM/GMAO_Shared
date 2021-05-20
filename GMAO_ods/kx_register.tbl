@@ -236,7 +236,12 @@
    263  gsi_diag    g13         goes_img                  13    # imgr_g13
    264  gsi_diag    dmsp        pcp_ssmi                   0    # pcp_ssmi   -- conflict 264
    264  gsi_diag    g14         goes_img                  14    # imgr_g14   -- conflict 264
-   265  gsi_diag    g15         goes_img                  15    # imgr_g15
+   265  gsi_diag    g15         goes_img                  15    # imgr_g15   -- conflict 265
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
+   265  gsi_conv    265         "gps_bnd,gps_ref"          0    # GeoOptics RO (gps) -- conflict 265
+   265  gsi_conv    269         "gps_bnd,gps_ref"          0    # Spire RO (gps)
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
