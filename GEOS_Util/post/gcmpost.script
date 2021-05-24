@@ -782,7 +782,7 @@ foreach collection ( $collections )
 
                      foreach local ($locals)
 
-                        set fdate = `echo $local | cut -d "." -f${daily_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
+                        set fdate = `echo $local | cut -d "." -f${daily_date_node}`   # Assumed date format: YYYY-MM-DDTHH:MM:SS
                         set year  = `echo $fdate | cut -c1-4`
                         set month = `echo $fdate | cut -c6-7`
                         set day   = `echo $fdate | cut -c9-10`
@@ -844,7 +844,7 @@ foreach collection ( $collections )
 
                echo "Archiving Monthlies for Collection: $collection for Date: $date"
                foreach local ($locals)
-                  set fdate  = `echo $local | cut -d "." -f${monthly_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
+                  set fdate  = `echo $local | cut -d "." -f${monthly_date_node}`   # Assumed date format: YYYYMM
                   set year   = `echo $fdate | cut -c1-4`
                   set month  = `echo $fdate | cut -c5-6`
                   set day    = `echo $fdate | cut -c7-8`
@@ -899,7 +899,7 @@ foreach collection ( $collections )
                if( $num  != 0 ) then
 
                foreach local ($locals)
-                  set fdate  = `echo $local | cut -d "." -f${monthly_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
+                  set fdate  = `echo $local | cut -d "." -f${monthly_date_node}`   # Assumed date format: YYYYMM
                   set year   = `echo $fdate | cut -c1-4`
                   set month  = `echo $fdate | cut -c5-6`
                   set day    = `echo $fdate | cut -c7-8`
