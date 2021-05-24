@@ -337,7 +337,7 @@ echo NAME_DOTS: $ndots
 @ m = 0
 set tdots = ''
 foreach collection ( $collections )
-      set   template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2`
+      set   template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2-`
       @ n = 0
       @ b = 1
       set bit = `echo ${template} | cut -b $b`
@@ -366,7 +366,7 @@ echo " "
 # ----------------------
 if( $PLOTS[1] != "NULL"  ) then
 
-    set   grads_ddfs = `grep grads_ddf $HISTORYRC | cut -d: -f2 | cut -d, -f1 | sed -e "s/'//g"`
+    set   grads_ddfs = `grep grads_ddf $HISTORYRC | cut -d: -f2- | cut -d, -f1 | sed -e "s/'//g"`
     if( $#grads_ddfs == 0 ) then
 
          # Default Model Development Case (No grads_ddf attribute)
@@ -377,7 +377,7 @@ if( $PLOTS[1] != "NULL"  ) then
          if( $check_plot == 'NULL' ) set check_plot = TRUE
          @ date_node = $expdots + $ndots[1] + 4
          if( $num >= 24 ) set DDF = clim
-         set  dates = `echo $monthlies[$num] | cut -d "." -f${date_node} | cut -c1-6`
+         set  dates = `echo $monthlies[$num] | cut -d "." -f${date_node} | cut -c1-7 | sed -e 's/-//'`
          @ numdates = 1
 
     else
@@ -422,7 +422,7 @@ if( $PLOTS[1] != "NULL"  ) then
          set       num = `/bin/ls -1 $monthlies | wc -l`
          if( $check_plot == 'NULL' ) set check_plot = TRUE
          @ date_node = $expdots + $ndots[1] + 4
-         set  dates = `echo $monthlies[$num] | cut -d "." -f${date_node} | cut -c1-6`
+         set  dates = `echo $monthlies[$num] | cut -d "." -f${date_node} | cut -c1-7 | sed -e 's/-//'`
          @ numdates = 1
 
     endif
@@ -523,7 +523,7 @@ end
 
                 set date0 = xxxx
                 foreach local ( $locals )
-                    set  date = `echo $local | cut -d "." -f${date_node} | cut -c1-6`
+                    set  date = `echo $local | cut -d "." -f${date_node} | cut -c1-7 | sed -e 's/-//'`
                     if( $date != $date0 ) then
                          @ numdate = $numdate + 1
                          set dates = `echo $dates $date`
@@ -658,11 +658,15 @@ while( -e LOCKFILE )
 end
                                 lockfile LOCKFILE
 echo "   Submitting Time_Ave job for: ${collection}.${date}"
+
+# Create a dash-date for gcm_post script: 200005 -> 2000-05
+set dashdate = `echo $date | sed 's/./&-/4'`
+
 /bin/rm -f sedfile
 cat >      sedfile << EOF
 s/@POST_O/gcm_post.${collection}.o${date}/g
 s/@COLLECTION/$collection/g
-s/@YYYYMM/$date/g
+s/@YYYYMM/$dashdate/g
 EOF
 /bin/rm -f                               gcm_post.${collection}.j${date}
 sed -f sedfile $SOURCE/post/gcm_post.j > gcm_post.${collection}.j${date}
@@ -780,9 +784,9 @@ foreach collection ( $collections )
 
                         set fdate = `echo $local | cut -d "." -f${daily_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
                         set year  = `echo $fdate | cut -c1-4`
-                        set month = `echo $fdate | cut -c5-6`
-                        set day   = `echo $fdate | cut -c7-8`
-                        set hour  = `echo $fdate | cut -c10-11`
+                        set month = `echo $fdate | cut -c6-7`
+                        set day   = `echo $fdate | cut -c9-10`
+                        set hour  = `echo $fdate | cut -c12-13`
 
                         set archive = `echo $archives[$m] | sed -e "s/%c/$collection/ g" | \
                                                             sed -e "s/%y4/$year/      g" | \
@@ -1113,7 +1117,7 @@ end
     if( ${#monthly_attribute} == 0 ) then
         echo DSET $SOURCE/${collection}/$expid.${collection}.monthly.%y4%m2.$ext > xdf.tabl
     else
-        set  template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2 | cut -d"'" -f2`
+        set  template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2- | cut -d"'" -f2`
         echo DSET $SOURCE/${collection}/$expid.${collection}.$template           > xdf.tabl
     endif
     echo TITLE $expdsc                                                          >> xdf.tabl
