@@ -45,6 +45,27 @@
       module procedure gsi_qsat_
    end interface
 
+   integer, parameter :: nkxe = 1   ! index for kinetic energy contribution
+   integer, parameter :: nape = 2   ! index for avail. pot. energy contribution
+   integer, parameter :: ngpe = 3   ! index for geopotential. energy contribution
+   integer, parameter :: nqxe = 4   ! index for moist energy contribution
+   integer, parameter :: ntxe = 5   ! index for total dry energy
+   integer, parameter :: ntwe = 6   ! index for total wet energy
+   integer, parameter :: nall = 6   ! max index from those above
+
+   character(len=*), dimension(nall), parameter :: vnames = &
+                      (/'kxe','ape','pse','qxe','txe','twe'/)
+   character(len=*), dimension(nall), parameter :: vunits = &
+                      (/'J/Kg','J/Kg','J/Kg','J/Kg','J/Kg','J/Kg'/)
+   character(len=*), dimension(nall), parameter :: vtitles = &
+                       (/'Kinetic Energy            ', &
+                         'Available Potential Energy', &
+                         'Potential Energy',           &
+                         'Latent Heat Energy        ', &
+                         'Total Dry Energy          ', &
+                         'Total Wet Energy          '/)
+
+
 CONTAINS
 
 !.................................................................
@@ -181,9 +202,9 @@ CONTAINS
       x%ts = 0.0
       x%delp = 0.0
       do k=1,x%grid%km
-         x%delp(:,:,k) = x%ps * sqrt(pfac) * w3d(:,:,k)! * pfac
+         x%delp(:,:,k) = x%ps * pfac * w3d(:,:,k)
       enddo
-      x%ps = x%ps * sqrt(pfac) * w2d
+      x%ps = x%ps * pfac * w2d
       if (optene_>0.or.normlz_) then
          call dotp_(x,dot,anorm,jnorm,nymd,nhms)
       endif
@@ -480,7 +501,54 @@ CONTAINS
          write (lu, '(6f20.12)') dot
          close (lu)
       endif
+      call get_ene_field_(x,nymd,nhms)
       end subroutine dotp_
+
+   subroutine get_ene_field_(x,nymd,nhms)
+
+      use m_GFIO_PutFld,only : GFIO_PutFld
+      implicit none
+
+      integer, intent(in) :: nymd,nhms
+      type(dyn_vect) x
+
+      real, allocatable :: energy_field(:,:,:,:)
+
+      integer k,im,jm,km,ier
+
+      im = x%grid%im
+      jm = x%grid%jm
+      km = x%grid%km
+      allocate(energy_field(im,jm,km,nall))
+
+      energy_field = 0.0
+
+      energy_field(:,:,:,nkxe) = x%u*x%u + x%v*x%v
+      energy_field(:,:,:,nape) = x%pt*x%pt
+      energy_field(:,:,:,nqxe) = x%q(:,:,:,1)*x%q(:,:,:,1)
+      energy_field(:,:,:,ngpe) = x%delp*x%delp
+
+      energy_field(:,:,:,nape) = energy_field(:,:,:,nape) + energy_field(:,:,:,ngpe)
+      energy_field(:,:,:,ntxe) = energy_field(:,:,:,nape) + energy_field(:,:,:,nkxe)
+      energy_field(:,:,:,ntwe) = energy_field(:,:,:,nqxe) + energy_field(:,:,:,ntxe)
+
+      call GFIO_PutFld ( 'gmao_pert_energy',  'GMAO',  'enepert.nc4',  &
+                          nymd, nhms, 240000, &
+                          im,jm,km,x%grid%ptop,x%grid%ks,x%grid%ak,x%grid%bk, &
+                          nall, vnames, vtitles, vunits, &
+                          energy_field, ier, untag=.true. )
+
+      print *, 'Energy partition: '
+      print *, 'Kinetic          Energy: ', sum(energy_field(:,:,:,nkxe))
+      print *, 'Moist Static     Energy: ', sum(energy_field(:,:,:,nqxe))
+      print *, 'Potential        Energy: ', sum(energy_field(:,:,:,ngpe))
+      print *, 'Avail. Potential Energy: ', sum(energy_field(:,:,:,nape))
+      print *, 'Total dry        Energy: ', sum(energy_field(:,:,:,ntxe))
+      print *, 'Total wet        Energy: ', sum(energy_field(:,:,:,ntwe))
+
+      deallocate(energy_field)
+
+  end subroutine get_ene_field_
 
 !.................................................................
 

@@ -1303,7 +1303,9 @@
 !     -----------------------------
       if (lrms) then
          do ll=1,nu
-            write(lu(ll),'(44x,5a)') '#obs ', '        sum ', '     numneg ', '     numneu ', '      rms'
+            write(lu(ll),'(a,1p,e11.4,25x,5a)') '#Total: ', sum(obssum), ' obs ', '        sum ', 
+     .                                               '     numneg ', '     numneu ', '      rms'
+!           write(lu(ll),'(44x,5a)') '#obs ', '        sum ', '     numneg ', '     numneu ', '      rms'
          enddo
          do i = 1, ncfound  ! loop ob classes
             n = obsnum(i)

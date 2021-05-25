@@ -1,4 +1,4 @@
-#!@DASPERL
+#!/usr/bin/env perl
 #
 # Script to copy restarts from rs location to recycle
 #
