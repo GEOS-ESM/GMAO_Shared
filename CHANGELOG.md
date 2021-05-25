@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
+
 ### Changed
 
 ### Removed
