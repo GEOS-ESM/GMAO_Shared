@@ -60,7 +60,7 @@
    character(len=*), dimension(nall), parameter :: vtitles = &
                        (/'Kinetic Energy            ', &
                          'Available Potential Energy', &
-                         'Potential Energy',           &
+                         'Potential Energy          ', &
                          'Latent Heat Energy        ', &
                          'Total Dry Energy          ', &
                          'Total Wet Energy          '/)
