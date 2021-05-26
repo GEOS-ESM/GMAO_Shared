@@ -369,7 +369,8 @@ END
 # --------
 BEGIN npp_ompsnm_bufr => OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
 # 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
-  20180227_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20180227_00z-20200115_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20200118_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
 END
 BEGIN npp_ompsnp_bufr => OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
 # 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.bufr
