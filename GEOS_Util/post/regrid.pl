@@ -3889,7 +3889,7 @@ OTHER OPTIONS
                         -catchcn 0, - Notice the trailing comma
                       = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
 		        to start from a GEOSldas restart file (Note, keywords are comma-separated).
-                        where CN_VERSION is the CLM version (40, 45, etc.) while other keywords 
+                        where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
                         are same as those in GEOSldas exeinp file. For e.g. 
                         -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
                         IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
