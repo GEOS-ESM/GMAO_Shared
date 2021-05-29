@@ -172,13 +172,13 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 
 %SURFACE      = ("catch_internal_rst"        => 1,
                  "catchcn_internal_rst"      => 1,
+                 "irrigation_internal_rst"   => 1,
+                 "route_internal_rst"        => 1,		 
                  "lake_internal_rst"         => 1,
                  "landice_internal_rst"      => 1,
                  "openwater_internal_rst"    => 1,
-                 "route_internal_rst"        => 1,
                  "saltwater_internal_rst"    => 1,
                  "seaicethermo_internal_rst" => 1);
-#                 "irrigation_internal_rst"   => 1);
 
 #=======================================================================
 # main program
@@ -210,7 +210,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
     }
     if ($surfFLG) {
         regrid_surface_rsts(\%IN, \%OUT);
-        regrid_surface_rsts(\%iceIN, \%OUT) if $landIceDT;	
+        regrid_surface_rsts(\%iceIN, \%OUT) if $landIceDT;
     }
     get_anafiles()  if $bkgFLG;
     write_rst_lcv() if $lcvFLG;
@@ -273,8 +273,8 @@ sub init {
                "catch"           => \$mk_catch,
                "catchcn=s"       => \$mk_catchcn,
                "route"           => \$mk_route,
-               "wemin"           => \$wemIN,
-               "wemout"          => \$wemOUT,
+               "wemin=i"         => \$wemIN,
+               "wemout=i"        => \$wemOUT,
                "bkg!"            => \$bkgFLG,
                "lbl!"            => \$lblFLG,
                "lcv!"            => \$lcvFLG,
@@ -466,7 +466,7 @@ sub init_tag_arrays_and_hashes {
 
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-    @INL  = qw( INL Icarus-NL Icarus-NLv3 );
+    @INL  = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
 
     foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0" }
@@ -540,7 +540,7 @@ sub check_inputs {
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
     my (@cnlabel);
-    
+
     # check for input tarfile
     #------------------------
     get_inputs_from_tarname() if $rstdir;
@@ -929,7 +929,7 @@ sub check_inputs {
 	    $mk_catchcn = join(",", @cnlist[0..3]);
 	}
     }
-        
+
     # get zoom value
     #---------------
     if ($surfFLG) {
@@ -1563,8 +1563,8 @@ sub check_rst_files {
         foreach $type (sort keys %SURFACE) {
             if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
             if ($type eq "route_internal_rst")      { next }
-#	    if ($type eq "irrigation_internal_rst") { next }
-	    
+            if ($type eq "irrigation_internal_rst") { next }
+
             $fname = rstname($expid, $type, $rstIN_template);
             $file  = findinput($fname);
             
@@ -1861,7 +1861,7 @@ sub getLandIceInput {
 #=======================================================================
 sub set_IN_OUT {
     my ($HH, $agrid, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
-    my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid);
+    my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid, $irrig_file);
     my ($im, $im4, $imo, $imo4, $jm, $jm4, $jm5, $jmo, $jmo4);
     my ($oceanID1, $oceanID2, $ogrid, $ogrid_);
     my ($tile, $topo, $val);
@@ -2091,7 +2091,11 @@ sub set_IN_OUT {
         print "\n";
         pause();
     }
-#    @irrig_file = "$bcsdir/irrigation_{$atmosID2}.dat";
+
+    if ($surfFLG) {
+        $irrig_file = "$bcsdir/irrigation_$atmosID2.dat";
+        copy_($irrig_file, "$outdir/irrigation_internal_rst") if -e $irrig_file;
+    }
 }
 
 #=======================================================================
@@ -2732,10 +2736,10 @@ sub regrid_surface_rsts {
 
     foreach $type (sort keys %SURFACE) {
         next unless $SURFACE{$type};
-        if ($type eq "catch_internal_rst")   { next unless $mk_catch }
-        if ($type eq "catchcn_internal_rst") { next unless $mk_catchcn }
-        if ($type eq "route_internal_rst")   { next unless $mk_route }
-#	if ($type eq "irrigation_internal_rst")   { next }
+        if ($type eq "catch_internal_rst")      { next unless $mk_catch }
+        if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
+        if ($type eq "route_internal_rst")      { next unless $mk_route }
+        if ($type eq "irrigation_internal_rst") { next }
 
         if ($landIceDT) {
             if ($H1{"landIce"}) {
@@ -2803,7 +2807,7 @@ sub regrid_surface_rsts {
 
         foreach $type (@SFC) {
             next if $type eq "route_internal_rst";
-#	    next if $type eq "irrigation_internal_rst";
+            next if $type eq "irrigation_internal_rst";
             $src = $input_restarts{$type};
 
             if ($src) {
@@ -2908,7 +2912,7 @@ sub regrid_surface_rsts {
         else             { symlinkinput($tile2, $InData_dir) }
 
         move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
-        move_("\n$catchcn", "$catchcnIN", $verbose) if ($mk_catchcn && scalar(@cnlist) == 1);
+        move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn && scalar(@cnlist)==1;
 
         # link clsm directory to OutData
         #-------------------------------
