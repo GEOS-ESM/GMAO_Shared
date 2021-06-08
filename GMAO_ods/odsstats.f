@@ -1305,7 +1305,6 @@
          do ll=1,nu
             write(lu(ll),'(a,1p,e11.4,25x,5a)') '#Total: ', sum(obssum), ' obs ', '        sum ', 
      .                                               '     numneg ', '     numneu ', '      rms'
-!           write(lu(ll),'(44x,5a)') '#obs ', '        sum ', '     numneg ', '     numneu ', '      rms'
          enddo
          do i = 1, ncfound  ! loop ob classes
             n = obsnum(i)
@@ -1317,7 +1316,8 @@
          enddo
       else
          do ll=1,nu
-            write(lu(ll),'(44x,4a)') '#obs ', ' sum_impact ', '     numneg ', '     numneu '
+            write(lu(ll),'(a,1p,e11.4,25x,4a)') '#Total: ', sum(obssum), ' obs ', ' sum_impact ', 
+     .                                          '     numneg ', '     numneu '
             do i = 1, ncfound  ! loop ob classes
                                ! intentionally truncate oclass to 20 chars
                write(lu(ll),'(i8.8,1x,i6.6,1x,a20,1x,i11,1x,1p,e11.4,1x,i11,1x,i11)') 
