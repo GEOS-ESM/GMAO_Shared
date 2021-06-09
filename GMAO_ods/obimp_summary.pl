@@ -18,7 +18,6 @@ use Env;                 # make env vars readily available
 use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
 use File::Copy "cp";     # for cp()
-use Shell qw(rm);        # rm commands
 use Getopt::Long;        # command line options
 
 # look for perl packages in the following locations
@@ -76,7 +75,7 @@ sub imp_summary {
                $ic = $ic + 1;
             } # foreach typ
            } # sum exists
-           rm("odsstats_sum.txt");
+           unlink("odsstats_sum.txt");
       } # imp files
    
       $ic = 0;
@@ -98,9 +97,9 @@ sub imp_summary {
       if ( -e "odsstats_all.txt" ) {
          print "mv odsstats_all.txt $outfile \n";
          cp("odsstats_all.txt","$outfile");
-         rm("odsstats_all.txt");
-         rm("odsstats_sum.txt");
-         rm("odsstats_numneg.txt");
+         unlink("odsstats_all.txt");
+         unlink("odsstats_sum.txt");
+         unlink("odsstats_numneg.txt");
       }
    } # kt-summary
 
@@ -145,7 +144,7 @@ sub init {
 
   $outfile = "obimp_summary.txt";
   if( $opt_o ) { $outfile = $opt_o };
-  if( -e "$outfile" ) { rm("$outfile") };
+  if( -e "$outfile" ) { unlink("$outfile") };
 
   if( $opt_type ) {  # location of input files
       $obimtyp = $opt_type;
