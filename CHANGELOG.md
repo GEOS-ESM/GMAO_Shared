@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    
 ### Added
 
-- Updates necessary for GEOSadas
-
 ### Fixed
 
 ### Changed
 
 ### Removed
+
+## [1.4.3] - 2021-06-11
+
+### Added
+
+- Add changes consistent with what is in GEOSadas 5.28
 
 ## [1.4.2] - 2021-05-25
 
