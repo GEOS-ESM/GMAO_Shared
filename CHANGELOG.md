@@ -6,15 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+   
+### Added
 
 ### Fixed
-- Fixed build for directories that are built as part of the GEOSdas
 
 ### Changed
 
+### Removed
+
+## [1.4.2] - 2021-05-25
+
 ### Added
 
-### Removed
+Add ability to write out energy components to file.
+
+### Fixed
+
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
+
+## [1.4.1] - 2021-05-14
+
+- Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+
+### Fixed
+
+- In `regrid.pl`: Fixed the -wemin and -wemout options so that they will accept integer values; Also added Jason-NL BCS tag choice
+- Fixes for PSAS code and Intel MPI
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
+
+## [1.4.0] - 2021-04-15
+
+### Fixed
+
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
+- Fixed build for directories that are built as part of the GEOSdas
 
 ## [1.3.10] - 2021-04-02
 
