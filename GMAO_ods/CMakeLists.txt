@@ -2,7 +2,7 @@ esma_set_this ()
 
 set (MODSRC
   m_ods.f90 m_roms.f90 m_odsmeta.f m_ods_structure.f m_ods_obsdiags.F90
-  m_saber.f m_odsxsup.f90 m_Sndx.F90 m_ODS_Sample.f m_mraob.f90
+  m_saber.f m_odsxsup.f90 m_Sndx.F90 m_ODS_Sample.f m_mraob.f90 m_obs_stats.F90
   )
 
 set (ODSSRC
@@ -31,7 +31,7 @@ set (ODSSRC
   ods_julhr.f     ods_ncp_itoi2.f  ods_resetp.f     odsnxtime.f
   ods_eget.f      ods_dcget.f      ods_dconv.f      ods_dcscan.f
   ods_drad.f      ods_dsbuv.f      ods_dpcp.f       ods_rmdupl.f
-  ods_do3lev.f 
+  ods_do3lev.f    ods_diagnc4.f90 
   )
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
