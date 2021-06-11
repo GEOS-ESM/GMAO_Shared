@@ -6,9 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-
-- [version number??] 2021-04-16 
-  Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
    
 ### Added
 
@@ -17,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Removed
+
+## [1.4.2] - 2021-05-25
+
+### Added
+
+Add ability to write out energy components to file.
+
+### Fixed
+
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
 
 ## [1.4.1] - 2021-05-14
 
