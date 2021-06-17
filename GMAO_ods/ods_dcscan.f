@@ -182,7 +182,9 @@
      &           .not. trim(satype)=='mopitt'  .and.
      &           .not. trim(satype)=='acos'    .and.
      &           .not. trim(satype)=='ompsnm'  .and.
-     &           .not. trim(satype)=='ompsnp') then
+     &           .not. trim(satype)=='ompsnmeff' .and.
+     &           .not. trim(satype)=='ompsnp'    .and.
+     &           .not. trim(satype)=='ompsnpnc') then
                print*, myname, ': Unrecognized sensor on diag_ file: satype = ', trim(satype)
                goto 302
             endif
