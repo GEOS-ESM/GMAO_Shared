@@ -318,7 +318,7 @@
      8                 'no impact due to advected local '/)
 
 
-      integer, parameter :: nsats = 50
+      integer, parameter :: nsats = 52
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -336,6 +336,7 @@
      .                 'tmi             ', 'gmi             ', 'acos            ',
      .                 'mopitt          ', 'cris-fsr        ', 'ompslpuv        ', 
      .                 'ompslpvis       ', 'ompsnm          ', 'ompsnp          ',
+     .                 'ompsnmeff       ', 'ompsnpnc        ',
      .                 'amsr2           ', 'amsre           '/)
 
 ! note: numbers below were made up for MHS, and SSU
@@ -359,6 +360,7 @@
      .                 705               , 706               , 998               ,
      .                 999               , 940               , 335               ,
      .                 336               , 427               , 437               ,
+     .                 428               , 438               ,
      .                 550               , 546               /)
 
       integer, parameter :: npcp = 4
