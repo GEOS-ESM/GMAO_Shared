@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `esma_mpirun` for MVAPICH2
+
 ### Removed
 
 ## [1.4.3] - 2021-06-11
