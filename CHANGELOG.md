@@ -6,18 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+### Added
+### Fixed
+### Changed
+### Removed
+
+## [1.4.4] - 2021-06-25
    
 ### Added
 
 - Add new `echorc.pl` script (alternative to `echorc.x`)
-
-### Fixed
+- Added 181 levs to `GMAO_hermes/dyn2dyn.f90` and a frequency change in `GMAO_etc/obsys-nccs.rc`
 
 ### Changed
 
 - Changed `esma_mpirun` for MVAPICH2
-
-### Removed
 
 ## [1.4.3] - 2021-06-11
 
