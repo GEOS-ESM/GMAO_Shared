@@ -7,16 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-- [version number??] 2021-04-16 
-  Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+### Added
+### Fixed
+### Changed
+### Removed
+
+## [1.4.4] - 2021-06-25
    
 ### Added
 
-### Fixed
+- Add new `echorc.pl` script (alternative to `echorc.x`)
+- Added 181 levs to `GMAO_hermes/dyn2dyn.f90` and a frequency change in `GMAO_etc/obsys-nccs.rc`
 
 ### Changed
 
-### Removed
+- Changed `esma_mpirun` for MVAPICH2
+
+## [1.4.3] - 2021-06-11
+
+### Added
+
+- Add changes consistent with what is in GEOSadas 5.28
+
+## [1.4.2] - 2021-05-25
+
+### Added
+
+Add ability to write out energy components to file.
+
+### Fixed
+
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
 
 ## [1.4.1] - 2021-05-14
 
