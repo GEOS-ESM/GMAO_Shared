@@ -12,8 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Removed
 
+## [1.4.5] - 2021-06-25
+
+### Fixed
+
+- Fix for IASI (#202)
+
 ## [1.4.4] - 2021-06-25
-   
+
 ### Added
 
 - Add new `echorc.pl` script (alternative to `echorc.x`)
