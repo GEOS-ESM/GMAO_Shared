@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    
 ### Added
 
+- Add new `echorc.pl` script (alternative to `echorc.x`)
+
 ### Fixed
 
 ### Changed
+
+- Changed `esma_mpirun` for MVAPICH2
 
 ### Removed
 
