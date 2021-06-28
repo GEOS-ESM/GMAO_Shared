@@ -240,9 +240,7 @@ END
 
 BEGIN ncep_mtiasi_bufr => gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d.ublk
 # 20090129_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
-  20080916_00z-20210103_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
-  20210104_00z-20210223_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASIX/Y%y4/M%m2/gdas.%y4%m2%d2.t%h2z.mtiasi.tm00.bufr_d
-  20210224_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
+  20080916_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
 END
 
 BEGIN ncep_atms_bufr => gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d.ublk
@@ -405,5 +403,5 @@ BEGIN npp_ompsnp_nc => ompsnpnc.%y4%m2%d2.t%h2z.nc
 END
 
 BEGIN aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
- 20041001_00z-21001231_18z 240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20041001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
 END
