@@ -41,7 +41,7 @@ my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
 my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
 my (%jm, %jm4, %jm5, %jmo, %jmo4, %newLand);
-my (@anafiles, @warnings);
+my (@anafiles, @cnlist, @warnings);
 
 # global tag variables
 #---------------------
@@ -172,10 +172,10 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 
 %SURFACE      = ("catch_internal_rst"        => 1,
                  "catchcn_internal_rst"      => 1,
+                 "route_internal_rst"        => 1,		 
                  "lake_internal_rst"         => 1,
                  "landice_internal_rst"      => 1,
                  "openwater_internal_rst"    => 1,
-                 "route_internal_rst"        => 1,
                  "saltwater_internal_rst"    => 1,
                  "seaicethermo_internal_rst" => 1);
 
@@ -270,7 +270,7 @@ sub init {
                "tar"             => \$tarFLG,
                "rs=i"            => \$rsFLG,
                "catch"           => \$mk_catch,
-               "catchcn"         => \$mk_catchcn,
+               "catchcn=s"       => \$mk_catchcn,
                "route"           => \$mk_route,
                "wemin=i"         => \$wemIN,
                "wemout=i"        => \$wemOUT,
@@ -534,10 +534,11 @@ sub init_tag_arrays_and_hashes {
 #=======================================================================
 sub check_inputs {
     my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
-    my ($grINocean_dflt, $grOUTocean_dflt);
+    my ($grINocean_dflt, $grOUTocean_dflt, $ii);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
+    my (@cnlabel);
 
     # check for input tarfile
     #------------------------
@@ -912,6 +913,21 @@ sub check_inputs {
     #------------------------------------
     $mk_catchcn = 0 if $rank{$bcsTagOUT} < $rank_1_catchcn;
     $mk_route = 0 if $rank{$bcsTagOUT} < $rank_1_route;
+
+    # get CNLIST values
+    #------------------
+    @cnlist = split(/,/, $mk_catchcn) if $mk_catchcn;
+    if ($mk_catchcn) {
+	unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
+	    @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
+	    foreach $ii (0..3) {
+		$prompt = "Enter Carbon (CN) $cnlabel[$ii]";
+		if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
+		else              { $cnlist[$ii] = query($prompt) }
+	    }
+	    $mk_catchcn = join(",", @cnlist[0..3]);
+	}
+    }
 
     # get zoom value
     #---------------
@@ -1544,8 +1560,8 @@ sub check_rst_files {
     %notfound = ();
     if ($surfFLG) {
         foreach $type (sort keys %SURFACE) {
-            if ($type eq "catchcn_internal_rst") { next unless $mk_catchcn }
-            if ($type eq "route_internal_rst")   { next }
+            if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
+            if ($type eq "route_internal_rst")      { next }
 
             $fname = rstname($expid, $type, $rstIN_template);
             $file  = findinput($fname);
@@ -2713,9 +2729,9 @@ sub regrid_surface_rsts {
 
     foreach $type (sort keys %SURFACE) {
         next unless $SURFACE{$type};
-        if ($type eq "catch_internal_rst")   { next unless $mk_catch }
-        if ($type eq "catchcn_internal_rst") { next unless $mk_catchcn }
-        if ($type eq "route_internal_rst")   { next unless $mk_route }
+        if ($type eq "catch_internal_rst")      { next unless $mk_catch }
+        if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
+        if ($type eq "route_internal_rst")      { next unless $mk_route }
 
         if ($landIceDT) {
             if ($H1{"landIce"}) {
@@ -2740,9 +2756,9 @@ sub regrid_surface_rsts {
         $flags .= " -openwater" if $input_restarts{"openwater_internal_rst"};
         $flags .= " -seaice"    if $input_restarts{"seaicethermo_internal_rst"};
 
-        $flags .= " -route"            if $mk_route;
-        $flags .= " -catch"            if $mk_catch;
-        $flags .= " -catchcn"          if $mk_catchcn;
+        $flags .= " -route"               if $mk_route;
+        $flags .= " -catch"               if $mk_catch;
+        $flags .= " -catchcn $mk_catchcn" if $mk_catchcn;
         $flags .= " -wemin $wemIN"     if $mk_catch or $mk_catchcn;
         $flags .= " -wemout $wemOUT"   if $mk_catch or $mk_catchcn;
         $flags .= " -surflay $surflay" if $mk_catch or $mk_catchcn;
@@ -2887,7 +2903,7 @@ sub regrid_surface_rsts {
         else             { symlinkinput($tile2, $InData_dir) }
 
         move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
-        move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn;
+        move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn && scalar(@cnlist)==1;
 
         # link clsm directory to OutData
         #-------------------------------
@@ -2898,11 +2914,11 @@ sub regrid_surface_rsts {
         # catch and/or catchcn restart only during this pass
         #---------------------------------------------------
         $flags = "";
-        $flags .= " -catch"             if $mk_catch;
-        $flags .= " -catchcn"           if $mk_catchcn;
-        $flags .= " -wemin $wemIN"      if $mk_catch or $mk_catchcn;
-        $flags .= " -wemout $wemOUT"    if $mk_catch or $mk_catchcn;
-        $flags .= " -surflay $surflay";
+        $flags .= " -catch"               if $mk_catch;
+        $flags .= " -catchcn $mk_catchcn" if $mk_catchcn;
+        $flags .= " -wemin $wemIN"        if $mk_catch or $mk_catchcn;
+        $flags .= " -wemout $wemOUT"      if $mk_catch or $mk_catchcn;
+        $flags .= " -surflay $surflay"    if $mk_catch or $mk_catchcn;
         $flags .= " -grpID $grpID"      if ($mk_catch or $mk_catchcn) and $grpID;
         $flags .= " -rsttime $ymd$hr"   if $mk_catchcn;
         $flags .= " -rescale"           if $mk_catch or $mk_catchcn;
@@ -3863,7 +3879,15 @@ OTHER OPTIONS
                       =1 for upper-air restarts only
                       =2 for land-surface restarts only
                       =3 for both upper-air and land-surface restarts (default)
-   -catchcn           Create a version of the catch restart which contains carbon values;
+   -catchcn           offers 2 options:
+                      = 0, cold start for CLM40 using an archived restart file. For e.g. 
+                        -catchcn 0, - Notice the trailing comma
+                      = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
+		        to start from a GEOSldas restart file (Note, keywords are comma-separated).
+                        where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
+                        are same as those in GEOSldas exeinp file. For e.g. 
+                        -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
+                        IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
                       Not valid for tags prior to Heracles; Note: This option will add
                       10-20 minutes to the regrid process.
    -wemin wemIN       minimum water snow water equivalent for input catch/cn
