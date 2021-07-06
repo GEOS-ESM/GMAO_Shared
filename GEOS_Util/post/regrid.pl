@@ -172,7 +172,6 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 
 %SURFACE      = ("catch_internal_rst"        => 1,
                  "catchcn_internal_rst"      => 1,
-                 "irrigation_internal_rst"   => 1,
                  "route_internal_rst"        => 1,		 
                  "lake_internal_rst"         => 1,
                  "landice_internal_rst"      => 1,
@@ -1563,7 +1562,6 @@ sub check_rst_files {
         foreach $type (sort keys %SURFACE) {
             if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
             if ($type eq "route_internal_rst")      { next }
-            if ($type eq "irrigation_internal_rst") { next }
 
             $fname = rstname($expid, $type, $rstIN_template);
             $file  = findinput($fname);
@@ -1861,7 +1859,7 @@ sub getLandIceInput {
 #=======================================================================
 sub set_IN_OUT {
     my ($HH, $agrid, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
-    my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid, $irrig_file);
+    my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid);
     my ($im, $im4, $imo, $imo4, $jm, $jm4, $jm5, $jmo, $jmo4);
     my ($oceanID1, $oceanID2, $ogrid, $ogrid_);
     my ($tile, $topo, $val);
@@ -2090,11 +2088,6 @@ sub set_IN_OUT {
         foreach (sort keys %OUT) { print "OUT{$_} = $OUT{$_}\n" };
         print "\n";
         pause();
-    }
-
-    if ($surfFLG) {
-        $irrig_file = "$bcsdir/irrigation_$atmosID2.dat";
-        copy_($irrig_file, "$outdir/irrigation_internal_rst") if -e $irrig_file;
     }
 }
 
@@ -2739,7 +2732,6 @@ sub regrid_surface_rsts {
         if ($type eq "catch_internal_rst")      { next unless $mk_catch }
         if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
         if ($type eq "route_internal_rst")      { next unless $mk_route }
-        if ($type eq "irrigation_internal_rst") { next }
 
         if ($landIceDT) {
             if ($H1{"landIce"}) {
@@ -2807,7 +2799,6 @@ sub regrid_surface_rsts {
 
         foreach $type (@SFC) {
             next if $type eq "route_internal_rst";
-            next if $type eq "irrigation_internal_rst";
             $src = $input_restarts{$type};
 
             if ($src) {
