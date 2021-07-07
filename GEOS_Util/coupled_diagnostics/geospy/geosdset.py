@@ -3,8 +3,7 @@ This modules provides utilities for reading different GEOS collections.
 '''
 
 import os
-import yaml
-from types import SimpleNamespace
+import yaml, cftime
 import numpy as np
 import xarray as xr
 
@@ -40,20 +39,23 @@ def _load_tripolar(exp, collection):
     return ds
 
 def _load_mom(exp, collection):
-    ds=xr.open_mfdataset(f'{exp["data_path"]}/MOM_Output/{collection}.e??????01_00z.nc')
-    ds_static=xr.open_dataset(exp["ocean_static"])
-    ds.coords.update({'geolon': ds_static['geolon'],
-                      'geolat': ds_static['geolat'],
-                      'geolon_c': ds_static['geolon_c'],
-                      'geolat_c': ds_static['geolat_c'],
-                      'geolon_u': ds_static['geolon_u'],
-                      'geolat_u': ds_static['geolat_u'],
-                      'geolon_v': ds_static['geolon_v'],
-                      'geolat_v': ds_static['geolat_v']})
+    ds=xr.open_mfdataset(f'{exp["data_path"]}/MOM_Output/{collection}.e??????01_00z.nc',decode_times=False)
+#    ds.coords['time']=cftime.num2date(ds['time'],'days since 0001-01-01')
+
+# Replace below fields with fields from MAPL_Tripolar.nc
+#    ds_static=xr.open_dataset(exp["ocean_static"])
+#    ds.coords.update({'geolon': ds_static['geolon'],
+#                      'geolat': ds_static['geolat'],
+#                      'geolon_c': ds_static['geolon_c'],
+#                      'geolat_c': ds_static['geolat_c'],
+#                      'geolon_u': ds_static['geolon_u'],
+#                      'geolat_u': ds_static['geolat_u'],
+#                      'geolon_v': ds_static['geolon_v'],
+#                      'geolat_v': ds_static['geolat_v']})
     
-    ds.update({'dx': (('yh','xh'), ds_static['dxt']),
-               'dy': (('yh','xh'), ds_static['dyt']),
-               'area': (('yh','xh'), ds_static['area_t'])})
+#    ds.update({'dx': (('yh','xh'), ds_static['dxt']),
+#               'dy': (('yh','xh'), ds_static['dyt']),
+#               'area': (('yh','xh'), ds_static['area_t'])})
 
     return ds 
 
