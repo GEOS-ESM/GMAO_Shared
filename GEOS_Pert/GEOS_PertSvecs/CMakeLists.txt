@@ -11,5 +11,5 @@ set (SRCS
 
 esma_add_library (${this}
   SRCS ${SRCS}
-  DEPENDENCIES MAPL_cfio_r4 MAPL_Base GMAO_mpeu GEOS_PertShared
+  DEPENDENCIES MAPL_cfio_r4 MAPL GMAO_mpeu GEOS_PertShared
   INCLUDES ${INC_ESMF})

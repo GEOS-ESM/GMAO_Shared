@@ -350,6 +350,7 @@ contains
     integer         :: N, iter_cool
     real            :: ALPH, Qb, fC, fLA, X1, X2, dTw
 
+    real, parameter :: TICE            = MAPL_TICE-1.8      ! -1.8C freezing temperature of sea water
     real, parameter :: RHO_SEAWATER    = 1022.0  ! sea water density             [kg/m^3]    ! Replace Usage of RHO_SEAWATER with MAPL_RHO_SEAWATER
     real, parameter :: NU_WATER        = 1.0E-6  ! kinematic viscosity of water  [m^2/s]
     real, parameter :: TherCond_WATER  = 0.563   ! Thermal conductivity of water [W/m/ K]
@@ -512,18 +513,22 @@ contains
              endif
 
 ! We DO NOT include cool-skin tdrop in TW, therefore, we now save TW
+! -------------------------------------------------------------------
 
              TW(N) = TS_FOUNDi(N) + ( 1.0/(1.+X2))  *    (TBAR_(N) - TS_FOUNDi(N))
              TS(N) = TS(N)  + ((1.0+MUSKIN)/MUSKIN) *    (TW(N)    - TBAR_(N))
 
-             TDEL_(N)    = TS_FOUNDi(N) + ((1.0+MUSKIN)/MUSKIN) * MAX(TW(N)    - TS_FOUNDi(N), 0.0)
+             TDEL_(N)    = TS_FOUNDi(N) + ((1.0+MUSKIN)/MUSKIN) * MAX(TW(N) - TS_FOUNDi(N), 0.0)
              TBAR_(N)    = TW(N)
 
              TS(N)    = TDEL_(N) - TDROP_(N)
-             TWMTS(N) = TW(N)    - TS(N)
              TWMTF(N) = 0.0
 !            TWMTF(N) = TW(N)    - TS_FOUNDi(N)  ! This will cause non-zero diff in internal/checkpoint, but ZERO DIFF in OUTPUT.
           end if WARM_LAYER
+          
+          ! Protection on minimum water temperture, do not allow colder than TICE
+          TW(N)    = MAX(TW(N),TICE)
+          TWMTS(N) = TW(N)    - TS(N)
 
        else            ! FR(N) <= fr_ice_thresh
           DCOOL_ (N)     = MAPL_UNDEF
@@ -536,6 +541,7 @@ contains
           SWCOOL_(N)     = MAPL_UNDEF
           BCOOL_ (N)     = MAPL_UNDEF
           TDEL_  (N)     = MAPL_UNDEF
+          TW     (N)     = TICE
           TWMTS  (N)     = 0.0
           TWMTF  (N)     = 0.0
           QWARM_ (N)     = MAPL_UNDEF

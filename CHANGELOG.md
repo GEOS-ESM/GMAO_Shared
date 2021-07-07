@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+### Fixed
+### Changed
+### Removed
+
+## [1.4.5] - 2021-06-25
+
+### Fixed
+
+- Fix for IASI (#202)
+
+## [1.4.4] - 2021-06-25
+
+### Added
+
+- Add new `echorc.pl` script (alternative to `echorc.x`)
+- Added 181 levs to `GMAO_hermes/dyn2dyn.f90` and a frequency change in `GMAO_etc/obsys-nccs.rc`
+
+### Changed
+
+- Changed `esma_mpirun` for MVAPICH2
+
+## [1.4.3] - 2021-06-11
+
+### Added
+
+- Add changes consistent with what is in GEOSadas 5.28
+
+## [1.4.2] - 2021-05-25
+
+### Added
+
+Add ability to write out energy components to file.
+
+### Fixed
+
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
+
+## [1.4.1] - 2021-05-14
+
+- Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+
+### Fixed
+
+- In `regrid.pl`: Fixed the -wemin and -wemout options so that they will accept integer values; Also added Jason-NL BCS tag choice
+- Fixes for PSAS code and Intel MPI
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
+
+## [1.4.0] - 2021-04-15
+
+### Fixed
+
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
+- Fixed build for directories that are built as part of the GEOSdas
+
+## [1.3.10] - 2021-04-02
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+
+## [1.3.9] - 2021-03-17
+
 ### Fixed
 
 - Fix for out-of-bounds error in lightning module (#99)
@@ -14,7 +81,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Stats plot updates
-- Multiple updates brought over from GEOSadas work (see #166)
 
 ### Added
 
