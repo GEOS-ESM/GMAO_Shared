@@ -35,7 +35,8 @@ class Plot2d(Plot):
 
     def __init__(self, **kwargs):
         super(Plot2d,self).__init__()
-        self.fill_opts=kwargs.get('fill_opts',{})
+        self.fill_opts={'extend': 'both'}
+        self.fill_opts.update(kwargs.get('fill_opts',{}))
         self.contour_opts=kwargs.get('contour_opts',{})
         self.quiver_opts=kwargs.get('quiver_opts',{})
         self.clab_opts={'fmt': '%1.1f'}

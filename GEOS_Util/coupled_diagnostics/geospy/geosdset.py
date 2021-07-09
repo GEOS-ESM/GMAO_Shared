@@ -40,9 +40,17 @@ def _load_tripolar(exp, collection):
 
 def _load_mom(exp, collection):
     ds=xr.open_mfdataset(f'{exp["data_path"]}/MOM_Output/{collection}.e??????01_00z.nc',decode_times=False)
-#    ds.coords['time']=cftime.num2date(ds['time'],'days since 0001-01-01')
 
-# Replace below fields with fields from MAPL_Tripolar.nc
+    # Now need to decode times
+    time=cftime.num2date(ds['time'],'days since 0001-01-01')
+    # And convert to numpy.datetime64 (this is rediculous)
+    ds.coords.update({'time': [np.datetime64(xx) for xx in time]})
+
+    grid=xr.open_dataset(f'{exp["griddir"]}/MAPL_Tripolar.nc')
+    ds.update({'mask': (('yh','xh'), grid['mask']),
+               'areat': (('yh','xh'), grid['areat']),
+               'atl_mask': (('yh','xh'), grid['atl_mask'])})
+
 #    ds_static=xr.open_dataset(exp["ocean_static"])
 #    ds.coords.update({'geolon': ds_static['geolon'],
 #                      'geolat': ds_static['geolat'],
