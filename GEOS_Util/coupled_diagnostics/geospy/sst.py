@@ -119,6 +119,7 @@ def plot_gm(exp,da):
     ax=plotter.line(da)
     ax.set_title('Global SST')
     ax.set_ylabel('$^0C$')
+    ax.set_xlabel('')
     pl.grid()
     pl.tight_layout()
     pl.show()
