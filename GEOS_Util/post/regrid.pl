@@ -918,15 +918,19 @@ sub check_inputs {
     #------------------
     @cnlist = split(/,/, $mk_catchcn) if $mk_catchcn;
     if ($mk_catchcn) {
-	unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
-	    @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
-	    foreach $ii (0..3) {
-		$prompt = "Enter Carbon (CN) $cnlabel[$ii]";
-		if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
-		else              { $cnlist[$ii] = query($prompt) }
-	    }
-	    $mk_catchcn = join(",", @cnlist[0..3]);
-	}
+	   unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
+	      @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
+	      foreach $ii (0..3) {
+		      $prompt = "Enter Carbon (CN) $cnlabel[$ii]";
+		      if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
+		      else              { $cnlist[$ii] = query($prompt) }
+	      }
+	      $mk_catchcn = join(",", @cnlist[0..3]);
+	   }
+
+      unless ( $cnlist[0] eq "clm40" or $cnlist[0] eq "clm45") {
+         die "Error. CN_VERSION should be clm40 or clm45\n";
+      } 
     }
 
     # get zoom value
@@ -1560,7 +1564,12 @@ sub check_rst_files {
     %notfound = ();
     if ($surfFLG) {
         foreach $type (sort keys %SURFACE) {
-            if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
+            if ($type eq "catchcn_internal_rst")    { 
+               next unless $mk_catchcn;
+               delete($SURFACE{$type});
+               $type = "catchcn${cnlist[0]}_internal_rst";
+               $SURFACE{$type} = 1;
+            }
             if ($type eq "route_internal_rst")      { next }
 
             $fname = rstname($expid, $type, $rstIN_template);
@@ -1570,7 +1579,7 @@ sub check_rst_files {
             else       { $notfound{$type} = 1 }
         }
         foreach $type (keys %notfound) {
-            next if $type eq "catchcn_internal_rst";
+            next if $type eq "catchcn${cnlist[0]}_internal_rst";
             $SURFACE{$type} = 0;
             $swFLG = 1;
             if ($type eq "saltwater_internal_rst") {
@@ -2730,7 +2739,9 @@ sub regrid_surface_rsts {
     foreach $type (sort keys %SURFACE) {
         next unless $SURFACE{$type};
         if ($type eq "catch_internal_rst")      { next unless $mk_catch }
-        if ($type eq "catchcn_internal_rst")    { next unless $mk_catchcn }
+        if ($type eq "catchcn_internal_rst")    { next }
+        if ($type eq "catchcn${cnlist[0]}_internal_rst") { next unless $mk_catchcn};
+
         if ($type eq "route_internal_rst")      { next unless $mk_route }
 
         if ($landIceDT) {
@@ -2795,7 +2806,7 @@ sub regrid_surface_rsts {
         $template1 = $H1{"template"};
 
         $catchtype{"catch_internal_rst"} = 1;
-        $catchtype{"catchcn_internal_rst"} = 1;
+        $catchtype{"catchcn${cnlist[0]}_internal_rst"} = 1;
 
         foreach $type (@SFC) {
             next if $type eq "route_internal_rst";
@@ -2811,9 +2822,9 @@ sub regrid_surface_rsts {
             else {
                 print_("\n$type not found.\n");
 
-                # use catch for catchcn, if needed
+                # use catch for catchcn, if needed. WJ note: use catch for cnclm40 only
                 #---------------------------------
-                if ($type eq "catchcn_internal_rst") {
+                if ($type eq "catchcnclm40_internal_rst") {
                     $alt = "catch_internal_rst";
                     $src = $input_restarts{$alt};
                     if ($src) {
@@ -2888,12 +2899,12 @@ sub regrid_surface_rsts {
         $catch = "$rstdir2/$catchName";
         $catch .= ".$tagID.$gridID" if $label;
 
-        $catchcnName = rstname($expid2, "catchcn_internal_rst", $template2);
-        $catchcnIN = "$InData_dir/$catchcnName";
-
-        $catchcn = "$rstdir2/$catchcnName";
-        $catchcn .= ".$tagID.$gridID" if $label;
-
+        if ($mk_catchcn) {
+           $catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", $template2);
+           $catchcnIN = "$InData_dir/$catchcnName";
+           $catchcn = "$rstdir2/$catchcnName";
+           $catchcn .= ".$tagID.$gridID" if $label;
+        }
         # new input directory for step 2
         #-------------------------------
         move_($InData_dir, "$InData_dir.step1", $verbose);
@@ -2903,7 +2914,7 @@ sub regrid_surface_rsts {
         else             { symlinkinput($tile2, $InData_dir) }
 
         move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
-        move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn && scalar(@cnlist)==1;
+        move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn;
 
         # link clsm directory to OutData
         #-------------------------------
@@ -2930,7 +2941,7 @@ sub regrid_surface_rsts {
 
         @SFC = ();
         push @SFC, "catch_internal_rst"   if $mk_catch;
-        push @SFC, "catchcn_internal_rst" if $mk_catchcn;
+        push @SFC, "catchcn${cnlist[0]}_internal_rst" if ($mk_catchcn);
 
         # run mk_Restarts program
         #------------------------
