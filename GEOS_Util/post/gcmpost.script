@@ -190,6 +190,15 @@ else
     setenv HOMDIR $SOURCE
 endif
 
+# Set GEOSGCM_EXECUTABLE
+# ----------------------
+if( -e $SOURCE/.GEOSDIR ) then
+    setenv GEOSDIR `cat $SOURCE/.GEOSDIR`
+    setenv GEOSGCM_EXECUTABLE $GEOSDIR/bin/GEOSgcm.x
+else
+    setenv GEOSGCM_EXECUTABLE $SOURCE/GEOSgcm.x
+endif
+
 # Set HISTORYRC
 # -------------
 if( $HISTORYRC == "NULL" ) then
@@ -962,7 +971,7 @@ foreach collection ( $collections )
                     #echo 'set success = FALSE'                                                                  >> $archfile
                      echo 'endif'                                                                                >> $archfile
 
-                     echo "ssh ${MASTOR} $scpvar $SOURCE/GEOSgcm.x                  ${MASDIR}"                   >> $archfile
+                     echo "ssh ${MASTOR} $scpvar $GEOSGCM_EXECUTABLE                ${MASDIR}"                   >> $archfile
                      echo "ssh ${MASTOR} $scpvar $HISTORYRC                         ${MASDIR}"                   >> $archfile
                      echo "ssh ${MASTOR} $scpvar $HOMDIR/AGCM.rc                    ${MASDIR}"                   >> $archfile
                      echo "ssh ${MASTOR} $scpvar $HOMDIR/CAP.rc                     ${MASDIR}"                   >> $archfile
@@ -972,7 +981,7 @@ foreach collection ( $collections )
                if( $HOST == 'discover' ) then
                      echo "    ssh $MASTOR                             mkdir -p ${MASDIR}/restarts/Y${year}"     >> $archfile
                      echo "$scpvar $SOURCE/restarts/*${year}${month}* ${MASTOR}:${MASDIR}/restarts/Y${year}"     >> $archfile
-                     echo "$scpvar $SOURCE/GEOSgcm.x                  ${MASTOR}:${MASDIR}"                       >> $archfile
+                     echo "$scpvar $GEOSGCM_EXECUTABLE                ${MASTOR}:${MASDIR}"                       >> $archfile
                      echo "$scpvar $HISTORYRC                         ${MASTOR}:${MASDIR}"                       >> $archfile
                      echo "$scpvar $HOMDIR/AGCM.rc                    ${MASTOR}:${MASDIR}"                       >> $archfile
                      echo "$scpvar $HOMDIR/CAP.rc                     ${MASTOR}:${MASDIR}"                       >> $archfile
