@@ -102,6 +102,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'CLEVS ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CLEVS' ; endif
                                                                   clevs = result
 
+                        'getresource 'PLOTRC' 'mname'_'GC'_'level'_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'GC'_DPCT' ; endif
+                                                           dpct = result
+
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_REGRID'
                                                                   method = result
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_MASK'
@@ -133,7 +137,10 @@ else
 endif
 if( cbscale = 'NULL' ) ; cbscale =  0.8         ; endif
 if( clab    = 'NULL' ) ; clab    =  on          ; endif
+if( dpct    = 'NULL' ) ; dpct    =  0.1         ; endif
 
+                     'd 'dpct
+                         dpct    = subwrd(result,4)
 say ''
 say 'title: 'title
 say ' fact: ' fact
@@ -245,21 +252,24 @@ say 'Analysis DLON: 'dlon
 'define qobs  = regrid2( qobs,0.25,0.25,bs_p1,'lonbeg','latbeg')'
 'define qobs  = maskout(qobs,maskm)'
 
-m = 0
-if( ccols = NULL )
    'set gxout stat'
    'd qmod'
    qminmax = sublin(result,8)
    qmin    = subwrd(qminmax,4)
    qmax    = subwrd(qminmax,5)
-   say 'Min Value: 'qmin
-   say 'Max Value: 'qmax
+   say 'QMin Value: 'qmin
+   say 'QMax Value: 'qmax
    'set gxout shaded'
    'd abs('qmin')'
            qmin = subwrd(result,4)
    'd abs('qmax')'
            qmax = subwrd(result,4)
    if( qmin > qmax ) ; qmax = qmin ; endif
+
+   say 'Absolute QMAX: 'qmax
+
+m = 0
+if( ccols = NULL )
    if( qmax > 0 )
       'd log10('qmax')'
        m = subwrd(result,4)
@@ -299,6 +309,21 @@ endif
 'set parea 1.5 7.0 7.70 10.50'
 'set grads off'
 
+   'set gxout stat'
+   'd qmod'
+   qmodminmax = sublin(result,8)
+   qmodmin    = subwrd(qmodminmax,4)
+   qmodmax    = subwrd(qmodminmax,5)
+   say 'QMOD_Max Value: 'qmodmax
+   say 'QMOD_Min Value: 'qmodmin
+   'set gxout shaded'
+   'd abs('qmodmin')'
+          aqmodmin = subwrd(result,4)
+   'd abs('qmodmax')'
+          aqmodmax = subwrd(result,4)
+   if( aqmodmin > aqmodmax ) ; aqmodmax = aqmodmin ; endif
+   say 'Absolute QMOD_MAX: ' aqmodmax
+
    'set gxout shaded'
 if( ccols != NULL )
    'set clevs 'clevs
@@ -307,6 +332,7 @@ if( ccols != NULL )
 else
    'shades 'qmod' 0'
     cint = result*2
+    if( clevs != NULL ) ; 'set clevs 'clevs ; endif
 endif
    'd qmod'
 
@@ -317,12 +343,28 @@ endif
 'set parea 1.5 7.0 4.30 7.10'
 'set grads off'
 
+   'set gxout stat'
+   'd qobs'
+   qobsminmax = sublin(result,8)
+   qobsmin    = subwrd(qobsminmax,4)
+   qobsmax    = subwrd(qobsminmax,5)
+   say 'QOBS_Max Value: 'qobsmax
+   say 'QOBS_Min Value: 'qobsmin
+   'set gxout shaded'
+   'd abs('qobsmin')'
+          aqobsmin = subwrd(result,4)
+   'd abs('qobsmax')'
+          aqobsmax = subwrd(result,4)
+   if( aqobsmin > aqobsmax ) ; aqobsmax = aqobsmin ; endif
+   say 'Absolute QOBS_MAX: ' aqobsmax
+
 if( ccols != NULL )
    'set gxout shaded'
    'set clevs 'clevs
    'set ccols 'ccols
 else
    'shades 'qmod' 0'
+    if( clevs != NULL ) ; 'set clevs 'clevs ; endif
 endif
    'd qobs'
 
@@ -357,10 +399,27 @@ endif
  avgdif = subwrd(result,1)
  stddif = subwrd(result,2)
 
+  dqmax = stddif/3
+
 'set gxout shaded'
-       qmax = stddif/3
-   if( qmax > 0 )
-      'd log10('qmax')'
+
+     say 'Absolute DQMAX: 'dqmax'  qmax: 'qmax
+     dqrel = dqmax / qmax  * 100 * 100
+    'getint 'dqrel
+             dqrel = result/100
+
+     say 'QMAX: 'qmax'  DQMAX: 'dqmax
+     say 'Relative PCT Difference: 'dqrel' (100*DQMAX/QMAX)'
+     say ' Minimum PCT for  Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         dqmax = dqrel * qmax / 100
+         say 'Setting CINT using DQREL: 'dqrel'%, DQMAX: 'dqmax
+
+   if( dqmax > 0 )
+      'd log10('dqmax')'
        n = subwrd(result,4)
    else
        n = 0
@@ -389,7 +448,7 @@ endif
            fixpltcint =subwrd(result,4)
        cint = fixpltcint
    else
-      'd 'qmax'/1e'n
+      'd 'dqmax'/1e'n
        cint = subwrd(result,4)
    endif
 
@@ -397,6 +456,30 @@ endif
       'define qdif = (qmod-qobs)/1e'n
       'd qdif'
       'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
+
+      'set gxout stat'
+      'd qdif'
+      qdifminmax = sublin(result,8)
+      qdifmin    = subwrd(qdifminmax,4)
+      qdifmax    = subwrd(qdifminmax,5)
+      say 'QDIF_Max Value: 'qdifmax
+      say 'QDIF_Min Value: 'qdifmin
+      'set gxout shaded'
+      'd abs('qdifmin')'
+             aqdifmin = subwrd(result,4)
+      'd abs('qdifmax')'
+             aqdifmax = subwrd(result,4)
+      if( aqdifmin > aqdifmax ) ; aqdifmax = aqdifmin ; endif
+      say 'Absolute QDIF_MAX: ' aqdifmax
+
+      'set gxout stat'
+      'd maskout(qdif,abs(qobs))'
+         dqminmax = sublin(result,8)
+         dqmin    = subwrd(qminmax,4)
+         dqmax    = subwrd(qminmax,5)
+      say 'DQMin Value: 'dqmin
+      say 'DQMax Value: 'dqmax
+      'set gxout shaded'
 
 'stats maskout(qdif,abs(qobs))'
  avgdif = subwrd(result,1)
@@ -455,17 +538,35 @@ eyearo = subwrd(date,2)
 
 'set string 1 l 4'
 'set strsiz .08'
-'draw string 0.050 10.50 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.35 End: 'emnthm' 'eyearm
-'draw string 0.050 7.10 Beg: 'bmntho' 'byearo
-'draw string 0.050 6.95 End: 'emntho' 'eyearo
 
-'draw string 0.050 9.85  Mean: 'avgmod
-'draw string 0.050 9.70  Std: 'stdmod
-'draw string 0.050 6.45 Mean: 'avgobs
-'draw string 0.050 6.30  Std: 'stdobs
-'draw string 0.050 3.05 Mean: 'avgdif
-'draw string 0.050 2.90  Std: 'stddif
+'draw string 0.050 10.25 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.10 End: 'emnthm' 'eyearm
+'draw string 0.050 9.85  Max: 'qmodmax
+'draw string 0.050 9.70  Min: 'qmodmin
+'draw string 0.050 9.40 Mean: 'avgmod
+'draw string 0.050 9.25  Std: 'stdmod
+
+'draw string 0.050 6.85 Beg: 'bmntho' 'byearo
+'draw string 0.050 6.70 End: 'emntho' 'eyearo
+'draw string 0.050 6.45  Max: 'qobsmax
+'draw string 0.050 6.30  Min: 'qobsmin
+'draw string 0.050 6.00 Mean: 'avgobs
+'draw string 0.050 5.85  Std: 'stdobs
+
+'draw string 0.050 3.45 Beg: 'bmntho' 'byearo
+'draw string 0.050 3.30 End: 'emntho' 'eyearo
+'draw string 0.050 3.05  Max: 'qdifmax
+'draw string 0.050 2.90  Min: 'qdifmin
+'draw string 0.050 2.60 Mean: 'avgdif
+'draw string 0.050 2.45  Std: 'stddif
+
+if( CINTDIFF != 'NULL' )
+   'set strsiz .07'
+   'draw string 0.050 1.77 Plot represents'
+   'draw string 0.050 1.62 values > 'dqrel' %'
+   'draw string 0.050 1.47 Relative Difference'
+   'draw string 0.050 1.32 ( DQ/QMax )'
+endif
 
 'myprint -name 'output'/hdiag_'PRFX''anal'_'EXPORT'.'GC'_'level'.'season
 'set clab on'

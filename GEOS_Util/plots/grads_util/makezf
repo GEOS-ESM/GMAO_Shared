@@ -155,10 +155,23 @@ tag   = subwrd(args,3)
             tunit = result
    if( tunit = 'day' | tunit = 'hour' )
     'getinfo date'
-             day = substr( result,4,2 )
-            hour = substr( result,1,2 )
+             date = result
+                   delim = substr( date,3,1 )
+       'uppercase 'delim
+                   delim = result
+       if( delim = 'Z' )
+            hour = substr( date,1,2 )
+             day = substr( date,4,2 )
            fname = alias''tag'.'year''month''day'_'hour'z.nc4'
           tstamp = '%y4%m2%d2_%h2z'
+       endif
+       if( delim = ':' )
+            hour = substr( date,1,2 )
+          minute = substr( date,4,2 )
+             day = substr( date,7,2 )
+           fname = alias''tag'.'year''month''day'_'hour''minute'z.nc4'
+          tstamp = '%y4%m2%d2_%h2%n2z'
+       endif
    else
            fname = alias''tag'.'year''month'.nc4'
           tstamp = '%y4%m2'
