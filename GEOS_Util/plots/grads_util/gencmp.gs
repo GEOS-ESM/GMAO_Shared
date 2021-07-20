@@ -298,6 +298,8 @@ endif
           dummy = get_cmpexp (cmpexp,numexp)
             exp = subwrd(dummy,1)
            type = subwrd(dummy,2)
+     exp.numexp = exp
+    type.numexp = type
 
 while( exp != 'NULL' )
 say ' '
@@ -308,19 +310,38 @@ say 'Comparing with: 'exp
 * analysis = true   EXP=A CMP=A  => ALEVS
 * analysis = true   EXP=A CMP=M  => DLEVS
 
+* INPUT Experiment is an Analysis
+*********************************
 if( analysis != "false" )
-    if( type = A )
+    if( type = A | type = V )
+*   CMP Experiment is an Analysis
        'run setenv "LEVTYPE" 'ALEVS
+       'run setenv "DIFFTYPE" 'A
+
     else
+*   CMP Experiment is an Model
        'run setenv "LEVTYPE" 'DLEVS
+       'run setenv "DIFFTYPE" 'D
     endif
+
 else
+
+* INPUT Experiment is a Model
+*********************************
     if( type = A )
+*   CMP Experiment is an Analysis
        'run setenv "LEVTYPE" 'DLEVS
+       'run setenv "DIFFTYPE" 'D
+
     else
+*   CMP Experiment is an Model
        'run setenv "LEVTYPE" 'ALEVS
+       'run setenv "DIFFTYPE" 'A
     endif
+
 endif
+
+* ------------------------------------------------------
 
 '!chckfile 'exp'/.HOMDIR'
  'run getenv CHECKFILE'
@@ -340,12 +361,15 @@ endif
       oexp = 0
         m  = 1
 while ( m <= numGCs )
-'run getvar 'EXPORT.m' 'GC.m' 'exp
+       'run getvar 'EXPORT.m' 'GC.m' 'exp
         oname.numexp.m = subwrd(result,1)
       obsfile.numexp.m = subwrd(result,2)
        oscale.numexp.m = subwrd(result,3)
        obsdsc.numexp.m = subwrd(result,4)
        obsnam.numexp.m = subwrd(result,5)
+
+    say "Looping CMPEXPs, numexp = "numexp"  obsnam.numexp."m" = "obsnam.numexp.m"  numGCS = "numGCs
+    say 
     if( STAT = "STD" )
         oname.numexp.m = 'VAR_'oname.numexp.m
     endif
@@ -370,10 +394,11 @@ while ( m <= numGCs )
     else
            if( OPT.m = 'FALSE' )
                found =  FALSE
-      endif
+           endif
     endif
          m  = m + 1
 endwhile
+
 if( STAT = "RMS" | STAT = "BIAS" )
     oexp = oexp + 1
 endif
@@ -500,95 +525,103 @@ endif
 
 * Check next Comparison Experiment Dataset
 * ----------------------------------------
- numexp = numexp + 1
-  dummy = get_cmpexp (cmpexp,numexp)
-    exp = subwrd(dummy,1)
-   type = subwrd(dummy,2)
+       numexp = numexp + 1
+        dummy = get_cmpexp (cmpexp,numexp)
+          exp = subwrd(dummy,1)
+         type = subwrd(dummy,2)
+   exp.numexp = exp
+  type.numexp = type
 
 endwhile
  numexp = numexp - 1
 
 '!/bin/mv HISTORY.Tmp HISTORY.T'
 
-* ---------------------------------------------------------
+* ---------------------------------------------------------------------------
 * Now that we have computed plots for each experiment,
-* we can compute the Closeness plots to MERRA-2
-* ---------------------------------------------------------
+* we can compute the Closeness plots to MERRA-2 and any CMPEXP ending with :V
+* ---------------------------------------------------------------------------
 
-* Find MERRA2 experiment
-* ----------------------
-  MERRA2  = 0
-       n  = 1
-while( n <= numexp )
-say "obsnam.numexp.1 = "n"  "obsnam.numexp.1
-if( obsnam.numexp.1 = "MERRA-2" )
-    MERRA2 = n
-endif
-         n = n + 1
-endwhile
-say "MERRA2 = "MERRA2
+       k  = 1
+while( k <= numexp )
+  cname.k =  oname.k.1
+   ctag.k = obsnam.k.1
+say 'Looping through experiments, k = 'k' CTAG = 'ctag.k' TYPE = 'type.k
 
-if( MERRA2 != 0 )
+if( ( ctag.k = "MERRA-2" | type.k = V ) & cname.k != 'NULL' )
+     TAG   = k
+     say 'Performing Closeness plots to: 'ctag.TAG' k = 'k
 
 * Loop over Seasons to Process
 * ----------------------------
        m = 1
 while( m > 0 )
     season = subwrd(seasons,m)
+
 if( season = '' )
          m = -1
 else
          m = m+1
-         say 'Processing Season: 'season
+         say 'm = 'm'  Processing Season: 'season
 
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
-'run setenv "LEVTYPE" 'DLEVS
+'run getenv "DIFFTYPE"'
+             DIFFTYPE = result
+'run setenv "LEVTYPE" 'DIFFTYPE'LEVS'
 
-* Closeness Plot (Experiment_vs_Comparison to MERRA-2)
-* ----------------------------------------------------
-       n  = 1
-while( n <= numexp )
-if( obsnam.n.1 != "NULL" & obsnam.n.1 != "merra" & obsnam.n.1 != "MERRA-2" )
-say 'Closeness plot between  exp: 'qtag.1
-say '                       cexp: 'obsnam.n.1
-say '                        obs: 'obsnam.MERRA2.1
-say ''
+* Horizontal Closeness Plot (Experiment_vs_Comparison to Verification)
+* --------------------------------------------------------------------
+            n  = 1
+     while( n <= numexp )
+     say 'n = 'n'  Testing 'qtag.1' and 'ctag.n' for closeness with 'ctag.TAG
 
-'define zobs'MERRA2''season' = regrid2( obs'MERRA2''season',0.25,0.25,bs_p1,0,-90 )'
-'define zobs'n''season'      = regrid2( obs'n''season'     ,0.25,0.25,bs_p1,0,-90 )'
-'define zmod'season'         = regrid2( mod'season'        ,0.25,0.25,bs_p1,0,-90 )'
+     if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != ctag.TAG & type.n != V & cname.n != 'NULL' )
+         say 'Closeness plot between  exp: 'qtag.1
+         say '                       cexp: 'ctag.n
+         say '                        obs: 'ctag.TAG
+         say '              Total  numexp: 'numexp
+         say ''
+                 flag = ""
+         while ( flag = "" )
 
-        flag = ""
-while ( flag = "" )
+             'define zobs'TAG''season' = regrid2( obs'TAG''season',0.25,0.25,bs_p1,0,-90 )'
+             'define zobs'n''season'   = regrid2( obs'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
+             'define zmod'season'      = regrid2( mod'season'     ,0.25,0.25,bs_p1,0,-90 )'
 
-'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''MERRA2' -CNAME 'obsnam.n.1' -MNAME 'NAME' -ONAME 'obsnam.MERRA2.1' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.MERRA2.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'obsfile.MERRA2.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
+             'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n' -MNAME 'EXPORT' -ONAME 'ctag.TAG' -CDESC 'obsdsc.n.1' -MDESC 'qdesc.1' -ODESC 'obsdsc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'obsfile.TAG.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'NULL' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'NULL' -LEVEL 'LEVEL
 
-'myprint -name 'OUTPUT'/hdiag_'obsnam.n.1'_'NAME'.'GC.1'_'LEVEL'_closeness_'obsnam.MERRA2.1'.'season
+             'myprint -name 'OUTPUT'/hdiag_'ctag.n'_'NAME'.'GC.1'_'LEVEL'_closeness_'ctag.TAG'.'season
 
+              if( DEBUG = "debug" )
+                  say "Hit ENTER to repeat plot, or NON-BLANK to continue"
+                  pull flag
+              else
+                  flag = "next"
+              endif
+             'c'
+         endwhile ;* END While_FLAG Loop
 
- if( DEBUG = "debug" )
-     say "Hit ENTER to repeat plot, or NON-BLANK to continue"
-     pull flag
- else
-     flag = "next"
- endif
-'c'
-endwhile ;* END While_FLAG Loop
-endif
-       n  = n + 1
-endwhile ;* END While_N Loop
+     endif :* END CTAG Test
 
-* End Season Test
+     n = n + 1
+     endwhile ;* END While_N Loop
+
 * ---------------
-endif
-* ---------------
-endwhile ;* END While_m>0 Loop
+endif ;* End Season Test
 
-endif ;* END MERRA-2 Test
+* ---------------
+endwhile ;* END SEASON Loop
+
+endif ;* END Closeness If Test
+
+k = k + 1
+endwhile ;* END While_k Loop
 
 return
+
+
 
 * Get Next EXP from CMPEXP List
 * -----------------------------

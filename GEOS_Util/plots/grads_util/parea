@@ -106,7 +106,9 @@ xleft  = x1 - 0.20*delx
 xright = x2 + 0.10*delx
 ybot =   y1 - 0.12*dely
 ytop =   y2 + 0.03*dely
+ytop =   y2 + 0.04*dely
 ymid = ( ybot + ytop )/2
 
+say 'xmid: 'xmid'  ybot: 'ybot'  ytop: 'ytop'  ymid: 'ymid'  xleft: 'xleft'  xright: 'xright
 return xmid' 'ybot' 'ytop' 'ymid' 'xleft' 'xright
 
