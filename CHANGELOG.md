@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Fixed
 ### Changed
+### Removed
+
+## [1.4.6] - 2021-07-21
+
+### Changed
 
 - Updates to plots package from L. Takacs
-
-### Removed
 
 ## [1.4.5] - 2021-06-25
 
