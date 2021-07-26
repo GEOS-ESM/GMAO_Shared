@@ -80,7 +80,7 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_am.png')
     pl.show()
 
-    rr.clean_weight_file()
+    #rr.clean_weight_file()
 
 def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     '''
@@ -111,7 +111,7 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     pl.savefig(f'{exp["plot_path"]}/sst-obs_am.png')
     pl.show()
 
-    rr.clean_weight_file()
+    #rr.clean_weight_file()
 
 def plot_gm(exp,da):
     plotter=plots.Plot1d()

@@ -51,20 +51,6 @@ def _load_mom(exp, collection):
                'areat': (('yh','xh'), grid['areat']),
                'atl_mask': (('yh','xh'), grid['atl_mask'])})
 
-#    ds_static=xr.open_dataset(exp["ocean_static"])
-#    ds.coords.update({'geolon': ds_static['geolon'],
-#                      'geolat': ds_static['geolat'],
-#                      'geolon_c': ds_static['geolon_c'],
-#                      'geolat_c': ds_static['geolat_c'],
-#                      'geolon_u': ds_static['geolon_u'],
-#                      'geolat_u': ds_static['geolat_u'],
-#                      'geolon_v': ds_static['geolon_v'],
-#                      'geolat_v': ds_static['geolat_v']})
-    
-#    ds.update({'dx': (('yh','xh'), ds_static['dxt']),
-#               'dy': (('yh','xh'), ds_static['dyt']),
-#               'area': (('yh','xh'), ds_static['area_t'])})
-
     return ds 
 
 def _get_loader(type):

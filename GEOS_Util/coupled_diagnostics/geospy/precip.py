@@ -74,7 +74,7 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     pl.savefig(f'{exp["plot_path"]}/precip-{cmpexp["expid"]}_am.png')
     pl.show()
 
-    rr.clean_weight_file()
+    #rr.clean_weight_file()
 
 def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     '''
@@ -105,7 +105,7 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     pl.savefig(f'{exp["plot_path"]}/precip-obs_am.png')
     pl.show()
 
-    rr.clean_weight_file()
+    #rr.clean_weight_file()
 
 def mkplots(exps,dsets):
     # Calculate climatologies for experiments to comapre

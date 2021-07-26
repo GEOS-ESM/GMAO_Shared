@@ -30,9 +30,13 @@ def main(exp_conf):
     import surf_stress
     surf_stress.mkplots(exps, ocn2d)
 
-    # Plot surface wind stress
+    # Plot surface wind stress in tropical Pacific
     import zonal_stress_tp
     zonal_stress_tp.mkplots(exps, ocn2d)
+
+    # Plot surface currents
+    import surf_current
+    surf_current.mkplots(exps, ocn2d)
 
     geosdset.close(ocn2d)
 
@@ -60,6 +64,15 @@ def main(exp_conf):
     salt.mkplots(exps, ocn3d)
 
     geosdset.close(ocn3d)
+
+    # Load MOM diagnostics
+    ocean_month=geosdset.load_collection(exps,'ocean_month',type='MOM')
+
+    # Plot AMOC stream function
+    import amoc
+    amoc.mkplots(exps,ocean_month)
+
+    geosdset.close(ocean.month)
 
     # Add more plots....
     

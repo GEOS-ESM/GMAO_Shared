@@ -4,12 +4,11 @@
 Docstring
 '''
 import sys, importlib
-import numpy as np
 import matplotlib.pyplot as pl
 import xarray as xr
 import cartopy.crs as ccrs
 import xesmf, cmocean
-import geosdset, plots, utils
+import geosdset, plots
 
 def mkclim(exp,dset):
     '''
@@ -75,7 +74,7 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
 
     pl.show()
 
-    rr.clean_weight_file()
+    #rr.clean_weight_file()
 
 def plot_diffobs(plotter, exp, clim, obsclim, obsname,obsvarname):
     '''
@@ -110,7 +109,7 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname,obsvarname):
 
     pl.show()
 
-    rr.clean_weight_file()
+    #rr.clean_weight_file()
 
 def mkplots(exps,dsets):
     # Calculate climatologies for experiments to comapre

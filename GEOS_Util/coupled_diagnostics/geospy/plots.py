@@ -39,6 +39,7 @@ class Plot2d(Plot):
         self.fill_opts.update(kwargs.get('fill_opts',{}))
         self.contour_opts=kwargs.get('contour_opts',{})
         self.quiver_opts=kwargs.get('quiver_opts',{})
+        self.stream_opts=kwargs.get('stream_opts',{})
         self.clab_opts={'fmt': '%1.1f'}
         self.clab_opts.update(kwargs.get('clab_opts',{}))
         
@@ -102,7 +103,39 @@ class Plot2d(Plot):
               y[::skip,::skip],
               ds[u].values[::skip,::skip],
               ds[v].values[::skip,::skip]]
-        cs=pl.quiver(*args,**self.quiver_opts)
+        cs=ax.quiver(*args,**self.quiver_opts)
+
+        return ax
+
+    def streamplot(self, ds, x, y, u, v, amplitude=True, ax=None):
+        '''
+        Makes a stream plot of vector data.
+        
+        Parameters
+        ----------
+        ds: Dataset with vector data components
+        x: name of x axis
+        y: name of y axis
+        u: name of U component
+        v: name of V component
+        amplitude: plot amplitude in shades
+        ax: axes
+        '''
+        
+        if ax is None:
+            ax=pl.gca()
+
+        if amplitude:
+            da=np.sqrt(ds[u]**2+ds[v]**2)
+            cs=da.plot.contourf(ax=ax,**self.fill_opts)
+
+        if ds[x].ndim==1:
+            x,y=np.meshgrid(ds[x].values,ds[y].values)
+        else:
+            x,y=ds[x].values,ds[y].values
+
+        args=[x,y,ds[u].values,ds[v].values]
+        cs=ax.streamplot(*args,**self.stream_opts)
 
         return ax
         
@@ -117,6 +150,7 @@ class PlotMap(Plot2d):
         self.fill_opts['transform']=ccrs.PlateCarree()
         self.contour_opts['transform']=ccrs.PlateCarree()
         self.quiver_opts['transform']=ccrs.PlateCarree()
+        self.stream_opts['transform']=ccrs.PlateCarree()
 
     def plot_map(self):
         ax=pl.axes(projection=self.projection)
@@ -163,6 +197,27 @@ class PlotMap(Plot2d):
             ax=self.plot_map()
 
         super(PlotMap,self).quiver(ds, x, y, u, v, ax=ax)
+
+        return ax
+
+    def streamplot(self, ds, x, y, u, v, ax=None):
+        '''
+        Makes a stream plot of vector data.
+        
+        Parameters
+        ----------
+        ds: Dataset with vector data components
+        x: name of x axis
+        y: name of y axis
+        u: name of U component
+        v: name of V component
+        ax: axes
+        '''
+        
+        if ax is None:
+            ax=self.plot_map()
+
+        super(PlotMap,self).streamplot(ds, x, y, u, v, ax=ax)
 
         return ax
 
