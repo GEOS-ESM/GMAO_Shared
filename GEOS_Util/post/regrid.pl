@@ -2824,7 +2824,7 @@ sub regrid_surface_rsts {
 
                 # use catch for catchcn, if needed. WJ note: use catch for cnclm40 only
                 #---------------------------------
-                if ($type eq "catchcnclm40_internal_rst") {
+                if ($type eq "catchcn${cnlist[0]}_internal_rst") {
                     $alt = "catch_internal_rst";
                     $src = $input_restarts{$alt};
                     if ($src) {
@@ -2851,6 +2851,12 @@ sub regrid_surface_rsts {
         symlinkinput($tile1, $InData_dir);
         symlinkinput($tile2, $OutData_dir);
     }
+
+    # link clsm directory to OutData
+    #-------------------------------
+    $clsm = dirname($tile2) ."/clsm";
+    $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
+    symlinkinput($clsm, $OutData_dir);
 
     # link rst directory to OutData
     #------------------------------
@@ -2915,12 +2921,6 @@ sub regrid_surface_rsts {
 
         move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
         move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn;
-
-        # link clsm directory to OutData
-        #-------------------------------
-        $clsm = dirname($tile2) ."/clsm";
-        $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
-        symlinkinput($clsm, $OutData_dir);
 
         # catch and/or catchcn restart only during this pass
         #---------------------------------------------------
