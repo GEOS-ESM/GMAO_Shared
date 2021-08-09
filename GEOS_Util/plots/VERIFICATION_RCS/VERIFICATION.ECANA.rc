@@ -2,7 +2,7 @@
 OBSNAM: ecops
 OBSDSC: ECMWF_OPNL_ANA
 
-        filename:   'VERIFICATION/ECMWF_OPS.NCDF3/xdf.tabl'
+        filename:   'VERIFICATION/ECMWF_OPS.NC4/xdf.tabl'
         filetype:   'HDF'
         fields:     'ZLE'      , 'DYN'           , 'HGHT'   , 1
                     'SLP'      , 'DYN'           , 'SLP'    , 1

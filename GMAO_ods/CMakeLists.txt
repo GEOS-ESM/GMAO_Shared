@@ -2,7 +2,7 @@ esma_set_this ()
 
 set (MODSRC
   m_ods.f90 m_roms.f90 m_odsmeta.f m_ods_structure.f m_ods_obsdiags.F90
-  m_saber.f m_odsxsup.f90 m_Sndx.F90 m_ODS_Sample.f m_mraob.f90
+  m_saber.f m_odsxsup.f90 m_Sndx.F90 m_ODS_Sample.f m_mraob.f90 m_obs_stats.F90
   )
 
 set (ODSSRC
@@ -31,7 +31,7 @@ set (ODSSRC
   ods_julhr.f     ods_ncp_itoi2.f  ods_resetp.f     odsnxtime.f
   ods_eget.f      ods_dcget.f      ods_dconv.f      ods_dcscan.f
   ods_drad.f      ods_dsbuv.f      ods_dpcp.f       ods_rmdupl.f
-  ods_do3lev.f 
+  ods_do3lev.f    ods_diagnc4.f90 
   )
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
@@ -89,7 +89,7 @@ install(
    DESTINATION bin
    )
 
-file (GLOB rc_files *.rc)
+file (GLOB rc_files CONFIGURE_DEPENDS *.rc)
 install (
    FILES ${rc_files} odslist.odt
    DESTINATION etc
@@ -100,15 +100,19 @@ install (
    DESTINATION lib/Python/pyods
    )
 
-include(UseF2Py)
-add_f2py_module(pyods_
-   SOURCES pyods_.F90
-   LIBRARIES GMAO_ods GMAO_mpeu ${NETCDF_LIBRARIES}
-   INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
-   DESTINATION lib/Python/pyods
-   USE_MPI
-   )
-add_dependencies(pyods_ ${this})
+if (USE_F2PY)
+   find_package(F2PY2)
+   if (F2PY2_FOUND)
+      esma_add_f2py2_module(pyods_
+         SOURCES pyods_.F90
+         LIBRARIES GMAO_ods GMAO_mpeu ${NETCDF_LIBRARIES}
+         INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
+         DESTINATION lib/Python/pyods
+         USE_MPI
+         )
+      add_dependencies(pyods_ ${this})
+   endif ()
+endif ()
 
 separate_arguments(ODSMETA_ARGS NATIVE_COMMAND "sed -e 's/integer, parameter//g' -e 's/:://g' -e 's/\!/   #/g' -e 's/^[ ]*//g'")
 add_custom_command (
