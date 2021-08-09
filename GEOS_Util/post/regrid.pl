@@ -1579,9 +1579,25 @@ sub check_rst_files {
             else       { $notfound{$type} = 1 }
         }
         foreach $type (keys %notfound) {
-            next if $type eq "catchcn${cnlist[0]}_internal_rst";
             $SURFACE{$type} = 0;
             $swFLG = 1;
+            if ($type eq "catchcn${cnlist[0]}_internal_rst") { 
+               $SURFACE{$type} = 1;
+               if (scalar(@cnlist) eq 4) {
+                  $fname = rstname($cnlist[1], $type, "%s.%s.${ymd}_0000");
+                  my $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
+                  $file = findinput($fname, $ldas_rst_dir);
+               }
+               elsif (scalar(@cnlist) eq 1) {
+                  $fname = rstname($expid, $type, "%s.%s.${ymd}_0000");
+                  $file  = findinput($fname);
+               }
+              if ($file) { $input_restarts{$type} = $file}
+              else  {
+                    die("File $file not found;");
+              }
+              next;
+            }
             if ($type eq "saltwater_internal_rst") {
                 $swFLG = 0 if $notfound{"openwater_internal_rst"};
                 $swFLG = 0 if $notfound{"seaicethermo_internal_rst"}
@@ -2906,7 +2922,8 @@ sub regrid_surface_rsts {
         $catch .= ".$tagID.$gridID" if $label;
 
         if ($mk_catchcn) {
-           $catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", $template2);
+           #$catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", $template2);
+           $catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", "%s.%s.${ymd}_${hr}z.nc4");
            $catchcnIN = "$InData_dir/$catchcnName";
            $catchcn = "$rstdir2/$catchcnName";
            $catchcn .= ".$tagID.$gridID" if $label;
@@ -3041,6 +3058,7 @@ sub rename_surface_rsts {
         }
         $newname = rstname($expid2, $type, "$outdir/$template2");
         $newname .= ".$tagID.$gridID" if $label;
+        if ($type eq "catchcn${cnlist[0]}_internal_rst" ){ $newname = rstname($expid2, $type, "$outdir/%s.%s.${ymd}_${hr}z.nc4")};
         move_("\n$newrst", $newname);
     }
 
