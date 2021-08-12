@@ -1584,9 +1584,16 @@ sub check_rst_files {
             if ($type eq "catchcn${cnlist[0]}_internal_rst") { 
                $SURFACE{$type} = 1;
                if (scalar(@cnlist) eq 4) {
+                  # find GEOSldas file first
                   $fname = rstname($cnlist[1], $type, "%s.%s.${ymd}_${hr}00");
                   my $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
                   $file = findinput($fname, $ldas_rst_dir);
+                  # find LDASsa file 
+                  unless ($file) {
+                     $fname = rstname($cnlist[1], $type, "%s.ens0000.%s.${ymd}_${hr}00z");
+                     $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
+                     $file = findinput($fname, $ldas_rst_dir);
+                  }         
                }
                elsif (scalar(@cnlist) eq 1) {
                   $fname = rstname($expid, $type, "%s.%s.${ymd}_${hr}00");
