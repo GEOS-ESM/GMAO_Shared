@@ -83,6 +83,7 @@
 # 2020.10.14 McCarty         COSMIC-2 single file for period before early Mar 2020
 # 2021.05.25 Wargan          Add npp_ompsnmeff_nc, npp_ompsnp_nc, aura_omieff_nc
 # 2021.06.03 RT/McCarty/RL   RO class including commencial data; max used of IASI MetopC
+# 2021.07.31 Todling         Add MLS-T for verification
 # 2021.08.18 Todling         Blacked out a few days of AIRS due to data corruption
 #
 #+BEGIN obclass data set description
@@ -124,6 +125,7 @@
 #+  npp_ompsnmeff_nc:  OMPS AM netcdf format
 #+  npp_ompsnp_nc:     OMPS PM netcdf format
 #+  aura_omieff_nc:    AURA OMI netcdf format
+#+  gmao_mlst_bufr:    MLS Retrieved Temperature (for verification in x-exp and FP)
 #+END
 #
 
@@ -408,4 +410,10 @@ END
 
 BEGIN aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
  20041001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+END
+
+# MLS retrieved temperature
+BEGIN gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
+ 20040813_00z-20150531_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v3/bufr/Y%y4/M%m2/MLSt.%y4%m2%d2.t%h2z.bufr
+ 20150601_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v4/bufr/Y%y4/M%m2/MLSt_v4.%y4%m2%d2.t%h2z.bufr
 END
