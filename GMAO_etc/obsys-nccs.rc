@@ -83,6 +83,7 @@
 # 2020.10.14 McCarty         COSMIC-2 single file for period before early Mar 2020
 # 2021.05.25 Wargan          Add npp_ompsnmeff_nc, npp_ompsnp_nc, aura_omieff_nc
 # 2021.06.03 RT/McCarty/RL   RO class including commencial data; max used of IASI MetopC
+# 2021.08.18 Todling         Blacked out a few days of AIRS due to data corruption
 #
 #+BEGIN obclass data set description
 #+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
@@ -314,7 +315,10 @@ BEGIN disc_airs_bufr => airs.%y4%m2%d2.t%h2z.bufr
   20100819_00z-20130405_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
   20130406_18z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
   20131012_00z-20170306_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
-  20170307_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20170307_00z-20201112_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201114_00z-20201123_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201125_00z-20201130_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201202_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
 # 20131001_00z-20131031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
 END
 BEGIN disc_amsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
