@@ -28,11 +28,14 @@ ecbuild_add_executable (TARGET binarytile.x SOURCES binarytile.F90)
 ecbuild_add_executable (TARGET rs_numtiles.x SOURCES rs_numtiles.F90)
 ecbuild_add_executable (TARGET rs_vinterp.x SOURCES rs_vinterp.F90)
 ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
+
 ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
   set_target_properties (stats.x PROPERTIES COMPILE_FLAGS ${DISABLE_FIELD_WIDTH_WARNING})
 endif ()
 set_target_properties (stats.x PROPERTIES COMPILE_FLAGS "${BIG_ENDIAN}")
+set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 
 file(GLOB perlscripts CONFIGURE_DEPENDS *.pl)

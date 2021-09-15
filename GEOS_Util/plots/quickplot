@@ -344,6 +344,7 @@ foreach plot ($plots)
   set datetime = `date +%Y%m%d_%H%M%S`
   if( ! -e $plots_dir/$plot.$datetime.$type ) mkdir -p $plots_dir/$plot.$datetime.$type
   cd       $plots_dir/$plot.$datetime.$type
+  echo "quickplot $argv" > quickplot.command
 
 # Configure QUICKPLOT to Computing Platform
 # -----------------------------------------

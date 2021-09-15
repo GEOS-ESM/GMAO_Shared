@@ -155,7 +155,8 @@ sub write_and_submit_jobfile {
     unlink $jobfile if -e $jobfile;
     unlink $jobfile if -e $logfile;
 
-    if ( -e "/etc/os-release" ) {
+    my $npn = `facter processorcount`; chomp($npn);
+    if ( $npn == 40 ) {
       $mynodes = "sky";
     } else {
       $mynodes = "hasw";

@@ -220,7 +220,7 @@ sub which_mpi_cmd {
        # For now use mpirun_rsh. At NCCS this should be
        # srun -n but as -np is *external* to esma_mpirun
        # this requires wholesale script changes
-       chomp($mpicmd = `which mpirun_rsh`);
+       chomp($mpicmd = `which mpiexec.mpirun_rsh`);
     } else {
        # Used by both Intel MPI and Open MPI
        chomp($mpicmd = `which mpirun`);
@@ -251,7 +251,7 @@ sub get_xtraflags {
 
     # flags needed for mvapich2 mpi
     #------------------------------
-    $xtraflags .= "-export -hostfile \$PBS_NODEFILE" if $mpi_type eq "mvapich2";
+    $xtraflags .= "-export" if $mpi_type eq "mvapich2";
 
     # flags needed for intel mpi
     #---------------------------

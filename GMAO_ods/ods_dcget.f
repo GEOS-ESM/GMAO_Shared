@@ -17,6 +17,7 @@
       use m_odsxsup, only : ncepQCXval 
       use m_Sndx,    only : setSndx
       use m_ods_obsdiags, only : ods_obsdiags_getparam
+      use netcdf
       
       Implicit NONE
 
@@ -64,7 +65,8 @@
 !       28Jan2014 - Todling     - read sensitivity slot indicator (ioff) from header
 !       02Apr2014 - Todling     - gather ob variance error for possible output option
 !       12Nov2014 - Weir        - add mopitt terra and acos/gosat+oco2 support
-!       2018-05-25  wargan      - added OMPS 
+!       2018-05-25  wargan      - added OMPS
+!       2019-04-15  Sienkiewicz - add handling of netcdf4 diag files.
 !
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,11 +110,29 @@
       integer,     allocatable, dimension(:)   :: iouse
       real(4),     allocatable, dimension(:)   :: pobs,gross,tnoise
 
+      integer                                  :: status, ncid
+
       character(len=20)  isis                ! sensor/instrument/satellite id  ex.amsua_n15
       character(len=10)  dplat               ! sattelite platform id
 
       
-      rc = 0 ! all is well to start with
+      rc = 0                    ! all is well to start with
+
+!     First determine whether this is a netCDF4 diag file
+!     ---------------------------------------------------
+      status =  nf90_open(path=trim(fname), mode = nf90_nowrite, ncid = ncid )
+      if ( status == nf90_noerr ) then
+         status = nf90_inquire_attribute(ncid,NF90_GLOBAL,'date_time')
+         if ( status /= nf90_noerr ) then
+            rc = 1
+            print *, myname_, ': error reading nc4 diag file'
+            return
+         end if
+         status = nf90_close(ncid)
+         call ods_diagnc4 ( fname, nymd, nhms, ods, rc )
+         return
+      end if
+          
       
 !     Inquire whether this is diag file w/ history of omx, osens, ...
 !     --------------------------------------------------------------- 
@@ -355,7 +375,8 @@
      &	       trim(satype)/='acos'.and. trim(satype)/='mopitt' .and.
      &         trim(satype)/='gome'  .and. trim(satype)/='ompslpuv' .and.
      &         trim(satype)/='ompslpvis' .and. trim(satype)/='ompsnm'.and.
-     &         trim(satype)/='ompsnp' ) then
+     &         trim(satype)/='ompsnp' .and. trim(satype)/='ompsnmeff' .and.
+     &         trim(satype)/='ompsnpnc') then
       
 !        Radiance data:
 !        -------------
@@ -435,7 +456,7 @@
 	 end if
 
          call ozone_getisat_(satype,dplat,isis,isat)
-         if(verbose) print *, 'will read *'//trim(dplat)//'* for ', satype, ' isat = ', isat, ' nchanl = ', nchanl
+         if(verbose) print *, 'will read *'//trim(dplat)//'* for ', satype, ' isat = ', isat
 	 	 
          ios = 0	    
          ndiag = ioff0

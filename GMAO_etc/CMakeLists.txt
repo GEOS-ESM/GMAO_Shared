@@ -86,6 +86,7 @@ set(perlscripts
 set(otherbin
    Functions.csh
    pyrob
+   pyrob_CF
    RmShmKeys_sshmpi.csh
    rmshmkeyhere.sh
    protex

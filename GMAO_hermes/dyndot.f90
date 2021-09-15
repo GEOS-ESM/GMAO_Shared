@@ -28,7 +28,7 @@
 
     argc = iargc()
     if ( argc < 1 ) call usage_()
-    nf=0
+    nf=0; iarg=0
     do i = 1, 32767
        iarg = iarg + 1
        if ( iarg .gt. argc ) exit
