@@ -8,12 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-
-- Added `pyrob_CF` script
-
 ### Fixed
 ### Changed
 ### Removed
+
+## [1.4.7] - 2021-10-04
+
+### Added
+
+- Added `pyrob_CF` script
+
+### Changed
+
+- Updates to support Catchment-CN.4.5 in addition to Catchment-CN.4.0
 
 ## [1.4.6] - 2021-09-15
 
