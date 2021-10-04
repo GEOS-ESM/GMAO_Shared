@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Removed
 
+## [1.4.6] - 2021-09-15
+
+### Changed
+
+- Updates to `regrid.pl` to allow processing of restarts for two different versions of Catchment-CN land model
+- change is zero-diff for Catchment and Catchment-CN4.0
+
 ## [1.4.6] - 2021-07-21
 
 ### Changed
