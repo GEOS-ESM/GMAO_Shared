@@ -120,6 +120,8 @@
 #+  mls_nrt_nc:        GMAO MLS near-real-time (nc4 format)
 #+  npp_ompsnm_bufr:   OMPS AM bufr format
 #+  npp_ompsnp_bufr:   OMPS PM bufr format
+#+  ncep_ahicsr_bufr:  NCEP HIMAWARI AHI bufr format
+#+  ncep_abicsr_bufr:  NCEP GOES ABI bufr format
 #+  npp_ompsnmeff_nc:  OMPS AM netcdf format
 #+  npp_ompsnp_nc:     OMPS PM netcdf format
 #+  aura_omieff_nc:    AURA OMI netcdf format
@@ -392,6 +394,16 @@ END
 BEGIN ncep_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
 # 20160511_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
   20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+END
+
+# NCEP HIMAWARI AHI clear-sky bufr
+BEGIN ncep_ahicsr_bufr => gdasp.%y4%m2%d2.t%h2z.ahicsr.ublk
+  20201029_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_gps/bufr/AHICSR/Y%y4/M%m2/gdasp.%y4%m2%d2.t%h2z.ahicsr.tm00.bufr_d
+END
+
+# NCEP GOES ABI clear-sky bufr
+BEGIN ncep_abicsr_bufr => gdasp.%y4%m2%d2.t%h2z.abicsr.ublk
+  20201029_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_gps/bufr/GSRCSR/Y%y4/M%m2/gdasp.%y4%m2%d2.t%h2z.gsrcsr.tm00.bufr_d
 END
 
 BEGIN npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
