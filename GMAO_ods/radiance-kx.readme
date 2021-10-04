@@ -126,6 +126,9 @@
  seviri      m09         seviri_m09                     9         989
  seviri      m10         seviri_m10                    10         990
  seviri      m11         seviri_m11                    11         991
+ abi         g16         abi_g16                       16         981
+ abi         g17         abi_g17                       17         982
+ ahi         himawari8   ahi_himawari8                  0         955
 !
 !
 !  Note:  hsb_aqua, amsre_aqua, imgr_* not really being used

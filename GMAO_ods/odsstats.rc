@@ -85,7 +85,9 @@ OBS*Class*Kxs::
 #  WLidar     226
    Dropsnd    132 232
    ATMS       900
-   SEVIRI     989 990
+   SEVIRI     988 989 990 991
+   ABI        981 982
+   AHI        955
    SSMI       708 710 711 713:715
 #  OMI        449
 ::
