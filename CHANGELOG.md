@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel. Requires ESMA_cmake v3.6.1
 
 ## [1.4.7] - 2021-10-04
 
