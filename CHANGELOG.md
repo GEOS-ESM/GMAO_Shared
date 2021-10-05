@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Removed
 
+## [1.4.8] - 2021-10-05
+
+### Fixed
+
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel
+
 ## [1.4.7] - 2021-10-04
 
 ### Added
