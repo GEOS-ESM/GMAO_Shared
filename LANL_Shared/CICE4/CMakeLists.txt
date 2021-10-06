@@ -54,4 +54,11 @@ if (CMAKE_SYSTEM_NAME MATCHES Linux)
    target_compile_definitions(${this} PRIVATE LINUX)
 endif ()
 
+# It turns out the new vectorized Release flags for Intel cause a segfault
+# in CICE4. For now, we workaround this by restoring the old non-vectorized
+# flags here when building as Release
+if (CMAKE_Fortran_COMPILER_ID MATCHES Intel AND CMAKE_BUILD_TYPE MATCHES Release)
+  set (CMAKE_Fortran_FLAGS_RELEASE  "${GEOS_Fortran_FLAGS_NOVECT}")
+endif ()
+
 ecbuild_add_executable(TARGET makdep SOURCES bld/makdep.c)
