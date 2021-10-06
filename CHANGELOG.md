@@ -6,14 +6,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-   
+
 ### Added
+### Fixed
+### Changed
+### Removed
+
+## [1.4.8] - 2021-10-05
 
 ### Fixed
 
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel. Requires ESMA_cmake v3.6.1
+
+## [1.4.7] - 2021-10-04
+
+### Added
+
+- Added `pyrob_CF` script
+
 ### Changed
 
-### Removed
+- Updates to support Catchment-CN.4.5 in addition to Catchment-CN.4.0
+
+## [1.4.6] - 2021-09-15
+
+### Changed
+
+- Updates to `regrid.pl` to allow processing of restarts for two different versions of Catchment-CN land model
+- change is zero-diff for Catchment and Catchment-CN4.0
+
+## [1.4.6] - 2021-07-21
+
+### Changed
+
+- Updates to plots package from L. Takacs
+
+## [1.4.5] - 2021-06-25
+
+### Fixed
+
+- Fix for IASI (#202)
+
+## [1.4.4] - 2021-06-25
+
+### Added
+
+- Add new `echorc.pl` script (alternative to `echorc.x`)
+- Added 181 levs to `GMAO_hermes/dyn2dyn.f90` and a frequency change in `GMAO_etc/obsys-nccs.rc`
+
+### Changed
+
+- Changed `esma_mpirun` for MVAPICH2
+
+## [1.4.3] - 2021-06-11
+
+### Added
+
+- Add changes consistent with what is in GEOSadas 5.28
 
 ## [1.4.2] - 2021-05-25
 

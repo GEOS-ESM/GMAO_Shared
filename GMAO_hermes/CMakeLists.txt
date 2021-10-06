@@ -73,7 +73,7 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET eta_echo.x       SOURCES eta_echo.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
    
-   install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
+   install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
 
 else ()
 
