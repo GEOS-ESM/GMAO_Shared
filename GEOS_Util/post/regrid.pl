@@ -23,10 +23,10 @@ use WriteLog qw(symlink_ system_ unlink_ );
 # global variables
 #-----------------
 my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT);
-my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir);
+my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir, $new_coupled_model_dir);
 my ($dbHash, $debug, $drymassFLG, $dyn2dynX, $expid);
-my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_);
-my ($grOUT, $grOUTocean, $grouplist, $grpID, $hr, $interactive);
+my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_, $mdlINocean);
+my ($grOUT, $grOUTocean, $mdlOUTocean, $grouplist, $grpID, $hr, $interactive);
 my ($interp_restartsX, $landIceDT, $lblFLG, $lcvFLG, $levsIN, $levsOUT);
 my ($logfile, $merra, $mk_RestartsX, $mk_catch, $mk_catchcn, $mk_route);
 my ($mkdrstdateX, $month, $newid, $node, $noprompt, $outdir, $outdir_save);
@@ -46,7 +46,7 @@ my (@anafiles, @cnlist, @warnings);
 # global tag variables
 #---------------------
 my $former_tag  = "Ganymed-4_0";       # default for input restarts
-my $current_tag = "Ganymed-4_0";       # default for output restarts
+my $current_tag = "Icarus-NLv3";       # default for output restarts
 
 my (@GCMtags, @DAStags);
 my (@F14, @F20, @F21, @G10, @G10p, @G20, @G30, @G40, @INL, @ICA);
@@ -90,14 +90,16 @@ foreach (qw/ 90 180 360 720 /) {
 
 # coupled ocean grids
 #--------------------
-%coupledFLG = ( "cc" => 1, "dd" => 1, "ee" => 1 );
-$imo{"cc"} =  "360"; $jmo{"cc"} = "200";
-$imo{"dd"} =  "720"; $jmo{"dd"} = "410";
+%coupledFLG = ( "aa" => 1, "cc" => 1, "dd" => 1, "ee" => 1 );
+$imo{"aa"} =   "72"; $jmo{"aa"} =   "36";
+$imo{"cc"} =  "360"; $jmo{"cc"} =  "200";
+$imo{"dd"} =  "720"; $jmo{"dd"} =  "410";
 $imo{"ee"} = "1440"; $jmo{"ee"} = "1080";
 
 # until an official location for coupled-model tiles is created
 #--------------------------------------------------------------
 $coupled_model_dir = "/discover/nobackup/yvikhlia/coupled/Forcings";
+$new_coupled_model_dir = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs";
 
 $coupled_model_tile{"CF0048x6C_TM0360xTM0200-Pfafstetter.til"} =
     "${coupled_model_dir}/Ganymed/a48x288_o360x200/";
@@ -261,7 +263,9 @@ sub init {
                "np|noprompt"     => \$noprompt,
                "levsout=s"       => \$levsOUT,
                "oceanin=s"       => \$grINocean,
+               "ocnmdlin=s"      => \$mdlINocean,
                "oceanout=s"      => \$grOUTocean,
+               "ocnmdlout=s"     => \$mdlOUTocean,
                "esmabin=s"       => \$ESMABIN,
                "iceDT=s"         => \$landIceDT,
                "newid=s"         => \$newid,
@@ -535,6 +539,7 @@ sub init_tag_arrays_and_hashes {
 sub check_inputs {
     my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
     my ($grINocean_dflt, $grOUTocean_dflt, $ii);
+    my ($mdlINocean_dflt, $mdlOUTocean_dflt);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
@@ -636,6 +641,7 @@ sub check_inputs {
         $tagIN  = "Fortuna-1_4";
         $grIN      = "d";
         $grINocean = "c";
+        $mdlINocean = "data";
 
         if    ($year < 1979) { die "Error. MERRA data < 1979 not available\n" }
         elsif ($year < 1989) { $expid = "d5_merra_jan79" }
@@ -648,6 +654,7 @@ sub check_inputs {
         $tagIN  = "Ganymed-4_0";
         $grIN      = "C180";
         $grINocean = "e";
+        $mdlINocean = "data";
 
         if ("$year$month" < 197901) {
             die "Error. MERRA-2 data < 1979 not available\n"
@@ -736,8 +743,12 @@ sub check_inputs {
     #
     # For non-cubed-sphere grids, $grINocean_ = $grINocean
     #---------------------------------------------------------------------------
-    $grINocean_dflt  = "c";
-    $grOUTocean_dflt = "c";
+    $grINocean_dflt   = "c";
+    $grOUTocean_dflt  = "c";
+
+    # These are the defaults for ocean models
+    $mdlINocean  = "data";
+    $mdlOUTocean = "data";
 
     unless ($grINocean  and ($imo{$grINocean}) and
             $grOUTocean and $imo{$grOUTocean}) {
@@ -750,6 +761,7 @@ sub check_inputs {
             .   "\n"
             .   "Coupled Ocean Grids\n"
             .   "-------------------\n"
+            .   "aa = 72x36\n"
             .   "cc = 360x200\n"
             .   "dd = 720x410\n"
             .   "ee = 1440x1080\n\n";
@@ -771,6 +783,13 @@ sub check_inputs {
     $grINocean_ = $grINocean unless $grINocean_;
     print "INPUT ocean grid: $grINocean_\n";
 
+    if (($grINocean eq "aa") or ($grINocean eq "cc") or 
+        ($grINocean eq "dd") or ($grINocean eq "ee")) {
+        until (($mdlINocean eq "MOM5") or ($mdlINocean eq "MOM6")) {
+           $mdlINocean = query("Coupled model output requested, Enter OUTPUT ocean model (MOM5 or MOM6):");
+        }
+    }
+
     # output ocean grid: $grOUTocean
     #-------------------------------
     until ($grOUTocean and $imo{$grOUTocean}) {
@@ -786,6 +805,12 @@ sub check_inputs {
         $jmo4{"CS"} = $jm4{$grOUT};
     }
     print "OUTPUT ocean grid: $grOUTocean\n";
+    if (($grOUTocean eq "aa") or ($grOUTocean eq "cc") or 
+        ($grOUTocean eq "dd") or ($grOUTocean eq "ee")) {
+        until (($mdlOUTocean eq "MOM5") or ($mdlOUTocean eq "MOM6")) {
+           $mdlOUTocean = query("Coupled model output requested, Enter OUTPUT ocean model (MOM5 or MOM6):");
+        }
+    }
 
     # check tag info: $tagIN and $tagOUT
     #-----------------------------------
@@ -2079,7 +2104,11 @@ sub set_IN_OUT {
             $bcsdir = "$bcsHEAD/$bcsTAG/$gridID";
         }
         if ($coupledFLG{$ogrid}) {
-            $bcsdir = (<${bcsdir}*>)[0];
+            if ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
+               $bcsdir = "$new_coupled_model_dir/Icarus-NLv3/$mdlOUTocean/$gridID_tile";
+            } else {
+               $bcsdir = (<${bcsdir}*>)[0];
+            }
         }
 
         die "Error; Cannot find bcs directory: $bcsdir;" unless -d $bcsdir;
@@ -2102,9 +2131,14 @@ sub set_IN_OUT {
         }
         $tile = "$bcsdir/$tile";
 
+        # Coupled tile files
         if ($coupledFLG{$ogrid}) {
             $tile = "${gridID_tile}-Pfafstetter.til";
-            $tile = "$coupled_model_tile{$tile}/$tile";
+            if ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
+               $tile = "$bcsdir/$tile";
+            } else {
+               $tile = "$coupled_model_tile{$tile}/$tile";
+            }
         }
 
         die "Error. Cannot find tile file: $tile" unless -f $tile;
@@ -3341,6 +3375,7 @@ sub write_CMD_file {
         }
         $capture .= " -tagin $tagIN"        if $capture !~ m/\s+\-tagin\b/;
         $capture .= " -oceanin $grINocean_" if $capture !~ m/\s+\-oceanin\b/;
+        $capture .= " -ocnmdlin $mdlINocean" if $capture !~ m/\s+\-ocnmdlin\b/;
     }
 
     if ($interactive) {
@@ -3365,6 +3400,7 @@ sub write_CMD_file {
     $capture .= " -rs $rsFLG"      if $capture !~ m/\s+\-rs\b/;
 
     $capture .= " -oceanout $grOUTocean" if $capture !~ m/\s+\-oceanout\b/;
+    $capture .= " -ocnmdlout $mdlOUTocean" if $capture !~ m/\s+\-ocnmdlout\b/;
 
     if ($mk_catchcn) {
         $capture .= " -catchcn"    if $capture !~ m/\s+\-catchcn\b/;
@@ -3905,15 +3941,26 @@ INTERACTIVE OPTION
                       note: the -np flag takes precedence over the -i flag
 
 OTHER OPTIONS
-   -levsout  levsout  number of atmosphere levels in output
-   -oceanin  oceanIN  ocean horizontal grid of inputs
-                      =c  : 1-deg (360x180); e.g. Reynolds
-                      =e  : 1/4-deg (1440x720); e.g. MERRA-2
-                      =f  : 1/8-deg (2880x1440); e.g. OSTIA
-                      =CS : OSTIA regridded to cubed-sphere
-                      defaults to \'c\'
-   -oceanout oceanOUT ocean horizontal grid of outputs (see -oceanIN)
-   -esmabin  ESMABIN  location of build\'s scripts and programs; defaults to location
+   -levsout   levsout  number of atmosphere levels in output
+   -oceanin   oceanIN  ocean horizontal grid of inputs
+                       data ocean grids
+                         =c  : 1-deg (360x180); e.g. Reynolds
+                         =e  : 1/4-deg (1440x720); e.g. MERRA-2
+                         =f  : 1/8-deg (2880x1440); e.g. OSTIA
+                         =CS : OSTIA regridded to cubed-sphere
+                       coupled ocean grids (requires choice of ocean model)
+                         =aa  : 5-deg (72x36)
+                         =cc  : 1-deg (360x200)
+                         =dd  : 1/2-deg (720x410)
+                         =ee  : 1/4-deg (1440x1080)
+                       defaults to \'c\'
+   -ocnmdlin  oceanMDL ocean input model
+                       data : data ocean (default)
+                       MOM5 : MOM5
+                       MOM6 : MOM6
+   -oceanout  oceanOUT ocean horizontal grid of outputs (see -oceanin)
+   -ocnmdlout oceanMDL ocean output model (see -ocnmdlin)
+   -esmabin   ESMABIN  location of build\'s scripts and programs; defaults to location
                       of regrid.pl script
    -iceDT     dtime   datetime for alternate landice rst input if regridding to
                       \'Ganymed-2_0\' from earlier tag; dtime should have the
@@ -3985,12 +4032,19 @@ GRID IDENTIFIERS
    ------------------
    Cn, where n = {12, 24, 48, 90, 180, 360, 500, 720, 1000, 1440, 2000, 2880, 5760}
 
-   Ocean Horizontal Grids
-   ======================
+   Data Ocean Horizontal Grids
+   ===========================
    c  = 1-deg   (360x180);   e.g. Reynolds
    e  = 1/4-deg (1440x720) ; e.g. MERRA-2
    f  = 1/8-deg (2880x1440); e.g. OSTIA
    CS = OSTIA regridded to cubed-sphere grid
+
+   Coupled Ocean Horizontal Grids
+   ==============================
+   aa  =   5-deg (72x36) (MOM6 only)
+   cc  =   1-deg (360x200)
+   dd  = 1/2-deg (720x410)
+   ee  = 1/4-deg (1440x1080)
 
 TAGS
    Use GCM or DAS tag names with -tagin and -tagout flags
