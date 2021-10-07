@@ -129,7 +129,7 @@ jobs:
           name: "GEOS_Shared branch"
           command: echo ${CIRCLE_BRANCH}
       - checkout:
-          path: MAPL
+          path: GEOSgcm
       - versions:
           compiler: << parameters.compiler >>
       - mepoclone:
