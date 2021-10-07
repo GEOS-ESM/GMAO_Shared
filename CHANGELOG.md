@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update remapping to be consistent with FV3
+
 ### Removed
 
 ## [1.4.10] - 2021-10-08
@@ -204,16 +206,6 @@ be deleted in future releases of MAPL
 ### Changed
 
 - Update plots consistent with latest cvs tags
-
-## [1.3.3] - 2020-10-28
-
-### Changed
-
-- Update remapping to be consistent with FV3
-
-### Fixed
-### Removed
-### Added
 
 ## [1.3.3] - 2020-10-28
 
