@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Fixed
 ### Changed
+
+- Updates to documentation tables for KX values
+
 ### Removed
 
 ## [1.4.8] - 2021-10-05
