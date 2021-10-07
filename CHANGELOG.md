@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
+- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU Make days
+
 ### Fixed
 ### Changed
 ### Removed
@@ -42,9 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updates to plots package from L. Takacs
 
 ## [1.4.5] - 2021-06-25
-
-- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU
-  Make days
 
 ### Fixed
 
