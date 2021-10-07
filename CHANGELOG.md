@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updates to documentation tables for KX values
 - Updates to `obsys-nccs.rc`
 - Updates to `g5fcst_stats.pl`
+- Updated the CI for GMAO_Shared to do Intel and GNU
 
 ### Removed
 
