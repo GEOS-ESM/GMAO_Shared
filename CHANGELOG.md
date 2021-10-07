@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Removed
 
+## [1.4.9] - 2021-10-06
+
+### Fixed
+
+- Fixed issue with `regrid.pl` and regridding `catch_internal_rst`
+
 ## [1.4.8] - 2021-10-05
 
 ### Fixed
