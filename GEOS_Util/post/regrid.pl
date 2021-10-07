@@ -2953,15 +2953,16 @@ sub regrid_surface_rsts {
         move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
         move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn;
 
-        # Note this was done above for if catchcn is being
-        # regridded. It is done here because it used to be done
-        # in previous versions
-
-        # link clsm directory to OutData
-        #-------------------------------
-        $clsm = dirname($tile2) ."/clsm";
-        $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
-        symlinkinput($clsm, $OutData_dir);
+        # Note this was done above if catchcn is being
+        # regridded. It is done here because now catch
+        # needs it, but we don't want to do it twice
+        unless ($mk_catchcn) {
+           # link clsm directory to OutData
+           #-------------------------------
+           $clsm = dirname($tile2) ."/clsm";
+           $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
+           symlinkinput($clsm, $OutData_dir);
+        }
 
         # catch and/or catchcn restart only during this pass
         #---------------------------------------------------
