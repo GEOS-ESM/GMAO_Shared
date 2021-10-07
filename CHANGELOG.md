@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Fixed
+
+- CMake fix for non-Intel compilers in GMAO_ods
+
 ### Changed
 ### Removed
 
