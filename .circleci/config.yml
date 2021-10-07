@@ -126,7 +126,7 @@ jobs:
     working_directory: /root/project
     steps:
       - run:
-          name: "GEOS_Shared branch"
+          name: "GMAO_Shared branch"
           command: echo ${CIRCLE_BRANCH}
       - checkout_fixture:
           repo: GEOSgcm
