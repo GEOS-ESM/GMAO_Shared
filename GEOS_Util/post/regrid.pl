@@ -2880,13 +2880,11 @@ sub regrid_surface_rsts {
     # link here if catchcn. Note that there is
     # *another* link to clsm below for the catch case
     if ($mk_catchcn) {
-
        # link clsm directory to OutData
        #-------------------------------
        $clsm = dirname($tile2) ."/clsm";
        $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
        symlinkinput($clsm, $OutData_dir);
-
     }
 
     # link rst directory to OutData
@@ -2957,15 +2955,12 @@ sub regrid_surface_rsts {
         # Note this was done above if catchcn is being
         # regridded. It is done here because now catch
         # needs it, but we don't want to do it twice
-        #
         unless ($mk_catchcn) {
-
            # link clsm directory to OutData
            #-------------------------------
            $clsm = dirname($tile2) ."/clsm";
            $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
            symlinkinput($clsm, $OutData_dir);
-
         }
 
         # catch and/or catchcn restart only during this pass
