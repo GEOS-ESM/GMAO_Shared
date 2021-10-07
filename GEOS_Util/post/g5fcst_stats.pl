@@ -21,7 +21,9 @@ use WriteLog qw(chdir_ query setprompt);
 
 # global variables
 #-----------------
-my ($anadir, $arcfile, $archiveFLG, $dasFLG, $dryrun, $etcdir);
+my ($EXP_ARCHIVE);
+my ($EXP_DATAMOVE_CONSTRAINT);
+my ($anadir, $arcfile, $archiveFLG, $dasFLG, $nodes, $dryrun, $etcdir);
 my ($expid, $fhours, $fhours_dflt, $fs_tag, $fv_etcdir);
 my ($idate, $ihh, $jobdir, $localID, $ncsuffix, $ndays, $noprompt, $nver);
 my ($offset_sec, $pesto, $progdir, $progtype, $secs_per_day, $secs_per_hour);
@@ -43,7 +45,7 @@ $secs_per_day  = 24 * $secs_per_hour;
     my ($fdir, $file, $getlist, $ffile, $ffile0, $fname, $fstatswork);
     my ($mm, $mm1, $ndate, $ndd, $ndy, $nmm, $ntime, $nv, $nyyyy);
     my ($pid, $vdate, $vdate0, $vdate1, $vdd, $vhh, $vhh0, $vhh1);
-    my ($vmm, $vtime, $vyyyy, $yyyy, $yyyy1);
+    my ($vmm, $vmn, $vtime, $vyyyy, $yyyy, $yyyy1);
     my (%args, %fcsthash, %pesto_dirs, %vanahash);
     my (@alist, @ana_fnames, @climfiles, @fcst_fnames, @fcstlist, @fcstget);
     my (@pesto_dir_list, @rmlist, @vanalist, @vanaget);
@@ -117,7 +119,7 @@ $secs_per_day  = 24 * $secs_per_hour;
         # for labeling output and log files
         #----------------------------------
         $vdate1 = $vdate;
-        $vhh1 = extract_hh($vtime);
+        ($vhh1, $vmn) = extract_hh_mn($vtime);
 
         # save initial verification date/time from first forecast
         # for labeling archive log
@@ -129,11 +131,11 @@ $secs_per_day  = 24 * $secs_per_hour;
 
         foreach $nv (1..$nver) {
             ($vyyyy, $vmm, $vdd) = extract_yyyy_mm_dd($vdate);
-            $vhh = extract_hh($vtime);
+            ($vhh, $vmn) = extract_hh_mn($vtime);
 
             if ($ihh eq "00" and $nv == 1) {
                 $fdir = "$vanadir/Y$nyyyy/M$nmm";
-                $fname = "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}z";
+                $fname = "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";
                 $ffile0 = "$fdir/$fname$ncsuffix";
             }
             else {
@@ -142,11 +144,11 @@ $secs_per_day  = 24 * $secs_per_hour;
                 #----------------------------------------------------------
                 if ($progtype eq "ana") {
                     $fdir  = "$anadir/Y$vyyyy/M$vmm";
-                    $fname = "$expid.ana.inst3d_met_p.${vdate}_${vhh}z";
+                    $fname = "$expid.ana.inst3d_met_p.${vdate}_${vhh}${vmn}z";
                 }
                 else {
                     $fdir  = "$progdir/Y$nyyyy/M$nmm/D$ndd/H$ihh";
-                    $fname = "$expid.prog.$progtype.${ndate}_${ihh}z+${vdate}_${vhh}z";
+                    $fname = "$expid.prog.$progtype.${ndate}_${ihh}z+${vdate}_${vhh}${vmn}z";
                 }
             }
             $ffile = "$fdir/$fname$ncsuffix";
@@ -159,12 +161,13 @@ $secs_per_day  = 24 * $secs_per_hour;
             # multiple naming convention options
             #-----------------------------------
             @alist = ();
-            if ($vexpid eq "gfs" or $vexpid eq "ecmwf") {
+            if ($vexpid eq "gfs" or $vexpid eq "ecmwf" or $vexpid eq "era5") {
                 push @alist, "$vexpid.$vanatype.${vdate}_${vhh}00z";
                 push @alist, "$vexpid.$vanatype.${vdate}_${vhh}z+${vdate}_${vhh}z";
+                push @alist, "$vexpid.$vanatype.${vdate}_${vhh}z+${vdate}_${vhh}${vmn}z";
             }
             else {
-                push @alist, "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}z";
+                push @alist, "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";
             }
 
             # loop through naming convention options
@@ -200,7 +203,7 @@ $secs_per_day  = 24 * $secs_per_hour;
 
         # get fcst and ana filenames
         #---------------------------
-        if ($vexpid eq "g5ncep" or $vexpid eq "gfs" or $vexpid eq "ecmwf") {
+        if ($vexpid eq "g5ncep" or $vexpid eq "gfs" or $vexpid eq "ecmwf" or $vexpid eq "era5") {
             if ($progtype eq "ana") {
                 push @fcst_fnames, "$expid.ana.inst3d_met_p.*$ncsuffix";
                 push @ana_fnames, "$vexpid.$vanatype.*$ncsuffix";
@@ -264,6 +267,8 @@ $secs_per_day  = 24 * $secs_per_hour;
             copy $file, $fstatswork or die "Error. copy failed: $file; $!";
         }
 
+        $nodes = "null" unless $nodes;
+
         # store calling arguments in a hash
         #----------------------------------
         $args{"ana_fnames_addr"}  = \@ana_fnames;
@@ -276,6 +281,7 @@ $secs_per_day  = 24 * $secs_per_hour;
         $args{"vdate1"}           = $vdate1;
         $args{"vhh0"}             = $vhh0;
         $args{"vhh1"}             = $vhh1;
+        $args{"nodes"}            = $nodes;
 
         # submit job to calculate stats
         #------------------------------
@@ -310,6 +316,11 @@ sub init {
     $ENV{"PATH"} = ".:$Bin:$ENV{PATH}";
     do "g5_modules_perl_wrapper";
 
+    $EXP_ARCHIVE = $ENV{"ARCHIVE"};
+    $EXP_ARCHIVE = $ENV{"FVARCH"} if $ENV{"FVARCH"};
+
+    $EXP_DATAMOVE_CONSTRAINT = $ENV{"DATAMOVE_CONSTRAINT"};
+
     # flush buffer after each output operation
     #-----------------------------------------
     $| = 1;
@@ -330,6 +341,8 @@ sub init {
 
                "storedir=s" => \$storedir,
                "archive!"   => \$archiveFLG,
+
+               "nodes=s"  => \$nodes,
 
                "das"      => \$dasFLG,
                "np"       => \$noprompt,
@@ -414,15 +427,15 @@ sub init {
 
     # get $anadir and $progdir
     #-------------------------
-    $anadir = "$ENV{ARCHIVE}/$expid/ana" unless $anadir;
+    $anadir = "$EXP_ARCHIVE/$expid/ana" unless $anadir;
     until (-d $anadir) {
         unless ($noprompt) {
             print "ANA directory does not exist: $anadir\n\n";
-            $anadir = query("forecast ana directory:", $anadir);
+            $anadir = query("verification ana directory:", $anadir);
         }
-        else { die "forecast ana directory does not exist: $anadir;" }
+        #else { die "verification ana directory does not exist: $anadir;" }
     }
-    $progdir = dirname($anadir) ."/prog" unless $progdir;
+    $progdir = "$EXP_ARCHIVE/$expid/prog" unless $progdir;
     until (-d $progdir) {
         unless ($noprompt) {
             print "forecase prog directory does not exist: $progdir\n\n";
@@ -462,14 +475,17 @@ sub init {
 
     # determine fs_tag
     #--------------------
-    $fs_tag = "fstats_$vanatype";
+    $fs_tag = "fstats_${vexpid}_$vanatype";
 
     if ($vanatype eq "inst3_3d_ana_Np") {
         $fs_tag = "fstats_ana"
     }
 
-    if ($vexpid eq "dctl573" or $vexpid eq "dhyb573a") {
-        $vanadir = "/archive/u/aelakkra/$vexpid/ana";
+    if ($vexpid eq "era5") {
+        $fs_tag = "fstats_era5";
+        if ($progtype eq "ana") {
+            $fs_tag = "astats_era5";
+        }
     }
     elsif ($vexpid eq "ecmwf") {
         $fs_tag = "fstats_ecmwf";
@@ -534,7 +550,7 @@ sub init {
 #=======================================================================
 sub das_check {
     my ($ndate, $ntime);
-    my ($calculate_stats, $fdatetime, $FVHOME, $dotSUBMITTED);
+    my ($calculate_stats, $fdatetime, $FVHOME, $dotDONEFCST);
     my ($ddate, $dtime, $ddatetime, $dotDONE, %notfound);
 
     $ndate = shift @_;
@@ -548,13 +564,13 @@ sub das_check {
     die "Error. FVHOME environment variable not defined;" unless $FVHOME;
     die "Error. Cannot find FVHOME directory: $FVHOME;" unless -d $FVHOME;
 
-    # check for fcst SUBMITTED hidden file
+    # check for fcst DONE hidden file
     #-------------------------------------
     $fdatetime = "${ndate}_" .substr($ntime, 0, 2) ."z";
-    $dotSUBMITTED = "$ENV{FVHOME}/fcst/.SUBMITTED.$fdatetime";
-    unless (-e $dotSUBMITTED) {
+    $dotDONEFCST = "$ENV{FVHOME}/fcst/.DONE_FCST.$fdatetime";
+    unless (-e $dotDONEFCST) {
         print "\nCannot find forecast hidden file:\n"
-            . "- $dotSUBMITTED\n\n";
+            . "- $dotDONEFCST\n\n";
         $calculate_stats = 0;
     }
 
@@ -585,12 +601,6 @@ sub das_check {
 #=======================================================================
 # name - write_g5fcst_stats_arc
 # purpose - write the g5fcst_stats.arc file
-#
-# NOTE:
-# The fstats_inputs.log entry is obsolete (renamed to fstats_run.log in fvsetup).
-# Both names are maintained in the arc file for old experiments which may be
-# transitioning to the new version of this script. Eventually the
-# fstats_inputs.log entry can be removed.
 #=======================================================================
 sub write_g5fcst_stats_arc {
     use File::Copy qw(move);
@@ -610,9 +620,7 @@ sub write_g5fcst_stats_arc {
 \${PESTOROOT}%s/prog/$fs_tag/Y%y4/M%m2/%s.%H2z.stats.b%y4%m2%d2_%h2z.e%Y4%M2%D2_%H2z.ctl2
 \${PESTOROOT}%s/prog/$fs_tag/Y%y4/M%m2/%s.%H2z.stats.b%y4%m2%d2_%h2z.e%Y4%M2%D2_%H2z.data
 \${PESTOROOT}%s/prog/$fs_tag/Y%y4/M%m2/%s.fstats.log.%y4%m2%d2_%h2z.txt
-\${PESTOROOT}%s/etc/Y%y4/M%m2/%s.fstats_inputs.log.%y4%m2%d2_%h2z.txt
 \${PESTOROOT}%s/etc/Y%y4/M%m2/%s.fstats_calc.log.%y4%m2%d2_%h2z.txt
-\${PESTOROOT}%s/etc/Y%y4/M%m2/%s.fstats_run.log.%y4%m2%d2_%h2z.txt
 EOF
 ;
     close ARC;
@@ -629,7 +637,9 @@ sub submit_calcjob {
     my ($logdir, $logfile1, $logfile2, $jobname, $jobdate, $jobfile, $jobtype);
     my ($cmd, $jobID, $jobIDline);
     my (@levs, @levels_19, @levels_11);
-    my ($mynodes, $mympi);
+    my ($mynodes,$usrnodes);
+    my ($qos, $partition);
+    my ($ntspn, $npn);
 
     @levels_19 = ( 1000.0, 975.0, 950.0, 925.0,
                     900.0, 850.0, 800.0, 750.0,
@@ -657,6 +667,7 @@ sub submit_calcjob {
     $fstatswork  = $args{"fstatswork"};
     $vdate1      = $args{"vdate1"};
     $vhh1        = $args{"vhh1"};
+    $usrnodes    = $args{"nodes"};
 
     foreach (@fcstlist, @vanalist) { push @rmfilelist, basename($_) };
 
@@ -671,34 +682,56 @@ sub submit_calcjob {
     $jobfile = "$jobdir/$jobname.j";
     $logfile1 = "$jobdir/$jobtype.log.$jobdate.o%j.txt";
     $logfile2 = "$logdir/$expid.$jobtype.log.$jobdate.txt";
-    if ( -e "/etc/os-release" ) {
+    $npn = `facter processorcount`; chomp($npn);
+    if ( $npn == 40 ) {
       $mynodes = "sky";
-      $mympi   = "mpirun";
+      $ntspn   = 36;
+      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
+      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
     } else {
       $mynodes = "hasw";
-      $mympi   = "mpiexec_mpt";
+      $ntspn   = 24;
+      $qos     = "";
+      $partition = "";
+#     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
+#     $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
     }
+    if ( $usrnodes ne "null" ) { $mynodes = $usrnodes }; # overwrite with specification from command line
 
     print "\nwriting jobfile: $jobfile\n";
     open FH, "> $jobfile" or die "Error opening $jobfile; $!";
     print FH <<"EOF" or die "Error writing to $jobfile: $!";
 #!/usr/bin/csh
+#SBATCH --ntasks=1
 #SBATCH --time=1:00:00
 #SBATCH --job-name=$jobname
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
 #SBATCH --constraint=$mynodes
+$qos
+$partition
 
 source $Bin/g5_modules
 set echo
 chdir $fstatswork
 
-$dryrun $mympi $statsX -np 1 -fcst @fcst_fnames \\
+# slurm env is messed up (inconsistent)
+#unsetenv SLURM_MEM_PER_CPU
+unsetenv SLURM_MEM_PER_GPU
+unsetenv SLURM_MEM_PER_NODE
+
+if ( \$?I_MPI_ROOT ) then
+  set mympi = "mpirun"
+else
+  set mympi = "mpiexec_mpt"
+endif
+
+$dryrun \$mympi -np 1 $statsX -fcst @fcst_fnames \\
                     -ana @ana_fnames \\
                     -cli @climfiles \\
                     -tag $expid.${ihh}z \\
                     -nfreq ${tau_freq}0000 \\
-                    -levs "@levs" \\
+                    -levs @levs \\
                     -o $expid.fstats.log.$jobdate.txt \\
                     -verif gmao \\
                     -fcsrc gmao \\
@@ -772,12 +805,6 @@ sub submit_archivejob {
     if ($ndays == 1) { $dtFLG = "-date $vdate0 -syntime ${vhh0}0000" }
     else             { $dtFLG = "" }    
 
-    if ( -e "/etc/os-release" ) {
-      $mynodes = "sky";
-    } else {
-      $mynodes = "hasw";
-    }
-
     # write archive jobfile
     #----------------------
     print "writing jobfile: $jobfile\n";
@@ -787,9 +814,9 @@ sub submit_archivejob {
 #SBATCH --time=1:00:00
 #SBATCH --job-name=$jobname
 #SBATCH --partition=datamove
+#$EXP_DATAMOVE_CONSTRAINT
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
-#SBATCH --constraint=$mynodes
 
 set echo
 @ archive_status = 0
@@ -799,7 +826,7 @@ foreach dir ( \\
     $pesto -arc $arcfile \\
            -expid $expid $dtFLG \\
            -d $storedir/$expid/\$dir \\
-           -r $ENV{"ARCHIVE"} \\
+           -r $EXP_ARCHIVE \\
            -l -v -clean
 
     @ archive_status += \$status
@@ -836,7 +863,7 @@ EOF
     foreach (@statsIDs) { $deps .= ":$_" if $_ }
 
     $dependFLG = "";
-    $dependFLG = "--dependency afterany$deps" if $deps;
+    $dependFLG = "--dependency=afterany$deps" if $deps;
 
     print "submitting jobfile: $jobfile\n";
     $cmd = "sbatch $dependFLG $jobfile";
@@ -848,8 +875,8 @@ EOF
 }
 
 #=======================================================================
-# name: extract_hh
-# purpose: extract hh value from hhmmss string
+# name: extract_hh_mn
+# purpose: extract hh and mn values from hhmmss string
 #
 # input parameter:
 # => $hhmmss: input time string
@@ -857,13 +884,13 @@ EOF
 # return value:
 # => $hh: extracted hour value
 #=======================================================================
-sub extract_hh {
-    my ($hhmmss, $hh);
+sub extract_hh_mn{
+    my ($hhmmss, $hh, $mn);
     $hhmmss = shift @_;
 
-    ($hh) = ($hhmmss =~ m/^(\d{2})\d{4}$/)
+    ($hh, $mn) = ($hhmmss =~ m/^(\d{2})(\d{2})\d{2}$/)
         or die "Error. Undecipherable time: $hhmmss;";
-    return $hh;
+    return $hh, $mn;
 }
 
 #=======================================================================
@@ -954,6 +981,7 @@ OPTIONS [defaults in brackets]
                        [dirname(\$FVHOME) or \$NOBACKUP]
     -noarchive         do not archive outputs [archives by default]
 
+    -nodes nodesname   specify nodes (e.g., sky or hasw)
     -das               check for DAS hidden files before attempting to fetch files
                        and set no prompt; requires \$FVHOME environment variable;
 

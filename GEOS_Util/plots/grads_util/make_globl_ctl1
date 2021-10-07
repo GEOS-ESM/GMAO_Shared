@@ -80,14 +80,24 @@ set year0  = `echo $nymd | cut -c1-4`
 set month  = `echo $nymd | cut -c5-6`
 set month0 = `echo $nymd | cut -c5-6`
 
-set TDEF = `grep  TDEF $files[1]`
+set TDEF = `grep -i  TDEF $files[1]`
 set TDEF = `echo $TDEF | sed -e "s/ /./g"`
 set TMAX = `echo $TDEF | cut -d'.' -f2`
-set TINC = `echo $TDEF | cut -d'.' -f5`
-@   bits = `printf $TINC | wc -c` - 2
-@   TINC = `echo   $TINC | cut -c1-$bits`
+set TINK = `echo    $TDEF | cut -d'.' -f5`
+@   bits = `printf  $TINK | wc -c` - 2
+@   TINC = `echo    $TINK | cut -c1-$bits`
 MATH  TINC = ${TINC}
+@   UNIT = $bits + 1
+set UNIT = `echo   $TINK | cut -c${UNIT}-`
+if( $UNIT == 'mn' ) then
+MATH  TINC = ${TINC}/60
+endif
+
 MATH  NDAY = (${TMAX}-1)*${TINC}/24
+echo TINK: $TINK
+echo TINC: $TINC
+echo UNIT: $UNIT
+echo NDAY: $NDAY
 set   NDAY =  `echo ${NDAY} | cut -d. -f1`
 @    SFCST =  ${NDAY} * 86400
 

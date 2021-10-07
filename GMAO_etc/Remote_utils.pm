@@ -35,7 +35,7 @@ require Exporter;
 
 $DEFAULT_RSH = "/usr/bin/ssh";
 $DEFAULT_RCP = "/usr/bin/scp";
-$DEFAULT_WGET = "/usr/local/other/SLES11.3/wget/1.18/bin/wget --no-check-certificate";
+$DEFAULT_WGET = "wget --no-check-certificate";
 
 #===================== Global Variables =============================#
 
@@ -1892,7 +1892,7 @@ sub rflist {
 
    if ( $remote_machine eq "http" || $remote_machine eq "https" ) {
 # Reconstruct URL without extra : characters.
-      $url         = "http:${remote_file}${extra}";
+      $url         = "${remote_machine}:${remote_file}${extra}";
       $dir         = dirname ("$url");
       $regex_raw   = basename ("$url");
       $regex_raw   =~s/\*/\.\*/g;

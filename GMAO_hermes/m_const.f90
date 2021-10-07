@@ -61,11 +61,14 @@
                                                                                 
 !     Thermodynamic constants                                                       
 !     -----------------------                                                       
+      real, parameter ::  capice = 2000.    ! MAPL J/(K kg)
       real, parameter ::  cpd    = 1004.16 
       real, parameter ::  cpm    = 1004.64
       real, parameter ::  cpv    = 1869.46 
-      real, parameter ::  alhl   = 2.499e6 ! Latent heat consensation
-      real, parameter ::  alhs   = 2.845e6 ! Latent heat sublimation
+!     real, parameter ::  alhl   = 2.499e6  ! Latent heat consensation
+      real, parameter ::  alhl   = 2.4665e6 ! Latent heat consensation J/kg (MAPL)
+      real, parameter ::  alhs   = 2.845e6  ! Latent heat sublimation
+      real, parameter ::  alhf   = 3.3370e5 ! Latent heat sublimation J/Kg
       real, parameter ::  stfbol = 5.6734e-8 
       real, parameter ::  airmw  = 28.965  ! molecular weight of air
       real, parameter ::  h2omw  = 18.015  ! molecular weight of H2O
@@ -80,6 +83,7 @@
       real, parameter ::  tice   = 273.16  ! Freezing point    
 !     real, parameter ::  zvir   = 4.61e2/rgas - 1.
       real, parameter ::  zvir   = rvap/rgas-1.0 ! MAPL
+      real, parameter ::  capwtr = 4218.         ! MAPL (J/(kg K))
                                       
 
 
@@ -97,6 +101,11 @@
       real, parameter ::  eps     = h2omw/airmw
       real, parameter ::  virtcon = 0.609      
       real, parameter ::  epsfac  = eps*heatw/rgas*caltoj 
+
+!     Constituents
+!     ------------
+      real, parameter :: o3_ppmv2gpg =  1.6571e-6
+      real, parameter :: o3_gpg2ppmv =  1.0/o3_ppmv2gpg
                                                                                 
 !EOC
 

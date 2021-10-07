@@ -6,6 +6,7 @@
 #
 #  dtype      dplat* isat   kx
 
+   ompsnm       npp        427
   tomseff         -    0   440
   tomseff     nim07    1   441
   tomseff        ep    2   442
@@ -37,6 +38,8 @@
     mls30*        -    0   325
     mls55         -    0   330
     mls55      aura    0   330
+    ompslp      npp    0   335
+    ompsnp      npp    0   437
 
 # Notes for (*):
 #

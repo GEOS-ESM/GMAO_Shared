@@ -7,10 +7,166 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Changed
-### Fixed
-### Removed
 ### Added
+
+### Fixed
+
+### Changed
+
+### Removed
+
+## [1.4.10] - 2021-10-08
+
+### Added
+
+- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU Make days
+- Added `parallel_untar.py` script
+- Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
+
+### Fixed
+
+- CMake fix for non-Intel compilers in GMAO_ods
+
+### Changed
+
+- Updates to documentation tables for KX values
+- Updates to `obsys-nccs.rc`
+- Updates to `g5fcst_stats.pl`
+- Updated the CI for GMAO_Shared to do Intel and GNU
+
+## [1.4.9] - 2021-10-06
+
+### Fixed
+
+- Fixed issue with `regrid.pl` and regridding `catch_internal_rst`
+
+## [1.4.8] - 2021-10-05
+
+### Fixed
+
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel. Requires ESMA_cmake v3.6.1
+
+## [1.4.7] - 2021-10-04
+
+### Added
+
+- Added `pyrob_CF` script
+
+### Changed
+
+- Updates to support Catchment-CN.4.5 in addition to Catchment-CN.4.0
+
+## [1.4.6] - 2021-09-15
+
+### Changed
+
+- Updates to `regrid.pl` to allow processing of restarts for two different versions of Catchment-CN land model
+- change is zero-diff for Catchment and Catchment-CN4.0
+
+## [1.4.6] - 2021-07-21
+
+### Changed
+
+- Updates to plots package from L. Takacs
+
+## [1.4.5] - 2021-06-25
+
+### Fixed
+
+- Fix for IASI (#202)
+
+## [1.4.4] - 2021-06-25
+
+### Added
+
+- Add new `echorc.pl` script (alternative to `echorc.x`)
+- Added 181 levs to `GMAO_hermes/dyn2dyn.f90` and a frequency change in `GMAO_etc/obsys-nccs.rc`
+
+### Changed
+
+- Changed `esma_mpirun` for MVAPICH2
+
+## [1.4.3] - 2021-06-11
+
+### Added
+
+- Add changes consistent with what is in GEOSadas 5.28
+
+## [1.4.2] - 2021-05-25
+
+### Added
+
+Add ability to write out energy components to file.
+
+### Fixed
+
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
+
+## [1.4.1] - 2021-05-14
+
+- Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+
+### Fixed
+
+- In `regrid.pl`: Fixed the -wemin and -wemout options so that they will accept integer values; Also added Jason-NL BCS tag choice
+- Fixes for PSAS code and Intel MPI
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
+
+## [1.4.0] - 2021-04-15
+
+### Fixed
+
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
+- Fixed build for directories that are built as part of the GEOSdas
+
+## [1.3.10] - 2021-04-02
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+
+## [1.3.9] - 2021-03-17
+
+### Fixed
+
+- Fix for out-of-bounds error in lightning module (#99)
+
+### Changed
+
+- Stats plot updates
+
+### Added
+
+- Extend binary tile to supprot future river route component development
+
+### Removed
+
+- Remove `CMIP_1977_1982` directory in `GEOS_Util/pre/NSIDC-OSTIA_SST-ICE_blend`
+
+## [1.3.8] - 2021-02-12
+
+### Changed
+
+- Plot and stats updates
+
+### Removed
+
+- Eliminated references to MAPL_COMM - these are no longer used and will
+be deleted in future releases of MAPL
+
+## [1.3.7] - 2021-01-29
+
+### Changed
+
+- Plot and stats updates
+
+### Fixed
+
+- Fix flags for `zonal.f` compilation
 
 ## [1.3.6] - 2021-01-12
 

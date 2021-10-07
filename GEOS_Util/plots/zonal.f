@@ -142,6 +142,7 @@ c ---------------------------
                 vz(:,L) = dum(:)
             else
                 vz(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading VZ, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -152,6 +153,7 @@ c ---------------------------
                 tz(:,L) = dum(:)
             else
                 tz(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading TZ, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -162,6 +164,7 @@ c ---------------------------
                 vptpz(:,L) = dum(:)
             else
                 vptpz(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading VPTPZ, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -172,6 +175,7 @@ c ---------------------------
                 pl(:,L) = dum(:)
             else
                 pl(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading PL, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -182,6 +186,7 @@ c ---------------------------
                 pk(:,L) = dum(:)
             else
                 pk(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading PK, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -192,6 +197,7 @@ c ---------------------------
                 uz(:,L) = dum(:)
             else
                 uz(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading UZ, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -202,6 +208,7 @@ c ---------------------------
                 upvpz(:,L) = dum(:)
             else
                 upvpz(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading UPVPZ, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo
@@ -212,6 +219,7 @@ c ---------------------------
                 upwpz(:,L) = dum(:)
             else
                 upwpz(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading UPWPZ, setting to UNDEF'
             endif
             lrec = lrec+1
          enddo

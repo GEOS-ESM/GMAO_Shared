@@ -41,7 +41,7 @@ my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
 my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
 my (%jm, %jm4, %jm5, %jmo, %jmo4, %newLand);
-my (@anafiles, @warnings);
+my (@anafiles, @cnlist, @warnings);
 
 # global tag variables
 #---------------------
@@ -172,10 +172,10 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 
 %SURFACE      = ("catch_internal_rst"        => 1,
                  "catchcn_internal_rst"      => 1,
+                 "route_internal_rst"        => 1,		 
                  "lake_internal_rst"         => 1,
                  "landice_internal_rst"      => 1,
                  "openwater_internal_rst"    => 1,
-                 "route_internal_rst"        => 1,
                  "saltwater_internal_rst"    => 1,
                  "seaicethermo_internal_rst" => 1);
 
@@ -270,10 +270,10 @@ sub init {
                "tar"             => \$tarFLG,
                "rs=i"            => \$rsFLG,
                "catch"           => \$mk_catch,
-               "catchcn"         => \$mk_catchcn,
+               "catchcn=s"       => \$mk_catchcn,
                "route"           => \$mk_route,
-               "wemin"           => \$wemIN,
-               "wemout"          => \$wemOUT,
+               "wemin=i"         => \$wemIN,
+               "wemout=i"        => \$wemOUT,
                "bkg!"            => \$bkgFLG,
                "lbl!"            => \$lblFLG,
                "lcv!"            => \$lcvFLG,
@@ -465,7 +465,7 @@ sub init_tag_arrays_and_hashes {
 
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-    @INL  = qw( INL Icarus-NL Icarus-NLv3 );
+    @INL  = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
 
     foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0" }
@@ -534,10 +534,11 @@ sub init_tag_arrays_and_hashes {
 #=======================================================================
 sub check_inputs {
     my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
-    my ($grINocean_dflt, $grOUTocean_dflt);
+    my ($grINocean_dflt, $grOUTocean_dflt, $ii);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
+    my (@cnlabel);
 
     # check for input tarfile
     #------------------------
@@ -880,13 +881,15 @@ sub check_inputs {
     else          { $mk_catch = 0; $mk_catchcn = 0; $mk_route = 0 }
 
     # get minimum snow water equivalent threshold
-    # (WEmin = 13 mm is newer value, from SMAP Nature Run 7.2, and Icarus-NL*
+    # (WEmin = 13 mm is newer value, from SMAP Nature Run 7.2, and Icarus-NL*;  was also used in (original) MERRA
     #  WEmin = 26 mm is older value, used in MERRA-2)
     #-----------------------------------------------
     if ($mk_catch or $mk_catchcn) {
-        print "\nMinimum snow water equivalent thresholds (WEmin) needed for catch(cn).\n"
-            .   "  WEmin = 13 mm is newer value (INL),\n"
-            .   "  WEmin = 26 mm is older value (ICA,G40)\n"
+        print "\nRegridding of Catch[CN] restarts requires specification of minimum snow water equivalent\n"
+            .   "values (WEmin) for the runs associated with the source (input) and target (output) restarts.\n"
+            .   "FYI, the following values are used in existing GEOS systems:\n"
+            .   "  WEmin = 26 kg/m2 : FP 5.13-5.22, MERRA-2, MERRA-Land, (Fortuna, Ganymed [G40], Icarus [ICA])\n"
+            .   "  WEmin = 13 kg/m2 : FP 5.25-    , MERRA,               (Icarus-NewLand [INL])\n"
             .   "----------------------------------------------\n";
 	
         if ($newLand{$bcsTagIN}) { $wemINdflt = 13 }
@@ -910,6 +913,25 @@ sub check_inputs {
     #------------------------------------
     $mk_catchcn = 0 if $rank{$bcsTagOUT} < $rank_1_catchcn;
     $mk_route = 0 if $rank{$bcsTagOUT} < $rank_1_route;
+
+    # get CNLIST values
+    #------------------
+    @cnlist = split(/,/, $mk_catchcn) if $mk_catchcn;
+    if ($mk_catchcn) {
+	   unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
+	      @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
+	      foreach $ii (0..3) {
+		      $prompt = "Enter Carbon (CN) $cnlabel[$ii]";
+		      if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
+		      else              { $cnlist[$ii] = query($prompt) }
+	      }
+	      $mk_catchcn = join(",", @cnlist[0..3]);
+	   }
+
+      unless ( $cnlist[0] eq "clm40" or $cnlist[0] eq "clm45") {
+         die "Error. CN_VERSION should be clm40 or clm45\n";
+      } 
+    }
 
     # get zoom value
     #---------------
@@ -1542,8 +1564,13 @@ sub check_rst_files {
     %notfound = ();
     if ($surfFLG) {
         foreach $type (sort keys %SURFACE) {
-            if ($type eq "catchcn_internal_rst") { next unless $mk_catchcn }
-            if ($type eq "route_internal_rst")   { next }
+            if ($type eq "catchcn_internal_rst")    { 
+               next unless $mk_catchcn;
+               delete($SURFACE{$type});
+               $type = "catchcn${cnlist[0]}_internal_rst";
+               $SURFACE{$type} = 1;
+            }
+            if ($type eq "route_internal_rst")      { next }
 
             $fname = rstname($expid, $type, $rstIN_template);
             $file  = findinput($fname);
@@ -1552,9 +1579,32 @@ sub check_rst_files {
             else       { $notfound{$type} = 1 }
         }
         foreach $type (keys %notfound) {
-            next if $type eq "catchcn_internal_rst";
             $SURFACE{$type} = 0;
             $swFLG = 1;
+            if ($type eq "catchcn${cnlist[0]}_internal_rst") { 
+               $SURFACE{$type} = 1;
+               if (scalar(@cnlist) eq 4) {
+                  # find GEOSldas file first
+                  $fname = rstname($cnlist[1], $type, "%s.%s.${ymd}_${hr}00");
+                  my $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
+                  $file = findinput($fname, $ldas_rst_dir);
+                  # find LDASsa file 
+                  unless ($file) {
+                     $fname = rstname($cnlist[1], $type, "%s.ens0000.%s.${ymd}_${hr}00z");
+                     $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
+                     $file = findinput($fname, $ldas_rst_dir);
+                  }         
+               }
+               elsif (scalar(@cnlist) eq 1) {
+                  $fname = rstname($expid, $type, "%s.%s.${ymd}_${hr}00");
+                  $file  = findinput($fname);
+               }
+              if ($file) { $input_restarts{$type} = $file}
+              else  {
+                    die("File $file not found;");
+              }
+              next;
+            }
             if ($type eq "saltwater_internal_rst") {
                 $swFLG = 0 if $notfound{"openwater_internal_rst"};
                 $swFLG = 0 if $notfound{"seaicethermo_internal_rst"}
@@ -2711,9 +2761,11 @@ sub regrid_surface_rsts {
 
     foreach $type (sort keys %SURFACE) {
         next unless $SURFACE{$type};
-        if ($type eq "catch_internal_rst")   { next unless $mk_catch }
-        if ($type eq "catchcn_internal_rst") { next unless $mk_catchcn }
-        if ($type eq "route_internal_rst")   { next unless $mk_route }
+        if ($type eq "catch_internal_rst")      { next unless $mk_catch }
+        if ($type eq "catchcn_internal_rst")    { next }
+        if ($type eq "catchcn${cnlist[0]}_internal_rst") { next unless $mk_catchcn};
+
+        if ($type eq "route_internal_rst")      { next unless $mk_route }
 
         if ($landIceDT) {
             if ($H1{"landIce"}) {
@@ -2738,9 +2790,9 @@ sub regrid_surface_rsts {
         $flags .= " -openwater" if $input_restarts{"openwater_internal_rst"};
         $flags .= " -seaice"    if $input_restarts{"seaicethermo_internal_rst"};
 
-        $flags .= " -route"            if $mk_route;
-        $flags .= " -catch"            if $mk_catch;
-        $flags .= " -catchcn"          if $mk_catchcn;
+        $flags .= " -route"               if $mk_route;
+        $flags .= " -catch"               if $mk_catch;
+        $flags .= " -catchcn $mk_catchcn" if $mk_catchcn;
         $flags .= " -wemin $wemIN"     if $mk_catch or $mk_catchcn;
         $flags .= " -wemout $wemOUT"   if $mk_catch or $mk_catchcn;
         $flags .= " -surflay $surflay" if $mk_catch or $mk_catchcn;
@@ -2777,7 +2829,7 @@ sub regrid_surface_rsts {
         $template1 = $H1{"template"};
 
         $catchtype{"catch_internal_rst"} = 1;
-        $catchtype{"catchcn_internal_rst"} = 1;
+        $catchtype{"catchcn${cnlist[0]}_internal_rst"} = 1;
 
         foreach $type (@SFC) {
             next if $type eq "route_internal_rst";
@@ -2793,9 +2845,9 @@ sub regrid_surface_rsts {
             else {
                 print_("\n$type not found.\n");
 
-                # use catch for catchcn, if needed
+                # use catch for catchcn, if needed. WJ note: use catch for cnclm40 only
                 #---------------------------------
-                if ($type eq "catchcn_internal_rst") {
+                if ($type eq "catchcn${cnlist[0]}_internal_rst") {
                     $alt = "catch_internal_rst";
                     $src = $input_restarts{$alt};
                     if ($src) {
@@ -2821,6 +2873,18 @@ sub regrid_surface_rsts {
     } else {
         symlinkinput($tile1, $InData_dir);
         symlinkinput($tile2, $OutData_dir);
+    }
+
+    # catchcn apparently needs clsm here, but
+    # this breaks the catch regridding. So only
+    # link here if catchcn. Note that there is
+    # *another* link to clsm below for the catch case
+    if ($mk_catchcn) {
+       # link clsm directory to OutData
+       #-------------------------------
+       $clsm = dirname($tile2) ."/clsm";
+       $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
+       symlinkinput($clsm, $OutData_dir);
     }
 
     # link rst directory to OutData
@@ -2870,12 +2934,13 @@ sub regrid_surface_rsts {
         $catch = "$rstdir2/$catchName";
         $catch .= ".$tagID.$gridID" if $label;
 
-        $catchcnName = rstname($expid2, "catchcn_internal_rst", $template2);
-        $catchcnIN = "$InData_dir/$catchcnName";
-
-        $catchcn = "$rstdir2/$catchcnName";
-        $catchcn .= ".$tagID.$gridID" if $label;
-
+        if ($mk_catchcn) {
+           #$catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", $template2);
+           $catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", "%s.%s.${ymd}_${hr}z.nc4");
+           $catchcnIN = "$InData_dir/$catchcnName";
+           $catchcn = "$rstdir2/$catchcnName";
+           $catchcn .= ".$tagID.$gridID" if $label;
+        }
         # new input directory for step 2
         #-------------------------------
         move_($InData_dir, "$InData_dir.step1", $verbose);
@@ -2887,20 +2952,25 @@ sub regrid_surface_rsts {
         move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
         move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn;
 
-        # link clsm directory to OutData
-        #-------------------------------
-        $clsm = dirname($tile2) ."/clsm";
-        $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
-        symlinkinput($clsm, $OutData_dir);
+        # Note this was done above if catchcn is being
+        # regridded. It is done here because now catch
+        # needs it, but we don't want to do it twice
+        unless ($mk_catchcn) {
+           # link clsm directory to OutData
+           #-------------------------------
+           $clsm = dirname($tile2) ."/clsm";
+           $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
+           symlinkinput($clsm, $OutData_dir);
+        }
 
         # catch and/or catchcn restart only during this pass
         #---------------------------------------------------
         $flags = "";
-        $flags .= " -catch"             if $mk_catch;
-        $flags .= " -catchcn"           if $mk_catchcn;
-        $flags .= " -wemin $wemIN"      if $mk_catch or $mk_catchcn;
-        $flags .= " -wemout $wemOUT"    if $mk_catch or $mk_catchcn;
-        $flags .= " -surflay $surflay";
+        $flags .= " -catch"               if $mk_catch;
+        $flags .= " -catchcn $mk_catchcn" if $mk_catchcn;
+        $flags .= " -wemin $wemIN"        if $mk_catch or $mk_catchcn;
+        $flags .= " -wemout $wemOUT"      if $mk_catch or $mk_catchcn;
+        $flags .= " -surflay $surflay"    if $mk_catch or $mk_catchcn;
         $flags .= " -grpID $grpID"      if ($mk_catch or $mk_catchcn) and $grpID;
         $flags .= " -rsttime $ymd$hr"   if $mk_catchcn;
         $flags .= " -rescale"           if $mk_catch or $mk_catchcn;
@@ -2912,7 +2982,7 @@ sub regrid_surface_rsts {
 
         @SFC = ();
         push @SFC, "catch_internal_rst"   if $mk_catch;
-        push @SFC, "catchcn_internal_rst" if $mk_catchcn;
+        push @SFC, "catchcn${cnlist[0]}_internal_rst" if ($mk_catchcn);
 
         # run mk_Restarts program
         #------------------------
@@ -3012,6 +3082,7 @@ sub rename_surface_rsts {
         }
         $newname = rstname($expid2, $type, "$outdir/$template2");
         $newname .= ".$tagID.$gridID" if $label;
+        if ($type eq "catchcn${cnlist[0]}_internal_rst" ){ $newname = rstname($expid2, $type, "$outdir/%s.%s.${ymd}_${hr}z.nc4")};
         move_("\n$newrst", $newname);
     }
 
@@ -3861,7 +3932,15 @@ OTHER OPTIONS
                       =1 for upper-air restarts only
                       =2 for land-surface restarts only
                       =3 for both upper-air and land-surface restarts (default)
-   -catchcn           Create a version of the catch restart which contains carbon values;
+   -catchcn           offers 2 options:
+                      = 0, cold start for CLM40 using an archived restart file. For e.g. 
+                        -catchcn 0, - Notice the trailing comma
+                      = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
+		        to start from a GEOSldas restart file (Note, keywords are comma-separated).
+                        where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
+                        are same as those in GEOSldas exeinp file. For e.g. 
+                        -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
+                        IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
                       Not valid for tags prior to Heracles; Note: This option will add
                       10-20 minutes to the regrid process.
    -wemin wemIN       minimum water snow water equivalent for input catch/cn

@@ -159,7 +159,8 @@
               obs(kobs)    = data(17,i)           ! observation
               omf(kobs)    = data(18,i)           ! omf used in the analysis
               oma(kobs)    = undef
-              xm(kobs)     = obs(kobs)-omf(kobs)+data(19,i) ! original obs w/o bias correction
+!             xm(kobs)     = obs(kobs)-omf(kobs)+data(19,i) ! original obs w/o bias correction
+              xm(kobs)     = data(7,i)            ! height
   
 	      qch(kobs)    = 0                    ! no info available
               qcx(kobs)    = 0

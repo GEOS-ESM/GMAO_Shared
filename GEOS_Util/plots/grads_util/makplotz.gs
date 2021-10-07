@@ -288,13 +288,14 @@ endif
 'setlons'
 
 'set vpage off'
-'set string 1 c 6'
+'set string 4 c 6'
 'set strsiz .11'
 *'xlabel 1 4.25 10.5'
 'draw string 4.25  10.5 EXPID: 'expid'  'mdesc
-'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')'
+'draw string 4.25  9.95 'math'  'title' 'season' ('nmod')  (blue)'
+'set string 1 c 6'
 'draw string 4.25  9.70 vs'
-'draw string 4.25  9.45 'odesc'  'season' ('nobs')  ('climate')'
+'draw string 4.25  9.45 'odesc'  'season' ('nobs')  ('climate')  (black)'
 
 * Print Beginning and Ending Dates
 * --------------------------------
