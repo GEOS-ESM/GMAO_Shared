@@ -10,11 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU Make days
+- Added `parallel_untar.py` script
+- Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
 
 ### Fixed
 ### Changed
 
 - Updates to documentation tables for KX values
+- Updates to `obsys-nccs.rc`
+- Updates to `g5fcst_stats.pl`
 
 ### Removed
 
