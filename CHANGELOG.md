@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
 
 ### Fixed
+
+- CMake fix for non-Intel compilers in GMAO_ods
+
 ### Changed
 
 - Updates to documentation tables for KX values
