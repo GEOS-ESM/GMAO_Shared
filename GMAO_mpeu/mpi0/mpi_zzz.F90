@@ -1,4 +1,4 @@
-#if defined (sysOSF1) || defined(sysLinux)
+#if defined (sysOSF1) || defined(sysLinux) || defined(sysDarwin)
 !
 !  Added because the compiler requires the presence of these procedures,
 !  although they are not actually used, but only declared by the system

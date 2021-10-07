@@ -22,6 +22,7 @@ use WriteLog qw(chdir_ query setprompt);
 # global variables
 #-----------------
 my ($EXP_ARCHIVE);
+my ($EXP_DATAMOVE_CONSTRAINT);
 my ($anadir, $arcfile, $archiveFLG, $dasFLG, $nodes, $dryrun, $etcdir);
 my ($expid, $fhours, $fhours_dflt, $fs_tag, $fv_etcdir);
 my ($idate, $ihh, $jobdir, $localID, $ncsuffix, $ndays, $noprompt, $nver);
@@ -318,6 +319,8 @@ sub init {
     $EXP_ARCHIVE = $ENV{"ARCHIVE"};
     $EXP_ARCHIVE = $ENV{"FVARCH"} if $ENV{"FVARCH"};
 
+    $EXP_DATAMOVE_CONSTRAINT = $ENV{"DATAMOVE_CONSTRAINT"};
+
     # flush buffer after each output operation
     #-----------------------------------------
     $| = 1;
@@ -428,11 +431,11 @@ sub init {
     until (-d $anadir) {
         unless ($noprompt) {
             print "ANA directory does not exist: $anadir\n\n";
-            $anadir = query("forecast ana directory:", $anadir);
+            $anadir = query("verification ana directory:", $anadir);
         }
-        else { die "forecast ana directory does not exist: $anadir;" }
+        #else { die "verification ana directory does not exist: $anadir;" }
     }
-    $progdir = dirname($anadir) ."/prog" unless $progdir;
+    $progdir = "$EXP_ARCHIVE/$expid/prog" unless $progdir;
     until (-d $progdir) {
         unless ($noprompt) {
             print "forecase prog directory does not exist: $progdir\n\n";
@@ -690,6 +693,8 @@ sub submit_calcjob {
       $ntspn   = 24;
       $qos     = "";
       $partition = "";
+#     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
+#     $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
     }
     if ( $usrnodes ne "null" ) { $mynodes = $usrnodes }; # overwrite with specification from command line
 
@@ -809,6 +814,7 @@ sub submit_archivejob {
 #SBATCH --time=1:00:00
 #SBATCH --job-name=$jobname
 #SBATCH --partition=datamove
+#$EXP_DATAMOVE_CONSTRAINT
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
 
