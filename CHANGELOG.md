@@ -8,8 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
+- Added `parallel_untar.py` script
+- Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
+
 ### Fixed
 ### Changed
+
+- Updates to `obsys-nccs.rc`
+- Updates to `g5fcst_stats.pl`
+
 ### Removed
 
 ## [1.4.9] - 2021-10-06
