@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+
 ### Removed
 
 ## [1.4.10] - 2021-10-08
