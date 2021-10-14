@@ -26,7 +26,7 @@ my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT);
 my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir, $new_coupled_model_dir);
 my ($dbHash, $debug, $drymassFLG, $dyn2dynX, $expid);
 my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_, $mdlINocean);
-my ($grOUT, $grOUTocean, $mdlOUTocean, $grouplist, $grpID, $hr, $interactive);
+my ($grOUT, $grOUTocean, $grOUTocean_, $mdlOUTocean, $grouplist, $grpID, $hr, $interactive);
 my ($interp_restartsX, $landIceDT, $lblFLG, $lcvFLG, $levsIN, $levsOUT);
 my ($logfile, $merra, $mk_RestartsX, $mk_catch, $mk_catchcn, $mk_route);
 my ($mkdrstdateX, $month, $newid, $node, $noprompt, $outdir, $outdir_save);
@@ -747,8 +747,8 @@ sub check_inputs {
     $grOUTocean_dflt  = "c";
 
     # These are the defaults for ocean models
-    $mdlINocean  = "data";
-    $mdlOUTocean = "data";
+    $mdlINocean_dflt  = "data";
+    $mdlOUTocean_dflt = "data";
 
     unless ($grINocean  and ($imo{$grINocean}) and
             $grOUTocean and $imo{$grOUTocean}) {
@@ -788,7 +788,10 @@ sub check_inputs {
         until (($mdlINocean eq "MOM5") or ($mdlINocean eq "MOM6")) {
            $mdlINocean = query("Coupled model output requested, Enter OUTPUT ocean model (MOM5 or MOM6):");
         }
+    } else {
+       $mdlINocean = $mdlINocean_dflt
     }
+    print "INPUT ocean model $mdlINocean\n";
 
     # output ocean grid: $grOUTocean
     #-------------------------------
@@ -804,13 +807,17 @@ sub check_inputs {
         $imo4{"CS"} = $im4{$grOUT};
         $jmo4{"CS"} = $jm4{$grOUT};
     }
-    print "OUTPUT ocean grid: $grOUTocean\n";
+    $grOUTocean_ = $grOUTocean unless $grOUTocean_;
+    print "OUTPUT ocean grid: $grOUTocean_\n";
     if (($grOUTocean eq "aa") or ($grOUTocean eq "cc") or 
         ($grOUTocean eq "dd") or ($grOUTocean eq "ee")) {
         until (($mdlOUTocean eq "MOM5") or ($mdlOUTocean eq "MOM6")) {
            $mdlOUTocean = query("Coupled model output requested, Enter OUTPUT ocean model (MOM5 or MOM6):");
         }
+    } else {
+       $mdlOUTocean = $mdlOUTocean_dflt
     }
+    print "OUTPUT ocean model $mdlOUTocean\n";
 
     # check tag info: $tagIN and $tagOUT
     #-----------------------------------
@@ -1952,6 +1959,9 @@ sub set_IN_OUT {
     $IN{"ogrid_"}  = $grINocean_;  # used for display purposes
     $OUT{"ogrid_"} = $grOUTocean;
 
+    $IN{"omdl"}  = $mdlINocean;
+    $OUT{"omdl"} = $mdlOUTocean;
+
     # bkg_eta grid value
     #-------------------
     if ($bkg_regrid_FLG) {
@@ -2223,6 +2233,7 @@ sub confirm_inputs {
            . ". atmos grid:   $IN{atmos3} ($IN{agrid})\n"
            . ". atmos levs:   $IN{levs}\n"
            . ". ocean grid:   $IN{ocean} ($IN{ogrid_})\n"
+           . ". ocean model:  $IN{omdl}\n"
            . ". bcsdir:       $IN{bcsdir}\n"
            . ". tile file:    $IN{tile}\n"
            . ". BCS tag:      $IN{bcsTAG}\n");
@@ -2249,6 +2260,7 @@ sub confirm_inputs {
            . ". atmos grid:   $OUT{atmos3} ($OUT{agrid})\n"
            . ". atmos levs:   $OUT{levs}\n"
            . ". ocean grid:   $OUT{ocean} ($OUT{ogrid})\n"
+           . ". ocean model:  $OUT{omdl}\n"
            . ". bcsdir:       $OUT{bcsdir}\n"
            . ". tile file:    $OUT{tile}\n");
     print_(  ". bkg_eta grid: $OUT{bkg_regrid}\n") if $OUT{"bkg_regrid"};
