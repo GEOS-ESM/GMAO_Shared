@@ -43,6 +43,11 @@ install(
    PROGRAMS ${perlscripts} ec2grd.csh
    DESTINATION bin)
 
+file(GLOB pythonscripts CONFIGURE_DEPENDS regrid*.py)
+install(
+   PROGRAMS ${pythonscripts} regrid.yaml
+   DESTINATION bin)
+
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE rs_vinterp.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN}")
 set_property(SOURCE rs_vinterp_scm.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN}")

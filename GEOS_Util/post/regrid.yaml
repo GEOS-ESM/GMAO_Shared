@@ -1,0 +1,52 @@
+restarts_in:
+    UPPERAIR:
+      fvcore: fvcore_internal_rst
+      moist:  moist_internal_rst
+      agcm:   agcm_import_rst
+    SURFACE:
+      lake: lake_internal_rst 
+      salwater: saltwater_internal_rst
+      seaice:   seaicethermo_internal_rst
+      catchcnclm40:
+      catch: catch_internal_rst
+
+options_in:
+  COMMON:
+    yyyymmddhh: 2000041421
+    expid:
+    agrid: C48
+    ogrid: 360x180
+    tag: Icarus_Reynolds
+    #rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
+    rst_src: MERR-2
+  UPPERAIR:
+    aaa:
+  SURFACE:
+    wemin: 26
+    surflay: 50
+    zoom: 1
+    rescale: 1
+  CS:
+    bbb:
+    ccc:
+  
+options_out:
+  COMMON:
+    yyyymmddhh: 2000041421
+    expid: c90e
+    tag: Icarus-NLv3_MERRA-2
+    agrid: 90x540
+    ogrid: 1440x720
+    outdir: /discover/nobackup/wjiang/test_regridpy/ 
+  UPPERAIR:
+    bbb:
+  SURFACE:
+    wemout: 13
+    surflay: 50
+  CS:
+    dyn2dyn.x:
+    interp_restarts.x:
+slurm_options:
+ account: s1873
+ qos: debug
+ partition: 
