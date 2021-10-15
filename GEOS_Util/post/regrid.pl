@@ -82,7 +82,7 @@ $imo{"e"} = "1440"; $jmo{"e"} = "720";     # MERRA-2
 $imo{"f"} = "2880"; $jmo{"f"} = "1440";    # OSTIA
 $imo{"CS"} = 1;                            # OSTIA cubed-sphere
 
-foreach (qw/ 90 180 360 720 /) {
+foreach (qw/ 90 180 360 720 1440 2880/) {
     $CSo{"C$_"} = $_;
     $imo{"C$_"} = $_;
     $jmo{"C$_"} = 6*$_;
@@ -2005,8 +2005,12 @@ sub set_IN_OUT {
 
         # bcs directory
         #--------------
-        if ($atmosID2 eq "5760x34560") {
-            $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/C5760";
+        if ($atmosID2 eq "2880x17280") {
+            $bcsdir = "/discover/nobackup/projects/gmao/osse2/mathomp4/DYAMOND2-C2880/bcs/Icarus-NLv3/Icarus-NLv3_Ostia/CF2880x6C_CF2880x6C";
+#       }
+#       if ($atmosID2 eq "5760x34560") {
+#           $bcsdir = "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/C5760";
+#           $bcsdir = "/discover/nobackup/projects/gmao/osse2/mathomp4/DYAMOND2-C2880/bcs/Icarus-NLv3/Icarus-NLv3_Ostia/CF5760x6C_CF5760x6C";
         }
         elsif ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
             $bcsdir = "$bcsHEAD/Icarus-NLv3/$bcsTAG/$gridID";
@@ -2282,7 +2286,7 @@ sub regrid_upperair_rsts_CS {
     elsif ($im eq "1000") { $NPE = 384; $nwrit = 2 }
     elsif ($im eq "1440") { $NPE = 576; $nwrit = 2 }
     elsif ($im eq "2000") { $NPE = 768; $nwrit = 2 }
-    elsif ($im eq "2880") { $NPE = 5400; $nwrit = 6 }
+    elsif ($im eq "2880") { $NPE = 2400; $nwrit = 6 }
     elsif ($im eq "5760") { $NPE = 5400; $nwrit = 6 }
     else { die "Error; cannot recognize output grid: $grOUT;" }
 
