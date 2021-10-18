@@ -791,7 +791,7 @@ sub check_inputs {
     } else {
        $mdlINocean = $mdlINocean_dflt
     }
-    print "INPUT ocean model $mdlINocean\n";
+    print "INPUT ocean model: $mdlINocean\n";
 
     # output ocean grid: $grOUTocean
     #-------------------------------
@@ -817,7 +817,7 @@ sub check_inputs {
     } else {
        $mdlOUTocean = $mdlOUTocean_dflt
     }
-    print "OUTPUT ocean model $mdlOUTocean\n";
+    print "OUTPUT ocean model: $mdlOUTocean\n";
 
     # check tag info: $tagIN and $tagOUT
     #-----------------------------------
