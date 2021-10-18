@@ -786,7 +786,7 @@ sub check_inputs {
     if (($grINocean eq "aa") or ($grINocean eq "cc") or 
         ($grINocean eq "dd") or ($grINocean eq "ee")) {
         until (($mdlINocean eq "MOM5") or ($mdlINocean eq "MOM6")) {
-           $mdlINocean = query("Coupled model output requested, Enter OUTPUT ocean model (MOM5 or MOM6):");
+           $mdlINocean = query("Coupled model input requested, Enter INPUT ocean model (MOM5 or MOM6):");
         }
     } else {
        $mdlINocean = $mdlINocean_dflt
