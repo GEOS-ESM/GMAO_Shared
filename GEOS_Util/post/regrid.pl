@@ -750,6 +750,9 @@ sub check_inputs {
     $mdlINocean_dflt  = "data";
     $mdlOUTocean_dflt = "data";
 
+    $mdlINocean  = $mdlINocean_dflt;
+    $mdlOUTocean = $mdlOUTocean_dflt;
+
     unless ($grINocean  and ($imo{$grINocean}) and
             $grOUTocean and $imo{$grOUTocean}) {
         print "\nOcean Grids\n"
