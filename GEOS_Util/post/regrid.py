@@ -4,7 +4,9 @@
 #
 
 import yaml
-from regriders import *
+from regrider_base  import *
+from regrider_upper import *
+from regrider_surf  import *
 
 if __name__ == '__main__' :
 

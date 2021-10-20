@@ -4,8 +4,10 @@ restarts_in:
       moist:  moist_internal_rst
       agcm:   agcm_import_rst
     SURFACE:
+      openwater: openwater_internal_rst 
       lake: lake_internal_rst 
-      salwater: saltwater_internal_rst
+      landice: landice_internal_rst 
+      #salwater: saltwater_internal_rst
       seaice:   seaicethermo_internal_rst
       catchcnclm40:
       catch: catch_internal_rst
@@ -17,15 +19,20 @@ options_in:
     agrid: C48
     ogrid: 360x180
     tag: Icarus_Reynolds
-    #rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
+    rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
     rst_src: MERR-2
   UPPERAIR:
-    aaa:
+    nlevel: 72
   SURFACE:
     wemin: 26
     surflay: 50
     zoom: 1
     rescale: 1
+    catchcnFLG: 1
+    restart_path: 
+    restart_id: 
+    restart_domain: 
+    cn_version:
   CS:
     bbb:
     ccc:
@@ -39,7 +46,7 @@ options_out:
     ogrid: 1440x720
     outdir: /discover/nobackup/wjiang/test_regridpy/ 
   UPPERAIR:
-    bbb:
+    nlevel: 72
   SURFACE:
     wemout: 13
     surflay: 50
