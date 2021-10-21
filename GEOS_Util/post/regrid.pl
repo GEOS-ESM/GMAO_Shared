@@ -2410,6 +2410,8 @@ sub regrid_upperair_rsts_CS {
     my $npn = `facter processorcount`; chomp($npn);
     if ( $npn == 40 ) {
       $mynodes = "sky";
+    } elsif ( $npn == 48 ) { 
+      $mynodes = "cas";
     } else {
       $mynodes = "hasw";
     }
