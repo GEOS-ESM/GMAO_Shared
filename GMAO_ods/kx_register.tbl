@@ -341,6 +341,7 @@
    325  gsi_diag    aura        mls30                      0    #                       -- conflict 325
    325  gsi_diag    metop-a     amsua                     25    # amsua_metop-a         -- conflict 325
    326  gsi_diag    metop-b     amsua                     26    # amsua_metop-b
+   327  gsi_diag    metop-c     amsua                     27    # amsua_metop-c
    330  gsi_diag    aura        mls55                      0    #
    335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    # ???
    355  gsi_diag    tirosn      ssu                        5    # ssu_tirosn
@@ -497,14 +498,25 @@
    612  odas_obs    -reserved-  -1                       612    #  -reserved-
    613  odas_obs    -reserved-  -1                       613    #  -reserved-
    614  odas_obs    -reserved-  -1                       614    #  -reserved-
-   615  odas_obs    -reserved-  -1                       615    #  -reserved-
-   616  odas_obs    -reserved-  -1                       616    #  -reserved-
-   617  odas_obs    -reserved-  -1                       617    #  -reserved-
-   618  odas_obs    -reserved-  -1                       618    #  -reserved-           -- conflict 618
+   615  odas_obs    -reserved-  -1                       615    #  -reserved-           -- conflict 615
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
+   615  gsi_diag    n15         avhrr                     15    # avhrr3_n15            -- conflict 615
+
+# See ODAS_OBS.xlsx
+#  kx   source      platform    var_id(kt)           data_id(ks)
+   616  odas_obs    -reserved-  -1                       616    #  -reserved-
+   617  odas_obs    -reserved-  -1                       617    #  -reserved-           -- conflict 617
+
+# see gsi.rc: OBS_INPUT::
+#  kx   source      dplat       dtype                   isat
+   617  gsi_diag    n17         avhrr                     17    # avhrr3_n17            -- conflict 617
    618  gsi_diag    n18         avhrr                     18    # avhrr3_n18            -- conflict 618
+
+# See ODAS_OBS.xlsx
+#  kx   source      platform    var_id(kt)           data_id(ks)
+   618  odas_obs    -reserved-  -1                       618    #  -reserved-           -- conflict 618
    619  odas_obs    -reserved-  -1                       619    #  -reserved-           -- conflict 619
 
 # see gsi.rc: OBS_INPUT::
