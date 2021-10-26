@@ -15,8 +15,8 @@ if __name__ == '__main__' :
    config = yaml.full_load(stream)
 
    # upper air
-#   upper = upperair(config)
-#   upper.regrid()
+   upper = upperair(config)
+   upper.regrid()
    
    # surface
    surf  = surface(config)

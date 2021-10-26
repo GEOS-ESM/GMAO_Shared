@@ -7,7 +7,7 @@ restarts_in:
       openwater: openwater_internal_rst 
       lake: lake_internal_rst 
       landice: landice_internal_rst 
-      #salwater: saltwater_internal_rst
+      #saltwater: saltwater_internal_rst
       seaice:   seaicethermo_internal_rst
       catchcnclm40:
       catch: catch_internal_rst
@@ -18,16 +18,18 @@ options_in:
     expid:
     agrid: C48
     ogrid: 360x180
-    tag: Icarus_Reynolds
+    tag: ICA
     rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
     rst_src: MERR-2
+    #bc_base: /discover/nobackup/ltakacs/bcs
+    bc_base: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs
+
   UPPERAIR:
     nlevel: 72
   SURFACE:
     wemin: 26
-    surflay: 50
-    zoom: 1
-    rescale: 1
+    surflayd: 50
+    zoom: 8
     catchcnFLG: 1
     restart_path: 
     restart_id: 
@@ -41,15 +43,15 @@ options_out:
   COMMON:
     yyyymmddhh: 2000041421
     expid: c90e
-    tag: Icarus-NLv3_MERRA-2
-    agrid: 90x540
+    tag: INL
+    agrid: C90
     ogrid: 1440x720
     outdir: /discover/nobackup/wjiang/test_regridpy/ 
+    bc_base: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs
   UPPERAIR:
     nlevel: 72
   SURFACE:
     wemout: 13
-    surflay: 50
   CS:
     dyn2dyn.x:
     interp_restarts.x:

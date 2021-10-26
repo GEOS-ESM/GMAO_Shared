@@ -26,6 +26,17 @@ class surface(regrider):
      self.catch = self.restarts_in.get('catch')
      self.catchcnclm40 = self.restarts_in.get('catchcnclm40')
      self.catchcnclm45 = self.restarts_in.get('catchcnclm45')
+     tagout = config['options_out']['COMMON']['tag']
+     ogrid = config['options_out']['COMMON']['ogrid']
+     bctag = self.get_bcTag(tagout, ogrid)
+     tagrank = self.tagsRank[bctag]
+
+     self.surf_out['surflay'] = 20.
+     if tagrank >=12 :
+       self.surf_out['surflay'] = 50.
+     self.surf_in['rescale'] = 0 
+     if tagrank > self.tagsRank["Fortuna-2_0"]:
+       self.surf_in['rescale'] = 1 
          
   def regrid(self):
      bindir = os.getcwd()
@@ -93,6 +104,7 @@ class surface(regrider):
      if ( self.catchcnclm40 or self.catchcnclm45) :
        dirname = os.path.dirname(self.out_til)
        clsm = dirname+'/clsm'
+       print( "symbolic link clsm to OutData/clsm")
        os.symlink(clsm, 'OutData/clsm')
 
      mk_catch_j_template = """#!/bin/csh -f
@@ -110,6 +122,8 @@ set echo
 #limit stacksize unlimited
 unlimit
 
+set lakelandRestartX = ( {Bin}/mk_LakeLandiceSaltRestarts )
+set routRestartX = ( {Bin}/mk_RouteRestarts )
 set esma_mpirun_X = ( {Bin}/esma_mpirun -np 84 )
 set mk_CatchRestarts_X   = ( $esma_mpirun_X {Bin}/mk_CatchRestarts )
 set mk_CatchCNRestarts_X = ( $esma_mpirun_X {Bin}/mk_CatchCNRestarts )
@@ -118,6 +132,31 @@ set Scale_CatchCN_X = {Bin}/Scale_CatchCN
 
 set OUT_til   = OutData/*.til
 set IN_til    = InData/*.til
+
+
+if ( {saltwaterFLG}) then
+   $lakelandRestartX $OUT_til $IN_til InData/{saltwater} 0 {zoom} 
+endif
+
+if ( {openwaterFLG}) then
+   $lakelandRestartX $OUT_til $IN_til InData/{openwater} 0 {zoom} 
+endif
+
+if ( {seaiceFLG}) then
+   $lakelandRestartX $OUT_til $IN_til InData/{seaice} 0 {zoom} 
+endif
+
+if ( {lakeFLG}) then
+   $lakelandRestartX $OUT_til $IN_til InData/{lake} 19 {zoom} 
+endif
+
+if ( {landiceFLG}) then
+   $lakelandRestartX $OUT_til $IN_til InData/{landice} 20 {zoom} 
+endif
+
+if ( {routeFLG}) then
+   $routeRestartX $OUT_til {yyyymm} 
+endif
 
 if ({catchFLG}) then
     set catchIN = InData/*catch_internal_rst*
@@ -166,24 +205,39 @@ if ({catchcnFLG}) then
         mv $catchcn_scaled $catchcn_regrid
     endif
 endif
-exit
 """
+     saltwaterFLG = '1' if self.saltwater else '0'
+     openwaterFLG = '1' if self.openwater else '0'
+     seaiceFLG    = '1' if self.seaice    else '0'
+     landiceFLG   = '1' if self.landice   else '0'
+     lakeFLG      = '1' if self.lake      else '0'
+     routeFLG     = '1' if self.route     else '0'
+
+
      catchFLG = '1' if self.catch else '0'
      catchcnFLG = '1' if (self.catchcnclm40 or self.catchcnclm45) else '0'
 
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = self.slurm_options['account'], \
-                  outdir = outdir, mk_catch_log = 'mk_catch_log.1', surflay = self.surf_in['surflay'],  \
+                  outdir = outdir, mk_catch_log = 'mk_catch_log.1', surflay = self.surf_out['surflay'],  \
                   wemin = self.surf_in['wemin'], wemout = self.surf_out['wemout'] ,  \
                   fromGCM = '0', catchFLG = catchFLG, catchcnFLG = catchcnFLG, rescale = '0', rsttime = self.common_in['yyyymmddhh'], \
                   RESTART_ID = self.surf_in['restart_id'], RESTART_PATH = self.surf_in['restart_path'], \
-                  RESTART_DOMAIN = self.surf_in['restart_domain'], CN_VERSION = self.surf_in['cn_version'] ) 
-     print(os.getcwd())
+                  RESTART_DOMAIN = self.surf_in['restart_domain'], CN_VERSION = self.surf_in['cn_version'], \
+                  saltwaterFLG = saltwaterFLG,  saltwater = self.saltwater,  \
+                  openwaterFLG = openwaterFLG,  openwater = self.openwater,  \
+                  seaiceFLG    = seaiceFLG,     seaice    = self.seaice,  \
+                  landiceFLG   = landiceFLG,    landice   = self.landice,  \
+                  lakeFLG      = lakeFLG,       lake      = self.lake,   \
+                  routeFLG     = routeFLG,      route     = self.route, yyyymm = str(self.common_in['yyyymmddhh'])[0:6],  \
+                  zoom = self.surf_in['zoom'] ) 
      catch1 = open('mk_catch.j.1','wt')
      catch1.write(catch1script)
      catch1.close()
+     print("step 1: sbatch -W mk_catch.j.1")
 
      subprocess.call('sbatch -W mk_catch.j.1', shell= True)
      # step 2
+     
      if (self.surf_in['rescale'] and ( self.catch or self.catchcnclm40 or self.catchcnclm45)) :
        if os.path.exists('InData.step1') : subprocess.call('rm -rf InData.step1', shell = True)
        shutil.move('InData', 'InData.step1')
@@ -197,16 +251,32 @@ exit
           clsm = dirname+'/clsm'
           os.symlink(clsm, 'OutData/clsm')
 
+       saltwaterFLG =  '0'
+       openwaterFLG =  '0'
+       seaiceFLG    =  '0'
+       landiceFLG   =  '0'
+       lakeFLG      =  '0'
+       routeFLG     =  '0'
        catch2script =  mk_catch_j_template.format(Bin = bindir, account = self.slurm_options['account'], \
-                  outdir = outdir, mk_catch_log = 'mk_catch_log.2', surflay = self.surf_in['surflay'],  \
+                  outdir = outdir, mk_catch_log = 'mk_catch_log.2', surflay = self.surf_out['surflay'],  \
                   wemin = self.surf_in['wemin'], wemout = self.surf_out['wemout'] ,  \
                   fromGCM = '0', catchFLG = catchFLG, catchcnFLG = catchcnFLG, rescale = '1', rsttime = self.common_in['yyyymmddhh'], \
                   RESTART_ID = self.surf_in['restart_id'], RESTART_PATH = self.surf_in['restart_path'], \
-                  RESTART_DOMAIN = self.surf_in['restart_domain'], CN_VERSION = self.surf_in['cn_version'] )
-     print(os.getcwd())
+                  RESTART_DOMAIN = self.surf_in['restart_domain'], CN_VERSION = self.surf_in['cn_version'], \
+                  saltwaterFLG = saltwaterFLG,  saltwater = self.saltwater,  \
+                  openwaterFLG = openwaterFLG,  openwater = self.openwater,  \
+                  seaiceFLG    = seaiceFLG,     seaice    = self.seaice,  \
+                  landiceFLG   = landiceFLG,    landice   = self.landice,  \
+                  lakeFLG      = lakeFLG,       lake      = self.lake,   \
+                  routeFLG     = routeFLG,      route     = self.route, yyyymm = str(self.common_in['yyyymmddhh'])[0:6], \
+                  zoom = self.surf_in['zoom'] ) 
      catch2 = open('mk_catch.j.2','wt')
      catch2.write(catch2script)
      catch2.close()
-
+     print("step 2: sbatch -W mk_catch.j.2")
      subprocess.call('sbatch -W mk_catch.j.2', shell= True)
-     
+     cwd = os.getcwd()
+     for out_rst in glob.glob("OutData/*_rst*"):
+       filename = os.path.basename(out_rst)
+       shutil.move(out_rst, cwd+"/"+filename)     
+     os.chdir(bindir)     
