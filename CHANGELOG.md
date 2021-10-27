@@ -8,9 +8,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
 ### Fixed
+
 ### Changed
+
 ### Removed
+
+## [1.4.10] - 2021-10-08
+
+### Added
+
+- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU Make days
+- Added `parallel_untar.py` script
+- Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
+
+### Fixed
+
+- CMake fix for non-Intel compilers in GMAO_ods
+
+### Changed
+
+- Updates to documentation tables for KX values
+- Updates to `obsys-nccs.rc`
+- Updates to `g5fcst_stats.pl`
+- Updated the CI for GMAO_Shared to do Intel and GNU
+
+## [1.4.9] - 2021-10-06
+
+### Fixed
+
+- Fixed issue with `regrid.pl` and regridding `catch_internal_rst`
+
+## [1.4.8] - 2021-10-05
+
+### Fixed
+
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel. Requires ESMA_cmake v3.6.1
+
+## [1.4.7] - 2021-10-04
+
+### Added
+
+- Added `pyrob_CF` script
+
+### Changed
+
+- Updates to support Catchment-CN.4.5 in addition to Catchment-CN.4.0
+
+## [1.4.6] - 2021-09-15
+
+### Changed
+
+- Updates to `regrid.pl` to allow processing of restarts for two different versions of Catchment-CN land model
+- change is zero-diff for Catchment and Catchment-CN4.0
+
+## [1.4.7] - 2021-08-27
+
+### Removed
+
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
 
 ## [1.4.6] - 2021-07-21
 
