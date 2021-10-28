@@ -38,7 +38,7 @@ my ($upairFLG, $verbose, $wemIN, $wemOUT, $workdir);
 my ($year, $ymd, $zoom, $zoom_);
 my ($qcmd, $qwaitFLG);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
-my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
+my (%atmLevs, %dataFLG, %coupledFLG, %coupledMDLFLG, %coupled_model_tile, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
 my (%jm, %jm4, %jm5, %jmo, %jmo4, %newLand);
 my (@anafiles, @cnlist, @warnings);
@@ -75,8 +75,9 @@ $atmLevs{"137"} = "137";
 $atmLevs{"144"} = "144";
 $atmLevs{"181"} = "181";
 
-# ocean grids
-#------------
+# data ocean grids
+#-----------------
+%dataFLG = ( "c" => 1, "e" => 1, "f" => 1, "CS" => 1 );
 $imo{"c"} =  "360"; $jmo{"c"} = "180";     # Reynolds
 $imo{"e"} = "1440"; $jmo{"e"} = "720";     # MERRA-2
 $imo{"f"} = "2880"; $jmo{"f"} = "1440";    # OSTIA
@@ -87,6 +88,10 @@ foreach (qw/ 90 180 360 720 /) {
     $imo{"C$_"} = $_;
     $jmo{"C$_"} = 6*$_;
 }
+
+# coupled ocean models
+#---------------------
+%coupledMDLFLG = ( "MOM5" => 1, "MOM6" => 1 );
 
 # coupled ocean grids
 #--------------------
@@ -538,8 +543,9 @@ sub init_tag_arrays_and_hashes {
 #=======================================================================
 sub check_inputs {
     my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
-    my ($grINocean_dflt, $grOUTocean_dflt, $ii);
-    my ($mdlINocean_dflt, $mdlOUTocean_dflt);
+    my ($grINocean_data_dflt, $grOUTocean_data_dflt, $ii);
+    my ($grINocean_coupled_dflt, $grOUTocean_coupled_dflt);
+    my ($mdlINocean_dflt, $mdlOUTocean_coupled_dflt);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
@@ -642,6 +648,7 @@ sub check_inputs {
         $grIN      = "d";
         $grINocean = "c";
         $mdlINocean = "data";
+        $mdlOUTocean = "data";
 
         if    ($year < 1979) { die "Error. MERRA data < 1979 not available\n" }
         elsif ($year < 1989) { $expid = "d5_merra_jan79" }
@@ -655,6 +662,7 @@ sub check_inputs {
         $grIN      = "C180";
         $grINocean = "e";
         $mdlINocean = "data";
+        $mdlOUTocean = "data";
 
         if ("$year$month" < 197901) {
             die "Error. MERRA-2 data < 1979 not available\n"
@@ -743,84 +751,104 @@ sub check_inputs {
     #
     # For non-cubed-sphere grids, $grINocean_ = $grINocean
     #---------------------------------------------------------------------------
-    $grINocean_dflt   = "c";
-    $grOUTocean_dflt  = "c";
+    $grINocean_data_dflt   = "c";
+    $grOUTocean_data_dflt  = "c";
 
-    # These are the defaults for ocean models
+    $grINocean_coupled_dflt   = "dd";
+    $grOUTocean_coupled_dflt  = "dd";
+
+    # These are the defaults for ocean model
     $mdlINocean_dflt  = "data";
-    $mdlOUTocean_dflt = "data";
+    $mdlOUTocean_coupled_dflt  = "MOM6"; # We don't need a default if dataocean in
 
-    $mdlINocean  = $mdlINocean_dflt;
-    $mdlOUTocean = $mdlOUTocean_dflt;
-
-    unless ($grINocean  and ($imo{$grINocean}) and
-            $grOUTocean and $imo{$grOUTocean}) {
-        print "\nOcean Grids\n"
-            .   "-----------\n"
-            .   "c  =  360x180   (Reynolds)\n"
-            .   "e  = 1440x720   (MERRA-2)\n"
-            .   "f  = 2880x1440  (OSTIA)\n"
-            .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
-            .   "\n"
-            .   "Coupled Ocean Grids\n"
-            .   "-------------------\n"
-            .   "aa = 72x36\n"
-            .   "cc = 360x200\n"
-            .   "dd = 720x410\n"
-            .   "ee = 1440x1080\n\n";
-    }
-    until ($grINocean and $imo{$grINocean}) {
-        $grINocean = query("Enter INPUT ocean grid:", $grINocean_dflt);
-    }
-    if (($grINocean eq "CS") or ($grINocean eq "CSi")) {
-        unless ($CSo{$grIN}) {
-            die "Error. Cannot have cubed ocean with atmosphere grid $grIN";
-        }
-        $grINocean = "CSi";
-        $grINocean_ = "CS";
-        $imo{"CSi"} = $im{$grIN};
-        $jmo{"CSi"} = $jm{$grIN};
-        $imo4{"CSi"} = $im4{$grIN};
-        $jmo4{"CSi"} = $jm4{$grIN};
-    }
-    $grINocean_ = $grINocean unless $grINocean_;
-    print "INPUT ocean grid: $grINocean_\n";
-
-    if (($grINocean eq "aa") or ($grINocean eq "cc") or 
-        ($grINocean eq "dd") or ($grINocean eq "ee")) {
-        until (($mdlINocean eq "MOM5") or ($mdlINocean eq "MOM6")) {
-           $mdlINocean = query("Coupled model input requested, Enter INPUT ocean model (MOM5 or MOM6):");
-        }
-    } else {
-       $mdlINocean = $mdlINocean_dflt
+    unless ($mdlINocean) {
+       print "\nOcean Models\n"
+           .   "------------\n"
+           .   "data  (Reynolds, MERRA-2, Ostia, Cubed-Sphere)\n"
+           .   "MOM5  \n"
+           .   "MOM6  \n"
+           .   "\n";
+       until ($mdlINocean and ( ($mdlINocean eq "data") or ($coupledMDLFLG{$mdlINocean}) ) ) {
+          $mdlINocean = query("Enter INPUT ocean model", $mdlINocean_dflt);
+       }
     }
     print "INPUT ocean model: $mdlINocean\n";
 
-    # output ocean grid: $grOUTocean
-    #-------------------------------
-    until ($grOUTocean and $imo{$grOUTocean}) {
-        $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_dflt);
+    unless ($grINocean  and $imo{$grINocean} and
+            $grOUTocean and $imo{$grOUTocean}) {
+       if ($mdlINocean eq "data") {
+          print "\nData Ocean Grids\n"
+                .   "----------------\n"
+                .   "c  =  360x180   (Reynolds)\n"
+                .   "e  = 1440x720   (MERRA-2)\n"
+                .   "f  = 2880x1440  (OSTIA)\n"
+                .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
+                .   "\n";
+          until ($grINocean and $imo{$grINocean} and $dataFLG{$grINocean}) {
+             $grINocean = query("Enter INPUT ocean grid:", $grINocean_data_dflt);
+          }
+          if (($grINocean eq "CS") or ($grINocean eq "CSi")) {
+             unless ($CSo{$grIN}) {
+                die "Error. Cannot have cubed ocean with atmosphere grid $grIN";
+             }
+             $grINocean = "CSi";
+             $grINocean_ = "CS";
+             $imo{"CSi"} = $im{$grIN};
+             $jmo{"CSi"} = $jm{$grIN};
+             $imo4{"CSi"} = $im4{$grIN};
+             $jmo4{"CSi"} = $jm4{$grIN};
+          }
+          $grINocean_ = $grINocean unless $grINocean_;
+       } else {
+          print "\nCoupled Ocean Grids\n"
+                .   "-------------------\n"
+                .   "aa = 72x36\n"
+                .   "cc = 360x200\n"
+                .   "dd = 720x410\n"
+                .   "ee = 1440x1080\n\n";
+          until ($grINocean and $imo{$grINocean} and $coupledFLG{$grINocean}) {
+             $grINocean = query("Enter INPUT ocean grid:", $grINocean_coupled_dflt);
+          }
+          $grINocean_ = $grINocean;
+       }
     }
-    if ($grOUTocean eq "CS") {
-        unless ($CSo{$grOUT}) {
-            die "Error. Cannot have cubed ocean with atmosphere grid $grOUT;";
-        }
-        $imo{"CS"} = $im{$grOUT};
-        $jmo{"CS"} = $jm{$grOUT};
-        $imo4{"CS"} = $im4{$grOUT};
-        $jmo4{"CS"} = $jm4{$grOUT};
-    }
-    $grOUTocean_ = $grOUTocean unless $grOUTocean_;
-    print "OUTPUT ocean grid: $grOUTocean_\n";
-    if (($grOUTocean eq "aa") or ($grOUTocean eq "cc") or 
-        ($grOUTocean eq "dd") or ($grOUTocean eq "ee")) {
-        until (($mdlOUTocean eq "MOM5") or ($mdlOUTocean eq "MOM6")) {
-           $mdlOUTocean = query("Coupled model output requested, Enter OUTPUT ocean model (MOM5 or MOM6):");
-        }
+    print "INPUT ocean grid: $grINocean_\n";
+
+    # output ocean model $mdlOUTocean
+    #--------------------------------
+    # If dataocean, we can only output data ocean, but if coupled, we can choose
+    if ($mdlINocean eq "data") {
+       $mdlOUTocean = "data"
     } else {
-       $mdlOUTocean = $mdlOUTocean_dflt
+       until ($mdlOUTocean and $coupledMDLFLG{$mdlOUTocean}) {
+          $mdlOUTocean = query("Enter OUTPUT ocean model", $mdlOUTocean_coupled_dflt);
+       }
     }
     print "OUTPUT ocean model: $mdlOUTocean\n";
+
+    # output ocean grid: $grOUTocean
+    #-------------------------------
+    if ($mdlOUTocean eq "data") {
+       until ($grOUTocean and $imo{$grOUTocean} and $dataFLG{$grOUTocean}) {
+          $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_data_dflt);
+       }
+       if ($grOUTocean eq "CS") {
+           unless ($CSo{$grOUT}) {
+               die "Error. Cannot have cubed ocean with atmosphere grid $grOUT;";
+           }
+           $imo{"CS"} = $im{$grOUT};
+           $jmo{"CS"} = $jm{$grOUT};
+           $imo4{"CS"} = $im4{$grOUT};
+           $jmo4{"CS"} = $jm4{$grOUT};
+       }
+       $grOUTocean_ = $grOUTocean unless $grOUTocean_;
+    } else {
+       until ($grOUTocean and $imo{$grOUTocean} and $coupledFLG{$grOUTocean}) {
+          $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_coupled_dflt);
+       }
+       $grOUTocean_ = $grOUTocean;
+    }
+    print "OUTPUT ocean grid: $grOUTocean_\n";
 
     # check tag info: $tagIN and $tagOUT
     #-----------------------------------
@@ -3956,25 +3984,27 @@ INTERACTIVE OPTION
                       note: the -np flag takes precedence over the -i flag
 
 OTHER OPTIONS
-   -levsout   levsout  number of atmosphere levels in output
-   -oceanin   oceanIN  ocean horizontal grid of inputs
-                       data ocean grids
-                         =c  : 1-deg (360x180); e.g. Reynolds
-                         =e  : 1/4-deg (1440x720); e.g. MERRA-2
-                         =f  : 1/8-deg (2880x1440); e.g. OSTIA
-                         =CS : OSTIA regridded to cubed-sphere
-                       coupled ocean grids (requires choice of ocean model)
-                         =aa  : 5-deg (72x36)
-                         =cc  : 1-deg (360x200)
-                         =dd  : 1/2-deg (720x410)
-                         =ee  : 1/4-deg (1440x1080)
-                       defaults to \'c\'
-   -ocnmdlin  oceanMDL ocean input model
-                       data : data ocean (default)
-                       MOM5 : MOM5
-                       MOM6 : MOM6
-   -oceanout  oceanOUT ocean horizontal grid of outputs (see -oceanin)
-   -ocnmdlout oceanMDL ocean output model (see -ocnmdlin)
+   -levsout   levsout   number of atmosphere levels in output
+   -ocnmdlin  ocnMDLIN  ocean input model 
+                        data : data ocean (Reynolds, MERRA-2, Ostia, CS)
+                        MOM5 : MOM5
+                        MOM6 : MOM6
+                          NOTE: If data in, only data out allowed
+   -oceanin   oceanIN   ocean horizontal grid of inputs
+                        data ocean grids
+                          =c  : 1-deg (360x180); e.g. Reynolds
+                          =e  : 1/4-deg (1440x720); e.g. MERRA-2
+                          =f  : 1/8-deg (2880x1440); e.g. OSTIA
+                          =CS : OSTIA regridded to cubed-sphere
+                          defaults to \'c\'
+                        coupled ocean grids (requires choice of ocean model)
+                          =aa  : 5-deg (72x36)
+                          =cc  : 1-deg (360x200)
+                          =dd  : 1/2-deg (720x410)
+                          =ee  : 1/4-deg (1440x1080)
+                          defaults to \'dd\'
+   -ocnmdlout ocnMDLOUT ocean model of outputs (see -ocnmdlin)
+   -oceanout  oceanOUT  ocean horizontal grid of outputs (see -oceanin)
    -esmabin   ESMABIN  location of build\'s scripts and programs; defaults to location
                       of regrid.pl script
    -iceDT     dtime   datetime for alternate landice rst input if regridding to
@@ -4090,6 +4120,7 @@ TAGS
 
 AUTHOR
    Joe Stassi, SSAI (joe.stassi\@nasa.gov)
+   Matthew Thompson, SSAI (matthew.thompson\@nasa.gov)
 
 EOF
 ;
