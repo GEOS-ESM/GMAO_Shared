@@ -30,7 +30,7 @@ my ($grOUT, $grOUTocean, $grOUTocean_, $mdlOUTocean, $grouplist, $grpID, $hr, $i
 my ($interp_restartsX, $landIceDT, $lblFLG, $lcvFLG, $levsIN, $levsOUT);
 my ($logfile, $merra, $mk_RestartsX, $mk_catch, $mk_catchcn, $mk_route);
 my ($mkdrstdateX, $month, $newid, $node, $noprompt, $outdir, $outdir_save);
-my ($qos, $partition, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
+my ($qos, $partition, $constraint, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
 my ($rstIN_template, $rstIN_templateB, $rst_tarfile, $rst_template);
 my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
@@ -290,6 +290,7 @@ sub init {
                "grpid=s"         => \$grpID,
                "qos=s"           => \$qos,
                "partition=s"     => \$partition,
+               "constraint=s"    => \$constraint,
                "altbcs:s{,1}"    => \$bcsALT,
                "zoom=i"          => \$zoom,
                "db|debug|nc"     => \$debug,
@@ -303,6 +304,7 @@ sub init {
     $verbose = 0 unless $verbose;
     $qos = 0 unless $qos;
     $partition = 0 unless $partition;
+    $constraint = "sky" unless $constraint;
 
     usage() if $help;
     setprompt(0) if $noprompt;
@@ -2393,7 +2395,7 @@ sub regrid_upperair_rsts_CS {
     my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
     my ($moist, $newrst, $rst, $status);
-    my ($mynodes);
+    my (%allowedConstraint);
 
     $im = $im{$grOUT};
     if    ($im eq   "12") { $NPE =  12; $nwrit = 1 }
@@ -2424,6 +2426,11 @@ sub regrid_upperair_rsts_CS {
 
     if ($im >= "2880") { $MEMPERCPU = "--mem-per-cpu=4G"}
     else               { $MEMPERCPU = ""                }
+
+    %allowedConstraint = ( "hasw" => 1, "sky" => 1, "cas" => 1);
+    unless($allowedConstraint{$constraint}) {
+       die "Error. Constraint $constraint is not allowed.";
+    }
 
     # MAT Workaround C180 -> C720 cannot run on 192
     # ---------------------------------------------
@@ -2484,13 +2491,6 @@ sub regrid_upperair_rsts_CS {
 
     $AGCMout   = rstnameI(".", "agcm_import_rst");
 
-    my $npn = `facter processorcount`; chomp($npn);
-    if ( $npn == 40 ) {
-      $mynodes = "sky";
-    } else {
-      $mynodes = "hasw";
-    }
-
     # write input.nml file
     #---------------------
     $input_nml = "$workdir/input.nml";
@@ -2519,7 +2519,7 @@ EOF
 #SBATCH --time=1:00:00
 #SBATCH --ntasks=${NPE} ${MEMPERCPU}
 #SBATCH --job-name=regrid
-#SBATCH --constraint=$mynodes
+#SBATCH --constraint=$constraint
 #$QOSline
 #$PARTline
 
@@ -2877,6 +2877,7 @@ sub regrid_surface_rsts {
         $flags .= " -rsttime $ymd$hr"  if $mk_catchcn or $mk_route;
         $flags .= " -qos $qos"         if ($mk_catch or $mk_catchcn) and $qos;
         $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
+        $flags .= " -constraint $constraint" if ($mk_catch or $mk_catchcn) and $constraint;
     }
     $flags .= " -zoom $zoom" if $zoom;
 
@@ -3054,6 +3055,7 @@ sub regrid_surface_rsts {
         $flags .= " -zoom $zoom"        if $zoom;
         $flags .= " -qos $qos"          if ($mk_catch or $mk_catchcn) and $qos;
         $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
+        $flags .= " -constraint $constraint" if ($mk_catch or $mk_catchcn) and $constraint;
         #--$flags .= " -walltime 2:00:00"  if $mk_catchcn;
         #--$flags .= " -ntasks 112"        if $mk_catchcn;
 
@@ -4054,6 +4056,7 @@ OTHER OPTIONS
                            -> numtasks <= 532
                            -> walltime le \'1:00:00\'
    -partition val     use \'SBATCH --partition=val directive\' for batch jobs
+   -constraint val    use \'SBATCH --constraint=val directive\' for batch jobs
    -db                (debug mode) Do not clean work directory after running programs;
    -dbh               (debug hash) Show contents of hashes: \%IN and \%OUT
    -v                 verbose mode
