@@ -38,7 +38,12 @@ set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${th
 
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 
-file(GLOB perlscripts CONFIGURE_DEPENDS *.pl)
+set (perlscripts
+  ecmwf2geos.pl
+  g5fcst_stats.pl
+  ncep2geos.pl
+  regrid.pl
+  )
 install(
    PROGRAMS ${perlscripts} ec2grd.csh
    DESTINATION bin)
