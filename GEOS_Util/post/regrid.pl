@@ -23,7 +23,7 @@ use WriteLog qw(symlink_ system_ unlink_ );
 # global variables
 #-----------------
 my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT);
-my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir, $new_coupled_model_dir);
+my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir);
 my ($dbHash, $debug, $drymassFLG, $dyn2dynX, $expid);
 my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_, $mdlINocean);
 my ($grOUT, $grOUTocean, $grOUTocean_, $mdlOUTocean, $grouplist, $grpID, $hr, $interactive);
@@ -38,7 +38,7 @@ my ($upairFLG, $verbose, $wemIN, $wemOUT, $workdir);
 my ($year, $ymd, $zoom, $zoom_);
 my ($qcmd, $qwaitFLG);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
-my (%atmLevs, %dataFLG, %coupledFLG, %coupledMDLFLG, %coupled_model_tile, %hgrd, %iceIN);
+my (%atmLevs, %dataFLG, %coupledFLG, %coupledMDLFLG, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
 my (%jm, %jm4, %jm5, %jmo, %jmo4, %newLand);
 my (@anafiles, @cnlist, @warnings);
@@ -103,26 +103,7 @@ $imo{"ee"} = "1440"; $jmo{"ee"} = "1080";
 
 # until an official location for coupled-model tiles is created
 #--------------------------------------------------------------
-$coupled_model_dir = "/discover/nobackup/yvikhlia/coupled/Forcings";
-$new_coupled_model_dir = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs";
-
-$coupled_model_tile{"CF0048x6C_TM0360xTM0200-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a48x288_o360x200/";
-
-$coupled_model_tile{"CF0090x6C_TM0360xTM0200-Pfafstetter.til"} =
-    "${coupled_model_dir}/a90x540_o360x200";
-
-$coupled_model_tile{"CF0090x6C_TM0720xTM0410-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a90x540_o720x410";
-
-$coupled_model_tile{"CF0090x6C_TM1440xTM1080-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a90x540_o1440x1080";
-
-$coupled_model_tile{"CF0180x6C_TM0720xTM0410-Pfafstetter.til"} =
-    "${coupled_model_dir}/a180x1080_o720x410";
-
-$coupled_model_tile{"CF0180x6C_TM1440xTM1080-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a180x1080_o1440x1080";
+$coupled_model_dir = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs";
 
 # atmosphere cubed-sphere grids
 #------------------------------
@@ -1958,7 +1939,7 @@ sub set_IN_OUT {
     my ($HH, $agrid, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
     my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid);
     my ($im, $im4, $imo, $imo4, $jm, $jm4, $jm5, $jmo, $jmo4);
-    my ($oceanID1, $oceanID2, $ogrid, $ogrid_);
+    my ($oceanID1, $oceanID2, $ogrid, $ogrid_, $omdl);
     my ($tile, $topo, $val);
 
     # tag values
@@ -2050,6 +2031,7 @@ sub set_IN_OUT {
         $agrid  = $$HH{"agrid"};
         $ogrid  = $$HH{"ogrid"};
         $ogrid_ = $$HH{"ogrid_"};
+        $omdl   = $$HH{"omdl"};
 
         $im  = $im{$agrid};
         $im4 = $im4{$agrid};
@@ -2148,9 +2130,13 @@ sub set_IN_OUT {
         }
         if ($coupledFLG{$ogrid}) {
             if ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
-               $bcsdir = "$new_coupled_model_dir/Icarus-NLv3/$mdlOUTocean/$gridID_tile";
+               $bcsdir = "$coupled_model_dir/Icarus-NLv3/$omdl/$gridID_tile";
+            } elsif ($rank{$bcsTAG} >= $rank{"Icarus_Reynolds"}) {
+               $bcsdir = "$coupled_model_dir/Icarus/$omdl/$gridID_tile";
+            } elsif ($rank{$bcsTAG} >= $rank{"Ganymed-4_0_Reynolds"}) {
+               $bcsdir = "$coupled_model_dir/Ganymed/$omdl/$gridID_tile";
             } else {
-               $bcsdir = (<${bcsdir}*>)[0];
+               die "Only BCs Ganymed-4_0 and newer supported";
             }
         }
 
@@ -2176,12 +2162,7 @@ sub set_IN_OUT {
 
         # Coupled tile files
         if ($coupledFLG{$ogrid}) {
-            $tile = "${gridID_tile}-Pfafstetter.til";
-            if ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
-               $tile = "$bcsdir/$tile";
-            } else {
-               $tile = "$coupled_model_tile{$tile}/$tile";
-            }
+            $tile = "$bcsdir/${gridID_tile}-Pfafstetter.til";
         }
 
         die "Error. Cannot find tile file: $tile" unless -f $tile;
@@ -3456,6 +3437,9 @@ sub write_CMD_file {
     elsif (defined($landIceFLG) and $landIceFLG == 0) {
         $capture .= " -iceDT 0" if $capture !~ m/\s+\-iceDT\b/;
     }
+
+    $capture .= " -wemin $wemIN" if $capture !~ m/\s+\-wemin\b/;
+    $capture .= " -wemout $wemOUT" if $capture !~ m/\s+\-wemout\b/;
 
     $capture .= " -grpID $grpID" if $capture !~ m/\s+\-grpID\b/ and $grpID;
     $capture .= " -zoom $zoom"   if $capture !~ m/\s+\-zoom\b/ and $zoom_;
