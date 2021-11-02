@@ -2528,31 +2528,24 @@ set im = $im{$grOUT}
 
 if (\$?I_MPI_ROOT) then
 
-  # intel scaling suggestions
-  #--------------------------
+  # Based on GEOSgcm NCCS Intel MPI settings
+  #-----------------------------------------
   
-  setenv I_MPI_DAPL_UD on
-
-  setenv DAPL_UCM_CQ_SIZE 4096
-  setenv DAPL_UCM_QP_SIZE 4096
-
-  setenv I_MPI_DAPL_UD_SEND_BUFFER_NUM 4096
-  setenv I_MPI_DAPL_UD_RECV_BUFFER_NUM 4096
-  setenv I_MPI_DAPL_UD_ACK_SEND_POOL_SIZE 4096
-  setenv I_MPI_DAPL_UD_ACK_RECV_POOL_SIZE 4096
-  setenv I_MPI_DAPL_UD_RNDV_EP_NUM 2
-  setenv I_MPI_DAPL_UD_REQ_EVD_SIZE 2000
-
-  setenv DAPL_UCM_REP_TIME 2000
-  setenv DAPL_UCM_RTU_TIME 2000
-  setenv DAPL_UCM_RETRY 7
-  setenv DAPL_ACK_RETRY 7
-  setenv DAPL_ACK_TIMER 20
-  setenv DAPL_UCM_RETRY 10
-  setenv DAPL_ACK_RETRY 10
+  setenv I_MPI_ADJUST_ALLREDUCE 12
+  setenv I_MPI_ADJUST_GATHERV 3
+  setenv I_MPI_SHM_HEAP_VSIZE 512
+  setenv PSM2_MEMORY large
+  setenv I_MPI_EXTRA_FILESYSTEM 1
+  setenv I_MPI_EXTRA_FILESYSTEM_FORCE gpfs
+  setenv ROMIO_FSTYPE_FORCE "gpfs:"
 
 else if (\$?MVAPICH2) then
+
   setenv MV2_ENABLE_AFFINITY 0
+  setenv MV2_ENABLE_AFFINITY     0
+  setenv SLURM_DISTRIBUTION block
+  setenv MV2_MPIRUN_TIMEOUT 100
+  setenv MV2_GATHERV_SSEND_THRESHOLD 256
 
 endif
 
