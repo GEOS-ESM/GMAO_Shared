@@ -528,7 +528,7 @@ sub check_inputs {
     my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
     my ($grINocean_data_dflt, $grOUTocean_data_dflt, $ii);
     my ($grINocean_coupled_dflt, $grOUTocean_coupled_dflt);
-    my ($mdlINocean_dflt, $mdlOUTocean_coupled_dflt);
+    my ($mdlINocean_dflt, $mdlOUTocean_dflt);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
@@ -742,7 +742,7 @@ sub check_inputs {
 
     # These are the defaults for ocean model
     $mdlINocean_dflt  = "data";
-    $mdlOUTocean_coupled_dflt  = "MOM6"; # We don't need a default if dataocean in
+    $mdlOUTocean_dflt  = "data"; # We don't need a default if dataocean in
 
     unless ($mdlINocean) {
        print "\nOcean Models\n"
@@ -759,78 +759,67 @@ sub check_inputs {
 
     unless ($grINocean  and $imo{$grINocean} and
             $grOUTocean and $imo{$grOUTocean}) {
-       if ($mdlINocean eq "data") {
-          print "\nData Ocean Grids\n"
-                .   "----------------\n"
-                .   "c  =  360x180   (Reynolds)\n"
-                .   "e  = 1440x720   (MERRA-2)\n"
-                .   "f  = 2880x1440  (OSTIA)\n"
-                .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
-                .   "\n";
-          until ($grINocean and $imo{$grINocean} and $dataFLG{$grINocean}) {
+       print "\nData Ocean Grids\n"
+             .   "----------------\n"
+             .   "c  =  360x180   (Reynolds)\n"
+             .   "e  = 1440x720   (MERRA-2)\n"
+             .   "f  = 2880x1440  (OSTIA)\n"
+             .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
+             .   "\nCoupled Ocean Grids\n"
+             .   "-------------------\n"
+             .   "aa = 72x36\n"
+             .   "cc = 360x200\n"
+             .   "dd = 720x410\n"
+             .   "ee = 1440x1080\n\n";
+       until ($grINocean and $imo{$grINocean} and ($dataFLG{$grINocean} or $coupledFLG{$grINocean}) ) {
+          if ($mdlINocean eq "data") {
              $grINocean = query("Enter INPUT ocean grid:", $grINocean_data_dflt);
-          }
-          if (($grINocean eq "CS") or ($grINocean eq "CSi")) {
-             unless ($CSo{$grIN}) {
-                die "Error. Cannot have cubed ocean with atmosphere grid $grIN";
-             }
-             $grINocean = "CSi";
-             $grINocean_ = "CS";
-             $imo{"CSi"} = $im{$grIN};
-             $jmo{"CSi"} = $jm{$grIN};
-             $imo4{"CSi"} = $im4{$grIN};
-             $jmo4{"CSi"} = $jm4{$grIN};
-          }
-          $grINocean_ = $grINocean unless $grINocean_;
-       } else {
-          print "\nCoupled Ocean Grids\n"
-                .   "-------------------\n"
-                .   "aa = 72x36\n"
-                .   "cc = 360x200\n"
-                .   "dd = 720x410\n"
-                .   "ee = 1440x1080\n\n";
-          until ($grINocean and $imo{$grINocean} and $coupledFLG{$grINocean}) {
+          } else {
              $grINocean = query("Enter INPUT ocean grid:", $grINocean_coupled_dflt);
           }
-          $grINocean_ = $grINocean;
+       }
+       if (($grINocean eq "CS") or ($grINocean eq "CSi")) {
+          unless ($CSo{$grIN}) {
+             die "Error. Cannot have cubed ocean with atmosphere grid $grIN";
+          }
+          $grINocean = "CSi";
+          $grINocean_ = "CS";
+          $imo{"CSi"} = $im{$grIN};
+          $jmo{"CSi"} = $jm{$grIN};
+          $imo4{"CSi"} = $im4{$grIN};
+          $jmo4{"CSi"} = $jm4{$grIN};
        }
     }
+    $grINocean_ = $grINocean unless $grINocean_;
     print "INPUT ocean grid: $grINocean_\n";
 
     # output ocean model $mdlOUTocean
     #--------------------------------
     # If dataocean, we can only output data ocean, but if coupled, we can choose
-    if ($mdlINocean eq "data") {
-       $mdlOUTocean = "data"
-    } else {
-       until ($mdlOUTocean and $coupledMDLFLG{$mdlOUTocean}) {
-          $mdlOUTocean = query("Enter OUTPUT ocean model", $mdlOUTocean_coupled_dflt);
-       }
+    until ($mdlOUTocean and ( ($mdlOUTocean eq "data") or ($coupledMDLFLG{$mdlOUTocean}) ) ) {
+       $mdlOUTocean = query("Enter OUTPUT ocean model", $mdlOUTocean_dflt);
     }
     print "OUTPUT ocean model: $mdlOUTocean\n";
 
     # output ocean grid: $grOUTocean
     #-------------------------------
-    if ($mdlOUTocean eq "data") {
-       until ($grOUTocean and $imo{$grOUTocean} and $dataFLG{$grOUTocean}) {
+    until ($grOUTocean and $imo{$grOUTocean} and ($dataFLG{$grOUTocean} or $coupledFLG{$grOUTocean})) {
+       if ($mdlOUTocean eq "data") {
           $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_data_dflt);
-       }
-       if ($grOUTocean eq "CS") {
-           unless ($CSo{$grOUT}) {
-               die "Error. Cannot have cubed ocean with atmosphere grid $grOUT;";
-           }
-           $imo{"CS"} = $im{$grOUT};
-           $jmo{"CS"} = $jm{$grOUT};
-           $imo4{"CS"} = $im4{$grOUT};
-           $jmo4{"CS"} = $jm4{$grOUT};
-       }
-       $grOUTocean_ = $grOUTocean unless $grOUTocean_;
-    } else {
-       until ($grOUTocean and $imo{$grOUTocean} and $coupledFLG{$grOUTocean}) {
+       } else {
           $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_coupled_dflt);
        }
-       $grOUTocean_ = $grOUTocean;
     }
+    if ($grOUTocean eq "CS") {
+        unless ($CSo{$grOUT}) {
+            die "Error. Cannot have cubed ocean with atmosphere grid $grOUT;";
+        }
+        $imo{"CS"} = $im{$grOUT};
+        $jmo{"CS"} = $jm{$grOUT};
+        $imo4{"CS"} = $im4{$grOUT};
+        $jmo4{"CS"} = $jm4{$grOUT};
+    }
+    $grOUTocean_ = $grOUTocean unless $grOUTocean_;
     print "OUTPUT ocean grid: $grOUTocean_\n";
 
     # check tag info: $tagIN and $tagOUT
@@ -858,7 +847,7 @@ sub check_inputs {
             print "\n";
         }
     }
-    if ($bcsTagIN) { print_("\nINPUT tag: $bcsTagIN\n\n") }
+    if ($bcsTagIN) { print_("INPUT tag: $bcsTagIN\n") }
     else {
         until ($bcsTagIN) {
             print_("\nType 'bcs' to see BCS tags or\n");
@@ -870,11 +859,14 @@ sub check_inputs {
     if ($rank{$bcsTagIN} >= 12 ) { $surflayIN = 50 }
     else                         { $surflayIN = 20 }
 
-    until ($bcsTagOUT) {
-        print_("\nType 'bcs' to see BCS tags or\n");
-        $tagOUT = query("Enter GCM or DAS tag for outputs:", $current_tag);
-        $bcsTagOUT = resolve_bcsTAG($tagOUT, $grOUTocean, "out");
-        $tagOUT = $bcsTagOUT if $tagOUT eq "bcs";
+    if ($bcsTagOUT) { print_("OUTPUT tag: $bcsTagOUT\n") }
+    else {
+       until ($bcsTagOUT) {
+          print_("\nType 'bcs' to see BCS tags or\n");
+          $tagOUT = query("Enter GCM or DAS tag for outputs:", $current_tag);
+          $bcsTagOUT = resolve_bcsTAG($tagOUT, $grOUTocean, "out");
+          $tagOUT = $bcsTagOUT if $tagOUT eq "bcs";
+       }
     }
     if ($rank{$bcsTagOUT} >= 12 ) { $surflay = 50; $drymassFLG = 1 }
     else                          { $surflay = 20 }
@@ -1971,7 +1963,7 @@ sub set_IN_OUT {
     $OUT{"ogrid"} = $grOUTocean;
 
     $IN{"ogrid_"}  = $grINocean_;  # used for display purposes
-    $OUT{"ogrid_"} = $grOUTocean;
+    $OUT{"ogrid_"} = $grOUTocean_;
 
     $IN{"omdl"}  = $mdlINocean;
     $OUT{"omdl"} = $mdlOUTocean;
