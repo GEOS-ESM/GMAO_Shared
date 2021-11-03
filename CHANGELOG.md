@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
+
 ### Removed
 
 ## [1.4.10] - 2021-10-08
