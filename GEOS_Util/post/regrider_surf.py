@@ -10,8 +10,8 @@ class surface(regrider):
   def __init__(self, config):
      super().__init__(config)
      self.restarts_in = self.restarts_in['SURFACE']
-     self.surf_in  = config['options_in']['SURFACE']
-     self.surf_out = config['options_out']['SURFACE']
+     self.surf_in  = config['input']['parameters']['SURFACE']
+     self.surf_out = config['output']['parameters']['SURFACE']
 
      print("--ToDO--\n")
      print("split saltwater after some tags(need to rank tag)")
@@ -26,8 +26,8 @@ class surface(regrider):
      self.catch = self.restarts_in.get('catch')
      self.catchcnclm40 = self.restarts_in.get('catchcnclm40')
      self.catchcnclm45 = self.restarts_in.get('catchcnclm45')
-     tagout = config['options_out']['COMMON']['tag']
-     ogrid = config['options_out']['COMMON']['ogrid']
+     tagout = self.common_out['tag']
+     ogrid = self.common_out['ogrid']
      bctag = self.get_bcTag(tagout, ogrid)
      tagrank = self.tagsRank[bctag]
 

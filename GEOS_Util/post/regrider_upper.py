@@ -9,8 +9,23 @@ from regrider_base import *
 class upperair(regrider):
   def __init__(self, config):
      super().__init__(config)
-     self.upper_out = config['options_out']['UPPERAIR']
-     self.common_out = config['options_out']['COMMON']
+     self.upper_out = config['input']['parameters']['UPPERAIR']
+
+     # verify agrid
+     cmd = './fvrst.x -h /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48/fvcore_internal_rst'
+     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+     (output, err) = p.communicate()
+     p_status = p.wait()
+     ss = output.decode().split()
+     agrid = self.common_in['agrid']
+     if (agrid):
+       if agrid[0].upper() == "C":
+          n=int(agrid[1:])
+          o=int(ss[0])
+          assert n==o, "input agrid is not consistent with fvcore restart"
+     else:
+        self.common_in['agrid'] = "C"+ss[0]
+
      tagout = self.common_out['tag']
      ogrid  = self.common_out['ogrid']
      bctag  = self.get_bcTag(tagout, ogrid) 
@@ -171,7 +186,8 @@ set interp_restartsX = {Bin}/interp_restarts.x
      upper.close()
      print('sbatch -W regrider_upper.j\n')
      subprocess.call('sbatch -W regrider_upper.j', shell= True)
+     cwd = os.getcwd()
      for out_rst in glob.glob("*_rst*"):
-       shutil.move(out_rst, "../")     
-     print('cd '+bindir)
+       filename = os.path.basename(out_rst)
+       shutil.move(out_rst, cwd+"/"+filename)
      os.chdir(bindir)

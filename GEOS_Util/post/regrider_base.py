@@ -8,20 +8,23 @@ import time
 
 class regrider:
   def __init__(self, config):
-     self.common_in  = config['options_in']['COMMON']
-     self.common_out = config['options_out']['COMMON']
-     self.restarts_in = config['restarts_in']
+     self.common_in   = config['input']['parameters']['COMMON']
+     self.restarts_in = config['input']['restarts']
+     self.common_out  = config['output']['parameters']['COMMON']
      self.slurm_options = config['slurm_options']
-     # check input grid from fvcore
-     #fvrstX = .... ToDo
 
-     self.init_tags_to_bctags()
+     self.init_tags()
+
+     # get bc directory and tile file
      self.in_bcsdir  = self.get_bcdir("IN")
      self.in_til     = glob.glob(self.in_bcsdir+ '/*-Pfafstetter.til')[0] 
      self.out_bcsdir = self.get_bcdir("OUT")
      self.out_til     = glob.glob(self.out_bcsdir+ '/*-Pfafstetter.til')[0] 
 
-  def init_tags_to_bctags(self):
+     #ToDo
+     # 1) get rst source
+
+  def init_tags(self):
      # copy and paste from regrid.pl
      # minor change. Add "D" to the number for each group
      # BCS Tag: Fortuna-1_4
@@ -163,13 +166,28 @@ class regrider:
      self.tagsRank['Icarus-NLv3_MERRA-2']  = 19
      self.tagsRank['Icarus-NLv3_Ostia']    = 20
 
+     self.bcbase={}
+     self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
+     self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
+
+  def get_bcbase(self, opt):
+     base = ''
+     if opt.upper() == 'IN':
+        base = self.common_in.get('bc_base')
+     if opt.upper() == 'OUT':
+        base = self.common_out.get('bc_base')
+     assert base, 'please specify bc_base: discover_ops, discover_lt or an absolute path'
+     if base == 'discover_ops' or base == 'discover_lt':
+        return self.bcbase[base]
+     else:
+        return base 
+
   def get_bcdir(self, opt):
+    bc_base = self.get_bcbase(opt)
     tag = self.common_in['tag']
-    bc_base = self.common_in['bc_base']
     ogrid = self.common_in['ogrid']
     if opt.upper() == "OUT":
        tag = self.common_out['tag']
-       bc_base = self.common_out['bc_base']
        ogrid = self.common_out['ogrid']
     bctag = self.get_bcTag(tag,ogrid)
 
@@ -177,10 +195,10 @@ class regrider:
     if (tagrank >= self.tagsRank['Icarus-NLv3_Reynolds']) :
        bcdir = bc_base+'/Icarus-NLv3/'+bctag+'/'
     elif (tagrank >= self.tagsRank['Icarus_Reynolds']):
-       if bc_base == '/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs' :
-         bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
+       if bc_base == self.bcbase['discover_ops']:
+          bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
        else:
-         bcdir = bc_base+'/Icarus/'+bctag+'/'
+          bcdir = bc_base+'/Icarus/'+bctag+'/'
     elif(tagrank >= self.tagsRank["Ganymed-4_0_Reynolds"]):
        bcdir = bc_base + '/Ganymed-4_0/'+bctag+'/'
     else:

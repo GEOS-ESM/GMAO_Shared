@@ -1,4 +1,5 @@
-restarts_in:
+input:
+  restarts:
     UPPERAIR:
       fvcore: fvcore_internal_rst
       moist:  moist_internal_rst
@@ -11,51 +12,45 @@ restarts_in:
       seaice:   seaicethermo_internal_rst
       catchcnclm40:
       catch: catch_internal_rst
+  parameters:
+    COMMON:
+      yyyymmddhh: 2000041421
+      expid:
+      agrid: C48
+      ogrid: 360x180
+      tag: ICA
+      rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
+      #rst_src: MERRA-2
+      tarfile:
+      bc_base: discover_ops
+      #bc_base: discover_lt
 
-options_in:
-  COMMON:
-    yyyymmddhh: 2000041421
-    expid:
-    agrid: C48
-    ogrid: 360x180
-    tag: ICA
-    rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
-    rst_src: MERR-2
-    #bc_base: /discover/nobackup/ltakacs/bcs
-    bc_base: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs
+    UPPERAIR:
+      nlevel: 72
+    SURFACE:
+      wemin: 26
+      zoom: 8
+      catchcnFLG: 1
+      restart_path: 
+      restart_id: 
+      restart_domain: 
+      cn_version:
 
-  UPPERAIR:
-    nlevel: 72
-  SURFACE:
-    wemin: 26
-    surflayd: 50
-    zoom: 8
-    catchcnFLG: 1
-    restart_path: 
-    restart_id: 
-    restart_domain: 
-    cn_version:
-  CS:
-    bbb:
-    ccc:
-  
-options_out:
-  COMMON:
-    yyyymmddhh: 2000041421
-    expid: c90e
-    tag: INL
-    agrid: C90
-    ogrid: 1440x720
-    outdir: /discover/nobackup/wjiang/test_regridpy/ 
-    bc_base: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs
-  UPPERAIR:
-    nlevel: 72
-  SURFACE:
-    wemout: 13
-  CS:
-    dyn2dyn.x:
-    interp_restarts.x:
+output:
+  parameters:
+     COMMON:
+       expid: c90e
+       tag: INL
+       agrid: C90
+       ogrid: 1440x720
+       outdir: /discover/nobackup/wjiang/test_regridpy/ 
+       bc_base: discover_ops
+     UPPERAIR:
+       #ak, bk
+       nlevel: 72
+     SURFACE:
+       wemout: 13
 slurm_options:
- account: s1873
- qos: debug
- partition: 
+  account: s1873
+  qos: debug
+  partition:
