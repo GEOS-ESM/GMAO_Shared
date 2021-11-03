@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated CI to use Baselibs 6.2.8
+- Updated `pyrob` to work with GEOS-IT files
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
+
 ### Removed
 
 ### Added
