@@ -2533,6 +2533,7 @@ if (\$?I_MPI_ROOT) then
   
   setenv I_MPI_ADJUST_ALLREDUCE 12
   setenv I_MPI_ADJUST_GATHERV 3
+
   setenv I_MPI_SHM_HEAP_VSIZE 512
   setenv PSM2_MEMORY large
   setenv I_MPI_EXTRA_FILESYSTEM 1
