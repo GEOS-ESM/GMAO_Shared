@@ -688,13 +688,18 @@ sub submit_calcjob {
       $ntspn   = 36;
       $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
       $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
+    } elsif ( $npn == 48 ) {
+      $mynodes = "cas";
+      $ntspn   = 42;
+      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use CAS
+      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use CAS
     } else {
       $mynodes = "hasw";
       $ntspn   = 24;
       $qos     = "";
       $partition = "";
-#     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
-#     $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
+#     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use HASW
+#     $partition = "#SBATCH --partition=preops"; # wired for now since only way to use HASW
     }
     if ( $usrnodes ne "null" ) { $mynodes = $usrnodes }; # overwrite with specification from command line
 
@@ -981,7 +986,7 @@ OPTIONS [defaults in brackets]
                        [dirname(\$FVHOME) or \$NOBACKUP]
     -noarchive         do not archive outputs [archives by default]
 
-    -nodes nodesname   specify nodes (e.g., sky or hasw)
+    -nodes nodesname   specify nodes (e.g., sky, hasw, or cas)
     -das               check for DAS hidden files before attempting to fetch files
                        and set no prompt; requires \$FVHOME environment variable;
 

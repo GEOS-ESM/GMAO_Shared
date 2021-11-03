@@ -5,34 +5,44 @@ use m_dyn,  only: dyn_put
 use m_dyn,  only: dyn_vect
 use m_dyn,  only: dyn_clean
 use m_const, only: radius_earth
+use m_die, only: die
 
 implicit none
 
 character(len=*), parameter :: fname = 'bkg.eta.nc4'
 character(len=*), parameter :: pname = 'fsens.eta.nc4'
 character(len=*), parameter :: bname = 'blob.eta.nc4'
+character(len=*), parameter :: dname = 'delta.eta.nc4'
+real, parameter    :: PPMV2GpG = 1.6571E-6         ! ((47.9982 g/mol)/((28.9644 g/mol))*1e-6(mol/mol)-> g/g
 integer, parameter :: dyntype=5
 integer nymd, nhms, ier, im, jm, km, freq, nstep
 integer ii, nymdw, nhmsw
-integer, parameter :: npnts=4
-real blocs(2,npnts)
+real,allocatable:: blocs(:,:)
 logical :: advect=.false.
 
 real,parameter:: adrate     = 0.75
 real,parameter:: lenfcst    = 24
+real,parameter:: deltlen    = 0.001                     ! make this really small
 real,parameter:: corrlen    = 800.                      ! to be read from file
-real,parameter:: corrlength = corrlen*1000/radius_earth
+real :: corrlength 
 
-integer, parameter :: zlevout = 1 ! -1 won''t do anything
+integer, parameter :: zlevout = -1! won''t do anything
 
 type(dyn_vect) :: wind
 type(dyn_vect) :: pert
 
+logical :: delta=.true. !.false.
 integer :: ntimes = 12
 integer :: lu=10
+real,parameter :: dlon=60.
 real,allocatable :: covloc(:,:,:,:)
 real,allocatable :: adcovloc(:,:,:,:)
 real,allocatable :: ploc(:,:,:)
+integer :: npnts,nblobs_perlon
+
+nblobs_perlon=360./dlon
+npnts = 4*nblobs_perlon
+allocate(blocs(2,npnts))
 
 ! read in perturbation fields
 call dyn_get ( trim(pname), nymd, nhms, pert, ier, timidx=1, freq=freq, nstep=nstep, vectype=dyntype )
@@ -53,14 +63,21 @@ pert%ps = 0.0
 pert%delp = 0.0
 pert%q = 0.0
 pert%pt = 0.0
+pert%ts = 0.0
 
 call set_blobs_
+if ( delta ) then
+  corrlength = deltlen*1000/radius_earth
+else
+  corrlength = corrlen*1000/radius_earth
+endif
 call make_blobs_
+!call make_sfc_blobs_
 call dyn_put ( trim(bname), nymd, nhms, 0, pert, ier, freq=freq, nstep=nstep, vectype=dyntype )
 
 ! read in wind fields
- call dyn_get ( trim(fname), nymdw, nhmsw, wind, ier, timidx=1, freq=freq, nstep=nstep, vectype=dyntype )
 if (advect) then
+   call dyn_get ( trim(fname), nymdw, nhmsw, wind, ier, timidx=1, freq=freq, nstep=nstep, vectype=dyntype )
    call advect_blobs_
 endif
 if (zlevout>0) then
@@ -75,6 +92,7 @@ call clean_blobs_
 if(zlevout<=0) then
   call dyn_put ( trim(pname), nymd, nhms, 0, pert, ier, freq=freq, nstep=nstep, vectype=dyntype )
 endif
+
 
 contains
 
@@ -112,19 +130,30 @@ subroutine readin_(lu,fld)
 end subroutine readin_
 
 subroutine set_blobs_
-  blocs(1,1)=10  ! :,1=lats, :,2=lons
-  blocs(2,1)= 0
 
-! blocs(1,2)=90
-  blocs(1,2)=30
-  blocs(2,2)=180
+  integer :: np,n
 
-  blocs(1,3)=45
-  blocs(2,3)=50
-
-! blocs(1,4)=-90
-  blocs(1,4)=-30
-  blocs(2,4)=-60
+  np=1
+  do n=1,nblobs_perlon
+     blocs(1,np)=45  ! 1,:=lats, 2,:=lons
+     blocs(2,np)= -180.+(n-1)*dlon
+     np=np+1
+  enddo
+  do n=1,nblobs_perlon
+     blocs(1,np)=10  ! 1,:=lats, 2,:=lons
+     blocs(2,np)= -180.+(n-1)*dlon
+     np=np+1
+  enddo
+  do n=1,nblobs_perlon
+     blocs(1,np)=-30  ! 1,:=lats, 2,:=lons
+     blocs(2,np)= -180.+(n-1)*dlon
+     np=np+1
+  enddo
+  do n=1,nblobs_perlon
+     blocs(1,np)=-60  ! 1,:=lats, 2,:=lons
+     blocs(2,np)= -180.+(n-1)*dlon
+     np=np+1
+  enddo
 
   allocate(ploc(1,1,3))
   allocate(covloc(im,jm,3,npnts))
@@ -134,13 +163,69 @@ subroutine clean_blobs_
   if(advect) deallocate(adcovloc)
   deallocate(covloc)
   deallocate(ploc)
+  deallocate(blocs)
 end subroutine clean_blobs_
 
 subroutine make_blobs_
-  integer nn,mm,ii,jj,iii,jjj
+  integer nn,ma,mb,ii,jj,kk,iii,jjj,jlat,jlon
   real pi,cs,sn,dist
 
-  mm=km
+! ma=km-9  ! 850 mb
+! mb=km-9  ! 850 mb
+! ma=km-22 ! 500 mb
+! mb=km-22 ! 500 mb
+! ma=14    !   1 mb
+! mb=14    !   1 mb
+! ma=25    !  10 mb
+! mb=25    !  10 mb
+  ma=km    !  sfc
+  mb=km    !  sfc
+  do jlat=1,4
+  do jlon=1,nblobs_perlon
+     nn=nn+1
+     if(nn>npnts) call die('make_blobs_','Trying to access more pnts than avail',99)
+   
+     call globeloc ( ploc, blocs(1,nn:nn), blocs(2,nn:nn) )
+     call globeloc ( covloc(:,:,:,nn), pert%grid%lat, pert%grid%lon )
+     do jj=1,jm
+        do ii=1,im
+           dist = sqrt( (covloc(ii,jj,1,nn)-ploc(1,1,1))**2 + &
+                        (covloc(ii,jj,2,nn)-ploc(1,1,2))**2 + &
+                        (covloc(ii,jj,3,nn)-ploc(1,1,3))**2   )/corrlength
+           if (jlon==1) then
+              if (dist<10*corrlength) then
+!                 do kk=1,km
+!                    pert%delp(ii,jj,kk) = 0.01*gc(dist)*(pert%grid%bk(kk+1)-pert%grid%bk(kk))
+!                 enddo
+                  pert%ps(ii,jj) = 0.01*gc(dist) ! 1mb
+              endif
+           endif
+           if (jlon==2) then
+              if (dist<10*corrlength) pert%pt(ii,jj,ma:mb) = gc(dist)
+           endif
+           if (jlon==3) then
+              if (dist<10*corrlength) pert%u(ii,jj,ma:mb) = gc(dist)
+           endif
+           if (jlon==4) then
+              if (dist<10*corrlength) pert%v(ii,jj,ma:mb) = gc(dist)
+           endif
+           if (jlon==5) then
+              if (dist<10*corrlength) pert%q(ii,jj,ma:mb,1) = gc(dist)
+           endif
+           if (jlon==6) then
+              if (dist<10*corrlength) pert%q(ii,jj,ma:mb,2) = gc(dist)/PPMV2GpG ! 1 g/g
+           endif
+        enddo
+     enddo
+  enddo
+  enddo
+
+end subroutine make_blobs_
+
+subroutine make_sfc_blobs_
+  integer nn,ii,jj,iii,jjj
+  real pi,cs,sn,dist
+
   do nn=1,npnts
      call globeloc ( ploc, blocs(1,nn:nn), blocs(2,nn:nn) )
      call globeloc ( covloc(:,:,:,nn), pert%grid%lat, pert%grid%lon )
@@ -149,13 +234,15 @@ subroutine make_blobs_
            dist = sqrt( (covloc(ii,jj,1,nn)-ploc(1,1,1))**2 + &
                         (covloc(ii,jj,2,nn)-ploc(1,1,2))**2 + &
                         (covloc(ii,jj,3,nn)-ploc(1,1,3))**2   )/corrlength
-           if (dist<10*corrlength) pert%pt(ii,jj,:mm) = gc(dist)
+           if (dist<10*corrlength) then
+!             pert%ts(ii,jj) = gc(dist)
+              pert%ps(ii,jj) = 100.*gc(dist)
+           endif
         enddo
      enddo
-     mm=mm-1
   enddo
 
-end subroutine make_blobs_
+end subroutine make_sfc_blobs_
 
 subroutine advect_blobs_
   integer nn,ii,jj,kk,iii,jjj
