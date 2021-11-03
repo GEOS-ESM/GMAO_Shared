@@ -19,6 +19,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+### Added
+
+### Fixed
+
+### Changed
+
+- add Cascade knob to g5fcst_stats.pl and regrid.pl
+- revised dyn_blob: more general on the blobs
+- make sure echorc.x exits w/ success code when applicable
+
+### Removed
+
+
 ## [1.4.10] - 2021-10-08
 
 ### Added
