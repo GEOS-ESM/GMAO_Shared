@@ -7,6 +7,7 @@ import yaml
 from regrider_base  import *
 from regrider_upper import *
 from regrider_surf  import *
+from regrider_ana  import *
 
 if __name__ == '__main__' :
 
@@ -22,8 +23,8 @@ if __name__ == '__main__' :
    surf  = surface(config)
    surf.regrid()
 
-   # what ever
-#   forcing = force(config)
-#   forcing.regrid()
+   # analysis
+   ana = analysis(config)
+   ana.regrid()
    
 

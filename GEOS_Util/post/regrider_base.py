@@ -5,27 +5,33 @@ import subprocess
 import shutil
 import glob
 import time
+from datetime import datetime
+from datetime import timedelta
 
-class regrider:
+class regrider(object):
   def __init__(self, config):
-     self.common_in   = config['input']['parameters']['COMMON']
      self.restarts_in = config['input']['restarts']
+     self.common_in   = config['input']['parameters']['COMMON']
      self.common_out  = config['output']['parameters']['COMMON']
      self.upper_in  = config['input']['parameters']['UPPERAIR']
-     self.upper_out  = config['output']['parameters']['UPPERAIR']
+     self.upper_out = config['output']['parameters']['UPPERAIR']
      self.slurm_options = config['slurm_options']
 
+     self.init_time()
      self.init_tags()
-
+     merra = self.common_in.get('rst_src')
+     if merra == 'MERRA-1':
+       print("Not yet implmented")
+       exit()
      self.init_merra2()
 
      # get bc directory and tile file
      self.in_bcsdir  = self.get_bcdir("IN")
      self.in_til     = glob.glob(self.in_bcsdir+ '/*-Pfafstetter.til')[0] 
-     print("input tile file: " + self.in_til
+     print("input tile file: " + self.in_til)
      self.out_bcsdir = self.get_bcdir("OUT")
      self.out_til     = glob.glob(self.out_bcsdir+ '/*-Pfafstetter.til')[0] 
-     print("output tile file: " + self.out_til
+     print("output tile file: " + self.out_til)
 
 
   def init_tags(self):
@@ -174,14 +180,21 @@ class regrider:
      self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
 
+  def init_time(self):
+     yyyymmddhh = str(self.common_in['yyyymmddhh'])
+     self.yyyymm = yyyymmddhh[0:6]
+     self.yyyy = yyyymmddhh[0:4]  
+     self.mm   = yyyymmddhh[4:6]  
+     self.dd   = yyyymmddhh[6:8]  
+     self.hh   = yyyymmddhh[8:10]  
+     self.ymd  = yyyymmddhh[0:8]  
+
   def init_merra2(self):
      merra2 = self.common_in.get('rst_src')
      if merra2 != 'MERRA-2':
        return
      print("merra-2 source")
-     yyyymmddhh = str(self.common_in['yyyymmddhh'])
-     print(type(yyyymmddhh))
-     yyyymm = int(yyyymmddhh[0:6])
+     yyyymm = int(self.yyyymm)
      if yyyymm < 197901 :
        print("Error. MERRA-2 data < 1979 not available\n")
        exit()
@@ -199,12 +212,9 @@ class regrider:
      self.common_in['bc_base']= 'discover_ops'
      self.upper_in['nlevel'] = 72
      expid = self.common_in['expid']
-     yyyy = yyyymmddhh[0:4]
-     mm   = yyyymmddhh[4:6]
-     dd   = yyyymmddhh[6:8]
-     hh   = yyyymmddhh[8:10]
-     surfix = yyyymmddhh[0:8]+'_'+hh+'z.bin'
-     self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy +'/M'+mm
+     yyyymmddhh = str(self.common_in['yyyymmddhh'])
+     surfix = yyyymmddhh[0:8]+'_'+self.hh+'z.bin'
+     self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm
     
      self.restarts_in['UPPERAIR'] = {} 
      self.restarts_in['UPPERAIR']['fvcore'] = expid+'.fvcore_internal_rst.' + surfix
@@ -218,7 +228,7 @@ class regrider:
      self.restarts_in['SURFACE']['lake']     = expid+'.lake_internal_rst.'     + surfix
      self.restarts_in['SURFACE']['landice']  = expid+'.landice_internal_rst.'  + surfix
      self.restarts_in['SURFACE']['saltwater']= expid+'.saltwater_internal_rst.'+ surfix
-  
+
   def get_bcbase(self, opt):
      base = ''
      if opt.upper() == 'IN':
@@ -270,7 +280,7 @@ class regrider:
        namex = []
        if (grid[0].upper() == 'C'):
          n = int(grid[1:])
-         s1 =f'{n}x6C'
+         s1 ='{n}x6C'.format(n=n)
          j=n*6
          s2 =str(n)
          s3 =str(j)
@@ -288,8 +298,10 @@ class regrider:
          for name in names:
            if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(name)
        return namex
-
-     dirnames = [ f.name for f in os.scandir(bcdir) if f.is_dir()]
+     #v3.5
+     #dirnames = [ f.name for f in os.scandir(bcdir) if f.is_dir()]
+     #v2.7
+     dirnames = [f for f in os.listdir(bcdir) if os.path.isdir(os.path.join(bcdir,f))]
      agrid_ = self.common_in['agrid']   
      ogrid_ = self.common_in['ogrid'] 
      if opt.upper() == "OUT" :

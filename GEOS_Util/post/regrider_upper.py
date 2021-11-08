@@ -8,7 +8,10 @@ from regrider_base import *
 
 class upperair(regrider):
   def __init__(self, config):
-     super().__init__(config)
+     # v3.0
+     #super().__init__(config)
+     # v2.7
+     super(upperair, self).__init__(config)
      self.upper_out = config['input']['parameters']['UPPERAIR']
      self.restarts_in = self.restarts_in['UPPERAIR']
       
@@ -71,11 +74,11 @@ class upperair(regrider):
   def regrid(self):
      print( "Regridding upper air......\n")
      bindir = os.getcwd()
-     outdir = self.common_out['outdir']
-     if not os.path.exists(outdir) : os.makedirs(outdir)
-     print( "cd " + self.common_out['outdir'])
-     os.chdir(self.common_out['outdir'])
-     tmpdir = outdir+'/upper_data/'
+     out_dir = self.common_out['out_dir']
+     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     print( "cd " + self.common_out['out_dir'])
+     os.chdir(self.common_out['out_dir'])
+     tmpdir = out_dir+'/upper_data/'
      if os.path.exists(tmpdir) : subprocess.call('rm -rf '+ tmpdir, shell = True)
      print ("mkdir " + tmpdir)
      os.makedirs(tmpdir)
@@ -111,12 +114,12 @@ class upperair(regrider):
 #SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name=regrid_upper
-#SBATCH --output={outdir}/{out_log}
+#SBATCH --output={out_dir}/{out_log}
 {QOS}
 
 unlimit
 
-cd {outdir}/upper_data
+cd {out_dir}/upper_data
 source {Bin}/g5_modules
 /bin/touch input.nml
 
@@ -183,7 +186,7 @@ set interp_restartsX = {Bin}/interp_restarts.x
 
 """
      regrid_upper_script = regrid_template.format(Bin=bindir, account = self.slurm_options['account'], \
-             outdir = outdir, out_log = 'regrid_upper_log', drymassFLG = self.upper_out['drymassFLG'], \
+             out_dir = out_dir, out_log = 'regrid_upper_log', drymassFLG = self.upper_out['drymassFLG'], \
              imout = self.upper_out['imout'], nwrit = self.upper_out['nwrit'], NPE = self.upper_out['NPE'], \
              QOS = self.upper_out['QOS'], nlevel = self.upper_out['nlevel'])
      upper = open('regrider_upper.j','wt')

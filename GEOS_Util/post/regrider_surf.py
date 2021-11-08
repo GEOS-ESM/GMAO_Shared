@@ -8,15 +8,14 @@ from regrider_base import *
 
 class surface(regrider):
   def __init__(self, config):
-     super().__init__(config)
+     #v3.0
+     #super().__init__(config)
+     #v2.7
+     super(surface, self).__init__(config)
      self.restarts_in = self.restarts_in['SURFACE']
      self.surf_in  = config['input']['parameters']['SURFACE']
      self.surf_out = config['output']['parameters']['SURFACE']
 
-     print("--ToDO--\n")
-     print("split saltwater after some tags(need to rank tag)")
-     print("if split, set self.saltwater None")
-     print("\n")
      self.saltwater = self.restarts_in.get('saltwater')
      self.openwater = self.restarts_in.get('openwater')
      self.seaice  = self.restarts_in.get('seaice')
@@ -40,11 +39,11 @@ class surface(regrider):
          
   def regrid(self):
      bindir = os.getcwd()
-     outdir = self.common_out['outdir']
-     if not os.path.exists(outdir) : os.makedirs(outdir)
-     os.chdir(self.common_out['outdir'])
-     InData_dir = outdir+'/InData/'
-     OutData_dir = outdir+'/OutData/'
+     out_dir = self.common_out['out_dir']
+     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     os.chdir(self.common_out['out_dir'])
+     InData_dir = out_dir+'/InData/'
+     OutData_dir = out_dir+'/OutData/'
      if os.path.exists(InData_dir) : subprocess.call('rm -rf '+ InData_dir, shell = True)
      os.makedirs(InData_dir)
      if os.path.exists(OutData_dir) : subprocess.call('rm -rf '+ OutData_dir, shell = True)
@@ -113,7 +112,7 @@ class surface(regrider):
 #SBATCH --time=1:00:00
 #SBATCH --job-name=mk_catch
 #SBATCH --qos=debug
-#SBATCH --output={outdir}/{mk_catch_log}
+#SBATCH --output={out_dir}/{mk_catch_log}
 #
 
 source {Bin}/g5_modules
@@ -218,7 +217,7 @@ endif
      catchcnFLG = '1' if (self.catchcnclm40 or self.catchcnclm45) else '0'
 
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = self.slurm_options['account'], \
-                  outdir = outdir, mk_catch_log = 'mk_catch_log.1', surflay = self.surf_out['surflay'],  \
+                  out_dir = out_dir, mk_catch_log = 'mk_catch_log.1', surflay = self.surf_out['surflay'],  \
                   wemin = self.surf_in['wemin'], wemout = self.surf_out['wemout'] ,  \
                   fromGCM = '0', catchFLG = catchFLG, catchcnFLG = catchcnFLG, rescale = '0', rsttime = self.common_in['yyyymmddhh'], \
                   RESTART_ID = self.surf_in['restart_id'], RESTART_PATH = self.surf_in['restart_path'], \
@@ -258,7 +257,7 @@ endif
        lakeFLG      =  '0'
        routeFLG     =  '0'
        catch2script =  mk_catch_j_template.format(Bin = bindir, account = self.slurm_options['account'], \
-                  outdir = outdir, mk_catch_log = 'mk_catch_log.2', surflay = self.surf_out['surflay'],  \
+                  out_dir = out_dir, mk_catch_log = 'mk_catch_log.2', surflay = self.surf_out['surflay'],  \
                   wemin = self.surf_in['wemin'], wemout = self.surf_out['wemout'] ,  \
                   fromGCM = '0', catchFLG = catchFLG, catchcnFLG = catchcnFLG, rescale = '1', rsttime = self.common_in['yyyymmddhh'], \
                   RESTART_ID = self.surf_in['restart_id'], RESTART_PATH = self.surf_in['restart_path'], \
