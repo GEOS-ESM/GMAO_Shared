@@ -52,7 +52,7 @@ class surface(regrider):
 
      for key, value in self.restarts_in.items():
         if not value : continue
-        src  = self.common_in['rstdir']+'/'+value
+        src  = self.common_in['rst_dir']+'/'+value
         if not os.path.exists(src) :
            print( "Could not find " + src + "--remove it from yaml config file add to restart dir")
            exit()

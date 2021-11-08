@@ -9,18 +9,18 @@ input:
       lake: lake_internal_rst 
       landice: landice_internal_rst 
       #saltwater: saltwater_internal_rst
-      seaice:   seaicethermo_internal_rst
+      #seaice:   seaicethermo_internal_rst
       catchcnclm40:
       catch: catch_internal_rst
   parameters:
     COMMON:
       yyyymmddhh: 2000041421
+      tag: ICA
+      rst_src: MERRA-2
       expid:
       agrid: C48
       ogrid: 360x180
-      tag: ICA
-      rstdir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
-      #rst_src: MERRA-2
+      rst_dir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
       tarfile:
       bc_base: discover_ops
       #bc_base: discover_lt
@@ -40,6 +40,9 @@ output:
   parameters:
      COMMON:
        expid: c90e
+       #model_config:
+         #tag:
+         #couple:
        tag: INL
        agrid: C90
        ogrid: 1440x720

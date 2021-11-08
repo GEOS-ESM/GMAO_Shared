@@ -10,24 +10,29 @@ class upperair(regrider):
   def __init__(self, config):
      super().__init__(config)
      self.upper_out = config['input']['parameters']['UPPERAIR']
-
+     self.restarts_in = self.restarts_in['UPPERAIR']
+      
      # verify agrid
-     cmd = './fvrst.x -h /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48/fvcore_internal_rst'
-     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-     (output, err) = p.communicate()
-     p_status = p.wait()
-     ss = output.decode().split()
      agrid = self.common_in['agrid']
-     if (agrid):
-       if agrid[0].upper() == "C":
-          n=int(agrid[1:])
-          o=int(ss[0])
-          assert n==o, "input agrid is not consistent with fvcore restart"
-     else:
-        self.common_in['agrid'] = "C"+ss[0]
+     ogrid = self.common_out['ogrid']
+     merra_2 = self.common_in.get('rst_src')
+     if not (merra_2 == 'MERRA-2') :
+       fvcore = self.common_in['rst_dir']+'/'+self.restarts_in['fvcore']
+       cmd = './fvrst.x -h ' + fvcore
+       print(cmd +'\n')
+       p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+       (output, err) = p.communicate()
+       p_status = p.wait()
+       ss = output.decode().split()
+       if (agrid):
+         if agrid[0].upper() == "C":
+            n=int(agrid[1:])
+            o=int(ss[0])
+            assert n==o, "input agrid is not consistent with fvcore restart"
+       else:
+         self.common_in['agrid'] = "C"+ss[0]
 
      tagout = self.common_out['tag']
-     ogrid  = self.common_out['ogrid']
      bctag  = self.get_bcTag(tagout, ogrid) 
      tagrank = self.tagsRank[bctag]
 
@@ -77,8 +82,8 @@ class upperair(regrider):
 
      print( "cd " + tmpdir)
      os.chdir(tmpdir)
-     rst_dir = self.common_in['rstdir']
-     for key, rst in self.restarts_in['UPPERAIR'].items():
+     rst_dir = self.common_in['rst_dir']
+     for key, rst in self.restarts_in.items():
         if (rst):
           rst_in = "_internal_restart_in"
           if rst.find('import') != -1 :

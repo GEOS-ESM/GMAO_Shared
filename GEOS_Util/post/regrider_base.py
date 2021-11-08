@@ -11,18 +11,22 @@ class regrider:
      self.common_in   = config['input']['parameters']['COMMON']
      self.restarts_in = config['input']['restarts']
      self.common_out  = config['output']['parameters']['COMMON']
+     self.upper_in  = config['input']['parameters']['UPPERAIR']
+     self.upper_out  = config['output']['parameters']['UPPERAIR']
      self.slurm_options = config['slurm_options']
 
      self.init_tags()
 
+     self.init_merra2()
+
      # get bc directory and tile file
      self.in_bcsdir  = self.get_bcdir("IN")
      self.in_til     = glob.glob(self.in_bcsdir+ '/*-Pfafstetter.til')[0] 
+     print("input tile file: " + self.in_til
      self.out_bcsdir = self.get_bcdir("OUT")
      self.out_til     = glob.glob(self.out_bcsdir+ '/*-Pfafstetter.til')[0] 
+     print("output tile file: " + self.out_til
 
-     #ToDo
-     # 1) get rst source
 
   def init_tags(self):
      # copy and paste from regrid.pl
@@ -170,6 +174,51 @@ class regrider:
      self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
 
+  def init_merra2(self):
+     merra2 = self.common_in.get('rst_src')
+     if merra2 != 'MERRA-2':
+       return
+     print("merra-2 source")
+     yyyymmddhh = str(self.common_in['yyyymmddhh'])
+     print(type(yyyymmddhh))
+     yyyymm = int(yyyymmddhh[0:6])
+     if yyyymm < 197901 :
+       print("Error. MERRA-2 data < 1979 not available\n")
+       exit()
+     elif (yyyymm < 199201):
+       self.common_in['expid'] = "d5124_m2_jan79"     
+     elif (yyyymm < 200106):
+       self.common_in['expid'] = "d5124_m2_jan91"
+     elif (yyyymm < 201101):
+       self.common_in['expid'] = "d5124_m2_jan00"
+     else:
+       self.common_in['expid'] = "d5124_m2_jan10"
+
+     self.common_in['agrid'] = 'C180'
+     self.common_in['ogrid'] = '1440x720'
+     self.common_in['bc_base']= 'discover_ops'
+     self.upper_in['nlevel'] = 72
+     expid = self.common_in['expid']
+     yyyy = yyyymmddhh[0:4]
+     mm   = yyyymmddhh[4:6]
+     dd   = yyyymmddhh[6:8]
+     hh   = yyyymmddhh[8:10]
+     surfix = yyyymmddhh[0:8]+'_'+hh+'z.bin'
+     self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy +'/M'+mm
+    
+     self.restarts_in['UPPERAIR'] = {} 
+     self.restarts_in['UPPERAIR']['fvcore'] = expid+'.fvcore_internal_rst.' + surfix
+     self.restarts_in['UPPERAIR']['moist']  = expid+'.moist_internal_rst.'  + surfix
+     self.restarts_in['UPPERAIR']['agcm']   = expid+'.agcm_import_rst.'     + surfix
+     self.restarts_in['UPPERAIR']['gocart'] = expid+'.gocart_internal_rst.' + surfix
+     self.restarts_in['UPPERAIR']['pchem']  = expid+'.pchem_internal_rst.'  + surfix
+
+     self.restarts_in['SURFACE'] = {} 
+     self.restarts_in['SURFACE']['catch']    = expid+'.catch_internal_rst.'    + surfix
+     self.restarts_in['SURFACE']['lake']     = expid+'.lake_internal_rst.'     + surfix
+     self.restarts_in['SURFACE']['landice']  = expid+'.landice_internal_rst.'  + surfix
+     self.restarts_in['SURFACE']['saltwater']= expid+'.saltwater_internal_rst.'+ surfix
+  
   def get_bcbase(self, opt):
      base = ''
      if opt.upper() == 'IN':
