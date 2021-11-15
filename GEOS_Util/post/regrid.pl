@@ -631,7 +631,6 @@ sub check_inputs {
         $grIN      = "d";
         $grINocean = "c";
         $mdlINocean = "data";
-        $mdlOUTocean = "data";
 
         if    ($year < 1979) { die "Error. MERRA data < 1979 not available\n" }
         elsif ($year < 1989) { $expid = "d5_merra_jan79" }
@@ -645,7 +644,6 @@ sub check_inputs {
         $grIN      = "C180";
         $grINocean = "e";
         $mdlINocean = "data";
-        $mdlOUTocean = "data";
 
         if ("$year$month" < 197901) {
             die "Error. MERRA-2 data < 1979 not available\n"
