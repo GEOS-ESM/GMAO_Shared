@@ -72,7 +72,7 @@ class upperair(regrider):
      if self.upper_out['NPE'] <= 532: self.upper_out['QOS'] = "#SBATCH --qos=debug"
 
   def regrid(self):
-     print( "Regridding upper air......\n")
+     print( "\nRegridding upper air......\n")
      bindir = os.getcwd()
      out_dir = self.common_out['out_dir']
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
@@ -91,21 +91,22 @@ class upperair(regrider):
           rst_in = "_internal_restart_in"
           if rst.find('import') != -1 :
             rst_in = "_import_restart_in"
-          cmd = '/bin/ln -s '+rst_dir+'/'+rst+' '+key+rst_in
-          print(cmd)
+          cmd = '/bin/cp  '+rst_dir+'/'+rst+' '+key+rst_in
+          print('\n'+cmd)
           subprocess.call(cmd, shell = True)
      # link topo file
      topoin = glob.glob(self.in_bcsdir+'/topo_DYN_ave*')[0]
-     cmd = '/bin/ln -s ' + topoin
-     print(cmd)
+     cmd = '/bin/cp ' + topoin + ' .'
+     print('\n'+cmd)
      subprocess.call(cmd, shell = True)
 
      topoout = glob.glob(self.out_bcsdir+'/topo_DYN_ave*')[0]
-     cmd = '/bin/ln -s ' + topoout
-     print(cmd)
+     cmd = '/bin/cp ' + topoout + ' .'
+     print('\n'+cmd)
      subprocess.call(cmd, shell = True)
-     cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
-     print(cmd)
+     fname = os.path.basename(topoout)
+     cmd = '/bin/ln -s ' + fname + ' topo_dynave.data'
+     print('\n'+cmd)
      subprocess.call(cmd, shell = True)
 
      regrid_template="""#!/bin/csh -xf
@@ -194,8 +195,8 @@ set interp_restartsX = {Bin}/interp_restarts.x
      upper.close()
      print('sbatch -W regrider_upper.j\n')
      subprocess.call('sbatch -W regrider_upper.j', shell= True)
-     cwd = os.getcwd()
      for out_rst in glob.glob("*_rst*"):
        filename = os.path.basename(out_rst)
-       shutil.move(out_rst, cwd+"/"+filename)
+       print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
+       shutil.move(out_rst, out_dir+"/"+filename)
      os.chdir(bindir)

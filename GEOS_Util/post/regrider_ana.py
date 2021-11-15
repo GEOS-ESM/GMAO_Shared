@@ -146,7 +146,6 @@ class analysis(regrider):
        nlevel = self.upper_out['nlevel']
        flags = "-g5 -res " + self.hgrd[agrid_out] + " -nlevs " + str(nlevel)
        bkg_files = glob.glob(tmp_dir+'/*.bkg??_eta_rst*')
-       print(bkg_files)
        for f in bkg_files:
           f_orig = f + ".orig"
           shutil.move(f,f_orig)

@@ -215,7 +215,7 @@ class regrider(object):
      yyyymmddhh = str(self.common_in['yyyymmddhh'])
      surfix = yyyymmddhh[0:8]+'_'+self.hh+'z.bin'
      self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm
-    
+     print('\nMERRA-2 Restart dir: ' + self.common_in['rst_dir']) 
      self.restarts_in['UPPERAIR'] = {} 
      self.restarts_in['UPPERAIR']['fvcore'] = expid+'.fvcore_internal_rst.' + surfix
      self.restarts_in['UPPERAIR']['moist']  = expid+'.moist_internal_rst.'  + surfix

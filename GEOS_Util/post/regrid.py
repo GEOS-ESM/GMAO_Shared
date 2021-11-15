@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# module load python/GEOSpyD/Min4.9.2_py3.9 
+# source g5_modules
 #
 
 import yaml

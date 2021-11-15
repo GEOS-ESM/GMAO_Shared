@@ -17,7 +17,7 @@ input:
       yyyymmddhh: 2000041421
       tag: ICA
       rst_src: MERRA-2
-      expid:
+      expid: 
       agrid: C48
       ogrid: 360x180
       rst_dir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
@@ -35,7 +35,9 @@ input:
       restart_id: 
       restart_domain: 
       cn_version:
-
+    ANALYSIS:
+      bkg: Yes
+      lcv: Yes
 output:
   parameters:
      COMMON:
@@ -46,7 +48,7 @@ output:
        tag: INL
        agrid: C90
        ogrid: 1440x720
-       outdir: /discover/nobackup/wjiang/test_regridpy/ 
+       out_dir: /discover/nobackup/wjiang/test_all/ 
        bc_base: discover_ops
      UPPERAIR:
        #ak, bk
