@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.4.11] - 2021-11-03
+
+### Changed
+
+- add Cascade knob to g5fcst_stats.pl and regrid.pl
+- revised dyn_blob: more general on the blobs
+- make sure echorc.x exits w/ success code when applicable
+- Updated CI to use Baselibs 6.2.8
+- Updated `pyrob` to work with GEOS-IT files
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
+
 ## [1.4.10] - 2021-10-08
 
 ### Added
