@@ -742,7 +742,7 @@ sub check_inputs {
     $mdlINocean_dflt  = "data";
     $mdlOUTocean_dflt  = "data"; # We don't need a default if dataocean in
 
-    unless ($mdlINocean) {
+    unless ($mdlINocean and not $merra) {
        print "\nOcean Models\n"
            .   "------------\n"
            .   "data  (Reynolds, MERRA-2, Ostia, Cubed-Sphere)\n"
