@@ -179,6 +179,7 @@ class regrider(object):
      self.bcbase={}
      self.bcbase['discover_ops'] = "/discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs"
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
+     self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
   def init_time(self):
      yyyymmddhh = str(self.common_in['yyyymmddhh'])
@@ -231,12 +232,17 @@ class regrider(object):
 
   def get_bcbase(self, opt):
      base = ''
+     model = ''
      if opt.upper() == 'IN':
-        base = self.common_in.get('bc_base')
+        base  = self.common_in.get('bc_base')
+        model = self.common_in.get('model')
      if opt.upper() == 'OUT':
         base = self.common_out.get('bc_base')
-     assert base, 'please specify bc_base: discover_ops, discover_lt or an absolute path'
-     if base == 'discover_ops' or base == 'discover_lt':
+        model = self.common_out.get('model')
+     assert base, 'please specify bc_base: discover_ops, discover_lt, discover_couple or an absolute path'
+     if model == 'MOM5' or model == 'MOM6':
+       assert base == 'discover_couple', "couples model's bc base should be discover_couple"
+     if base == 'discover_ops' or base == 'discover_lt' or base=='discover_couple':
         return self.bcbase[base]
      else:
         return base 
@@ -245,23 +251,33 @@ class regrider(object):
     bc_base = self.get_bcbase(opt)
     tag = self.common_in['tag']
     ogrid = self.common_in['ogrid']
+    model = self.common_in['model']
     if opt.upper() == "OUT":
        tag = self.common_out['tag']
        ogrid = self.common_out['ogrid']
+       model = self.common_out['model']
     bctag = self.get_bcTag(tag,ogrid)
 
     tagrank = self.tagsRank[bctag]
     if (tagrank >= self.tagsRank['Icarus-NLv3_Reynolds']) :
        bcdir = bc_base+'/Icarus-NLv3/'+bctag+'/'
+       if model == 'MOM6' or model == 'MOM5':
+          bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
     elif (tagrank >= self.tagsRank['Icarus_Reynolds']):
        if bc_base == self.bcbase['discover_ops']:
           bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
        else:
           bcdir = bc_base+'/Icarus/'+bctag+'/'
+       if model == 'MOM6' or model == 'MOM5':
+          bcdir = bc_base+'/Icarus/'+model+'/'
     elif(tagrank >= self.tagsRank["Ganymed-4_0_Reynolds"]):
        bcdir = bc_base + '/Ganymed-4_0/'+bctag+'/'
+       if model == 'MOM6' or model == 'MOM5':
+          bcdir = bc_base+'/Ganymed/'+model+'/'
     else:
-       bcdir = bc_base + '/' + bctag
+       bcdir = bc_base + '/' + bctag + '/'
+       if model == 'MOM6' or model == 'MOM5':
+          bcdir = bc_base+'/Ganymed/'+model+'/'
 
     if not os.path.exists(bcdir):
        print( "Cannot find bc dir " +  bcdir)

@@ -20,6 +20,7 @@ input:
       expid: 
       agrid: C48
       ogrid: 360x180
+      model: data
       rst_dir: /gpfsm/dnb44/mathomp4/Restarts-J10/nc4/Reynolds/c48
       tarfile:
       bc_base: discover_ops
@@ -29,7 +30,7 @@ input:
       nlevel: 72
     SURFACE:
       wemin: 26
-      zoom: 8
+      zoom: 2
       catchcnFLG: 1
       restart_path: 
       restart_id: 
@@ -41,20 +42,19 @@ input:
 output:
   parameters:
      COMMON:
-       expid: c90e
-       #model_config:
-         #tag:
-         #couple:
+       expid: c24
+       model: MOM6
        tag: INL
-       agrid: C90
-       ogrid: 1440x720
-       out_dir: /discover/nobackup/wjiang/test_all/ 
-       bc_base: discover_ops
+       agrid: C24
+       ogrid: 72x36
+       out_dir: /discover/nobackup/wjiang/test_mycouple/ 
+       bc_base: discover_couple
      UPPERAIR:
        #ak, bk
        nlevel: 72
      SURFACE:
        wemout: 13
+
 slurm_options:
   account: s1873
   qos: debug
