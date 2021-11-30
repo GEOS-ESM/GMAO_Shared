@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
 ### Changed
 
 ### Removed
