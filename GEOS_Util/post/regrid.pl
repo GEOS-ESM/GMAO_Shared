@@ -50,7 +50,8 @@ my $current_tag = "Icarus-NLv3";       # default for output restarts
 
 my (@GCMtags, @DAStags);
 my (@F14, @F20, @F21, @G10, @G10p, @G20, @G30, @G40, @INL, @ICA);
-my (@D214, @D540, @D561, @D580, @D591p, @D5A0, @D5B0, @D512, @D517);
+my (@GITOL, @GITNL); # Git GCM tags
+my (@D214, @D540, @D561, @D580, @D591p, @D5A0, @D5B0, @D512, @D517, @D525);
 my (%bcsTAG, %rank, %landIceVER, $landIceFLG);
 my ($rank_1_catchcn, $rank_1_route, $rank_saltwater_split);
 
@@ -160,7 +161,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 
 %SURFACE      = ("catch_internal_rst"        => 1,
                  "catchcn_internal_rst"      => 1,
-                 "route_internal_rst"        => 1,		 
+                 "route_internal_rst"        => 1,
                  "lake_internal_rst"         => 1,
                  "landice_internal_rst"      => 1,
                  "openwater_internal_rst"    => 1,
@@ -447,28 +448,42 @@ sub init_tag_arrays_and_hashes {
     # BCS Tags: Icarus (New Land Parameters, New Topography)
     #---------------------------------------------------------------------------
     @ICA  = qw( ICA                    Icarus                 Jason );
-    @D517 = qw( GEOSadas-5_17_0        GEOSadas-5_17_1        GEOSadas-5_18_0
+    @D517 = qw( 517
+                GEOSadas-5_17_0        GEOSadas-5_17_1        GEOSadas-5_18_0
                 GEOSadas-5_18_1        GEOSadas-5_18_2        GEOSadas-5_18_3
                 GEOSadas-5_18_3_p1     GEOSadas-5_19_0        GEOSadas-5_20_0
                 GEOSadas-5_20_0_p1     GEOSadas-5_20_0_p2     GEOSadas-5_21_0
                 GEOSadas-5_21_2        GEOSadas-5_21_3_p1     GEOSadas-5_22_0
                 GEOSadas-5_22_0_p1     GEOSadas-5_22_0_p2     GEOSadas-5_23_0
                 GEOSadas-5_23_0_p1     GEOSadas-5_24_0        GEOSadas-5_24_0_p1 );
+    @GITOL = qw( GITOL
+                 10.3  10.4  10.5
+                 10.6  10.7  10.8
+                 10.9  10.10 10.11
+                 10.12 10.13 10.14
+                 10.15 10.16 10.17
+                 10.18 );
 
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-    @INL  = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
+    @INL   = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
+    @GITNL = qw( GITNL 10.19 10.20 );
+    @D525 = qw( 525
+                GEOSadas-5_25_1        GEOSadas-5_25_1_p5     GEOSadas-5_25_p7
+                GEOSadas-5_27_1        GEOSadas-5_29_3                        );
 
-    foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
-    foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0" }
-    foreach (@F21)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_1" }
-    foreach (@G10)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0" }
-    foreach (@G10p)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0_M" }
-    foreach (@G20)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_M" }
+    foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4"          }
+    foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0"          }
+    foreach (@F21)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_1"          }
+    foreach (@G10)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0"          }
+    foreach (@G10p)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0_M"        }
+    foreach (@G20)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_M"        }
     foreach (@G30)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_Reynolds" }
     foreach (@G40)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-4_0_Reynolds" }
-    foreach (@ICA)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds" }
+    foreach (@ICA)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds"      }
+    foreach (@GITOL) { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds"      }
     foreach (@INL)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
+    foreach (@GITNL) { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
 
     foreach (@D214)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@D540)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
@@ -479,9 +494,10 @@ sub init_tag_arrays_and_hashes {
     foreach (@D5B0)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_Reynolds" }
     foreach (@D512)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-4_0_Reynolds" }
     foreach (@D517)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds" }
+    foreach (@D525)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
 
-    @GCMtags = (\@F14, \@F20, \@F21, \@G10, \@G10p, \@G20, \@G30, \@G40, \@INL, \@ICA);
-    @DAStags = (\@D214, \@D540, \@D561, \@D580, \@D591p, \@D5A0, \@D5B0, \@D512);
+    @GCMtags = (\@F14, \@F20, \@F21, \@G10, \@G10p, \@G20, \@G30, \@G40, \@ICA, \@GITOL, \@INL, \@GITNL);
+    @DAStags = (\@D214, \@D540, \@D561, \@D580, \@D591p, \@D5A0, \@D5B0, \@D512, \@D517, \@D525);
 
     # rank of BCS tags
     #-----------------
@@ -924,10 +940,10 @@ sub check_inputs {
         print "\nRegridding of Catch[CN] restarts requires specification of minimum snow water equivalent\n"
             .   "values (WEmin) for the runs associated with the source (input) and target (output) restarts.\n"
             .   "FYI, the following values are used in existing GEOS systems:\n"
-            .   "  WEmin = 26 kg/m2 : FP 5.13-5.22, MERRA-2, MERRA-Land, (Fortuna, Ganymed [G40], Icarus [ICA])\n"
-            .   "  WEmin = 13 kg/m2 : FP 5.25-    , MERRA,               (Icarus-NewLand [INL])\n"
-            .   "----------------------------------------------\n";
-	
+            .   "  WEmin = 26 kg/m2 : FP 5.13-5.22, MERRA-2, MERRA-Land, (Fortuna, Ganymed [G40], Icarus [ICA], Git GCM 10.3-10.18)\n"
+            .   "  WEmin = 13 kg/m2 : FP 5.25-    , MERRA,               (Icarus-NewLand [INL], Git GCM 10.19+)\n"
+            .   "----------------------------------------------------------------------------------------------\n";
+
         if ($newLand{$bcsTagIN}) { $wemINdflt = 13 }
         else                     { $wemINdflt = 26 }
 
@@ -954,15 +970,15 @@ sub check_inputs {
     #------------------
     @cnlist = split(/,/, $mk_catchcn) if $mk_catchcn;
     if ($mk_catchcn) {
-	   unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
-	      @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
-	      foreach $ii (0..3) {
-		      $prompt = "Enter Carbon (CN) $cnlabel[$ii]";
-		      if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
-		      else              { $cnlist[$ii] = query($prompt) }
-	      }
-	      $mk_catchcn = join(",", @cnlist[0..3]);
-	   }
+       unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
+          @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
+          foreach $ii (0..3) {
+             $prompt = "Enter Carbon (CN) $cnlabel[$ii]";
+             if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
+             else              { $cnlist[$ii] = query($prompt) }
+          }
+          $mk_catchcn = join(",", @cnlist[0..3]);
+       }
 
       unless ( $cnlist[0] eq "clm40" or $cnlist[0] eq "clm45") {
          die "Error. CN_VERSION should be clm40 or clm45\n";
@@ -1473,7 +1489,7 @@ sub resolve_bcsTAG {
     # was BCS tag found?
     #------------------
     else {
-        print "\nWARNING. Cannot recognize Tag ID: $tagIDx";
+        print "\nWARNING. Cannot recognize Tag ID: $tagIDx (NOTE: Use only X.Y for Git Tags)";
         print " ($tagID)" if $tagID ne $tagIDx;
         print "\n";
     }
@@ -3925,10 +3941,10 @@ REQUIRED INPUTS
    -----------------------------
    as ordered runtime parameters
    -----------------------------
-   yyyymmdd          8-digit date of the restarts being regridded
-   hr                2-digit hour of the restarts being regridded
-   grOUT             grid ID of the output restarts (see GRID IDENTIFIERS below)
-   outdir            directory location for output restarts
+   yyyymmdd            8-digit date of the restarts being regridded
+   hr                  2-digit hour of the restarts being regridded
+   grOUT               grid ID of the output restarts (see GRID IDENTIFIERS below)
+   outdir              directory location for output restarts
 
    --------------------
    or as flagged values
@@ -3939,27 +3955,27 @@ REQUIRED INPUTS
    -outdir   outdir
 
 REQUIRED OPTION FOR MERRA INPUTS
-   -merra             (same as -merra2)
-   -merra1            get input restarts from OPS MERRA-1 data archives
-   -merra2            get input restarts from OPS MERRA-2 data archives
+   -merra               (same as -merra2)
+   -merra1              get input restarts from OPS MERRA-1 data archives
+   -merra2              get input restarts from OPS MERRA-2 data archives
 
 REQUIRED OPTIONS FOR NON-MERRA INPUTS
-   -d        rstdir   pathname for input tarfile or restart directory
-   -expid    expid    experiment ID of input restart files
+   -d        rstdir     pathname for input tarfile or restart directory
+   -expid    expid      experiment ID of input restart files
 
 INTERACTIVE OPTION
-   -i                 prompt for inputs that are not supplied
-                      (this is the default if no inputs are supplied)
-   -np                no prompt; take defaults for all prompts;
-                      note: the -np flag takes precedence over the -i flag
+   -i                   prompt for inputs that are not supplied
+                        (this is the default if no inputs are supplied)
+   -np                  no prompt; take defaults for all prompts;
+                        note: the -np flag takes precedence over the -i flag
 
 OTHER OPTIONS
    -levsout   levsout   number of atmosphere levels in output
    -ocnmdlin  ocnMDLIN  ocean input model 
-                        data : data ocean (Reynolds, MERRA-2, Ostia, CS)
-                        MOM5 : MOM5
-                        MOM6 : MOM6
-                          NOTE: If data in, only data out allowed
+                          =data : data ocean (Reynolds, MERRA-2, Ostia, CS)
+                          =MOM5 : MOM5
+                          =MOM6 : MOM6
+                          defailts to \'data\'
    -oceanin   oceanIN   ocean horizontal grid of inputs
                         data ocean grids
                           =c  : 1-deg (360x180); e.g. Reynolds
@@ -3975,60 +3991,60 @@ OTHER OPTIONS
                           defaults to \'dd\'
    -ocnmdlout ocnMDLOUT ocean model of outputs (see -ocnmdlin)
    -oceanout  oceanOUT  ocean horizontal grid of outputs (see -oceanin)
-   -esmabin   ESMABIN  location of build\'s scripts and programs; defaults to location
-                      of regrid.pl script
-   -iceDT     dtime   datetime for alternate landice rst input if regridding to
-                      \'Ganymed-2_0\' from earlier tag; dtime should have the
-                      following format: -iceDT yyyymmdd_hh
-                      if dtime is not provided or if no restarts can be found to
-                      match dtime, then script will prompt user from list of
-                      available datetimes.
-                      if dtime eq \'0\', then alternate landice rst will not be used
-   -newid    newid    label to replace expid in output restart names;
-                      defaults to \'n-expid\' where n is OUTPUT atmosphere grid ID
-   -tagin    tagIN    GCM or DAS tag associated with inputs (see TAGS below);
-                      defaults to $former_tag
-   -tagout   tagOUT   GCM or DAS tag associated with outputs (see TAGS below);
-                      defaults to $current_tag
-   -rs       flag     flag indicating which restarts to regrid
-                      =1 for upper-air restarts only
-                      =2 for land-surface restarts only
-                      =3 for both upper-air and land-surface restarts (default)
-   -catchcn           offers 2 options:
-                      = 0, cold start for CLM40 using an archived restart file. For e.g. 
-                        -catchcn 0, - Notice the trailing comma
-                      = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
-		        to start from a GEOSldas restart file (Note, keywords are comma-separated).
-                        where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
-                        are same as those in GEOSldas exeinp file. For e.g. 
-                        -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
-                        IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
-                      Not valid for tags prior to Heracles; Note: This option will add
-                      10-20 minutes to the regrid process.
-   -wemin wemIN       minimum water snow water equivalent for input catch/cn
-   -wemout wemOUT     minimum water snow water equivalent for output catch/cn
+   -esmabin   ESMABIN   location of build\'s scripts and programs; defaults to location
+                        of regrid.pl script
+   -iceDT     dtime     datetime for alternate landice rst input if regridding to
+                        \'Ganymed-2_0\' from earlier tag; dtime should have the
+                        following format: -iceDT yyyymmdd_hh
+                        if dtime is not provided or if no restarts can be found to
+                        match dtime, then script will prompt user from list of
+                        available datetimes.
+                        if dtime eq \'0\', then alternate landice rst will not be used
+   -newid    newid      label to replace expid in output restart names;
+                        defaults to \'n-expid\' where n is OUTPUT atmosphere grid ID
+   -tagin    tagIN      GCM or DAS tag associated with inputs (see TAGS below);
+                        defaults to $former_tag
+   -tagout   tagOUT     GCM or DAS tag associated with outputs (see TAGS below);
+                        defaults to $current_tag
+   -rs       flag       flag indicating which restarts to regrid
+                          =1 for upper-air restarts only
+                          =2 for land-surface restarts only
+                          =3 for both upper-air and land-surface restarts (default)
+   -catchcn             offers 2 options:
+                        = 0, cold start for CLM40 using an archived restart file. For e.g. 
+                          -catchcn 0, - Notice the trailing comma
+                        = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
+                          to start from a GEOSldas restart file (Note, keywords are comma-separated).
+                          where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
+                          are same as those in GEOSldas exeinp file. For e.g. 
+                          -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
+                          IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
+                        Not valid for tags prior to Heracles; Note: This option will add
+                        10-20 minutes to the regrid process.
+   -wemin wemIN         minimum water snow water equivalent for input catch/cn
+   -wemout wemOUT       minimum water snow water equivalent for output catch/cn
 
-   -route             write the route_internal_rst
+   -route               write the route_internal_rst
 
-   -[no]bkg           copy and rename input bkg + satbang/bias files
-   -[no]lbl           label final restarts with \'tagID.gridID\' extension
-   -[no]lcv           create rst.lcv file for final restarts
-   -gcm               gcm mode; equivalent to -nobkg, -lbl, and -nolcv flags
-   -altbcs [bcsdir]   use boundary condition files found in bcsdir; if bcsdir
-                      is not given, then use Larry\'s bcs directory
-   -zoom n            zoom value to send to land regridding codes
+   -[no]bkg             copy and rename input bkg + satbang/bias files
+   -[no]lbl             label final restarts with \'tagID.gridID\' extension
+   -[no]lcv             create rst.lcv file for final restarts
+   -gcm                 gcm mode; equivalent to -nobkg, -lbl, and -nolcv flags
+   -altbcs [bcsdir]     use boundary condition files found in bcsdir; if bcsdir
+                        is not given, then use Larry\'s bcs directory
+   -zoom n              zoom value to send to land regridding codes
 
-   -grpid             group id; sponsor code to use for batch job charge
-   -qos val           use \'SBATCH --qos=val directive\' for batch jobs;
-                      \'-qos debug\' will not work unless these conditions are met
-                           -> numtasks <= 532
-                           -> walltime le \'1:00:00\'
-   -partition val     use \'SBATCH --partition=val directive\' for batch jobs
-   -constraint val    use \'SBATCH --constraint=val directive\' for batch jobs
-   -db                (debug mode) Do not clean work directory after running programs;
-   -dbh               (debug hash) Show contents of hashes: \%IN and \%OUT
-   -v                 verbose mode
-   -h[elp]            print usage message
+   -grpid               group id; sponsor code to use for batch job charge
+   -qos val             use \'SBATCH --qos=val directive\' for batch jobs;
+                        \'-qos debug\' will not work unless these conditions are met
+                             -> numtasks <= 532
+                             -> walltime le \'1:00:00\'
+   -partition val       use \'SBATCH --partition=val directive\' for batch jobs
+   -constraint val      use \'SBATCH --constraint=val directive\' for batch jobs
+   -db                  (debug mode) Do not clean work directory after running programs;
+   -dbh                 (debug hash) Show contents of hashes: \%IN and \%OUT
+   -v                   verbose mode
+   -h[elp]              print usage message
 
 GRID IDENTIFIERS
 
@@ -4067,15 +4083,17 @@ TAGS
 
       Sample GCM tags
       ---------------
-      F14  : $F14[1]  ............  $F14[-1]
-      F21  : $F21[1]  ............  $F21[-1]
-      G10  : $G10[1]  ............  $G10[-1]
-      G10p : $G10p[1]  .........  $G10p[-1]
-      G20  : $G20[1]  ............  $G20[-1]
-      G30  : $G30[1]  ............  $G30[-1]
-      G40  : $G40[1]  ............  $G40[-1]
-      ICA  : $ICA[1]  .................  $ICA[-1]
-      INL  : $INL[1]  ..............  $INL[-1]
+      F14   : $F14[1]  ...........  $F14[-1]
+      F21   : $F21[1]  ...........  $F21[-1]
+      G10   : $G10[1]  ...........  $G10[-1]
+      G10p  : $G10p[1]  ........  $G10p[-1]
+      G20   : $G20[1]  ...........  $G20[-1]
+      G30   : $G30[1]  ...........  $G30[-1]
+      G40   : $G40[1]  ...........  $G40[-1]
+      ICA   : $ICA[1]  ................  $ICA[-1]
+      GITOL : $GITOL[1]  ..................  $GITOL[-1]
+      INL   : $INL[1]  .............  $INL[-1]
+      GITNL : $GITNL[1]  .................  $GITNL[-1]
 
       Sample DAS tags
       ---------------
@@ -4088,6 +4106,7 @@ TAGS
       5B0  : $D5B0[1]  .....  $D5B0[-1]
       512  : $D512[1]  ........  $D512[-1]
       517  : $D517[1]  ........  $D517[-1]
+      525  : $D525[1]  ........  $D525[-1]
 
 AUTHOR
    Joe Stassi, SSAI (joe.stassi\@nasa.gov)
