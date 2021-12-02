@@ -88,8 +88,8 @@ class upperair(regrider):
 
      print( "cd " + tmpdir)
      os.chdir(tmpdir)
-     print('\nUpper air restart files should end with "_rst" \n'
-     for rst in self.restarts_in:
+     print('\nUpper air restart files should end with "_rst" \n')
+     for rst in self.restarts_in :
        f = os.path.basename(rst)
        f = f.replace('_rst','_restart_in')
        cmd = '/bin/cp  '+rst+' '+f
