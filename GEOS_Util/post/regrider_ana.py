@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 import os
 import subprocess
@@ -36,61 +36,65 @@ class analysis(regrider):
      rst_time = datetime(year=int(self.yyyy), month=int(self.mm), day=int(self.dd), hour = int(self.hh))
      rst_dir_orig = self.common_in['rst_dir']
      expid = self.common_in['expid']
-     self.anafiles=[]
-     for h in [3,4,5,6,7,8,9]:
-        delt = timedelta(hours = h-3)
-        new_time = rst_time + delt
-        yyyy = "Y"+str(new_time.year)
-        mm   = 'M%02d'%new_time.month
-        ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
-        hh   = '%02d'%h
-        newhh= '%02d'%new_time.hour
-        rst_dir = rst_dir_orig.replace('Y'+self.yyyy,yyyy).replace('M'+self.mm,mm)
-        # bkg files 
-        for ftype in ['sfc', 'eta']:
-           fname = expid+'.bkg'+hh+'_'+ftype+'_rst.'+ymd+'_'+newhh+'z.nc4'
-           f = rst_dir+'/'+fname
-           if(os.path.isfile(f)):
-             self.anafiles.append(f)
-           else:
-             print('Warning: Cannot find '+f)
+     anafiles = self.restarts_in['ANALYSIS']
+     if len(anafiles) == 0 and self.common_in.get('MERRA-2'): 
+       self.anafiles=[]
+       for h in [3,4,5,6,7,8,9]:
+          delt = timedelta(hours = h-3)
+          new_time = rst_time + delt
+          yyyy = "Y"+str(new_time.year)
+          mm   = 'M%02d'%new_time.month
+          ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
+          hh   = '%02d'%h
+          newhh= '%02d'%new_time.hour
+          rst_dir = rst_dir_orig.replace('Y'+self.yyyy,yyyy).replace('M'+self.mm,mm)
+          # bkg files
+          for ftype in ['sfc', 'eta']:
+             fname = expid+'.bkg'+hh+'_'+ftype+'_rst.'+ymd+'_'+newhh+'z.nc4'
+             f = rst_dir+'/'+fname
+             if(os.path.isfile(f)):
+               self.anafiles.append(f)
+             else:
+               print('Warning: Cannot find '+f)
 
-        # cbkg file
-        fname = expid + '.cbkg' + hh + '_eta_rst.' + ymd + '_' + newhh + 'z.nc4'
-        f = rst_dir+'/'+fname
-        if(os.path.isfile(f)):
-          self.anafiles.append(f)
-        else:
-          print('Warning: Cannot find '+f)
-        # gaas_bkg_sfc files
-        if (h==6 or h==9):
-           fname = expid+'.gaas_bkg_sfc_rst.'+ymd+'_'+newhh+'z.nc4'
-           f = rst_dir+'/'+fname
-           if (os.path.isfile(f)):
-             self.anafiles.append(f)
-           else:
-             print('Warning: Cannot find '+f)
-     # satbang and satbias
-     ymd  = '%04d%02d%02d'%(rst_time.year,rst_time.month, rst_time.day)
-     hr ='%02d'%rst_time.hour
-     for ftype in ["ana_satbang_rst", "ana_satbias_rst", "ana_satbiaspc_rst"]:
-        fname = expid+'.'+ftype+'.'+ymd+'_'+hr+'z.txt'
-        f = rst_dir_orig+'/'+fname
-        if(os.path.isfile(f)):
-          self.anafiles.append(f)
-        else:
-          print('Warning: Cannot find '+f)
+          # cbkg file
+          fname = expid + '.cbkg' + hh + '_eta_rst.' + ymd + '_' + newhh + 'z.nc4'
+          f = rst_dir+'/'+fname
+          if(os.path.isfile(f)):
+            self.anafiles.append(f)
+          else:
+            print('Warning: Cannot find '+f)
+          # gaas_bkg_sfc files
+          if (h==6 or h==9):
+             fname = expid+'.gaas_bkg_sfc_rst.'+ymd+'_'+newhh+'z.nc4'
+             f = rst_dir+'/'+fname
+             if (os.path.isfile(f)):
+               self.anafiles.append(f)
+             else:
+               print('Warning: Cannot find '+f)
+       # satbang and satbias
+       ymd  = '%04d%02d%02d'%(rst_time.year,rst_time.month, rst_time.day)
+       hr ='%02d'%rst_time.hour
+       for ftype in ["ana_satbang_rst", "ana_satbias_rst", "ana_satbiaspc_rst"]:
+          fname = expid+'.'+ftype+'.'+ymd+'_'+hr+'z.txt'
+          f = rst_dir_orig+'/'+fname
+          if(os.path.isfile(f)):
+            self.anafiles.append(f)
+          else:
+            print('Warning: Cannot find '+f)
 
-     # trak.GDA.rst file
-     delt = timedelta(hours = 3)
-     new_time = rst_time - delt
-     yyyy = "Y"+str(new_time.year)
-     mm   = 'M%02d'%new_time.month
-     ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
-     rst_dir = rst_dir_orig.replace('Y'+self.yyyy,yyyy).replace('M'+self.mm,mm)
-     fname = expid+'.trak.GDA.rst.'+ymdh+'z.txt'
-     f = rst_dir+'/'+fname
-     if (os.path.isfile(f)): self.anafiles.append(f)
+       # trak.GDA.rst file
+       delt = timedelta(hours = 3)
+       new_time = rst_time - delt
+       yyyy = "Y"+str(new_time.year)
+       mm   = 'M%02d'%new_time.month
+       ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
+       rst_dir = rst_dir_orig.replace('Y'+self.yyyy,yyyy).replace('M'+self.mm,mm)
+       fname = expid+'.trak.GDA.rst.'+ymdh+'z.txt'
+       f = rst_dir+'/'+fname
+       if (os.path.isfile(f)): self.anafiles.append(f)
+     else:
+       self.anafiles = anafiles
 
      agrid_in  = self.common_in['agrid']
      agrid_out = self.common_out['agrid']

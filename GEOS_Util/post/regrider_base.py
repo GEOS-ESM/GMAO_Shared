@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 import os
 import subprocess
@@ -10,20 +10,15 @@ from datetime import timedelta
 
 class regrider(object):
   def __init__(self, config):
-     self.restarts_in = config['input']['restarts']
      self.common_in   = config['input']['parameters']['COMMON']
      self.common_out  = config['output']['parameters']['COMMON']
-     self.upper_in  = config['input']['parameters']['UPPERAIR']
      self.upper_out = config['output']['parameters']['UPPERAIR']
      self.slurm_options = config['slurm_options']
 
      self.init_time()
      self.init_tags()
-     merra = self.common_in.get('rst_src')
-     if merra == 'MERRA-1':
-       print("Not yet implmented")
-       exit()
      self.init_merra2()
+     self.init_restarts_in()
 
      # get bc directory and tile file
      self.in_bcsdir  = self.get_bcdir("IN")
@@ -190,58 +185,76 @@ class regrider(object):
      self.hh   = yyyymmddhh[8:10]  
      self.ymd  = yyyymmddhh[0:8]  
 
+  def init_restarts_in(self):
+    if self.common_in['MERRA-2']:
+      return
+      
+    rst_dir = self.common_in.get('rst_dir')+'/'
+    self.restarts_in={}
+    self.restarts_in['UPPERAIR'] = glob.glob(rst_dir +'upperair/*')
+    self.restarts_in['SURFACE'] = glob.glob(rst_dir +'surface/*')
+    self.restarts_in['ANALYSIS'] = glob.glob(rst_dir +'analysis/*')
+    
   def init_merra2(self):
-     merra2 = self.common_in.get('rst_src')
-     if merra2 != 'MERRA-2':
-       return
-     print("merra-2 source")
-     yyyymm = int(self.yyyymm)
-     if yyyymm < 197901 :
-       print("Error. MERRA-2 data < 1979 not available\n")
-       exit()
-     elif (yyyymm < 199201):
-       self.common_in['expid'] = "d5124_m2_jan79"     
-     elif (yyyymm < 200106):
-       self.common_in['expid'] = "d5124_m2_jan91"
-     elif (yyyymm < 201101):
-       self.common_in['expid'] = "d5124_m2_jan00"
-     else:
-       self.common_in['expid'] = "d5124_m2_jan10"
+    if not self.common_in['MERRA-2']:
+      return
+    print("\nMERRA-2 sources:\n")
+    yyyymm = int(self.yyyymm)
+    if yyyymm < 197901 :
+      print("Error. MERRA-2 data < 1979 not available\n")
+      exit()
+    elif (yyyymm < 199201):
+      self.common_in['expid'] = "d5124_m2_jan79"     
+    elif (yyyymm < 200106):
+      self.common_in['expid'] = "d5124_m2_jan91"
+    elif (yyyymm < 201101):
+      self.common_in['expid'] = "d5124_m2_jan00"
+    else:
+      self.common_in['expid'] = "d5124_m2_jan10"
 
-     self.common_in['agrid'] = 'C180'
-     self.common_in['ogrid'] = '1440x720'
-     self.common_in['bc_base']= 'discover_ops'
-     self.upper_in['nlevel'] = 72
-     expid = self.common_in['expid']
-     yyyymmddhh = str(self.common_in['yyyymmddhh'])
-     surfix = yyyymmddhh[0:8]+'_'+self.hh+'z.bin'
-     self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm
-     print('\nMERRA-2 Restart dir: ' + self.common_in['rst_dir']) 
-     self.restarts_in['UPPERAIR'] = {} 
-     self.restarts_in['UPPERAIR']['fvcore'] = expid+'.fvcore_internal_rst.' + surfix
-     self.restarts_in['UPPERAIR']['moist']  = expid+'.moist_internal_rst.'  + surfix
-     self.restarts_in['UPPERAIR']['agcm']   = expid+'.agcm_import_rst.'     + surfix
-     self.restarts_in['UPPERAIR']['gocart'] = expid+'.gocart_internal_rst.' + surfix
-     self.restarts_in['UPPERAIR']['pchem']  = expid+'.pchem_internal_rst.'  + surfix
+    self.common_in['agrid'] = 'C180'
+    self.common_in['ogrid'] = '1440x720'
+    self.common_in['bc_base']= 'discover_ops'
+    self.common_in['tag']= 'Ganymed-4_0'
+    expid = self.common_in['expid']
+    yyyymmddhh = str(self.common_in['yyyymmddhh'])
+    surfix = yyyymmddhh[0:8]+'_'+self.hh+'z.bin'
+    self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm+'/'
+    print('\nMERRA-2 Restart dir: ' + self.common_in['rst_dir']) 
 
-     self.restarts_in['SURFACE'] = {} 
-     self.restarts_in['SURFACE']['catch']    = expid+'.catch_internal_rst.'    + surfix
-     self.restarts_in['SURFACE']['lake']     = expid+'.lake_internal_rst.'     + surfix
-     self.restarts_in['SURFACE']['landice']  = expid+'.landice_internal_rst.'  + surfix
-     self.restarts_in['SURFACE']['saltwater']= expid+'.saltwater_internal_rst.'+ surfix
+    self.restarts_in = {}
+    upperin =[self.common_in['rst_dir']+  expid+'.fvcore_internal_rst.' + surfix,
+              self.common_in['rst_dir']+  expid+'.moist_internal_rst.'  + surfix,
+              self.common_in['rst_dir']+  expid+'.agcm_import_rst.'     + surfix,
+              self.common_in['rst_dir']+  expid+'.gocart_internal_rst.' + surfix,
+              self.common_in['rst_dir']+  expid+'.pchem_internal_rst.'  + surfix ]
+    self.restarts_in['UPPERAIR'] = upperin 
+
+    surfin = [self.common_in['rst_dir']+  expid+'.catch_internal_rst.'    + surfix, 
+              self.common_in['rst_dir']+  expid+'.lake_internal_rst.'     + surfix,
+              self.common_in['rst_dir']+  expid+'.landice_internal_rst.'  + surfix,
+              self.common_in['rst_dir']+  expid+'.saltwater_internal_rst.'+ surfix]
+    self.restarts_in['SURFACE'] = surfin 
+    self.restarts_in['ANALYSIS'] = []
 
   def get_bcbase(self, opt):
      base = ''
      model = ''
+     
      if opt.upper() == 'IN':
-        base  = self.common_in.get('bc_base')
         model = self.common_in.get('model')
+        if model == 'MOM6' or model == 'MOM5':
+          base = 'discover_couple'
+        else:
+          base  = self.common_in.get('bc_base')
+
      if opt.upper() == 'OUT':
-        base = self.common_out.get('bc_base')
         model = self.common_out.get('model')
+        if model == 'MOM6' or model == 'MOM5':
+          base = 'discover_couple'
+        else:
+          base = self.common_out.get('bc_base')
      assert base, 'please specify bc_base: discover_ops, discover_lt, discover_couple or an absolute path'
-     if model == 'MOM5' or model == 'MOM6':
-       assert base == 'discover_couple', "couples model's bc base should be discover_couple"
      if base == 'discover_ops' or base == 'discover_lt' or base=='discover_couple':
         return self.bcbase[base]
      else:
@@ -326,8 +339,13 @@ class regrider(object):
           
      anames = get_name_with_grid(agrid_, dirnames)
      gridID = get_name_with_grid(ogrid_, anames)
-     if len(gridID) ==0 or len(gridID) >=2 :
-       print(" cannot find the grid string: " + bcdir)
+     if len(gridID) == 0 :
+       print("cannot find the grid string: " + bcdir)
+       exit()
+     if len(gridID) >=2 :
+       print("find too may grid strings in " + bcdir)
+       print(" gridIDs found", gridID)
+       print(" pick the first one " + gridID[0])
      return gridID[0]
 
   def get_bcTag(self, tag, ogrid):

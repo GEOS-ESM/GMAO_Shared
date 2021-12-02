@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 import os
 import subprocess
@@ -16,15 +16,41 @@ class surface(regrider):
      self.surf_in  = config['input']['parameters']['SURFACE']
      self.surf_out = config['output']['parameters']['SURFACE']
 
-     self.saltwater = self.restarts_in.get('saltwater')
-     self.openwater = self.restarts_in.get('openwater')
-     self.seaice  = self.restarts_in.get('seaice')
-     self.landice = self.restarts_in.get('landice')
-     self.lake  = self.restarts_in.get('lake')
-     self.route = self.restarts_in.get('route')
-     self.catch = self.restarts_in.get('catch')
-     self.catchcnclm40 = self.restarts_in.get('catchcnclm40')
-     self.catchcnclm45 = self.restarts_in.get('catchcnclm45')
+     self.saltwater = None
+     self.openwater = None
+     self.seaice  = None
+     self.landice = None
+     self.lake  = None
+     self.route = None
+     self.catch = None
+     self.catchcnclm40 = None
+     self.catchcnclm45 = None
+     for rst in self.restarts_in :
+        f = os.path.basename(rst)
+        if (f.find('saltwater') != -1):
+          self.saltwater = f
+          continue
+        if (f.find('seaice') != -1):
+          self.seaice = f
+          continue
+        if (f.find('landice') != -1):
+          self.landice = f
+          continue
+        if (f.find('lake') != -1):
+          self.lake = f
+          continue
+        if (f.find('route') != -1):
+          self.route = f
+          continue
+        if (f.find('catch_') != -1):
+          self.catch = f
+          continue
+        if (f.find('catchcnclm40') != -1):
+          self.catchcnclm40 = f
+          continue
+        if (f.find('catchcnclm45') != -1):
+          self.catchcnclm45 = f
+          continue
      tagout = self.common_out['tag']
      ogrid = self.common_out['ogrid']
      bctag = self.get_bcTag(tagout, ogrid)
@@ -48,17 +74,13 @@ class surface(regrider):
      os.makedirs(InData_dir)
      if os.path.exists(OutData_dir) : subprocess.call('rm -rf '+ OutData_dir, shell = True)
      os.makedirs(OutData_dir)
-
-     for key, value in self.restarts_in.items():
-        if not value : continue
-        src  = self.common_in['rst_dir']+'/'+value
-        if not os.path.exists(src) :
-           print( "Could not find " + src + "--remove it from yaml config file add to restart dir")
-           exit()
-        dest = InData_dir+'/'+value
+    
+     for rst in self.restarts_in:
+        f = os.path.basename(rst)
+        dest = InData_dir+'/'+f
         if os.path.exists(dest) : shutil.remove(dest)
-        print('\nCopy ' + src + ' to ' +dest)
-        shutil.copy(src,dest)
+        print('\nCopy ' + rst + ' to ' +dest)
+        shutil.copy(rst,dest)
 
      in_til = InData_dir+'/' + self.in_til.split('/')[-1]
      out_til = OutData_dir+'/'+self.out_til.split('/')[-1]
@@ -249,8 +271,8 @@ endif
                   out_dir = out_dir, mk_catch_log = 'mk_catch_log.1', surflay = self.surf_out['surflay'],  \
                   wemin = self.surf_in['wemin'], wemout = self.surf_out['wemout'] ,  \
                   fromGCM = '0', catchFLG = catchFLG, catchcnFLG = catchcnFLG, rescale = '0', rsttime = self.common_in['yyyymmddhh'], \
-                  RESTART_ID = self.surf_in['restart_id'], RESTART_PATH = self.surf_in['restart_path'], \
-                  RESTART_DOMAIN = self.surf_in['restart_domain'], CN_VERSION = self.surf_in['cn_version'], \
+                  RESTART_ID = self.surf_in.get('restart_id'), RESTART_PATH = self.surf_in.get('restart_path'), \
+                  RESTART_DOMAIN = self.surf_in.get('restart_domain'), CN_VERSION = self.surf_in.get('cn_version'), \
                   saltwaterFLG = saltwaterFLG,  saltwater = self.saltwater,  \
                   openwaterFLG = openwaterFLG,  openwater = self.openwater,  \
                   seaiceFLG    = seaiceFLG,     seaice    = self.seaice,  \
@@ -292,8 +314,8 @@ endif
                   out_dir = out_dir, mk_catch_log = 'mk_catch_log.2', surflay = self.surf_out['surflay'],  \
                   wemin = self.surf_in['wemin'], wemout = self.surf_out['wemout'] ,  \
                   fromGCM = '0', catchFLG = catchFLG, catchcnFLG = catchcnFLG, rescale = '1', rsttime = self.common_in['yyyymmddhh'], \
-                  RESTART_ID = self.surf_in['restart_id'], RESTART_PATH = self.surf_in['restart_path'], \
-                  RESTART_DOMAIN = self.surf_in['restart_domain'], CN_VERSION = self.surf_in['cn_version'], \
+                  RESTART_ID = self.surf_in.get('restart_id'), RESTART_PATH = self.surf_in.get('restart_path'), \
+                  RESTART_DOMAIN = self.surf_in.get('restart_domain'), CN_VERSION = self.surf_in.get('cn_version'), \
                   saltwaterFLG = saltwaterFLG,  saltwater = self.saltwater,  \
                   openwaterFLG = openwaterFLG,  openwater = self.openwater,  \
                   seaiceFLG    = seaiceFLG,     seaice    = self.seaice,  \

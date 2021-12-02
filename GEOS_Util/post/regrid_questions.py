@@ -1,0 +1,370 @@
+#!/usr/bin/env python3
+#
+# source python/GEOSpyD/Min4.9.2_py3.9 
+#
+
+import os
+import subprocess
+import yaml
+import shutil
+import questionary
+
+def ask_common_in():
+   questions = [
+        {
+            "type": "confirm",
+            "name": "MERRA-2",
+            "message": "Would you like to get restarts from MERRA-2 archive?",
+            "default": False
+        },
+        {
+            "type": "path",
+            "name": "rst_dir",
+            "message": "Enter the directory with restart files to be regrided: \n \
+                       restart files should be distributed under subdirectories \n \
+                       upperair, surface, analysis",
+            "when": lambda x: not x["MERRA-2"],
+        },
+        {
+            "type": "text",
+            "name": "yyyymmddhh",
+            "message": "What time would you like to regrid from?(yyyymmddhh)",
+            "default": "2000041421"
+        },
+        {
+            "type": "text",
+            "name": "expid",
+            "message": "Enter input restarts expid:",
+            "default": "",
+            "when": lambda x: not x["MERRA-2"],
+        },
+        {
+            "type": "select",
+            "name": "model",
+            "message": "Select ocean model:",
+            "choices": ["data", "MOM5", "MOM6"],
+            "default": "data",
+        },
+        {
+            "type": "text",
+            "name": "agrid",
+            "message": "Enter input atmospheric grid, format(Cxxx):",
+            "default": 'C360',
+            "when": lambda x: not x['MERRA-2'],
+        },
+        {
+            "type": "select",
+            "name": "ogrid",
+            "message": "Input Ocean grid: \n \
+             Data Ocean Grids \n \
+             ------------------- \n \
+             360X180  (Reynolds) \n \
+             1440X720 (MERRA-2) \n \
+             2880X1440  (OSTIA) \n \
+             CS = same as atmospere grid (OSTIA cubed-sphere) \n",
+            "choices": ['360X180','1440X720','2880X1440','CS'],
+            "when": lambda x: x['model'] == 'data' and not x['MERRA-2'],
+        },
+        {
+            "type": "select",
+            "name": "ogrid",
+            "message": "Input Ocean grid: \n \
+             Coupled Ocean Grids \n \
+             ------------------- \n \
+             72X36 \n \
+             360X200 \n \
+             720X410 \n \
+             1440X1080 \n ",
+            "choices": ['72X36','360X200','720X410','1440X1080'],
+            "when": lambda x: x['model'] != 'data',
+        },
+        {
+            "type": "text",
+            "name": "tag",
+            "message": "Enter GCM or DAS tag for input: \n \
+Sample GCM tags \n \
+--------------- \n \
+F14  : Fortuna-1_4  .........  Fortuna-1_4_p1 \n \
+F20  : Fortuna-2_0  .........  Fortuna-2_0 \n \
+F21  : Fortuna-2_1  .........  Fortuna-2_5_pp2 \n \
+G10  : Ganymed-1_0  .........  Ganymed-1_0_BETA4 \n \
+G10p : Ganymed-1_0_p1  ......  Ganymed-1_0_p6 \n \
+G20  : Ganymed-2_0  .........  Ganymed-2_1_p6 \n \
+G30  : Ganymed-3_0  .........  Ganymed-3_0_p1 \n \
+G40  : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
+INL  : Icarus-NL  ...........  Jason-NL \n \
+ICA  : Icarus  ..............  Jason \n \
+\n \
+Sample DAS tags \n \
+--------------- \n \
+214  : GEOSdas-2_1_4  .......  GEOSdas-2_1_4-m4 \n \
+540  : GEOSadas-5_4_0  ......  GEOSadas-5_5_3 \n \
+561  : GEOSadas-5_6_1  ......  GEOSadas-5_7_3_p2 \n \
+580  : GEOSadas-5_8_0  ......  GEOSadas-5_9_1 \n \
+591p : GEOSadas-5_9_1_p1  ...  GEOSadas-5_9_1_p9 \n \
+5A0  : GEOSadas-5_10_0  .....  GEOSadas-5_10_0_p1 \n \
+5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
+512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n",
+            "default": "ICA",
+            "when": lambda x: not x["MERRA-2"],
+        },
+        {
+            "type": "select",
+            "name": "bc_base",
+            "message": "Select bcs base \n \
+             discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
+             discover_lt: /discover/nobackup/ltakacs/bcs \n",
+            "choices": ["discover_ops", "discover_lt"],
+            "when": lambda x: x.get("model")=="data" and not x['MERRA-2'],
+        },
+   ]
+   common_in = questionary.prompt(questions)
+   if common_in.get('ogrid') == 'CS':
+      common_in['ogrid'] = common_in['agrid']
+   return common_in
+
+def ask_common_out():
+   questions = [
+        {
+            "type": "path",
+            "name": "out_dir",
+            "message": "Enter the directory for new restarts:\n"
+        },
+        {
+            "type": "text",
+            "name": "expid",
+            "message": "Enter new restarts expid:",
+            "default": "",
+        },
+        {
+            "type": "text",
+            "name": "agrid",
+            "message": "Enter new atmospheric grid, format(Cxxx):",
+            "default": 'C360',
+        },
+        {
+            "type": "text",
+            "name": "tag",
+            "message": "Enter GCM or DAS tag for new restarts: \n \
+Sample GCM tags \n \
+--------------- \n \
+F14  : Fortuna-1_4  .........  Fortuna-1_4_p1 \n \
+F20  : Fortuna-2_0  .........  Fortuna-2_0 \n \
+F21  : Fortuna-2_1  .........  Fortuna-2_5_pp2 \n \
+G10  : Ganymed-1_0  .........  Ganymed-1_0_BETA4 \n \
+G10p : Ganymed-1_0_p1  ......  Ganymed-1_0_p6 \n \
+G20  : Ganymed-2_0  .........  Ganymed-2_1_p6 \n \
+G30  : Ganymed-3_0  .........  Ganymed-3_0_p1 \n \
+G40  : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
+ICA  : Icarus  ..............  Jason \n \
+INL  : Icarus-NL  ...........  Jason-NL \n \
+\n \
+Sample DAS tags \n \
+--------------- \n \
+214  : GEOSdas-2_1_4  .......  GEOSdas-2_1_4-m4 \n \
+540  : GEOSadas-5_4_0  ......  GEOSadas-5_5_3 \n \
+561  : GEOSadas-5_6_1  ......  GEOSadas-5_7_3_p2 \n \
+580  : GEOSadas-5_8_0  ......  GEOSadas-5_9_1 \n \
+591p : GEOSadas-5_9_1_p1  ...  GEOSadas-5_9_1_p9 \n \
+5A0  : GEOSadas-5_10_0  .....  GEOSadas-5_10_0_p1 \n \
+5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
+512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n",
+            "default": "ICA",
+        },
+        {
+            "type": "select",
+            "name": "model",
+            "message": "Select ocean model for new restarts:",
+            "choices": ["data", "MOM5", "MOM6"],
+            "default": "data",
+        },
+        {
+            "type": "select",
+            "name": "ogrid",
+            "message": "Select new Ocean grid: \n \
+             Data Ocean Grids \n \
+             ------------------- \n \
+             360X180  (Reynolds) \n \
+             1440X720 (MERRA-2) \n \
+             2880X1440  (OSTIA) \n \
+             CS = same as atmospere grid (OSTIA cubed-sphere) \n",
+            "choices": ['360X180','1440X720','2880X1440','CS'],
+            "when": lambda x: x['model'] == 'data',
+        },
+        {
+            "type": "select",
+            "name": "ogrid",
+            "message": "Select new Ocean grid: \n \
+             Coupled Ocean Grids \n \
+             ------------------- \n \
+             72X36 \n \
+             360X200 \n \
+             720X410 \n \
+             1440X1080 \n ",
+            "choices": ['72X36','360X200','720X410','1440X1080'],
+            "when": lambda x: x['model'] != 'data',
+        },
+        {
+            "type": "select",
+            "name": "bc_base",
+            "message": "Select bcs base for new restarts: \n \
+             discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
+             discover_lt: /discover/nobackup/ltakacs/bcs \n",
+            "choices": ["discover_ops", "discover_lt","other"],
+            "when": lambda x: x.get("model")=="data",
+        },
+        {
+            "type": "path",
+            "name": "alt_bcs",
+            "message": "Specify your own bcs path for new restarts: \n ",
+            "when": lambda x: x.get("bc_base")=="other",
+        },
+
+   ]
+   common_out = questionary.prompt(questions)
+   if common_out.get('ogrid') == 'CS':
+      common_out['ogrid'] = common_out['agrid']
+
+   return common_out
+def ask_upper_out():
+   questions = [
+        {
+            "type": "text",
+            "name": "nlevel",
+            "message": "Enter new atmospheric levels:",
+            "default": "72",
+        },
+   ]
+   return questionary.prompt(questions)
+def ask_surface_in(common_in):
+   wemin_default = '26'
+   if common_in.get('tag') == 'INL': wemin_default = '13'
+   questions = [
+        {
+            "type": "text",
+            "name": "wemin",
+            "message": "What is value of Wemin?",
+            "default": wemin_default
+        },
+        {
+            "type": "text",
+            "name": "zoom",
+            "message": "What is value of zoom [1-8]?",
+            "default": '1'
+        },
+   ]
+   return questionary.prompt(questions)
+
+def ask_surface_out(common_out):
+   wemout_default = '26'
+   if common_out.get('tag') == 'INL': wemout_default = '13'
+   questions = [
+        {
+            "type": "text",
+            "name": "wemout",
+            "message": "What is value of Wemout?",
+            "default": wemout_default
+        },
+   ]
+   return questionary.prompt(questions)
+
+def ask_analysis_in():
+   questions = [
+        {
+            "type": "confirm",
+            "name": "bkg",
+            "message": "Regrid bkg files?",
+            "default": False,
+        },
+        {
+            "type": "confirm",
+            "name": "lcv",
+            "message": "Write lcv?",
+            "default": False,
+        },
+   ]
+   return questionary.prompt(questions)
+
+def ask_slurm_options():
+   cmd = 'id -gn'
+   p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+   (accounts, err) = p.communicate()
+   p_status = p.wait()
+   accounts = accounts.decode().split()
+
+   questions = [
+        {
+            "type": "text",
+            "name": "debug",
+            "message": "qos?",
+            "default": "debug",
+        },
+        {
+            "type": "text",
+            "name": "account",
+            "message": "account?",
+            "default": accounts[0],
+        },
+        {
+            "type": "select",
+            "name": "partition",
+            "message": "partition?",
+            "choices": ['hasw', 'sky'],
+        },
+   ]
+   return questionary.prompt(questions)
+
+def get_config_from_questionary():
+    print("\nCommon parameters INPUT: \n")
+    common_in = ask_common_in()
+    print("\nSurface parameters INPUT: \n")
+    surface_in = ask_surface_in(common_in)
+    print("\nAnalysis parameters INPUT: \n")
+    analysis_in = ask_analysis_in()
+    print("\nCommon parameters OUTPUT: \n")
+    common_out = ask_common_out()
+    print("\nUPPER parameters OUTPUT: \n")
+    upper_out = ask_upper_out()
+    print("\nSurface parameters OUTPUT: \n")
+    surface_out = ask_surface_out(common_out)
+    print("\nSlurm parameters OUTPUT: \n")
+    slurm = ask_slurm_options()
+
+    config={}
+    inputs={}
+    outputs={}
+    parameters_in={}
+    parameters_in['COMMON']  = common_in
+    parameters_in['SURFACE'] = surface_in
+    parameters_in['ANALYSIS'] = analysis_in
+    inputs['parameters'] = parameters_in
+
+    config['input']= inputs
+
+    parameters_out={}
+    parameters_out['COMMON']  = common_out
+    parameters_out['UPPERAIR'] = upper_out
+    parameters_out['SURFACE'] = surface_out
+    outputs['parameters'] = parameters_out
+
+    config['output']= outputs
+
+    config['slurm_options'] = slurm
+
+    if os.path.exists('regrid.yaml') :
+       overwrite = questionary.confirm("Do you want to overwrite regrid.yaml file?", default=False).ask()
+       if not overwrite :
+         while True:
+           new_name = questionary.text("What's the backup name for existing regrid.yaml?", default='regrid.yaml.1').ask()
+           if os.path.exists(new_name):
+              print('\n'+ new_name + ' exists, please enter a new one. \n')
+           else:
+              shutil.move('regrid.yaml', new_name)
+              break
+
+    f = open("regrid.yaml", "w")
+    yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
+    f.close()
+
+if __name__ == "__main__":
+  get_config_from_questionary()

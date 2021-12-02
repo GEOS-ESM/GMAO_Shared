@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 import os
 import subprocess
@@ -12,15 +12,18 @@ class upperair(regrider):
      #super().__init__(config)
      # v2.7
      super(upperair, self).__init__(config)
-     self.upper_out = config['input']['parameters']['UPPERAIR']
+     self.upper_out = config['output']['parameters']['UPPERAIR']
      self.restarts_in = self.restarts_in['UPPERAIR']
       
      # verify agrid
      agrid = self.common_in['agrid']
      ogrid = self.common_out['ogrid']
-     merra_2 = self.common_in.get('rst_src')
-     if not (merra_2 == 'MERRA-2') :
-       fvcore = self.common_in['rst_dir']+'/'+self.restarts_in['fvcore']
+     if not self.common_in.get('MERRA-2'):
+       fvcore = '' 
+       for f in self.restarts_in:
+           if 'fvcore' in f:
+             fvcore = f
+             break
        cmd = './fvrst.x -h ' + fvcore
        print(cmd +'\n')
        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
@@ -85,15 +88,14 @@ class upperair(regrider):
 
      print( "cd " + tmpdir)
      os.chdir(tmpdir)
-     rst_dir = self.common_in['rst_dir']
-     for key, rst in self.restarts_in.items():
-        if (rst):
-          rst_in = "_internal_restart_in"
-          if rst.find('import') != -1 :
-            rst_in = "_import_restart_in"
-          cmd = '/bin/cp  '+rst_dir+'/'+rst+' '+key+rst_in
-          print('\n'+cmd)
-          subprocess.call(cmd, shell = True)
+     print('\nUpper air restart files should end with "_rst" \n'
+     for rst in self.restarts_in:
+       f = os.path.basename(rst)
+       f = f.replace('_rst','_restart_in')
+       cmd = '/bin/cp  '+rst+' '+f
+       print('\n'+cmd)
+       subprocess.call(cmd, shell = True)
+ 
      # link topo file
      topoin = glob.glob(self.in_bcsdir+'/topo_DYN_ave*')[0]
      cmd = '/bin/cp ' + topoin + ' .'

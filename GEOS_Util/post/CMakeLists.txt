@@ -45,7 +45,7 @@ install(
 
 file(GLOB pythonscripts CONFIGURE_DEPENDS regrid*.py)
 install(
-   PROGRAMS ${pythonscripts} regrid.yaml
+   PROGRAMS ${pythonscripts} 
    DESTINATION bin)
 
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN} ${EXTENDED_SOURCE}")
