@@ -12,8 +12,10 @@ R=6378e3 # Earth radius
 def _load_geos(exp,collection):
     ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
 
-    IM=ds.dims['lon']
-    JM=ds.dims['lat']
+    ds=ds.rename_dims({'lon': 'x', 'lat': 'y'})
+
+    IM=ds.dims['x']
+    JM=ds.dims['y']
 
     dx=np.radians(np.ones((JM,IM))*360./IM)*R
     dx*=np.cos(np.radians(ds['lat'].values[:,np.newaxis]))
@@ -26,16 +28,33 @@ def _load_geos(exp,collection):
     area[1:-1,:]*=0.5*(0.5*dx[0:-2,:] + dx[1:-1,:] + 0.5*dx[2:,:])
     area[0,:]*=0.5*(dx[0,:]+dx[1,:])
     area[-1,:]*=0.5*(dx[-2,:]+dx[-1,:])
-        
-    ds.update({'dx': (('lat','lon'), dx),
-               'dy': (('lat','lon'), dy),
-               'area': (('lat','lon'), area)})
+
+    ds.update({'dx': (('y','x'), dx),
+               'dy': (('y','x'), dy),
+               'mask': (('y','x'), ds['MASKO'][0]),
+               'area': (('y','x'), area)})
     
     return ds
         
 def _load_tripolar(exp, collection):
     ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
-    ds=ds.set_coords(['LON','LAT'])
+    grid=xr.open_dataset(f'{exp["griddir"]}/MAPL_Tripolar.nc')
+    dx=(grid['htn']+grid['hus'])*0.5
+    dy=(grid['hte']+grid['huw'])*0.5
+    ds=ds.assign_coords({'LON':(('lat','lon'),ds['LON'][0]), 
+                         'LAT':(('lat','lon'),ds['LAT'][0])})
+    # Rename coords for XESMF
+    ds=ds.rename({'lon':'x', 'lat':'y'})
+    ds=ds.rename({'LON': 'lon', 'LAT': 'lat'})
+    ds.coords.update({'x': ds.lon[0,:], 'y': ds.lat[:,0]})
+
+    ds.update({'dx': (('y','x'), dx), 
+               'dy': (('y','x'), dy),
+               'mask': (('y','x'), grid['mask']),
+               'area': (('y','x'), grid['areat']),
+               'basin': (('y','x'), grid['basin']),               
+               'atl_mask': (('y','x'), grid['atl_mask'])})
+    
     return ds
 
 def _load_mom(exp, collection):
@@ -48,7 +67,8 @@ def _load_mom(exp, collection):
 
     grid=xr.open_dataset(f'{exp["griddir"]}/MAPL_Tripolar.nc')
     ds.update({'mask': (('yh','xh'), grid['mask']),
-               'areat': (('yh','xh'), grid['areat']),
+               'area': (('yh','xh'), grid['areat']),
+               'basin': (('yh','xh'), grid['basin']),               
                'atl_mask': (('yh','xh'), grid['atl_mask'])})
 
     return ds 

@@ -22,13 +22,13 @@ def mkclim(exp,dset):
     ds=dset[[varname]].sel(time=slice(*exp['dates']))
     ds=ds.groupby('time.season').mean('time')
     ds[varname]-=TFREEZE
-    ds['weight']=dset['MASKO'][0]*dset['dx']*dset['dy']
+    ds['weight']=dset['mask']*dset['area']
     return ds
 
 def mkglobal(exp,ds):
     var=ds[varname]-TFREEZE
-    wght=ds['MASKO'][0]*ds.dy*ds.dx
-    return utils.average(var,('lat','lon'),wght)
+    wght=ds['mask']*ds['area']
+    return utils.average(var,('y','x'),wght)
     
 def plot_clim(plotter, exp, clim):
     '''
@@ -36,19 +36,19 @@ def plot_clim(plotter, exp, clim):
     '''
     pl.figure(1); pl.clf() 
     var=clim[varname].sel(season='DJF')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SST, DJF')
     pl.savefig(f'{exp["plot_path"]}/sst_djf.png')
     
     pl.figure(2); pl.clf()
     var=clim[varname].sel(season='JJA')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SST, JJA')
     pl.savefig(f'{exp["plot_path"]}/sst_jja.png')
 
     pl.figure(3); pl.clf()
     var=clim[varname].mean('season')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst_am.png')
     pl.show()
@@ -63,19 +63,19 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
 
     pl.figure(1); pl.clf() 
     var=dif.sel(season='DJF')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, DJF')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_djf.png')
     
     pl.figure(2); pl.clf()
     var=dif.sel(season='JJA')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, JJA')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_jja.png')
 
     pl.figure(3); pl.clf()
     var=dif.mean('season')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_am.png')
     pl.show()
@@ -91,21 +91,21 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
 
     pl.figure(1); pl.clf() 
     var=dif.sel(season='DJF')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SST, DJF')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_djf.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_djf.png')
     
     pl.figure(2); pl.clf()
     var=dif.sel(season='JJA')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SST, JJA')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_jja.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_jja.png')
 
     pl.figure(3); pl.clf()
     var=dif.mean('season')
-    ax=plotter.contour(var, stat=utils.print_stat(var,('lon','lat'),clim['weight']))
+    ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{obsname} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_am.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_am.png')
@@ -140,11 +140,15 @@ def mkplots(exps, dsets):
     
     fill_opts={'cmap': cmocean.cm.thermal, 
               'levels': np.arange(0.0,31.0,2.0),
-               'cbar_kwargs': cbar_kwargs
+               'cbar_kwargs': cbar_kwargs,
+               'x': 'lon',
+               'y': 'lat'
     }
 
     contour_opts={'levels': np.arange(0.0,31.0,4.0),
-                  'colors': 'black'
+                  'colors': 'black',
+                  'x': 'lon',
+                  'y': 'lat'
     }
 
     clab_opts={'fmt': '%1.0f'}
@@ -173,6 +177,6 @@ def mkplots(exps, dsets):
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
+    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT', type='GEOSTripolar')
     mkplots(exps,dsets)
     geosdset.close(dsets)    
