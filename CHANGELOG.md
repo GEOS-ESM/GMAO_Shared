@@ -13,7 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
 ### Changed
+
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
 
 ### Removed
 

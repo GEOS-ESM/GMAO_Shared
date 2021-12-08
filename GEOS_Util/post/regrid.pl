@@ -25,12 +25,12 @@ use WriteLog qw(symlink_ system_ unlink_ );
 my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT);
 my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir);
 my ($dbHash, $debug, $drymassFLG, $dyn2dynX, $expid);
-my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_);
-my ($grOUT, $grOUTocean, $grouplist, $grpID, $hr, $interactive);
+my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_, $mdlINocean);
+my ($grOUT, $grOUTocean, $grOUTocean_, $mdlOUTocean, $grouplist, $grpID, $hr, $interactive);
 my ($interp_restartsX, $landIceDT, $lblFLG, $lcvFLG, $levsIN, $levsOUT);
 my ($logfile, $merra, $mk_RestartsX, $mk_catch, $mk_catchcn, $mk_route);
 my ($mkdrstdateX, $month, $newid, $node, $noprompt, $outdir, $outdir_save);
-my ($qos, $partition, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
+my ($qos, $partition, $constraint, $regridj, $rsFLG, $rstdir, $rstTAR, $rs_hinterpX, $rs_scaleX);
 my ($rstIN_template, $rstIN_templateB, $rst_tarfile, $rst_template);
 my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
@@ -39,7 +39,7 @@ my ($binRST);
 my ($year, $ymd, $zoom, $zoom_);
 my ($qcmd, $qwaitFLG);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
-my (%atmLevs, %coupledFLG, %coupled_model_tile, %hgrd, %iceIN);
+my (%atmLevs, %dataFLG, %coupledFLG, %coupledMDLFLG, %hgrd, %iceIN);
 my (%im, %im4, %imo, %imo4, %input_restarts);
 my (%jm, %jm4, %jm5, %jmo, %jmo4, %newLand);
 my (@anafiles, @cnlist, @warnings);
@@ -47,11 +47,12 @@ my (@anafiles, @cnlist, @warnings);
 # global tag variables
 #---------------------
 my $former_tag  = "Ganymed-4_0";       # default for input restarts
-my $current_tag = "Ganymed-4_0";       # default for output restarts
+my $current_tag = "Icarus-NLv3";       # default for output restarts
 
 my (@GCMtags, @DAStags);
 my (@F14, @F20, @F21, @G10, @G10p, @G20, @G30, @G40, @INL, @ICA);
-my (@D214, @D540, @D561, @D580, @D591p, @D5A0, @D5B0, @D512, @D517);
+my (@GITOL, @GITNL); # Git GCM tags
+my (@D214, @D540, @D561, @D580, @D591p, @D5A0, @D5B0, @D512, @D517, @D525);
 my (%bcsTAG, %rank, %landIceVER, $landIceFLG);
 my ($rank_1_catchcn, $rank_1_route, $rank_saltwater_split);
 
@@ -76,8 +77,9 @@ $atmLevs{"137"} = "137";
 $atmLevs{"144"} = "144";
 $atmLevs{"181"} = "181";
 
-# ocean grids
-#------------
+# data ocean grids
+#-----------------
+%dataFLG = ( "c" => 1, "e" => 1, "f" => 1, "CS" => 1 );
 $imo{"c"} =  "360"; $jmo{"c"} = "180";     # Reynolds
 $imo{"e"} = "1440"; $jmo{"e"} = "720";     # MERRA-2
 $imo{"f"} = "2880"; $jmo{"f"} = "1440";    # OSTIA
@@ -89,34 +91,21 @@ foreach (qw/ 90 180 360 720 /) {
     $jmo{"C$_"} = 6*$_;
 }
 
+# coupled ocean models
+#---------------------
+%coupledMDLFLG = ( "MOM5" => 1, "MOM6" => 1 );
+
 # coupled ocean grids
 #--------------------
-%coupledFLG = ( "cc" => 1, "dd" => 1, "ee" => 1 );
-$imo{"cc"} =  "360"; $jmo{"cc"} = "200";
-$imo{"dd"} =  "720"; $jmo{"dd"} = "410";
+%coupledFLG = ( "aa" => 1, "cc" => 1, "dd" => 1, "ee" => 1 );
+$imo{"aa"} =   "72"; $jmo{"aa"} =   "36";
+$imo{"cc"} =  "360"; $jmo{"cc"} =  "200";
+$imo{"dd"} =  "720"; $jmo{"dd"} =  "410";
 $imo{"ee"} = "1440"; $jmo{"ee"} = "1080";
 
 # until an official location for coupled-model tiles is created
 #--------------------------------------------------------------
-$coupled_model_dir = "/discover/nobackup/yvikhlia/coupled/Forcings";
-
-$coupled_model_tile{"CF0048x6C_TM0360xTM0200-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a48x288_o360x200/";
-
-$coupled_model_tile{"CF0090x6C_TM0360xTM0200-Pfafstetter.til"} =
-    "${coupled_model_dir}/a90x540_o360x200";
-
-$coupled_model_tile{"CF0090x6C_TM0720xTM0410-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a90x540_o720x410";
-
-$coupled_model_tile{"CF0090x6C_TM1440xTM1080-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a90x540_o1440x1080";
-
-$coupled_model_tile{"CF0180x6C_TM0720xTM0410-Pfafstetter.til"} =
-    "${coupled_model_dir}/a180x1080_o720x410";
-
-$coupled_model_tile{"CF0180x6C_TM1440xTM1080-Pfafstetter.til"} =
-    "${coupled_model_dir}/Ganymed/a180x1080_o1440x1080";
+$coupled_model_dir = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs";
 
 # atmosphere cubed-sphere grids
 #------------------------------
@@ -181,7 +170,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 
 %SURFACE      = ("catch_internal_rst"        => 1,
                  "catchcn_internal_rst"      => 1,
-                 "route_internal_rst"        => 1,		 
+                 "route_internal_rst"        => 1,
                  "lake_internal_rst"         => 1,
                  "landice_internal_rst"      => 1,
                  "openwater_internal_rst"    => 1,
@@ -270,7 +259,9 @@ sub init {
                "np|noprompt"     => \$noprompt,
                "levsout=s"       => \$levsOUT,
                "oceanin=s"       => \$grINocean,
+               "ocnmdlin=s"      => \$mdlINocean,
                "oceanout=s"      => \$grOUTocean,
+               "ocnmdlout=s"     => \$mdlOUTocean,
                "esmabin=s"       => \$ESMABIN,
                "iceDT=s"         => \$landIceDT,
                "newid=s"         => \$newid,
@@ -290,6 +281,7 @@ sub init {
                "grpid=s"         => \$grpID,
                "qos=s"           => \$qos,
                "partition=s"     => \$partition,
+               "constraint=s"    => \$constraint,
                "altbcs:s{,1}"    => \$bcsALT,
                "zoom=i"          => \$zoom,
                "db|debug|nc"     => \$debug,
@@ -303,6 +295,7 @@ sub init {
     $verbose = 0 unless $verbose;
     $qos = 0 unless $qos;
     $partition = 0 unless $partition;
+    $constraint = "sky" unless $constraint;
 
     usage() if $help;
     setprompt(0) if $noprompt;
@@ -464,28 +457,42 @@ sub init_tag_arrays_and_hashes {
     # BCS Tags: Icarus (New Land Parameters, New Topography)
     #---------------------------------------------------------------------------
     @ICA  = qw( ICA                    Icarus                 Jason );
-    @D517 = qw( GEOSadas-5_17_0        GEOSadas-5_17_1        GEOSadas-5_18_0
+    @D517 = qw( 517
+                GEOSadas-5_17_0        GEOSadas-5_17_1        GEOSadas-5_18_0
                 GEOSadas-5_18_1        GEOSadas-5_18_2        GEOSadas-5_18_3
                 GEOSadas-5_18_3_p1     GEOSadas-5_19_0        GEOSadas-5_20_0
                 GEOSadas-5_20_0_p1     GEOSadas-5_20_0_p2     GEOSadas-5_21_0
                 GEOSadas-5_21_2        GEOSadas-5_21_3_p1     GEOSadas-5_22_0
                 GEOSadas-5_22_0_p1     GEOSadas-5_22_0_p2     GEOSadas-5_23_0
                 GEOSadas-5_23_0_p1     GEOSadas-5_24_0        GEOSadas-5_24_0_p1 );
+    @GITOL = qw( GITOL
+                 10.3  10.4  10.5
+                 10.6  10.7  10.8
+                 10.9  10.10 10.11
+                 10.12 10.13 10.14
+                 10.15 10.16 10.17
+                 10.18 );
 
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-    @INL  = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
+    @INL   = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
+    @GITNL = qw( GITNL 10.19 10.20 );
+    @D525 = qw( 525
+                GEOSadas-5_25_1        GEOSadas-5_25_1_p5     GEOSadas-5_25_p7
+                GEOSadas-5_27_1        GEOSadas-5_29_3                        );
 
-    foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
-    foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0" }
-    foreach (@F21)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_1" }
-    foreach (@G10)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0" }
-    foreach (@G10p)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0_M" }
-    foreach (@G20)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_M" }
+    foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4"          }
+    foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0"          }
+    foreach (@F21)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_1"          }
+    foreach (@G10)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0"          }
+    foreach (@G10p)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Ganymed-1_0_M"        }
+    foreach (@G20)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_M"        }
     foreach (@G30)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_Reynolds" }
     foreach (@G40)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-4_0_Reynolds" }
-    foreach (@ICA)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds" }
+    foreach (@ICA)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds"      }
+    foreach (@GITOL) { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds"      }
     foreach (@INL)   { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
+    foreach (@GITNL) { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
 
     foreach (@D214)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
     foreach (@D540)  { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4" }
@@ -496,9 +503,10 @@ sub init_tag_arrays_and_hashes {
     foreach (@D5B0)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-1_0_Reynolds" }
     foreach (@D512)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Ganymed-4_0_Reynolds" }
     foreach (@D517)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus_Reynolds" }
+    foreach (@D525)  { $landIceVER{$_} = 2; $bcsTAG{$_} = "Icarus-NLv3_Reynolds" }
 
-    @GCMtags = (\@F14, \@F20, \@F21, \@G10, \@G10p, \@G20, \@G30, \@G40, \@INL, \@ICA);
-    @DAStags = (\@D214, \@D540, \@D561, \@D580, \@D591p, \@D5A0, \@D5B0, \@D512);
+    @GCMtags = (\@F14, \@F20, \@F21, \@G10, \@G10p, \@G20, \@G30, \@G40, \@ICA, \@GITOL, \@INL, \@GITNL);
+    @DAStags = (\@D214, \@D540, \@D561, \@D580, \@D591p, \@D5A0, \@D5B0, \@D512, \@D517, \@D525);
 
     # rank of BCS tags
     #-----------------
@@ -543,7 +551,9 @@ sub init_tag_arrays_and_hashes {
 #=======================================================================
 sub check_inputs {
     my ($ans, $arcdir, $bkg_dflt, $dflt, $fname, $fvrst);
-    my ($grINocean_dflt, $grOUTocean_dflt, $ii);
+    my ($grINocean_data_dflt, $grOUTocean_data_dflt, $ii);
+    my ($grINocean_coupled_dflt, $grOUTocean_coupled_dflt);
+    my ($mdlINocean_dflt, $mdlOUTocean_dflt);
     my ($label, $landIceVERin, $landIceVERout, $lbl_dflt);
     my ($lcv_dflt, $len, $levsOUTdflt, $msg, $newid_dflt);
     my ($prompt, $rstlcvIN, $warnFLG, $wemINdflt, $wemOUTdflt);
@@ -645,6 +655,7 @@ sub check_inputs {
         $tagIN  = "Fortuna-1_4";
         $grIN      = "d";
         $grINocean = "c";
+        $mdlINocean = "data";
 
         if    ($year < 1979) { die "Error. MERRA data < 1979 not available\n" }
         elsif ($year < 1989) { $expid = "d5_merra_jan79" }
@@ -657,6 +668,7 @@ sub check_inputs {
         $tagIN  = "Ganymed-4_0";
         $grIN      = "C180";
         $grINocean = "e";
+        $mdlINocean = "data";
 
         if ("$year$month" < 197901) {
             die "Error. MERRA-2 data < 1979 not available\n"
@@ -745,45 +757,81 @@ sub check_inputs {
     #
     # For non-cubed-sphere grids, $grINocean_ = $grINocean
     #---------------------------------------------------------------------------
-    $grINocean_dflt  = "c";
-    $grOUTocean_dflt = "c";
+    $grINocean_data_dflt   = "c";
+    $grOUTocean_data_dflt  = "c";
 
-    unless ($grINocean  and ($imo{$grINocean}) and
+    $grINocean_coupled_dflt   = "dd";
+    $grOUTocean_coupled_dflt  = "dd";
+
+    # These are the defaults for ocean model
+    $mdlINocean_dflt  = "data";
+    $mdlOUTocean_dflt  = "data"; # We don't need a default if dataocean in
+
+    unless ($mdlINocean and not $merra) {
+       print "\nOcean Models\n"
+           .   "------------\n"
+           .   "data  (Reynolds, MERRA-2, Ostia, Cubed-Sphere)\n"
+           .   "MOM5  \n"
+           .   "MOM6  \n"
+           .   "\n";
+       until ($mdlINocean and ( ($mdlINocean eq "data") or ($coupledMDLFLG{$mdlINocean}) ) ) {
+          $mdlINocean = query("Enter INPUT ocean model", $mdlINocean_dflt);
+       }
+    }
+    print "INPUT ocean model: $mdlINocean\n";
+
+    unless ($grINocean  and $imo{$grINocean} and
             $grOUTocean and $imo{$grOUTocean}) {
-        print "\nOcean Grids\n"
-            .   "-----------\n"
-            .   "c  =  360x180   (Reynolds)\n"
-            .   "e  = 1440x720   (MERRA-2)\n"
-            .   "f  = 2880x1440  (OSTIA)\n"
-            .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
-            .   "\n"
-            .   "Coupled Ocean Grids\n"
-            .   "-------------------\n"
-            .   "cc = 360x200\n"
-            .   "dd = 720x410\n"
-            .   "ee = 1440x1080\n\n";
-    }
-    until ($grINocean and $imo{$grINocean}) {
-        $grINocean = query("Enter INPUT ocean grid:", $grINocean_dflt);
-    }
-    if (($grINocean eq "CS") or ($grINocean eq "CSi")) {
-        unless ($CSo{$grIN}) {
-            die "Error. Cannot have cubed ocean with atmosphere grid $grIN";
-        }
-        $grINocean = "CSi";
-        $grINocean_ = "CS";
-        $imo{"CSi"} = $im{$grIN};
-        $jmo{"CSi"} = $jm{$grIN};
-        $imo4{"CSi"} = $im4{$grIN};
-        $jmo4{"CSi"} = $jm4{$grIN};
+       print "\nData Ocean Grids\n"
+             .   "----------------\n"
+             .   "c  =  360x180   (Reynolds)\n"
+             .   "e  = 1440x720   (MERRA-2)\n"
+             .   "f  = 2880x1440  (OSTIA)\n"
+             .   "CS = same as atmosphere (OSTIA cubed-sphere)\n"
+             .   "\nCoupled Ocean Grids\n"
+             .   "-------------------\n"
+             .   "aa = 72x36\n"
+             .   "cc = 360x200\n"
+             .   "dd = 720x410\n"
+             .   "ee = 1440x1080\n\n";
+       until ($grINocean and $imo{$grINocean} and ($dataFLG{$grINocean} or $coupledFLG{$grINocean}) ) {
+          if ($mdlINocean eq "data") {
+             $grINocean = query("Enter INPUT ocean grid:", $grINocean_data_dflt);
+          } else {
+             $grINocean = query("Enter INPUT ocean grid:", $grINocean_coupled_dflt);
+          }
+       }
+       if (($grINocean eq "CS") or ($grINocean eq "CSi")) {
+          unless ($CSo{$grIN}) {
+             die "Error. Cannot have cubed ocean with atmosphere grid $grIN";
+          }
+          $grINocean = "CSi";
+          $grINocean_ = "CS";
+          $imo{"CSi"} = $im{$grIN};
+          $jmo{"CSi"} = $jm{$grIN};
+          $imo4{"CSi"} = $im4{$grIN};
+          $jmo4{"CSi"} = $jm4{$grIN};
+       }
     }
     $grINocean_ = $grINocean unless $grINocean_;
     print "INPUT ocean grid: $grINocean_\n";
 
+    # output ocean model $mdlOUTocean
+    #--------------------------------
+    # If dataocean, we can only output data ocean, but if coupled, we can choose
+    until ($mdlOUTocean and ( ($mdlOUTocean eq "data") or ($coupledMDLFLG{$mdlOUTocean}) ) ) {
+       $mdlOUTocean = query("Enter OUTPUT ocean model", $mdlOUTocean_dflt);
+    }
+    print "OUTPUT ocean model: $mdlOUTocean\n";
+
     # output ocean grid: $grOUTocean
     #-------------------------------
-    until ($grOUTocean and $imo{$grOUTocean}) {
-        $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_dflt);
+    until ($grOUTocean and $imo{$grOUTocean} and ($dataFLG{$grOUTocean} or $coupledFLG{$grOUTocean})) {
+       if ($mdlOUTocean eq "data") {
+          $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_data_dflt);
+       } else {
+          $grOUTocean = query("Enter OUTPUT ocean grid:", $grOUTocean_coupled_dflt);
+       }
     }
     if ($grOUTocean eq "CS") {
         unless ($CSo{$grOUT}) {
@@ -794,7 +842,8 @@ sub check_inputs {
         $imo4{"CS"} = $im4{$grOUT};
         $jmo4{"CS"} = $jm4{$grOUT};
     }
-    print "OUTPUT ocean grid: $grOUTocean\n";
+    $grOUTocean_ = $grOUTocean unless $grOUTocean_;
+    print "OUTPUT ocean grid: $grOUTocean_\n";
 
     # check tag info: $tagIN and $tagOUT
     #-----------------------------------
@@ -821,7 +870,7 @@ sub check_inputs {
             print "\n";
         }
     }
-    if ($bcsTagIN) { print_("\nINPUT tag: $bcsTagIN\n\n") }
+    if ($bcsTagIN) { print_("INPUT tag: $bcsTagIN\n") }
     else {
         until ($bcsTagIN) {
             print_("\nType 'bcs' to see BCS tags or\n");
@@ -833,11 +882,14 @@ sub check_inputs {
     if ($rank{$bcsTagIN} >= 12 ) { $surflayIN = 50 }
     else                         { $surflayIN = 20 }
 
-    until ($bcsTagOUT) {
-        print_("\nType 'bcs' to see BCS tags or\n");
-        $tagOUT = query("Enter GCM or DAS tag for outputs:", $current_tag);
-        $bcsTagOUT = resolve_bcsTAG($tagOUT, $grOUTocean, "out");
-        $tagOUT = $bcsTagOUT if $tagOUT eq "bcs";
+    if ($bcsTagOUT) { print_("OUTPUT tag: $bcsTagOUT\n") }
+    else {
+       until ($bcsTagOUT) {
+          print_("\nType 'bcs' to see BCS tags or\n");
+          $tagOUT = query("Enter GCM or DAS tag for outputs:", $current_tag);
+          $bcsTagOUT = resolve_bcsTAG($tagOUT, $grOUTocean, "out");
+          $tagOUT = $bcsTagOUT if $tagOUT eq "bcs";
+       }
     }
     if ($rank{$bcsTagOUT} >= 12 ) { $surflay = 50; $drymassFLG = 1 }
     else                          { $surflay = 20 }
@@ -897,10 +949,10 @@ sub check_inputs {
         print "\nRegridding of Catch[CN] restarts requires specification of minimum snow water equivalent\n"
             .   "values (WEmin) for the runs associated with the source (input) and target (output) restarts.\n"
             .   "FYI, the following values are used in existing GEOS systems:\n"
-            .   "  WEmin = 26 kg/m2 : FP 5.13-5.22, MERRA-2, MERRA-Land, (Fortuna, Ganymed [G40], Icarus [ICA])\n"
-            .   "  WEmin = 13 kg/m2 : FP 5.25-    , MERRA,               (Icarus-NewLand [INL])\n"
-            .   "----------------------------------------------\n";
-	
+            .   "  WEmin = 26 kg/m2 : FP 5.13-5.22, MERRA-2, MERRA-Land, (Fortuna, Ganymed [G40], Icarus [ICA], Git GCM 10.3-10.18)\n"
+            .   "  WEmin = 13 kg/m2 : FP 5.25-    , MERRA,               (Icarus-NewLand [INL], Git GCM 10.19+)\n"
+            .   "----------------------------------------------------------------------------------------------\n";
+
         if ($newLand{$bcsTagIN}) { $wemINdflt = 13 }
         else                     { $wemINdflt = 26 }
 
@@ -927,15 +979,15 @@ sub check_inputs {
     #------------------
     @cnlist = split(/,/, $mk_catchcn) if $mk_catchcn;
     if ($mk_catchcn) {
-	   unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
-	      @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
-	      foreach $ii (0..3) {
-		      $prompt = "Enter Carbon (CN) $cnlabel[$ii]";
-		      if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
-		      else              { $cnlist[$ii] = query($prompt) }
-	      }
-	      $mk_catchcn = join(",", @cnlist[0..3]);
-	   }
+       unless  (scalar(@cnlist) != 4 || scalar(@cnlist) != 1) {
+          @cnlabel = (qw(CN_VERSION RESTART_ID RESTART_PATH RESTART_DOMAIN));
+          foreach $ii (0..3) {
+             $prompt = "Enter Carbon (CN) $cnlabel[$ii]";
+             if ($cnlist[$ii]) { $cnlist[$ii] = query($prompt, $cnlist[$ii]) }
+             else              { $cnlist[$ii] = query($prompt) }
+          }
+          $mk_catchcn = join(",", @cnlist[0..3]);
+       }
 
       unless ( $cnlist[0] eq "clm40" or $cnlist[0] eq "clm45") {
          die "Error. CN_VERSION should be clm40 or clm45\n";
@@ -1451,7 +1503,7 @@ sub resolve_bcsTAG {
     # was BCS tag found?
     #------------------
     else {
-        print "\nWARNING. Cannot recognize Tag ID: $tagIDx";
+        print "\nWARNING. Cannot recognize Tag ID: $tagIDx (NOTE: Use only X.Y for Git Tags)";
         print " ($tagID)" if $tagID ne $tagIDx;
         print "\n";
     }
@@ -1908,7 +1960,7 @@ sub set_IN_OUT {
     my ($HH, $agrid, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
     my ($bcsTAG, $bcsdir, $gridID, $gridID_tile, $hgrid);
     my ($im, $im4, $imo, $imo4, $jm, $jm4, $jm5, $jmo, $jmo4);
-    my ($oceanID1, $oceanID2, $ogrid, $ogrid_);
+    my ($oceanID1, $oceanID2, $ogrid, $ogrid_, $omdl);
     my ($tile, $topo, $val);
 
     # tag values
@@ -1940,7 +1992,10 @@ sub set_IN_OUT {
     $OUT{"ogrid"} = $grOUTocean;
 
     $IN{"ogrid_"}  = $grINocean_;  # used for display purposes
-    $OUT{"ogrid_"} = $grOUTocean;
+    $OUT{"ogrid_"} = $grOUTocean_;
+
+    $IN{"omdl"}  = $mdlINocean;
+    $OUT{"omdl"} = $mdlOUTocean;
 
     # bkg_eta grid value
     #-------------------
@@ -1997,6 +2052,7 @@ sub set_IN_OUT {
         $agrid  = $$HH{"agrid"};
         $ogrid  = $$HH{"ogrid"};
         $ogrid_ = $$HH{"ogrid_"};
+        $omdl   = $$HH{"omdl"};
 
         $im  = $im{$agrid};
         $im4 = $im4{$agrid};
@@ -2094,7 +2150,15 @@ sub set_IN_OUT {
             $bcsdir = "$bcsHEAD/$bcsTAG/$gridID";
         }
         if ($coupledFLG{$ogrid}) {
-            $bcsdir = (<${bcsdir}*>)[0];
+            if ($rank{$bcsTAG} >= $rank{"Icarus-NLv3_Reynolds"}) {
+               $bcsdir = "$coupled_model_dir/Icarus-NLv3/$omdl/$gridID_tile";
+            } elsif ($rank{$bcsTAG} >= $rank{"Icarus_Reynolds"}) {
+               $bcsdir = "$coupled_model_dir/Icarus/$omdl/$gridID_tile";
+            } elsif ($rank{$bcsTAG} >= $rank{"Ganymed-4_0_Reynolds"}) {
+               $bcsdir = "$coupled_model_dir/Ganymed/$omdl/$gridID_tile";
+            } else {
+               die "Only BCs Ganymed-4_0 and newer supported";
+            }
         }
 
         die "Error; Cannot find bcs directory: $bcsdir;" unless -d $bcsdir;
@@ -2117,9 +2181,9 @@ sub set_IN_OUT {
         }
         $tile = "$bcsdir/$tile";
 
+        # Coupled tile files
         if ($coupledFLG{$ogrid}) {
-            $tile = "${gridID_tile}-Pfafstetter.til";
-            $tile = "$coupled_model_tile{$tile}/$tile";
+            $tile = "$bcsdir/${gridID_tile}-Pfafstetter.til";
         }
 
         die "Error. Cannot find tile file: $tile" unless -f $tile;
@@ -2204,6 +2268,7 @@ sub confirm_inputs {
            . ". atmos grid:   $IN{atmos3} ($IN{agrid})\n"
            . ". atmos levs:   $IN{levs}\n"
            . ". ocean grid:   $IN{ocean} ($IN{ogrid_})\n"
+           . ". ocean model:  $IN{omdl}\n"
            . ". bcsdir:       $IN{bcsdir}\n"
            . ". tile file:    $IN{tile}\n"
            . ". BCS tag:      $IN{bcsTAG}\n");
@@ -2230,6 +2295,7 @@ sub confirm_inputs {
            . ". atmos grid:   $OUT{atmos3} ($OUT{agrid})\n"
            . ". atmos levs:   $OUT{levs}\n"
            . ". ocean grid:   $OUT{ocean} ($OUT{ogrid})\n"
+           . ". ocean model:  $OUT{omdl}\n"
            . ". bcsdir:       $OUT{bcsdir}\n"
            . ". tile file:    $OUT{tile}\n");
     print_(  ". bkg_eta grid: $OUT{bkg_regrid}\n") if $OUT{"bkg_regrid"};
@@ -2332,7 +2398,7 @@ sub regrid_upperair_rsts_CS {
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
     my ($HEMCO, $SSCHEM, $DUCHEM, $NICHEM, $SUCHEM, $CABRCHEM, $CABCCHEM, $CAOCCHEM);
     my ($moist, $newrst, $rst, $status);
-    my ($mynodes);
+    my (%allowedConstraint);
 
     $im = $im{$grOUT};
     if    ($im eq   "12") { $NPE =  12; $nwrit = 1 }
@@ -2363,6 +2429,11 @@ sub regrid_upperair_rsts_CS {
 
     if ($im >= "2880") { $MEMPERCPU = "--mem-per-cpu=4G"}
     else               { $MEMPERCPU = ""                }
+
+    %allowedConstraint = ( "hasw" => 1, "sky" => 1, "cas" => 1);
+    unless($allowedConstraint{$constraint}) {
+       die "Error. Constraint $constraint is not allowed.";
+    }
 
     # MAT Workaround C180 -> C720 cannot run on 192
     # ---------------------------------------------
@@ -2439,15 +2510,6 @@ sub regrid_upperair_rsts_CS {
 
     $AGCMout   = rstnameI(".", "agcm_import_rst");
 
-    my $npn = `facter processorcount`; chomp($npn);
-    if ( $npn == 40 ) {
-      $mynodes = "sky";
-    } elsif ( $npn == 48 ) { 
-      $mynodes = "cas";
-    } else {
-      $mynodes = "hasw";
-    }
-
     # write input.nml file
     #---------------------
     $input_nml = "$workdir/input.nml";
@@ -2476,7 +2538,7 @@ EOF
 #SBATCH --time=1:00:00
 #SBATCH --ntasks=${NPE} ${MEMPERCPU}
 #SBATCH --job-name=regrid
-#SBATCH --constraint=$mynodes
+#SBATCH --constraint=$constraint
 #$QOSline
 #$PARTline
 
@@ -2836,6 +2898,7 @@ sub regrid_surface_rsts {
         $flags .= " -rsttime $ymd$hr"  if $mk_catchcn or $mk_route;
         $flags .= " -qos $qos"         if ($mk_catch or $mk_catchcn) and $qos;
         $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
+        $flags .= " -constraint $constraint" if ($mk_catch or $mk_catchcn) and $constraint;
     }
     $flags .= " -zoom $zoom" if $zoom;
 
@@ -3013,6 +3076,7 @@ sub regrid_surface_rsts {
         $flags .= " -zoom $zoom"        if $zoom;
         $flags .= " -qos $qos"          if ($mk_catch or $mk_catchcn) and $qos;
         $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
+        $flags .= " -constraint $constraint" if ($mk_catch or $mk_catchcn) and $constraint;
         #--$flags .= " -walltime 2:00:00"  if $mk_catchcn;
         #--$flags .= " -ntasks 112"        if $mk_catchcn;
 
@@ -3377,6 +3441,7 @@ sub write_CMD_file {
         }
         $capture .= " -tagin $tagIN"        if $capture !~ m/\s+\-tagin\b/;
         $capture .= " -oceanin $grINocean_" if $capture !~ m/\s+\-oceanin\b/;
+        $capture .= " -ocnmdlin $mdlINocean" if $capture !~ m/\s+\-ocnmdlin\b/;
     }
 
     if ($interactive) {
@@ -3401,6 +3466,7 @@ sub write_CMD_file {
     $capture .= " -rs $rsFLG"      if $capture !~ m/\s+\-rs\b/;
 
     $capture .= " -oceanout $grOUTocean" if $capture !~ m/\s+\-oceanout\b/;
+    $capture .= " -ocnmdlout $mdlOUTocean" if $capture !~ m/\s+\-ocnmdlout\b/;
 
     if ($mk_catchcn) {
         $capture .= " -catchcn"    if $capture !~ m/\s+\-catchcn\b/;
@@ -3411,6 +3477,9 @@ sub write_CMD_file {
     elsif (defined($landIceFLG) and $landIceFLG == 0) {
         $capture .= " -iceDT 0" if $capture !~ m/\s+\-iceDT\b/;
     }
+
+    $capture .= " -wemin $wemIN" if $capture !~ m/\s+\-wemin\b/;
+    $capture .= " -wemout $wemOUT" if $capture !~ m/\s+\-wemout\b/;
 
     $capture .= " -grpID $grpID" if $capture !~ m/\s+\-grpID\b/ and $grpID;
     $capture .= " -zoom $zoom"   if $capture !~ m/\s+\-zoom\b/ and $zoom_;
@@ -3912,10 +3981,10 @@ REQUIRED INPUTS
    -----------------------------
    as ordered runtime parameters
    -----------------------------
-   yyyymmdd          8-digit date of the restarts being regridded
-   hr                2-digit hour of the restarts being regridded
-   grOUT             grid ID of the output restarts (see GRID IDENTIFIERS below)
-   outdir            directory location for output restarts
+   yyyymmdd            8-digit date of the restarts being regridded
+   hr                  2-digit hour of the restarts being regridded
+   grOUT               grid ID of the output restarts (see GRID IDENTIFIERS below)
+   outdir              directory location for output restarts
 
    --------------------
    or as flagged values
@@ -3926,82 +3995,96 @@ REQUIRED INPUTS
    -outdir   outdir
 
 REQUIRED OPTION FOR MERRA INPUTS
-   -merra             (same as -merra2)
-   -merra1            get input restarts from OPS MERRA-1 data archives
-   -merra2            get input restarts from OPS MERRA-2 data archives
+   -merra               (same as -merra2)
+   -merra1              get input restarts from OPS MERRA-1 data archives
+   -merra2              get input restarts from OPS MERRA-2 data archives
 
 REQUIRED OPTIONS FOR NON-MERRA INPUTS
-   -d        rstdir   pathname for input tarfile or restart directory
-   -expid    expid    experiment ID of input restart files
+   -d        rstdir     pathname for input tarfile or restart directory
+   -expid    expid      experiment ID of input restart files
 
 INTERACTIVE OPTION
-   -i                 prompt for inputs that are not supplied
-                      (this is the default if no inputs are supplied)
-   -np                no prompt; take defaults for all prompts;
-                      note: the -np flag takes precedence over the -i flag
+   -i                   prompt for inputs that are not supplied
+                        (this is the default if no inputs are supplied)
+   -np                  no prompt; take defaults for all prompts;
+                        note: the -np flag takes precedence over the -i flag
 
 OTHER OPTIONS
-   -levsout  levsout  number of atmosphere levels in output
-   -oceanin  oceanIN  ocean horizontal grid of inputs
-                      =c  : 1-deg (360x180); e.g. Reynolds
-                      =e  : 1/4-deg (1440x720); e.g. MERRA-2
-                      =f  : 1/8-deg (2880x1440); e.g. OSTIA
-                      =CS : OSTIA regridded to cubed-sphere
-                      defaults to \'c\'
-   -oceanout oceanOUT ocean horizontal grid of outputs (see -oceanIN)
-   -esmabin  ESMABIN  location of build\'s scripts and programs; defaults to location
-                      of regrid.pl script
-   -iceDT     dtime   datetime for alternate landice rst input if regridding to
-                      \'Ganymed-2_0\' from earlier tag; dtime should have the
-                      following format: -iceDT yyyymmdd_hh
-                      if dtime is not provided or if no restarts can be found to
-                      match dtime, then script will prompt user from list of
-                      available datetimes.
-                      if dtime eq \'0\', then alternate landice rst will not be used
-   -newid    newid    label to replace expid in output restart names;
-                      defaults to \'n-expid\' where n is OUTPUT atmosphere grid ID
-   -tagin    tagIN    GCM or DAS tag associated with inputs (see TAGS below);
-                      defaults to $former_tag
-   -tagout   tagOUT   GCM or DAS tag associated with outputs (see TAGS below);
-                      defaults to $current_tag
-   -rs       flag     flag indicating which restarts to regrid
-                      =1 for upper-air restarts only
-                      =2 for land-surface restarts only
-                      =3 for both upper-air and land-surface restarts (default)
-   -catchcn           offers 2 options:
-                      = 0, cold start for CLM40 using an archived restart file. For e.g. 
-                        -catchcn 0, - Notice the trailing comma
-                      = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
-		        to start from a GEOSldas restart file (Note, keywords are comma-separated).
-                        where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
-                        are same as those in GEOSldas exeinp file. For e.g. 
-                        -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
-                        IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
-                      Not valid for tags prior to Heracles; Note: This option will add
-                      10-20 minutes to the regrid process.
-   -wemin wemIN       minimum water snow water equivalent for input catch/cn
-   -wemout wemOUT     minimum water snow water equivalent for output catch/cn
+   -levsout   levsout   number of atmosphere levels in output
+   -ocnmdlin  ocnMDLIN  ocean input model 
+                          =data : data ocean (Reynolds, MERRA-2, Ostia, CS)
+                          =MOM5 : MOM5
+                          =MOM6 : MOM6
+                          defailts to \'data\'
+   -oceanin   oceanIN   ocean horizontal grid of inputs
+                        data ocean grids
+                          =c  : 1-deg (360x180); e.g. Reynolds
+                          =e  : 1/4-deg (1440x720); e.g. MERRA-2
+                          =f  : 1/8-deg (2880x1440); e.g. OSTIA
+                          =CS : OSTIA regridded to cubed-sphere
+                          defaults to \'c\'
+                        coupled ocean grids (requires choice of ocean model)
+                          =aa  : 5-deg (72x36)
+                          =cc  : 1-deg (360x200)
+                          =dd  : 1/2-deg (720x410)
+                          =ee  : 1/4-deg (1440x1080)
+                          defaults to \'dd\'
+   -ocnmdlout ocnMDLOUT ocean model of outputs (see -ocnmdlin)
+   -oceanout  oceanOUT  ocean horizontal grid of outputs (see -oceanin)
+   -esmabin   ESMABIN   location of build\'s scripts and programs; defaults to location
+                        of regrid.pl script
+   -iceDT     dtime     datetime for alternate landice rst input if regridding to
+                        \'Ganymed-2_0\' from earlier tag; dtime should have the
+                        following format: -iceDT yyyymmdd_hh
+                        if dtime is not provided or if no restarts can be found to
+                        match dtime, then script will prompt user from list of
+                        available datetimes.
+                        if dtime eq \'0\', then alternate landice rst will not be used
+   -newid    newid      label to replace expid in output restart names;
+                        defaults to \'n-expid\' where n is OUTPUT atmosphere grid ID
+   -tagin    tagIN      GCM or DAS tag associated with inputs (see TAGS below);
+                        defaults to $former_tag
+   -tagout   tagOUT     GCM or DAS tag associated with outputs (see TAGS below);
+                        defaults to $current_tag
+   -rs       flag       flag indicating which restarts to regrid
+                          =1 for upper-air restarts only
+                          =2 for land-surface restarts only
+                          =3 for both upper-air and land-surface restarts (default)
+   -catchcn             offers 2 options:
+                        = 0, cold start for CLM40 using an archived restart file. For e.g. 
+                          -catchcn 0, - Notice the trailing comma
+                        = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
+                          to start from a GEOSldas restart file (Note, keywords are comma-separated).
+                          where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
+                          are same as those in GEOSldas exeinp file. For e.g. 
+                          -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
+                          IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
+                        Not valid for tags prior to Heracles; Note: This option will add
+                        10-20 minutes to the regrid process.
+   -wemin wemIN         minimum water snow water equivalent for input catch/cn
+   -wemout wemOUT       minimum water snow water equivalent for output catch/cn
 
-   -route             write the route_internal_rst
+   -route               write the route_internal_rst
 
-   -[no]bkg           copy and rename input bkg + satbang/bias files
-   -[no]lbl           label final restarts with \'tagID.gridID\' extension
-   -[no]lcv           create rst.lcv file for final restarts
-   -gcm               gcm mode; equivalent to -nobkg, -lbl, and -nolcv flags
-   -altbcs [bcsdir]   use boundary condition files found in bcsdir; if bcsdir
-                      is not given, then use Larry\'s bcs directory
-   -zoom n            zoom value to send to land regridding codes
+   -[no]bkg             copy and rename input bkg + satbang/bias files
+   -[no]lbl             label final restarts with \'tagID.gridID\' extension
+   -[no]lcv             create rst.lcv file for final restarts
+   -gcm                 gcm mode; equivalent to -nobkg, -lbl, and -nolcv flags
+   -altbcs [bcsdir]     use boundary condition files found in bcsdir; if bcsdir
+                        is not given, then use Larry\'s bcs directory
+   -zoom n              zoom value to send to land regridding codes
 
-   -grpid             group id; sponsor code to use for batch job charge
-   -qos val           use \'SBATCH --qos=val directive\' for batch jobs;
-                      \'-qos debug\' will not work unless these conditions are met
-                           -> numtasks <= 532
-                           -> walltime le \'1:00:00\'
-   -partition val     use \'SBATCH --partition=val directive\' for batch jobs
-   -db                (debug mode) Do not clean work directory after running programs;
-   -dbh               (debug hash) Show contents of hashes: \%IN and \%OUT
-   -v                 verbose mode
-   -h[elp]            print usage message
+   -grpid               group id; sponsor code to use for batch job charge
+   -qos val             use \'SBATCH --qos=val directive\' for batch jobs;
+                        \'-qos debug\' will not work unless these conditions are met
+                             -> numtasks <= 532
+                             -> walltime le \'1:00:00\'
+   -partition val       use \'SBATCH --partition=val directive\' for batch jobs
+   -constraint val      use \'SBATCH --constraint=val directive\' for batch jobs
+   -db                  (debug mode) Do not clean work directory after running programs;
+   -dbh                 (debug hash) Show contents of hashes: \%IN and \%OUT
+   -v                   verbose mode
+   -h[elp]              print usage message
 
 GRID IDENTIFIERS
 
@@ -4021,27 +4104,36 @@ GRID IDENTIFIERS
    ------------------
    Cn, where n = {12, 24, 48, 90, 180, 360, 500, 720, 1000, 1440, 2000, 2880, 5760}
 
-   Ocean Horizontal Grids
-   ======================
+   Data Ocean Horizontal Grids
+   ===========================
    c  = 1-deg   (360x180);   e.g. Reynolds
    e  = 1/4-deg (1440x720) ; e.g. MERRA-2
    f  = 1/8-deg (2880x1440); e.g. OSTIA
    CS = OSTIA regridded to cubed-sphere grid
+
+   Coupled Ocean Horizontal Grids
+   ==============================
+   aa  =   5-deg (72x36) (MOM6 only)
+   cc  =   1-deg (360x200)
+   dd  = 1/2-deg (720x410)
+   ee  = 1/4-deg (1440x1080)
 
 TAGS
    Use GCM or DAS tag names with -tagin and -tagout flags
 
       Sample GCM tags
       ---------------
-      F14  : $F14[1]  ............  $F14[-1]
-      F21  : $F21[1]  ............  $F21[-1]
-      G10  : $G10[1]  ............  $G10[-1]
-      G10p : $G10p[1]  .........  $G10p[-1]
-      G20  : $G20[1]  ............  $G20[-1]
-      G30  : $G30[1]  ............  $G30[-1]
-      G40  : $G40[1]  ............  $G40[-1]
-      ICA  : $ICA[1]  .................  $ICA[-1]
-      INL  : $INL[1]  ..............  $INL[-1]
+      F14   : $F14[1]  ...........  $F14[-1]
+      F21   : $F21[1]  ...........  $F21[-1]
+      G10   : $G10[1]  ...........  $G10[-1]
+      G10p  : $G10p[1]  ........  $G10p[-1]
+      G20   : $G20[1]  ...........  $G20[-1]
+      G30   : $G30[1]  ...........  $G30[-1]
+      G40   : $G40[1]  ...........  $G40[-1]
+      ICA   : $ICA[1]  ................  $ICA[-1]
+      GITOL : $GITOL[1]  ..................  $GITOL[-1]
+      INL   : $INL[1]  .............  $INL[-1]
+      GITNL : $GITNL[1]  .................  $GITNL[-1]
 
       Sample DAS tags
       ---------------
@@ -4054,9 +4146,11 @@ TAGS
       5B0  : $D5B0[1]  .....  $D5B0[-1]
       512  : $D512[1]  ........  $D512[-1]
       517  : $D517[1]  ........  $D517[-1]
+      525  : $D525[1]  ........  $D525[-1]
 
 AUTHOR
    Joe Stassi, SSAI (joe.stassi\@nasa.gov)
+   Matthew Thompson, SSAI (matthew.thompson\@nasa.gov)
 
 EOF
 ;
