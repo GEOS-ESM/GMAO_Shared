@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
+
 ### Removed
 
 ## [1.4.11] - 2021-11-03
