@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Ad support for gocart2g restars in regrid.pl
+- Add support for gocart2g restarts in regrid.pl
 
 ### Fixed
 
