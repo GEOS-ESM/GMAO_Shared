@@ -146,7 +146,7 @@ def mkplots(exps, dsets):
     for exp,clim in zip(exps[1:],clims[1:]):
         plot_diff(plotmap, exps[0], exp, clims[0], clim)
         
-    obs={'woa13': 's_an'} # Names of observational data set and variable in this data set.
+    obs={'woa18': 's_an'} # Names of observational data set and variable in this data set.
     for obsname,obsvarname in obs.items():
         ds=importlib.import_module('verification.'+obsname).ds_s
         da=ds[obsvarname].sel(depth=slice(0.,10.)).mean('depth')
