@@ -40,10 +40,8 @@ def shift_lon(da, lon0, lon_name='lon'):
     '''
     Shifts the reference longitude of field da to lon0.
     '''
-    dlon=int(da[lon_name][0]-lon0)
+    idx=np.absolute(da[lon_name]-lon0).argmin().item()
 
-    var=da.roll(**{lon_name:dlon}, roll_coords=True)
+    var=da.roll(**{lon_name:-idx}, roll_coords=True)
     var[lon_name]=var[lon_name].where(var[lon_name]>=var[lon_name][0],var[lon_name]+360)
     return var
-
-
