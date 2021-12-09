@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support for gocart2g restarts in regrid.pl
+- Add support for GOCART2G restarts in regrid.pl
+
+### Changed
 
 ### Fixed
 
-- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+### Removed
+
+## [1.4.12] - 2021-12-09
 
 ### Changed
 
@@ -21,7 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add options for MOM5 and MOM6 tile files
   - Add ability to use git tags for "tagin" and "tagout"
 
-### Removed
+### Fixed
+
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
 
 ## [1.4.11] - 2021-11-03
 
