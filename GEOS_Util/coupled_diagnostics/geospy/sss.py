@@ -80,7 +80,7 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     Plots climatology difference against observations
     '''
     rr=xesmf.Regridder(obsclim,clim[varname],'bilinear',periodic=True)
-    # For some reason just doing clim[varname]-rr(obsclim) does not work
+    # Just doing clim[varname]-rr(obsclim) does not work, because x,y coords have duplicate values
     dif=clim[varname]
     dif.values-=rr(obsclim).values
 
