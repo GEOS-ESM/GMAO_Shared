@@ -17,7 +17,7 @@ def mkclim(exp,dset):
     varname=['US','VS']
     ds=dset[varname].sel(time=slice(*exp['dates']))
     ds=ds.groupby('time.season').mean('time')
-    ds['weight']=dset['MASKO'][0]*dset['dx']*dset['dy']
+    ds['weight']=dset['mask']*dset['area']
     return ds
 
 def plot_clim(plotter, exp, clim):
@@ -49,11 +49,14 @@ def mkplots(exps,dsets):
     
     fill_opts={'cmap': cmocean.cm.speed, 
                'levels': (0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.8,1.5),
-               'cbar_kwargs': cbar_kwargs
+               'cbar_kwargs': cbar_kwargs,
+               'x': 'lon',
+               'y': 'lat'
     }
 
     stream_opts={'density': (4,2), 
-                 'color': 'black'}
+                 'color': 'black'
+    }
 
     projection=ccrs.PlateCarree(central_longitude=210.)
     plotmap=plots.PlotMap(projection=projection, fill_opts=fill_opts,
@@ -64,6 +67,6 @@ def mkplots(exps,dsets):
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
+    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT',type='GEOSTripolar')
     mkplots(exps,dsets)
     geosdset.close(dsets)
