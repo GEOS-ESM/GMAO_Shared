@@ -17,7 +17,7 @@ def mkclim(exp,dset):
     varname=['TAUX','TAUY']
     ds=dset[varname].sel(time=slice(*exp['dates']))
     ds=ds.groupby('time.season').mean('time')
-    ds['weight']=dset['MASKO'][0]*dset['dx']*dset['dy']
+    ds['weight']=dset['mask']*dset['area']
     return ds
 
 def plot_clim(plotter, exp, clim):
@@ -83,8 +83,10 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname,obsvarname):
     rr=xesmf.Regridder(obsclim,clim,'bilinear',periodic=True)
     obs_out=rr(obsclim)
     dif=xr.Dataset()
-    dif['TAUX']=clim['TAUX']-obs_out[obsvarname[0]]
-    dif['TAUY']=clim['TAUY']-obs_out[obsvarname[1]]    
+    dif['TAUX']=clim['TAUX']
+    dif['TAUY']=clim['TAUY']
+    dif['TAUX'].values-=obs_out[obsvarname[0]].values
+    dif['TAUY'].values-=obs_out[obsvarname[1]].values
 
     pl.figure(1); pl.clf() 
     ds=dif.sel(season='DJF')
@@ -124,7 +126,9 @@ def mkplots(exps,dsets):
     
     fill_opts={'cmap': cmocean.cm.speed, 
               'levels': (0.01,0.02,0.04,0.06,0.08,0.1,0.15,0.2,0.25,0.3),
-               'cbar_kwargs': cbar_kwargs
+               'cbar_kwargs': cbar_kwargs,
+               'x': 'lon',
+               'y': 'lat'
     }
 
     projection=ccrs.PlateCarree(central_longitude=210.)
@@ -144,6 +148,6 @@ def mkplots(exps,dsets):
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
+    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT',type='GEOSTripolar')
     mkplots(exps,dsets)
     geosdset.close(dsets)

@@ -13,10 +13,10 @@ varname='TAUX'
 
 def mkequatorial(exp,ds):
     var=ds[varname].sel(time=slice(*exp['dates']))
-    wght=ds['MASKO'][0]*ds['dy']
-    eq_region={'lat':slice(-2.1,2.1)}
-    var=utils.average(var.sel(**eq_region),'lat',wght.sel(**eq_region))
-    return utils.shift_lon(var,30).sel(lon=slice(130,280))
+    wght=ds['mask']*ds['dy']
+    eq_region={'y':slice(-2.1,2.1)}
+    var=utils.average(var.sel(**eq_region),'y',wght.sel(**eq_region))
+    return utils.shift_lon(var,30,'x').sel(x=slice(130,280))
 
 def mkequatorial_obs(obsname,obsvarname):
     var=importlib.import_module('verification.'+obsname).ds[obsvarname]
@@ -98,6 +98,6 @@ def mkplots(exps,dsets):
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
+    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT',type='GEOSTripolar')
     mkplots(exps,dsets)
     geosdset.close(dsets)
