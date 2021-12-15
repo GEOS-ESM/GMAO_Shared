@@ -57,7 +57,12 @@ program rs_numtiles
   else
      bpos=0
      read (10)
+#ifdef __NAG_COMPILER_RELEASE
+     write (*,*) 'NAG does not provide ftell. Use only netCDF'
+     error stop 1
+#else
      epos = ftell(10)            ! ending position of file pointer
+#endif
      ntiles = (epos-bpos)/4-2    ! record size (in 4 byte words; 
      rewind 10
   end if
