@@ -23,6 +23,7 @@
       program Main
       use dynamics_lattice_module
       use ThreeCornerHat_mod
+      use iso_fortran_env, only: REAL64
       implicit none
 
       type ( dynamics_lattice_type ) lattice
@@ -49,37 +50,37 @@
       integer ndates
       integer ndt
 
-      real*8,  allocatable :: mse12(:,:,:)     ! Mean Square Error between Fixed Corners 1 & 2
-      real*8,  allocatable :: var12(:,:,:)     !   Variance        between Fixed Corners 1 & 2
-      real*8,  allocatable :: cov12(:,:,:)     ! CoVariance        between Fixed Corners 1 & 2
-      real*8,  allocatable :: rho12(:,:,:)     ! Corr. Coeff.      between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: mse12(:,:,:)     ! Mean Square Error between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: var12(:,:,:)     !   Variance        between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: cov12(:,:,:)     ! CoVariance        between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: rho12(:,:,:)     ! Corr. Coeff.      between Fixed Corners 1 & 2
 
-      real*8,  allocatable :: msec1(:,:,:,:)   ! Mean Square Error between Corner 1 and Corner 3 
-      real*8,  allocatable :: msec2(:,:,:,:)   ! Mean Square Error between Corner 2 and Corner 3
-      real*8,  allocatable :: varc1(:,:,:,:)   !   Variance        between Corner 1 and Corner 3
-      real*8,  allocatable :: varc2(:,:,:,:)   !   Variance        between Corner 2 and Corner 3
-      real*8,  allocatable :: covc1(:,:,:,:)   ! CoVariance        between Corner 1 and Corner 3
-      real*8,  allocatable :: covc2(:,:,:,:)   ! CoVariance        between Corner 2 and Corner 3
-      real*8,  allocatable :: rhoc1(:,:,:,:)   ! Corr. Coeff.      between Corner 1 and Corner 3
-      real*8,  allocatable :: rhoc2(:,:,:,:)   ! Corr. Coeff.      between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: msec1(:,:,:,:)   ! Mean Square Error between Corner 1 and Corner 3 
+      real(REAL64),  allocatable :: msec2(:,:,:,:)   ! Mean Square Error between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: varc1(:,:,:,:)   !   Variance        between Corner 1 and Corner 3
+      real(REAL64),  allocatable :: varc2(:,:,:,:)   !   Variance        between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: covc1(:,:,:,:)   ! CoVariance        between Corner 1 and Corner 3
+      real(REAL64),  allocatable :: covc2(:,:,:,:)   ! CoVariance        between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: rhoc1(:,:,:,:)   ! Corr. Coeff.      between Corner 1 and Corner 3
+      real(REAL64),  allocatable :: rhoc2(:,:,:,:)   ! Corr. Coeff.      between Corner 2 and Corner 3
 
-      real*8,  allocatable :: mse12A(:,:,:)    ! Amplitude Mean Square Error between Fixed Corners 1 & 2
-      real*8,  allocatable :: mse12B(:,:,:)    ! Bias      Mean Square Error between Fixed Corners 1 & 2
-      real*8,  allocatable :: mse12P(:,:,:)    ! Phase     Mean Square Error between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: mse12A(:,:,:)    ! Amplitude Mean Square Error between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: mse12B(:,:,:)    ! Bias      Mean Square Error between Fixed Corners 1 & 2
+      real(REAL64),  allocatable :: mse12P(:,:,:)    ! Phase     Mean Square Error between Fixed Corners 1 & 2
 
-      real*8,  allocatable :: msec1A(:,:,:,:)  ! Amplitude Mean Square Error between Corner 1 and Corner 3
-      real*8,  allocatable :: msec2A(:,:,:,:)  ! Amplitude Mean Square Error between Corner 2 and Corner 3
-      real*8,  allocatable :: msec1B(:,:,:,:)  ! Bias      Mean Square Error between Corner 1 and Corner 3
-      real*8,  allocatable :: msec2B(:,:,:,:)  ! Bias      Mean Square Error between Corner 2 and Corner 3
-      real*8,  allocatable :: msec1P(:,:,:,:)  ! Phase     Mean Square Error between Corner 1 and Corner 3
-      real*8,  allocatable :: msec2P(:,:,:,:)  ! Phase     Mean Square Error between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: msec1A(:,:,:,:)  ! Amplitude Mean Square Error between Corner 1 and Corner 3
+      real(REAL64),  allocatable :: msec2A(:,:,:,:)  ! Amplitude Mean Square Error between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: msec1B(:,:,:,:)  ! Bias      Mean Square Error between Corner 1 and Corner 3
+      real(REAL64),  allocatable :: msec2B(:,:,:,:)  ! Bias      Mean Square Error between Corner 2 and Corner 3
+      real(REAL64),  allocatable :: msec1P(:,:,:,:)  ! Phase     Mean Square Error between Corner 1 and Corner 3
+      real(REAL64),  allocatable :: msec2P(:,:,:,:)  ! Phase     Mean Square Error between Corner 2 and Corner 3
 
-      real*8,  allocatable ::  varec1(:,:,:,:)  !  3CH Corner-1 Variance Error    Estimates 
-      real*8,  allocatable ::  varec2(:,:,:,:)  !  3CH Corner-2 Variance Error    Estimates
-      real*8,  allocatable ::  varec3(:,:,:,:)  !  3CH Corner-3 Variance Error    Estimates
+      real(REAL64),  allocatable ::  varec1(:,:,:,:)  !  3CH Corner-1 Variance Error    Estimates 
+      real(REAL64),  allocatable ::  varec2(:,:,:,:)  !  3CH Corner-2 Variance Error    Estimates
+      real(REAL64),  allocatable ::  varec3(:,:,:,:)  !  3CH Corner-3 Variance Error    Estimates
 
-      real*8,  allocatable ::   var(:,:,:,:)   !  Variance  Variables
-      real*8,  allocatable ::     q(:,:,:,:)   !  Time-Mean Variables
+      real(REAL64),  allocatable ::   var(:,:,:,:)   !  Variance  Variables
+      real(REAL64),  allocatable ::     q(:,:,:,:)   !  Time-Mean Variables
       integer, allocatable ::    cc(:,:,:,:)   !  Time-Mean Counters
 
       character*256, allocatable ::  arg(:)
@@ -120,8 +121,6 @@
       character*3   months(12)
       data months /'JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'/
 
-      integer  iargc
-
 ! **********************************************************************
 ! ****                          Interfaces                          ****
 ! **********************************************************************
@@ -140,7 +139,7 @@
 ! ****                           Usage                              ****
 ! **********************************************************************
                                                                                                           
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) call usage()
 
 ! **********************************************************************
@@ -195,7 +194,7 @@
 
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
 
       nexps = 0
@@ -1975,10 +1974,11 @@
 
       subroutine writit ( q,im,jm,lm,lattice )
       use dynamics_lattice_module
+      use iso_fortran_env, only: REAL64
       implicit none
       type ( dynamics_lattice_type ) lattice
       integer  im,jm,lm,L,img,jmg
-      real*8 q(im,jm,lm)
+      real(REAL64) q(im,jm,lm)
       real,   allocatable :: qglo(:,:)
       real,   allocatable :: qloc(:,:)
       img = lattice%imglobal
