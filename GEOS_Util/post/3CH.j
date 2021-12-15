@@ -3,7 +3,7 @@
 unsetenv LD_LIBRARY_PATH
 
 setenv  ARCH `uname`
-setenv  GEOSBIN /discover/nobackup/ltakacs/TAGS/Jason-4_0/GEOSagcm/Linux/bin
+setenv  GEOSBIN @BINARY_INSTALL_DIR@
 source $GEOSBIN/g5_modules
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${BASEDIR}/${ARCH}/lib
 
