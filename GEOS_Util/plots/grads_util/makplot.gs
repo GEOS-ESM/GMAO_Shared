@@ -3,6 +3,8 @@ function makplot (args)
 'numargs  'args
  numargs = result
 
+qname = NULL
+
 * Initialize INPUT Parameters
 * ---------------------------
         num = 0
@@ -11,6 +13,7 @@ while ( num < numargs )
 
 if( subwrd(args,num) = '-MVAR'     ) ; mvar     = subwrd(args,num+1) ; say 'mvar  = 'mvar  ; endif
 if( subwrd(args,num) = '-MNAME'    ) ; mname    = subwrd(args,num+1) ; say 'mname = 'mname ; endif
+if( subwrd(args,num) = '-QNAME'    ) ; qname    = subwrd(args,num+1) ; say 'qname = 'qname ; endif
 if( subwrd(args,num) = '-MFILE'    ) ; mfile    = subwrd(args,num+1) ; say 'mfile = 'mfile ; endif
 if( subwrd(args,num) = '-MDESC'    ) ; mdesc    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-MBEGDATE' ) ; bdate    = subwrd(args,num+1) ; endif
@@ -28,7 +31,7 @@ if( subwrd(args,num) = '-PREFIX'   ) ; prefix   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-SEASON'   ) ; season   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT'   ) ; output   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-CLIMATE'  ) ; climate  = subwrd(args,num+1) ; endif
-if( subwrd(args,num) = '-GC'       ) ; gridcomp = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-GC'       ) ; gridcomp = subwrd(args,num+1) ; say '   gc = 'gridcomp ; endif
 if( subwrd(args,num) = '-MATH'     ) ; math     = subwrd(args,num+1) ; endif
 
 endwhile
@@ -37,6 +40,7 @@ endwhile
 if(     math = NULL ) ;     math = '' ; endif
 if(   season = NULL ) ;   season = '' ; endif
 if( gridcomp = NULL ) ; gridcomp = '' ; endif
+if(    qname = NULL ) ; qname = mname ; endif
 
 'set t 1'
 'run getenv "GEOSUTIL"'
@@ -51,6 +55,7 @@ if( prefix != NULL )
 else
     PFX = ''
 endif
+
 say ''
 
 title = 'NULL'
@@ -148,7 +153,7 @@ if( dpct = 'NULL' ) ; dpct = 0.1 ; endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'mname
+   'getdesc 'qname
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"
@@ -183,7 +188,7 @@ endif
    else
        m = 0
    endif
-   say '    Log Factor: 'm
+   say '    Log Factor for qmod: 'm
    if( m<0 ) ; m = m-2 ; endif
    'getint 'm
             m = result
@@ -194,11 +199,8 @@ endif
            m = m-2
        endif
    endif
-   say 'Field Scaling Factor: 'm
+   say 'Field Scaling Factor for qmod: 'm
    minv = -m
-
-'d log10('factor')'
-        m = subwrd(result,4)
 
 if( ccols = NULL )
    'define qmod = qmod * 1e'minv
@@ -215,8 +217,8 @@ if( ccols = NULL )
 endif
 
 if( math = LOG )
-   'define qmod = log(qmod+0.00001)'
-   'define qobs = log(qobs+0.00001)'
+   'define qmod = log10(qmod)'
+   'define qobs = log10(qobs)'
 endif
 
 'set vpage off'
@@ -337,7 +339,15 @@ else
       dqmax = stddif/3
 
      say '1/3 Diff. Std.Dev.: 'dqmax'  QMax: 'aqmodmax
+     'd 'aqmodmax
+         aqmodmax = subwrd(result,4)
+     say 'aqmodmax = 'aqmodmax
+     if(  aqmodmax = 0 )
+         dqrel = 100 * 100
+     else
      dqrel = dqmax / aqmodmax  * 100 * 100
+     endif
+
     'getint 'dqrel
              dqrel = result/100
 
