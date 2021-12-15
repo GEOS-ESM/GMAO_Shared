@@ -15,6 +15,7 @@ if( numargs = 0 )
     say '                             [-print    ]'
     say '                             [-pause    ]'
     say '                             [-name     ]'
+    say '                             [-loopdim  loopdim]'
     return
 endif
 
@@ -54,16 +55,25 @@ endif
     rotate = false
      print = false
      pause = false
+   loopdim = t
        num = 0
 while( num < numargs )
        num = num + 1
-if( subwrd(args,num)='-tbeg'   ) ; tbeg   = subwrd(args,num+1) ; endif
-if( subwrd(args,num)='-tend'   ) ; tend   = subwrd(args,num+1) ; endif
-if( subwrd(args,num)='-print'  ) ; print  = true               ; endif
-if( subwrd(args,num)='-pause'  ) ; pause  = true               ; endif
-if( subwrd(args,num)='-rotate' ) ; rotate = true               ; endif
-if( subwrd(args,num)='-name'   ) ; name   = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-tbeg'    ) ; tbeg    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-tend'    ) ; tend    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-print'   ) ; print   = true               ; endif
+if( subwrd(args,num)='-pause'   ) ; pause   = true               ; endif
+if( subwrd(args,num)='-rotate'  ) ; rotate  = true               ; endif
+if( subwrd(args,num)='-name'    ) ; name    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-loopdim' ) ; loopdim = subwrd(args,num+1) ; endif
 endwhile
+
+if( loopdim != t )
+    'run getinfo 'loopdim'min'
+         tbeg = result
+    'run getinfo 'loopdim'max'
+         tend = result
+endif
 
 if( tbeg != 0 )
     t     = tbeg
@@ -77,9 +87,11 @@ else
     tmax  = gettmax()
 endif
 
-say 't = 't
-say 'tmax = 'tmax
+
+say 'movie loop begin, 'loopdim' = 'tbeg
+say 'movie loop   end, 'loopdim' = 'tmax
 say 'print = 'print
+
 
 frame = 1000
 
@@ -90,7 +102,7 @@ frame = 1000
 if( print != true ) ; 'set dbuff on' ; endif
 'set csmooth on'
 while (t<tmax+1)
-      'set t 't
+      'set 'loopdim' 't
       frame = frame + 1
       'run 'script' 'opts
 if( print != true )

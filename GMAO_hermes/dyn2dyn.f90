@@ -282,7 +282,7 @@ CONTAINS
       integer, dimension(6), parameter :: IMSN = (/ 192, 376, 512, 768, 1152, 2304 /)
       integer, dimension(6), parameter :: JMSN = (/  96, 192, 258, 386,  578, 1154 /)
 
-      integer, dimension(8), parameter :: KMS  = (/ 18,  32,  55,  64,   72,   91, 132, 137 /)
+      integer, dimension(9), parameter :: KMS  = (/ 18,  32,  55,  64,   72,   91, 132, 137, 181 /)
 
 !     Defaults
 !     --------

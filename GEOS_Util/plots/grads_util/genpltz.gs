@@ -124,6 +124,10 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_CCOLS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DCOLS' ; endif
                                                                   dcols = result
 
+                        'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DPCT' ; endif
+                                                                  dpct = result
+
 if( zlog = 'ON' & ptop < 10 )
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_ZLOG_CLEVS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_Z_CLEVS' ; endif
@@ -142,7 +146,9 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_'LEVTYPE ; end
                         'getresource 'PLOTRC' 'PRFX''EXPORT'_'GC'_DIFFMIN'
                                                                   diffmin = result
 
-if( fact    = 'NULL' ) ; fact    = 1            ; endif
+if( fact    = 'NULL' ) ; fact = 1   ; endif
+if( dpct    = 'NULL' ) ; dpct = 0.5 ; endif
+
 if( title   = 'NULL' )
   'getdesc 'alias
      title  = alias': 'result
@@ -253,6 +259,8 @@ if( qmin > qmax )
     if( qzmin > qzmax ) ; qzmax = qzmin ; endif
 endif
 
+say 'Absolute   QMAX: 'qmax
+say 'Absolute  QZMAX: 'qzmax
 
 * Determin if ZLOG is appropriate
 * -------------------------------
@@ -348,9 +356,11 @@ if( ccols = NULL )
    say 'Scaling Factor: 'qn
      if( qn>0 )
        'shades modz*'fact'/1e'qm' 0'
+       if( clevs != NULL ) ; 'set clevs 'clevs ; endif
        'd      modz*'fact'/1e'qm
      else
        'shades modz*'fact'*1e'qm' 0'
+       if( clevs != NULL ) ; 'set clevs 'clevs ; endif
        'd      modz*'fact'*1e'qm
      endif
 
@@ -412,9 +422,11 @@ say '------------'
 if( ccols = NULL )
     if( qn>0 )
        'shades modz*'fact'/1e'qm' 0'
+        if( clevs != NULL ) ; 'set clevs 'clevs ; endif
        'd      obsz*'fact'/1e'qm
     else
        'shades modz*'fact'*1e'qm' 0'
+        if( clevs != NULL ) ; 'set clevs 'clevs ; endif
        'd      obsz*'fact'*1e'qm
     endif
 else
@@ -491,12 +503,32 @@ if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
    'd abs('dqmax')'
            dqmax = subwrd(result,4)
    if( dqmin > dqmax ) ; dqmax = dqmin ; endif
+
+     say 'Absolute DQMAX: 'dqmax'  qmax: 'qmax
+     dqrel = dqmax / qmax  * 100 * 100
+    'getint 'dqrel
+             dqrel = result/100
+             dqact = result/100
+         'd 'dpct
+             dpct = subwrd(result,4)
+
+     say 'QMAX: 'qmax'  DQMAX: 'dqmax
+     say 'Relative PCT Difference: 'dqrel' (100*DQMAX/QMAX)'
+     say ' Minimum PCT for  Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         dqmax = dqrel * qmax / 100
+         say 'Setting CINT using DQREL: 'dqrel'%, DQMAX: 'dqmax
+
    if( dqmax > 0 )
       'd log10('dqmax')'
        dn = subwrd(result,4)
    else
        dn = 0
    endif
+
    say '    Log Factor: 'dn
    if( dn<0 ) ; dn = dn-2 ; endif
    'getint 'dn
@@ -566,9 +598,6 @@ endif
 
 'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
 
-if( numlevs > 1 )
-'draw ylab Pressure (mb)'
-endif
 'set gxout contour'
 'set ccolor 1'
 if( dcols = NULL | CINTDIFF != NULL | USE_PLOTRC = TRUE )
@@ -586,8 +615,19 @@ endif
 ************************************************************
 ************************************************************
 
+if( numlevs>1 & CINTDIFF = 'NULL' )
+   'draw ylab Pressure (mb)'
+endif
+
 'set vpage off'
-'set string 1 l 4'
+
+if( numlevs>1 & CINTDIFF != 'NULL' )
+   'set string 1 l 6 90'
+   'set strsiz .17'
+   'draw string 0.75 1.8 Pressure (mb)'
+endif
+
+'set string 1 l 4 0'
 'set strsiz 0.065'
 'draw string 0.05 0.08 ( EXPID:  'expid' )'
 
@@ -617,10 +657,11 @@ endif
 'draw string 4.25 7.24 'odesc' 'season' ('nobs') ('climate')'
 endif
 
+
 if( dn != 0 )
-'draw string 4.25  3.80 Difference (Top-Middle) (x 10**'dn')'
+   'draw string 4.25  3.80 Difference (Top-Middle) (x 10**'dn')'
 else
-'draw string 4.25  3.80 Difference (Top-Middle)'
+   'draw string 4.25  3.80 Difference (Top-Middle)'
 endif
 
                 date = getdate (begdate)
@@ -643,6 +684,15 @@ if( numlevs > 1 )
 'draw string 0.10 10.24 End: 'emnthm' 'eyearm
 'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
 'draw string 0.10  6.84 End: 'emntho' 'eyearo
+
+if( CINTDIFF != 'NULL' )
+   'set strsiz .07'
+   'draw string 0.050 1.77 Plot represents'
+   'draw string 0.050 1.62 values > 'dqrel' %'
+   'draw string 0.050 1.47 Relative Difference'
+   'draw string 0.050 1.32 ( DQ/QMax )'
+endif
+
 else
 'set string 4 l 4'
 'set strsiz .08'

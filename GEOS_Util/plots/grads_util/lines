@@ -164,7 +164,8 @@ endif
 'set line 1'
  
 x1spot = xlow   + (xhigh-xlow)/10
-x2spot = x1spot + (xhigh-xlow)/4
+ x2spot = x1spot + (xhigh-xlow)/4
+*x2spot = x1spot + (xhigh-xlow)/2
 xtspot = x2spot + (xhigh-xlow)/10
  
 'set line 1 1 1'

@@ -41,6 +41,7 @@
 #  02Apr2014  Todling  Add -psigo as opt to allow writing out ods files w/ prescribed sigo
 #  04Nov2015  Todling  Correct handling of omf files
 #  18Dec2016  Todling  Add handle for reduced-diag files from GSI (ensemble observers)
+#  28Aug2019  Sienkiewicz add -nc4 switch to process 'nc4' files instead of 'bin'
 #-----------------------------------------------------------------------------
 
 use Env;                 # make env vars readily available
@@ -48,7 +49,6 @@ use FindBin;             # so we can find where this script resides
 use File::Basename;      # for basename(), dirname()
 use File::Copy "cp";     # for cp()
 use Getopt::Long;        # command line options
-use Shell qw(cat rm);    # cat command
 use Time::Local;         # time functions
 
 # look for perl packages in the following locations
@@ -57,7 +57,7 @@ use lib ( "$FindBin::Bin", "$FVROOT/bin", "$ESMADIR/$ARCH/bin" );
  
 # Command line options
 # --------------------
-  GetOptions( "h", "i=s", "o=s", "m=s", "omf", "sens", "reduce_diag", "psigo", "type=s", "log=s", "res=s", "dir=s", "single", "ncpus=i", "rc=s" );
+  GetOptions( "h", "i=s", "o=s", "m=s", "omf", "sens", "reduce_diag", "psigo", "type=s", "log=s", "res=s", "dir=s", "single", "ncpus=i", "rc=s", "nc4" );
 
   usage() if $opt_h;
 
@@ -114,12 +114,12 @@ sub d2o_all {
             #---------------#
             # child process #
             #---------------#
-            @files =  glob("$filepath/*diag_${grp}*${res0}*${nymdhh}.bin")
+            @files =  glob("$filepath/*diag_${grp}*${res0}*${nymdhh}.$suffix")
                 or print "($myname):No match\n";
             foreach $file (@files) { d2o($file,$xcmd[0],$res0) };
 
             if ( $dooma || $miter > 1 ) {
-                @files =  glob("$filepath/*diag_${grp}*${res1}*${nymdhh}.bin")
+                @files =  glob("$filepath/*diag_${grp}*${res1}*${nymdhh}.$suffix")
                     or print "($myname):No match\n";
                 foreach $file (@files) { d2o($file,$xcmd[1],$res1) };
             }
@@ -196,9 +196,9 @@ sub matchOMA {
                 die ">>>> ERROR <<< running odsmatch" if ( $rc );
                 print " $0: odsmatch \$rc =  $rc\n";
                 print "rm  $expid.${grp}_${res0}.${nymdhh}.ods \n";
-                       rm("$expid.${grp}_${res0}.${nymdhh}.ods");
+                       unlink("$expid.${grp}_${res0}.${nymdhh}.ods");
                 print "rm  $expid.${grp}_${res1}.${nymdhh}.ods \n";
-                       rm("$expid.${grp}_${res1}.${nymdhh}.ods");
+                       unlink("$expid.${grp}_${res1}.${nymdhh}.ods");
             }
             exit;
         }
@@ -227,7 +227,7 @@ sub matchOMA {
             die ">>>> ERROR <<< creating single ods file" if ( $rc );
             print " $0: odsselect \$rc =  $rc\n";
             print "rm  ${odsfnbase}_${grp}.${nymdhh}.ods \n";
-                   rm("${odsfnbase}_${grp}.${nymdhh}.ods");
+                   unlink("${odsfnbase}_${grp}.${nymdhh}.ods");
         }
     }
 
@@ -301,7 +301,7 @@ sub imp0hr {
                 die ">>>> ERROR <<< running odsmatch during imp0hr" if ( $rc );
                 print " $0: odsmatch \$rc =  $rc\n";
                 print "rm  $expid.selgood_${grp}.${nymdhh}.ods \n";
-                       rm("$expid.selgood_${grp}.${nymdhh}.ods");
+                       unlink("$expid.selgood_${grp}.${nymdhh}.ods");
             }
             exit;
         }
@@ -534,7 +534,13 @@ sub init {
       @xcmd = ( ""   , ""    );
   }
   $res0 = $resd[0]; 
-  $res1 = $resd[1]; 
+  $res1 = $resd[1];
+  
+  if ( $opt_nc4 ) {
+      $suffix = "nc4";
+  } else {
+      $suffix = "bin";
+  }
 
   if ( $opt_type ) {
       @dgrps = ( $opt_type );
@@ -553,8 +559,8 @@ sub init {
 
 # Clean up
 # --------
-        rm("$expid.${res0}_${nymdhh}.ods") if ( -e "$expid.${res0}_${nymdhh}.ods");
-        rm("$expid.${res1}_${nymdhh}.ods") if ( -e "$expid.${res1}_${nymdhh}.ods");
+        unlink("$expid.${res0}_${nymdhh}.ods") if ( -e "$expid.${res0}_${nymdhh}.ods");
+        unlink("$expid.${res1}_${nymdhh}.ods") if ( -e "$expid.${res1}_${nymdhh}.ods");
 
 return 0;
 }
@@ -566,12 +572,12 @@ sub unique_instruments {
     my (@names, $type, @list);
 
     if ( $opt_m ) {
-       @names = (<$filepath/*diag_*_ans_*.*bin>);
+       @names = (<$filepath/*diag_*_ans_*.*$suffix>);
     } else {
        if ( $opt_omf ) {
-          @names = (<$filepath/*diag_*ges.*bin>);
+          @names = (<$filepath/*diag_*ges.*$suffix>);
        } else {
-          @names = (<$filepath/*diag_*anl.*bin>);
+          @names = (<$filepath/*diag_*anl.*$suffix>);
        }
     }
     foreach (@names) {
@@ -742,6 +748,8 @@ OPTIONS
 
  -m            total number of analysis iterations (miter from gsi.rc)
                  (default: ignore)
+
+ -nc4          look for netcdf4 files instead of .bin files
 
  -ncpus        number of processes to run in parallel
                  (default: 1 - serial run)

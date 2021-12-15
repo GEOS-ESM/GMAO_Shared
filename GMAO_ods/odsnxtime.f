@@ -1,16 +1,16 @@
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!       NASA/GSFC, Data Assimilation Office, Code 610.1, GEOS/DAS      !
 !-----------------------------------------------------------------------
 !BOP
 !
-! !ROUTINE: ods_dcget:  get data from diag_conv and places in ODS
+! !ROUTINE: odsnxtime:  read next date/time from ODS (or other diag) file
 !
 ! !INTERFACE:
 
       subroutine odsnxtime ( ODSFile, nymd, nhms )
 
 ! !USES:
-
+      use netcdf
       implicit none
 
       include 'ods_stdio.h'
@@ -31,6 +31,7 @@
 !       15Apr2004 - Todling  - Added prologue; added support for diag_conv
 !       20Dec2004 - Dee      - Support for diag_sat
 !       03Mar2005 - Dee      - Fixed a bug introduced with 20Dec2004 revision
+!       15Apr2019 - Sienkiewicz  - modify check for binary diag, add netcdf4 diag 
 !
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,6 +48,7 @@
       integer     latest_jday, latest_hour, latest_jhour
       integer     latest_nymd, latest_nhms
       integer     jday, jhour, jhour2
+      integer     status, ncid, nymdhh
       save        jhour
       data        jhour / -1 /
       logical     diff_file
@@ -64,6 +66,39 @@
 !     Nothing to do, return
 !     ---------------------
       if ( nymd .ne. -1 ) return
+
+!     try opening as NetCDF (for nc4-diag or ODS)
+!     -------------------------------------------
+      status =  nf90_open(path=trim(ODSFile), mode = nf90_nowrite, ncid = ncid )
+      
+      if (status /= nf90_noerr) then ! not a netCDF file - treat as diag_bin
+         call ods_dcscan ( .true., ODSFile, idate, mobs, conv, satype, ierr )
+         if(ierr==0)then
+            nymd = idate / 100
+            nhms = 10000 * (idate - 100 * nymd)
+            return
+         else
+            write(stderr,'(4a,i5)') myname_, 
+     .                             ': Cannot open file ', trim(ODSFile), 
+     .                             ' error code: ',ierr
+            return
+         end if
+      else
+!
+!     determine if nc4/hdf file is nc4-diag by checking for date_time metadata
+!     ------------------------------------------------------------------------
+         status = nf90_inquire_attribute(ncid,NF90_GLOBAL,'date_time')
+         if ( status == nf90_noerr ) then
+!     
+!     treat as nc4-diag file, otherwise continue to ODS processing
+            status = nf90_get_att(ncid,NF90_GLOBAL,'date_time',nymdhh)
+            nhms = mod(nymdhh,100)*10000
+            nymd = int(nymdhh/100)
+            status =  nf90_close(ncid)
+            return
+         end if
+         status =  nf90_close(ncid)      !  ODS file, continue processing
+      end if
 
 !     open the ODS file:
 !     -----------------

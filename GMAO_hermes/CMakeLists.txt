@@ -72,8 +72,10 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn_efsens.x     SOURCES dyn_efsens.f90     LIBS ${this})
    ecbuild_add_executable (TARGET eta_echo.x       SOURCES eta_echo.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
+   ecbuild_add_executable (TARGET dyn_blob.x       SOURCES dyn_blob.f90       LIBS ${this})
+   ecbuild_add_executable (TARGET dyn_fsens_conv.x SOURCES dyn_fsens_conv.f90 LIBS ${this})
    
-   install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
+   install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
 
 else ()
 

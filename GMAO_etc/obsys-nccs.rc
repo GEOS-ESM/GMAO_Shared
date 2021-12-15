@@ -81,6 +81,10 @@
 # 2020.06.09 Todling         Set final dates for GOESFV and CrIS as in FP
 # 2020.09.30 Mohar           Historical AVHRR (N15,16,17)
 # 2020.10.14 McCarty         COSMIC-2 single file for period before early Mar 2020
+# 2021.05.25 Wargan          Add npp_ompsnmeff_nc, npp_ompsnp_nc, aura_omieff_nc
+# 2021.06.03 RT/McCarty/RL   RO class including commencial data; max used of IASI MetopC
+# 2021.07.31 Todling         Add MLS-T for verification
+# 2021.08.18 Todling         Blacked out a few days of AIRS due to data corruption
 #
 #+BEGIN obclass data set description
 #+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
@@ -99,6 +103,7 @@
 #+  ncep_mhs_bufr:    NCEP MHS bufr format
 #+  ncep_goesfv_bufr:  NCEP GEOS FV bufr format
 #+  ncep_gpsro_bufr:  NCEP GPSRO bufr format
+#+  ncep_gpsro_com_bufr:  NCEP GPSRO bufr format including period w/ commercial data
 #+  ncep_mls_bufr:    NCEP MLS bufr format
 #+  ncep_1bhrs4_bufr:  NCEP Satellite HIRS4 Data (bufr)
 #+  ncep_mtiasi_bufr:  NCEP IASI bufr format
@@ -117,6 +122,10 @@
 #+  mls_nrt_nc:        GMAO MLS near-real-time (nc4 format)
 #+  npp_ompsnm_bufr:   OMPS AM bufr format
 #+  npp_ompsnp_bufr:   OMPS PM bufr format
+#+  npp_ompsnmeff_nc:  OMPS AM netcdf format
+#+  npp_ompsnp_nc:     OMPS PM netcdf format
+#+  aura_omieff_nc:    AURA OMI netcdf format
+#+  gmao_mlst_bufr:    MLS Retrieved Temperature (for verification in x-exp and FP)
 #+END
 #
 
@@ -223,6 +232,15 @@ BEGIN ncep_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20200316_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
+BEGIN ncep_gpsro_com_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
+# 20080811_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20010519_00z-20190930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20191001_00z-20200316_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1_w_C2.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20200316_18z-20201217_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20201218_00z-20210114_18z 060000 /discover/nobackup/projects/gmao/obsdev/wrmccart/RO_BUFR/x0045_merge/gdas1_com.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20210115_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+END
+
 BEGIN ncep_mtiasi_bufr => gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d.ublk
 # 20090129_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
   20080916_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
@@ -299,7 +317,10 @@ BEGIN disc_airs_bufr => airs.%y4%m2%d2.t%h2z.bufr
   20100819_00z-20130405_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
   20130406_18z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
   20131012_00z-20170306_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
-  20170307_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20170307_00z-20201112_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201114_00z-20201123_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201125_00z-20201130_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201202_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
 # 20131001_00z-20131031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
 END
 BEGIN disc_amsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
@@ -365,7 +386,8 @@ END
 # --------
 BEGIN npp_ompsnm_bufr => OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
 # 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
-  20180227_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20180227_00z-20200115_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20200118_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
 END
 BEGIN npp_ompsnp_bufr => OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
 # 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.bufr
@@ -376,4 +398,22 @@ END
 BEGIN ncep_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
 # 20160511_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
   20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+END
+
+BEGIN npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
+ 20120201_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+END
+
+BEGIN npp_ompsnp_nc => ompsnpnc.%y4%m2%d2.t%h2z.nc
+ 20120201_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnp/Y%y4/M%m2/OMPSNP.%y4%m2%d2_%h2z.nc
+END
+
+BEGIN aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
+ 20041001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+END
+
+# MLS retrieved temperature
+BEGIN gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
+ 20040813_00z-20150531_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v3/bufr/Y%y4/M%m2/MLSt.%y4%m2%d2.t%h2z.bufr
+ 20150601_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v4/bufr/Y%y4/M%m2/MLSt_v4.%y4%m2%d2.t%h2z.bufr
 END
