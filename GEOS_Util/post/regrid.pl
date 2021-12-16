@@ -35,6 +35,7 @@ my ($rstIN_template, $rstIN_templateB, $rst_tarfile, $rst_template);
 my ($rst_templateB, $scale_catchX, $scale_catchcnX, $slurmjob);
 my ($surfFLG, $surflay, $surflayIN, $tagIN, $tagOUT, $tarFLG);
 my ($upairFLG, $verbose, $wemIN, $wemOUT, $workdir);
+my ($binRST);
 my ($year, $ymd, $zoom, $zoom_);
 my ($qcmd, $qwaitFLG);
 my (%CS, %CSo, %IN, %OUT, %SURFACE, %UPPERAIR_OPT, %UPPERAIR_REQ);
@@ -153,10 +154,18 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
                  "geoschemchem_internal_rst" => 1,
                  "gmichem_internal_rst"      => 1,
                  "gocart_internal_rst"       => 1,
+                 "hemco_internal_rst"        => 1,
                  "mam_internal_rst"          => 1,
                  "matrix_internal_rst"       => 1,
                  "pchem_internal_rst"        => 1,
                  "stratchem_internal_rst"    => 1,
+                 "ss_internal_rst"           => 1,
+                 "du_internal_rst"           => 1,
+                 "cabr_internal_rst"         => 1,
+                 "cabc_internal_rst"         => 1,
+                 "caoc_internal_rst"         => 1,
+                 "ni_internal_rst"           => 1,
+                 "su_internal_rst"           => 1,
                  "tr_internal_rst"           => 1);
 
 %SURFACE      = ("catch_internal_rst"        => 1,
@@ -1343,6 +1352,11 @@ sub get_fvrst {
     #-----------------------------
     $ext = ftype($fvrst);
     die "Error. $fvrst not 'bin' or 'nc4';" if $ext ne "bin" and $ext ne "nc4";
+    if ($ext eq 'bin') {
+       $binRST = 1;
+    } else {
+       $binRST = 0;
+    }
 
     $rst_template = "%s.%s.${ymd}_${hr}z.$ext";
     $rst_templateB = "%s.%s.${ymd}_${hr}z.bin";
@@ -1541,12 +1555,13 @@ sub check_programs {
         die "Error. Program not found: $rs_scaleX;" unless -x $rs_scaleX;
     }
     if ($CS{$grOUT}) {
-        $interp_restartsX = "$ESMABIN/interp_restarts.x";
+       
+        if ($binRST) {
+            $interp_restartsX = "$ESMABIN/interp_restarts_bin.x";
+        } else {
+            $interp_restartsX = "$ESMABIN/interp_restarts.x";
+        }
         $g5modules = "$ESMABIN/g5_modules";
-        $c2cX = "$ESMABIN/c2c.x";
-        die "Error. $interp_restartsX not found;" unless -e $interp_restartsX;
-        die "Error. $g5modules not found;" unless -e $g5modules;
-        die "Error. $c2cX not found;" unless -x $c2cX;
     }
 }
 
@@ -2381,6 +2396,7 @@ sub regrid_upperair_rsts_CS {
     my ($type, $src, $dest, $input_nml, $FH);
     my ($DYN, $MOIST, $ACHEM, $CCHEM, $CARMA, $AGCM, $AGCMout, $GMICHEM, $GOCART);
     my ($MAM, $MATRIX, $PCHEM, $STRATCHEM, $TR);
+    my ($HEMCO, $SSCHEM, $DUCHEM, $NICHEM, $SUCHEM, $CABRCHEM, $CABCCHEM, $CAOCCHEM);
     my ($moist, $newrst, $rst, $status);
     my (%allowedConstraint);
 
@@ -2462,6 +2478,14 @@ sub regrid_upperair_rsts_CS {
     $PCHEM     = rstname($expid, "pchem_internal_rst",        $rstIN_template);
     $STRATCHEM = rstname($expid, "stratchem_internal_rst",    $rstIN_template);
     $TR        = rstname($expid, "tr_internal_rst",           $rstIN_template);
+    $HEMCO     = rstname($expid, "hemco_internal_rst",        $rstIN_template);
+    $SSCHEM    = rstname($expid, "ss_internal_rst",           $rstIN_template);
+    $DUCHEM    = rstname($expid, "du_internal_rst",           $rstIN_template);
+    $NICHEM    = rstname($expid, "ni_internal_rst",           $rstIN_template);
+    $SUCHEM    = rstname($expid, "su_internal_rst",           $rstIN_template);
+    $CABRCHEM  = rstname($expid, "cabr_internal_rst",         $rstIN_template);
+    $CABCCHEM  = rstname($expid, "cabc_internal_rst",         $rstIN_template);
+    $CAOCCHEM  = rstname($expid, "caoc_internal_rst",         $rstIN_template);
 
     chdir_($workdir, $verbose);
     $ACHEM     = "" unless -e $ACHEM;
@@ -2475,6 +2499,14 @@ sub regrid_upperair_rsts_CS {
     $PCHEM     = "" unless -e $PCHEM;
     $STRATCHEM = "" unless -e $STRATCHEM;
     $TR        = "" unless -e $TR;
+    $HEMCO     = "" unless -e $HEMCO;
+    $DUCHEM    = "" unless -e $DUCHEM;
+    $SSCHEM    = "" unless -e $SSCHEM;
+    $NICHEM    = "" unless -e $NICHEM;
+    $SUCHEM    = "" unless -e $SUCHEM;
+    $CABRCHEM  = "" unless -e $CABRCHEM;
+    $CABCCHEM  = "" unless -e $CABCCHEM;
+    $CAOCCHEM  = "" unless -e $CAOCCHEM;
 
     $AGCMout   = rstnameI(".", "agcm_import_rst");
 
@@ -2533,6 +2565,14 @@ if( ".$MATRIX"    != . ) /bin/ln -s $MATRIX matrix_internal_restart_in
 if( ".$PCHEM"     != . ) /bin/ln -s $PCHEM  pchem_internal_restart_in
 if( ".$STRATCHEM" != . ) /bin/ln -s $STRATCHEM stratchem_internal_restart_in
 if( ".$TR"        != . ) /bin/ln -s $TR tr_internal_restart_in
+if( ".$HEMCO"     != . ) /bin/ln -s $HEMCO hemco_internal_restart_in
+if( ".$DUCHEM"    != . ) /bin/ln -s $DUCHEM du_internal_restart_in
+if( ".$SSCHEM"    != . ) /bin/ln -s $SSCHEM ss_internal_restart_in
+if( ".$NICHEM"    != . ) /bin/ln -s $NICHEM ni_internal_restart_in
+if( ".$SUCHEM"    != . ) /bin/ln -s $SUCHEM su_internal_restart_in
+if( ".$CABRCHEM"  != . ) /bin/ln -s $CABRCHEM cabr_internal_restart_in
+if( ".$CABCCHEM"  != . ) /bin/ln -s $CABCCHEM cabc_internal_restart_in
+if( ".$CAOCCHEM"  != . ) /bin/ln -s $CAOCCHEM caoc_internal_restart_in
 
 # The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting 
 # HYDROSTATIC = 0 which means HYDROSTATIC = FALSE
