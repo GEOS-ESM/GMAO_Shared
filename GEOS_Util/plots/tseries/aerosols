@@ -50,10 +50,10 @@ endwhile
     n = 1
 while( n<=nspecies )
    'set dfile 'qfile.n
-   'setx'
-   'sety'
-   'sett'
+   'set x 1'
+   'set y 1'
    'set z 1'
+   'sett'
    'make_ts -FUNCTION 'qname.n' -NAME VAR'n
    'set x 1'
    'set y 1'
@@ -128,10 +128,10 @@ if( qfile.m != 'NULL' )
     while( n<=nspecies )
            m = n + num * nspecies
        'set dfile 'qfile.m
-       'setx'
-       'sety'
-       'sett'
+       'set x 1'
+       'set y 1'
        'set z 1'
+       'sett'
        'make_ts -FUNCTION 'qname.m' -NAME VAR'm
        'set x 1'
        'set y 1'

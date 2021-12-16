@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.4.13] - 2021-12-15
+
+### Fixed
+- Quickplot and quickstat bugs
+
+### Added
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
 ## [1.4.12] - 2021-12-09
 
 ### Changed

@@ -243,9 +243,9 @@ if( $NCPUS == "NULL"  ) then
    if ($?SLURM_NTASKS) then
       set  NCPUS = $SLURM_NTASKS
    else if ($?PBS_NODEFILE) then
-      set  NCPUS = `cat $PBS_NODEFILE | wc -l`
-   endif
-endif
+        set  NCPUS = `cat $PBS_NODEFILE | wc -l`
+     endif
+  endif
 echo Use: NCPUS = $NCPUS
 
 
@@ -488,17 +488,17 @@ end
           if( $RECDATE != "NULL"  ) then
             if( ${#monthly_attribute} == 0 ) then
                 /bin/rm -f  ${expid}.${collection}.monthly.$RECDATE.*
-                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep $RECDATE`
-            else
+            set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep $RECDATE`
+          else
                 set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal | grep $RECDATE`
             endif
           else
             if( ${#monthly_attribute} == 0 ) then
                 /bin/rm -f  ${expid}.${collection}.monthly.*
-                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+            set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
             else
                 set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal`
-            endif
+          endif
           endif
           echo "Collection: $collection"
           echo "    Locals: $locals"
@@ -584,7 +584,7 @@ foreach collection ( $collections )
             cd $SOURCE/holding/$collection/$date
          
             if( ${#monthly_attribute} == 0 ) then
-                set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+            set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
             else
                 set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
             endif
@@ -646,6 +646,7 @@ foreach collection ( $collections )
                if( ($prvmon != $begmon && $endmon != $nxtmon) | (".$STRICT" != .) ) then
 
                  if( $MOVEFILES == "TRUE" ) then
+
 # Submit Time_Ave Job
 # -------------------
 cd $SOURCE/post
@@ -667,25 +668,25 @@ EOF
 /bin/rm -f                               gcm_post.${collection}.j${date}
 sed -f sedfile $SOURCE/post/gcm_post.j > gcm_post.${collection}.j${date}
 chmod 755                                gcm_post.${collection}.j${date}
-     $batch_cmd                                gcm_post.${collection}.j${date}
+     $batch_cmd                          gcm_post.${collection}.j${date}
 echo " "
 /bin/rm -f sedfile
 /bin/rm -f LOCKFILE
 sleep 5
 # ------------------
-                 else
-                      echo "   Performing time average ..."
-                      if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
 
-                      if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
+                 else
+                   echo "   Performing time average ..."
+                   if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
+                   if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
                               $GEOSUTIL/bin/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
-                                                             -tag $expid.$collection.monthly \
+                                                           -tag $expid.$collection.monthly \
                                                              -d   $expid.$collection.diurnal $STRICT $IGNORE_NAN
-                      else
+                   else
                           $RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave.x -hdf $locals -rc time_ave.rc    \
-                                                             -tag $expid.$collection.monthly \
+                                                            -tag $expid.$collection.monthly \
                                                              -d   $expid.$collection.diurnal $STRICT $IGNORE_NAN
-                      endif
+                   endif
                  endif
 
                else
@@ -742,16 +743,16 @@ foreach collection ( $collections )
 
    if( $streamdates[1] != 0 ) then   
       foreach date ( $streamdates )
-         if( -e           $SOURCE/holding/$collection/$date ) then
+         if( -e            $SOURCE/holding/$collection/$date ) then
             set locdir  = $SOURCE/holding/$collection/$date
             cd $SOURCE/holding/$collection/$date
 
-            set         archfile = $SOURCE/archive/archive_commands.$collection.$date.`date +%Y%m%d_%H%M%S`
+            set        archfile = $SOURCE/archive/archive_commands.$collection.$date.`date +%Y%m%d_%H%M%S`
             /bin/rm -f $archfile
-            touch      $archfile
+            touch     $archfile
 
             if( ${#monthly_attribute} == 0 ) then
-                set num = `/bin/ls -1 $expid.$collection.monthly.* | wc -l`
+            set  num  = `/bin/ls -1 $expid.$collection.monthly.* | wc -l`
             else
                 set num = `/bin/ls -1 $expid.$collection.* | wc -l`
             endif
@@ -766,64 +767,64 @@ foreach collection ( $collections )
                # Tar and Archive Dailies
                # -----------------------
                if( ${#monthly_attribute} == 0 ) then
-                 set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
                  if( $#locals != 0 ) then
                      echo "Archiving Dailies for Collection: $collection for Date: $date"
-                     @ daily_date_node  = $date_node
-                     if( $HIRES == FALSE ) then
-                        $mytar cf $expid.${collection}.daily.$date.$ext.tar $locals
-                        set locals = $expid.${collection}.daily.$date.$ext.tar
-                        @ daily_date_node  = $date_node + 1                 # Since daily is simply appended to collection name
-                     endif
+               @ daily_date_node  = $date_node
+               if( $HIRES == FALSE ) then
+                  $mytar cf $expid.${collection}.daily.$date.$ext.tar $locals
+                  set locals = $expid.${collection}.daily.$date.$ext.tar
+                  @ daily_date_node  = $date_node + 1                 # Since daily is simply appended to collection name
+               endif
 
-                     foreach local ($locals)
+               foreach local ($locals)
 
-                        set fdate = `echo $local | cut -d "." -f${daily_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
-                        set year  = `echo $fdate | cut -c1-4`
-                        set month = `echo $fdate | cut -c5-6`
-                        set day   = `echo $fdate | cut -c7-8`
-                        set hour  = `echo $fdate | cut -c10-11`
+                  set fdate = `echo $local | cut -d "." -f${daily_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
+                  set year  = `echo $fdate | cut -c1-4`
+                  set month = `echo $fdate | cut -c5-6`
+                  set day   = `echo $fdate | cut -c7-8`
+                  set hour  = `echo $fdate | cut -c10-11`
 
-                        set archive = `echo $archives[$m] | sed -e "s/%c/$collection/ g" | \
-                                                            sed -e "s/%y4/$year/      g" | \
-                                                            sed -e "s/%m2/$month/     g" | \
-                                                            sed -e "s/%d2/$day/       g" | \
-                                                            sed -e "s/%h2/$hour/      g"`
+                  set archive = `echo $archives[$m] | sed -e "s/%c/$collection/ g" | \
+                                                      sed -e "s/%y4/$year/      g" | \
+                                                      sed -e "s/%m2/$month/     g" | \
+                                                      sed -e "s/%d2/$day/       g" | \
+                                                      sed -e "s/%h2/$hour/      g"`
 
-                        echo "if( -e $local ) then"                                          >> $archfile
-                        echo "ssh ${MASTOR} mkdir -p ${MASDIR}/$archive"                     >> $archfile
-                        echo 'echo " "'                                                      >> $archfile
-                        echo "echo 'Archiving:  '$local"                                     >> $archfile
+                  echo "if( -e $local ) then"                                          >> $archfile
+                  echo "ssh ${MASTOR} mkdir -p ${MASDIR}/$archive"                     >> $archfile
+                  echo 'echo " "'                                                      >> $archfile
+                  echo "echo 'Archiving:  '$local"                                     >> $archfile
 
-                        if( $HOST == 'pleiades' ) then
-                           echo "ssh ${MASTOR} $scpvar $locdir/$local ${MASDIR}/$archive"    >> $archfile
+                  if( $HOST == 'pleiades' ) then
+                     echo "ssh ${MASTOR} $scpvar $locdir/$local ${MASDIR}/$archive"    >> $archfile
 
-                           echo 'if ($status == 0) then '                                    >> $archfile
-                           echo 'echo "   Archive ... PASS "'                                >> $archfile
-                           if( $FSEGMENT == 00000000 ) echo "/bin/rm -f $local"              >> $archfile
-                           echo 'else'                                                       >> $archfile
-                           echo 'echo "   Archive ... FAIL!"'                                >> $archfile
-                           echo 'set success = FALSE'                                        >> $archfile
-                           echo 'endif'                                                      >> $archfile
+                     echo 'if ($status == 0) then '                                    >> $archfile
+                     echo 'echo "   Archive ... PASS "'                                >> $archfile
+                     if( $FSEGMENT == 00000000 ) echo "/bin/rm -f $local"              >> $archfile
+                     echo 'else'                                                       >> $archfile
+                     echo 'echo "   Archive ... FAIL!"'                                >> $archfile
+                     echo 'set success = FALSE'                                        >> $archfile
+                     echo 'endif'                                                      >> $archfile
 
-                        else if( $HOST == 'discover' ) then
-                           echo "$scpvar $local ${MASTOR}:${MASDIR}/$archive | set archive_status = "'`sed -e "s/ / /g"`' >> $archfile
+                  else if( $HOST == 'discover' ) then
+                     echo "$scpvar $local ${MASTOR}:${MASDIR}/$archive | set archive_status = "'`sed -e "s/ / /g"`' >> $archfile
 
-                           echo 'if ( .$archive_status[4] == .OK ) then'                                                  >> $archfile
-                           echo 'echo "   Archive ... PASS "'                                >> $archfile
-                           if( $FSEGMENT == 00000000 ) echo "/bin/rm -f $local"              >> $archfile
-                           echo 'else'                                                       >> $archfile
-                           echo 'echo "   Archive ... FAIL!"'                                >> $archfile
-                           echo 'set success = FALSE'                                        >> $archfile
-                           echo 'endif'                                                      >> $archfile
+                     echo 'if ( .$archive_status[4] == .OK ) then'                                                  >> $archfile
+                     echo 'echo "   Archive ... PASS "'                                >> $archfile
+                     if( $FSEGMENT == 00000000 ) echo "/bin/rm -f $local"              >> $archfile
+                     echo 'else'                                                       >> $archfile
+                     echo 'echo "   Archive ... FAIL!"'                                >> $archfile
+                     echo 'set success = FALSE'                                        >> $archfile
+                     echo 'endif'                                                      >> $archfile
 
-                           echo 'unset  archive_status'                                      >> $archfile
-                        endif
+                     echo 'unset  archive_status'                                      >> $archfile
+                  endif
 
-                        echo 'endif'                                                         >> $archfile
+                  echo 'endif'                                                         >> $archfile
 
-                     end
-                     echo "wait" >> $archfile
+               end
+               echo "wait" >> $archfile
                  endif
                endif  # EndTest for monthly_attribute
 
@@ -833,7 +834,7 @@ foreach collection ( $collections )
                if( ${#monthly_attribute} != 0 ) @ monthly_date_node  = $date_node
 
                if( ${#monthly_attribute} == 0 ) then
-                   set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  monthly | grep -v diurnal`
+               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  monthly | grep -v diurnal`
                else
                    set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
                endif
@@ -907,7 +908,7 @@ foreach collection ( $collections )
                                                       sed -e "s/%d2/$day/       g" | \
                                                       sed -e "s/%h2/$hour/      g"`
 
-                  mkdir -p      $SOURCE/$collection/diurnal
+                  mkdir -p     $SOURCE/$collection/diurnal
                   $cpvar $local $SOURCE/$collection/diurnal
 
                   echo "if( -e $local ) then"                                          >> $archfile
@@ -1034,7 +1035,7 @@ wait
 @ nstream = 0
 foreach collection ( $collections )
      set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
-     @ nstream = $nstream  + 1
+    @ nstream   =                   $nstream  + 1
 
      if( ( ($MOVEFILES != "TRUE") & ${#monthly_attribute} == 0 ) | \
          ( ($MOVEFILES == "TRUE") & ${#monthly_attribute} != 0 ) | \
@@ -1051,7 +1052,7 @@ foreach collection ( $collections )
         set monthlies = `/bin/ls -1 $expid.${collection}.*        | grep -v clim`
     endif
 
-    set num = `/bin/ls -1 $monthlies | wc -l`
+    set       num = `/bin/ls -1 $monthlies | wc -l`
 
 if( $num != 0 ) then
 
@@ -1111,14 +1112,14 @@ end
 
 
     if( ${#monthly_attribute} == 0 ) then
-        echo DSET $SOURCE/${collection}/$expid.${collection}.monthly.%y4%m2.$ext > xdf.tabl
+    echo DSET $SOURCE/${collection}/$expid.${collection}.monthly.%y4%m2.$ext >  xdf.tabl
     else
         set  template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2 | cut -d"'" -f2`
         echo DSET $SOURCE/${collection}/$expid.${collection}.$template           > xdf.tabl
     endif
-    echo TITLE $expdsc                                                          >> xdf.tabl
-    echo OPTIONS template                                                       >> xdf.tabl
-    echo TDEF time $nmonths  LINEAR  00:00Z01$MON$year 1$timinc                 >> xdf.tabl
+    echo TITLE $expdsc                                                       >> xdf.tabl
+    echo OPTIONS template                                                    >> xdf.tabl
+    echo TDEF time $nmonths  LINEAR  00:00Z01$MON$year 1$timinc              >> xdf.tabl
 
 endif  # Endif for monthlies NUM = 0 check
 
@@ -1167,7 +1168,7 @@ cd  $SOURCE/plot
     set STATUS    = `grep    PLOT_STATUS: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
     set SEASONS   = `grep   PLOT_SEASONS: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
     set FREQUENCY = `grep PLOT_FREQUENCY: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
-    set OPTIONS   = `grep   PLOT_OPTIONS: plot.rc | grep -v '#' | cut -d':' -f2 `
+    set OPTIONS   = `grep   PLOT_OPTIONS: plot.rc | grep -v '#' | cut -d':' -f2- `
     set CMPEXP    = `grep    PLOT_CMPEXP: plot.rc | grep -v '#' | cut -d':' -f2- `
     set MISCTMP   = `grep      PLOT_MISC: plot.rc | grep -v '#' | tr "[:lower:]" "[:upper:]"`
     set NJOBS     = `grep      PLOT_JOBS: plot.rc | grep -v '#' | cut -d':' -f2- `

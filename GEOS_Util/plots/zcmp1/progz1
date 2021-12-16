@@ -177,14 +177,25 @@ endif
           else
                    m = m+1
 
+*say 'Processing Season: 'season
+
+*'set dfile 'mfile
+*'count "'season'" 'begdate' 'enddate
+* nmod =  result
+
+*'set dfile 'ofile
+*'count "'season'"'
+* nobs =  result
+
+
 say 'Processing Season: 'season
 
 'set dfile 'mfile
 'count "'season'" 'begdate' 'enddate
  nmod =  result
 
-'set dfile 'ofile
-'count "'season'"'
+'set dfile 'cfile.numexp
+'count "'season'" 'begdateo' 'enddateo
  nobs =  result
 
 
