@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
 
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
+
 ## [1.4.11] - 2021-11-03
 
 ### Changed
