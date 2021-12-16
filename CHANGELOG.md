@@ -9,11 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
 ### Fixed
+
+### Removed
+
+## [1.4.13] - 2021-12-15
+
+### Fixed
+- Quickplot and quickstat bugs
+
+### Added
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
+## [1.4.12] - 2021-12-09
 
 ### Changed
 
-### Removed
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
+
+### Fixed
+
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
 
 - Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
 

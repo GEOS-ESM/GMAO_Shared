@@ -291,6 +291,9 @@ t = t + 1
 endwhile
 'disable fwrite'
 
+say 'Creating 'name'.ctl'
+say 'TDIM: 'tdim
+
 '!remove sedfile'
 '!remove 'name'.ctl'
 '!echo "s@GRADSDATA@"'name'.data@g > sedfile'
@@ -305,13 +308,23 @@ endwhile
 'open 'name'.ctl'
 'getinfo    numfiles'
             newfile = result
+say 'NEWFILE = 'newfile
+
 'set dfile 'newfile
 'setx'
 'sety'
 'setlons'
 'setlats'
 'setz'
-'sett'
+'set t 1 'tdim
+say 'DIMS before: makezf q 'name' z'
+'q dims'
+say result
+say ' '
+say 'CAT 'name'.ctl'
+'!cat 'name'.ctl'
+say ' '
+
 'makezf q 'name' z'
 
 maxval = -1e15
