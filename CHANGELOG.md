@@ -9,13 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support for GOCART2G restarts in regrid.pl
-
 ### Changed
 
 ### Fixed
 
 ### Removed
+
+## [1.5.0] - 2021-12-16
+
+### Added
+
+- Add support for GOCART2G restarts in `regrid.pl`
+
+### Removed
+
+- Moved lightning files to Chem_Shared
 
 ## [1.4.13] - 2021-12-15
 
