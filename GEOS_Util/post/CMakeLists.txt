@@ -37,6 +37,7 @@ set_target_properties (stats.x PROPERTIES COMPILE_FLAGS "${BIG_ENDIAN}")
 set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
+ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
 
 set (perlscripts
   ecmwf2geos.pl
@@ -51,6 +52,7 @@ install(
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE rs_vinterp.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN}")
 set_property(SOURCE rs_vinterp_scm.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN}")
+set_property(SOURCE 3CH.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 
 set_property(SOURCE dynamics_lattice_module.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE mpi_util.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
@@ -89,6 +91,7 @@ target_link_libraries (flat2hdf.x post_nompi GMAO_gfio_r4)
 target_link_libraries (gg2fv.x post)
 target_link_libraries (rs2hdf.x post)
 target_link_libraries (time_ave.x ${this} GMAO_gfio_r4 MAPL )
+target_link_libraries (3CH_mpi.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
 
 target_link_libraries (rsg3_vinterp.x ${this} GMAO_hermes)
 target_link_libraries (rs_vinterp.x ${this} GMAO_hermes)
@@ -141,6 +144,7 @@ set (post_rc
    post.rc
    stats.rc
    time_ave.rc
+   3CH.rc
    )
 
 install (
@@ -152,3 +156,11 @@ install (
    FILES stats.rc time_ave.rc
    DESTINATION etc
    )
+
+# 3CH.j needs to know where we install
+set(BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin")
+configure_file(3CH.j 3CH.j @ONLY)
+install(PROGRAMS
+  ${CMAKE_CURRENT_BINARY_DIR}/3CH.j
+  DESTINATION post
+  )
