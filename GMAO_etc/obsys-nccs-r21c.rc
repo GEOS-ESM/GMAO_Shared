@@ -1,5 +1,10 @@
 #            NCCS Specific Version
 #
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#                   this is file is place-holder 
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#
+#
 # This observation system resource file database will track
 # the whereabout of observation files.
 #   It will be used by scripts require_obsys (hard check the
