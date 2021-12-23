@@ -19,81 +19,107 @@
 
 
 
-# NCEP Pre-bufr conventional data
+# NCEP Prep-bufr conventional data
 # -------------------------------
+# R21C Prep-bufr conventional data:  copied from MERRA2 CDAS prepbufr data
+#                                    removed duplicated and unused data including
+#                                    * satellite winds that have been reprocessed with later versions of data
+#                                    * unused data types 
+#                                    * inadvertent duplicates that were included in the M2 stream (e.g.Quikscat, ERS-2)
+#
+# This data has been separated into two streams: 'RAOB' and 'noRAOB' in anticipation of replacing the raob data with IGRA2 soundings
+#
 
-BEGIN merra2_cdas0_pre-qc_bufr => cdas.%y4%m2%d2.t%h2z.pre-qc.ublk
- 19790101_00z-19841231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/conv/prepbufr/Y%y4/M%m2/ncep2013.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
- 19850101_00z-19970430_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/conv/prepbufr_fixvai/Y%y4/M%m2/ncep2013_fixvai.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
- 19970501_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/conv/prepbufr_fixvai_no_npn/Y%y4/M%m2/ncep2013_fixvai_no_npn.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+BEGIN r21c_cdas_raob_pre-qc_bufr => raobs_NCEP.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19970101_00z-20201231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/prepbufr_work/prepbufr_noRAOB/RAOB/Y%y4/M%m2/raobs_NCEP.%y4%m2%d2.t%h2z.pre-qc.ublk
 END
 
-BEGIN merra2_cdas_pre-qc_bufr => cdas.%y4%m2%d2.t%h2z.pre-qc.ublk
- 20010101_00z-20040915_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20040916_00z-20040916_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20040917_00z-20050624_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20050625_00z-20050625_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20050626_00z-20050714_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20050715_00z-20050721_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20050722_00z-20051231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
- 20060101_00z-20080915_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/conv/prepbufr/runha/Y%y4/M%m2/prepbufr.gdas_red.%y4%m2%d2%h2
- 20080916_00z-20081231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/prepbufr_tamdarKXfix/runha/Y%y4/M%m2/prepbufr.gdas_red.%y4%m2%d2%h2
- 20090101_00z-20111231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/prepbufr_tamdarKXfix/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
- 20120101_00z-20170330_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
- 20170331_00z-20170401_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2_M2
- 20170402_00z-21001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+BEGIN r21c_cdas_conv_pre-qc_bufr => reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19970101_00z-20201231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/prepbufr_work/prepbufr_noRAOB/noRAOB/Y%y4/M%m2/reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
 END
 
-# AVHRR polar AMV data (prepbufr stream)
+# WIND PROFILER DATA
+# data prior to 20080801 primarily from NCAR; from 20080801 using operational NCEP Profiler in main cdas prepbufr file
+# data from 2001 onward written using the 'runh' bufr table
+BEGIN r21c_prof_pre-qc_bufr => prof.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19920510_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+ 20010101_00z-20080731_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler_runh/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+END
+
+#  PREPBUFR AMVs:
+#   for R21C the transition date between prepbufr format (including reprocessed AMVs) to operational satwndbufr is 20130101 00z
+#
+# AVHRR polar AMV data (prepbufr stream) [Akira will convert from satwndbufr]
 BEGIN r21c_avhrrwnd_pre-qc_bufr => avhrr.%y4%m2%d2.t%h2z.pre-qc.ublk
  19821001_00z-20100630_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
+ 20100701_00z-20121231_18z 060000 /additional/reprocessed/from/satwnd/to/prepbufr
 END
 
-# AVHRR polar AMV data (satwndbufr stream)
-BEGIN r21c_avhrr_satwnd_bufr => avhrr.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
- 20100701_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+# MODIS data from MERRA2 data archives 
+# data prior to 20041001 from Wisconsin and NESDIS 
+# data switches to NCEP MODIS winds in main cdas prepbufr file (r21c_cdas_conv_pre-qc_bufr) after 20041001 
+BEGIN r21c_nmodis_pre-qc_bufr => modis.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 20020701_00z-20040708_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_combined_runh/prepbufr/Y%y4/M%m2/modisw_c.%y4%m2%d2.t%h2z.bfr
+ 20040709_00z-20040930_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_runh/prepbufr/Y%y4/M%m2/modisw.%y4%m2%d2.t%h2z.bfr
 END
 
-BEGIN r21c_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
-  20100701_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+# REPROCESSED GEOSTATIONARY SATELLITE AMVs  (prepbufr)
+#------------------------------------------
+# GOES
+BEGIN r21c_goes_pre-qc_prep_bufr => gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
+ 19950101_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/GOES/bufr/WISCNAMV/Y%y4/M%m2/gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
+END
+# METEOSAT - retain MERRA2 winds from cdas prepbufr prior to 2004
+BEGIN r21c_metsat_pre-qc_prep_bufr => gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
+ 20040301_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/EUMETSAT/bufr/METSATBR/Y%y4/M%m2/gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
+END
+# JMA
+BEGIN r21c_jma_pre-qc_prep_bufr => gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
+ 19950621_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/JMA/bufr/JMAAMV/Y%y4/M%m2/gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
 END
 
-
+#
+# Ocean surface winds
+#
 # ASCAT Scatterometer (prepbufr)
 # -------------------
-BEGIN merra2_ascat_pre-qc_bufr => obsys.ascat.pre-qc.%y4%m2%d2_%h2z.bufr.ublk
+BEGIN r21c_ascat_pre-qc_bufr => obsys.ascat.pre-qc.%y4%m2%d2_%h2z.bufr.ublk
  20080916_00z-21001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/ascat/prepbufr/Y%y4/M%m2/ascat.%y4%m2%d2.t%h2z.prepbufr
 END
 
 # ERS-2 data. (Original processing through 19970519.  Reprocessing after 19970519.)
-BEGIN merra2_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
+# -----------
+BEGIN r21c_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
  19960319_00z-19970519_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2/prepbufr/Y%y4/M%m2/ers2.%y4%m2%d2.t%h2z.bufr
  19970520_00z-20030217_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_asps20n/bufr/Y%y4/M%m2/ers2_asps20n.%y4%m2%d2.t%h2z.bufr
  20030813_00z-20110329_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
 END
 
-# MERRA Quick SCAT Data   (ms - added 2003,2004)
+# MERRA Quick SCAT Data   (ms - added 2003,2004)  (jplqscat_elv10 fixed error with sfc elevation)
 # ---------------
-BEGIN merra2_qscat_jpl_pre-qc_bufr => obsys.qscat.pre-qc.%y4%m2%d2.t%h2z.ublk
+BEGIN r21c_qscat_jpl_pre-qc_bufr => obsys.qscat.pre-qc.%y4%m2%d2.t%h2z.ublk
  19990719_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/qscat/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
- 20010101_00z-20081029_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/qscat_runh/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
- 20081030_00z-20091122_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/jplqscat/bfr/jplqscat/Y%y4/M%m2/jplqscat.%y4%m2%d2%h2.bfr
+ 20010101_00z-20080908_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/qscat_runh/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+ 20080909_00z-20091122_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/qscat/jplqscat/Y%y4/M%m2/jplqscat_elv10.%y4%m2%d2%h2.bfr
 END
+
 # MERRA SSMI Wentz Speed
 BEGIN merra2_wspd_pre-qc_bufr => wentzspd.%y4%m2%d2.t%h2z.pre-qc.bufr.ublk
  19870709_00z-20131029_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIwind_wentz/v7/prepbufr/Y%y4/M%m2/ssmiwnd.%y4%m2%d2.%h2z.bufr
 END
 
-BEGIN merra2_nmodis_pre-qc_bufr => modis.%y4%m2%d2.t%h2z.pre-qc.ublk
- 20020701_00z-20040708_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_combined_runh/prepbufr/Y%y4/M%m2/modisw_c.%y4%m2%d2.t%h2z.bfr
- 20040709_00z-20040930_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_runh/prepbufr/Y%y4/M%m2/modisw.%y4%m2%d2.t%h2z.bfr
-END
-BEGIN merra2_prof_pre-qc_bufr => prof.%y4%m2%d2.t%h2z.pre-qc.ublk
- 19920510_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
- 20010101_00z-20080731_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler_runh/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
-END
+#--------------------------------- BELOW THIS POINT: NO PREP-QC OBSERVATIONS -----------------------------
 
-#--------------------------------- BELOW THIS POINT: NO PRE-QC OBSERVATIONS -----------------------------
+# SATELLITE WINDS IN SATWND BUFR FORMAT
+# -------------------------------------
+# M2/OPS satwnd bufr, start date revised for new transtion date between satwnd bufr and prepbufr
+BEGIN r21c_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
+  20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+END
+# MERRA2 AVHRR polar AMV data (satwndbufr stream)
+BEGIN r21c_avhrr_satwnd_bufr => avhrr.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+ 20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+END
 
 BEGIN r21c_ncep_tcvitals => tcvitals.%y4%m2%d2%h2
  19790101_00z-20061231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/tcvitals/text/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.syndata.tcvitals
@@ -129,11 +155,11 @@ END
 # 1x1 single FOVs in "goesfv" files
 # Control of usage set in satinfo_db
 # ----------------------------------
-BEGIN r21c_goesnd_prep_bufr => goesnd.%y4%m2%d2.t%h2z.ublk
- 20010424_00z-20071204_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/GOES_sounder/prepbufr/Y%y4/M%m2/goesnd.%y4%m2%d2.t%h2z.bufr
-END
+#BEGIN r21c_goesnd_prep_bufr => goesnd.%y4%m2%d2.t%h2z.ublk
+# 20010424_00z-20071204_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/GOES_sounder/prepbufr/Y%y4/M%m2/goesnd.%y4%m2%d2.t%h2z.bufr
+#END
 BEGIN r21c_goesfv_bufr => gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d.ublk
-  20070222_00z-20200303_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
+  20070222_00z-20200302_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
 END
 
 # SEVIRI radiances
@@ -169,7 +195,10 @@ BEGIN r21c_1bhrs3_bufr => gmao.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr.ublk
  19980721_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/tovs_best/HIRS3/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs3.tm00.bufr
  20130801_00z-20140606_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/tovs/bufr/HIRS3/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs3.tm00.bufr
 END
+# (appears to be data from 2007-early2009 not used in M2)
 BEGIN r21c_1bhrs4_bufr => gmao.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr.ublk
+ 20070521_00z-20081231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/tovs_best/HIRS4/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs4.tm00.bufr 
+ 20090101_00z-20090331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/tovs_best/HIRS4/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr 
  20090401_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/tovs_best/HIRS4/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs4.tm00.bufr 
  20130801_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/tovs/bufr/HIRS4/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs4.tm00.bufr
 END
@@ -236,7 +265,7 @@ END
 
 # Ozone partial column data 
 #--------------------------
-# SBUV ozone data ( Not preprocessed yet? 24 Aug 2021 )
+# SBUV ozone data ( Not preprocessed yet! 20 Dec 2021 )
 BEGIN r21c_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
  19781031_00z-20040930_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/gmao.sbuv8r7.%y4%m2%d2.t%h2z.bufr
 END
@@ -248,14 +277,14 @@ END
 
 # Ozone profile data 
 #-------------------
-# AURA MLS version 5  (Need to move these data to that location, but I don't seem to have permissions. Will ask Rob)
+# AURA MLS version 5  
 BEGIN r21c_mls_nc => mlsnc.%y4%m2%d2.t%h2z.nc
- 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/MLSv5/O3/Y%y4/M%m2/MLS-v5.0-oz.%y4%m2%d2_%h2z.nc
+ 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/oz_v5/netcdf/Y%y4/M%m2/MLS-v5.0-oz.%y4%m2%d2_%h2z.nc
 END
 
-# OMPS Limb Profiler profiles (These data are not ready.  We are waiting for the latest reprocessed version)
-BEGIN npp_ompslp_nc => ompslpnc.%y4%m2%d2.t%h2z.nc
- 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp/Y%y4/M%m2/OMPS-LPoz.%y4%m2%d2_%h2z.nc
+# OMPS Limb Profiler profiles
+BEGIN r21c_ompslpvis_nc => ompslpvisnc.%y4%m2%d2.t%h2z.nc
+ 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp/Y%y4/M%m2/OMPS-LPoz-Vis.%y4%m2%d2_%h2z.nc
 END
 
 # Total Ozone data
@@ -274,40 +303,26 @@ END
 
 # EOSMLSt 
 BEGIN r21c_gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
- 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/mls/temperature_v5/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
+ 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/mls/temperature_v5/bufr/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
 END 
-
-# REPROCESSED AMVs
-#----------------
-BEGIN r21c_goes_prep_bufr => gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
- 19790101_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/GOES/bufr/WISCNAMV/Y%y4/M%m2/gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
-END
-
-BEGIN r21c_metsat_prep_bufr => gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
- 19790101_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/EUMETSAT/bufr/METSATBR/Y%y4/M%m2/gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
-END
-
-BEGIN r21c_jma_prep_bufr => gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
- 19790101_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/JMA/bufr/JMAAMV/Y%y4/M%m2/gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
-END
 
  
 # REPROCESSED AVHRR
 # -----------------
 BEGIN r21c_avcsam_n15_bufr => gdas1_n15.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
- 20000101_00z-20120123_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n15.bufr_d
+ 19981026_00z-20120123_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n15.bufr_d
 END
 BEGIN r21c_avcspm_n16_bufr => gdas1_n16.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
  20010301_00z-20050430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.n16.bufr_d
 END
 BEGIN r21c_avcsam_n17_bufr => gdas1_n17.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
- 20021001_00z-20100131_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n17.bufr_d
+ 20020824_00z-20100131_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n17.bufr_d
 END
 BEGIN r21c_avcspm_n18_bufr => gdas1_n18.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
  20050701_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.n18.bufr_d
 END
 BEGIN r21c_avcsam_metopa_bufr => gdas1_metopa.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
- 20081101_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.metopA.bufr_d
+ 20070603_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.metopA.bufr_d
 END
 
 BEGIN r21c_avcsam_bufr => gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
@@ -325,12 +340,13 @@ BEGIN r21c_ssmis_bufr => gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d.ublk
   20110228_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
 END
 
-
-BEGIN r21c_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
-  20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
-END
+# aircraft profile files will be generated by prepqc so these probably won't be used
+#BEGIN r21c_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
+#  20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+#END
 
 BEGIN r21c_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
+# 20120901_00z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
   20171101_00z-20180228_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
   20180401_00z-20180909_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
   20181001_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
