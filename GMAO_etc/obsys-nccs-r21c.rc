@@ -67,15 +67,15 @@ END
 #------------------------------------------
 # GOES
 BEGIN r21c_goes_pre-qc_prep_bufr => gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
- 19950101_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/GOES/bufr/WISCNAMV/Y%y4/M%m2/gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
+ 19950101_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GOES/bufr/WISCNAMV/Y%y4/M%m2/gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
 END
 # METEOSAT - retain MERRA2 winds from cdas prepbufr prior to 2004
 BEGIN r21c_metsat_pre-qc_prep_bufr => gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
- 20040301_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/EUMETSAT/bufr/METSATBR/Y%y4/M%m2/gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
+ 20040301_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/EUMETSAT/bufr/METSATBR/Y%y4/M%m2/gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
 END
 # JMA
 BEGIN r21c_jma_pre-qc_prep_bufr => gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
- 19950621_00z-20121231_18z 060000 /gpfsm/dnb04/projects/p122/dao_ops/ops/reanalysis/JMA/bufr/JMAAMV/Y%y4/M%m2/gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
+ 19950621_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/JMA/bufr/JMAAMV/Y%y4/M%m2/gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
 END
 
 #
@@ -116,9 +116,11 @@ END
 BEGIN r21c_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
   20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
 END
-# MERRA2 AVHRR polar AMV data (satwndbufr stream)
+
+# MERRA2 AVHRR polar AMV data (satwndbufr stream)  Stop M2 data after 20150115 00z -  OPS file also has AVHRR starting 20150115 06z
 BEGIN r21c_avhrr_satwnd_bufr => avhrr.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
- 20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+#20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+ 20130101_00z-20150115_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
 END
 
 BEGIN r21c_ncep_tcvitals => tcvitals.%y4%m2%d2%h2
@@ -144,7 +146,7 @@ END
   
 # GPS Radio Occultation Data
 # 2001 - Mid-Dec 2007 CHAMP in monthly files
-# Mid-Dec 2007 - onward, the start of the COSMIC constellation
+# Mid-Dec 2007 - onward, the start of the COSMIC constellation - still need cosmic reprocessing?
 # ------------------------------------------------------------
 BEGIN r21c_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20010519_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
