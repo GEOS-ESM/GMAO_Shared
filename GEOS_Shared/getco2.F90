@@ -9,7 +9,7 @@
 
 ! !DESCRIPTION:
 !
-!  Given the year and day-of-year, this function returns the RCP45 CO2 concentration in 
+!  Given the year and day-of-year, this function returns the RCP60 CO2 concentration in 
 !  mole fraction (volume mixing ratio).  If Year is less than 1765, the value for 1765
 !  is returned.  If Year is greater than 2150, the value for 2150 is returned.  In the
 !  original dataset, the value for 2150 is used for all years through 2500.  We choose
@@ -18,24 +18,19 @@
 !  DayOfYear is expected to have a value of 1.00 at 0:00 UTC Jan 1.
 !
 !  In-line documentation from the source dataset is reproduced below:
-! 
-! RCP45 Midyear Atmospheric CO2 Concentrations (ppmv)
+! RCP6.0_MIDYEAR__CONCENTRATIONS____________________________
 !
-! CONTENT:           CMIP5 recommendations for annual average, global mean concentrations.
-! RUN:               RCP4.5, FINAL RELEASE, 26 Nov. 2009
-! RCP4.5 CONTACT:    MiniCAM group, Allison Thomson (Allison.Thomson@pnl.gov)
-! DATE:              26/11/2009 09:00:37  (updated description, 30 May 2010)
-! MAGICC-VERSION:    6.3.09, 25 November 2009
-! FILE PRODUCED BY:  RCP Concentration Calculation & Data Group, M. Meinshausen, S. Smith,  
-!                     K. Riahi, D. van Vuuren
-! DOCUMENTATION:     M. Meinshausen, S. Smith et al. "The RCP GHG concentrations and
-!                     their extension from 1765 to 2500", in prep., Climatic Change.
-! CMIP5 INFO:        http://cmip-pcmdi.llnl.gov/cmip5/
-! RCP DATABASE:      http://www.iiasa.ac.at/web-apps/tnt/RcpDb
-! FURTHER INFO:      For data sources, aknowledgements and further information, see 
-!                     http://www.pik-potsdam.de/~mmalte/rcps
-! NOTES:             RCP4.5 starts 2005; 20th century data and earlier is provided for
-!                     convenience.  
+!CONTENT:           CMIP5 RECOMMENDATIONS FOR ANNUAL AVERAGE, GLOBAL MEAN CONCENTRATIONS.
+!RUN:               RCP6, FINAL RELEASE, 30 May 2010
+!RCP6.0 CONTACT:    AIM group, Toshihiko Masui (masui@nies.go.jp) & Kenichi Matsumoto (matsumoto.kenichi@nies.go.jp)
+!DATE:              30/5/2010 01:02:33 (updated description) 
+!MAGICC-VERSION:    6.3.09, 25 November 2009
+!FILE PRODUCED BY:  RCP Concentration Calculation & Data Group, M. Meinshausen, S. Smith, K. Riahi, D. van Vuuren et al.
+!DOCUMENTATION:     M. Meinshausen, S. Smith et al. "The RCP GHG concentrations and their extension from 1765 to 2500", in prep., Climatic Change.
+!CMIP5 INFO:        http://cmip-pcmdi.llnl.gov/cmip5/
+!RCP DATABASE:      http://www.iiasa.ac.at/web-apps/tnt/RcpDb
+!FURTHER INFO:      For data sources, aknowledgements and further information, see http://www.pik-potsdam.de/~mmalte/rcps
+!NOTE:              RCP6 starts 2005; 20th century data and earlier is provided for convenience; 
 !
 ! !REVISION HISTORY:
 !  29 Oct 2010  Nielsen, adapted for GEOS-5.
@@ -84,26 +79,26 @@
    328.677,  329.742,  330.585,  331.747,  333.272,  334.848,  336.525,  338.360, &
    339.728,  340.793,  342.198,  343.783,  345.283,  346.797,  348.645,  350.737, &
    352.487,  353.855,  355.017,  355.885,  356.777,  358.128,  359.837,  361.462, &
-   363.155,  365.323,  367.348,  368.865,  370.467,  372.522,  374.760,  376.812, &
-   378.812,  380.828,  382.777,  384.800,  386.952,  389.128,  391.274,  393.421, &
-   395.583,  397.764,  399.966,  402.184,  404.411,  406.643,  408.882,  411.129, &
-   413.378,  415.639,  417.936,  420.274,  422.656,  425.080,  427.538,  430.021, &
-   432.523,  435.046,  437.589,  440.131,  442.664,  445.207,  447.770,  450.355, &
-   452.963,  455.586,  458.215,  460.845,  463.475,  466.093,  468.678,  471.234, &
-   473.780,  476.328,  478.881,  481.438,  483.993,  486.535,  489.060,  491.536, &
-   493.932,  496.244,  498.474,  500.645,  502.768,  504.847,  506.884,  508.871, &
-   510.799,  512.647,  514.401,  516.065,  517.629,  519.096,  520.488,  521.818, &
-   523.089,  524.302,  525.451,  526.509,  527.457,  528.296,  529.027,  529.643, &
-   530.144,  530.553,  530.883,  531.138,  531.319,  531.490,  531.702,  531.942, &
-   532.205,  532.487,  532.776,  533.070,  533.388,  533.741,  534.131,  534.558, &
-   535.011,  535.480,  535.955,  536.435,  536.920,  537.399,  537.871,  538.358, &
-   538.872,  539.388,  539.884,  540.352,  540.782,  541.168,  541.510,  541.808, &
-   542.053,  542.246,  542.408,  542.559,  542.712,  542.866,  543.013,  543.139, &
-   543.239,  543.311,  543.355,  543.360,  543.327,  543.288,  543.266,  543.264, &
-   543.282,  543.310,  543.337,  543.354,  543.361,  543.356,  543.330,  543.283, &
-   543.238,  543.208,  543.197,  543.205,  543.223,  543.239,  543.246,  543.242, &
-   543.227,  543.190,  543.131,  543.072,  543.025,  542.993,  542.979,  542.973, &
-   542.963,  542.955,  542.955 /)
+   363.155,  365.323,  367.348,  368.865,  370.467,  372.522,  374.760,  376.812, & !1997-2004
+   378.812,  380.828,  382.777,  384.800,  386.935,  389.072,  391.167,  393.240, &
+   395.297,  397.346,  399.387,  401.418,  403.431,  405.425,  407.400,  409.360, & !2013-2020
+   411.297,  413.219,  415.144,  417.083,  419.036,  421.004,  422.978,  424.950, &
+   426.916,  428.876,  430.832,  432.807,  434.831,  436.916,  439.068,  441.286, & !2029-2036
+   443.567,  445.903,  448.282,  450.698,  453.150,  455.645,  458.182,  460.762, &
+   463.405,  466.120,  468.907,  471.768,  474.692,  477.670,  480.697,  483.777, & !2045-2052
+   486.916,  490.103,  493.338,  496.642,  500.022,  503.483,  507.023,  510.634, &
+   514.305,  518.027,  521.797,  525.619,  529.486,  533.400,  537.381,  541.443, & !2061-2068
+   545.589,  549.820,  554.129,  558.486,  562.867,  567.272,  571.701,  576.146, &
+   580.606,  585.105,  589.653,  594.257,  598.918,  603.538,  608.020,  612.363, & !2077-2084
+   616.572,  620.648,  624.583,  628.381,  632.065,  635.649,  639.141,  642.597, &
+   646.061,  649.515,  652.951,  656.364,  659.754,  663.107,  666.423,  669.723, & !2093-2100
+   673.022,  676.291,  679.501,  682.645,  685.711,  688.693,  691.589,  694.400, &
+   697.114,  699.732,  702.276,  704.764,  707.202,  709.595,  711.934,  714.205, & !2109-2116
+   716.401,  718.519,  720.560,  722.510,  724.368,  726.158,  727.896,  729.591, &
+   731.244,  732.848,  734.389,  735.862,  737.263,  738.592,  739.834,  740.989, & !2125-2132
+   742.080,  743.124,  744.128,  745.096,  746.019,  746.882,  747.677,  748.400, &
+   749.052,  749.617,  750.093,  750.506,  750.871,  751.198,  751.489,  751.735, & !2141-2148
+   751.922,  751.999,  751.999 /)
 
 ! Establish location in table for current, previous and next year.
 ! ----------------------------------------------------------------
