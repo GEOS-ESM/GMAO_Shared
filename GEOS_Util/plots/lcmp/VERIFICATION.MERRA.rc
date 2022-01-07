@@ -2,7 +2,7 @@
 OBSNAM: MERRA1
 OBSDSC: GEOSdas-2_1_4_(MERRA)
 
-        filename:   'VERIFICATION/MERRA_MEANS/inst3_3d_asm_Cp.ddf'
+        filename:   'VERIFICATION/MERRA_MEANS/inst3_3d_asm_Cp/inst3_3d_asm_Cp.ddf'
         filetype:   'HDF'
         fields:     'ZLE'      , 'DYN'           , 'H'      , 1
                     'T'        , 'DYN'           , 'T'      , 1
