@@ -66,15 +66,15 @@ END
 # REPROCESSED GEOSTATIONARY SATELLITE AMVs  (prepbufr)
 #------------------------------------------
 # GOES
-BEGIN r21c_goes_pre-qc_prep_bufr => gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
+BEGIN r21c_goes_pre-qc_prep_bufr => gmao.GOES_amv.%y4%m2%d2.t%h2z.ublk
  19950101_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GOES/bufr/WISCNAMV/Y%y4/M%m2/gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
 END
 # METEOSAT - retain MERRA2 winds from cdas prepbufr prior to 2004
-BEGIN r21c_metsat_pre-qc_prep_bufr => gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
+BEGIN r21c_metsat_pre-qc_prep_bufr => gmao.METSAT_amv.%y4%m2%d2.t%h2z.ublk
  20040301_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/EUMETSAT/bufr/METSATBR/Y%y4/M%m2/gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
 END
 # JMA
-BEGIN r21c_jma_pre-qc_prep_bufr => gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
+BEGIN r21c_jma_pre-qc_prep_bufr => gmao.JMA_amv.%y4%m2%d2.t%h2z.ublk
  19950621_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/JMA/bufr/JMAAMV/Y%y4/M%m2/gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
 END
 
@@ -93,6 +93,12 @@ BEGIN r21c_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
  19960319_00z-19970519_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2/prepbufr/Y%y4/M%m2/ers2.%y4%m2%d2.t%h2z.bufr
  19970520_00z-20030217_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_asps20n/bufr/Y%y4/M%m2/ers2_asps20n.%y4%m2%d2.t%h2z.bufr
  20030813_00z-20110329_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
+END
+
+# Loon balloon wind data
+#-----------------------
+BEGIN r21c_loon_bufr => loon_wnd.%y4%m2%d2_t%h2z.ublk
+ 20120201_00z-20210517_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/loon_v03/Y%y4/M%m2/loon_wnd.%y4%m2%d2_t%h2z.bufr
 END
 
 # MERRA Quick SCAT Data   (ms - added 2003,2004)  (jplqscat_elv10 fixed error with sfc elevation)
@@ -147,7 +153,7 @@ END
 # GPS Radio Occultation Data
 # 2001 - Mid-Dec 2007 CHAMP in monthly files
 # Mid-Dec 2007 - onward, the start of the COSMIC constellation - still need cosmic reprocessing?
-# ------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------
 BEGIN r21c_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20010519_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
