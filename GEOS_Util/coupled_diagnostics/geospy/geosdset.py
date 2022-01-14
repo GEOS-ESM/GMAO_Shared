@@ -73,11 +73,11 @@ def _load_mom(exp, collection):
 
     return ds 
 
-def _get_loader(type):
+def _get_loader(coltype):
     loaders={'GEOS': _load_geos,
              'GEOSTripolar': _load_tripolar,
              'MOM': _load_mom}
-    return loaders[type]
+    return loaders[coltype]
 
 def load_exps(exp_conf):
     '''
@@ -106,7 +106,7 @@ def load_exps(exp_conf):
 
     return exps
 
-def load_collection(exps, colname, type='GEOS'):
+def load_collection(exps, colname, coltype='GEOS'):
     '''
     Loads a collection 'colname' for all experiments in 'exps' list.
     Returns a list of xarray data sets.
@@ -114,7 +114,7 @@ def load_collection(exps, colname, type='GEOS'):
 
     dsets=[]
     for exp in exps:
-        dsets.append(_get_loader(type)(exp, colname))
+        dsets.append(_get_loader(coltype)(exp, colname))
 
     return dsets
 

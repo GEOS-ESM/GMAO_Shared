@@ -11,7 +11,6 @@ import cmocean
 import geosdset, plots, utils
 
 # Globals
-varname='T'
 TFREEZE=273.16
 
 def mkzonal(exp,ds):
@@ -193,8 +192,10 @@ if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
 
     try:
+        varname='T'
         dsets=geosdset.load_collection(exps,'geosgcm_ocn3d')
     except OSError:
+        varname='temp'
         dsets=geosdset.load_collection(exps,'prog_z',type='MOM')
 
     mkplots(exps,dsets)

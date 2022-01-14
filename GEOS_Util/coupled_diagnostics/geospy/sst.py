@@ -12,7 +12,6 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots, utils
 
-varname='TS'
 TFREEZE=273.16    
 
 def mkclim(exp,dset):
@@ -179,6 +178,11 @@ def mkplots(exps, dsets):
 
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT', type='GEOSTripolar')
+    defaults={'name': 'TS', 
+              'colname': 'geosgcm_ocn2dT', 
+              'coltype': 'GEOSTripolar'}
+    vardata=exps[0]['plots']['variables'].get('SST',defaults)
+    dsets=geosdset.load_collection(exps, vardata['colname'], coltype=vardata['coltype'])
+    varname=vardata['name']
     mkplots(exps,dsets)
     geosdset.close(dsets)    

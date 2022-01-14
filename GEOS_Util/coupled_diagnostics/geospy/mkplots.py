@@ -72,7 +72,7 @@ def main(exp_conf):
     import amoc
     amoc.mkplots(exps,ocean_month)
 
-    geosdset.close(ocean.month)
+    geosdset.close(ocean_month)
 
     # Add more plots....
     
