@@ -21,13 +21,16 @@
 
 # NCEP Prep-bufr conventional data
 # -------------------------------
-# R21C Prep-bufr conventional data:  copied from MERRA2 CDAS prepbufr data
-#                                    removed duplicated and unused data including
-#                                    * satellite winds that have been reprocessed with later versions of data
-#                                    * unused data types 
-#                                    * inadvertent duplicates that were included in the M2 stream (e.g.Quikscat, ERS-2)
+# R21C 'cdas' Prep-bufr conventional data:  copied from MERRA2 CDAS prepbufr data
+#                                           removed duplicated and unused data including
+#                                           * satellite winds that have been reprocessed with later versions of data
+#                                           * unused data types
+#                                           * inadvertent duplicates that were included in the M2 stream (e.g.Quikscat, ERS-2)
 #
-# This data has been separated into two streams: 'RAOB' and 'noRAOB' in anticipation of replacing the raob data with IGRA2 soundings
+# This 'cdas' data has been separated into two streams: 'RAOB' and 'noRAOB' in anticipation of replacing the raob data with IGRA2 soundings
+#
+# Note that all the obs classes/files named 'pre-qc' are combined into unified prepbufr file that is checked with the pre-processing QC routines.
+# The 'obsclass' names to use in the gsi.rc.tmpl file are gmao_prep_bufr for regular data and gmao_acftpfl_bufr for aircraft profile data.
 #
 
 BEGIN r21c_cdas_raob_pre-qc_bufr => raobs_NCEP.%y4%m2%d2.t%h2z.pre-qc.ublk
@@ -95,12 +98,6 @@ BEGIN r21c_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
  20030813_00z-20110329_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
 END
 
-# Loon balloon wind data
-#-----------------------
-BEGIN r21c_loon_bufr => loon_wnd.%y4%m2%d2_t%h2z.ublk
- 20120201_00z-20210517_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/loon_v03/Y%y4/M%m2/loon_wnd.%y4%m2%d2_t%h2z.bufr
-END
-
 # MERRA Quick SCAT Data   (ms - added 2003,2004)  (jplqscat_elv10 fixed error with sfc elevation)
 # ---------------
 BEGIN r21c_qscat_jpl_pre-qc_bufr => obsys.qscat.pre-qc.%y4%m2%d2.t%h2z.ublk
@@ -112,6 +109,18 @@ END
 # MERRA SSMI Wentz Speed
 BEGIN merra2_wspd_pre-qc_bufr => wentzspd.%y4%m2%d2.t%h2z.pre-qc.bufr.ublk
  19870709_00z-20131029_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIwind_wentz/v7/prepbufr/Y%y4/M%m2/ssmiwnd.%y4%m2%d2.%h2z.bufr
+END
+
+# Loon balloon wind data - in prepbufr format but is not processed in preprocessing QC
+#-----------------------
+BEGIN r21c_loon_bufr => loon_wnd.%y4%m2%d2_t%h2z.ublk
+ 20120201_00z-20210517_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/loon_v03/Y%y4/M%m2/loon_wnd.%y4%m2%d2_t%h2z.bufr
+END
+
+# EOSMLSt  - in prepbufr format but is not processed in preprocessing QC
+#----------------------
+BEGIN r21c_gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
+ 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/mls/temperature_v5/bufr/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
 END
 
 #--------------------------------- BELOW THIS POINT: NO PREP-QC OBSERVATIONS -----------------------------
@@ -273,9 +282,10 @@ END
 
 # Ozone partial column data 
 #--------------------------
-# SBUV ozone data ( Not preprocessed yet! 20 Dec 2021 )
+# SBUV ozone data ( Not preprocessed yet! 20 Dec 2021 ) (processing in progress - dates TBD)
 BEGIN r21c_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
- 19781031_00z-20040930_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/gmao.sbuv8r7.%y4%m2%d2.t%h2z.bufr
+# 19781031_00z-20040930_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/gmao.sbuv8r7.%y4%m2%d2.t%h2z.bufr
+  19970101_00z-20181215_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/obs/reanalysis/sbuv_v87/bufr/Y%4/M%m2/sbuv_v87.%y5%m2%d2.%h2z.bufr
 END
 
 # OMPS nadir profiler (not used in R21C but keeping it here. We may need it if both MLS and OMPS LP fail)
@@ -306,13 +316,6 @@ END
 BEGIN r21c_npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
  20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
 END
-
-#----------------------
-
-# EOSMLSt 
-BEGIN r21c_gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
- 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/mls/temperature_v5/bufr/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
-END 
 
  
 # REPROCESSED AVHRR
