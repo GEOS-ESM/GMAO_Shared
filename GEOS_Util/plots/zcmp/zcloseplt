@@ -368,7 +368,24 @@ else
       'set ccolor 1'
       'd qzplt'
 
+
+      'set gxout stat'
+      'd qzplt'
+      mdifminmax = sublin(result,8)
+      mdifmin    = subwrd(mdifminmax,4)
+      mdifmax    = subwrd(mdifminmax,5)
+      say 'MDIF_Max Value: 'mdifmax
+      say 'MDIF_Min Value: 'mdifmin
+      'set gxout shaded'
+      'd abs('mdifmin')'
+             amdifmin = subwrd(result,4)
+      'd abs('mdifmax')'
+             amdifmax = subwrd(result,4)
+      if( amdifmin > amdifmax ) ; amdifmax = amdifmin ; endif
+      say 'Absolute MDIF_MAX: '   amdifmax
+
 endif
+'draw ylab Pressure (mb)'
 'set parea 0 8.5 7.0 11'
 'cbarn -vert'
 
@@ -398,16 +415,15 @@ if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
    'set clevs 'dlevs
    'd dif2z'
 else
-
-      'shades 'source_cint
-      'define qzplt = dif2z/1e'source_n
-      'd qzplt'
-      'set gxout contour'
-      'set clevs -'source_cint' 'source_cint
-      'set ccolor 1'
-      'd qzplt'
-
+   'shades 'source_cint
+   'define qzplt = dif2z/1e'source_n
+   'd qzplt'
+   'set gxout contour'
+   'set clevs -'source_cint' 'source_cint
+   'set ccolor 1'
+   'd qzplt'
 endif
+'draw ylab Pressure (mb)'
 
 * Bottom Plot:  Closeness to Verfification
 * ----------------------------------------
@@ -426,10 +442,33 @@ if( scale = LOG ) ; 'setlevs' ; endif
  dfact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
+
    'stats absdifz'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
        qmax = stddif/3
+
+
+
+     dqrel = qmax / amdifmax  * 100
+     say 'raw dqrel = 'dqrel
+    'getint 'dqrel*100
+             dqrel = result/100
+     say 'int dqrel = 'dqrel
+
+     dpct  = 0.1
+     say 'DQMAX: 'qmax'  QMOD_MAX: 'amdifmax
+     say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
+     say ' Default Percent Difference for  Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         qmax = dqrel * amdifmax / 100
+         say 'Setting Diff CINT using Relative Percent Difference: 'dqrel'%  dqmax = 'qmax
+
+
+
    if( qmax > 0 )
       'd log10('qmax')'
        n = subwrd(result,4)
@@ -481,8 +520,6 @@ if( scale = LOG ) ; 'setlevs' ; endif
 'set lev 1000 'ptop
 'set t 1'
 
-'draw ylab Pressure (mb)'
-
 'set vpage off'
 'set string 1 l 4'
 'set strsiz .065'
@@ -523,12 +560,28 @@ byearo = subwrd(date,2)
 emntho = subwrd(date,1)
 eyearo = subwrd(date,2)
 
-'set string 1 l 4'
+
+'set string 1 l 6 90'
+'set strsiz .17'
+'draw string 0.75 1.8 Pressure (mb)'
+
+'set string 1 l 4 0'
 'set strsiz .08'
-'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
-'draw string 0.10 10.24 End: 'emnthm' 'eyearm
-'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
-'draw string 0.10  6.84 End: 'emntho' 'eyearo
+
+ 'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
+ 'draw string 0.10 10.24 End: 'emnthm' 'eyearm
+ 'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
+ 'draw string 0.10  6.84 End: 'emntho' 'eyearo
+
+'set strsiz .07'
+'draw string 0.050 1.67 Plot represents'
+'draw string 0.050 1.52 values > 'dqrel' %'
+'draw string 0.050 1.36 Relative Difference'
+'draw string 0.050 1.22 ( DQ/QMax )'
+
+
+
+
 'set string 1 c 6'
 
 'myprint -name 'output'/'oname'.'season
