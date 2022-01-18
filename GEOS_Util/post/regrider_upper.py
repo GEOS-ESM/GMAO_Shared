@@ -24,7 +24,8 @@ class upperair(regrider):
            if 'fvcore' in f:
              fvcore = f
              break
-       cmd = './fvrst.x -h ' + fvcore
+       path_ = os.path.dirname(os.path.realpath(__file__)) 
+       cmd = path_ + '/fvrst.x -h ' + fvcore
        print(cmd +'\n')
        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
        (output, err) = p.communicate()
