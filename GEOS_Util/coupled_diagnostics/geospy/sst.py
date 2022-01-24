@@ -12,12 +12,20 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots, utils
 
+plotname='SST'
+defaults={'name': 'TS', 
+          'colname': 'geosgcm_ocn2dT', 
+          'coltype': 'GEOSTripolar'}
+
 TFREEZE=273.16    
 
 def mkclim(exp,dset):
     '''
     Computes climatology for given experiment.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     ds=dset[[varname]].sel(time=slice(*exp['dates']))
     ds=ds.groupby('time.season').mean('time')
     ds[varname]-=TFREEZE
@@ -25,6 +33,8 @@ def mkclim(exp,dset):
     return ds
 
 def mkglobal(exp,ds):
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
     var=ds[varname]-TFREEZE
     wght=ds['mask']*ds['area']
     return utils.average(var,('y','x'),wght)
@@ -33,6 +43,9 @@ def plot_clim(plotter, exp, clim):
     '''
     Makes climaology plots.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(1); pl.clf() 
     var=clim[varname].sel(season='DJF')
     ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
@@ -57,8 +70,14 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     Plots climatology difference between two experiments.
     '''
 
-    rr=xesmf.Regridder(cmpclim[varname],clim[varname],'bilinear',periodic=True)
-    dif=clim[varname]-rr(cmpclim[varname])
+    vardata=exp['plots'].get(plotname,defaults)
+    varname1=vardata['name']
+
+    vardata=cmpexp['plots'].get(plotname,defaults)
+    varname2=vardata['name']
+
+    rr=xesmf.Regridder(cmpclim[varname2],clim[varname1],'bilinear',periodic=True)
+    dif=clim[varname1]-rr(cmpclim[varname2])
 
     pl.figure(1); pl.clf() 
     var=dif.sel(season='DJF')
@@ -85,6 +104,9 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     '''
     Plots climatology difference against observations
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     rr=xesmf.Regridder(obsclim,clim[varname],'bilinear',periodic=True)
     # Just doing clim[varname]-rr(obsclim) does not work, because x,y coords have duplicate values
     dif=clim[varname]
@@ -176,13 +198,11 @@ def mkplots(exps, dsets):
 
     plot_gm(exps[0],gm)
 
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
+    mkplots(exps,dsets)
+    geosdset.close(dsets)            
+
 if __name__=='__main__':
     exps=geosdset.load_exps(sys.argv[1])
-    defaults={'name': 'TS', 
-              'colname': 'geosgcm_ocn2dT', 
-              'coltype': 'GEOSTripolar'}
-    vardata=exps[0]['plots']['variables'].get('SST',defaults)
-    dsets=geosdset.load_collection(exps, vardata['colname'], coltype=vardata['coltype'])
-    varname=vardata['name']
-    mkplots(exps,dsets)
-    geosdset.close(dsets)    
+    main(exps)

@@ -15,13 +15,12 @@ griddir: /discover/nobackup/projects/gmao/ssd/aogcm/ocean_bcs/MOM5/1440x1080
 #dates: ['yyyy-mm-dd','yyyy-mm-dd']
 
 plots:
-  variables:
-    SSS:
-      colname: geosgcm_ocn2dT
-      name: SS
-      coltype: GEOSTripolar
-    SST:
-      colname: geosgcm_ocn2dT
-      name: TS
-      coltype: GEOSTripolar
+  SSS:
+    colname: geosgcm_ocn2dT
+    name: SS
+    coltype: GEOSTripolar
+  SST:
+    colname: geosgcm_ocn2dT
+    name: TS
+    coltype: GEOSTripolar
 

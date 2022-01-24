@@ -118,6 +118,26 @@ def load_collection(exps, colname, coltype='GEOS'):
 
     return dsets
 
+def load_data(exps, varname, defaults=None):
+    '''
+    Load data for variable "varname" from experiments "exps".
+    Use metadata (collection and variable name in collection) from exp 
+    config if defaults is not None.
+    '''
+    dsets=[]
+    for exp in exps:
+        vardata=exp['plots'].get(varname,defaults)
+
+        if vardata is not None:
+            dsets.append(_get_loader(vardata['coltype'])(exp, vardata['colname']))
+        else:
+            raise Exception(f'''
+            Metadata for {varname} should be eigther passed as argument to "load_data"
+            or set as options in exp config file.
+            ''')
+
+    return dsets
+
 def close(dsets):
     for ds in dsets:
         ds.close()

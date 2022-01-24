@@ -9,10 +9,17 @@ import matplotlib.pyplot as pl
 import cmocean
 import geosdset, plots, utils
 
-varname='TS'
+plotname='SST'
+defaults={'name': 'TS', 
+          'colname': 'geosgcm_ocn2dT', 
+          'coltype': 'GEOSTripolar'}
+
 TFREEZE=273.16
 
 def mkequatorial(exp,ds):
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     var=ds[varname].sel(time=slice(*exp['dates']))-TFREEZE
     wght=ds['mask']*ds['dy']
     eq_region={'y':slice(-2.1,2.1)}
@@ -25,6 +32,9 @@ def mkequatorial_obs(obsname,obsvarname):
     return utils.shift_lon(var,30).sel(lon=slice(130,280))
 
 def mknino3(exp,ds):
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     var=ds[varname]-TFREEZE
     wght=ds['mask']*ds['area']
     n3region={'y':slice(-5.1,5.1),
@@ -156,8 +166,11 @@ def mkplots(exps,dsets):
 
     plot_nino3(exps[0],nino3)
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT',type='GEOSTripolar')
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)
