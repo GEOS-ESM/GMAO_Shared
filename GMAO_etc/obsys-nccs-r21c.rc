@@ -282,10 +282,9 @@ END
 
 # Ozone partial column data 
 #--------------------------
-# SBUV ozone data ( Not preprocessed yet! 20 Dec 2021 ) (processing in progress - dates TBD)
+# SBUV ozone data 
 BEGIN r21c_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
-# 19781031_00z-20040930_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/gmao.sbuv8r7.%y4%m2%d2.t%h2z.bufr
-  19970101_00z-20181215_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/obs/reanalysis/sbuv_v87/bufr/Y%4/M%m2/sbuv_v87.%y5%m2%d2.%h2z.bufr
+  19970103_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
 END
 
 # OMPS nadir profiler (not used in R21C but keeping it here. We may need it if both MLS and OMPS LP fail)
