@@ -15,6 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.5.0] - 2021-12-16
+
+### Added
+
+- Add support for GOCART2G restarts in `regrid.pl`
+
+### Removed
+
+- Moved lightning files to Chem_Shared
+
+## [1.4.13] - 2021-12-15
+
+### Fixed
+- Quickplot and quickstat bugs
+
+### Added
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
 ## [1.4.12] - 2021-12-09
 
 ### Changed
@@ -26,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
 
 ## [1.4.11] - 2021-11-03
 

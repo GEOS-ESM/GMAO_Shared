@@ -162,8 +162,10 @@ endwhile
 * -------------------
            t =tmin
     while( t<=tmax )
-       say '          Computing Global Mean for Function: 'function' with NAME: 'name'  for t = 't
       'set t 't
+      'getinfo date'
+               date = result
+       say '          Computing Global Mean for Function: 'function' with NAME: 'name'  for t = 't'  'date
       'set x 1'
       'set y 1'
       'set z 1'

@@ -17,6 +17,10 @@ if( -e $BASEDIR/$arch/bin/hdfdump ) then
 else
         set  hdfdump  =   ncdump
         set  version  =  `file -b $1`	
+        if( $version[1] == "symbolic" ) then
+               set link = `file -b $1 | cut -d " " -f 4`
+               set version = `file -b $link`	
+        endif
 	if("$version" == "Hierarchical Data Format (version 4) data") then
             if( -e $BASEDIR/$arch/bin/ncdump-hdf4 ) then
                        set hdfdump =  ncdump-hdf4

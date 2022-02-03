@@ -201,6 +201,7 @@ endwhile
 * -------------------------------
 month  = ''
 months = ''
+season = ''
         n   = filebeg
 while ( n  <= fileend )
 'set dfile 'n
@@ -210,15 +211,60 @@ while ( n  <= fileend )
         dummy = substr(date,6,3)
     if( dummy != month )
         month  = dummy
+
         if( months = '' )
             months = month
          else
             months = months'-'month
-         endif
-     endif
+        endif
+
+        if( months = 'DEC-JAN-FEB' )
+            if( season = '' )
+                season = 'DJF'
+            else
+                season = season'-DJF'
+            endif
+            months = ''
+        endif
+
+        if( months = 'MAR-APR-MAY' )
+            if( season = '' )
+                season = 'MAM'
+            else
+                season = season'-MAM'
+            endif
+            months = ''
+        endif
+
+        if( months = 'JUN-JUL-AUG' )
+            if( season = '' )
+                season = 'JJA'
+            else
+                season = season'-JJA'
+            endif
+            months = ''
+        endif
+
+        if( months = 'SEP-OCT-NOV' )
+            if( season = '' )
+                season = 'SON'
+            else
+                season = season'-SON'
+            endif
+            months = ''
+        endif
+    endif
 n = n + 1
 endwhile
+if( season != '' )
+    if( months != '' )
+        months  = season'-'months
+    else
+        months  = season
+    endif
+endif
 say 'Months Used in Forecasts: 'months
+
 
 * Define NDAY and NDAYMAX across ALL Experiments
 * ----------------------------------------------
