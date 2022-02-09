@@ -41,26 +41,26 @@ BEGIN r21c_cdas_conv_pre-qc_bufr => reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.u
  19970101_00z-20201231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/prepbufr_work/prepbufr_noRAOB/noRAOB/Y%y4/M%m2/reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
 END
 
-# WIND PROFILER DATA
+# NPN WIND PROFILER DATA
 # data prior to 20080801 primarily from NCAR; from 20080801 using operational NCEP Profiler in main cdas prepbufr file
 # data from 2001 onward written using the 'runh' bufr table
+# later Profiler data is in the regular prepbufr files
 BEGIN r21c_prof_pre-qc_bufr => prof.%y4%m2%d2.t%h2z.pre-qc.ublk
  19920510_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
  20010101_00z-20080731_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler_runh/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
 END
 
 #  PREPBUFR AMVs:
-#   for R21C the transition date between prepbufr format (including reprocessed AMVs) to operational satwndbufr is 20130101 00z
+#   for R21C the transition date between prepbufr format (including reprocessed AMVs) to operational satwndbufr is moved to 20130101 00z
 #
-# AVHRR polar AMV data (prepbufr stream) [Akira will convert from satwndbufr]
+# AVHRR polar AMV data (prepbufr stream) 
 BEGIN r21c_avhrrwnd_pre-qc_bufr => avhrr.%y4%m2%d2.t%h2z.pre-qc.ublk
- 19821001_00z-20100630_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
- 20100701_00z-20121231_18z 060000 /additional/reprocessed/from/satwnd/to/prepbufr
+ 19821001_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
 END
 
 # MODIS data from MERRA2 data archives 
 # data prior to 20041001 from Wisconsin and NESDIS 
-# data switches to NCEP MODIS winds in main cdas prepbufr file (r21c_cdas_conv_pre-qc_bufr) after 20041001 
+# data switches to NCEP MODIS winds in main cdas prepbufr file (r21c_cdas_conv_pre-qc_bufr) after 20041001, and in main satwnd bufr format later
 BEGIN r21c_nmodis_pre-qc_bufr => modis.%y4%m2%d2.t%h2z.pre-qc.ublk
  20020701_00z-20040708_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_combined_runh/prepbufr/Y%y4/M%m2/modisw_c.%y4%m2%d2.t%h2z.bfr
  20040709_00z-20040930_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_runh/prepbufr/Y%y4/M%m2/modisw.%y4%m2%d2.t%h2z.bfr
