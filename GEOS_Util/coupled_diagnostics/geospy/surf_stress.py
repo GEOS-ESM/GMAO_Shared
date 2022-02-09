@@ -49,8 +49,6 @@ def plot_clim(plotter, exp, clim):
     ax.set_title(f'{exp["expid"]} TAU, Annual mean')
     pl.savefig(f'{exp["plot_path"]}/tau_am.png')
 
-    pl.show()
-
 def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     '''
     Plots climatology difference between two experiments
@@ -78,8 +76,6 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     ax=plotter.quiver(ds, x='lon', y='lat', u='TAUX', v='TAUY')
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} TAU, Annual mean')
     pl.savefig(f'{exp["plot_path"]}/tau-{cmpexp["expid"]}_am.png')
-
-    pl.show()
 
     #rr.clean_weight_file()
 
@@ -115,8 +111,6 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname,obsvarname):
     ax.set_title(f'{exp["expid"]}-{obsname} TAU, Annual mean')
     pl.savefig(f'{exp["plot_path"]}/tau-{obsname}_am.png')
     pl.savefig(f'{exp["plot_path"]}/tau-obs_am.png')
-
-    pl.show()
 
     #rr.clean_weight_file()
 

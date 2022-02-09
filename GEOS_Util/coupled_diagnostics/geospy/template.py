@@ -11,8 +11,11 @@ import geosdset
 def mkplots(exps,dsets):
     pass
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2d')
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)

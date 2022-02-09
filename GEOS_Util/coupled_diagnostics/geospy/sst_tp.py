@@ -65,7 +65,6 @@ def plot_equatorial(exps,das,obs,obsdas):
     ax.set_xlabel('')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exps[0]["plot_path"]}/sst_eq_am.png')
 
     # Plot equatorial standard deviations
@@ -87,7 +86,6 @@ def plot_equatorial(exps,das,obs,obsdas):
     ax.set_xlabel('')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exps[0]["plot_path"]}/sst_eq_std.png')
 
 def plot_equatorial_ac(plotter,exp,da):
@@ -103,7 +101,6 @@ def plot_equatorial_ac(plotter,exp,da):
     ax.set_ylabel('')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exp["plot_path"]}/sst_eq_ac.png')
 
 def plot_hovm(plotter,exp,da):
@@ -116,7 +113,6 @@ def plot_hovm(plotter,exp,da):
     ax.xaxis.set_major_formatter(plots.LONGITUDE_FORMATTER)
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exp["plot_path"]}/hov_tp.png')
 
 def plot_nino3(exp,da):
@@ -128,7 +124,6 @@ def plot_nino3(exp,da):
     ax.set_ylabel('$^0C$')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exp["plot_path"]}/n3.png')
 
 def mkplots(exps,dsets):

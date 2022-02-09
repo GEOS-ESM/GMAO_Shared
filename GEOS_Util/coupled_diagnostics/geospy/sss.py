@@ -53,7 +53,6 @@ def plot_clim(plotter, exp, clim):
     ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SSS, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sss_am.png')
-    pl.show()
 
 def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     '''
@@ -85,7 +84,6 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SSS, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sss-{cmpexp["expid"]}_am.png')
-    pl.show()
 
     #rr.clean_weight_file()
 
@@ -121,7 +119,6 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     ax.set_title(f'{exp["expid"]}-{obsname} SSS, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sss-{obsname}_am.png')
     pl.savefig(f'{exp["plot_path"]}/sss-obs_am.png')
-    pl.show()
 
     #rr.clean_weight_file()
 

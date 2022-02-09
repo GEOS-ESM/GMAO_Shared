@@ -12,8 +12,6 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots, utils
 
-matplotlib.use('Agg')
-
 plotname='SST'
 defaults={'name': 'TS', 
           'colname': 'geosgcm_ocn2dT', 
@@ -65,7 +63,6 @@ def plot_clim(plotter, exp, clim):
     ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst_am.png')
-    pl.show()
 
 def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     '''
@@ -98,7 +95,6 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     ax=plotter.contour(var, stat=utils.print_stat(var,('x','y'),clim['weight']))
     ax.set_title(f'{exp["expid"]}-{cmpexp["expid"]} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst-{cmpexp["expid"]}_am.png')
-    pl.show()
 
     #rr.clean_weight_file()
 
@@ -134,7 +130,6 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     ax.set_title(f'{exp["expid"]}-{obsname} SST, Annual Mean')
     pl.savefig(f'{exp["plot_path"]}/sst-{obsname}_am.png')
     pl.savefig(f'{exp["plot_path"]}/sst-obs_am.png')
-    pl.show()
 
     #rr.clean_weight_file()
 
@@ -147,7 +142,6 @@ def plot_gm(exp,da):
     ax.set_xlabel('')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exp["plot_path"]}/sst_gm.png')
 
 def mkplots(exps, dsets):

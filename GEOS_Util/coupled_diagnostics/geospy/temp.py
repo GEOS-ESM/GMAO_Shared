@@ -58,7 +58,6 @@ def plot_zonal(plotter, exp, zonal):
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}_lat_depth.png')
-    pl.show()
 
 def plot_equatorial(plotter, exp, equatorial):
     '''
@@ -77,7 +76,6 @@ def plot_equatorial(plotter, exp, equatorial):
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}_eq_depth.png')
-    pl.show()
     
 def plot_zonal_diff(plotter, exp, cmpexp, zonal, cmpzonal):
     '''
@@ -98,7 +96,6 @@ def plot_zonal_diff(plotter, exp, cmpexp, zonal, cmpzonal):
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{cmpexp["expid"]}_lat_depth.png')
-    pl.show()
 
 def plot_equatorial_diff(plotter, exp, cmpexp, eq, cmpeq):
     '''
@@ -119,7 +116,6 @@ def plot_equatorial_diff(plotter, exp, cmpexp, eq, cmpeq):
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{cmpexp["expid"]}_eq_depth.png')
-    pl.show()
 
 def plot_zonal_diffobs(plotter, exp, zonal, obszonal, obsname):
     '''
@@ -141,7 +137,6 @@ def plot_zonal_diffobs(plotter, exp, zonal, obszonal, obsname):
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{obsname}_lat_depth.png')
     pl.savefig(f'{exp["plot_path"]}/{varname}-obs_lat_depth.png')
-    pl.show()
 
 def plot_equatorial_diffobs(plotter, exp, eq, obseq, obsname):
     '''
@@ -163,7 +158,6 @@ def plot_equatorial_diffobs(plotter, exp, eq, obseq, obsname):
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/{varname}-{obsname}_eq_depth.png')
     pl.savefig(f'{exp["plot_path"]}/{varname}-obs_eq_depth.png')
-    pl.show()
 
 def mkplots(exps, dsets):
     # Calculate zonal and equatorial profiles for experiments to comapre

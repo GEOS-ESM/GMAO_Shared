@@ -52,7 +52,6 @@ def plot_equatorial(exps,das,obs,obsdas):
     ax.set_xlabel('')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exps[0]["plot_path"]}/taux_eq_am.png')
 
 def plot_equatorial_ac(plotter,exp,da):
@@ -68,7 +67,6 @@ def plot_equatorial_ac(plotter,exp,da):
     ax.set_ylabel('')
     pl.grid()
     pl.tight_layout()
-    pl.show()
     pl.savefig(f'{exp["plot_path"]}/taux_eq_ac.png')
 
 def mkplots(exps,dsets):

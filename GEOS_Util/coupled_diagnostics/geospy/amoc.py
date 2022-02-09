@@ -60,7 +60,6 @@ def plot_amoc(exp,da):
     ax.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/atl_moc.png')
-    pl.show()
 
 def plot_amoc_ind(exp,da):
     ind40=da.sel(yu_ocean=slice(40.,50.), st_ocean=slice(1000.,1500)).mean(('yu_ocean','st_ocean'))
@@ -79,8 +78,6 @@ def plot_amoc_ind(exp,da):
     pl.grid()
     pl.tight_layout()
     pl.savefig(f'{exp["plot_path"]}/amoc_ind.png')    
-    pl.show()
-
 
 def mkplots(exps,dsets):
     amoc=mkamoc(exps[0], dsets[0])
