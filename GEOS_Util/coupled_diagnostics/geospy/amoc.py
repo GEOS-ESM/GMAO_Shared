@@ -9,15 +9,23 @@ import matplotlib.pyplot as pl
 import cmocean
 import geosdset, plots
 
+plotname='AMOC'
+defaults={'name': 'ty_trans', 
+          'colname': 'ocean_month', 
+          'coltype': 'MOM'}
+
 def mkamoc(exp,dset):
-    amoc=dset.ty_trans*dset.atl_mask.values
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
+    amoc=dset[varname]*dset['atl_mask'].values
     amoc=amoc.sum('xt_ocean',skipna=True)
     # We need to integrate transport from the bottom using reverse cumsum
     amoc=-amoc[:,::-1,:].cumsum('st_ocean',skipna=True)[:,::-1,:]
 
     # Add GM transport
     try:
-        gm=dset.ty_trans*dset.atl_mask.values
+        gm=dset[varname]*dset['atl_mask'].values
         gm=gm.sum('xt_ocean',skipna=True)
     except KeyError:
         gm=0.0
@@ -80,8 +88,11 @@ def mkplots(exps,dsets):
     plot_amoc(exps[0],amoc)
     plot_amoc_ind(exps[0],amoc)
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'ocean_month',type='MOM')
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)

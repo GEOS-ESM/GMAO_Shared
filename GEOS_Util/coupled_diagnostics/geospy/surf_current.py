@@ -10,11 +10,18 @@ import cartopy.crs as ccrs
 import cmocean
 import geosdset, plots
 
+plotname='Surf_current'
+defaults={'name': ['US','VS'], 
+          'colname': 'geosgcm_ocn2dT', 
+          'coltype': 'GEOSTripolar'}
+
 def mkclim(exp,dset):
     '''
     Computes climatology for given experiment.
     '''
-    varname=['US','VS']
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     ds=dset[varname].sel(time=slice(*exp['dates']))
     ds=ds.groupby('time.season').mean('time')
     ds['weight']=dset['mask']*dset['area']
@@ -65,8 +72,11 @@ def mkplots(exps,dsets):
     # Plots
     plot_clim(plotmap, exps[0], clim)
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT',type='GEOSTripolar')
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)

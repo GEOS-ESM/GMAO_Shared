@@ -11,12 +11,18 @@ import cartopy.crs as ccrs
 import xesmf
 import geosdset, plots, utils
 
-varname='TPREC'
+plotname='Precip'
+defaults={'name': 'TPREC', 
+          'colname': 'geosgcm_surf', 
+          'coltype': 'GEOS'}
 
 def mkclim(exp,dset):
     '''
     Computes climatology for given experiment.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     factor=3600*24 # converts from kg/m^2/sec to mm/day
     ds=dset[[varname]].sel(time=slice(*exp['dates']))
     ds=ds.groupby('time.season').mean('time')
@@ -28,6 +34,9 @@ def plot_clim(plotter, exp, clim):
     '''
     Makes climaology plots.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(1); pl.clf() 
     var=clim[varname].sel(season='DJF')
     ax=plotter.contour(var, mode='filled', stat=utils.print_stat(var,('lon','lat'),clim['weight']))
@@ -51,9 +60,14 @@ def plot_diff(plotter, exp, cmpexp, clim, cmpclim):
     '''
     Plots climatology difference between two experiments.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname1=vardata['name']
 
-    rr=xesmf.Regridder(cmpclim[varname],clim[varname],'bilinear',periodic=True)
-    dif=clim[varname]-rr(cmpclim[varname])
+    vardata=cmpexp['plots'].get(plotname,defaults)
+    varname2=vardata['name']
+
+    rr=xesmf.Regridder(cmpclim[varname2],clim[varname1],'bilinear',periodic=True)
+    dif=clim[varname1]-rr(cmpclim[varname2])
 
     pl.figure(1); pl.clf() 
     var=dif.sel(season='DJF')
@@ -80,6 +94,9 @@ def plot_diffobs(plotter, exp, clim, obsclim, obsname):
     '''
     Plots climatology difference against observations
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     rr=xesmf.Regridder(obsclim,clim[varname],'bilinear',periodic=True)
     dif=clim[varname]-rr(obsclim)
 
@@ -143,8 +160,11 @@ def mkplots(exps,dsets):
         obsclim=da.groupby('time.season').mean('time')
         plot_diffobs(plotmap, exps[0], clims[0], obsclim, obsname)
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_surf')
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)

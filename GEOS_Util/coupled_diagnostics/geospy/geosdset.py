@@ -12,10 +12,10 @@ R=6378e3 # Earth radius
 def _load_geos(exp,collection):
     ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
 
-    ds=ds.rename_dims({'lon': 'x', 'lat': 'y'})
+#    ds=ds.rename_dims({'lon': 'x', 'lat': 'y'})
 
-    IM=ds.dims['x']
-    JM=ds.dims['y']
+    IM=ds.dims['lon']
+    JM=ds.dims['lat']
 
     dx=np.radians(np.ones((JM,IM))*360./IM)*R
     dx*=np.cos(np.radians(ds['lat'].values[:,np.newaxis]))
@@ -29,10 +29,9 @@ def _load_geos(exp,collection):
     area[0,:]*=0.5*(dx[0,:]+dx[1,:])
     area[-1,:]*=0.5*(dx[-2,:]+dx[-1,:])
 
-    ds.update({'dx': (('y','x'), dx),
-               'dy': (('y','x'), dy),
-               'mask': (('y','x'), ds['MASKO'][0]),
-               'area': (('y','x'), area)})
+    ds.update({'dx': (('lat','lon'), dx),
+               'dy': (('lat','lon'), dy),
+               'area': (('lat','lon'), area)})
     
     return ds
         
@@ -118,21 +117,21 @@ def load_collection(exps, colname, coltype='GEOS'):
 
     return dsets
 
-def load_data(exps, varname, defaults=None):
+def load_data(exps, plotname, defaults=None):
     '''
-    Load data for variable "varname" from experiments "exps".
+    Load data for plot "plotname" from experiments "exps".
     Use metadata (collection and variable name in collection) from exp 
     config if defaults is not None.
     '''
     dsets=[]
     for exp in exps:
-        vardata=exp['plots'].get(varname,defaults)
+        vardata=exp['plots'].get(plotname,defaults)
 
         if vardata is not None:
             dsets.append(_get_loader(vardata['coltype'])(exp, vardata['colname']))
         else:
             raise Exception(f'''
-            Metadata for {varname} should be eigther passed as argument to "load_data"
+            Metadata for {plotname} should be eigther passed as argument to "load_data"
             or set as options in exp config file.
             ''')
 

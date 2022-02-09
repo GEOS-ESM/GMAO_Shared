@@ -9,9 +9,15 @@ import matplotlib.pyplot as pl
 import cmocean
 import geosdset, utils, plots
 
-varname='TAUX'
+plotname='Zonal_stress'
+defaults={'name': 'TAUX', 
+          'colname': 'geosgcm_ocn2dT', 
+          'coltype': 'GEOSTripolar'}
 
 def mkequatorial(exp,ds):
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     var=ds[varname].sel(time=slice(*exp['dates']))
     wght=ds['mask']*ds['dy']
     eq_region={'y':slice(-2.1,2.1)}
@@ -96,8 +102,11 @@ def mkplots(exps,dsets):
 
     plot_equatorial_ac(plotter, exps[0],equatorials[0])
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-    dsets=geosdset.load_collection(exps,'geosgcm_ocn2dT',type='GEOSTripolar')
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)

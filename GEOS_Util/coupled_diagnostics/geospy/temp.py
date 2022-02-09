@@ -11,9 +11,18 @@ import cmocean
 import geosdset, plots, utils
 
 # Globals
+
+plotname='TEMP'
+defaults={'name': 'T', 
+          'colname': 'geosgcm_ocn3d', 
+          'coltype': 'GEOS'}
+
 TFREEZE=273.16
 
 def mkzonal(exp,ds):
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     var=ds[varname].sel(time=slice(*exp['dates'])).mean('time')-TFREEZE
     var.coords['lev']=-var['lev']
     mask=1.0-np.isnan(var)
@@ -21,6 +30,9 @@ def mkzonal(exp,ds):
     return utils.average(var,'lon',wght)
 
 def mkequatorial(exp,ds):
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     var=ds[varname].sel(time=slice(*exp['dates'])).mean('time')-TFREEZE
     var.coords['lev']=-var['lev']
     mask=1.0-np.isnan(var)
@@ -32,6 +44,9 @@ def plot_zonal(plotter, exp, zonal):
     '''
     Plots zonal mean profile.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(1); pl.clf()
     ax=plotter.contour(zonal)
     ax.set_ylim(1400.0,0.0)
@@ -49,6 +64,9 @@ def plot_equatorial(plotter, exp, equatorial):
     '''
     Plots equatoral profile (-2S -- 2N).
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(2); pl.clf()
     ax=plotter.contour(equatorial)
     ax.set_ylim(500.0,0.0)
@@ -65,6 +83,9 @@ def plot_zonal_diff(plotter, exp, cmpexp, zonal, cmpzonal):
     '''
     Plots zonal mean profile.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(1); pl.clf()
     dif=zonal-cmpzonal.interp_like(zonal)
     ax=plotter.contour(dif)
@@ -83,6 +104,9 @@ def plot_equatorial_diff(plotter, exp, cmpexp, eq, cmpeq):
     '''
     Plots equatorial profile.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(2); pl.clf()
     dif=eq-cmpeq.interp_like(eq)
     ax=plotter.contour(dif)
@@ -101,6 +125,9 @@ def plot_zonal_diffobs(plotter, exp, zonal, obszonal, obsname):
     '''
     Plots zonal mean profile.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(1); pl.clf()
     dif=zonal-obszonal.interp_like(zonal)
     ax=plotter.contour(dif)
@@ -120,6 +147,9 @@ def plot_equatorial_diffobs(plotter, exp, eq, obseq, obsname):
     '''
     Plots equatorial profile.
     '''
+    vardata=exp['plots'].get(plotname,defaults)
+    varname=vardata['name']
+
     pl.figure(2); pl.clf()
     dif=eq-obseq.interp_like(eq)
     ax=plotter.contour(dif)
@@ -188,16 +218,12 @@ def mkplots(exps, dsets):
         plot_zonal_diffobs(plotter,exps[0],zonals[0],obszonal,obsname)
         plot_equatorial_diffobs(plotter,exps[0],equatorials[0],obsequatorial,obsname)
 
-if __name__=='__main__':
-    exps=geosdset.load_exps(sys.argv[1])
-
-    try:
-        varname='T'
-        dsets=geosdset.load_collection(exps,'geosgcm_ocn3d')
-    except OSError:
-        varname='temp'
-        dsets=geosdset.load_collection(exps,'prog_z',type='MOM')
-
+def main(exps):
+    dsets=geosdset.load_data(exps, plotname, defaults)
     mkplots(exps,dsets)
     geosdset.close(dsets)
+
+if __name__=='__main__':
+    exps=geosdset.load_exps(sys.argv[1])
+    main(exps)
     
