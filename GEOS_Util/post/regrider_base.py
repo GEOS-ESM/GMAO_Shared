@@ -261,36 +261,39 @@ class regrider(object):
         return base 
 
   def get_bcdir(self, opt):
-    bc_base = self.get_bcbase(opt)
     tag = self.common_in['tag']
     ogrid = self.common_in['ogrid']
     model = self.common_in['model']
+    bcdir = self.common_in.get('alt_bcs', None)
     if opt.upper() == "OUT":
        tag = self.common_out['tag']
        ogrid = self.common_out['ogrid']
        model = self.common_out['model']
-    bctag = self.get_bcTag(tag,ogrid)
+       bcdir = self.common_in.get('alt_bcs', None)
 
-    tagrank = self.tagsRank[bctag]
-    if (tagrank >= self.tagsRank['Icarus-NLv3_Reynolds']) :
-       bcdir = bc_base+'/Icarus-NLv3/'+bctag+'/'
-       if model == 'MOM6' or model == 'MOM5':
-          bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
-    elif (tagrank >= self.tagsRank['Icarus_Reynolds']):
-       if bc_base == self.bcbase['discover_ops']:
-          bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
+    if bcdir is None :
+       bc_base = self.get_bcbase(opt)
+       bctag = self.get_bcTag(tag,ogrid)
+       tagrank = self.tagsRank[bctag]
+       if (tagrank >= self.tagsRank['Icarus-NLv3_Reynolds']) :
+          bcdir = bc_base+'/Icarus-NLv3/'+bctag+'/'
+          if model == 'MOM6' or model == 'MOM5':
+             bcdir = bc_base+'/Icarus-NLv3/'+model+'/'
+       elif (tagrank >= self.tagsRank['Icarus_Reynolds']):
+          if bc_base == self.bcbase['discover_ops']:
+             bcdir = bc_base+'/Icarus_Updated/'+bctag+'/'
+          else:
+             bcdir = bc_base+'/Icarus/'+bctag+'/'
+          if model == 'MOM6' or model == 'MOM5':
+             bcdir = bc_base+'/Icarus/'+model+'/'
+       elif(tagrank >= self.tagsRank["Ganymed-4_0_Reynolds"]):
+          bcdir = bc_base + '/Ganymed-4_0/'+bctag+'/'
+          if model == 'MOM6' or model == 'MOM5':
+             bcdir = bc_base+'/Ganymed/'+model+'/'
        else:
-          bcdir = bc_base+'/Icarus/'+bctag+'/'
-       if model == 'MOM6' or model == 'MOM5':
-          bcdir = bc_base+'/Icarus/'+model+'/'
-    elif(tagrank >= self.tagsRank["Ganymed-4_0_Reynolds"]):
-       bcdir = bc_base + '/Ganymed-4_0/'+bctag+'/'
-       if model == 'MOM6' or model == 'MOM5':
-          bcdir = bc_base+'/Ganymed/'+model+'/'
-    else:
-       bcdir = bc_base + '/' + bctag + '/'
-       if model == 'MOM6' or model == 'MOM5':
-          bcdir = bc_base+'/Ganymed/'+model+'/'
+          bcdir = bc_base + '/' + bctag + '/'
+          if model == 'MOM6' or model == 'MOM5':
+             bcdir = bc_base+'/Ganymed/'+model+'/'
 
     if not os.path.exists(bcdir):
        print( "Cannot find bc dir " +  bcdir)

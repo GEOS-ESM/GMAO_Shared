@@ -113,9 +113,16 @@ Sample DAS tags \n \
             "name": "bc_base",
             "message": "Select bcs base \n \
              discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
-             discover_lt: /discover/nobackup/ltakacs/bcs \n",
-            "choices": ["discover_ops", "discover_lt"],
-            "when": lambda x: x.get("model")=="data" and not x['MERRA-2'],
+             discover_lt: /discover/nobackup/ltakacs/bcs \n \
+             discover_couple: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs \n",
+            "choices": ["discover_ops", "discover_lt", "discover_couple", "other"],
+            "when": lambda x: not x['MERRA-2'],
+        },
+        {
+            "type": "path",
+            "name": "alt_bcs",
+            "message": "Specify your own bcs path (do not contain grid info) for restarts: \n ",
+            "when": lambda x: x.get("bc_base")=="other",
         },
    ]
    common_in = questionary.prompt(questions)
@@ -209,14 +216,14 @@ Sample DAS tags \n \
             "name": "bc_base",
             "message": "Select bcs base for new restarts: \n \
              discover_ops: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs \n \
-             discover_lt: /discover/nobackup/ltakacs/bcs \n",
-            "choices": ["discover_ops", "discover_lt","other"],
-            "when": lambda x: x.get("model")=="data",
+             discover_lt: /discover/nobackup/ltakacs/bcs \n \
+             discover_couple: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs \n",
+            "choices": ["discover_ops", "discover_lt", "discover_couple", "other"],
         },
         {
             "type": "path",
             "name": "alt_bcs",
-            "message": "Specify your own bcs path for new restarts: \n ",
+            "message": "Specify your own bcs path (do not contain grid info) for new restarts: \n ",
             "when": lambda x: x.get("bc_base")=="other",
         },
 

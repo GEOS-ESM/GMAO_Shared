@@ -21,12 +21,13 @@ def main(argv):
     sys.exit(2)
   for opt, arg in opts:
     if opt == '-h':
-      print('Command line: \n \
-            ./regrid.py -c regrid.yaml  ( the config file regrid.yaml is used) \n \
-            ./regrid.py   ( without arguments, the questionary will generate a regrid.yaml file) \n \
-            Help message: \n \
-            1) .... \n \
-            2) .... ')
+      print('\nUse a config file to regrid: \n'
+            './regrid.py -c my_config.yaml \n \n'
+            'Use questionary to generate regrid.yaml and regrid \n'
+            './regrid.py \n'
+            '\nHelp message: \n'
+            '1) .... \n'
+            '2) .... ')
       sys.exit()
     if opt in("-c", "--config_file"):
       config_yaml = arg

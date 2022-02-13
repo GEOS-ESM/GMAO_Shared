@@ -18,14 +18,14 @@ class upperair(regrider):
      # verify agrid
      agrid = self.common_in['agrid']
      ogrid = self.common_out['ogrid']
+     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
      if not self.common_in.get('MERRA-2'):
        fvcore = '' 
        for f in self.restarts_in:
            if 'fvcore' in f:
              fvcore = f
              break
-       path_ = os.path.dirname(os.path.realpath(__file__)) 
-       cmd = path_ + '/fvrst.x -h ' + fvcore
+       cmd = fvrst + fvcore
        print(cmd +'\n')
        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
        (output, err) = p.communicate()
