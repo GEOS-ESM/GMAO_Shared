@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-A collection for scripts for: prepare_SST_ICEC/
+A collection of functions for: prepare_SST_ICEC/
 '''
 
 import xesmf as xe

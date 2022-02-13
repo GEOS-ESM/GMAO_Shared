@@ -46,4 +46,4 @@ for n in range(num_records):
   print('writing out for:\t', dates)
   out_file = out_file_template + '_' + dates.strftime('%Y%m%d') + '.nc'
   write_out(out_file, begin_date, 'days', '365_day', dates, out_lat, out_lon,\
-  out_data[n,:,:], 'kPAR', 'climatological photosynthetically available radiation', 'm-1', 1.e+15, 0., 1.)
+  out_data[n,:,:], 'KPAR', 'PAR_extinction_coefficient', 'm-1', 1.e+15, 0., 1.)
