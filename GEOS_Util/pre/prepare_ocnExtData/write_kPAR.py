@@ -37,13 +37,13 @@ else:
 #
 
 out_file_template = 'clim_kpar_GMAO2022'
-begin_date = datetime(year=1, month=1, day=15) # climatological data, mid-month at 00UTC
+begin_date = datetime(year=2000, month=1, day=15) # climatological data, mid-month at 00UTC
 out_frequency = 1   # ouput frequency in months
 num_records   = 12  # monthly climatology
 # one data record at a time
 for n in range(num_records):
   dates = begin_date + n*relativedelta(months=out_frequency)
   print('writing out for:\t', dates)
-  out_file = out_file_template + '_' + dates.strftime('%Y%m%d') + '.nc'
+  out_file = out_file_template + '_' + dates.strftime('%Y%m%d') + '.nc4'
   write_out(out_file, begin_date, 'days', '365_day', dates, out_lat, out_lon,\
   out_data[n,:,:], 'KPAR', 'PAR_extinction_coefficient', 'm-1', 1.e+15, 0., 1.)
