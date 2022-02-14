@@ -20,7 +20,7 @@ from utils import write_out, gather_gmao2022_kpar, regrid_data
 input_file = '/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/SST/1440x720/SEAWIFS_KPAR_mon_clim.1440x720'
 
 # input resolution of above data (on regular lat-lon grid)
-# output resolution = 0.125 <-- Ben, do we need a way to regrid? Or write it out at input resolution?
+# output resolution = 0.125 # We do not need to regrid, or writing it out at input resolution will work.
 in_res, out_res = [0.25, 0.25]
 
 # get the data and its lat-lon
