@@ -9,10 +9,11 @@ import xarray as xr
 
 R=6378e3 # Earth radius
 
-def _load_geos(exp,collection):
-    ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
-
-#    ds=ds.rename_dims({'lon': 'x', 'lat': 'y'})
+def _load_geos(exp,vardata):
+    colname=vardata['colname']
+    templ=vardata.get('template','{data_path}/{colname}/{expid}.{colname}.monthly.??????.nc4')
+    fnames=templ.format(data_path=exp['data_path'], colname=vardata['colname'], expid=exp['expid'])
+    ds=xr.open_mfdataset(fnames)
 
     IM=ds.dims['lon']
     JM=ds.dims['lat']
@@ -35,17 +36,26 @@ def _load_geos(exp,collection):
     
     return ds
         
-def _load_tripolar(exp, collection):
-    ds=xr.open_mfdataset(f'{exp["data_path"]}/{collection}/{exp["expid"]}.{collection}.monthly.??????.nc4')
+def _load_tripolar(exp, vardata):
+    colname=vardata['colname']
+    templ=vardata.get('template','{data_path}/{colname}/{expid}.{colname}.monthly.??????.nc4')
+    fnames=templ.format(data_path=exp['data_path'], colname=vardata['colname'], expid=exp['expid'])
+    ds=xr.open_mfdataset(fnames)
+    monthly='Xdim' in ds.coords.keys()
     grid=xr.open_dataset(f'{exp["griddir"]}/MAPL_Tripolar.nc')
     dx=(grid['htn']+grid['hus'])*0.5
     dy=(grid['hte']+grid['huw'])*0.5
-    ds=ds.assign_coords({'LON':(('lat','lon'),ds['LON'][0]), 
-                         'LAT':(('lat','lon'),ds['LAT'][0])})
+
     # Rename coords for XESMF
-    ds=ds.rename({'lon':'x', 'lat':'y'})
-    ds=ds.rename({'LON': 'lon', 'LAT': 'lat'})
-    ds.coords.update({'x': ds.lon[0,:], 'y': ds.lat[:,0]})
+    if monthly:
+        ds=ds.rename({'Xdim':'x', 'Ydim':'y'})
+        ds=ds.rename({'lons': 'lon', 'lats': 'lat'})
+    else:
+        ds=ds.assign_coords({'LON':(('lat','lon'),ds['LON'][0]), 
+                             'LAT':(('lat','lon'),ds['LAT'][0])})
+        ds=ds.rename({'lon':'x', 'lat':'y'})
+        ds=ds.rename({'LON': 'lon', 'LAT': 'lat'})
+        ds.coords.update({'x': ds.lon[0,:], 'y': ds.lat[:,0]})
 
     ds.update({'dx': (('y','x'), dx), 
                'dy': (('y','x'), dy),
@@ -56,8 +66,11 @@ def _load_tripolar(exp, collection):
     
     return ds
 
-def _load_mom(exp, collection):
-    ds=xr.open_mfdataset(f'{exp["data_path"]}/MOM_Output/{collection}.e??????01_00z.nc',decode_times=False)
+def _load_mom(exp, vardata):
+    colname=vardata['colname']
+    templ=vardata.get('template','{data_path}/MOM_Output/{colname}.e??????01_00z.nc')
+    fnames=templ.format(data_path=exp['data_path'], colname=vardata['colname'])
+    ds=xr.open_mfdataset(fnames, decode_times=False)
 
     # Now need to decode times
     time=cftime.num2date(ds['time'],'days since 0001-01-01')
@@ -72,7 +85,8 @@ def _load_mom(exp, collection):
 
     return ds 
 
-def _get_loader(coltype):
+def _get_loader(vardata):
+    coltype=vardata['coltype']
     loaders={'GEOS': _load_geos,
              'GEOSTripolar': _load_tripolar,
              'MOM': _load_mom}
@@ -128,7 +142,7 @@ def load_data(exps, plotname, defaults=None):
         vardata=exp['plots'].get(plotname,defaults)
 
         if vardata is not None:
-            dsets.append(_get_loader(vardata['coltype'])(exp, vardata['colname']))
+            dsets.append(_get_loader(vardata)(exp, vardata))
         else:
             raise Exception(f'''
             Metadata for {plotname} should be eigther passed as argument to "load_data"
