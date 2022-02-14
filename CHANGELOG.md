@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added preprocessing team as CODEOWNER for the GEOS_Util/pre directory
+
 ### Changed
 
 - Compress CircleCI artifacts
@@ -30,9 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.13] - 2021-12-15
 
 ### Fixed
+
 - Quickplot and quickstat bugs
 
 ### Added
+
 - Quickplot now supports plotting GOCART-2G collections
 - Support for Three Corner Hat (3CH) Analysis
 
