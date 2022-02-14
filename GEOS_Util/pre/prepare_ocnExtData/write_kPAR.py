@@ -2,11 +2,11 @@
 
 """
 Purpose:
- - Write out a climatological k-PAR (Photosynthetically Available Radiation) file
+ - Write out a k-PAR (Photosynthetically Available Radiation) file
  - _Current_ input is from what is used in the NASA Global Modeling and Assimilation Office (GMAO) 
    [Weather Analysis and Prediction System](https://gmao.gsfc.nasa.gov/weather_prediction/) and 
    [MERRA-2 reanalysis](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/). This is a climatological field
-   whose source was **not** documented, therefore unknow.
+   whose source was **not** documented, therefore unknown.
 """
 
 from datetime import datetime, timedelta
