@@ -6,6 +6,8 @@ used as external dataset(s) in various applications of [GEOS-ESM](https://github
 It also has a few notebooks, see `notebooks/` that could be used to plot the data.
 
 1. `write_kPAR.py`: A script to write out a climatological k-PAR (Photosynthetically Available Radiation) file.
+   It will write a single file (with a single data record) for each month.
+   Use for instance [xarray: ds.to_netcdf()](https://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_netcdf.html) to write a single file.
 
 **Note**:
  - For all python scripts, python3 or later version is needed.
