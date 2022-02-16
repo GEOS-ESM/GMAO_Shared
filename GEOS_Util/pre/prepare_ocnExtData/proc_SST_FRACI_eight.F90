@@ -278,20 +278,6 @@ PROGRAM proc_SST_FRACI_eight
         CLOSE(992)
 !---------------------------------------------------------------------------
 
-!       Write out Reynolds fields for MERRA-2
-!       SST, ICE:
-        fileName_reynolds_SST  = 'Reynolds_sst_' // today //'.bin'
-        fileName_reynolds_ICE  = 'Reynolds_ice_' // today //'.bin'
-
-        OPEN (UNIT = 993, FILE = fileName_reynolds_SST, FORM = 'unformatted', STATUS = 'new')
-        OPEN (UNIT = 994, FILE = fileName_reynolds_ICE, FORM = 'unformatted', STATUS = 'new')
-
-        WRITE(993) HEADER
-        WRITE(994) HEADER
-
-        CLOSE(993)
-        CLOSE(994)
-!---------------------------------------------------------------------------
         IF( iERR == 0) PRINT *, '...Finished!'
 !---------------------------------------------------------------------------
  98     FORMAT(I4)
