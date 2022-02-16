@@ -16,6 +16,7 @@ public read_Ostia_quart
 public read_input
 public read_input_quart
 public write_bin
+public write_netcdf
 public check
 
 contains
@@ -832,7 +833,7 @@ contains
 !      .......................................................................
 !
       SUBROUTINE read_input(inputFile, iDebug, today, tomrw, fileName, NLAT, NLON, &
-                            iAdjust_SST_SIC, SST_Thr, iERR)
+                            iAdjust_SST_SIC, SST_Thr, iERR, bin_output)
 !---------------------------------------------------------------------------
           IMPLICIT NONE
 
@@ -844,6 +845,7 @@ contains
           INTEGER,              INTENT(OUT)   :: iERR
           INTEGER,              INTENT(OUT)   :: iAdjust_SST_SIC
           REAL,                 INTENT(OUT)   :: SST_Thr
+          character(len=*),     INTENT(OUT)   :: bin_output
 !---------------------------------------------------------------------------
 
 !       READ *, inputFileName
@@ -852,12 +854,13 @@ contains
 !       Read multi-line input
         READ (21, '(A)') today
         READ (21, '(A)') tomrw
-        READ (21, '(A)') fileName(1)                                 ! Reynolds file
-        READ (21, '(A)') fileName(2)                                 ! OSTIA    file
+        READ (21, '(A)') fileName(1)            ! Reynolds file
+        READ (21, '(A)') fileName(2)            ! OSTIA    file
         READ (21, '(I5)') NLAT
         READ (21, '(I5)') NLON
-        READ (21, '(I5)') iAdjust_SST_SIC                             ! adjust SIC based on SST?
-        READ (21, '(F5.2)') SST_Thr                                   ! adjust SIC based on what value of SST?
+        READ (21, '(I5)') iAdjust_SST_SIC       ! adjust SIC based on SST?
+        READ (21, '(F5.2)') SST_Thr             ! adjust SIC based on what value of SST?
+        READ (21, '(A)') bin_output             ! write binary output: yes OR no
         CLOSE(21)
 !      .......................................................................
 !      CHECK USER INPUT. Die if not correct
@@ -996,7 +999,7 @@ contains
     HEADER(13)   = REAL(nlon);       HEADER(14)    = REAL(nlat)
 
 !---------------------------------------------------------------------------
-!       Write out SST, ICE concentration data
+!   Write out SST and ICE concentration data
 !
     fileName_sst = 'Ostia_sst_' // today //'.bin'
     fileName_ice = 'Ostia_ice_' // today //'.bin'
@@ -1013,7 +1016,30 @@ contains
 !---------------------------------------------------------------------------
 
     END SUBROUTINE write_bin
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Write out a netcdf file, see below for its format.
+!
+    SUBROUTINE write_netcdf( today_year, today_mon, today_day, &
+                             today, nlat, nlon, sst, ice)
+!---------------------------------------------------------------------------
+    IMPLICIT NONE
 
+    INTEGER, INTENT(IN)     :: today_year, today_mon, today_day, &
+                               nlat, nlon
+    CHARACTER (LEN=*),INTENT(IN) :: today
+
+    REAL, INTENT(IN)        :: sst(nlon, nlat), &
+                               ice(nlon, nlat)
+
+    CHARACTER (LEN = 40)    :: fileName
+!---------------------------------------------------------------------------
+
+    fileName = 'sst_fraci_' // today //'.nc4'
+    PRINT*, "Written ... ", fileName
+!---------------------------------------------------------------------------
+
+    END SUBROUTINE write_netcdf
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module sst_ice_helpers

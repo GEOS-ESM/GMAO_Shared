@@ -10,7 +10,8 @@ PROGRAM proc_SST_FRACI_eight
                                     interp_to_eight_deg,   &
                                     bin2bin,               &
                                     fill_Land,             &
-                                    write_bin
+                                    write_bin,             &
+                                    write_netcdf
                                     
         IMPLICIT NONE
 
@@ -38,6 +39,7 @@ PROGRAM proc_SST_FRACI_eight
         INTEGER                 :: iLon, iLat, k
         INTEGER                 :: iAdjust_SST_SIC
         REAL                    :: SST_thr                           ! threshold on SST- above which we "expect" no sea-ice 
+        character (len=3)       :: bin_output
 
         REAL                    :: reynolds_LAT        (reynolds_NLAT), reynolds_LON(reynolds_NLON)
         REAL                    :: reynolds_SST_native (reynolds_NLON,  reynolds_NLAT)
@@ -59,7 +61,7 @@ PROGRAM proc_SST_FRACI_eight
 !       Read all input data parameters (time to proc, files to proc, output resolution)
         CALL getarg(1,inputBuffer)
         READ(inputBuffer, *) inputFile
-        CALL read_input(inputFile, iDebug, today, tomrw, fileNames, NLAT_out, NLON_out, iAdjust_SST_SIC, SST_Thr, iERR)
+        CALL read_input(inputFile, iDebug, today, tomrw, fileNames, NLAT_out, NLON_out, iAdjust_SST_SIC, SST_Thr, iERR, bin_output)
 !---------------------------------------------------------------------------
         IF( iERR == 0) THEN
              PRINT *, 'Processing SST and ICE data from: ', today, '...To... ', tomrw
@@ -252,11 +254,18 @@ PROGRAM proc_SST_FRACI_eight
         READ( today_Day,  99) today_iDay
         READ( tomrw_Day,  99) tomrw_iDay
 
-        call write_bin(today_iYear, today_iMon, today_iDay, &
-                       tomrw_iYear, tomrw_iMon, tomrw_iDay, &
-                       today,                               &
-                       NLAT_out,    NLON_out,               &
-                       ostia_SST_eigth, ostia_ICE_eigth)
+        if (bin_output == 'yes') then
+          call write_bin(today_iYear, today_iMon, today_iDay, &
+                         tomrw_iYear, tomrw_iMon, tomrw_iDay, &
+                         today,                               &
+                         NLAT_out,    NLON_out,               &
+                         ostia_SST_eigth, ostia_ICE_eigth)
+        endif
+
+        call write_netcdf(today_iYear, today_iMon, today_iDay, &
+                          today,                               &
+                          NLAT_out,    NLON_out,               &
+                          ostia_SST_eigth, ostia_ICE_eigth)
 
         IF( iERR == 0) PRINT *, '...Finished!'
 !---------------------------------------------------------------------------
