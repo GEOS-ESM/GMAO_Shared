@@ -34,7 +34,7 @@ PROGRAM proc_SST_FRACI_eight
         CHARACTER (LEN = 40)    :: fileName_reynolds_SST, fileName_reynolds_ICE
         CHARACTER (LEN = 40)    :: fileName_ostia_SST,    fileName_ostia_ICE
 
-        INTEGER                 :: iERR, iMerra
+        INTEGER                 :: iERR
         INTEGER                 :: NLAT_out
         INTEGER                 :: NLON_out
         INTEGER                 :: iLon, iLat, k
@@ -62,7 +62,7 @@ PROGRAM proc_SST_FRACI_eight
 !       Read all input data parameters (time to proc, files to proc, output resolution)
         CALL getarg(1,inputBuffer)
         READ(inputBuffer, *) inputFile
-        CALL read_input(inputFile, iDebug, today, tomrw, fileNames, NLAT_out, NLON_out, iMerra, iAdjust_SST_SIC, SST_Thr, iERR)
+        CALL read_input(inputFile, iDebug, today, tomrw, fileNames, NLAT_out, NLON_out, iAdjust_SST_SIC, SST_Thr, iERR)
 !---------------------------------------------------------------------------
         IF( iERR == 0) THEN
              PRINT *, 'Processing SST and ICE data from: ', today, '...To... ', tomrw
@@ -161,17 +161,6 @@ PROGRAM proc_SST_FRACI_eight
          END DO
         END DO
 !
-        IF( iMerra == 1) THEN
-!       only needed for CASPIAN, because Reynolds has sst & ice in Great Lakes!
-          DO iLat = 500, 560
-            DO iLon = 900, 945
-               IF( reynolds_SST_native(iLon,iLat) <= 275.0d0) THEN
-                  IF( (reynolds_ICE_native(iLon,iLat) .eq. myUNDEF) .or. (reynolds_ICE_native(iLon,iLat) <= Ice_thr)) &
-                   reynolds_ICE_native(iLon,iLat) = MIN( 1.0d0, MAX(-0.017451*((reynolds_SST_native(iLon,iLat)- 271.38)/0.052747) + 0.96834, 0.0d0))
-               END IF
-            END DO
-          END DO
-        END IF
 !---------------------------------------------------------------------------
 !       Fill up values over land
 
@@ -181,10 +170,6 @@ PROGRAM proc_SST_FRACI_eight
         CALL fill_Land (reynolds_SST_eigth,    NLON_out, NLAT_out, myUNDEF)
         CALL fill_Land (reynolds_ICE_eigth,    NLON_out, NLAT_out, myUNDEF)
 
-        IF( iMerra == 1) THEN
-            CALL fill_Land (reynolds_SST_native,  reynolds_NLON, reynolds_NLAT, myUNDEF)
-            CALL fill_Land (reynolds_ICE_native,  reynolds_NLON, reynolds_NLAT, myUNDEF)
-        END IF
 !---------------------------------------------------------------------------
 ! SST values over Antarctic land - for ice, it does not matter which way, since it is over *land*
 !---------------------------------------------------------------------------
@@ -222,25 +207,6 @@ PROGRAM proc_SST_FRACI_eight
            END DO
         END DO
 !*
-        IF( iMerra == 1) THEN
-          sstave = 0.0d0
-          DO iLon = 1, NLON_out
-             iLat = 1
-             DO WHILE( reynolds_SST_native(iLon, iLat) .EQ. myUNDEF)
-                iLat = iLat + 1
-             END DO
-             sstave = sstave + reynolds_SST_native(iLon, iLat)
-          END DO
-          sstave = sstave/NLON_out
-          DO iLon = 1, NLON_out
-             iLat = 1
-             DO WHILE( reynolds_SST_native(iLon, iLat) .EQ. myUNDEF)
-                reynolds_SST_native(iLon, iLat) = sstave
-                iLat = iLat + 1
-             END DO
-          END DO
-        END IF
-!*
         DO iLon = 1, NLON_out
            iLat = 1
            DO WHILE( ostia_ICE_eigth(iLon, iLat) .EQ. myUNDEF)
@@ -260,19 +226,8 @@ PROGRAM proc_SST_FRACI_eight
               reynolds_ICE_eigth(iLon, k) = reynolds_ICE_eigth(iLon, iLat)
            END DO
         END DO
-
-        IF( iMerra == 1) THEN
-          DO iLon = 1, NLON_out
-             iLat = 1
-             DO WHILE( reynolds_ICE_native(iLon, iLat) .EQ. myUNDEF)
-                iLat = iLat + 1
-             END DO
-             DO k = 1, iLat-1
-                reynolds_ICE_native(iLon, k) = reynolds_ICE_native(iLon, iLat)
-             END DO
-          END DO
-        END IF
 !---------------------------------------------------------------------------
+
         diff_SST = SUM( ABS(reynolds_SST_eigth-ostia_SST_eigth))/(NLON_out*NLAT_out)
         diff_ICE = SUM( ABS(reynolds_ICE_eigth-ostia_ICE_eigth))/(NLON_out*NLAT_out)
         IF( diff_SST > 2.0d0) PRINT *, 'CAUTION! SST of OSTIA and Reynolds differ by Threshold; CHECK!!'
@@ -322,9 +277,7 @@ PROGRAM proc_SST_FRACI_eight
         CLOSE(991)
         CLOSE(992)
 !---------------------------------------------------------------------------
-        IF( iMerra == 1) &
-          HEADER(13)   = REAL(reynolds_NLON);    HEADER(14)    = REAL(reynolds_NLAT)
-!---------------------------------------------------------------------------
+
 !       Write out Reynolds fields for MERRA-2
 !       SST, ICE:
         fileName_reynolds_SST  = 'Reynolds_sst_' // today //'.bin'
@@ -335,14 +288,6 @@ PROGRAM proc_SST_FRACI_eight
 
         WRITE(993) HEADER
         WRITE(994) HEADER
-
-        IF( iMerra == 1) THEN
-           WRITE(993) reynolds_SST_native
-           WRITE(994) reynolds_ICE_native
-        ELSE
-           WRITE(993) reynolds_SST_eigth
-           WRITE(994) reynolds_ICE_eigth
-        END IF
 
         CLOSE(993)
         CLOSE(994)

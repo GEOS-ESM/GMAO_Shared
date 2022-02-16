@@ -831,7 +831,7 @@ contains
 !      .......................................................................
 !
       SUBROUTINE read_input(inputFile, iDebug, today, tomrw, fileName, NLAT, NLON, &
-                            iMerra, iAdjust_SST_SIC, SST_Thr, iERR)
+                            iAdjust_SST_SIC, SST_Thr, iERR)
 !---------------------------------------------------------------------------
           IMPLICIT NONE
 
@@ -840,7 +840,6 @@ contains
           CHARACTER (LEN = *),  INTENT(OUT)   :: today, tomrw
           CHARACTER (LEN = *),  INTENT(OUT)   :: fileName(2)
           INTEGER,              INTENT(OUT)   :: NLAT, NLON
-          INTEGER,              INTENT(OUT)   :: iMerra
           INTEGER,              INTENT(OUT)   :: iERR
           INTEGER,              INTENT(OUT)   :: iAdjust_SST_SIC
           REAL,                 INTENT(OUT)   :: SST_Thr
@@ -856,7 +855,6 @@ contains
         READ (21, '(A)') fileName(2)                                 ! OSTIA    file
         READ (21, '(I5)') NLAT
         READ (21, '(I5)') NLON
-        READ (21, '(I5)') iMerra                                      ! process for MERRA?
         READ (21, '(I5)') iAdjust_SST_SIC                             ! adjust SIC based on SST?
         READ (21, '(F5.2)') SST_Thr                                   ! adjust SIC based on what value of SST?
         CLOSE(21)
@@ -881,7 +879,6 @@ contains
           PRINT *, 'Reynolds file: ', fileName(1)
           PRINT *, 'OSTIA    file: ', fileName(2)
           PRINT *, 'NLAT & NLON:   ', NLAT, NLON
-          PRINT *, 'iMerra:        ', iMerra
           PRINT *, 'iAdjust_SST_SIC:', iAdjust_SST_SIC
           PRINT *, 'SST_Thr:        ', SST_Thr
           PRINT *, '---------------------------------------'
