@@ -2,6 +2,7 @@
 #
 import os
 import subprocess
+import shlex
 import shutil
 import glob
 from regrider_base import *
@@ -27,7 +28,7 @@ class upperair(regrider):
              break
        cmd = fvrst + fvcore
        print(cmd +'\n')
-       p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+       p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
        (output, err) = p.communicate()
        p_status = p.wait()
        ss = output.decode().split()
@@ -83,7 +84,7 @@ class upperair(regrider):
      print( "cd " + self.common_out['out_dir'])
      os.chdir(self.common_out['out_dir'])
      tmpdir = out_dir+'/upper_data/'
-     if os.path.exists(tmpdir) : subprocess.call('rm -rf '+ tmpdir, shell = True)
+     if os.path.exists(tmpdir) : subprocess.call(['rm', '-rf',tmpdir])
      print ("mkdir " + tmpdir)
      os.makedirs(tmpdir)
 
@@ -95,22 +96,22 @@ class upperair(regrider):
        f = f.replace('_rst','_restart_in')
        cmd = '/bin/cp  '+rst+' '+f
        print('\n'+cmd)
-       subprocess.call(cmd, shell = True)
+       subprocess.call(shlex.split(cmd))
  
      # link topo file
      topoin = glob.glob(self.in_bcsdir+'/topo_DYN_ave*')[0]
      cmd = '/bin/cp ' + topoin + ' .'
      print('\n'+cmd)
-     subprocess.call(cmd, shell = True)
+     subprocess.call(shlex.split(cmd))
 
      topoout = glob.glob(self.out_bcsdir+'/topo_DYN_ave*')[0]
      cmd = '/bin/cp ' + topoout + ' .'
      print('\n'+cmd)
-     subprocess.call(cmd, shell = True)
+     subprocess.call(shlex.split(cmd))
      fname = os.path.basename(topoout)
      cmd = '/bin/ln -s ' + fname + ' topo_dynave.data'
      print('\n'+cmd)
-     subprocess.call(cmd, shell = True)
+     subprocess.call(shlex.split(cmd))
 
      regrid_template="""#!/bin/csh -xf
 #!/bin/csh -xf
@@ -197,7 +198,7 @@ set interp_restartsX = {Bin}/interp_restarts.x
      upper.write(regrid_upper_script)
      upper.close()
      print('sbatch -W regrider_upper.j\n')
-     subprocess.call('sbatch -W regrider_upper.j', shell= True)
+     subprocess.call(['sbatch', '-W', 'regrider_upper.j'])
      for out_rst in glob.glob("*_rst*"):
        filename = os.path.basename(out_rst)
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)

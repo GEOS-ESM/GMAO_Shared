@@ -2,6 +2,7 @@
 #
 import os
 import subprocess
+import shlex
 import shutil
 import glob
 import fileinput
@@ -119,7 +120,7 @@ class analysis(regrider):
     print( "cd " + self.common_out['out_dir'])
     os.chdir(self.common_out['out_dir'])
     tmp_dir = out_dir+'/ana_data/'
-    if os.path.exists(tmp_dir) : subprocess.call('rm -rf '+ tmp_dir, shell = True)
+    if os.path.exists(tmp_dir) : subprocess.call(['rm', '-rf', tmp_dir])
     print ("mkdir " + tmp_dir)
     os.makedirs(tmp_dir)
     print( "cd " + tmp_dir)
@@ -155,7 +156,7 @@ class analysis(regrider):
           shutil.move(f,f_orig)
           cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
           print(cmd)
-          subprocess.call(cmd, shell = True)
+          subprocess.call(shlex.split(cmd))
     for f in local_fs:
        fname = os.path.basename(f)
        shutil.move(f, out_dir+'/'+fname)
@@ -168,5 +169,5 @@ class analysis(regrider):
        rstlcvOut = out_dir+'/'+expid_out+'rst.lcv.'+ymd+'_'+hh+'z.bin'
        cmd = bindir+'/mkdrstdate.x ' + ymd + ' ' + hms +' ' + rstlcvOut
        print(cmd)
-       subprocess.call(cmd, shell = True)
+       subprocess.call(shlex.split(cmd))
     os.chdir(bindir)

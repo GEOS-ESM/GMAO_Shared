@@ -70,9 +70,9 @@ class surface(regrider):
      os.chdir(self.common_out['out_dir'])
      InData_dir = out_dir+'/InData/'
      OutData_dir = out_dir+'/OutData/'
-     if os.path.exists(InData_dir) : subprocess.call('rm -rf '+ InData_dir, shell = True)
+     if os.path.exists(InData_dir) : subprocess.call(['rm','-rf', InData_dir])
      os.makedirs(InData_dir)
-     if os.path.exists(OutData_dir) : subprocess.call('rm -rf '+ OutData_dir, shell = True)
+     if os.path.exists(OutData_dir) : subprocess.call(['rm','-rf', OutData_dir])
      os.makedirs(OutData_dir)
     
      for rst in self.restarts_in:
@@ -103,7 +103,7 @@ class surface(regrider):
      if (self.saltwater):
        cmd = exe + 'OutData/*.til InData/*.til InData/'+self.saltwater + ' 0 ' + str(self.surf_in['zoom'])
        print('\n'+cmd)
-       subprocess.call(cmd, shell= True)
+       subprocess.call(shlex.split(cmd))
   
        # split Saltwater
        ogrid = self.common_out['ogrid']
@@ -114,35 +114,35 @@ class surface(regrider):
          print("\nSplitting Saltwater...\n")
          cmd = bindir+'/SaltIntSplitter ' + out_til + ' ' + 'OutData/'+self.saltwater
          print('\n'+cmd)
-         subprocess.call(cmd, shell= True)
+         subprocess.call(shlex.split(cmd))
          self.openwater = None
          self.seaice  = None
 
      if (self.openwater):
        cmd = exe + 'OutData/*.til InData/*.til InData/'+self.openwater + ' 0 ' + str(self.surf_in['zoom'])
        print('\n'+cmd)
-       subprocess.call(cmd, shell= True)
+       subprocess.call(shlex.split(cmd))
 
      if (self.seaice):
        cmd = exe + 'OutData/*.til InData/*.til InData/'+self.seaice + ' 0 ' + str(self.surf_in['zoom'])
        print('\n'+cmd)
-       subprocess.call(cmd, shell= True)
+       subprocess.call(shlex.split(cmd))
 
      if (self.lake):
        cmd = exe + 'OutData/*.til InData/*.til InData/'+self.lake + ' 19 ' + str(self.surf_in['zoom'])
        print('\n'+cmd)
-       subprocess.call(cmd, shell= True)
+       subprocess.call(shlex.split(cmd))
 
      if (self.landice):
        cmd = exe + 'OutData/*.til InData/*.til InData/'+self.landice + ' 20 ' + str(self.surf_in['zoom'])
        print('\n'+cmd)
-       subprocess.call(cmd, shell= True)
+       subprocess.call(shlex.split(cmd))
 
      if (self.route):
        route = bindir + '/mk_RouteRestarts '
        cmd = route + 'OutData/*.til '+ self.common_in["yyyymmddhh"][0:6]
        print('\n'+cmd)
-       subprocess.call(cmd, shell= True)
+       subprocess.call(shlex.split(cmd))
 
      if ( self.catchcnclm40 or self.catchcnclm45) :
        dirname = os.path.dirname(self.out_til)
@@ -285,10 +285,10 @@ endif
      catch1.write(catch1script)
      catch1.close()
      print("step 1: sbatch -W mk_catch.j.1")
-     subprocess.call('sbatch -W mk_catch.j.1', shell= True)
+     subprocess.call(['sbatch','-W', 'mk_catch.j.1'])
      # step 2
      if (self.surf_in['rescale'] and ( self.catch or self.catchcnclm40 or self.catchcnclm45)) :
-       if os.path.exists('InData.step1') : subprocess.call('rm -rf InData.step1', shell = True)
+       if os.path.exists('InData.step1') : subprocess.call(['rm','-rf', 'InData.step1'])
        print("\n Move Indata to InData.step1")
        shutil.move('InData', 'InData.step1')
        os.makedirs('InData')
@@ -328,7 +328,7 @@ endif
      catch2.write(catch2script)
      catch2.close()
      print("step 2: sbatch -W mk_catch.j.2")
-     subprocess.call('sbatch -W mk_catch.j.2', shell= True)
+     subprocess.call(['sbatch','-W', 'mk_catch.j.2'])
      cwd = os.getcwd()
      for out_rst in glob.glob("OutData/*_rst*"):
        filename = os.path.basename(out_rst)

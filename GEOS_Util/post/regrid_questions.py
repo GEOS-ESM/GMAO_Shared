@@ -5,6 +5,7 @@
 
 import os
 import subprocess
+import shlex
 import yaml
 import shutil
 import questionary
@@ -294,7 +295,7 @@ def ask_analysis_in():
 
 def ask_slurm_options():
    cmd = 'id -gn'
-   p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
    (accounts, err) = p.communicate()
    p_status = p.wait()
    accounts = accounts.decode().split()
