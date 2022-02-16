@@ -8,6 +8,10 @@ It also has a few notebooks, see `notebooks/` that could be used to plot the dat
 1. `write_kPAR.py`: A script to write out a climatological k-PAR (Photosynthetically Available Radiation) file.
    It will write a single file (with a single data record) for each month.
    Use for instance [xarray: ds.to_netcdf()](https://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_netcdf.html) to write a single file.
+2. Fortran codes: `proc_SST_FRACI_eight.F90, proc_SST_FRACI_quart.F90` which rely on `sst_ice_helpers.F90`, compiled using `CMakeLists.txt` produce
+   SST and sea ice concentration data on regular lat-lon (date-line-edge, pole-edge) grid:
+   - `sst_sic_eight.x` from `proc_SST_FRACI_eight.F90` on **1/8-deg**
+   - `sst_sic_quart.x` from `proc_SST_FRACI_quart.F90` on **1/4-deg**
 
 **Note**:
  - For all python scripts, python3 or later version is needed.
