@@ -9,7 +9,8 @@ PROGRAM proc_SST_FRACI_eight
                                     hflip,                 &
                                     interp_to_eight_deg,   &
                                     bin2bin,               &
-                                    fill_Land
+                                    fill_Land,             &
+                                    write_bin
                                     
         IMPLICIT NONE
 
@@ -31,9 +32,6 @@ PROGRAM proc_SST_FRACI_eight
 
         CHARACTER (LEN = 150)   :: fileName_Reynolds, fileName_Ostia
 
-        CHARACTER (LEN = 40)    :: fileName_reynolds_SST, fileName_reynolds_ICE
-        CHARACTER (LEN = 40)    :: fileName_ostia_SST,    fileName_ostia_ICE
-
         INTEGER                 :: iERR
         INTEGER                 :: NLAT_out
         INTEGER                 :: NLON_out
@@ -51,7 +49,6 @@ PROGRAM proc_SST_FRACI_eight
 
         REAL                    :: sstave, diff_SST, diff_ICE
 
-        REAL                    :: HEADER(14)
         CHARACTER(LEN = 4)      :: today_Year, tomrw_Year
         CHARACTER(LEN = 2)      :: today_Mon,  tomrw_Mon, today_Day, tomrw_Day
         INTEGER                 :: today_iYear, tomrw_iYear
@@ -255,28 +252,11 @@ PROGRAM proc_SST_FRACI_eight
         READ( today_Day,  99) today_iDay
         READ( tomrw_Day,  99) tomrw_iDay
 
-        HEADER(1)    = REAL(today_iYear); HEADER(7)     = REAL(tomrw_iYear)
-        HEADER(2)    = REAL(today_iMon);  HEADER(8)     = REAL(tomrw_iMon)
-        HEADER(3)    = REAL(today_iDay);  HEADER(9)     = REAL(tomrw_iDay)
-        HEADER(4:6)  = 0.0;               HEADER(10:12) = 0.0
-
-        HEADER(13)   = REAL(NLON_out);    HEADER(14)    = REAL(NLAT_out)
-!---------------------------------------------------------------------------
-!       Write out for OSTIA fields for FP & RPIT
-!       SST, ICE:
-        fileName_ostia_SST = 'Ostia_sst_'        // today //'.bin'
-        fileName_ostia_ICE = 'Ostia_ice_'        // today //'.bin'
-
-        OPEN (UNIT = 991, FILE = fileName_ostia_SST, FORM = 'unformatted', STATUS = 'new')
-        OPEN (UNIT = 992, FILE = fileName_ostia_ICE, FORM = 'unformatted', STATUS = 'new')
-
-        WRITE(991) HEADER
-        WRITE(992) HEADER
-        WRITE(991) ostia_SST_eigth
-        WRITE(992) ostia_ICE_eigth
-        CLOSE(991)
-        CLOSE(992)
-!---------------------------------------------------------------------------
+        call write_bin(today_iYear, today_iMon, today_iDay, &
+                       tomrw_iYear, tomrw_iMon, tomrw_iDay, &
+                       today,                               &
+                       NLAT_out,    NLON_out,               &
+                       ostia_SST_eigth, ostia_ICE_eigth)
 
         IF( iERR == 0) PRINT *, '...Finished!'
 !---------------------------------------------------------------------------

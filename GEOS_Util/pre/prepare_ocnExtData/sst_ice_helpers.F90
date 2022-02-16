@@ -15,6 +15,7 @@ public read_OSTIA
 public read_Ostia_quart
 public read_input
 public read_input_quart
+public write_bin
 public check
 
 contains
@@ -464,7 +465,7 @@ contains
 !
 ! From https://github.com/GEOS-ESM/GMAO_Shared/tree/main/GEOS_Util/pre/NSIDC-OSTIA_SST-ICE_blend/
 ! flip lon: [0, 360] to [-180, 180]
-          SUBROUTINE hflip( q, im, jm)
+      SUBROUTINE hflip( q, im, jm)
 !---------------------------------------------------------------------------
           IMPLICIT NONE
           INTEGER  im,jm,i,j
@@ -478,7 +479,7 @@ contains
               q(:,j) = dum(:)
             ENDDO
 !---------------------------------------------------------------------------
-          END SUBROUTINE hflip
+      END SUBROUTINE hflip
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! From https://github.com/GEOS-ESM/GMAO_Shared/tree/main/GEOS_Util/pre/NSIDC-OSTIA_SST-ICE_blend/
@@ -966,6 +967,53 @@ contains
          STOP
         END IF
       END SUBROUTINE check
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Write out a binary file with `HEADER` and data, see below for its format.
+!
+    SUBROUTINE write_bin( today_year, today_mon, today_day, &
+                          tomrw_year, tomrw_mon, tomrw_day, &
+                          today, nlat, nlon, sst, ice)
+!---------------------------------------------------------------------------
+    IMPLICIT NONE
+
+    INTEGER, INTENT(IN)     :: today_year, today_mon, today_day, &
+                               tomrw_year, tomrw_mon, tomrw_day, &
+                               nlat, nlon
+    CHARACTER (LEN=*),INTENT(IN) :: today
+
+    REAL, INTENT(IN)        :: sst(nlon, nlat), &
+                               ice(nlon, nlat)
+
+    REAL                    :: HEADER(14)
+    CHARACTER (LEN = 40)    :: fileName_sst, fileName_ice
+!---------------------------------------------------------------------------
+
+    HEADER(1)    = REAL(today_year); HEADER(7)     = REAL(tomrw_year)
+    HEADER(2)    = REAL(today_mon);  HEADER(8)     = REAL(tomrw_mon)
+    HEADER(3)    = REAL(today_day);  HEADER(9)     = REAL(tomrw_day)
+    HEADER(4:6)  = 0.0;              HEADER(10:12) = 0.0                  ! hours, min, sec are assumed to 00:00:00
+    HEADER(13)   = REAL(nlon);       HEADER(14)    = REAL(nlat)
+
+!---------------------------------------------------------------------------
+!       Write out SST, ICE concentration data
+!
+    fileName_sst = 'Ostia_sst_' // today //'.bin'
+    fileName_ice = 'Ostia_ice_' // today //'.bin'
+
+    OPEN (UNIT = 991, FILE = fileName_sst, FORM = 'unformatted', STATUS = 'new')
+    OPEN (UNIT = 992, FILE = fileName_ice, FORM = 'unformatted', STATUS = 'new')
+
+    WRITE(991) HEADER
+    WRITE(992) HEADER
+    WRITE(991) sst
+    WRITE(992) ice
+    CLOSE(991)
+    CLOSE(992)
+!---------------------------------------------------------------------------
+
+    END SUBROUTINE write_bin
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module sst_ice_helpers
