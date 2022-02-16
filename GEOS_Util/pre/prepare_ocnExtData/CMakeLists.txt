@@ -9,6 +9,7 @@ target_link_libraries (${this} PUBLIC ${NETCDF_LIBRARIES})
 target_include_directories (${this} PUBLIC ${INC_NETCDF})
 
 set (pyscripts
+  plot_binary_sst_ice.py
   ocnExtData_utils.py
   write_kPAR.py
   )

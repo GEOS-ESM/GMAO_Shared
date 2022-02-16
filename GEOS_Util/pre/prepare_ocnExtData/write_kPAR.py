@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import numpy as np
 
-from utils import write_out, gather_gmao2022_kpar, regrid_data
+from ocnExtData_utils import write_out, gather_gmao2022_kpar, regrid_data
 
 
 # path to a file on NCCS discover (https://www.nccs.nasa.gov/) maintained by GMAO "operations group"
