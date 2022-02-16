@@ -20,12 +20,6 @@ ecbuild_add_executable (
   LIBS ${this})
 set_target_properties(sst_sic_eight.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
-ecbuild_add_executable (
-  TARGET sst_sic_quart.x
-  SOURCES proc_SST_FRACI_quart.F90
-  LIBS ${this})
-set_target_properties(sst_sic_quart.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
-
 if (USE_F2PY)
    find_package(F2PY2)
    if (F2PY2_FOUND)

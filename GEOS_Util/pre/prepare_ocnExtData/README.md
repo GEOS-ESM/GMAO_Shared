@@ -9,10 +9,9 @@ It also has a few notebooks, see `notebooks/` that could be used to plot the dat
    It will write a single file (with a single data record) for each month.
    Use for instance [xarray: ds.to_netcdf()](https://xarray.pydata.org/en/stable/generated/xarray.Dataset.to_netcdf.html) to write a single file.
 
-2. Fortran codes: `proc_SST_FRACI_eight.F90, proc_SST_FRACI_quart.F90` which rely on `sst_ice_helpers.F90`, compiled using `CMakeLists.txt` produce
-   SST and sea ice concentration data on following regular lat-lon (date-line-edge, pole-edge) grids:
+2. Fortran program: `proc_SST_FRACI_eight.F90` which relies on `sst_ice_helpers.F90`, compiled using `CMakeLists.txt` produce
+   SST and sea ice concentration data on following regular lat-lon (date-line-edge, pole-edge) grid:
    - Executable: `sst_sic_eight.x` from `proc_SST_FRACI_eight.F90` on **1/8-deg**
-   - Executable: `sst_sic_quart.x` from `proc_SST_FRACI_quart.F90` on **1/4-deg**
    - Usage instructions, if _your_ `install/bin` is: `INSTALL_BIN`,
      ${INSTALL_BIN}/sst_sic_eight.x input_template; see example `input_template`
      - If all was successful four binary files: Ostia_xx_yyyymmdd.bin; xx= sst, ice; Reynolds_xx_yyyymmdd.bin are output.
