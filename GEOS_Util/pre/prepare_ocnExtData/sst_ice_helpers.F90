@@ -1013,6 +1013,9 @@ contains
     WRITE(992) ice
     CLOSE(991)
     CLOSE(992)
+
+    PRINT*, "Finished writing:"
+    PRINT*, fileName_sst, fileName_ice
 !---------------------------------------------------------------------------
 
     END SUBROUTINE write_bin
@@ -1033,11 +1036,117 @@ contains
                                ice(nlon, nlat)
 
     CHARACTER (LEN = 40)    :: fileName
+
+    integer                        :: ncid
+    integer, parameter             :: ndims     = 3
+    character (len = *), parameter :: lat_name  = "lat"
+    character (len = *), parameter :: lon_name  = "lon"
+    character (len = *), parameter :: time_name = "time"
+    integer :: lon_dimid, lat_dimid, time_dimid, i
+
+    real    :: lats(nlat), lons(nlon)
+    integer :: lon_varid, lat_varid, time_varid
+    integer :: dimids(ndims), sst_varid, fraci_varid
+    real*8 dlon, dlat
+
+    character (len = *), parameter :: UNITS      = "units"
+    character (len = *), parameter :: TEMP_UNITS = "K"
+    character (len = *), parameter :: ICE_UNITS  = "1"
+    character (len = *), parameter :: LAT_UNITS  = "degrees_north"
+    character (len = *), parameter :: LON_UNITS  = "degrees_east"
+    character (len = 120)          :: TIME_UNITS
+
+    character (len = *), parameter :: LONG_NAME       = "long_name"
+    character (len = *), parameter :: long_LAT_name   = "latitude"
+    character (len = *), parameter :: long_LON_name   = "longitude"
+    character (len = *), parameter :: long_TIME_name  = "time"
+    character (len = *), parameter :: long_SST_name   = "sea_surface_temperature"
+    character (len = *), parameter :: long_FRACI_name = "sea_ice_concentration"
+
+    character (len = *), parameter :: SST_NAME   = "SST"
+    character (len = *), parameter :: FRACI_NAME = "FRACI"
+
+    real :: sst_out(nlon, nlat, 1), fraci_out(nlon, nlat, 1)
+
+    CHARACTER(LEN=10) :: DTSTR
+    character(len=120):: file_hist
+
+    character(8)  :: date_creation
+    character(10) :: time_creation
 !---------------------------------------------------------------------------
+   
+    call date_and_time(date_creation,time_creation)
+    file_hist = "File created on " // trim(date_creation) // trim(time_creation) // ". In yyyymmddHHMMSS.millisec"
+
+    write(DTSTR,10) today_year, today_mon, today_day
+ 10 FORMAT(I4,'-', I2, '-', I0.2)
+    TIME_UNITS = "days since " // trim(DTSTR) //" 12:00:00" 
+
+    dlat = 180./real(nlat); dlon = 360./real(nlon)
+
+    lats(1) = -90.+0.5*dlat
+    DO i = 2, nlat
+      lats(i) = lats(i-1) + dlat
+    ENDDO
+
+    lons(1) = -180.+0.5*dlon
+    DO i = 2, nlon
+      lons(i) = lons(i-1) + dlon
+    ENDDO
+
+    sst_out(:,:, 1) = sst; fraci_out(:,:, 1) = ice
 
     fileName = 'sst_fraci_' // today //'.nc4'
-    PRINT*, "Written ... ", fileName
+
+    call check( nf90_create(fileName, nf90_clobber, ncid)) ! Create the file. 
+
+    call check( nf90_def_dim(ncid, lat_name,  nlat, lat_dimid))   ! Define the dimensions.
+    call check( nf90_def_dim(ncid, lon_name,  nlon, lon_dimid))
+    call check( nf90_def_dim(ncid, time_name, 1,    time_dimid))
+
+    call check( nf90_def_var(ncid, lat_name,  NF90_REAL, lat_dimid,  lat_varid)) ! Define coordinate variables
+    call check( nf90_def_var(ncid, lon_name,  NF90_REAL, lon_dimid,  lon_varid))
+    call check( nf90_def_var(ncid, time_name, NF90_REAL, time_dimid, time_varid))
+
+    call check( nf90_put_att(ncid, lat_varid,  UNITS, LAT_UNITS)) ! Assign units attributes to coordinate variables.
+    call check( nf90_put_att(ncid, lon_varid,  UNITS, LON_UNITS))
+    call check( nf90_put_att(ncid, time_varid, UNITS, TIME_UNITS))
+
+    call check( nf90_put_att(ncid, lat_varid,  LONG_NAME, long_LAT_name))
+    call check( nf90_put_att(ncid, lon_varid,  LONG_NAME, long_LON_name))
+    call check( nf90_put_att(ncid, time_varid, LONG_NAME, long_TIME_name))
+
+    dimids = (/ lon_dimid, lat_dimid, time_dimid /)
+    
+    call check( nf90_def_var(ncid, SST_NAME,   NF90_REAL, dimids, sst_varid))
+    call check( nf90_def_var(ncid, FRACI_NAME, NF90_REAL, dimids, fraci_varid))
+
+    call check( nf90_put_att(ncid, sst_varid,   UNITS, TEMP_UNITS)) ! Assign units attributes to variables
+    call check( nf90_put_att(ncid, fraci_varid, UNITS, ICE_UNITS))
+
+    call check( nf90_put_att(ncid, sst_varid,   LONG_NAME, long_SST_name))
+    call check( nf90_put_att(ncid, fraci_varid, LONG_NAME, long_FRACI_name))
+
+    call check( nf90_put_att(ncid, NF90_GLOBAL, "title",       "ExtData_for_GEOS-ESM"))
+    call check( nf90_put_att(ncid, NF90_GLOBAL, "institution", "NASA Global Modeling and Assimilation Office"))
+    call check( nf90_put_att(ncid, NF90_GLOBAL, "source",      "https://github.com/GEOS-ESM/GMAO_Shared/tree/main/GEOS_Util/pre/prepare_ocnExtData/"))
+    call check( nf90_put_att(ncid, NF90_GLOBAL, "references",  "https://github.com/GEOS-ESM/GMAO_Shared/tree/main/GEOS_Util/pre/prepare_ocnExtData/README.md"))
+    call check( nf90_put_att(ncid, NF90_GLOBAL, "history",      file_hist))
+
+    call check( nf90_enddef(ncid) ) ! End define mode
+
+    call check( nf90_put_var(ncid, lat_varid,  lats)) ! write variables
+    call check( nf90_put_var(ncid, lon_varid,  lons))
+    call check( nf90_put_var(ncid, time_varid, 0))
+    ! metadata
+
+    call check( nf90_put_var(ncid, sst_varid,   sst_out,   (/ 1, 1, 1/), (/ nlon, nlat, 1 /) ))
+    call check( nf90_put_var(ncid, fraci_varid, fraci_out, (/ 1, 1, 1/), (/ nlon, nlat, 1 /) ))
+
+    call check( nf90_close(ncid) ) ! Close the file.
 !---------------------------------------------------------------------------
+
+    PRINT*, "Finished writing ... ", fileName
 
     END SUBROUTINE write_netcdf
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

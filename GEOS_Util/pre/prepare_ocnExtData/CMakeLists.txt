@@ -10,6 +10,7 @@ target_include_directories (${this} PUBLIC ${INC_NETCDF})
 
 set (pyscripts
   plot_binary_sst_ice.py
+  plot_sst_ice.py
   ocnExtData_utils.py
   write_kPAR.py
   )
