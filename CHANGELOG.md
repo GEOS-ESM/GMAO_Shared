@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+### Added
+
+- Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
+
 ### Removed
 
 ## [1.5.0] - 2021-12-16
