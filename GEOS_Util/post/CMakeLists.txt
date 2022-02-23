@@ -46,6 +46,7 @@ ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
 set (perlscripts
   ecmwf2geos.pl
   g5fcst_stats.pl
+  g5fcst_statsNx.pl
   ncep2geos.pl
   regrid.pl
   )
