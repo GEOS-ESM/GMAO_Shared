@@ -334,11 +334,15 @@ cat        $GEOSAPP/gcm_quickstat.j >> $SOURCE/gcm_quickstat.tmpl
 # Create CORCMP Commands
 # ----------------------
 if( $#quickstat_corcmp > 1 ) then
+      set rmstypes = `echo 0 1 2 3 4`
       foreach FIELD ($fields)
-      echo 'if( $ID == '$IDX' ) '$quickstat_corcmp -field $FIELD              >> $SOURCE/gcm_quickstat.tmpl
+          foreach rmstype ($rmstypes)
+              echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_corcmp -field $FIELD -rms $rmstype  >> $SOURCE/gcm_quickstat.tmpl
               @ IDX =   $IDX + 1
+          end
+          echo " "                                                                                   >> $SOURCE/gcm_quickstat.tmpl
       end
-      echo " "                                                                >> $SOURCE/gcm_quickstat.tmpl
+
 endif
 
 # Create PLTSYS Commands
@@ -347,21 +351,21 @@ if( $#quickstat_pltsys > 1 ) then
       foreach EXP  ($exps)
       foreach FIELD ($fields)
          if( $FIELD == 'p' ) then
-             echo 'if( $ID == '$IDX' ) '$quickstat_pltsys" -field $FIELD -exp $EXP" -level 1000        >> $SOURCE/gcm_quickstat.tmpl
-                     @ IDX =   $IDX + 1
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_pltsys" -field $FIELD -exp $EXP" -level 1000   >> $SOURCE/gcm_quickstat.tmpl
+                         @ IDX  =  $IDX  + 1
          else
              if( $level == 'ALL' ) then
-                 echo 'if( $ID == '$IDX' ) '$quickstat_pltsys" -field $FIELD -exp $EXP" -level HORIZ   >> $SOURCE/gcm_quickstat.tmpl
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_pltsys" -field $FIELD -exp $EXP" -level HORIZ  >> $SOURCE/gcm_quickstat.tmpl
                          @ IDX  =  $IDX  + 1
-                 echo 'if( $ID == '$IDX' ) '$quickstat_pltsys" -field $FIELD -exp $EXP" -level ZONAL   >> $SOURCE/gcm_quickstat.tmpl
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_pltsys" -field $FIELD -exp $EXP" -level ZONAL  >> $SOURCE/gcm_quickstat.tmpl
                          @ IDX  =  $IDX  + 1
              else
-                 echo 'if( $ID == '$IDX' ) '$quickstat_pltsys" -field $FIELD -exp $EXP" -level $level  >> $SOURCE/gcm_quickstat.tmpl
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_pltsys" -field $FIELD -exp $EXP" -level $level >> $SOURCE/gcm_quickstat.tmpl
                          @ IDX  =  $IDX  + 1
              endif
          endif
       end
-      echo " "                                                                                  >> $SOURCE/gcm_quickstat.tmpl
+      echo " "                                                                                                     >> $SOURCE/gcm_quickstat.tmpl
       end
 endif
  
@@ -371,25 +375,27 @@ if( $#quickstat_syscmp > 1 ) then
       foreach EXP  ($syscmpexps)
       foreach FIELD ($fields)
          if( $FIELD == 'p' ) then
-             echo 'if( $ID == '$IDX' ) '$quickstat_syscmp" -field $FIELD -exp $EXP"  -level 1000   >> $SOURCE/gcm_quickstat.tmpl
-                     @ IDX =   $IDX + 1
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_syscmp" -field $FIELD -exp $EXP" -level 1000   >> $SOURCE/gcm_quickstat.tmpl
+                         @ IDX  =  $IDX  + 1
          else
              if( $level == 'ALL' ) then
-                 echo 'if( $ID == '$IDX' ) '$quickstat_syscmp" -field $FIELD -exp $EXP"  -level HORIZ  >> $SOURCE/gcm_quickstat.tmpl
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_syscmp" -field $FIELD -exp $EXP" -level HORIZ  >> $SOURCE/gcm_quickstat.tmpl
                          @ IDX  =  $IDX  + 1
-                 echo 'if( $ID == '$IDX' ) '$quickstat_syscmp" -field $FIELD -exp $EXP"  -level ZONAL  >> $SOURCE/gcm_quickstat.tmpl
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_syscmp" -field $FIELD -exp $EXP" -level ZONAL  >> $SOURCE/gcm_quickstat.tmpl
                          @ IDX  =  $IDX  + 1
              else
-                 echo 'if( $ID == '$IDX' ) '$quickstat_syscmp" -field $FIELD -exp $EXP"  -level $level >> $SOURCE/gcm_quickstat.tmpl
+                 echo 'if( $ID == '"`printf %3d $IDX` ) "$quickstat_syscmp" -field $FIELD -exp $EXP" -level $level >> $SOURCE/gcm_quickstat.tmpl
                          @ IDX  =  $IDX  + 1
              endif
          endif
       end
       end
-      echo " "                                                                    >> $SOURCE/gcm_quickstat.tmpl
+      echo " "                                                                                                     >> $SOURCE/gcm_quickstat.tmpl
 endif
 
-@ NTASKS = $IDX - 1
+@ NTASKS   = $IDX - 1   # length of job list
+@ NODES    = 1          # number of nodes per job
+@ MAXTASKS = 15         # max concurrent jobs to run
 
 /bin/rm -f $SOURCE/gcm_quickstat.j
 /bin/rm -f $SOURCE/sedfile
@@ -398,6 +404,8 @@ cat >      $SOURCE/sedfile << EOF
 s?@GEOSBIN?$GEOSBIN?g
 s?@GEOSSRC?$GEOSSRC?g
 s?@NTASKS?$NTASKS?g
+s?@MAXTASKS?$MAXTASKS?g
+s?@NODES?$NODES?g
 s?@PARTITION?$PARTITION?g
 s?@MODEL?$MODEL?g
 s?@QUEUE?$QUEUE?g
@@ -531,7 +539,7 @@ if( "$plots" =~ *pltsys* ) then
             endif
         else
                                       set levels =  $level
-            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 7 5 3 1`
+            if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 50 30 10 7 5 3 1`
             if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
             foreach level  ( $levels )
@@ -591,7 +599,7 @@ if( "$plots" =~ *syscmp* ) then
                endif
            else
                                          set levels =  $level
-               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 30 10 7 5 3 1`
+               if( "$level" == "HORIZ" ) set levels = `echo 1000 975 950 925 900 850 800 750 700 600 500 400 300 250 200 150 100 70 50 30 10 7 5 3 1`
                if( "$level" == "ZONAL" ) set levels = `echo ZONAL`
 
                foreach level  ( $levels )

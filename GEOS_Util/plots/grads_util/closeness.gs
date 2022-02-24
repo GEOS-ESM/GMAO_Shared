@@ -31,6 +31,12 @@ gridcomp = getarg (args,GC)
     math = getarg (args,MATH)
    level = getarg (args,LEVEL)
 
+   qname = NULL
+   qname = getarg (args,QNAME)
+if(qname = NULL )
+   qname = mname
+endif
+ 
 * ---------------------------
 if(     math = NULL ) ;     math = '' ; endif
 if(   season = NULL ) ;   season = '' ; endif
@@ -96,6 +102,23 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DLEVS'   ; endif
                         'getresource 'PLOTRC' 'PFX'DCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DCOLS' ; endif
                                                    dcols  = result
+
+                        'getresource 'PLOTRC' 'PFX'FIXED_PLOT_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FIXED_PLOT_FACTOR' ; endif
+                                                   fixpltfact = result
+
+                        'getresource 'PLOTRC' 'PFX'CLOSE_PLOT_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      CLOSE_PLOT_FACTOR' ; endif
+                                                   clspltfact = result
+
+                        'getresource 'PLOTRC' 'PFX'FIXED_PLOT_CINT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      FIXED_PLOT_CINT' ; endif
+                                                   fixpltcint = result
+
+                        'getresource 'PLOTRC' 'PFX'CLOSE_PLOT_CINT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      CLOSE_PLOT_CINT' ; endif
+                                                   clspltcint = result
+
 factor = 1
 
 else
@@ -112,6 +135,14 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CBSCALE' ; endi
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FACTOR' ; endif
                                                                 factor = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FIXED_PLOT_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FIXED_PLOT_FACTOR' ; endif
+                                                                 fixpltfact = result
+
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CLOSE_PLOT_FACTOR'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLOSE_PLOT_FACTOR' ; endif
+                                                                 clspltfact = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_TITLE'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_TITLE' ; endif
                                                                 title = result
@@ -119,6 +150,14 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_TITLE' ; endif
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CINT'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CINT' ; endif
                                                                 ccint = result
+
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_FIXED_PLOT_CINT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_FIXED_PLOT_CINT' ; endif
+                                                                 fixpltcint = result
+
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CLOSE_PLOT_CINT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLOSE_PLOT_CINT' ; endif
+                                                                 clspltcint = result
 
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_CCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
@@ -135,9 +174,7 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLEVS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_DCOLS' ; endif
                                                                  dcols = result
 
-                    say 'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_'LEVTYPE
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_'LEVTYPE
-                    say 'RESULT = 'result
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_'level' 'DLEVS ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_'DLEVS         ; endif
                                                                   dlevs = result
@@ -150,7 +187,7 @@ endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'mname
+   'getdesc 'qname
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"
@@ -160,7 +197,7 @@ if( title  = 'NULL' )
 endif
 
 if( dcols = 'NULL' )
-    dcols = '55  49  47  45  44  36  34  33  32  0  21  22  23  24  25  26  27  28 69'
+     dcols = '55  49  47  45  44  36  34  33  32  0  21  22  23  24  25  26  27  28 69'
 endif
 
 * Perform Mathematics if necessary
@@ -210,6 +247,22 @@ endif
 * Top Panel
 * ---------
 'set parea 1.5 7.0 7.70 10.50'
+
+   'set gxout stat'
+   'd modg'
+   qmodminmax = sublin(result,8)
+   qmodmin    = subwrd(qmodminmax,4)
+   qmodmax    = subwrd(qmodminmax,5)
+   say 'QMOD_Max Value: 'qmodmax
+   say 'QMOD_Min Value: 'qmodmin
+   'set gxout shaded'
+   'd abs('qmodmin')'
+          aqmodmin = subwrd(result,4)
+   'd abs('qmodmax')'
+          aqmodmax = subwrd(result,4)
+   if( aqmodmin > aqmodmax ) ; aqmodmax = aqmodmin ; endif
+   say 'Absolute QMOD_MAX: '   aqmodmax
+
 ntop = 0
     say 'TOP CLEVS: 'dlevs
     say 'TOP CCOLS: 'dcols
@@ -221,12 +274,31 @@ else
    'stats difg'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
-     say 'AVGDIF: 'avgdif
-     say 'STDDIF: 'stddif
-       qmax = stddif/3
-     say '  QMAX: 'qmax
-   if( qmax > 0 )
-      'd log10('qmax')'
+
+say 'avgdif = 'avgdif
+say 'stddif = 'stddif
+     dqmax  =  stddif/3
+
+     dqrel = dqmax / aqmodmax  * 100
+
+say 'dqrel = 'dqrel
+    'getint 'dqrel*100
+             dqrel = result/100
+say 'dqrel = 'dqrel
+
+     dpct  = 0.1
+     say 'Absolute DQMAX: 'dqmax'  QMOD_MAX: 'aqmodmax
+     say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
+     say ' Default Percent Difference for  Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         dqmax = dqrel * aqmodmax / 100
+         say 'Setting Diff CINT using Relative Percent Difference: 'dqrel'%  dqmax = 'dqmax
+
+   if( dqmax > 0 )
+      'd log10('dqmax')'
        ntop = subwrd(result,4)
    else
        ntop = 0
@@ -242,14 +314,27 @@ else
            ntop = ntop+2
         endif
    endif
+
+   if( fixpltfact != NULL )
+    'd 'fixpltfact
+     ntop = subwrd(result,4)
+   endif
    say 'Diff Scaling Factor: 'ntop
+
+   if( fixpltcint != NULL )
+    'd 'fixpltcint
+        fixpltcint = subwrd(result,4)
+        cint = fixpltcint
+   else
       if( ntop < 0 )
           ztop = -1 * ntop
-         'd 'qmax'*1e'ztop
+         'd 'dqmax'*1e'ztop
       else
-      '   d 'qmax'/1e'ntop
+      '   d 'dqmax'/1e'ntop
       endif
-       cint = subwrd(result,4)
+        cint = subwrd(result,4)
+   endif
+
        say 'TOP CINT: 'cint
       'shades 'cint
       if( ntop < 0 )
@@ -260,12 +345,29 @@ else
       endif
       'd difg'
 endif
+
+   'set gxout stat'
+   'd difg'
+   mdifminmax = sublin(result,8)
+   mdifmin    = subwrd(mdifminmax,4)
+   mdifmax    = subwrd(mdifminmax,5)
+   say 'MDIF_Max Value: 'mdifmax
+   say 'MDIF_Min Value: 'mdifmin
+   'set gxout shaded'
+   'd abs('mdifmin')'
+          amdifmin = subwrd(result,4)
+   'd abs('mdifmax')'
+          amdifmax = subwrd(result,4)
+   if( amdifmin > amdifmax ) ; amdifmax = amdifmin ; endif
+   say 'Absolute MDIF_MAX: '   amdifmax
+
 'set parea 0 8.5 7.0 11'
 'cbarn -vert'
 
 * Middle Panel
 * ------------
 'set parea 1.5 7.0 4.30 7.10'
+
 nmid = 0
 if( dcols != NULL & dlevs != NULL )
    'set clevs 'dlevs
@@ -283,17 +385,66 @@ else
       'd cifg'
 endif
 
+   'set gxout stat'
+   'd cifg'
+   qobsminmax = sublin(result,8)
+   qobsmin    = subwrd(qobsminmax,4)
+   qobsmax    = subwrd(qobsminmax,5)
+   say 'QOBS_Max Value: 'qobsmax
+   say 'QOBS_Min Value: 'qobsmin
+   'set gxout shaded'
+   'd abs('qobsmin')'
+          aqobsmin = subwrd(result,4)
+   'd abs('qobsmax')'
+          aqobsmax = subwrd(result,4)
+   if( aqobsmin > aqobsmax ) ; aqobsmax = aqobsmin ; endif
+   say 'Absolute QOBS_MAX: '   aqobsmax
+
 * Bottom Panel
 * ------------
 'set parea 1.5 7.0 0.90 3.70'
+
 'define closeness = abs(difg)-abs(cifg)'
+
+   'set gxout stat'
+   'd closeness'
+   closminmax = sublin(result,8)
+   closmin    = subwrd(closminmax,4)
+   closmax    = subwrd(closminmax,5)
+   say 'CLOSE_Max Value: 'closmax
+   say 'CLOSE_Min Value: 'closmin
+   'set gxout shaded'
+   'd abs('closmin')'
+          aclosmin = subwrd(result,4)
+   'd abs('closmax')'
+          aclosmax = subwrd(result,4)
+   if( aclosmin > aclosmax ) ; aclosmax = aclosmin ; endif
+   say 'Absolute CLOSE_MAX: '  aclosmax
 
    'stats closeness'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
-       qmax = stddif/3
-   if( qmax > 0 )
-      'd log10('qmax')'
+      dqmax = stddif/3
+
+     dqrel = dqmax / amdifmax  * 100
+say 'raw dqrel = 'dqrel
+    'getint 'dqrel*100
+             dqrel = result/100
+say 'int dqrel = 'dqrel
+
+     dpct  = 0.1
+     say 'DQMAX: 'dqmax'  QMOD_MAX: 'amdifmax
+     say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
+     say ' Default Percent Difference for  Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         dqmax = dqrel * amdifmax / 100
+         say 'Setting Diff CINT using Relative Percent Difference: 'dqrel'%  dqmax = 'dqmax
+
+   if( dqmax > 0 )
+      'd log10('dqmax')'
        n = subwrd(result,4)
    else
        n = 0
@@ -309,15 +460,29 @@ endif
            n = n+2
         endif
    endif
+
+   if( clspltfact != NULL )
+    'd 'clspltfact
+     n = subwrd(result,4)
+   endif
    say 'Diff Scaling Factor: 'n
+
+   if( clspltcint != NULL )
+    'd 'clspltcint
+        clspltcint = subwrd(result,4)
+        cint = clspltcint
+   else
       if( n < 0 )
           ztop = -1 * n
-         'd 'qmax'*1e'ztop
+         'd 'dqmax'*1e'ztop
       else
-         'd 'qmax'/1e'n
+         'd 'dqmax'/1e'n
       endif
-       cint = subwrd(result,4)
+        cint = subwrd(result,4)
+   endif
+
       'shades 'cint
+
       if( n < 0 )
           ztop = -1 * n
          'define closeness = closeness*1e'ztop
@@ -345,7 +510,7 @@ endif
 
 'set string 1 c 6'
 'set strsiz .125'
-if( level = '' )
+if( level = '' | level = 0 )
    'draw string 4.25 10.85 'math' 'title
 else
    'draw string 4.25 10.85 'level'-mb 'math' 'title
@@ -372,8 +537,13 @@ else
    'draw string 4.25 7.22 'cdesc' - 'oname'  'season' ('nobs')  ('climate')'
 endif
 
-if( n != 0 )
-   'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**'n')'
+*if( n != 0 )
+if( ntop != 0 )
+   if( ntop>0 )
+      'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**-'ntop')'
+   else
+      'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)  (x 10**'ntop')'
+   endif
 else
    'draw string 4.25 3.80 Closeness to 'oname':  ABS(Top)-ABS(Middle)'
 endif
@@ -397,17 +567,35 @@ eyearo = subwrd(date,2)
 
 'set string 1 l 4'
 'set strsiz .08'
-'draw string 0.050 10.50 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.35 End: 'emnthm' 'eyearm
-'draw string 0.050 7.10 Beg: 'bmntho' 'byearo
-'draw string 0.050 6.95 End: 'emntho' 'eyearo
+'draw string 0.050 10.30 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.15 End: 'emnthm' 'eyearm
+'draw string 0.050 9.85  Max: 'mdifmax
+'draw string 0.050 9.70  Min: 'mdifmin
+'draw string 0.050 9.40 Mean: 'avgmod
+'draw string 0.050 9.25  Std: 'stdmod
 
-'draw string 0.050 9.85 Mean: 'avgmod
-'draw string 0.050 9.70  Std: 'stdmod
-'draw string 0.050 6.45 Mean: 'avgobs
-'draw string 0.050 6.30  Std: 'stdobs
-'draw string 0.050 3.05 Mean: 'avgdif
-'draw string 0.050 2.90  Std: 'stddif
+'draw string 0.050 6.90 Beg: 'bmntho' 'byearo
+'draw string 0.050 6.75 End: 'emntho' 'eyearo
+'draw string 0.050 6.45  Max: 'qobsmax
+'draw string 0.050 6.30  Min: 'qobsmin
+'draw string 0.050 6.00 Mean: 'avgobs
+'draw string 0.050 5.85  Std: 'stdobs
+
+'draw string 0.050 3.50 Beg: 'bmnthm' 'byearm
+'draw string 0.050 3.35 End: 'emnthm' 'eyearm
+'draw string 0.050 3.05  Max: 'closmax
+'draw string 0.050 2.90  Min: 'closmin
+'draw string 0.050 2.60 Mean: 'avgdif
+'draw string 0.050 2.45  Std: 'stddif
+
+*if( CINTDIFF != 'NULL' )
+   'set strsiz .07'
+   'draw string 0.050 1.77 Plot represents'
+   'draw string 0.050 1.62 values > 'dqrel' %'
+   'draw string 0.050 1.47 Relative Difference'
+   'draw string 0.050 1.32 ( DQ/QMax )'
+*endif
+
 
 'set mproj latlon'
 return

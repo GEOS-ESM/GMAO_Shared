@@ -208,7 +208,7 @@ endif
 # --------------------
 setenv ARCH `   uname`
 setenv HOST `hostname`
-set name = `echo $HOST` ; if ( ($name =~ pfe*) || ($name =~ p4fe*) || ($name =~ r[0-9]*i[0-9]*n[0-9]*) || ($name =~ bridge*) ) setenv HOST pleiades
+set name = `echo $HOST` ; if ( ($name =~ pfe*) || ($name =~ p4fe*) || ($name =~ r[0-9]*i[0-9]*n[0-9]*) || ($name =~ r[0-9]*c[0-9]*t[0-9]*n[0-9]*) || ($name =~ bridge*) ) setenv HOST pleiades
 
 set name = `echo $HOST | cut -b 1-8` ; if( $name == 'discover' ) setenv HOST $name
 set name = `echo $HOST | cut -b 1-4` ; if( $name == 'borg'     ) setenv HOST discover
@@ -244,13 +244,11 @@ endif
 # Determine Number of Nodes if running in BATCH
 # ---------------------------------------------
 if( $NCPUS == "NULL"  ) then
-  if ($?PBS_NODEFILE & $?BATCHNAME) then
-     set BATCHJOB  = `qstat | grep $BATCHNAME | grep $LOGNAME | cut -d' ' -f1`
-     set  numjobs  = $#BATCHJOB
-     if( $numjobs != 0 ) then
-        set  NCPUS = `cat $PBS_NODEFILE | wc -l`
-     endif
-  endif
+   if ($?SLURM_NTASKS) then
+      set  NCPUS = $SLURM_NTASKS
+   else if ($?PBS_NODEFILE) then
+      set  NCPUS = `cat $PBS_NODEFILE | wc -l`
+   endif
 endif
 echo Use: NCPUS = $NCPUS
 

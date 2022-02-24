@@ -9,6 +9,7 @@
       character*256,  parameter :: c_t    = 't'
       character*256,  parameter :: c_q    = 'q'
       character*256,  parameter :: c_h    = 'h'
+      character*256,  parameter :: c_gz   = 'gz'
       character*256,  parameter :: c_th   = 'th'
       character*256,  parameter :: c_tv   = 'tv'
       character*256,  parameter :: c_thv  = 'thv'

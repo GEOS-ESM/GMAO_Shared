@@ -5,17 +5,308 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
+
+### Added
 
 ### Changed
 
-- Updated the CircleCI Image
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
 
 ### Fixed
 
 ### Removed
 
+## [1.5.0] - 2021-12-16
+
 ### Added
+
+- Add support for GOCART2G restarts in `regrid.pl`
+
+### Removed
+
+- Moved lightning files to Chem_Shared
+
+## [1.4.13] - 2021-12-15
+
+### Fixed
+- Quickplot and quickstat bugs
+
+### Added
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
+## [1.4.12] - 2021-12-09
+
+### Changed
+
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
+
+### Fixed
+
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
+
+## [1.4.11] - 2021-11-03
+
+### Changed
+
+- add Cascade knob to g5fcst_stats.pl and regrid.pl
+- revised dyn_blob: more general on the blobs
+- make sure echorc.x exits w/ success code when applicable
+- Updated CI to use Baselibs 6.2.8
+- Updated `pyrob` to work with GEOS-IT files
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
+
+## [1.4.10] - 2021-10-08
+
+### Added
+
+- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU Make days
+- Added `parallel_untar.py` script
+- Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
+
+### Fixed
+
+- CMake fix for non-Intel compilers in GMAO_ods
+
+### Changed
+
+- Updates to documentation tables for KX values
+- Updates to `obsys-nccs.rc`
+- Updates to `g5fcst_stats.pl`
+- Updated the CI for GMAO_Shared to do Intel and GNU
+
+## [1.4.9] - 2021-10-06
+
+### Fixed
+
+- Fixed issue with `regrid.pl` and regridding `catch_internal_rst`
+
+## [1.4.8] - 2021-10-05
+
+### Fixed
+
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel. Requires ESMA_cmake v3.6.1
+
+## [1.4.7] - 2021-10-04
+
+### Added
+
+- Added `pyrob_CF` script
+
+### Changed
+
+- Updates to support Catchment-CN.4.5 in addition to Catchment-CN.4.0
+
+## [1.4.6] - 2021-09-15
+
+### Changed
+
+- Updates to `regrid.pl` to allow processing of restarts for two different versions of Catchment-CN land model
+- change is zero-diff for Catchment and Catchment-CN4.0
+
+## [1.4.6] - 2021-07-21
+
+### Changed
+
+- Updates to plots package from L. Takacs
+
+## [1.4.5] - 2021-06-25
+
+### Fixed
+
+- Fix for IASI (#202)
+
+## [1.4.4] - 2021-06-25
+
+### Added
+
+- Add new `echorc.pl` script (alternative to `echorc.x`)
+- Added 181 levs to `GMAO_hermes/dyn2dyn.f90` and a frequency change in `GMAO_etc/obsys-nccs.rc`
+
+### Changed
+
+- Changed `esma_mpirun` for MVAPICH2
+
+## [1.4.3] - 2021-06-11
+
+### Added
+
+- Add changes consistent with what is in GEOSadas 5.28
+
+## [1.4.2] - 2021-05-25
+
+### Added
+
+Add ability to write out energy components to file.
+
+### Fixed
+
+Bugfix to prevent a seg-fault when calculating the lightning flash rate implemented in HEMCO/GEOS-Chem.
+
+## [1.4.1] - 2021-05-14
+
+- Renamed `LANL_Shared/LANL_cice` to `LANL_Shared/CICE4`
+
+### Fixed
+
+- In `regrid.pl`: Fixed the -wemin and -wemout options so that they will accept integer values; Also added Jason-NL BCS tag choice
+- Fixes for PSAS code and Intel MPI
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+- Update F2PY module calls to support both Python2 and Python3 loaded at same time
+
+## [1.4.0] - 2021-04-15
+
+### Fixed
+
+- Sync atmOcnIntlayer with that in GEOS-FP GEOS-5.27.1 (02/2021) GEOSadas-5_27_1_p3
+- Fixed build for directories that are built as part of the GEOSdas
+
+## [1.3.10] - 2021-04-02
+
+### Changed
+
+- Multiple updates brought over from GEOSadas work (see #166)
+
+## [1.3.9] - 2021-03-17
+
+### Fixed
+
+- Fix for out-of-bounds error in lightning module (#99)
+
+### Changed
+
+- Stats plot updates
+
+### Added
+
+- Extend binary tile to supprot future river route component development
+
+### Removed
+
+- Remove `CMIP_1977_1982` directory in `GEOS_Util/pre/NSIDC-OSTIA_SST-ICE_blend`
+
+## [1.3.8] - 2021-02-12
+
+### Changed
+
+- Plot and stats updates
+
+### Removed
+
+- Eliminated references to MAPL_COMM - these are no longer used and will
+be deleted in future releases of MAPL
+
+## [1.3.7] - 2021-01-29
+
+### Changed
+
+- Plot and stats updates
+
+### Fixed
+
+- Fix flags for `zonal.f` compilation
+
+## [1.3.6] - 2021-01-12
+
+### Changed
+
+- Added `-partition` option to `regrid.pl`
+
+### Fixed
+
+- Fixed compilation flags for `zonal.f` to match that of CVS
+- Fixed bug in `res/zonal.gs` for `zonal.x` location
+- Added flag to regrid_forcing_esmf.x to force a 0 to 1 range when regridding files that should use fractions
+
+### Added
+
+- Allows PRs with "0-diff trivial" labels to skip updating `CHANGELOG.md`
+
+## [1.3.5] - 2020-12-10
+
+### Fixed
+
+- Use `CONFIGURE_DEPENDS` with `file(GLOB)` calls
+- Fix OpenMP in GMAO_stoch
+
+### Added
+
+- Add support for `Aggressive` build type
+
+## [1.3.4] - 2020-11-25
+
+### Fixed
+
+- Updates for DSO work
+
+### Changed
+
+- Update plots consistent with latest cvs tags
+
+## [1.3.3] - 2020-10-28
+
+### Changed
+
+- Added Docker authentication for CI
+- Update CI images for Baselibs 6.0.22
+
+### Fixed
+
+- Updates to `plots/configure` so that it is run at install time. This
+  should allow others to then run plots on another person's build
+
+### Removed
+### Added
+
+- Add warning-level loggers to `GEOS_Utilities` (D)QSAT code for NaN detection
+
+## [1.3.2] - 2020-10-14
+
+### Fixed
+
+- Fixed regrid_forcing.x and regrid_forcing_esmf.x so they will work with MAPL2.2 and beyond
+
+### Changed
+
+- Updated the NCPUs detection in various post scripts to be SLURM-aware
+
+## [1.3.1] - 2020-10-13
+
+### Changed
+
+- Updated `changelog-enforcer.yml` to v1.4.0
+
+### Added
+
+- Modify plots to display new constraint diagnostics
+- Update `atmOceanIntLayer.F90` add AVOIL_v0 which wraps the update of surface skin variables (temperature, water mass, salinity, etc) into a single call.
+
+## [1.3.0] - 2020-09-28
+
+### Fixed
+
+- Undo the change to `GEOS_Utilities.F90` in v1.2.0. This has a bug at the end of the table (#123)
+
+## [1.2.0] - 2020-09-25
+
+### Changed
+
+- Update `GEOS_Utilities.F90` to match `GEOSadas-5_27_0` (#115)
+
+## [1.1.10] - 2020-09-25
+
+### Changed
+
+- Updated the CircleCI Image
 
 ## [1.1.9] - 2020-09-15
 

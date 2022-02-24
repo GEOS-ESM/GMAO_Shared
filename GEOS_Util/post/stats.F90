@@ -1262,7 +1262,7 @@
       call timeend ('main')
       call timepri (6)
 
-      stop
+      call ESMF_Finalize()
       end
 
       SUBROUTINE BOUNDS (LAT1,LAT2,LONG1,LONG2,  &
@@ -1294,6 +1294,7 @@
 
       subroutine read_clim_hdf ( nymd,nhms,fields_2d,fields_3d,n2d,n3d,idim,jdim,nl,zlev,cli_files,num,undef )
       use stats_mod
+      use ESMF
       implicit none
       integer n2d,n3d
       type(fields) :: fields_2d(n2d)
@@ -1393,7 +1394,7 @@
              call gfio_open ( cli_files(n),1,id(n),rc )
              if( rc.ne.0 ) then
                  print *, 'Climatology File: ',trim(cli_files(n)),' NOT found!'
-                 call exit(1)
+                 call ESMF_Finalize()
                  stop
              endif
              call gfio_diminquire ( id(n),im,jm,lm,ntime,nvars,ngatts,rc )
@@ -1401,6 +1402,7 @@
              if( ntime.ne.12 ) then
                  print *, 'Climatology data should consist of 12 monthly means'
                  print *, 'Current file: ',trim(cli_files(n)),' contains ',ntime,' time periods!'
+                 call ESMF_Finalize()
                  stop
              endif
 
@@ -1469,6 +1471,7 @@
           enddo
           if( nid.eq.-999 ) then
               print *, 'Climatology Datasets do not have desired TOD: ',nhms
+              call ESMF_Finalize()
               stop
           endif
       endif
@@ -2643,6 +2646,7 @@
 
       subroutine init_fcst( fname,nfiles,dates,ndates,timinc,undef,collections,ncoll )
       use stats_mod
+      use ESMF
       implicit none
       integer  ncoll
 
@@ -2729,6 +2733,7 @@
                   print *
                   print *, 'Forecast Files have exceeded 1000 Time Periods!'
                   print *
+                  call ESMF_Finalize()
                   stop
               endif
 
@@ -2916,6 +2921,7 @@
 
       subroutine read_syserr( fields_2d,fields_3d,n2d,n3d,idim,jdim,nl,zlev,efile,ndt,undef )
       use stats_mod
+      use ESMF
       implicit none
 
       integer      ::  n2d,n3d
@@ -2967,6 +2973,7 @@
           call gfio_open ( efile,1,id,rc )
           if( rc.ne.0 ) then
               print *, 'Systematic Error File: ',trim(efile),' NOT found!'
+              call ESMF_Finalize()
               stop
           endif
           call gfio_diminquire ( id,im,jm,lm,ntime,nvars,ngatts,rc )

@@ -426,9 +426,9 @@ endif
 if( cname.numexp != 'NULL' )
 
            'set dfile 'cfile.numexp
-           'getinfo cxdim'
+           'getinfo  xdim'
                     cxdim  = result
-           'getinfo cydim'
+           'getinfo  ydim'
                     cydim  = result
            'set lev 'level
            'getinfo  level'

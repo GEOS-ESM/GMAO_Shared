@@ -113,6 +113,10 @@ if( EXPORT = "U"   )
    'getresource 'PLOTRC' U_DYN_Z'scale'_DCOLS'  ; dcols = result
    'getresource 'PLOTRC' U_DYN_Z_'LEVTYPE'LEVS' ; dlevs = result
    'getresource 'PLOTRC' U_DYN_Z'scale'_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' U_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' U_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' U_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' U_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "V"   )
     oname = "/horiz_"cmpnam"_vwnd_"zid"_closeness_"obsnam
@@ -121,6 +125,10 @@ if( EXPORT = "V"   )
    'getresource 'PLOTRC' V_DYN_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' V_DYN_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' V_DYN_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' V_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' V_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' V_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' V_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "T"   )
     oname = "/horiz_"cmpnam"_tmpu_"zid"_closeness_"obsnam
@@ -129,6 +137,10 @@ if( EXPORT = "T"   )
    'getresource 'PLOTRC' T_DYN_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' T_DYN_Z_'LEVTYPE'COLS' ; dcols = result
    'getresource 'PLOTRC' T_DYN_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' T_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' T_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' T_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' T_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "Q"   )
     oname = "/horiz_"cmpnam"_sphu_"zid"_closeness_"obsnam
@@ -137,6 +149,10 @@ if( EXPORT = "Q"   )
    'getresource 'PLOTRC' Q_MOIST_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' Q_MOIST_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' Q_MOIST_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' Q_MOIST_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' Q_MOIST_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' Q_MOIST_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' Q_MOIST_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "QLTOT"   )
     oname = "/horiz_"cmpnam"_ql_"zid"_closeness_"obsnam
@@ -145,6 +161,10 @@ if( EXPORT = "QLTOT"   )
    'getresource 'PLOTRC' QLTOT_AGCM_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' QLTOT_AGCM_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' QLTOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' QLTOT_AGCM_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' QLTOT_AGCM_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' QLTOT_AGCM_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' QLTOT_AGCM_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "QITOT"   )
     oname = "/horiz_"cmpnam"_qi_"zid"_closeness_"obsnam
@@ -153,6 +173,10 @@ if( EXPORT = "QITOT"   )
    'getresource 'PLOTRC' QITOT_AGCM_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' QITOT_AGCM_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' QITOT_AGCM_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' QITOT_AGCM_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' QITOT_AGCM_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' QITOT_AGCM_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' QITOT_AGCM_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "RH2" )
     oname = "/horiz_"cmpnam"_rh_"zid"_closeness_"obsnam
@@ -161,6 +185,10 @@ if( EXPORT = "RH2" )
    'getresource 'PLOTRC' RH2_MOIST_Z_CCOLS'         ; ccols = result
    'getresource 'PLOTRC' RH2_MOIST_Z_DCOLS'         ; dcols = result
    'getresource 'PLOTRC' RH2_MOIST_Z_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' RH2_MOIST_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' RH2_MOIST_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' RH2_MOIST_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' RH2_MOIST_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "ZLE"   )
     oname = "/horiz_"cmpnam"_hght_"zid"_closeness_"obsnam
@@ -169,6 +197,10 @@ if( EXPORT = "ZLE"   )
    'getresource 'PLOTRC' ZLE_DYN_Z_CCOLS'                ; ccols = result
    'getresource 'PLOTRC' ZLE_DYN_Z'scale'_'LEVTYPE'COLS' ; dcols = result
    'getresource 'PLOTRC' ZLE_DYN_Z'scale'_'LEVTYPE'LEVS' ; dlevs = result
+   'getresource 'PLOTRC' ZLE_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' ZLE_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' ZLE_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' ZLE_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "OMEGA"   )
     oname = "/horiz_"cmpnam"_omega_"zid"_closeness_"obsnam
@@ -177,6 +209,10 @@ if( EXPORT = "OMEGA"   )
    'getresource 'PLOTRC' OMEGA_DYN_CCOLS'           ; ccols = result
    'getresource 'PLOTRC' OMEGA_DYN_'LEVTYPE'COLS'   ; dcols = result
    'getresource 'PLOTRC' OMEGA_DYN_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' OMEGA_DYN_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' OMEGA_DYN_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' OMEGA_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' OMEGA_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 if( EXPORT = "O3"   )
     oname = "/horiz_"cmpnam"_o3_"zid"_closeness_"obsnam
@@ -185,6 +221,10 @@ if( EXPORT = "O3"   )
    'getresource 'PLOTRC' O3_CHEMISTRY_Z_DCOLS'                  ; dcols = result
    'getresource 'PLOTRC' O3_CHEMISTRY_Z'scale'_CLEVS'           ; clevs = result
    'getresource 'PLOTRC' O3_CHEMISTRY_Z'scale'_'LEVTYPE'LEVS'   ; dlevs = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_CLOSE_PLOT_FACTOR' ; clspltfact = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_CLOSE_PLOT_CINT'   ; clspltcint = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_FIXED_PLOT_FACTOR' ; fixpltfact = result
+   'getresource 'PLOTRC' O3_CHEMISTRY_FIXED_PLOT_CINT'   ; fixpltcint = result
 endif
 say ' TITLE: 'title
 say ' CLEVS: 'clevs
@@ -303,6 +343,20 @@ else
             source_cint = comparison_cint
        endif
 
+* Set Hardwired Values for Consistent Plots
+* -----------------------------------------
+       if( fixpltfact != NULL )
+       'd 'fixpltfact
+        source_n = subwrd(result,4)
+       endif
+       say 'Diff Scaling Factor: 'source_n
+
+       if( fixpltcint != NULL )
+       'd 'fixpltcint
+           fixpltcint = subwrd(result,4)
+           source_cint = fixpltcint
+       endif
+
 * -----------------------------------------------------------------
 
       'shades 'source_cint
@@ -314,7 +368,24 @@ else
       'set ccolor 1'
       'd qzplt'
 
+
+      'set gxout stat'
+      'd qzplt'
+      mdifminmax = sublin(result,8)
+      mdifmin    = subwrd(mdifminmax,4)
+      mdifmax    = subwrd(mdifminmax,5)
+      say 'MDIF_Max Value: 'mdifmax
+      say 'MDIF_Min Value: 'mdifmin
+      'set gxout shaded'
+      'd abs('mdifmin')'
+             amdifmin = subwrd(result,4)
+      'd abs('mdifmax')'
+             amdifmax = subwrd(result,4)
+      if( amdifmin > amdifmax ) ; amdifmax = amdifmin ; endif
+      say 'Absolute MDIF_MAX: '   amdifmax
+
 endif
+'draw ylab Pressure (mb)'
 'set parea 0 8.5 7.0 11'
 'cbarn -vert'
 
@@ -344,16 +415,15 @@ if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
    'set clevs 'dlevs
    'd dif2z'
 else
-
-      'shades 'source_cint
-      'define qzplt = dif2z/1e'source_n
-      'd qzplt'
-      'set gxout contour'
-      'set clevs -'source_cint' 'source_cint
-      'set ccolor 1'
-      'd qzplt'
-
+   'shades 'source_cint
+   'define qzplt = dif2z/1e'source_n
+   'd qzplt'
+   'set gxout contour'
+   'set clevs -'source_cint' 'source_cint
+   'set ccolor 1'
+   'd qzplt'
 endif
+'draw ylab Pressure (mb)'
 
 * Bottom Plot:  Closeness to Verfification
 * ----------------------------------------
@@ -372,10 +442,33 @@ if( scale = LOG ) ; 'setlevs' ; endif
  dfact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
+
    'stats absdifz'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
        qmax = stddif/3
+
+
+
+     dqrel = qmax / amdifmax  * 100
+     say 'raw dqrel = 'dqrel
+    'getint 'dqrel*100
+             dqrel = result/100
+     say 'int dqrel = 'dqrel
+
+     dpct  = 0.1
+     say 'DQMAX: 'qmax'  QMOD_MAX: 'amdifmax
+     say 'Relative Percent Difference: 'dqrel' (100*DQMAX/QMOD_MAX)'
+     say ' Default Percent Difference for  Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         qmax = dqrel * amdifmax / 100
+         say 'Setting Diff CINT using Relative Percent Difference: 'dqrel'%  dqmax = 'qmax
+
+
+
    if( qmax > 0 )
       'd log10('qmax')'
        n = subwrd(result,4)
@@ -393,14 +486,23 @@ if( scale = LOG ) ; 'setlevs' ; endif
            n = n+2
         endif
    endif
-   say 'Diff Scaling Factor: 'n
-   'd 'qmax'/1e'n
-   cint = subwrd(result,4)
 
 * Set Hardwired Values for Consistent Plots
 * -----------------------------------------
-*         n = -2
-*      cint = 1
+   if( clspltfact != NULL )
+   'd 'clspltfact
+    n = subwrd(result,4)
+   endif
+   say 'Diff Scaling Factor: 'n
+
+   if( clspltcint != NULL )
+   'd 'clspltcint
+       clspltcint = subwrd(result,4)
+       cint = clspltcint
+   else
+      'd 'qmax'/1e'n
+       cint = subwrd(result,4)
+   endif
 
       'shades 'cint
       'define qzplt = absdifz/1e'n
@@ -417,8 +519,6 @@ if( scale = LOG ) ; 'setlevs' ; endif
 'set lon 'lonmin
 'set lev 1000 'ptop
 'set t 1'
-
-'draw ylab Pressure (mb)'
 
 'set vpage off'
 'set string 1 l 4'
@@ -460,12 +560,28 @@ byearo = subwrd(date,2)
 emntho = subwrd(date,1)
 eyearo = subwrd(date,2)
 
-'set string 1 l 4'
+
+'set string 1 l 6 90'
+'set strsiz .17'
+'draw string 0.75 1.8 Pressure (mb)'
+
+'set string 1 l 4 0'
 'set strsiz .08'
-'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
-'draw string 0.10 10.24 End: 'emnthm' 'eyearm
-'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
-'draw string 0.10  6.84 End: 'emntho' 'eyearo
+
+ 'draw string 0.10 10.37 Beg: 'bmnthm' 'byearm
+ 'draw string 0.10 10.24 End: 'emnthm' 'eyearm
+ 'draw string 0.10  6.97 Beg: 'bmntho' 'byearo
+ 'draw string 0.10  6.84 End: 'emntho' 'eyearo
+
+'set strsiz .07'
+'draw string 0.050 1.67 Plot represents'
+'draw string 0.050 1.52 values > 'dqrel' %'
+'draw string 0.050 1.36 Relative Difference'
+'draw string 0.050 1.22 ( DQ/QMax )'
+
+
+
+
 'set string 1 c 6'
 
 'myprint -name 'output'/'oname'.'season

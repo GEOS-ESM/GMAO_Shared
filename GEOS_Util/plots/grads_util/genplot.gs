@@ -389,6 +389,8 @@ endif
           dummy = get_cmpexp (cmpexp,numexp)
             exp = subwrd(dummy,1)
            type = subwrd(dummy,2)
+     exp.numexp = exp
+    type.numexp = type
 
 while( exp != 'NULL' )
 say ' '
@@ -399,19 +401,36 @@ say 'Comparing with: 'exp
 * analysis = true   EXP=A CMP=A  => ALEVS
 * analysis = true   EXP=A CMP=M  => DLEVS
 
+* INPUT Experiment is an Analysis
+*********************************
 if( analysis != "false" )
-    if( type = A )
+    if( type = A | type = V )
+*   CMP Experiment is an Analysis
        'run setenv "LEVTYPE" 'ALEVS
+       'run setenv "DIFFTYPE" 'A
+
     else
+*   CMP Experiment is an Model
        'run setenv "LEVTYPE" 'DLEVS
+       'run setenv "DIFFTYPE" 'D
     endif
 else
+
+* INPUT Experiment is a Model
+*********************************
     if( type = A )
+*   CMP Experiment is an Analysis
        'run setenv "LEVTYPE" 'DLEVS
+       'run setenv "DIFFTYPE" 'D
+
     else
+*   CMP Experiment is an Model
        'run setenv "LEVTYPE" 'ALEVS
+       'run setenv "DIFFTYPE" 'A
     endif
 endif
+
+* ------------------------------------------------------
 
 '!chckfile 'exp'/.HOMDIR'
  'run getenv CHECKFILE'
@@ -616,29 +635,26 @@ endif
   dummy = get_cmpexp (cmpexp,numexp)
     exp = subwrd(dummy,1)
    type = subwrd(dummy,2)
+   exp.numexp = exp
+  type.numexp = type
 
 endwhile
  numexp = numexp - 1
 
 '!/bin/mv HISTORY.Tmp HISTORY.T'
 
-* ---------------------------------------------------------
+* ---------------------------------------------------------------------------
 * Now that we have computed plots for each experiment,
-* we can compute the Closeness plots to MERRA-2
-* ---------------------------------------------------------
+* we can compute the Closeness plots to MERRA-2 and any CMPEXP ending with :V
+* ---------------------------------------------------------------------------
 
-* Find MERRA2 experiment
-* ----------------------
-  MERRA2  = 0
-       n  = 1
-while( n <= numexp )
-if( ctag.n.1 = "MERRA-2" )
-    MERRA2 = n
-endif
-         n = n + 1
-endwhile
+       k  = 1
+while( k <= numexp )
+say 'Looping through experiments, k = 'k' CTAG = 'ctag.k.1' TYPE = 'type.k
 
-if( MERRA2 != 0 )
+if( ( ctag.k.1 = "MERRA-2" | type.k = V ) & cname.k.1 != 'NULL' )
+     TAG   = k
+     say 'Performing Closeness plots to: 'ctag.TAG.1' k = 'k
 
 * Loop over Seasons to Process
 * ----------------------------
@@ -654,50 +670,64 @@ else
 'set dfile 'qfile.1
 'set gxout shaded'
 'rgbset'
-'run setenv "LEVTYPE" 'DLEVS
+'run getenv "DIFFTYPE"'
+             DIFFTYPE = result
+'run setenv "LEVTYPE" 'DIFFTYPE'LEVS'
 
-* Horizontal Plot
-* ---------------
+* Horizontal Closeness Plot (Experiment_vs_Comparison to Verification)
+* --------------------------------------------------------------------
        mathparm  =  MATH
 while( mathparm != 'DONE' )
 
-* Closeness Plot (Experiment_vs_Comparison to MERRA-2)
-* ----------------------------------------------------
        n  = 1
 while( n <= numexp )
-if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" )
-say 'Closeness plot between  exp: 'qtag.1
-say '                       cexp: 'ctag.n.1
-say '                        obs: 'ctag.MERRA2.1
-say ''
-        flag = ""
-while ( flag = "" )
 
-'closeness -CVAR 'cmod''n' -MVAR 'qmod' -OVAR 'cmod''MERRA2' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'ctag.MERRA2.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'cdesc.MERRA2.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'cfile.MERRA2.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm
+     say 'n = 'n' Testing 'qtag.1' and 'ctag.n.1' for closeness with 'ctag.TAG.1
 
-if( mathparm != NULL )
-    MTH = '_'mathparm
-else
-    MTH = ''
-endif
-if( PREFIX != NULL )
-    PFX = PREFIX'_'
-else
-    PFX = ''
-endif
-'myprint -name 'OUTPUT'/'NAME''MTH'_'ctag.n.1'_closeness_'PFX''ctag.MERRA2.1'.'season
+     if( ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & ctag.n.1 != ctag.TAG.1 & type.n != V & cname.n.1 != 'NULL' )
+     say 'Closeness plot between  exp: 'qtag.1
+     say '                       cexp: 'ctag.n.1
+     say '                        obs: 'ctag.TAG.1
+     say '              Total  numexp: 'numexp
+     say ''
 
- if( DEBUG = "debug" )
-     say "Hit ENTER to repeat plot, or NON-BLANK to continue"
-     pull flag
- else
-     flag = "next"
- endif
-'c'
-endwhile ;* END While_FLAG Loop 
-endif
-       n  = n + 1
-endwhile ;* END While_N Loop 
+             flag = ""
+     while ( flag = "" )
+     
+                  'define zobs'TAG''season' = regrid2( cmod'TAG''season',0.25,0.25,bs_p1,0,-90 )'
+                  'define zobs'n''season'   = regrid2( cmod'n''season'  ,0.25,0.25,bs_p1,0,-90 )'
+                  'define zmod'season'      = regrid2( qmod'season'     ,0.25,0.25,bs_p1,0,-90 )'
+
+     'closeness -CVAR 'zobs''n' -MVAR 'zmod' -OVAR 'zobs''TAG' -CNAME 'ctag.n.1' -MNAME 'NAME' -ONAME 'ctag.TAG.1' -CDESC 'cdesc.n.1' -MDESC 'qdesc.1' -ODESC 'cdesc.TAG.1' -MFILE 'qfile.1' -MBEGDATE 'begdate' -MENDDATE 'enddate' -OFILE 'cfile.TAG.1' -OBEGDATE 'begdateo' -OENDDATE 'enddateo' -EXPID 'EXPID' -PREFIX 'PREFIX' -SEASON 'season' -OUTPUT 'OUTPUT' -CLIMATE 'climate' -GC 'GC.1' -MATH 'mathparm
+
+     if( mathparm != NULL )
+         MTH = '_'mathparm
+     else
+         MTH = ''
+     endif
+     if( PREFIX != NULL )
+         PFX = PREFIX'_'
+     else
+         PFX = ''
+     endif
+     
+     'myprint -name 'OUTPUT'/'NAME''MTH'_'ctag.n.1'_closeness_'PFX''ctag.TAG.1'.'season
+
+      if( DEBUG = "debug" )
+          say "Hit ENTER to repeat plot, or NON-BLANK to continue"
+          pull flag
+      else
+          flag = "next"
+      endif
+
+     'c'
+     endwhile ;* END While_FLAG Loop 
+
+     endif
+
+n  = n + 1
+endwhile ;* END While n<=numexp Loop 
+
        if( mathparm != 'NULL' )
            mathparm  = 'NULL'
        else
@@ -711,12 +741,15 @@ endif
 * ---------------
 endwhile ;* END While_m>0 Loop
 
-endif ;* END MERRA-2 Test
+endif ;* END CTAG Test
+
+k = k + 1
+endwhile ;* END While_k Loop
 
 if( cmpexp_only = TRUE ) ; return ; endif
 
 ***********************************************************************************
-*                          Loop over Verification Datasets
+*                      Loop over Observational Verification Datasets
 ***********************************************************************************
 
 'getnumrc 'geosutil'/plots/'NAME
@@ -1017,7 +1050,7 @@ endwhile ;* END While_FLAG Loop
 * ---------------------------------------------------------
        n  = 1
 while( n <= numexp )
-if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" )
+if( ctag.n.1 != "NULL" & ctag.n.1 != "merra" & ctag.n.1 != "MERRA-2" & type.n != V )
 say 'Closeness plot between  exp: 'qtag.1
 say '                       cexp: 'ctag.n.1
 say '                        obs: 'otag.1
