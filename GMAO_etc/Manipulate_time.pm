@@ -522,7 +522,7 @@ sub token_resolve {
             $jd = jdoy($yyyy,$mm,$dd);
         }
     }
-    if (defined($time)) {
+    if ($time) {
         $time = "000000" if int($time) == 0;
         $hh = substr($time,0,2) if length($time) >= 2;
         $nn = substr($time,2,2) if length($time) >= 4;
