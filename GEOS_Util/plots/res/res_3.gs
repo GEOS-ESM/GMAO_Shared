@@ -192,6 +192,12 @@ endif
 'set t 1'
 'd res'season'obs'
 
+'set dfile ' zdifile
+'set x 1'
+'set t 1'
+'sety'
+'setz'
+
 if( CINTDIFF != NULL )
 * --------------------
 
@@ -265,6 +271,12 @@ else
     'd maskout( resdifz,abs(resdifz)-0.3 )'
 
 endif
+
+'set dfile 'dfile
+'set x 'x1' 'x2
+'set y 'y1' 'y2
+'set z 'z1' 'z2
+'set t 1'
 
 'cbarn -scale 0.9 -snum 0.5'
 'set gxout contour'

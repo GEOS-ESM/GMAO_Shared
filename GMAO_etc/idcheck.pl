@@ -23,7 +23,9 @@ my ($noprompt, $quiet, $verbose, $DBcheck, $PLcheck);
 {
     init();
     check_semperpy_dbs() if $DBcheck;
-    check_plots_dir()    if $PLcheck;
+    unless ($status == 1) {
+        check_plots_dir() if $PLcheck;
+    }
     exit $status;
 }
 
@@ -76,16 +78,17 @@ sub check_semperpy_dbs {
     # load SemperPy module
     #---------------------
     $SHARE = "/discover/nobackup/projects/gmao/share";
-    $modsDIR = "$SHARE/dasilva/lib/python/gmaopy/modules";
+    $modsDIR = "/home/dao_ops/gmao_packages/modules";
 
     unless (-e $modsDIR) {
-        myprint("Warning: Unable to check SemperPy DB info");
+        myprint("Warning: Unable to check SemperPy DB info: $modsDIR;");
         $status = 99 unless $status == 1;
         return;
     }
     $ENV{"MODULEPATH"} .= ":${modsDIR}";
     do "/usr/share/modules/init/perl";
-    module ("load semperpy/1.90");
+    module ("load gpy/sles12-v1.1.0");
+    $ENV{"SEMPERPY_CONFIG"} = "/home/dao_ops/gmao_packages/o2h/o2h/config";
 
     # write .pgpass, if it does not already  exist
     #---------------------------------------------
@@ -94,7 +97,7 @@ sub check_semperpy_dbs {
     unless (-e $pgpass) {
         myprint("Writing temporary password file: $pgpass");
         open $PGP, "> $pgpass" or die "Error. Unable to write $pgpass\n";
-        print $PGP "dpdb:*:*:$user:hemperUI9#\n";
+        print $PGP "edb1:*:*:$user:hemperUI9#\n";
         close $PGP;
         system "chmod 600 $pgpass";
         $removeAfterCheck = 1;
@@ -103,6 +106,10 @@ sub check_semperpy_dbs {
     # find SemperPy bin directory
     #----------------------------
     chomp($spy_sql = `which spy_sql`);
+    unless ($spy_sql) {
+        warn "Cannot find spy_sql. Exiting ... ;";
+        exit;
+    }
     chomp($bindir = `dirname $spy_sql`);
 
     # look for expid in each logical database
@@ -111,9 +118,10 @@ sub check_semperpy_dbs {
     foreach $logical_db (qw( fc_exp fc_ops im_exp im_ops )) {
         chomp($which_pdb = `python $bindir/whichdb.py $logical_db`);
         $physical_db = (split /\s+/, $which_pdb)[0];
+        next unless $physical_db;
 
         $cmd = "select distinct expver from $logical_db.stats";
-        $psql_cmd = "psql -w -q -U $user -h dpdb $physical_db -c \"$cmd\"";
+        $psql_cmd = "psql -w -q -U $user -h edb1 $physical_db -c \"$cmd\"";
         print "$psql_cmd\n" if $verbose;
         $select_results = `$psql_cmd`;
 
@@ -265,7 +273,7 @@ options
                    =1  => check SemperPy databases
                    =2  => check geos5 modeling Intranet plot directory
                    =3  => check both (default)
- -rem            Remote account to use for accessing Intranet plot directory
+ -rem acct       Remote account to use for accessing Intranet plot directory
                  default: $ENV{"USER"}\@train
                  (remote machine must be either "polar" or "train")
  -np             Take default for \$rem_acct if not provided; Otherwise,
