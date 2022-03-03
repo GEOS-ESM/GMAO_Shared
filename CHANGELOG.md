@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Compress CircleCI artifacts
 - Updated CircleCI to use Orb
+- Updated Manipulate_time.pm to include new routine, get_htype()
 
 ### Fixed
 
