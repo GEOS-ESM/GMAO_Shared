@@ -12,12 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
-- Compress CircleCI artifacts
-- Updated CircleCI to use Orb
 
 ### Fixed
 
 ### Removed
+
+## [1.5.1] - 2022-02-04
+
+### Changed
+
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
 
 ## [1.5.0] - 2021-12-16
 
