@@ -165,7 +165,9 @@ END
 # Mid-Dec 2007 - onward, the start of the COSMIC constellation - still need cosmic reprocessing?
 # ----------------------------------------------------------------------------------------------
 BEGIN r21c_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
-  20010519_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20010519_00z-20060430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20060501_00z-20181231_18z 240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GPSRO/bufr/COSMIC/Y%y4/M%m2/gdas1_modified.%y4%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20191010_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
 # GOES Sounder Radiances
@@ -323,14 +325,15 @@ END
  
 # REPROCESSED AVHRR
 # -----------------
+# AVHRR AM radiances SAME AS REAL-TIME STREAM at present
 BEGIN r21c_avcsam_bufr => gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
-  19981026_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+  19981026_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.avcsam.tm00.bufr_d
   20120207_00z-20160227_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
   20160227_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
 END
 
 BEGIN r21c_avcspm_bufr => gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
-  19981026_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20010301_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.avcspm.tm00.bufr_d
   20120207_00z-20140731_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
   20140801_00z-20160226_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
   20160228_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
