@@ -13,9 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Compress CircleCI artifacts
-- Updated CircleCI to use Orb
-
 ### Fixed
 
 ### Added
@@ -23,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
 
 ### Removed
+
+## [1.5.1] - 2022-02-04
+
+### Changed
+
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
 
 ## [1.5.0] - 2021-12-16
 
