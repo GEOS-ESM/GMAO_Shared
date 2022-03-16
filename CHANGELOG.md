@@ -9,25 +9,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-### Fixed
-
 ### Changed
+
+- bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
+
+### Fixed
 
 ### Removed
 
+## [1.5.1] - 2022-02-04
+
+### Changed
+
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
+
+## [1.5.0] - 2021-12-16
+
 ### Added
 
+- Add support for GOCART2G restarts in `regrid.pl`
+
+### Removed
+
+- Moved lightning files to Chem_Shared
+
+## [1.4.13] - 2021-12-15
+
 ### Fixed
+- Quickplot and quickstat bugs
+
+### Added
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
+## [1.4.12] - 2021-12-09
+
+### Changed
+
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
+
+### Fixed
+
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
+
+## [1.4.11] - 2021-11-03
 
 ### Changed
 
 - add Cascade knob to g5fcst_stats.pl and regrid.pl
 - revised dyn_blob: more general on the blobs
 - make sure echorc.x exits w/ success code when applicable
-- bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
-
-### Removed
-
+- Updated CI to use Baselibs 6.2.8
+- Updated `pyrob` to work with GEOS-IT files
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
 
 ## [1.4.10] - 2021-10-08
 
