@@ -687,10 +687,10 @@ if( numlevs > 1 )
 
 if( CINTDIFF != 'NULL' )
    'set strsiz .07'
-   'draw string 0.050 1.77 Plot represents'
-   'draw string 0.050 1.62 values > 'dqrel' %'
-   'draw string 0.050 1.47 Relative Difference'
-   'draw string 0.050 1.32 ( DQ/QMax )'
+   'draw string 0.050 1.67 Plot represents'
+   'draw string 0.050 1.52 values > 'dqrel' %'
+   'draw string 0.050 1.36 Relative Difference'
+   'draw string 0.050 1.22 ( DQ/QMax )'
 endif
 
 else

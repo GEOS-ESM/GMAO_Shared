@@ -31,6 +31,12 @@ gridcomp = getarg (args,GC)
     math = getarg (args,MATH)
    level = getarg (args,LEVEL)
 
+   qname = NULL
+   qname = getarg (args,QNAME)
+if(qname = NULL )
+   qname = mname
+endif
+ 
 * ---------------------------
 if(     math = NULL ) ;     math = '' ; endif
 if(   season = NULL ) ;   season = '' ; endif
@@ -181,7 +187,7 @@ endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'mname
+   'getdesc 'qname
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"
