@@ -470,6 +470,7 @@
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
+   546  gsi_diag    aqua        amsre                      0    # amsre_aqua
    547  gsi_diag    aqua        amsre_low                  0    # amsre_aqua(low)
    548  gsi_diag    aqua        amsre_mid                  0    # amsre_aqua(mid)
    549  gsi_diag    aqua        amsre_hig                  0    # amsre_aqua(hi)
