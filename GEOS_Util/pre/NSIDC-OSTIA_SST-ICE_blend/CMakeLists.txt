@@ -45,6 +45,12 @@ ecbuild_add_executable (
   LIBS ${this})
 set_target_properties(lake_sst_sic_EIGTHdeg.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
+ecbuild_add_executable (
+  TARGET reynolds_QUART.x
+  SOURCES proc_SST_FRACI_reynolds_quart.F90
+  LIBS ${this})
+set_target_properties(reynolds_QUART.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
 if (USE_F2PY)
    find_package(F2PY2)
    if (F2PY2_FOUND)

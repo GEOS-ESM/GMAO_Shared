@@ -9,11 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added preprocessing team as CODEOWNER for the GEOS_Util/pre directory
+- added a way to process Reynolds only for producing SST and Ice Concentration data, using a land-sea mask.
+  The _new_ file is: `proc_SST_FRACI_reynolds_quart.F90` and modified: `read_Reynolds.F90`, `CMakeLists.txt`
+  **Note**: the contents of this directory will be defunct once `ExtData` mechanics are implemented, WIP with @bena-nasa
+
 ### Changed
 
 ### Fixed
 
 - Updates to CMake to support Spack
+
+### Added
+
+- Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
 
 ### Removed
 
@@ -37,9 +46,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.13] - 2021-12-15
 
 ### Fixed
+
 - Quickplot and quickstat bugs
 
 ### Added
+
 - Quickplot now supports plotting GOCART-2G collections
 - Support for Three Corner Hat (3CH) Analysis
 
