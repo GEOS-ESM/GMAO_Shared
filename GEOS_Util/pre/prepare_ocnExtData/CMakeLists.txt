@@ -4,9 +4,7 @@ set ( srcs
   sst_ice_helpers.F90
   )
 
-esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL)
-target_link_libraries (${this} PUBLIC ${NETCDF_LIBRARIES})
-target_include_directories (${this} PUBLIC ${INC_NETCDF})
+esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL NetCDF::NetCDF_Fortran)
 
 set (pyscripts
   plot_binary_sst_ice.py
