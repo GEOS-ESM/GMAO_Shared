@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
+
 ### Fixed
 
 - Updates to CMake to support Spack
