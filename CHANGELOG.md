@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
 - bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
 
 ### Fixed
