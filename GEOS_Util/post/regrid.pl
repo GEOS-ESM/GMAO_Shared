@@ -22,7 +22,7 @@ use WriteLog qw(symlink_ system_ unlink_ );
 
 # global variables
 #-----------------
-my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsTagIN, $bcsTagOUT);
+my ($ESMABIN, $ESMATAG, $bcsHEAD, $bcsHEAD_ops, $bcsHEAD_dev, $bcsTagIN, $bcsTagOUT);
 my ($bkgFLG, $bkg_regrid_FLG, $c2cX, $capture, $coupled_model_dir);
 my ($dbHash, $debug, $drymassFLG, $dyn2dynX, $expid);
 my ($g5modules, $gcmFLG, $getinput, $grIN, $grINocean, $grINocean_, $mdlINocean);
@@ -85,7 +85,7 @@ $imo{"e"} = "1440"; $jmo{"e"} = "720";     # MERRA-2
 $imo{"f"} = "2880"; $jmo{"f"} = "1440";    # OSTIA
 $imo{"CS"} = 1;                            # OSTIA cubed-sphere
 
-foreach (qw/ 90 180 360 720 /) {
+foreach (qw/ 90 180 360 720 1440 2880 5760 /) {
     $CSo{"C$_"} = $_;
     $imo{"C$_"} = $_;
     $jmo{"C$_"} = 6*$_;
@@ -340,11 +340,13 @@ sub init {
     $bcsHEAD_lt = "/discover/nobackup/ltakacs/bcs";
     $bcsHEAD_ops = "/discover/nobackup/"
         .           "projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs";
+    $bcsHEAD_dev = "/discover/nobackup/"
+        .           "projects/gmao/osse2/stage/BCS_FILES";
 
     if (defined($bcsALT)) {
         if ($bcsALT) { $bcsHEAD = $bcsALT }
-        else         { $bcsHEAD = $bcsHEAD_lt }
-    } else           { $bcsHEAD = $bcsHEAD_ops }
+        else         { $bcsHEAD = $bcsHEAD_dev }
+    } else           { $bcsHEAD = $bcsHEAD_dev }
 
     # sbatch or qsub?
     #----------------

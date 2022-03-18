@@ -9,6 +9,7 @@
 # where $SOURCE is an OPTIONAL valid SOURCE directory containing a HISTORY.rc
 #######################################################################################
 
+set FAST = "OFF"
 
 set plots = "residual"
 set MAKE_LIST = FALSE
@@ -154,6 +155,8 @@ endif
 
 #######################################################################################
 
+if ($FAST == "OFF") then
+
 # Taylor Plots
 # ------------
 if( $MAKE_LIST == TRUE | ( $TAYLOR == "TRUE" & $CMPEXP_ONLY == "FALSE" ) ) then
@@ -186,6 +189,7 @@ if( $MAKE_LIST == TRUE | ( $TAYLOR == "TRUE" & $CMPEXP_ONLY == "FALSE" ) ) then
    if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/taylor/taylor_prog SLP DYN  1000 $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 endif
 
+endif
 
 # Prognostic Zonal Mean Comparisons
 # ---------------------------------
@@ -198,6 +202,7 @@ endif
        if( $plot == $plotname.$n ) $grads $batch -p -c "run $GEOSUTIL/plots/zcmp/progz $EXPORT $GC $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
      end
 
+if ($FAST == "OFF") then
 
 # Prognostic Horizontal Mean Dynamics Comparisons
 # -----------------------------------------------
@@ -285,6 +290,7 @@ if( $plot == residual ) then
     $grads $batch -p -c "run $GEOSUTIL/plots/res/res   $expid $output $debug $seasons "
 endif
 
+endif
 
 # Surface/2-D
 # -----------
@@ -332,7 +338,6 @@ endif
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT CLDTT:SOLAR   -NAME cldtt   -EXPID $expid -OUTPUT $output -DEBUG $debug        -RC SRB   -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT CLDTT:SOLAR   -NAME cldtt   -EXPID $expid -OUTPUT $output -DEBUG $debug        -RC ISCCP -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
    if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -EXPORT CLDTT:SOLAR   -NAME cldtt   -EXPID $expid -OUTPUT $output -DEBUG $debug -OCEAN -RC COADS -SEASON $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-
 
 
 # Radiation: Shortwave
@@ -397,6 +402,7 @@ endif
   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME nettoac      -EXPID $expid -EXPORT RSC:SOLAR   OLC:IRRAD  -OBS RSC:SOLAR   OLC:IRRAD -OUTPUT $output -DEBUG $debug -SEASON $seasons "                                  ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
   if( $plot == $plotname.$n ) $grads $batch -p -c "run genplot -NAME nettoac_cc5  -EXPID $expid -EXPORT RSC:SOLAR OLCC5:IRRAD  -OBS RSC:SOLAR OLCC5:IRRAD -OUTPUT $output -DEBUG $debug -SEASON $seasons "                                  ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+if ($FAST == "OFF") then
 
 # Aerosols:
 # ---------
@@ -966,6 +972,8 @@ if( $MAKE_LIST == TRUE | "$CMPEXP" != "NULL" ) then
 
 # End Experiment Comparison Plots
 # -------------------------------
+endif
+
 endif
 
 #######################################################################################

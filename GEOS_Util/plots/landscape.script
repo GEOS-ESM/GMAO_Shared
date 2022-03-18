@@ -14,6 +14,7 @@ set plots = `echo $plots` # To remove blanks
 
 set LIST  = FALSE
 
+set FAST = "OFF"
 
 setenv ORIENTATION LANDSCAPE
 if ( ! $?LONSENV ) then
@@ -141,9 +142,9 @@ endif
      @ n = 1
 
 if( $plot == residual ) then
-                             $GEOSUTIL/plots/res/makeres      $source
-    $grads $batch -l -c "run $GEOSUTIL/plots/res/res   $expid $output $debug $seasons "
-    $grads $batch -l -c "run $GEOSUTIL/plots/zcmp/zcmp $expid $output $seasons "
+#                            $GEOSUTIL/plots/res/makeres      $source
+#   $grads $batch -l -c "run $GEOSUTIL/plots/res/res   $expid $output $debug $seasons "
+#   $grads $batch -l -c "run $GEOSUTIL/plots/zcmp/zcmp $expid $output $seasons "
 endif
 
 # Prognostics: Loop over Variables for Zonal Mean Comparisons
@@ -154,7 +155,7 @@ endif
      foreach EXPORT ($EXPORTS)
        @ k = $k + 1
        set GC = $GCS[$k]
-       if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/zcmp1/progz1 $EXPORT $GC $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#      if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/zcmp1/progz1 $EXPORT $GC $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
      end
 
      set EXPORTS = `echo ZLE SLP U   V   T   Q     RH2  `
@@ -163,7 +164,7 @@ endif
      foreach EXPORT ($EXPORTS)
        @ k = $k + 1
        set GC = $GCS[$k]
-       if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/lcmp/lcmp1 $EXPORT $GC $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#      if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/lcmp/lcmp1 $EXPORT $GC $expid $output $debug $seasons " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
      end
 
 
@@ -171,13 +172,13 @@ endif
 # -----------
 # Time Series
 # -----------
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/aerosols   $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/ps         $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/pme        $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#   if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/aerosols   $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#   if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/ps         $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#   if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/pme        $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/tpw        $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/rad        $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/ke         $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
-    if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/zcmp1/vortex U DYN $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#   if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/tseries/ke         $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+#   if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/zcmp1/vortex U DYN $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run $GEOSUTIL/plots/zcmp1/qbo    U DYN $expid $output $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
 # Quadratics
@@ -203,7 +204,7 @@ if( $exp != NULL ) then
 endif
 end
 
-
+if ($FAST == "OFF") then
 # Energy
 # ----------
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT KEDYN:DYN KEPHY:DYN KEANA:DYN   -NAME DKEDT   -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
@@ -341,6 +342,7 @@ end
 
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMDTDYN:DYN  DMDTANA:DYN              -NAME DMDTDYNANA     -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT DMDTDYN:DYN  DMDTANA:DYN DMDT:PHYSICS -NAME DMDTDYNANAPHY  -SEASON $seasons -OUTPUT $output -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+endif
 
 # Gravity-Wave Drag
 # -----------------
@@ -376,6 +378,7 @@ end
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ALBNR:SOLAR  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template -EXPID $expid -EXPORT ALBNF:SOLAR  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
 
+if ($FAST == "OFF") then
 # Tendencies
 # ----------
     set levels = '1000 975 950 925 900 850 800 750 700 650 600 550 500 450 400 350 300 250 200 150 100'
@@ -532,6 +535,8 @@ set level  = `echo $plot | cut -d: -f3`
 if( $EXPORT != $GC ) then
        if( $level == '' | $level == 'Z' | $level == 'z' ) set level = misc
        $grads $batch -l -c "run template -EXPID $expid -EXPORT ${EXPORT}:${GC} -LEVELS $level -SEASON $seasons -OUTPUT ${output}/misc -DEBUG $debug -ZLOG $zlog "
+endif
+
 endif
 
 #######################################################################################
