@@ -344,7 +344,6 @@ def get_config_from_questionary():
     parameters_in={}
     parameters_in['COMMON']  = common_in
     parameters_in['SURFACE'] = surface_in
-    parameters_in['ANALYSIS'] = analysis_in
     inputs['parameters'] = parameters_in
 
     config['input']= inputs
@@ -353,26 +352,14 @@ def get_config_from_questionary():
     parameters_out['COMMON']  = common_out
     parameters_out['UPPERAIR'] = upper_out
     parameters_out['SURFACE'] = surface_out
+    parameters_out['ANALYSIS'] = analysis_in
     outputs['parameters'] = parameters_out
 
     config['output']= outputs
 
     config['slurm_options'] = slurm
 
-    if os.path.exists('regrid.yaml') :
-       overwrite = questionary.confirm("Do you want to overwrite regrid.yaml file?", default=False).ask()
-       if not overwrite :
-         while True:
-           new_name = questionary.text("What's the backup name for existing regrid.yaml?", default='regrid.yaml.1').ask()
-           if os.path.exists(new_name):
-              print('\n'+ new_name + ' exists, please enter a new one. \n')
-           else:
-              shutil.move('regrid.yaml', new_name)
-              break
-
-    f = open("regrid.yaml", "w")
-    yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
-    f.close()
+    return config
 
 if __name__ == "__main__":
-  get_config_from_questionary()
+  config = get_config_from_questionary()
