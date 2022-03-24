@@ -14,7 +14,7 @@ class catchment(object):
      stream.close()
 
   def regrid(self):
-     print("\nRegridding land, landice, saltwater.....\n")
+     print("\nRegridding catchment.....\n")
      config = self.config
      bindir  = os.getcwd()
      in_bcsdir  = config['input']['shared']['bcs_dir']

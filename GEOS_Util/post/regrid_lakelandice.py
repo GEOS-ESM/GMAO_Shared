@@ -43,8 +43,7 @@ class lakelandice(object):
          expid = config['input']['shared']['expid']
          suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.bin'
          # from merra-2
-         restarts_in = [rst_dir + expid + '.catch_internal_rst.'    + suffix,
-                        rst_dir + expid + '.lake_internal_rst.'     + suffix,
+         restarts_in = [rst_dir + expid + '.lake_internal_rst.'     + suffix,
                         rst_dir + expid + '.landice_internal_rst.'  + suffix,
                         rst_dir + expid + '.saltwater_internal_rst.'+ suffix]
 
