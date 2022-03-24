@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+- Added a few new tags to `regrid.pl`
+
+### Fixed
+
+### Added
+
+### Removed
+
+## [1.5.3] - 2022-03-18
+
+### Changed
+
+- Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
+
+## [1.5.2] - 2022-03-18
+
+### Added
+
 - Added preprocessing team as CODEOWNER for the GEOS_Util/pre directory
 - added a way to process Reynolds only for producing SST and Ice Concentration data, using a land-sea mask.
   The _new_ file is: `proc_SST_FRACI_reynolds_quart.F90` and modified: `read_Reynolds.F90`, `CMakeLists.txt`
@@ -16,7 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
 - bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
 
 ### Fixed
@@ -26,8 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
-
-### Removed
 
 ## [1.5.1] - 2022-02-04
 
