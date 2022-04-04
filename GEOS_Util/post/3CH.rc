@@ -1,0 +1,77 @@
+# --------------------------------------------------------------------------------------------------------------  
+#   Required Parameters
+#   -------------------
+#   expid_1:  expid                  for 1st 3CH Triplet member (exp1:exp2:exp3)
+#   files_1:  file location and name for 1st 3CH Triplet member (exp1:exp2:exp3)
+#
+#   expid_2:  expid                  for 2nd 3CH Triplet member (exp1:exp2:exp3)
+#   files_2:  file location and name for 2nd 3CH Triplet member (exp1:exp2:exp3)
+#
+#   expid_3:  expid                  for 3rd 3CH Triplet member (exp1:exp2:exp3)
+#   files_3:  file location and name for 3rd 3CH Triplet member (exp1:exp2:exp3)
+#
+#   nymdb:  Beginning Date for 3CH computation
+#   nhmsb:  Beginning Time for 3CH computation
+#   nymde:     Ending Date for 3CH computation
+#   nhmse:     Ending Time for 3CH computation
+
+#   Optional Parameters
+#   -------------------
+#    ( for N=4,5,... )
+#      expid_N:  expid                  for 3rd 3CH Triplet member of N-2 Triplet  (exp1:exp2:expN)
+#      files_N:  file location and name for 3rd 3CH Triplet member of N-2 Triplet  (exp1:exp2:expN)
+#
+#      ndt:   Time Frequency in seconds  (Default:  21600)
+#  
+#      levs:   levels used for 3CH computation (e.g., 1000 925 850 700 ) (Default: ALL coincident levels)
+#      fields: fields used for 3CH computation (Default: u v t q h p)
+#      im:     Longitudinal Dimension for Output (Default: Minimum among input experiments)
+#      jm:     Latitudinal  Dimension for Output (Default: Minimum among input experiments)
+#  
+#      interpolation_method:  BL => Bilinear    Interpolation  (Default)
+#                             BC => BiCubic     Interpolation
+#                             BA => Box-Average Interpolation
+#  
+#   creates:  nc4 file  which contains
+#                       3-D fields of 3CH Variance Error Estimates for each Triplet Member: var(expN error),
+#             plus full 3-D fields of Member Means: ave(expN), Variance Differences: var(expM-expN)
+#                  and  3-D fields of Mean Square Error Decomposition: Total, Bias, Amplitude, Phase
+#  
+# --------------------------------------------------------------------------------------------------------------  
+
+
+#  Required Parameters (One Complete Triplet Set + Dates of Interest)
+#  ------------------------------------------------------------------
+   expid_1: GFS
+   files_1: /discover/nobackup/projects/gmao/g6dev/ltakacs/GFS/analysis/Y%y4/M%m2/gfs.0.5x0.5_L47.%y4%m2%d2_%h2z.nc4
+
+   expid_2: ECOPS
+   files_2: /discover/nobackup/projects/gmao/g6dev/ltakacs/ecmwf/Y%y4/M%m2/ecmwf.1x125_14_levels.%y4%m2%d2_%h2z.nc4
+
+   expid_3: f5271_fp
+   files_3: /discover/nobackup/projects/gmao/g6dev/ltakacs/f5271_fp/f5271_fp.inst3_3d_asm_Np.%y4%m2%d2_%h200z.nc4
+
+   expid_4: prePP
+   files_4: /discover/nobackup/projects/gmao/dadev/rtodling/archive/prePP/diag/Y2021/M10/prePP.inst3_3d_asm_Np.%y4%m2%d2_%h200z.nc4
+
+#  expid_2: ERA5
+#  files_2: /discover/nobackup/projects/gmao/g6dev/sdrabenh/validation_data/era5/pres_levels_daily/Y%y4/M%m2/era5_pl-allvar.%y4%m2%d2_%h2z.nc4
+#  files_2: /discover/nobackup/projects/gmao/g6dev/sdrabenh/validation_data/era5/pres_levels_daily/Y%y4/M%m2/era5_mrg_selvar_4dly.%y4%m2%d2_%h2z.nc4
+
+#  expid_3: MERRA2
+#  files_3: /gpfsm/dnb55/projects/p136/aelakkra/archive/LevSubset/merra2/Y%y4/M%m2/MERRA-2.inst3_3d_asm_Np.%y4%m2%d2_%h200z.levsubset.nc4 
+
+#  expid_3: f522_fp
+#  files_3: /gpfsm/dnb55/projects/p136/aelakkra/archive/LevSubset/f522_fp/Y%y4/M%m2/f522_fp.inst3_3d_asm_Np.%y4%m2%d2_%h200z.levsubset.nc4
+
+#  expid_4: f525_fp
+#  files_4: /gpfsm/dnb55/projects/p136/aelakkra/archive/LevSubset/f525_p7_fp/Y%y4/M%m2/f525_p7_fp.inst3_3d_asm_Np.%y4%m2%d2_%h200z.levsubset.nc4
+
+   nymdb: 20211001
+   nhmsb:   000000
+   nymde: 20211031
+   nhmse:   180000
+
+#  fields: q
+#  im: 576
+#  jm: 361

@@ -85,6 +85,7 @@
 # 2021.06.03 RT/McCarty/RL   RO class including commencial data; max used of IASI MetopC
 # 2021.07.31 Todling         Add MLS-T for verification
 # 2021.08.18 Todling         Blacked out a few days of AIRS due to data corruption
+# 2021.12.14 Todling         Update MLST from v3/v4 to simply v5
 #
 #+BEGIN obclass data set description
 #+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
@@ -351,8 +352,8 @@ BEGIN disc_amsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
   20130126_06z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
   20131012_00z-20190727_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
   20190728_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
-  20101001_00z-20101031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
-  20131001_00z-20131031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
+# 20101001_00z-20101031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
+# 20131001_00z-20131031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
 END
 
 # GPM GMI 1CR brightness temperature
@@ -414,6 +415,7 @@ END
 
 # MLS retrieved temperature
 BEGIN gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
- 20040813_00z-20150531_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v3/bufr/Y%y4/M%m2/MLSt.%y4%m2%d2.t%h2z.bufr
- 20150601_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v4/bufr/Y%y4/M%m2/MLSt_v4.%y4%m2%d2.t%h2z.bufr
+#20040813_00z-20150531_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v3/bufr/Y%y4/M%m2/MLSt.%y4%m2%d2.t%h2z.bufr
+#20150601_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v4/bufr/Y%y4/M%m2/MLSt_v4.%y4%m2%d2.t%h2z.bufr
+ 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v5/bufr/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
 END

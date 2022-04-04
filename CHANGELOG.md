@@ -5,17 +5,100 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
 
 ### Added
 
+### Changed
+
+- Added a few new tags to `regrid.pl`
+- Update remapping to be consistent with FV3
+
 ### Fixed
+
+### Added
+
+### Removed
+
+## [1.5.3] - 2022-03-18
 
 ### Changed
 
-- Update remapping to be consistent with FV3
+- Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
+
+## [1.5.2] - 2022-03-18
+
+### Added
+
+- Added preprocessing team as CODEOWNER for the GEOS_Util/pre directory
+- added a way to process Reynolds only for producing SST and Ice Concentration data, using a land-sea mask.
+  The _new_ file is: `proc_SST_FRACI_reynolds_quart.F90` and modified: `read_Reynolds.F90`, `CMakeLists.txt`
+  **Note**: the contents of this directory will be defunct once `ExtData` mechanics are implemented, WIP with @bena-nasa
+
+### Changed
+
+- bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
+
+### Fixed
+
+- Updates to CMake to support Spack
+
+### Added
+
+- Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
+
+## [1.5.1] - 2022-02-04
+
+### Changed
+
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
+
+## [1.5.0] - 2021-12-16
+
+### Added
+
+- Add support for GOCART2G restarts in `regrid.pl`
 
 ### Removed
+
+- Moved lightning files to Chem_Shared
+
+## [1.4.13] - 2021-12-15
+
+### Fixed
+
+- Quickplot and quickstat bugs
+
+### Added
+
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
+## [1.4.12] - 2021-12-09
+
+### Changed
+
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
+
+### Fixed
+
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
+
+## [1.4.11] - 2021-11-03
+
+### Changed
+
+- add Cascade knob to g5fcst_stats.pl and regrid.pl
+- revised dyn_blob: more general on the blobs
+- make sure echorc.x exits w/ success code when applicable
+- Updated CI to use Baselibs 6.2.8
+- Updated `pyrob` to work with GEOS-IT files
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
 
 ## [1.4.10] - 2021-10-08
 
@@ -307,7 +390,7 @@ be deleted in future releases of MAPL
 ### Changed
 
 - Rolls back the constraint on gcmpost.script to only operate on pressure-level collections.
- 
+
 ### Fixed
 
 - Enables correct post proccessing of MAPL monthly collections.
@@ -389,7 +472,7 @@ be deleted in future releases of MAPL
 
 ## [1.0.12] - 2019-09-27
 
-### Changed 
+### Changed
 
 - Updates for s2s
 
