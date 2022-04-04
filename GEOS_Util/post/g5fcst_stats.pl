@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #=======================================================================
 # name - g5fcst_stats.pl 
-# with options of land only and 2d Nx with screen level variables only 
 # purpose - script to submit jobs to calculate screen level forecast statistics
 #
 # key global variables -
@@ -397,8 +396,6 @@ sub init {
     #nxonly option
     #--------------
     $nxonly = $nxonly_dflt unless $nxonly;
-    #print ("nxonly option: $nxonly\n");
-    #print ("landonly option: $nxonly\n");
            
     # initial fcst hour and offset
     #-----------------------------
@@ -1064,7 +1061,7 @@ OPTIONS [defaults in brackets]
                        [no by default]
 
     -nxonly            calculate stats of 2d Nx collection only (yes/no) 
-                       [no by default]
+                       [no by default] 
 
     -nodes nodesname   specify nodes (e.g., sky, hasw, or cas)
     -das               check for DAS hidden files before attempting to fetch files
