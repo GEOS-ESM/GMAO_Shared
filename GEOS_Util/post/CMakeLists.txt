@@ -30,15 +30,11 @@ ecbuild_add_executable (TARGET rs_vinterp.x SOURCES rs_vinterp.F90)
 ecbuild_add_executable (TARGET rs_vinterp_scm.x SOURCES rs_vinterp_scm.F90)
 
 ecbuild_add_executable (TARGET stats.x SOURCES stats.F90)
-ecbuild_add_executable (TARGET statsNx.x SOURCES statsNx.F90)
 if (DISABLE_FIELD_WIDTH_WARNING)
   set_target_properties (stats.x PROPERTIES COMPILE_FLAGS ${DISABLE_FIELD_WIDTH_WARNING})
-  set_target_properties (statsNx.x PROPERTIES COMPILE_FLAGS ${DISABLE_FIELD_WIDTH_WARNING})
 endif ()
 set_target_properties (stats.x PROPERTIES COMPILE_FLAGS "${BIG_ENDIAN}")
-set_target_properties (statsNx.x PROPERTIES COMPILE_FLAGS "${BIG_ENDIAN}")
 set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
-set_target_properties(statsNx.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
@@ -46,7 +42,6 @@ ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
 set (perlscripts
   ecmwf2geos.pl
   g5fcst_stats.pl
-  g5fcst_statsNx.pl
   ncep2geos.pl
   regrid.pl
   )
@@ -58,6 +53,7 @@ set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL
 set_property(SOURCE rs_vinterp.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN}")
 set_property(SOURCE rs_vinterp_scm.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN}")
 set_property(SOURCE 3CH.F90 APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
+
 set_property(SOURCE dynamics_lattice_module.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE mpi_util.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
 set_property(SOURCE mymalloc.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN} ${EXTENDED_SOURCE}")
@@ -91,7 +87,6 @@ target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL ${ESMF_LIBRARIES})
-target_link_libraries (statsNx.x post_nompi GMAO_gfio_r4 MAPL ${ESMF_LIBRARIES})
 target_link_libraries (flat2hdf.x post_nompi GMAO_gfio_r4)
 target_link_libraries (gg2fv.x post)
 target_link_libraries (rs2hdf.x post)
