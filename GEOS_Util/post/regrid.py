@@ -9,7 +9,7 @@ import yaml
 from regrid_questions import get_config_from_questionary 
 from regrid_params import *
 from regrid_upper import *
-from regrid_lakelandice import *
+from regrid_lake_landice_saltwater import *
 from regrid_analysis  import *
 from regrid_catchment  import *
 
@@ -45,9 +45,9 @@ def main(argv):
   upper = upperair(config_yaml)
   upper.regrid()
 
-  # land and water
-  land  = lakelandice(config_yaml)
-  land.regrid()
+  # lake, landice and saltwater
+  lls  = lake_landice_saltwater(config_yaml)
+  lls.regrid()
 
   # catchment
   catch  = catchment(config_yaml)

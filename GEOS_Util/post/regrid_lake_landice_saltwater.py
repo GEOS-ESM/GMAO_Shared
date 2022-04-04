@@ -7,7 +7,7 @@ import glob
 import yaml
 import shlex
 
-class lakelandice(object):
+class lake_landice_saltwater(object):
   def __init__(self, params_file):
      stream = open(params_file, 'r')
      self.config = yaml.full_load(stream)
@@ -137,6 +137,6 @@ class lakelandice(object):
      os.chdir(bindir)
 
 if __name__ == '__main__' :
-   lli = lakelandice('regrid_params.yaml')
-   lli.regrid()
+   lls = lake_landice_saltwater('regrid_params.yaml')
+   lls.regrid()
 
