@@ -144,9 +144,9 @@ set fname = $expid.$collection.$filetype
 # Extract Extension (last node) from Monthly Mean Files
 # -----------------------------------------------------
 if( $MM != -99 ) then
-set files = `/bin/ls -1 $fname.*$MM.nc4 | grep -v clim`
+set files = `/bin/ls -1 $fname.*$MM.nc4 | grep -v clim | grep -v nc4-partial`
 else
-set files = `/bin/ls -1 $fname.* | grep -v clim`
+set files = `/bin/ls -1 $fname.* | grep -v clim | grep -v nc4-partial`
 endif
 
 set   num = $#files
