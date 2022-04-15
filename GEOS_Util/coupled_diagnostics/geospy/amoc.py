@@ -18,14 +18,16 @@ def mkamoc(exp,dset):
     vardata=exp['plots'].get(plotname,defaults)
     varname=vardata['name']
 
-    amoc=dset[varname]*dset['atl_mask'].values
+    amoc=dset[varname].resample(time='1Y').mean('time')
+    amoc=amoc*dset['atl_mask'].values
     amoc=amoc.sum('xt_ocean',skipna=True)
     # We need to integrate transport from the bottom using reverse cumsum
     amoc=-amoc[:,::-1,:].cumsum('st_ocean',skipna=True)[:,::-1,:]
 
     # Add GM transport
     try:
-        gm=dset[varname]*dset['atl_mask'].values
+        gm=dset[varname].resample(time='1Y').mean('time')
+        gm=gm*dset['atl_mask'].values
         gm=gm.sum('xt_ocean',skipna=True)
     except KeyError:
         gm=0.0
