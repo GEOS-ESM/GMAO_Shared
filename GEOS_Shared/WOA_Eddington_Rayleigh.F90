@@ -56,6 +56,7 @@ module WOA_Eddington_Rayleigh_Mod
   ! Constant for external use to avoid clash of
   !   -1/(any eigenvalue) too close to mu0
   double precision, parameter, public :: mu0_davoid = 1.0d-6
+! ??? increase ???
 
   ! constants to avoid extreme cases, which shouldnt occur
   ! in real cases and which can cause analyze_optics problems
@@ -78,6 +79,7 @@ module WOA_Eddington_Rayleigh_Mod
        zero, two,  zero,  three, &
        zero, zero, three, zero], &
       shape(matA), order=[2,1])
+  ! (produces a 4x4 matrix filling rows first, i.e., as "pictured" above)
 
   type, public :: Eddington_Rayleigh_Optics
 
@@ -188,14 +190,17 @@ contains
 !   if (this%f_Ry /= f_Ry_) print *, trim(Iam) // ': warning: f_Ry rectified'
 
     ! backstop: crash for unphysical or extreme optics
-    ASSERT_(zero < this%taue)
-    ASSERT_(zero < this%ssae .and. this%ssae < one)
-    ASSERT_(zero < this%f_Ry .and. this%f_Ry < one)
+    _ASSERT(zero < this%taue,                       'require taue > 0')
+    _ASSERT(zero < this%ssae .and. this%ssae < one, 'require ssae in (0,1)')
+    _ASSERT(zero < this%f_Ry .and. this%f_Ry < one, 'require f_Ry in (0,1)')
 
     ! Normally require an asymmetry factor g in (-1,+1).
     ! But a stricter (-1/3,+1/3) ensures the Eddington
     ! phase function is strictly positive at all angles.
-    ASSERT_(-third < this%g_Ed .and. this%g_Ed < third)
+    _ASSERT(-third < this%g_Ed .and. this%g_Ed < third, 'require g_Ed in (-1/3,+1/3)')
+
+    ! Solve for the homogeneous solution eigenvalues/vectors ...
+    ! ==========================================================
 
     ! intermediates
     this%ssaec = one - this%ssae
@@ -208,17 +213,21 @@ contains
     facOM = fourteen_ninths * this%ssaec
     facDe = half * (ksquared + facKa) + facOM
     De2 = facDe**2 - facKa * ksquared
-    ASSERT_(De2 > zero)
+    _ASSERT(De2 > zero, 'require De2 > 0')
     De = sqrt(De2)
     la2_lo = facDe - De
     la2_hi = facDe + De
-    ASSERT_(la2_lo > zero)
+    _ASSERT(la2_lo > zero, 'require la2_lo > 0')
 
     ! eigenvalues (in increasing order)
     this%vecla(1) = -sqrt(la2_hi)  ! -ve
     this%vecla(2) = -sqrt(la2_lo)  ! -ve
     this%vecla(3) = -this%vecla(2) ! +ve
     this%vecla(4) = -this%vecla(1) ! +ve
+
+    ! make sure eigenvalues are distinct as expected
+    _ASSERT(this%vecla(2) < zero,          'require lamba2 < 0')
+    _ASSERT(this%vecla(1) < this%vecla(2), 'lamba1 and lamba2 not distinct')
 
     ! mu0 equivalent of the eigenvalues
     this%vecnrla = -one / this%vecla
@@ -231,8 +240,9 @@ contains
     this%matK(:,2) = eigenvec(this%vecla(2))
     this%matK(:,3) = eigenvec(this%vecla(3))
     this%matK(:,4) = eigenvec(this%vecla(4))
+    ! (a 4x4 matrix with each COLUMN being an eigenvector)
 
-    ! diagonal matrix
+    ! diagonal matrix needed to solve for particular solution later ...
     this%matC = zero
     this%matC(1,1) = this%ssaec
     this%matC(2,2) = k2fac
@@ -282,10 +292,10 @@ contains
     logical :: mu0_rectified
 
     ! check inputs
-    ASSERT_(zero < FdirDnTOA)
-    ASSERT_(zero < mu0 .and. mu0 <= one)
-    ASSERT_(zero <= adir .and. adir <= one)
-    ASSERT_(zero <= adif .and. adif <= one)
+    _ASSERT(zero < FdirDnTOA,               'require FdirDnTOA > 0')
+    _ASSERT(zero < mu0 .and. mu0 <= one,    'require mu0 in (0,1]')
+    _ASSERT(zero <= adir .and. adir <= one, 'require adir in [0,1]')
+    _ASSERT(zero <= adif .and. adif <= one, 'require adif in [0,1]')
 
     ! copy optical properties
     this%optics = optics
@@ -309,11 +319,17 @@ contains
     end do
     if (mu0_rectified) then
       ! backstop
-      ASSERT_(minval(abs(this%mu0_used - optics%vecnrla)) >= mu0_davoid)
+      _ASSERT(minval(abs(this%mu0_used - optics%vecnrla)) >= mu0_davoid, 'eigenvalue resonance')
     else
       ! default
       this%mu0_used = this%mu0
     end if
+
+    ! Note: we do not adjust FdirDnTOA for mu0_used,
+    ! but keep the downward energy flux at TOA unchanged.
+
+    ! Solve for the particular solution ...
+    ! =====================================
 
     ! direct beam transmission of whole layer (i.e., to SFC)
     this%nrmu0_used = -one / this%mu0_used
@@ -331,8 +347,11 @@ contains
     ! using LAPACK routine dgesv
     mat = this%mu0_used * optics%matC - matA
     call dgesv(4, 1, mat, 4, ipiv, vec, 4, info)
-    ASSERT_(info == 0)
+    _ASSERT(info == 0, 'dgesv fail in solve for vecP')
     this%vecP = vec
+
+    ! Apply boundary conditions ...
+    ! =============================
 
     ! solve for vecC = [C_1, ..., C_4]
     omadif  = one - this%adif
@@ -345,6 +364,7 @@ contains
         half  *omadif, -opadif,  five_eighths*omadif , zero,	&
         eighth*omadif, -qadif , -five_eighths*opqadif, one   ],	&
       [4,4], order=[2,1])
+    ! (produces a 4x4 matrix filling rows first, i.e., as "pictured" above)
     mat = matmul(matQ,optics%matK)
     mat(3,:) = mat(3,:) * optics%vecT
     mat(4,:) = mat(4,:) * optics%vecT
@@ -352,8 +372,9 @@ contains
     fac = this%adir * Qsol
     vec(3) = (vec(3) +         fac) * this%Tsol
     vec(4) = (vec(4) + quarter*fac) * this%Tsol
+    ! solve mat * vecC = vec
     call dgesv(4, 1, mat, 4, ipiv, vec, 4, info)
-    ASSERT_(info == 0)
+    _ASSERT(info == 0, 'dgesv fail in solve for vecC')
     this%vecC = vec
 
     RETURN_(ESMF_SUCCESS)
@@ -391,11 +412,11 @@ contains
     double precision :: Tsol, taue, ID(4)
 
     ! must select position somewhere in WOA layer
-    ASSERT_(zero <= Rsol .and. Rsol <= one)
+    _ASSERT(zero <= Rsol .and. Rsol <= one, 'require Rsol in [0,1]')
 
     ! formally Rsol = (one - Tsol) / (one - this%Tsol)
     Tsol = one - Rsol * (one - this%Tsol)
-    ASSERT_(zero <= Tsol .and. Tsol <= one)
+    _ASSERT(zero <= Tsol .and. Tsol <= one, 'require Tsol in [0,1]')
     FdirDn = this%FdirDnTOA * Tsol
     taue = -log(Tsol) * this%mu0_used
     call Idif(taue, ID)
@@ -411,7 +432,7 @@ contains
       double precision, intent(in ) :: taue
       double precision, intent(out) :: ID(4)
 
-      ID = (exp(this%optics%vecla * taue) * this%vecC)
+      ID = exp(this%optics%vecla * taue) * this%vecC
       ID = matmul(this%optics%matK, ID) + this%vecP * exp(this%nrmu0_used * taue)
 
     end subroutine Idif
@@ -488,6 +509,7 @@ contains
     type(Eddington_Rayleigh_Optics) :: optics
     double precision :: Rsol(nlay+1), taue, ssae, g_Ed, f_Ry
     double precision :: FdifUpSFC_expected
+    character(len=4) :: istr
 
     ! lmdif_driver locals
     ! there are 2*nlay constraints, as per subroutine header
@@ -500,45 +522,45 @@ contains
     lmdif_info = -9
 
     ! number of constraints should equal or exceed number of parameters to constrain
-    ASSERT_(size(fvec) >= size(x))
+    _ASSERT(size(fvec) >= size(x), 'not enough constraints')
 
     ! check on assumptions:
     ! (1) no downward diffuse at TOA
-    ASSERT_(FtotDn(1) == FdirDn(1))
+    _ASSERT(FtotDn(1) == FdirDn(1), 'FtotDn @ TOA must be all direct')
     ! (2) direct at TOA should be in background (forcing) state
-    ASSERT_(FdirDn(1) == bkg%FdirDnTOA)
+    _ASSERT(FdirDn(1) == bkg%FdirDnTOA, 'FDirDn @ TOA not consistent with bkg')
     ! (3) check using correct albedos
     FdifUpSFC_expected = &
       bkg%adir * FdirDn(nlay+1) + bkg%adif * (FtotDn(nlay+1)-FdirDn(nlay+1))
-    ASSERT_(abs(FdifUp(nlay+1) - FdifUpSFC_expected) < 1.d-6)
+    _ASSERT(abs(FdifUp(nlay+1) - FdifUpSFC_expected) < 1.d-6, 'FdifUp @ SFC not consistent')
 
     ! further checks:
     ! (1) total downwelling fluxes should be positive at all levels
-    ASSERT_(all( FtotDn > zero ))
+    _ASSERT(all( FtotDn > zero ), 'require all FtotDn > 0')
     ! (2) exclude also exponential underflow to zero for beam attenuation
     ! (infact, have already ensured FdirDn(1) == FtotDn(1) > 0)
-    ASSERT_(all( FdirDn > zero ))
+    _ASSERT(all( FdirDn > zero ), 'require all FdirDn > 0')
     ! (3) check that beam never increases downward
-    ASSERT_(all( FdirDn(1:nlay) >= FdirDn(2:nlay+1) ))
+    _ASSERT(all( FdirDn(1:nlay) >= FdirDn(2:nlay+1) ), 'FdirDn should only attenuate')
     ! (4) upward fluxes should be positive at all levels,
     ! but allow zero up at surface since albedos can be zero
-    ASSERT_(     FdifUp(nlay+1) >= zero  )
-    ASSERT_(all( FdifUp(1:nlay) >  zero ))
+    _ASSERT(     FdifUp(nlay+1) >= zero  , 'require FdifUp @ SFC >= 0')
+    _ASSERT(all( FdifUp(1:nlay) >  zero ), 'require FdifUp above SFC > 0')
     ! (5) outgoing shouldn't exceed incoming
-    ASSERT_( FdifUp(1) <= FtotDn(1) )
-    ! (6) net downward flux should never increase with depth
-    ! in atmosphere (because only absorption, never emission)
-    do k = 1,nlay
-      if ((FtotDn(k)-FdifUp(k)) < (FtotDn(k+1)-FdifUp(k+1))) &
-        print *, 'FnetDn increases!', k, (FtotDn(k)-FdifUp(k))-(FtotDn(k+1)-FdifUp(k+1))
-    end do
-    ASSERT_(all( (FtotDn(1:nlay)-FdifUp(1:nlay)) >= (FtotDn(2:nlay+1)-FdifUp(2:nlay+1)) ))
+    _ASSERT( FdifUp(1) <= FtotDn(1), 'outgoing should not exceed incoming @ TOA' )
+!   ! (6) net downward flux should never increase with depth
+!   ! in atmosphere (because only absorption, never emission)
+!   do k = 1,nlay
+!     if ((FtotDn(k)-FdifUp(k)) < (FtotDn(k+1)-FdifUp(k+1))) &
+!       print *, 'FnetDn increases!', k, (FtotDn(k)-FdifUp(k))-(FtotDn(k+1)-FdifUp(k+1))
+!   end do
+!   _ASSERT(all( (FtotDn(1:nlay)-FdifUp(1:nlay)) >= (FtotDn(2:nlay+1)-FdifUp(2:nlay+1)) ))
 ! seems to be violated by RRTMG by < 1.d-2
 ! will probably remove (6)
 
     ! set taue directly from solar transmission
     taue = -bkg%mu0 * log(FdirDn(nlay+1) / bkg%FdirDnTOA)
-    ASSERT_(taue > zero)
+    _ASSERT(taue > zero, 'require taue > 0')
 
     ! set Rsol of data points
     ! remember that bkg FdirDnTOA held fixed
@@ -552,9 +574,9 @@ contains
     f_Ry = (bkg%optics%f_Ry - f_Ry_min) / f_Ry_range
 
     ! transformation requires strictly within rectified limits
-    ASSERT_(zero < ssae .and. ssae < one)
-    ASSERT_(zero < g_Ed .and. g_Ed < one)
-    ASSERT_(zero < f_Ry .and. f_Ry < one)
+    _ASSERT(zero < ssae .and. ssae < one, 'require normalized ssae in (0,1)')
+    _ASSERT(zero < g_Ed .and. g_Ed < one, 'require normalized g_Ed in (0,1)')
+    _ASSERT(zero < f_Ry .and. f_Ry < one, 'require normalized f_Ry in (0,1)')
 
     ! project initial conditions to the nD real space of solver
     ! Note: (0,1) -> (-Inf,+Inf) using inverse logistic
@@ -580,8 +602,8 @@ contains
     endif
     call lmdif_driver(lmdif_residuals,size(fvec),size(x),x,fvec,lmdif_info,epsfcn_,nprint_)
     if (lmdif_info < 1 .or. lmdif_info > 3) then
-      print *, 'non-linear solver failing with info =', lmdif_info
-      ASSERT_(.FALSE.)
+      write(istr,'(i0)') lmdif_info
+      _ASSERT(.FALSE., 'non-linear solver failing with info = ' // istr)
     end if
     frmse = sqrt(sum(fvec**2)/size(fvec))
 
@@ -617,22 +639,19 @@ contains
       ! nprint: if /= 0, report progress on first, last,
       !   and every nprint iterations
 
-!?    integer :: index, lr, maxfev, ml, mode, mu, nfev
-      double precision :: factor, xtol
       integer :: iwa(n)
+      double precision :: xtol
       double precision :: wa(m*n+5*n+m)
 
       ! dimension of solution space
-      ASSERT_(n > 0)
+      _ASSERT(n > 0, 'invalid solution space dimension')
 
       ! precision in x space
       xtol = sqrt(epsilon(one))
-      ASSERT_(xtol >= zero)
+      _ASSERT(xtol >= zero, 'lmdif1 requires non-negative tolerance')
 
       ! for now try lmdif1
       call lmdif1(fcn,m,n,x,fvec,xtol,info,iwa,wa,size(wa))
-
-!     print *, 'lmdif: number of fcn evaluations:', nfev
 
     end subroutine lmdif_driver
 
@@ -706,57 +725,6 @@ contains
       end if
 
     end subroutine lmdif_residuals
-
-!   subroutine hybrd_driver(fcn,n,x,fvec,info,epsfcn,nprint)
-
-!     integer,          intent(in   ) :: n
-!     double precision, intent(inout) :: x(n)
-!     double precision, intent(out  ) :: fvec(n)
-!     integer,          intent(out  ) :: info
-!     double precision, intent(in   ) :: epsfcn
-!     integer,          intent(in   ) :: nprint
-!     external fcn
-
-!     ! epsfcn: used in determining a suitable step length
-!     !   for the forward-difference approximation
-
-!     ! nprint: if /= 0, report progress on first, last,
-!     !   and every nprint iterations
-
-!     integer :: index, lr, maxfev, ml, mode, mu, nfev
-!     double precision :: factor, xtol
-!     double precision :: wa((n*(3*n+13))/2)
-
-!     ! dimension of solution space
-!     ASSERT_(n > 0)
-
-!     ! call hybrd ...
-!     maxfev = 200*(n+1)
-!     ml = n-1; mu = n-1
-!     lr = (n*(n+1))/2
-!     index = 6*n+lr
-
-!     ! precision in x space
-!     xtol = sqrt(epsilon(one))
-!     ASSERT_(xtol >= zero)
-
-!     ! step bound factor:
-!     !  suggested range (0.1,100)
-!     !  important for convergence.
-!     factor = 100.d0	! same as hybrd1
-
-!     ! mode==1 sets its own diag scaling
-!     ! mode==2 input a diag scaling in wa(1:n)
-!     mode = 2; wa(1:n) = one	! <- used in hybrd1 but BAD!
-!     mode = 1			! <- found to be much better
-
-!     call hybrd(fcn,n,x,fvec,xtol,maxfev,ml,mu,epsfcn,wa(1),mode,   &
-!                factor,nprint,info,nfev,wa(index+1),n,wa(6*n+1),lr, &
-!                wa(n+1),wa(2*n+1),wa(3*n+1),wa(4*n+1),wa(5*n+1))
-!     if (info .eq. 5) info = 4
-!     print *, 'hybrd: number of fcn evaluations:', nfev
-
-!   end subroutine hybrd_driver
 
   end function analyze_optics
 
