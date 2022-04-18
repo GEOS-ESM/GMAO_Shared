@@ -37,6 +37,7 @@
 #                       which is not something to be set in esma_mpirun. But
 #                       a fat comment is added for future reference.
 # 03Oct2018  Thompson   Add support for HPC-X and treat as Open MPI
+# 20Aug2020  Thompson   Assume Open MPI to start (for CI, etc.)
 #============================================================================
 use strict;
 use warnings;
@@ -87,7 +88,10 @@ sub init {
 sub get_mpi_type {
     my ($MPIHOME);
 
-    $mpi_type = "unknown";
+    # Assume that the MPI stack will be openmpi (useful for CI, AWS, etc.)
+    # This will be overridden below if a match occurs, but if not, this
+    # will assume openmpi
+    $mpi_type = "openmpi";
 
     # At NCCS, Open MPI modules can define M_MPI_ROOT, so we cannot
     # depend on that as always good. Instead, we'll use the specific
@@ -216,7 +220,7 @@ sub which_mpi_cmd {
        # For now use mpirun_rsh. At NCCS this should be
        # srun -n but as -np is *external* to esma_mpirun
        # this requires wholesale script changes
-       chomp($mpicmd = `which mpirun_rsh`);
+       chomp($mpicmd = `which mpiexec.mpirun_rsh`);
     } else {
        # Used by both Intel MPI and Open MPI
        chomp($mpicmd = `which mpirun`);
@@ -247,7 +251,7 @@ sub get_xtraflags {
 
     # flags needed for mvapich2 mpi
     #------------------------------
-    $xtraflags .= "-export -hostfile \$PBS_NODEFILE" if $mpi_type eq "mvapich2";
+    $xtraflags .= "-export" if $mpi_type eq "mvapich2";
 
     # flags needed for intel mpi
     #---------------------------
@@ -335,8 +339,6 @@ sub get_xtraflags {
           $xtraflags .= " -oversubscribe";
        } elsif ($perhost) {
           $xtraflags .= " -map-by ppr:$perhost:node -bind-to core";
-       } else {
-          $xtraflags .= " -map-by core -bind-to core";
        }
 
     }

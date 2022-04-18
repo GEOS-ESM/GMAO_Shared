@@ -618,7 +618,7 @@
       print *
       print *, '   -a pcoef          perturbation coefficient (default: 1.0)'
       print *
-      print *, '   -scal  scale      scaling factor for the output perturbation (default: 1.0)'
+      print *, '   -scale  scale     scaling factor for the output perturbation (default: 1.0)'
       print *
       print *, '   -pick nymd nhms   date and time'
       print *, '                    (default: use latest on file)'

@@ -534,6 +534,7 @@ end subroutine ODS_GetM_
 !
 ! !USES
 !
+    use netcdf
     Implicit NONE
 
 ! !INPUT PARAMETERS:
@@ -600,13 +601,14 @@ end subroutine ODS_GetM_
 !  25Jun2003   Todling   Defining nsyn only in case it's been read ok.
 !  28Apr2004   Todling   Overload of ODS to read GSI-diag-out files
 !  14Jun2004   Todling   Added ncf opt-arg to avoid errmsg from Open.
+!  16Apr2019   Sienkiewicz Add check for nc4diag, treat as ncf
 !                        
 !
 !EOP
 !-------------------------------------------------------------------------
 
   character(len=*), parameter :: myname = 'ods_get1_'
-  integer id, ier, nkt, nkt1, nkx, nqc, ncr, nsyn, nobs, khms
+  integer id, ier, nkt, nkt1, nkx, nqc, ncr, nsyn, nobs, khms, n4id
   integer jday, syn_hour, ods_nget
   integer first_jday, first_nymd, first_nhms
   logical fexists, dconv
@@ -624,9 +626,21 @@ end subroutine ODS_GetM_
   else
        inquire ( file=trim(fname), exist=fexists )
        if ( fexists ) then
-          if ( .not. dconv ) then 
-               call ODS_Open ( id, fname, 'r', ier ) ! open the file
-               if ( ier .ne. 0 ) dconv = .true.
+          if ( .not. dconv ) then
+! Check if file is netCDF, and if so check for date_time global (for nc4diag)
+! ---------------------------------------------------------------------------             
+             ier = nf90_open(path=trim(fname), mode = nf90_nowrite, ncid = n4id )
+             if (ier /= nf90_noerr) then
+                dconv = .true.
+             else
+                ier = nf90_inquire_attribute(n4id,NF90_GLOBAL,'date_time')
+                if (ier == nf90_noerr) dconv = .true.
+                ier = nf90_close(n4id)
+                if ( .not. dconv ) then
+                   call ODS_Open ( id, fname, 'r', ier ) ! open the file
+                   if ( ier .ne. 0 ) dconv = .true.
+                end if
+             endif
           endif
 
        else

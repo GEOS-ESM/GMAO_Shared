@@ -3,7 +3,7 @@ esma_set_this()
 add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
 string (REPLACE " " ";" flags ${FREAL8})
 add_compile_options(${flags})
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
 
 if ( NOT HERMES_LIGHT )
 
@@ -47,7 +47,7 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn2prs.x        SOURCES dyn2prs.f90        LIBS ${this})
    ecbuild_add_executable (TARGET dyn2rs5.x        SOURCES dyn2rs5.f90        LIBS ${this})
    ecbuild_add_executable (TARGET dyn52dyn.x       SOURCES dyn52dyn.f90       LIBS ${this})
-   ecbuild_add_executable (TARGET dyndiff.x        SOURCES dyndiff.f90        LIBS ${this})
+   ecbuild_add_executable (TARGET dyndiff.x        SOURCES dyndiff.f90        LIBS ${this} GEOS_Shared)
    ecbuild_add_executable (TARGET dyndims.x        SOURCES dyndims.f          LIBS ${this})
    ecbuild_add_executable (TARGET dynp.x           SOURCES dynp.f90           LIBS ${this})
    ecbuild_add_executable (TARGET echorc.x         SOURCES echorc.f90         LIBS ${this})
@@ -72,8 +72,10 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn_efsens.x     SOURCES dyn_efsens.f90     LIBS ${this})
    ecbuild_add_executable (TARGET eta_echo.x       SOURCES eta_echo.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
+   ecbuild_add_executable (TARGET dyn_blob.x       SOURCES dyn_blob.f90       LIBS ${this})
+   ecbuild_add_executable (TARGET dyn_fsens_conv.x SOURCES dyn_fsens_conv.f90 LIBS ${this})
    
-   install(PROGRAMS cnv2prs.pl ana5sfc DESTINATION bin)
+   install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
 
 else ()
 
@@ -88,5 +90,5 @@ endif ()
 
 ecbuild_add_executable (TARGET write_eta.x      SOURCES write_eta.F90      LIBS ${this})
 
-file(GLOB resource_files *.rc)
+file(GLOB resource_files CONFIGURE_DEPENDS *.rc)
 install(FILES ${resource_files} DESTINATION etc)

@@ -1,7 +1,7 @@
 import scipy as sp
 import datetime
 import dateutil.rrule as rrule
-from my_lib  import dset
+from g5lib  import dset
 
 class Ctl(dset.GADset):
     def __init__(self):

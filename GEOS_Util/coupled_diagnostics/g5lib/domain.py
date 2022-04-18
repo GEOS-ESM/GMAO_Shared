@@ -3,7 +3,7 @@ This module define a converter from world-time coordinates to grid indexes.
 '''
 
 import scipy as sp
-import my_lib.utils as utl
+from g5lib import utils as utl
 import matplotlib.dates as mdt
 from dateutil import parser
 

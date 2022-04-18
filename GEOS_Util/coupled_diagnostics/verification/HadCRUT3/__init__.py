@@ -1,7 +1,7 @@
 import os
 import netCDF4 as nc
 import scipy as sp
-from my_lib import dset
+from g5lib import dset
 
 __all__=['ctl']
 

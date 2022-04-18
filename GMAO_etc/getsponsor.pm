@@ -361,7 +361,7 @@ sub defaultID {
     # as last resort, pick last value in @GID as default
     #---------------------------------------------------
     unless ($dflt) {
-        if (@GID) { $dflt = $GID[-1] }
+        if (@GID) { $dflt = $GID[0] }
     }
     return $dflt;
 }

@@ -1,5 +1,5 @@
 import os
-from my_lib import dset, grid 
+from g5lib import dset, grid 
 
 class Ctl(Dset):
     def __init__(self):

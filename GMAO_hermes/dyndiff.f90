@@ -29,6 +29,7 @@
 !  05Mar2009   Todling    Add land fractions
 !  08Mar2012   Todling    Add acoeff [to allow calc of inc as -(b-a)]
 !  12Sep2012   Todling    Quick fix for LM issue in dyn-vector
+!  10Jun2020   Todling    Add ability to add rh diff and mean rh to diff file
 !
 !-------------------------------------------------------------------------
 !EOP
@@ -42,7 +43,7 @@
       integer            :: nfiles       ! actual no. of input files
 
       character(len=255) :: dyn_dout      ! difference output file name
-
+      logical, parameter :: fix_top_rh = .true.
 
 !     Dynamics/simulator vectors
 !     --------------------------
@@ -58,12 +59,15 @@
       integer ios, rc, iopt, ifile
       integer ntimes, n, freq, nymd, nhms, prec
       integer freq_d, nymd_d, nhms_d, prec_d    !Timetag for newly created diff in *.hdf format  
-      integer im, jm, km, lm, system, dyntype
+      integer im, jm, km, lm, system, dyntype, irh
       logical dominmax,verb,sbyene,tv2t
+      integer addrh
       logical normlz
       character(len=3) ntype ! norm type (when applicable)
       real, allocatable :: ps  (:,:)
       real, allocatable :: delp(:,:,:)
+      real, allocatable :: rh1(:,:,:)
+      real, allocatable :: rh2(:,:,:)
       real    acoeff
       real    eps_eer
       real    projlat(2), projlon(2)
@@ -72,7 +76,7 @@
 !  Initialize
 !  ----------     
    call Init_ ( dyntype, mfiles, files, dominmax, verb, egress, eps_eer, anorm, jnorm,  &
-                tv2t, projlon, projlat, projlev, normlz, ntype )
+                tv2t, projlon, projlat, projlev, normlz, ntype, addrh )
 
 !  Loop over input eta files
 !  -------------------------
@@ -122,6 +126,13 @@
          print *, "> nymd, nhms: ", nymd, nhms, " (diff)"
          lm = min(dyn(1)%grid%lm,dyn(2)%grid%lm)
          if ( .not. dominmax ) then
+           if (abs(addrh)>0) then
+              allocate(rh1(im,jm,km))
+              allocate(rh2(im,jm,km))
+              call getrh_(rh1,dyn(1)%pt,dyn(1)%q(:,:,:,1),dyn(1)%ps,dyn(1)%grid%ak,dyn(1)%grid%bk)
+              call getrh_(rh2,dyn(2)%pt,dyn(2)%q(:,:,:,1),dyn(2)%ps,dyn(2)%grid%ak,dyn(2)%grid%bk)
+           endif
+
            print *, "scaling difference by: ", acoeff
            if (sbyene) then
               allocate(ps  (dyn(1)%grid%im,dyn(1)%grid%jm))
@@ -154,6 +165,15 @@
                                         nymd,nhms,ntype=ntype,normlz=normlz,ps=ps,delp=delp)
                deallocate(ps,delp)
            endif
+           if (abs(addrh)>0) then
+               if (addrh<0) then
+                  rh2 = (rh1 + rh2)
+                  rh1 = acoeff*(2.*rh1 - rh2)
+                  rh2 = 0.5*acoeff*rh2
+               else
+                  rh1 = acoeff*(rh1 - rh2)
+               endif
+           endif
          endif
 
 !       If so, echo result to standard out
@@ -165,17 +185,37 @@
             endif
          endif
 
+!       Do some cleaning
+!       ----------------
+        call dyn_clean ( dyn(2) )
+
 !       If requested write *.hdf file with a header from dyn(1)
 !       -------------------------------------------------------
         if ( trim(dyn_dout) .ne. 'NONE' ) then
-             dyn(1)%grid%lm = lm
-             call dyn_put ( trim(dyn_dout), nymd_d, nhms_d, 0, dyn(1), rc, freq=freq, vectype=dyntype )
+             if ( abs(addrh)>0 ) then
+                irh=1
+                if(addrh<0) irh=2
+                call dyn_init ( dyn(1), dyn(2), rc, copy=.true., vectype=dyntype, lm=dyn(1)%grid%lm+irh )
+                dyn(2)%q(:,:,:,dyn(1)%grid%lm+1) = rh1
+                dyn(2)%qm(dyn(1)%grid%lm+1)%name = 'rh';  dyn(2)%qm(dyn(1)%grid%lm+1)%long_name = 'Relative Humidity '
+                dyn(2)%qm(dyn(1)%grid%lm+1)%units = '%'
+                if(irh==2) then 
+                  dyn(2)%q(:,:,:,dyn(1)%grid%lm+2) = rh2
+                  dyn(2)%qm(dyn(1)%grid%lm+2)%name = 'mrh';  dyn(2)%qm(dyn(1)%grid%lm+2)%long_name = 'Mean Relative Humidity '
+                  dyn(2)%qm(dyn(1)%grid%lm+2)%units = '%'
+                endif
+                call dyn_put ( trim(dyn_dout), nymd_d, nhms_d, 0, dyn(2), rc, freq=freq, vectype=dyntype, skip_setvec=.true. )
+                deallocate(rh1,rh2)
+                call dyn_clean ( dyn(2) )
+             else
+                dyn(1)%grid%lm = lm
+                call dyn_put ( trim(dyn_dout), nymd_d, nhms_d, 0, dyn(1), rc, freq=freq, vectype=dyntype )
+             endif
         endif 
 
 !       Clean up mess
 !       -------------
         call dyn_clean ( dyn(1) )
-        call dyn_clean ( dyn(2) )
 
       end do
 
@@ -210,7 +250,7 @@ CONTAINS
 !
       subroutine Init_ ( dyntype, mfiles, files, dominmax, verb, egress, &
                          eps_eer, anorm, jnorm, tv2t, &
-                         projlon, projlat, projlev, normlz, ntype )
+                         projlon, projlat, projlev, normlz, ntype, addrh )
 
       use m_inpak90
       use m_chars,   only: lowercase
@@ -231,12 +271,14 @@ CONTAINS
       logical, intent(out) :: tv2t
       logical, intent(out) :: verb
       logical, intent(out) :: normlz
+      integer, intent(out) :: addrh
       character(len=*), intent(out) :: ntype
       
 !
 ! !REVISION HISTORY:
 !       2002.01.07  E. Yeh   Initial code.
 !       05Oct2012   Todling  Add verb
+!       09Jun2020   Todling  Add rh option
 !
 !EOP
 !BOC
@@ -261,6 +303,7 @@ CONTAINS
       acoeff = 1.0
       egress = 'DYNDIFF_EGRESS'
       rcfile = 'NULL'
+      addrh  =  0
       sbyene = .false.
       tv2t   = .false.
       eps_eer = 1.0
@@ -319,6 +362,11 @@ CONTAINS
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
              call GetArg ( iArg, jnorm )
+           case ("-addrh")
+             if ( iarg+1 .gt. argc ) call usage()
+             iarg = iarg + 1
+             call GetArg ( iArg, argv )
+             read(argv,*) addrh
            case ("-tv2t")
              tv2t = .true.
            case ("-h")
@@ -466,6 +514,18 @@ CONTAINS
       do i = 1, nfiles
         print *, i, ': ', trim(files(i))
       end do
+      if(dout) then
+         select case (abs(addrh))
+         case (1)
+           print *, 'Adding GEOS-qsat-based RH to ouput file'
+         case (2)
+           print *, 'Adding BeCov-qsat-based RH to ouput file'
+         case (3)
+           print *, 'Adding GSI-qsat-based RH to ouput file'
+         case default
+           ! nothing to say
+         end select
+      endif
 
       end subroutine Init_
 
@@ -486,6 +546,9 @@ CONTAINS
       print *, '-tv2t       Converts diff in Tv to diff in T'
       print *, '-egress     Name of EGRESS file for successful finalization'
       print *, '-a  coeff   Scale difference by this coefficient (see note)'
+      print *, '-addrh N    Add rh diff to file: 1=use GEOS  qsat'
+      print *, '                                 2=use BeCov qsat'
+      print *, '                                 3=use GSI   qsat'
       print *
       print *
       print *, 'Where etafile_1 and etafile_2 are two (required)'
@@ -507,6 +570,7 @@ CONTAINS
       print *, '     in general meaningless. This ability is added to compensate'
       print *, '     for the fact that sometimes file1-file2 not possible, but'
       print *, '     file2-file1 is possible due to nc4-header issues'
+      print *, '  3. If addrh<0, mean rh is added to the file (serves BeCov code)'
       call exit(1)
       end subroutine usage
       
@@ -518,6 +582,69 @@ CONTAINS
       call exit(1)
       end subroutine die
 
+      subroutine getrh_(rh,tv,qv,ps,ak,bk)
+      use m_const, only: zvir
+      use GEOS_UtilsMod, only: GEOS_Qsat
+      use m_dyn_util, only: dyn_qsat
+      implicit none
+      real,intent(out):: rh(:,:,:)
+      real,intent(in) :: tv(:,:,:), qv(:,:,:), ps(:,:)
+      real,intent(in) :: ak(:), bk(:)
+      real(4),allocatable :: tmp(:,:,:),pmk(:,:,:),qs(:,:,:)
+      integer i,j,k,kb
+      select case (abs(addrh))
+      case (1)
+         allocate(tmp(im,jm,1),pmk(im,jm,1),qs(im,jm,1))
+         do k = 1, km
+            pmk(:,:,1) = 0.5 * (  ak(k)+ak(k+1)  + &
+                              ps*(bk(k)+bk(k+1)) )
+            tmp(:,:,1) = tv(:,:,k)/(1.0+zvir*qv(:,:,k))
+            qs (:,:,1) = GEOS_Qsat(tmp(:,:,1), pmk(:,:,1), PASCALS=.true.)
+            rh(:,:,k) = qv(:,:,k)/qs(:,:,1)
+         end do
+      case (2)
+         allocate(tmp(im,jm,1),pmk(im,jm,1),qs(im,jm,1))
+         if (fix_top_rh) then
+            k=1
+            pmk(:,:,1) = 0.5 * (  ak(k)+ak(k+1)  + &
+                              ps*(bk(k)+bk(k+1)) )
+            tmp(:,:,1) = tv(:,:,k)/(1.0+zvir*qv(:,:,k))
+            qs (:,:,1) = GEOS_Qsat(tmp(:,:,1), pmk(:,:,1), PASCALS=.true.)
+            rh(:,:,k) = qv(:,:,k)/qs(:,:,1)
+            kb = 2
+         else
+            kb = 1
+         endif
+         do k = kb, km
+            pmk(:,:,1) = 0.5 * (  ak(k)+ak(k+1)  + &
+                              ps*(bk(k)+bk(k+1)) )
+            tmp(:,:,1) = tv(:,:,k)
+            qs (:,:,1) = qv(:,:,k)
+            call dyn_qsat(qs(:,:,1),tmp(:,:,1),pmk(:,:,1),im,jm,.true.)
+            rh(:,:,k) = qv(:,:,k)/qs(:,:,1)
+         end do
+      case (3)
+         allocate(tmp(im,jm,km),pmk(im,jm,km),qs(im,jm,km))
+         do k = 1, km
+             pmk(:,:,k) = 0.5 * (  ak(k)+ak(k+1)  + &
+                               ps*(bk(k)+bk(k+1)) )
+             tmp(:,:,k) = tv(:,:,k)/(1.0+zvir*qv(:,:,k))
+         enddo
+         call dyn_qsat(qs,tmp,pmk,im,jm,km,.true.,ntop=1)
+         rh = qv/qs
+         if (fix_top_rh) then
+            k=1
+            pmk(:,:,1) = 0.5 * (  ak(k)+ak(k+1)  + &
+                              ps*(bk(k)+bk(k+1)) )
+            tmp(:,:,1) = tv(:,:,k)/(1.0+zvir*qv(:,:,k))
+            qs (:,:,1) = GEOS_Qsat(tmp(:,:,1), pmk(:,:,1), PASCALS=.true.)
+            rh(:,:,1)=qv(:,:,1)/qs(:,:,1)
+         endif
+      case default
+         return
+      end select
+      deallocate(tmp,pmk,qs)
+      end subroutine getrh_
 !.................................................................
 
   end program dyndiff

@@ -28,6 +28,8 @@
    use m_const, only : rvap
    use m_const, only : rgas
    use m_const, only : undef
+   use m_const, only : o3_ppmv2gpg
+   use m_const, only : o3_gpg2ppmv
 
    use m_dynp, only : dynp_add
    implicit none
@@ -1158,7 +1160,7 @@
      ll%o = dum
    end if
    ! at this point ll%o is in kg/kg, we need to convert to ppmv
-   ll%o = 0.6035e6 * ll%o
+   ll%o = o3_gpg2ppmv * ll%o
 
 ! Cloud-water fraction
 
@@ -1333,7 +1335,7 @@
                    gxg,lons,lats,SFL,ORD,FLG,undef)
    gg%o = dumg
    ! ozone from eta file is in ppmv. we need to convert to kg/kg
-   gg%o = 1.657e-6 * gg%o
+   gg%o = o3_ppmv2gpg * gg%o
 
 ! Cloud-water fraction
 

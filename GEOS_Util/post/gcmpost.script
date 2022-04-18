@@ -27,6 +27,7 @@ if( $nmax == 0 ) then
       echo "       <-rec_plt   YYYYMM    Optional Argument to Perform TimeAve of YYYYMM and Check for Plots>"
       echo "       <-ddf       clim      Optional Argument to Use clim.tabl for plots>"
       echo "       <-nostrict            Optional Argument to Disable STRICT (Default: TRUE)>"
+      echo "       <-ignore_nan          Optional Argument to Ignore Nans in Time_Average"
       echo " "
       echo "       <-plots    SEASON     Optional Argument to use SEASON              for plots>"
       echo "       <-begdate  BEGDATE    Optional Argument to use BEGDATE (YYYYMM)    for plots>"
@@ -63,6 +64,7 @@ endif
         set    COLL      = "ALL"
         set    STRICT    = ""
         set    ANA       = ""
+        set   IGNORE_NAN = ""
         set   check_plot = "NULL"
 
 @       n  = 1
@@ -105,6 +107,10 @@ while( $n <= $nmax )
 
        if( "$argv[$n]" == "-nostrict" ) then 
             set  STRICT = '-strict false'
+       endif
+
+       if( "$argv[$n]" == "-ignore_nan" ) then 
+            set  IGNORE_NAN = '-ignore_nan'
        endif
 
        if( "$argv[$n]" == "-ana" ) then 
@@ -210,7 +216,7 @@ endif
 # --------------------
 setenv ARCH `   uname`
 setenv HOST `hostname`
-set name = `echo $HOST` ; if ( ($name =~ pfe*) || ($name =~ r[0-9]*i[0-9]*n[0-9]*) ) setenv HOST pleiades
+set name = `echo $HOST` ; if ( ($name =~ pfe*) || ($name =~ r[0-9]*i[0-9]*n[0-9]*) || ($name =~ r[0-9]*c[0-9]*t[0-9]*n[0-9]*) ) setenv HOST pleiades
 
 set name = `echo $HOST | cut -b 1-8` ; if( $name == 'discover' ) setenv HOST $name
 set name = `echo $HOST | cut -b 1-4` ; if( $name == 'borg'     ) setenv HOST discover
@@ -234,14 +240,12 @@ endif
 # Determine Number of Nodes if running in BATCH
 # ---------------------------------------------
 if( $NCPUS == "NULL"  ) then
-  if ($?PBS_NODEFILE & $?BATCHNAME) then
-     set BATCHJOB  = `qstat | grep $BATCHNAME | grep $LOGNAME | cut -d' ' -f1`
-     set  numjobs  = $#BATCHJOB
-     if( $numjobs != 0 ) then
+   if ($?SLURM_NTASKS) then
+      set  NCPUS = $SLURM_NTASKS
+   else if ($?PBS_NODEFILE) then
         set  NCPUS = `cat $PBS_NODEFILE | wc -l`
      endif
   endif
-endif
 echo Use: NCPUS = $NCPUS
 
 
@@ -271,6 +275,11 @@ endif
 setenv GROUP `cat $HOME/.GROUProot`
 
 
+# Set STREAMS to ALL Streams in HISTORY.RC
+# ----------------------------------------
+set  streams = `$GEOSUTIL/post/get_streams $HISTORYRC`
+set nstreams = $#streams
+
 
 # Determine Collection Names and Archive Locations from HISTORY RC File
 # ---------------------------------------------------------------------
@@ -282,8 +291,9 @@ else
 endif
     set    archives = `$GEOSUTIL/post/get_archive $HISTORYRC $COLL`
 
-#echo COLLECTIONS: $collections
-#echo    ARCHIVES: $archives
+echo "COLLECTIONS: $collections"
+echo "   ARCHIVES: $archives"
+echo " "
 
 # Count Number of "Dots" in EXPID
 # -------------------------------
@@ -299,7 +309,7 @@ set expdots = ''
          set bit = `echo ${expid} | cut -b $b`
       end
       set expdots = `echo $expdots $n`
-echo EXPDOTS: $expdots
+echo EXPID_DOTS: $expdots
 
 
 # Count Number of "Dots" in Collection Name to Find Location of Date Node
@@ -320,6 +330,37 @@ foreach collection ( $collections )
       set ndots = `echo $ndots $n`
 @ m = $m + 1
 end
+echo NAME_DOTS: $ndots
+
+# Count Number of "Dots" in Collection Template to Find Location of Date Node
+# ---------------------------------------------------------------------------
+@ m = 0
+set tdots = ''
+foreach collection ( $collections )
+      set   template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2`
+      @ n = 0
+      @ b = 1
+      set bit = `echo ${template} | cut -b $b`
+      while( "${bit}" != '' )
+         if( "${bit}" == '.' ) then
+                  @ n = $n + 1
+         endif
+                  @ b = $b + 1
+         set bit = `echo ${template} | cut -b $b`
+      end
+                  @ n = $n - 1  # subtract 1 for .extenstion
+      set tdots = `echo $tdots $n`
+@ m = $m + 1
+end
+echo TEMPLATE_DOTS: $tdots
+
+@ m = 0
+foreach collection ( $collections )
+@ m = $m + 1
+@ ndots[$m] = $ndots[$m] + $tdots[$m]
+end
+echo TOTAL_DOTS: $ndots
+echo " "
 
 # Check for PLOTS Option
 # ----------------------
@@ -402,15 +443,15 @@ endif
 end
 
 
-# Check for RECDATE Option
-# ------------------------
+# Check for RECDATE Option (Note: monthly files, if present, are also moved)
+# --------------------------------------------------------------------------
      if( $RECDATE != "NULL"  ) then
          foreach collection (  $collections )
             if( -e      $SOURCE/holding/$collection/$RECDATE ) then
                      cd $SOURCE/holding/$collection
                  if( -e $RECDATE.tmp ) /bin/rm -r $RECDATE.tmp
                 /bin/mv $RECDATE $RECDATE.tmp
-                /bin/mv   `/bin/ls -1 $RECDATE.tmp/${expid}*${collection}* | grep -v monthly | grep -v diurnal | grep -v daily` .
+                /bin/mv   `/bin/ls -1 $RECDATE.tmp/${expid}*${collection}* | grep -v diurnal | grep -v daily` .
                 /bin/rm            -r $RECDATE.tmp
             endif
          end
@@ -434,19 +475,34 @@ end
      set numlocs  = ''
      @    nstream = 0
      foreach collection (  $collections )
+          set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
      @    nstream =                   $nstream  + 1
      @  date_node = $expdots + $ndots[$nstream] + 3
 
-      echo COLLECTION: $collection
-      echo    nstream: $nstream
-      echo Date_node: $date_node
+      echo "COLLECTION: $collection"
+      echo "   nstream: $nstream"
+      echo " Date_node: $date_node"
+      echo " "
 
       cd $SOURCE/holding/$collection
           if( $RECDATE != "NULL"  ) then
+            if( ${#monthly_attribute} == 0 ) then
+                /bin/rm -f  ${expid}.${collection}.monthly.$RECDATE.*
             set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | grep $RECDATE`
           else
+                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal | grep $RECDATE`
+            endif
+          else
+            if( ${#monthly_attribute} == 0 ) then
+                /bin/rm -f  ${expid}.${collection}.monthly.*
             set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+            else
+                set locals  = `/bin/ls -1  | grep ${expid}.${collection} | grep -v diurnal`
           endif
+          endif
+          echo "Collection: $collection"
+          echo "    Locals: $locals"
+
             set numlocs = `echo $numlocs $#locals`
             set numdate = 0
 
@@ -472,6 +528,7 @@ end
                          @ numdate = $numdate + 1
                          set dates = `echo $dates $date`
                          set date0 = $date
+                         echo Collection: $collection Dates: $dates
                     endif
                     if(! -e $SOURCE/holding/$collection/$date ) mkdir      -p $SOURCE/holding/$collection/$date
                                                                /bin/mv $local $SOURCE/holding/$collection/$date
@@ -480,7 +537,9 @@ end
                 @ numdate = $numdate + 1
                 set date  = 0
                 set dates = `echo $dates $date`
+                echo Collection: $collection Dates: $dates
             endif
+            echo " "
 
      set numdates = `echo $numdates $numdate`
      end
@@ -500,28 +559,38 @@ echo "     Dates: $dates[$n]"
         @ n = $n + 1
 echo "     Dates: $dates[$n]"
   end
-echo ""
 end
 
 
 
 # Process Monthly Means
 # ---------------------
+set monthly_collections = "FALSE"
 @ m      = 1
 @ begloc = 1
 foreach collection ( $collections )
+        set   monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+        if( ${monthly_collections} == "FALSE" & ${#monthly_attribute} != 0 ) set monthly_collections = "TRUE"
+
       @ endloc = $begloc + $numdates[$m] - 1
         set streamdates = `echo $dates[${begloc}-${endloc}]`
 
   if( $streamdates[1] != 0 ) then   
         foreach date ( $streamdates )
+        echo " "
         echo $collection $streamdates Current Date: $date
 
         if( -e $SOURCE/holding/$collection/$date ) then
             cd $SOURCE/holding/$collection/$date
          
+            if( ${#monthly_attribute} == 0 ) then
             set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
-            set num    = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal | wc -l`
+            else
+                set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
+            endif
+
+            set  num = $#locals
+            if( $num > 0 & ${#monthly_attribute} == 0 ) then
 
             echo "Is it time to perform Time-Average on Local Files?:"
             echo "--------------------------------------------------"
@@ -529,10 +598,6 @@ foreach collection ( $collections )
             echo "           Date: $date"
             echo "Number of Files: $num"
             echo ""
-          # echo $locals # Strange echo failure under certain conditions
-            echo ""
-
-            if( $num > 0 ) then
 
 # Find Dates within first local file
 # ----------------------------------
@@ -603,38 +668,32 @@ EOF
 /bin/rm -f                               gcm_post.${collection}.j${date}
 sed -f sedfile $SOURCE/post/gcm_post.j > gcm_post.${collection}.j${date}
 chmod 755                                gcm_post.${collection}.j${date}
- $batch_cmd                                    gcm_post.${collection}.j${date}
+     $batch_cmd                          gcm_post.${collection}.j${date}
+echo " "
 /bin/rm -f sedfile
 /bin/rm -f LOCKFILE
 sleep 5
 # ------------------
 
                  else
-
-                   # Only time-avererage pressure-level collections (defined by possessing grid_label attribute)
-                   # -------------------------------------------------------------------------------------------
-                   set  PRSTEST = `grep ${collection} $HISTORYRC | grep grid_label | cut -d: -f2`
-
-                   if ($PRSTEST != '' ) then
                    echo "   Performing time average ..."
                    if(! -e time_ave.rc ) ln -s $GEOSUTIL/post/time_ave.rc .
                    if( $NCPUS == "NULL" | $NCPUS == 1 | !($?RUN_CMD) ) then
-                           $GEOSUTIL/bin/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
+                              $GEOSUTIL/bin/time_ave_nompi.x -hdf $locals -rc time_ave.rc    \
                                                            -tag $expid.$collection.monthly \
-                                                           -d   $expid.$collection.diurnal $STRICT
+                                                             -d   $expid.$collection.diurnal $STRICT $IGNORE_NAN
                    else
-                  $RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave.x -hdf $locals -rc time_ave.rc    \
+                          $RUN_CMD $NCPUS $GEOSUTIL/bin/time_ave.x -hdf $locals -rc time_ave.rc    \
                                                             -tag $expid.$collection.monthly \
-                                                            -d   $expid.$collection.diurnal $STRICT
+                                                             -d   $expid.$collection.diurnal $STRICT $IGNORE_NAN
                    endif
                  endif
-
-                 endif  # End IFTEST for movefiles or time-average
 
                else
                    echo "   End of Month not yet reached."
                endif
-            endif
+
+            endif # End IFTEST for Non-Monthly-Attribute locals = 0
 
         endif  # End IFTEST for -e $SOURCE/holding/$collection/$date due to possible deletion from other archive job
         end
@@ -646,7 +705,7 @@ sleep 5
 end      # End Collection Loop
 wait
 
-if( $MOVEFILES == "TRUE" ) exit
+if( $MOVEFILES == "TRUE" & ${monthly_collections} == "FALSE" ) exit
 
 # Test for REPLAY with Forecasts
 # ------------------------------
@@ -671,10 +730,15 @@ if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE
 @ begloc  = 1
 @ nstream = 0
 foreach collection ( $collections )
+     set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
    @ nstream   =                   $nstream  + 1
    @ date_node = $expdots + $ndots[$nstream] + 3
-
    @ endloc = $begloc + $numdates[$m] - 1
+
+ if( ( ($MOVEFILES != "TRUE") & ${#monthly_attribute} == 0 ) | \
+     ( ($MOVEFILES == "TRUE") & ${#monthly_attribute} != 0 ) | \
+       ( $RECDATE  != "NULL") ) then
+
    set  streamdates = `echo $dates[${begloc}-${endloc}]`
 
    if( $streamdates[1] != 0 ) then   
@@ -687,9 +751,13 @@ foreach collection ( $collections )
             /bin/rm -f $archfile
             touch     $archfile
 
+            if( ${#monthly_attribute} == 0 ) then
             set  num  = `/bin/ls -1 $expid.$collection.monthly.* | wc -l`
+            else
+                set num = `/bin/ls -1 $expid.$collection.* | wc -l`
+            endif
 
-            if( $num != 0 | $PRSTEST == '') then
+            if( $num != 0 ) then
 
                if( $check_plot == 'NULL' ) set check_plot = TRUE
                echo "set success = TRUE"                               >> $archfile
@@ -698,7 +766,10 @@ foreach collection ( $collections )
 
                # Tar and Archive Dailies
                # -----------------------
+               if( ${#monthly_attribute} == 0 ) then
                set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v monthly | grep -v diurnal`
+                 if( $#locals != 0 ) then
+                     echo "Archiving Dailies for Collection: $collection for Date: $date"
                @ daily_date_node  = $date_node
                if( $HIRES == FALSE ) then
                   $mytar cf $expid.${collection}.daily.$date.$ext.tar $locals
@@ -754,12 +825,21 @@ foreach collection ( $collections )
 
                end
                echo "wait" >> $archfile
+                 endif
+               endif  # EndTest for monthly_attribute
 
                # Archive Monthlies (non diurnal files)
                # -------------------------------------
-               @ monthly_date_node  = $date_node + 1                 # Since monthly is simply appended to collection name
-               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  monthly | grep -v diurnal`
+               if( ${#monthly_attribute} == 0 ) @ monthly_date_node  = $date_node + 1 # Since monthly is simply appended to collection name
+               if( ${#monthly_attribute} != 0 ) @ monthly_date_node  = $date_node
 
+               if( ${#monthly_attribute} == 0 ) then
+               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  monthly | grep -v diurnal`
+               else
+                   set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
+               endif
+
+               echo "Archiving Monthlies for Collection: $collection for Date: $date"
                foreach local ($locals)
                   set fdate  = `echo $local | cut -d "." -f${monthly_date_node}`   # Assumed date format: YYYYMMDD_HHMMSS
                   set year   = `echo $fdate | cut -c1-4`
@@ -866,9 +946,9 @@ foreach collection ( $collections )
                end
             endif
 
-            # Archive Restarts (First Stream Only)
-            # ------------------------------------
-            if( $nstream == 1 ) then
+            # Archive Restarts (on First Stream Only)
+            # ---------------------------------------
+            if( $collection == $streams[1] ) then
                echo " "                                                                                          >> $archfile
                if( $HOST == 'pleiades' ) then
                      echo "ssh ${MASTOR}                                   mkdir -p ${MASDIR}/restarts/Y${year}" >> $archfile
@@ -944,6 +1024,7 @@ EOF
    @ begloc = $endloc + 1
    @ m      = $m      + 1
 
+ endif # End IFTEST for $MOVEFILES and ${monthly_attribute} tests
 end
 wait
 
@@ -953,11 +1034,24 @@ wait
 
 @ nstream = 0
 foreach collection ( $collections )
+     set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
     @ nstream   =                   $nstream  + 1
-    @ date_node = $expdots + $ndots[$nstream] + 4
+
+     if( ( ($MOVEFILES != "TRUE") & ${#monthly_attribute} == 0 ) | \
+         ( ($MOVEFILES == "TRUE") & ${#monthly_attribute} != 0 ) | \
+           ( $RECDATE  != "NULL") ) then
+
+         if( ${#monthly_attribute} != 0 ) @ date_node = $expdots + $ndots[$nstream] + 3
+         if( ${#monthly_attribute} == 0 ) @ date_node = $expdots + $ndots[$nstream] + 4
 
     cd $SOURCE/${collection}
-    set monthlies = `/bin/ls -1 $expid.${collection}.monthly* | grep -v $expid.${collection}.monthly.clim`
+
+    if( ${#monthly_attribute} == 0 ) then
+        set monthlies = `/bin/ls -1 $expid.${collection}.monthly* | grep -v clim`
+    else
+        set monthlies = `/bin/ls -1 $expid.${collection}.*        | grep -v clim`
+    endif
+
     set       num = `/bin/ls -1 $monthlies | wc -l`
 
 if( $num != 0 ) then
@@ -1017,7 +1111,12 @@ end
 @   nmonths = ( $eyear - $year ) * 12 + ( $emonth - $month ) + 1
 
 
+    if( ${#monthly_attribute} == 0 ) then
     echo DSET $SOURCE/${collection}/$expid.${collection}.monthly.%y4%m2.$ext >  xdf.tabl
+    else
+        set  template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2 | cut -d"'" -f2`
+        echo DSET $SOURCE/${collection}/$expid.${collection}.$template           > xdf.tabl
+    endif
     echo TITLE $expdsc                                                       >> xdf.tabl
     echo OPTIONS template                                                    >> xdf.tabl
     echo TDEF time $nmonths  LINEAR  00:00Z01$MON$year 1$timinc              >> xdf.tabl
@@ -1049,7 +1148,8 @@ else if( $RECDATE != "NULL" ) then
     endif
 endif
 
-end    # End ForEach Output Stream Loop
+endif
+end    # End ForEach Collection Loop
 
 endif  # End PLOTS Option
 
@@ -1068,7 +1168,7 @@ cd  $SOURCE/plot
     set STATUS    = `grep    PLOT_STATUS: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
     set SEASONS   = `grep   PLOT_SEASONS: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
     set FREQUENCY = `grep PLOT_FREQUENCY: plot.rc | grep -v '#' | cut -d':' -f2 | tr "[:lower:]" "[:upper:]"`
-    set OPTIONS   = `grep   PLOT_OPTIONS: plot.rc | grep -v '#' | cut -d':' -f2 `
+    set OPTIONS   = `grep   PLOT_OPTIONS: plot.rc | grep -v '#' | cut -d':' -f2- `
     set CMPEXP    = `grep    PLOT_CMPEXP: plot.rc | grep -v '#' | cut -d':' -f2- `
     set MISCTMP   = `grep      PLOT_MISC: plot.rc | grep -v '#' | tr "[:lower:]" "[:upper:]"`
     set NJOBS     = `grep      PLOT_JOBS: plot.rc | grep -v '#' | cut -d':' -f2- `
@@ -1097,7 +1197,7 @@ if( $BEGDATE != "NULL" & $ENDDATE != "NULL" ) then
      @ n = $n + 1
      end
 else
-     set lastdate = `echo $monthlies[$num] | cut -d "." -f${date_node}`
+     set lastdate = `echo $monthlies[$num] | cut -d "." -f${date_node} | cut -b1-6`
      set checkdates = ''
      @ n = 1
      while( $n <=    $numdates[1] )
@@ -1107,11 +1207,8 @@ else
      end
 endif
 
-# Set STREAMS to ALL Streams in HISTORY.RC
-# ----------------------------------------
-set  streams = `$GEOSUTIL/post/get_streams $HISTORYRC`
-set nstreams = $#streams
-
+# Set Seasons to plot
+# -------------------
 echo CHECKDATES: $checkdates
 set season   = ''
 set plotdate = ''
@@ -1161,28 +1258,26 @@ if( $PLOTS[1] == "NULL" ) then
                if( $LOCKAGE > 120 ) /bin/rm -f LOCKFILE
      end
                                       lockfile LOCKFILE
-@ NPRS  = 0
 @ count = 0
 foreach stream ($streams)
-    set  PRSTEST  = `grep ${stream} $HISTORYRC | grep grid_label | cut -d: -f2`
-    if( $PRSTEST != '' ) then
-          @ NPRS  = $NPRS + 1
-    endif
+    set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
     echo Checking stream: $stream for date: $date
-    set  checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.monthly.${date}* | grep -v monthly.clim`
+    if( ${#monthly_attribute} == 0 ) then
+        set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.monthly.${date}* | grep -v clim`
+    else
+        set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.${date}* | grep -v clim`
+    endif
+
     echo checkstream: $checkstream
     echo ' '
     set ncheckstream = $#checkstream
     @ count = $count + $ncheckstream
 end
 
-# Only perform plots when all pressure-level streams have completed desired date
-# ------------------------------------------------------------------------------
-echo "Number of total          streams: $nstreams"
-echo "Number of pressure-level streams: $NPRS"
+echo "Number of streams: $nstreams"
 echo "Number of streams containing ${date}: $count"
+if ( $count != $nstreams ) set season = ''
 
-if ( $count != $NPRS ) set season = ''
 /bin/rm -f LOCKFILE
 endif
 

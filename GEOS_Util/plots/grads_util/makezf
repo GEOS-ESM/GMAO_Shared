@@ -69,7 +69,14 @@ tag   = subwrd(args,3)
              line = sublin(result,n)
              word = subwrd(line,1)
          if( word = 'tdef' )
-             dt = subwrd(line,5)
+               dt = subwrd(line,5)
+           length = strlen(dt)
+                 unit = substr( dt,length-1,length )
+             if( unit = 'yr' ) ; tunit = year   ; endif
+             if( unit = 'mo' ) ; tunit = month  ; endif
+             if( unit = 'dy' ) ; tunit = day    ; endif
+             if( unit = 'hr' ) ; tunit = hour   ; endif
+             if( unit = 'mn' ) ; tunit = minute ; endif
              n  = 0
           else
              n  = n + 1
@@ -129,6 +136,8 @@ tag   = subwrd(args,3)
   '!touch  sedfile'
   '!remove 'alias''tag'.ddf'
 
+  'set looping off'
+
     t = tmin
     while( t<=tmax )
     say '          Computing Zonal Mean Variable: 'alias''tag' for t = 't
@@ -150,7 +159,35 @@ tag   = subwrd(args,3)
    'getinfo month'
             month = result
             month = getnum(month)
-    fname = alias''tag'.'year''month'.nc4'
+
+   if( tunit = 'day' | tunit = 'hour' | tunit = 'minute' )
+    'getinfo date'
+             date = result
+                   delim = substr( date,3,1 )
+       'uppercase 'delim
+                   delim = result
+       if( delim = 'Z' )
+             day = substr( date,4,2 )
+            hour = substr( date,1,2 )
+          minute = 00
+       endif
+       if( delim = ':' )
+             day = substr( date,7,2 )
+            hour = substr( date,1,2 )
+          minute = substr( date,4,2 )
+       endif
+          if( tunit = 'minute' )
+              fname = alias''tag'.'year''month''day'_'hour''minute'z.nc4'
+             tstamp = '%y4%m2%d2_%h2%n2z'
+          else
+              fname = alias''tag'.'year''month''day'_'hour'z.nc4'
+             tstamp = '%y4%m2%d2_%h2z'
+          endif
+   else
+           fname = alias''tag'.'year''month'.nc4'
+          tstamp = '%y4%m2'
+   endif
+
    'set sdfwrite -5d 'fname
    'set undef 'undef
    'sdfwrite  tempz'
@@ -164,7 +201,7 @@ tag   = subwrd(args,3)
 '!echo "s?@DT?"'dt'?g >> sedfile'
 '!echo "s?@TDIM?"'tdim'?g >> sedfile'
 '!echo "s?@BDATE?"'begdate'?g >> sedfile'
-'!echo "s?qz.data?"'alias''tag'.%y4%m2.nc4?g >> sedfile'
+'!echo "s?qz.data?"'alias''tag'.'tstamp'.nc4?g >> sedfile'
 '!/bin/cp 'geosutil'/plots/grads_util/makez.tmpl .'
 '!sed -f   sedfile makez.tmpl > 'alias''tag'.ddf'
 

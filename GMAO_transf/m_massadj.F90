@@ -143,10 +143,6 @@
       real(r_kind)    :: lambda(im,jm)
       real(r_kind)    :: ps_corr, delp_min
 
-      real(r_kind)    :: gmean_
-
-
-
       rc = 0
       lm = min ( 2, nq )  ! Note: Needs 2 to properly replay GEOS-4.0.3
                           !       ana.eta files. However, in replay mode
@@ -246,7 +242,6 @@
     real(r_kind)    :: qmax, qmin, gps_a
     real(r_kind)    :: lambda(im,jm)
     real(r_kind)    :: ps_corr, delp_min
-    real(r_kind)    :: gmean_
     real(r_kind)    :: delpmin_
 
     rc = 0

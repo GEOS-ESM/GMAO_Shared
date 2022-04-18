@@ -5,7 +5,7 @@ set (srcs
   tropovars.F90 surfacelayer.F90 GEOS_TopoGet.F90
   GEOS_GmapMod.F90 GEOS_RemapMod.F90 G3_MPI_Util_Mod.F90 windfix.F90
   PWSSSP.F sphere.F calcdbz.F OVP.F90 
-  getco2.F90 Lightning_mod.F90 lightning_toolbox_mod.F90
+  getco2.F90 atmOceanIntLayer.F90
   minpack_lmdif1_plus_dependencies.f WOA_Eddington_Rayleigh.F90
   )
 

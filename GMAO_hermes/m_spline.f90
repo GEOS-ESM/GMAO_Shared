@@ -75,10 +75,10 @@ contains
   real(kind=REAL32) :: yi(:)
   real(kind=REAL32) :: yo(:)
 
-  real(kind=REAL64), allocatable, dimension(:) :: b(:), c(:), d(:)
-  real(kind=REAL64), allocatable, dimension(:) :: xxi(:)
-  real(kind=REAL64), allocatable, dimension(:) :: yyi(:)
-  real(kind=REAL64), allocatable, dimension(:) :: xxo(:)
+  real(kind=REAL64), allocatable :: b(:), c(:), d(:)
+  real(kind=REAL64), allocatable :: xxi(:)
+  real(kind=REAL64), allocatable :: yyi(:)
+  real(kind=REAL64), allocatable :: xxo(:)
 
   integer k,ni,no
   logical reverse_

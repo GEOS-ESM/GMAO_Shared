@@ -15,6 +15,7 @@
 #   21Sep2015 Todling  Add a version of an incremental update machinery
 #   26Apr2016 Todling  Add option to update initial time restarts (4d-only)
 #   20Feb2017 Todling  Parallel upd; opt to calc only initial tendency
+#   12Feb2020 Todling  Update extension of RST filenames
 #
 # !TO DO:
 #
@@ -477,9 +478,9 @@ sub rst0upd {
      die ">>> ERROR <<< cannot find file $species ; likely lnbcs has not been executed" if ( $errcode );
   }
 
-  my $adynsfx  = "bin";
-  my $moistsfx = "bin";
-  my $pchemsfx = "bin";
+  my $adynsfx  = "nc4";
+  my $moistsfx = "nc4";
+  my $pchemsfx = "nc4";
 
 # if ( $do_iupd && $iter > 0 ) {
 #    $gcmfile = "$expid.fvcore_internal_rst.$timetagz.iter0.$dynsfx";

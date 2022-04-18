@@ -214,7 +214,7 @@ say 'Processing Season: 'season
 * Set EXPORT Model, Observation Scaling Factors, and PTOPs for plots (for LOG use :L)
 * -----------------------------------------------------------------------------------
 if( EXPORT = "U"     ) ; facm = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
-if( EXPORT = "V"     ) ; facm = 1     ; nplots = 2 ; ptops = "30      0.1:L" ; endif
+if( EXPORT = "V"     ) ; facm = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
 if( EXPORT = "T"     ) ; facm = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
 if( EXPORT = "Q"     ) ; facm = 1000  ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "ZLE"   ) ; facm = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
@@ -447,7 +447,7 @@ if( cmpexp_only = TRUE ) ; return ; endif
 * Set EXPORT Model, Observation Scaling Factors, and PTOPs for plots (for LOG use :L)
 * -----------------------------------------------------------------------------------
 if( EXPORT = "U"     ) ; facm = 1     ; faco = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
-if( EXPORT = "V"     ) ; facm = 1     ; faco = 1     ; nplots = 2 ; ptops = "30      0.1:L" ; endif
+if( EXPORT = "V"     ) ; facm = 1     ; faco = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
 if( EXPORT = "T"     ) ; facm = 1     ; faco = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
 if( EXPORT = "Q"     ) ; facm = 1000  ; faco = 1000  ; nplots = 1 ; ptops = "30"            ; endif
 if( EXPORT = "ZLE"   ) ; facm = 1     ; faco = 1     ; nplots = 3 ; ptops = "30 30:L 0.1:L" ; endif
@@ -608,6 +608,11 @@ say 'Processing Season: 'season
 * --------------------------------------------------------------------
        n  = 1
 while( n <= numexp )
+
+say 'Checking  plot between  exp: 'qtag
+say '                       cexp: 'ctag.n
+say '                        obs: 'obsnam
+say ''
 
 if( ctag.n != "merra" & ctag.n != "MERRA-2" & ctag.n != "NULL" & type.n != V & ofile.n != "NULL" )
 

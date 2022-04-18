@@ -201,7 +201,7 @@ while ( n<=numflds )
 ****         Begin Systematic Error Plots ...      ****
 *******************************************************
 
-say 'Processing 'field' for pltsys:'
+say 'Processing 'field' for pltsys, level: 'level0
 
 if( level0 = 'NULL' | level0 = 'HORIZ' | level0 = 'ZONAL' )
 

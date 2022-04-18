@@ -19,7 +19,8 @@ integer, parameter :: dyntype=5
 integer :: nymd, nhms, freq, rc
 integer :: im1,jm1,km1,lm1
 integer :: im2,jm2,km2,lm2
-integer :: iargc,iarg, argc, k
+integer :: k
+real :: rscale
 real,allocatable :: ak(:),bk(:)
 type(dyn_vect) :: xi
 type(dyn_vect) :: yi
@@ -27,19 +28,9 @@ type(dyn_vect) :: zi
 logical, parameter :: pncf=.true.
 character(len=*), parameter :: ovars(11)=(/'    u','    v',' delp','   tv','   ps','   ts', ' sphu','qitot','qltot','qrtot','qstot'/)
 
-argc = iargc()
-if ( argc < 2 ) then
-   print *, "Usage: dyn_iupd.x finput foutput"
-   print *, "   "
-   stop
-end if
+rscale = -1.0e15
 
-iarg = 1
-call GetArg ( iarg, ifile )
-print * , "input increment: ", trim(ifile)
-iarg = iarg + 1
-call GetArg ( iarg, iofile )
-print * , "increment to update: ", trim(iofile)
+call init_()
 
 call dyn_getdim ( trim(ifile) , im1, jm1, km1, lm1, rc )
 call dyn_getdim ( trim(iofile), im2, jm2, km2, lm2, rc )
@@ -108,6 +99,14 @@ yi%pt= yi%pt+ xi%pt
 yi%q(:,:,:,1:lm1) = yi%q(:,:,:,1:lm1) + xi%q(:,:,:,1:lm1)
 yi%ps= yi%ps+ xi%ps
 yi%ts= yi%ts+ xi%ts
+if ( rscale > -1.0e15 ) then ! split to avoid round off diffs in DAS when rscale=1.
+   yi%u = rscale*yi%u
+   yi%v = rscale*yi%v
+   yi%pt= rscale*yi%pt
+   yi%q(:,:,:,1:lm1) = rscale*yi%q(:,:,:,1:lm1)
+   yi%ps= rscale*yi%ps
+   yi%ts= rscale*yi%ts
+endif
 
 ! reconstruct delp increment from ps increment
 allocate(ak(km2+1),bk(km2+1))
@@ -125,4 +124,49 @@ call dyn_put ( trim(iofile), nymd, nhms, 0, yi, rc, new=.true., freq=freq, vecty
 call dyn_clean ( yi )
 call dyn_clean ( xi )
 
+contains
+  subroutine init_
+
+  integer, parameter :: mfiles=2
+  integer iargc,argc,nfiles,iarg,i
+  character(len=256) str,argv
+
+  argc = iargc()
+  if ( argc < 2 ) then
+     print *, "Usage: dyn_iupd.x [-scale SCALE] finput foutput"
+     print *, "   "
+     stop
+  end if
+
+  iarg = 0
+  nfiles = 0
+
+  do i = 1, 32767
+     iarg = iarg + 1
+     if ( iarg .gt. argc ) exit
+     call GetArg ( iarg, argv )
+     select case (argv)
+       case ('-scale')
+         if ( iarg+1 .gt. argc ) then
+             print *, "See usage, aborting"
+             stop
+         endif
+           iarg = iarg + 1
+           call GetArg ( iarg, str )
+           read(str,*) rscale
+       case default
+           nfiles = nfiles + 1
+           if ( nfiles .gt. mfiles ) call die(myname,'too many eta files')
+           if ( nfiles==1 )  ifile = argv
+           if ( nfiles==2 ) iofile = argv
+       end select
+   enddo
+
+   print * , "input increment: ", trim(ifile)
+   print * , "increment to update: ", trim(iofile)
+   if ( rscale > -1.e15 ) then 
+      print *, "scaling perturbation by: ", rscale
+   endif
+
+  end subroutine init_
 end program dyn_iupd

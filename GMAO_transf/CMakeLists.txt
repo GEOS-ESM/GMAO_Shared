@@ -9,12 +9,12 @@ add_definitions (-Dopenmp)
 # use r4i4 to get zero-diff with the GNU Make build
 # The "correct" lines should be:
 #
-#include_directories (${include_NCEP_sp_r8i4})
+#include_directories (${include_NCEP_sp_r4i4})
 #include_directories (${include_NCEP_w3_r8i4})
-#esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r8i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
+#esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
 
 include_directories (${include_GMAO_mpeu})
-include_directories (${include_NCEP_sp_r8i4})
+include_directories (${include_NCEP_sp_r4i4})
 include_directories (${include_NCEP_w3_r8i4})
 include_directories (${include_NCEP_sfcio})
 include_directories (${include_GMAO_hermes})
@@ -82,8 +82,8 @@ set (srcs
    gmap.F
    )
 
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${EXTENDED_SOURCE} ${ALIGNCOM}")
-set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG} ${EXTENDED_SOURCE}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
+set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG}")
 
 ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} FFLAGS "${FREAL8}")
 ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} FFLAGS "${FREAL8}")
@@ -94,10 +94,13 @@ ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} FFLAGS "${F
 install (PROGRAMS ec2fv.csh DESTINATION bin)
 
 #This needs to be worked on
-ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
+ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bufr_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r8i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_bufr_r4i4  NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+if (EXTENDED_SOURCE)
+   set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
+endif ()
 
 string (REPLACE " " ";" flags ${FREAL8})
 foreach (flag ${flags})

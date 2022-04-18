@@ -28,6 +28,15 @@ if(begdate = begdateo & enddate = enddateo )
 endif
 
 
+* Get Fixed Plotting Values from Resource File
+* --------------------------------------------
+'run getenv "GEOSUTIL"'
+             geosutil = result
+              PLOTRC  = geosutil'/plots/grads_util/plot.rc'
+'getresource 'PLOTRC' STR_DYN_FIXED_PLOT_FACTOR' ; fixpltfact = result
+'getresource 'PLOTRC' STR_DYN_FIXED_PLOT_CINT'   ; fixpltcint = result
+
+
 'rgbset'
 'set rgb 84 204 204 204'
 'set rgb 85 137 137 137'
@@ -182,6 +191,12 @@ endif
 'set t 1'
 'd str'season'obs'
 
+'set dfile ' zdifile
+'set x 1'
+'set t 1'
+'sety'
+'setz'
+
 if( CINTDIFF != NULL )
 * --------------------
 
@@ -210,6 +225,12 @@ if( CINTDIFF != NULL )
            dn = dn+2
         endif
    endif
+
+   if( fixpltfact != NULL )
+       'd 'fixpltfact
+        dn =subwrd(result,4)
+   endif
+
    if( dn<0 )
        dm = -dn
    else
@@ -221,12 +242,22 @@ if( CINTDIFF != NULL )
      if( dn>0 )
        'd 0.1*'dqmax'/1e'dm
         cint = subwrd(result,4)
+             if( fixpltcint != NULL )
+             'd 'fixpltcint
+                 fixpltcint =subwrd(result,4)
+                 cint = fixpltcint
+             endif
         say 'dn> 0,  CINT: 'cint
        'shades 'cint
        'd maskout( strdifz/1e'dm',abs(strdifz/1e'dm')-'cint' )'
      else
        'd 0.1*'dqmax'*1e'dm
         cint = subwrd(result,4)
+             if( fixpltcint != NULL )
+             'd 'fixpltcint
+                 fixpltcint =subwrd(result,4)
+                 cint = fixpltcint
+             endif
         say 'dn< 0,  CINT: 'cint
        'shades 'cint
        'd maskout( strdifz*1e'dm',abs(strdifz*1e'dm')-'cint' )'
@@ -239,6 +270,12 @@ else
     'd maskout( strdifz,abs(strdifz)-0.3 )'
 
 endif
+
+'set dfile 'dfile
+'set x 'x1' 'x2
+'set y 'y1' 'y2
+'set z 'z1' 'z2
+'set t 1'
 
 'cbarn -scale 0.9 -snum 0.5'
 'set gxout contour'
@@ -257,7 +294,8 @@ endif
 'set string 1 c 6'
 'set strsiz .11'
 
-'draw string 4.25 10.6 EXPID: 'expid'  'expdsc'  'season' ('nmod')'
+'draw string 4.25 10.85 EXPID: 'expid
+'draw string 4.25 10.6 'expdsc'  'season' ('nmod')'
 'draw string 4.25  7.23 'obsdsc'  'season' ('nobs') ('climate')'
 
 if( dn != 0 )

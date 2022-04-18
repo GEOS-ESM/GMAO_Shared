@@ -85,7 +85,7 @@ if ($etaasmflg) {
 }
 
 if ($etabkgflg) {
-    @files = < *.bkg.eta.*_{00,06,12,18}z.nc4 >;
+    @files = < *.bkg.eta.*.nc4 >;
     @rcfiles = ( @eta_rc );
     $lcvflg = "-lcv";
     $subsetflg = "";

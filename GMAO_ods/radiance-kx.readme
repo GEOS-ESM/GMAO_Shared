@@ -1,4 +1,5 @@
 ! Radiance KX 04/20/15 - added tmi_trmm and gmi_gpm KX
+!             02/23/18 - added n20, n21 cris, cris-fsr, atms
 !
 ! radiance kx values are assigned using the sum of the value for dtype
 ! from the sats/idsats lookup table in 'odsmeta.h' and the isat value 
@@ -24,7 +25,7 @@
  hirs4       n19         hirs4_n19                     19          19
  hirs4       metop-a     hirs4_metop-a                 25          25
  hirs4       metop-b     hirs4_metop-b                 26          26
- airs        aqua        airs281_aqua                   0          49
+ airs        aqua        airs_aqua                      0          49
  sndr        g08_prep    sndr_g08                       8          53
  sndr        g10_prep    sndr_g10                      10          55
  sndr        g11_prep    sndr_g11                      11          56
@@ -71,6 +72,7 @@
  amsua       n19         amsua_n19                     19         319
  amsua       metop-a     amsua_metop-a                 25         325
  amsua       metop-b     amsua_metop-b                 26         326
+ amsua       metop-c     amsua_metop-c                 27         327
  ssu         tirosn      ssu_tirosn                     5         355
  ssu         n06         ssu_n06                        6         356
  ssu         n07         ssu_n07                        7         357
@@ -85,6 +87,9 @@
  amsre_low   aqua        amsre_aqua(low)                0         547
  amsre_mid   aqua        amsre_aqua(mid)                0         548
  amsre_hig   aqua        amsre_aqua(hi)                 0         549
+ amsr2       gcom-w1     amsr2_gcom-w1                  0         550
+ avhrr       n15         avhrr3_n15                    15         615
+ avhrr       n17         avhrr3_n17                    17         617
  avhrr       n18         avhrr3_n18                    18         618
  avhrr       n19         avhrr3_n19                    19         619
  avhrr       metop-a     avhrr3_metop-a                25         625
@@ -106,18 +111,30 @@
  mhs         n19         mhs_n19                       19         819
  mhs         metop-a     mhs_metop-a                   25         825
  mhs         metop-b     mhs_metop-b                   26         826
- iasi        metop-a     iasi616_metop-a               25         875
- iasi        metop-b     iasi616_metop-b               26         876
+ mhs         metop-c     mhs_metop-c                   27         827
+ iasi        metop-a     iasi_metop-a                  25         875
+ iasi        metop-b     iasi_metop-b                  26         876
+ iasi        metop-c     iasi_metop-c                  27         877
  atms        npp         atms_npp                       0         900
+ atms        n20         atms_n20                      20         920
+ atms        n21         atms_n21                      21         921
+ cris-fsr    npp         cris-fsr_npp                   0         940
  cris        npp         cris_npp                       0         950
+ cris-fsr    n20         cris-fsr_n20                  20         960
+ cris-fsr    n21         cris-fsr_n21                  21         961
+ cris        n20         cris_n20                      20         970
+ cris        n21         cris_n21                      21         971
  seviri      m08         seviri_m08                     8         988
  seviri      m09         seviri_m09                     9         989
  seviri      m10         seviri_m10                    10         990
+ seviri      m11         seviri_m11                    11         991
 !
 !
 !  Note:  hsb_aqua, amsre_aqua, imgr_* not really being used
 !  avhrr* could be expanded for n06-n17, not sure about sats for avhrr_navy
 !  so that type is not listed, would be avhrr+50 so possibly 656-676
+!
+!  cris_n20, cris_n21 would be designators for remapped CrIS in MERRA2
 
 ! Precipitation KX  - determined as delta from GSI assigned values (211,264)
 ! add base value (tmi->211, ssmi->264) and isat to get the KX

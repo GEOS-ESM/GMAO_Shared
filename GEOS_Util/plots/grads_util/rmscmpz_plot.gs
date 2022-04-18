@@ -182,6 +182,7 @@ endwhile
 * -------------------------------
 month  = ''
 months = ''
+season = ''
         n   = filebeg
 while ( n  <= fileend )
 'set dfile 'n
@@ -191,19 +192,65 @@ while ( n  <= fileend )
         dummy = substr(date,6,3)
     if( dummy != month )
         month  = dummy
+
         if( months = '' )
             months = month
          else
             months = months'-'month
-         endif
-     endif
+        endif
+
+        if( months = 'DEC-JAN-FEB' )
+            if( season = '' )
+                season = 'DJF'
+            else
+                season = season'-DJF'
+            endif
+            months = ''
+        endif
+
+        if( months = 'MAR-APR-MAY' )
+            if( season = '' )
+                season = 'MAM'
+            else
+                season = season'-MAM'
+            endif
+            months = ''
+        endif
+
+        if( months = 'JUN-JUL-AUG' )
+            if( season = '' )
+                season = 'JJA'
+            else
+                season = season'-JJA'
+            endif
+            months = ''
+        endif
+
+        if( months = 'SEP-OCT-NOV' )
+            if( season = '' )
+                season = 'SON'
+            else
+                season = season'-SON'
+            endif
+            months = ''
+        endif
+
+    endif
 n = n + 1
 endwhile
+if( season != '' )
+    if( months != '' )
+        months  = season'-'months
+    else
+        months  = season
+    endif
+endif
 say 'Months Used in Forecasts: 'months
+
 
 * Define TOPLEV, NDAY and NDAYMAX across ALL Experiments
 * ------------------------------------------------------
- toplev  = 1000
+ toplev  = 0
  ndaymax = 999
        m = 0
 while( m<=mexps )
@@ -216,7 +263,7 @@ while( m<=mexps )
         'set z 'zdim
         'getinfo level'
                  level = result
-             if( level < toplev )
+             if( level > toplev )
                  toplev = level
              endif
 
@@ -988,57 +1035,58 @@ if( level >= levmin )
 zcnt = zcnt + 1
 
 'minmax rave0'
-maxval = subwrd(result,1)
-maxval = 1.02 * maxval
+if( subwrd(result,1) != 1e+15 )
 
-axmax  =   1.08 * maxval
-axmin  = - 0.08 * maxval
+    maxval = subwrd(result,1)
+    maxval = 1.02 * maxval
+    axmax  =   1.08 * maxval
+    axmin  = - 0.08 * maxval
 
-'set vpage off'
-'set parea off'
-'set grads off'
-'set parea 2.25 9.75 4.0 7.5'
-'set axlim 'axmin' 'axmax
-'d rave0'
-'d rave1'
-'q gr2xy 1 0'
- xval = subwrd(result,3)
- yval = subwrd(result,6)
+    'set vpage off'
+    'set parea off'
+    'set grads off'
+    'set parea 2.25 9.75 4.0 7.5'
+    'set axlim 'axmin' 'axmax
+    'd rave0'
+    'd rave1'
+    'q gr2xy 1 0'
+     xval = subwrd(result,3)
+     yval = subwrd(result,6)
+    
+      if( xval != environment )
+        say 'xval = 'xval
+        say 'yval = 'yval
+        say 'GR2XY Result, xval:yval = 'result
+       'set line 2 1 3'
+       'draw line 'xval' 'yval' 4 'yval
+        yval = yval + 0.03
+        say 'New yval = 'yval
+       'q xy2gr 'xval' 'yval
+        say 'XY2GR Result: 'result
+        thickness.xpos.z = subwrd(result,6)
+        thickness.xpos.z = thickness.xpos.z * 1000
+        zsum = zsum + thickness.xpos.z
+        if( thickness.xpos.z > zmax ) ; zmax = thickness.xpos.z ; endif
+        if( thickness.xpos.z < zmin ) ; zmin = thickness.xpos.z ; endif
+       'set line 3 1 3'
+       'draw line 3.5 'yval' 7.5 'yval
+        say ' '
+        say 'z = 'z'  Level: 'level'  LEVMIN: 'levmin'  LINE_THICKNESS x 1000 = 'thickness.xpos.z
+        say 'zmin = 'zmin'  zmax = 'zmax'  zsum = 'zsum
+        say ' '
+        say 'Hit Enter to Continue ...'
+        pull flag
+       'c'
+      else
+        zsum = 0
+        zmin = 0
+      endif
 
-  if( xval != environment )
-
-    say 'xval = 'xval
-    say 'yval = 'yval
-    say 'GR2XY Result, xval:yval = 'result
-   'set line 2 1 3'
-   'draw line 'xval' 'yval' 4 'yval
-    yval = yval + 0.03
-    say 'New yval = 'yval
-   'q xy2gr 'xval' 'yval
-    say 'XY2GR Result: 'result
-    thickness.xpos.z = subwrd(result,6)
-    thickness.xpos.z = thickness.xpos.z * 1000
-    zsum = zsum + thickness.xpos.z
-    if( thickness.xpos.z > zmax ) ; zmax = thickness.xpos.z ; endif
-    if( thickness.xpos.z < zmin ) ; zmin = thickness.xpos.z ; endif
-   'set line 3 1 3'
-   'draw line 3.5 'yval' 7.5 'yval
-    say ' '
-    say 'z = 'z'  Level: 'level'  LEVMIN: 'levmin'  LINE_THICKNESS x 1000 = 'thickness.xpos.z
-    say 'zmin = 'zmin'  zmax = 'zmax'  zsum = 'zsum
-    say ' '
-    say 'Hit Enter to Continue ...'
-    pull flag
-   'c'
-
-  else
-    zsum = 0
-    zmin = 0
-  endif
-
+endif
 endif
 z = z + 1
 endwhile
+
    zsum = zsum / zcnt
    say 'Average zthick = 'zsum
 
@@ -1057,6 +1105,31 @@ if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
 
 say '        DCINT for plots: 'dcint
 say 'MIN_THICKNESS for plots: 'min_thickness
+
+************************************************************************
+****        To hardwire contour levels within Montage plots     ********
+************************************************************************
+* if( field = 'h' )
+* say 'Hardwire values for plots,         dcint = '350 ; dcint = 350
+* say 'Hardwire values for plots, min_thickness = '100 ; min_thickness = 100
+* endif
+* if( field = 't' )
+* say 'Hardwire values for plots,         dcint = '35 ; dcint = 35
+* say 'Hardwire values for plots, min_thickness = '7 ; min_thickness = 7
+* endif
+* if( field = 'u' )
+* say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
+* say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
+* endif
+* if( field = 'v' )
+* say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
+* say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
+* endif
+* if( field = 'q' )
+* say 'Hardwire values for plots,         dcint = '20 ; dcint = 20
+* say 'Hardwire values for plots, min_thickness = '0.05 ; min_thickness = 0.05
+* endif
+************************************************************************
 
 flag = ''
 while( flag = '' )
@@ -1109,6 +1182,10 @@ endif
 
  'set clevs 'clevs
  'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
+
+ say 'DISPLAY sigdiffcrit:'
+ say 'CLEVS: 'clevs
+ say 'CCOLS: 'ccols
 
  ' d sigdiffcrit '
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'
