@@ -13,9 +13,7 @@ set (srcs
   read_Reynolds.F90
   )
 
-esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL)
-target_link_libraries (${this} PUBLIC ${NETCDF_LIBRARIES})
-target_include_directories (${this} PUBLIC ${INC_NETCDF})
+esma_add_library (${this} SRCS ${srcs} DEPENDENCIES MAPL NetCDF::NetCDF_Fortran)
 
 ecbuild_add_executable (
   TARGET regrid_forcing.x
@@ -46,6 +44,12 @@ ecbuild_add_executable (
   SOURCES lake_data_EIGTHdeg.F90
   LIBS ${this})
 set_target_properties(lake_sst_sic_EIGTHdeg.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
+
+ecbuild_add_executable (
+  TARGET reynolds_QUART.x
+  SOURCES proc_SST_FRACI_reynolds_quart.F90
+  LIBS ${this})
+set_target_properties(reynolds_QUART.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 if (USE_F2PY)
    find_package(F2PY2)

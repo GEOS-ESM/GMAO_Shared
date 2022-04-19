@@ -1,0 +1,9 @@
+#output
+*.nc
+*.nc4
+*.png
+*.pdf
+
+#scratch
+__pycache__/*
+.ipynb_checkpoints/*
