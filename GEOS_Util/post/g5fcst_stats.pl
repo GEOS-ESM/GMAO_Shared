@@ -579,7 +579,6 @@ sub init {
         die "Error. Cannot find $fv_etcdir/stats.rc" unless -e "$fv_etcdir/stats.rc";
     }
 }
-
 #=======================================================================
 # name - das_check
 # purpose - check for hidden files in $FVHOME/fcst and $FVHOME directories
@@ -716,9 +715,13 @@ sub submit_calcjob {
     $usrnodes    = $args{"nodes"};
     $landonly    = $args{"landonly"};
     $nxonly      = $args{"nxonly"};
-    if ($landonly eq "yes") { $landmaskdirfile = "$jobdir/landmaskfile.nc4"}
     print "nxonly: $nxonly\n";
     print "landonly: $landonly\n";
+
+    if ($landonly eq "yes") {
+     $landmaskdirfile = "$jobdir/landmaskfile.nc4";
+     die "Error. Cannot find $landmaskdirfile" unless -e "$landmaskdirfile";
+    }
     
     $whichrc = "stats.rc";
     if ($nxonly eq "yes") {
