@@ -50,7 +50,7 @@ install(
    PROGRAMS ${perlscripts} ec2grd.csh
    DESTINATION bin)
 
-file(GLOB pythonscripts CONFIGURE_DEPENDS regrid*.py regrid_params.tpl)
+file(GLOB pythonscripts CONFIGURE_DEPENDS ./regrid_py/regrid*)
 install(
    PROGRAMS ${pythonscripts} 
    DESTINATION bin)
