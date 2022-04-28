@@ -113,29 +113,41 @@ class regridder(object):
     # BCS Tags: Icarus (New Land Parameters, New Topography)
     #---------------------------------------------------------------------------
      ICA  = ( 'ICA',                  'Icarus',              'Jason' )
-     D517 = ( 'D517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
+     D517 = ( 'D517',
+              'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
               'GEOSadas-5_18_1',      'GEOSadas-5_18_2',     'GEOSadas-5_18_3',
               'GEOSadas-5_18_3_p1',   'GEOSadas-5_19_0',     'GEOSadas-5_20_0',
               'GEOSadas-5_20_0_p1',   'GEOSadas-5_20_0_p2',  'GEOSadas-5_21_0',
               'GEOSadas-5_21_2',      'GEOSadas-5_21_3_p1',  'GEOSadas-5_22_0',
               'GEOSadas-5_22_0_p1',   'GEOSadas-5_22_0_p2',  'GEOSadas-5_23_0',
               'GEOSadas-5_23_0_p1',   'GEOSadas-5_24_0',     'GEOSadas-5_24_0_p1' )
+     GITOL = ( 'GITOL', '10.3',  '10.4',  '10.5',
+               '10.6',  '10.7',  '10.8',
+               '10.9',  '10.10', '10.11',
+               '10.12', '10.13', '10.14',
+               '10.15', '10.16', '10.17',
+               '10.18'  )
 
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
-     INL  = ( 'INL', 'Icarus-NL', 'Icarus-NLv3', 'Jason-NL' )
+     INL   = ( 'INL', 'Icarus-NL', 'Icarus-NLv3', 'Jason-NL' )
+     GITNL = ( 'GITNL', '10.19', '10.20', '10.21', '10.22', '10.23' )
+     D525  = ( '525', 'GEOSadas-5_25_1', 'GEOSadas-5_25_1_p5', 'GEOSadas-5_25_p7',
+                      'GEOSadas-5_27_1', 'GEOSadas-5_29_3',    'GEOSadas-5_29_4' )
 
      self.bcsTag={}
-     for tag in F14:  self.bcsTag[tag]= "Fortuna-1_4"
-     for tag in F20:  self.bcsTag[tag]= "Fortuna-2_0"
-     for tag in F21:  self.bcsTag[tag]= "Fortuna-2_1"
-     for tag in G10:  self.bcsTag[tag]= "Ganymed-1_0"
-     for tag in G10p: self.bcsTag[tag]= "Ganymed-1_0_M"
-     for tag in G20:  self.bcsTag[tag]= "Ganymed-1_0_M"
-     for tag in G30:  self.bcsTag[tag]= "Ganymed-1_0_Reynolds"
-     for tag in G40:  self.bcsTag[tag]= "Ganymed-4_0_Reynolds"
-     for tag in ICA:  self.bcsTag[tag]= "Icarus_Reynolds"
-     for tag in INL:  self.bcsTag[tag]= "Icarus-NLv3_Reynolds"
+     for tag in F14:   self.bcsTag[tag]= "Fortuna-1_4"
+     for tag in F20:   self.bcsTag[tag]= "Fortuna-2_0"
+     for tag in F21:   self.bcsTag[tag]= "Fortuna-2_1"
+     for tag in G10:   self.bcsTag[tag]= "Ganymed-1_0"
+     for tag in G10p:  self.bcsTag[tag]= "Ganymed-1_0_M"
+     for tag in G20:   self.bcsTag[tag]= "Ganymed-1_0_M"
+     for tag in G30:   self.bcsTag[tag]= "Ganymed-1_0_Reynolds"
+     for tag in G40:   self.bcsTag[tag]= "Ganymed-4_0_Reynolds"
+     for tag in ICA:   self.bcsTag[tag]= "Icarus_Reynolds"
+     for tag in GITOL: self.bcsTag[tag]= "Icarus_Reynolds"
+     for tag in INL:   self.bcsTag[tag]= "Icarus-NLv3_Reynolds"
+     for tag in GITNL: self.bcsTag[tag]= "Icarus-NLv3_Reynolds"
 
      
      for tag in D214:  self.bcsTag[tag]= "Fortuna-1_4"
@@ -147,6 +159,7 @@ class regridder(object):
      for tag in D5B0:  self.bcsTag[tag]= "Ganymed-1_0_Reynolds"
      for tag in D512:  self.bcsTag[tag]= "Ganymed-4_0_Reynolds"
      for tag in D517:  self.bcsTag[tag]= "Icarus_Reynolds"
+     for tag in D525:  self.bcsTag[tag]= "Icarus-NLv3_Reynolds"
     
      self.tagsRank ={}
      self.tagsRank['Fortuna-1_4'] = 1 
