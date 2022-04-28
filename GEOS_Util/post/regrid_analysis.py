@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 #
-# source g5_modules
-# module load python/GEOSpyD/Min4.9.2_py3.9
+# source install/bin/g5_modules
+#
+# Newer GEOS code should load a module with GEOSpyD Python3 if not run:
+#   module load python/GEOSpyD/Min4.10.3_py3.9
 #
 
 import os
