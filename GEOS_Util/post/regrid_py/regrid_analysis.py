@@ -13,13 +13,15 @@ import shlex
 import shutil
 import glob
 import fileinput
-import yaml
+import ruamel.yaml
 
 class analysis(object):
   def __init__(self, params_file):
-     stream = open(params_file, 'r')
-     self.config = yaml.full_load(stream)
-     stream.close()
+     yaml = ruamel.yaml.YAML()
+     stream =''
+     with  open(params_file, 'r') as f:
+        stream = f.read()
+     self.config = yaml.load(stream)
 
   def regrid(self):
      config = self.config

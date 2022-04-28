@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 import os
-import yaml
+import ruamel.yaml
 import shutil
 import glob
 import time
@@ -34,11 +34,13 @@ class regrid_params(object):
      print("\noutput tile file: " + self.out_til)
 
      # load input yaml
-     stream     = open('regrid_params.tpl', 'r')
-     config_tpl = yaml.full_load(stream)
-     
-     # params for shared
+     yaml = ruamel.yaml.YAML() 
+     stream = ''
+     with  open('regrid_params.tpl', 'r') as f:
+       stream = f.read()
+     config_tpl = yaml.load(stream)
 
+     # params for shared
      config_tpl['input']['shared']['agrid']    = self.common_in['agrid']
      config_tpl['input']['shared']['ogrid']    = self.common_in['ogrid']
      config_tpl['input']['shared']['bcs_dir']  = self.in_bcsdir
@@ -71,9 +73,9 @@ class regrid_params(object):
            else:
               shutil.move('regrid_params.yaml', new_name)
               break
-     f = open("regrid_params.yaml", "w")
-     yaml.dump(self.config, f, allow_unicode=True, default_flow_style=False)
-     f.close()
+     yaml = ruamel.yaml.YAML()
+     with open("regrid_params.yaml", "w") as f:
+        yaml.dump(self.config, f)
 
   def init_tags(self):
      # copy and paste from regrid.pl

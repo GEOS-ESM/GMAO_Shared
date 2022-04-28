@@ -7,7 +7,6 @@
 #
 
 import sys, getopt
-import yaml
 from regrid_questions import get_config_from_questionary 
 from regrid_params import *
 from regrid_upper import *
@@ -43,6 +42,7 @@ def main(argv):
     params.convert_to_yaml()
     config_yaml = 'regrid_params.yaml'
 
+  sys.exit()
   # upper air
   upper = upperair(config_yaml)
   upper.regrid()
