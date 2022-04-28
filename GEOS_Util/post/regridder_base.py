@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from datetime import timedelta
 
-class regrider(object):
+class regridder(object):
   def __init__(self, config):
      self.common_in   = config['input']['parameters']['COMMON']
      self.common_out  = config['output']['parameters']['COMMON']

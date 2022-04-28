@@ -6,9 +6,9 @@ import shlex
 import shutil
 import glob
 import fileinput
-from regrider_base import *
+from regridder_base import *
 
-class analysis(regrider):
+class analysis(regridder):
   def __init__(self, config):
      # v3.0
      #super().__init__(config)

@@ -5,9 +5,9 @@ import subprocess
 import shlex
 import shutil
 import glob
-from regrider_base import *
+from regridder_base import *
 
-class upperair(regrider):
+class upperair(regridder):
   def __init__(self, config):
      # v3.0
      #super().__init__(config)
@@ -194,11 +194,11 @@ set interp_restartsX = {Bin}/interp_restarts.x
              out_dir = out_dir, out_log = 'regrid_upper_log', drymassFLG = self.upper_out['drymassFLG'], \
              imout = self.upper_out['imout'], nwrit = self.upper_out['nwrit'], NPE = self.upper_out['NPE'], \
              QOS = self.upper_out['QOS'], nlevel = self.upper_out['nlevel'])
-     upper = open('regrider_upper.j','wt')
+     upper = open('regridder_upper.j','wt')
      upper.write(regrid_upper_script)
      upper.close()
-     print('sbatch -W regrider_upper.j\n')
-     subprocess.call(['sbatch', '-W', 'regrider_upper.j'])
+     print('sbatch -W regridder_upper.j\n')
+     subprocess.call(['sbatch', '-W', 'regridder_upper.j'])
      for out_rst in glob.glob("*_rst*"):
        filename = os.path.basename(out_rst)
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)

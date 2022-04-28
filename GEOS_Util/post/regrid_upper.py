@@ -187,11 +187,11 @@ endif
              out_dir = out_dir, out_log = 'regrid_upper_log', drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
              QOS = QOS, nlevel = nlevel, hydrostatic = hydrostatic)
-     upper = open('regrider_upper.j','wt')
+     upper = open('regridder_upper.j','wt')
      upper.write(regrid_upper_script)
      upper.close()
-     print('sbatch -W regrider_upper.j\n')
-     subprocess.call(['sbatch', '-W', 'regrider_upper.j'])
+     print('sbatch -W regridder_upper.j\n')
+     subprocess.call(['sbatch', '-W', 'regridder_upper.j'])
 #
 #    post process
 #

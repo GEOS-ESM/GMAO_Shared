@@ -5,9 +5,9 @@ import subprocess
 import shutil
 import shlex
 import glob
-from regrider_base import *
+from regridder_base import *
 
-class surface(regrider):
+class surface(regridder):
   def __init__(self, config):
      #v3.0
      #super().__init__(config)
