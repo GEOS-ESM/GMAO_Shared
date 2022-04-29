@@ -38,6 +38,7 @@ set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${th
 
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
+set_target_properties(3CH_mpi.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 set (perlscripts
   ecmwf2geos.pl
