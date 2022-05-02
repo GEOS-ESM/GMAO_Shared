@@ -12,8 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Added a few new tags to `regrid.pl`
+- Changes allow `gcmpost.script` and `gcmclim.script` to handle `collection.monthly: 1` output and stop automatic archiving.
 
 ### Fixed
+
+- Fixed a minor CMake issue to keep all mod files in `build/include`
 
 ### Added
 
