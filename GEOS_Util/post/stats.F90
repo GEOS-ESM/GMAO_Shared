@@ -56,6 +56,13 @@
       real, allocatable ::   rms(:,:,:,:,:)    ! Note: Hardwired for 100 time periods (Max)
       real*4 dum(nr)
 
+!for land-only option
+! -------------------
+      real, allocatable :: landmask(:,:)
+      logical              landonly
+      data                 landonly /.false./ 
+      character*256        lndfname
+
 !     Original Levels
 !     ---------------
 !     real  zlev0(10)
@@ -277,6 +284,12 @@
              if( trim(arg(n)).eq.'-o'      ) read(arg(n+1),fmt='(a)') outfile
              if( trim(arg(n)).eq.'-verif'  ) read(arg(n+1),*) averify
              if( trim(arg(n)).eq.'-fcsrc'  ) read(arg(n+1),*) fcsource
+!for land-only option 
+!--------------------
+             if( trim(arg(n)).eq.'-land'   ) then
+                                             read(arg(n+1),fmt='(a)') lndfname
+                                             landonly = .true.
+             endif 
 
            enddo
       endif
@@ -335,7 +348,7 @@
           if(failed) then
              print* ,' ERROR: when GMAOpy output requested the following must be specified:'
              print* ,'        -fcsrc FORECAST     (e.g., gmao)'
-             print* ,'        -verif VERIFICATION (e.g., ncep)'
+             print* ,'        -verif VERIFICATION (e.g., ecmwf or ncep)'
              print* ,' Aborting ...'
              call exit(1)
           endif
@@ -702,6 +715,14 @@
       dl = 2*pi/im
       dp = pi/(jm-1)
 
+!for land-only option
+!--------------------
+      if ( landonly ) then
+           allocate ( landmask (im,jm ) )
+           print *, ' landmask filename: ', trim(lndfname)
+           call load_landmask ( lndfname,landmask,im,jm,undef )
+      endif
+
 ! Loop over Forecast Times
 ! ------------------------
       nt = 0
@@ -792,6 +813,16 @@
         call writit ( fields_3d(n)%clim,im,jm,nl,cundef,undef )
         enddo
 
+!for land-only option
+!--------------------
+        if (landonly) then
+            do n=1,n2d
+            call landmk ( fields_2d(n)%fcst,im,jm,1 ,landmask,undef )
+            enddo
+            do n=1,n3d
+            call landmk ( fields_3d(n)%fcst,im,jm,nl,landmask,undef )
+            enddo
+        endif
 
 ! Loop over Geographical Regions
 ! ------------------------------
@@ -2360,6 +2391,7 @@
 
       subroutine read_anal( nymd,nhms,fields_2d,fields_3d,n2d,n3d,idim,jdim,nl,zlev,ana_files,num_ana_files,undef )
       use stats_mod
+      use MAPL_ConstantsMod 
       implicit none
       type(fields) :: fields_2d(n2d)
       type(fields) :: fields_3d(n3d)
@@ -2383,6 +2415,7 @@
       character*256, allocatable :: vunits(:)
 
       real,    allocatable ::      q(:,:)
+      real,    allocatable ::     sp(:,:) 
       real,    allocatable ::    lat(:)
       real,    allocatable ::    lon(:)
       real,    allocatable ::    lev(:)
@@ -2400,6 +2433,8 @@
       logical check_names
       logical shift, defined, first
       integer num, LL, i,j,k, loc, ndates, len
+      real Td, pp, ee  
+      real tice, epsln, ec0, ec1, ec2 
       data id    /0/
       data num   /0/
       data shift /.false./
@@ -2522,6 +2557,34 @@
                 if( check_names( vname(n),fields_2d(m)%alias(k) ) ) then
                 found_2d(m) = .true.
                  call gfio_getvar ( id,vname(n),nymd,nhms,im,jm,0,1,q,rc )
+                 
+                 if( trim(vname(n)) == 'N2_metre_dewpoint_temperature'  ) then 
+                     tice= MAPL_TICE 
+                     epsln = MAPL_EPSILON 
+                     !! empirical coeff. (Bolton 1980) 
+                     ec0 = 6.112
+                     ec1 = 17.67
+                     ec2 = 243.5 
+
+                     allocate( sp(im, jm) ) 
+                     call gfio_getvar ( id,'Surface_pressure',nymd,nhms,im,jm,0,1,sp,rc ) 
+                     do j=1,jm
+                     do i=1,im
+                       if( defined(q(i,j),undef) .and. defined(sp(i,j),undef) )then 
+                          Td = q(i,j)-tice ! to C   
+                          pp = sp(i,j)/100.  ! to mb 
+                          ee= ec0*exp((ec1*Td)/(Td + ec2)) 
+                          q(i,j) = (epsln * ee)/(pp - (1.0-epsln) * ee)
+                       else 
+                          print*, 'Td conversion fails,set q2m to UNDEF' 
+                          q(i,j) = undef 
+                       endif 
+                     enddo
+                     enddo
+                     deallocate ( sp ) 
+                 endif
+                 !------ 
+                 
                  if( shift ) call hshift ( q,im,jm )
                      if( check_names( fields_2d(m)%name,'p' ) ) then
                          do j=1,jm
@@ -3181,6 +3244,106 @@
       return
       end
 
+!for land-only option
+!--------------------
+      subroutine landmk ( q,im,jm,lm,landmask,undef )
+      implicit none
+      integer    im,jm,lm
+      real       q(im,jm,lm)
+      real*4     undef
+      real*4     landmask(im,jm)
+      integer    i,j,L
+
+      do L=1,lm
+      do j=1,jm
+      do i=1,im
+         if(landmask(i,j) == 0 ) then
+           q(i,j,L) = undef
+         endif
+      enddo
+      enddo
+      enddo
+      return
+      end
+
+! for land-only option 
+!--------------------
+      subroutine load_landmask (filename,frland,imbin,jmbin,undef )
+      use stats_mod
+      implicit none
+      
+      character*256  filename
+      integer        id,im,jm,lm,nvars,rc
+      integer        ntime,ngatts,timinc
+      character*256  title
+      character*256  source
+      character*256  contact
+      character*256  levunits
+      character*256, allocatable ::  vname(:)
+      character*256, allocatable :: vtitle(:)
+      character*256, allocatable :: vunits(:)
+
+      real,    allocatable ::      q(:,:)
+      real,    allocatable ::    lat(:)
+      real,    allocatable ::    lon(:)
+      real,    allocatable ::    lev(:)
+      real,    allocatable :: vrange(:,:)
+      real,    allocatable :: prange(:,:)
+      integer, allocatable :: yymmdd(:)
+      integer, allocatable :: hhmmss(:)
+      integer, allocatable ::  kmvar(:)
+
+      integer        imbin,jmbin, n 
+      character*256  landname
+      real           frland (imbin,jmbin )
+      logical        shift
+      real           undef
+
+      call gfio_open       ( trim(filename) ,1,id,rc )
+      call gfio_diminquire ( id,im,jm,lm,ntime,nvars,ngatts,rc )
+      print *, ' landmask dimension: ',im, jm
+      allocate ( lon(im) )
+      allocate ( lat(jm) )
+      allocate ( lev(lm) )
+      allocate ( yymmdd(ntime) )
+      allocate ( hhmmss(ntime) )
+      allocate (  vname(nvars) )
+      allocate ( vtitle(nvars) )
+      allocate ( vunits(nvars) )
+      allocate (  kmvar(nvars) )
+      allocate ( vrange(2,nvars) )
+      allocate ( prange(2,nvars) )
+      call gfio_inquire ( id,im,jm,lm,ntime,nvars,    &
+                              title,source,contact,undef, &
+                              lon,lat,lev,levunits,       &
+                              yymmdd,hhmmss,timinc,       &
+                              vname,vtitle,vunits,kmvar,  &
+                              vrange,prange,rc ) 
+      shift = .false.
+      if( lon(1).eq.0.0 ) then
+         print *, 'landmask  begins at lon: ',lon(1)
+         print *, 'Horizontal Shift will be performed'
+         shift = .true.
+      endif
+
+      do n=1, nvars
+         if ( trim(vname(n)) == 'FRLAND') then 
+            landname = trim(vname(n)) 
+            print *, ' landmask  varname :', trim(landname) 
+         endif 
+      enddo 
+      
+      allocate (q(im,jm))
+      call gfio_getvar ( id,trim(landname),yymmdd,hhmmss, &
+                            im,jm,0,1,q,rc )
+
+      if( shift ) call hshift ( q,im,jm )
+      call bin ( q,im,jm,frland,imbin,jmbin,undef,0 )
+      call gfio_close(id,rc)
+      return
+      end
+
+
       subroutine usage()
       print *, "Usage:  "
       print *
@@ -3190,6 +3353,7 @@
       print *, "              <-tag   tag>"
       print *, "              <-pref  PREF>"
       print *, "              <-nfreq HHMMSS>"
+      print *, "           <-landonly landmaskfile>"
       print *, "           <-syserror SYSERR>"
       print *
       print *, "where:"
@@ -3205,6 +3369,7 @@
       print *, "  -pref   PREF        :  Optional Reference Pressure for STD Output Printing"
       print *, "                                  (Default: 500-mb)"
       print *, "  -nfreq  HHMMSS      :  Optional Frequency for Forecast Time Periods"
+      print *, "  -landonly landmaskfile : Optional calculate stats overland" 
       print *, "  -syserr SYSERR File :  Optional Systematic Error File"
       print *, "                                  to be Subtracted from Forecasts"
       print *
