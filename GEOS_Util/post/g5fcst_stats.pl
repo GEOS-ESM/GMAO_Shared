@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #=======================================================================
 # name - g5fcst_stats.pl 
-# purpose - script to submit jobs to calculate screen level forecast statistics
+# purpose - script to submit jobs to calculate forecast statistics
 #
 # key global variables -
 # => $storedir: directory where output files get copied

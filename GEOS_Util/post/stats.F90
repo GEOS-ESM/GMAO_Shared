@@ -2391,6 +2391,7 @@
 
       subroutine read_anal( nymd,nhms,fields_2d,fields_3d,n2d,n3d,idim,jdim,nl,zlev,ana_files,num_ana_files,undef )
       use stats_mod
+      use MAPL_ConstantsMod 
       implicit none
       type(fields) :: fields_2d(n2d)
       type(fields) :: fields_3d(n3d)
@@ -2433,6 +2434,7 @@
       logical shift, defined, first
       integer num, LL, i,j,k, loc, ndates, len
       real Td, pp, ee  
+      real tice, epsln, ec0, ec1, ec2 
       data id    /0/
       data num   /0/
       data shift /.false./
@@ -2555,17 +2557,24 @@
                 if( check_names( vname(n),fields_2d(m)%alias(k) ) ) then
                 found_2d(m) = .true.
                  call gfio_getvar ( id,vname(n),nymd,nhms,im,jm,0,1,q,rc )
-                 !! conversion (Bolton 1980) 
+                 
                  if( trim(vname(n)) == 'N2_metre_dewpoint_temperature'  ) then 
+                     tice= MAPL_TICE 
+                     epsln = MAPL_EPSILON 
+                     !! empirical coeff. (Bolton 1980) 
+                     ec0 = 6.112
+                     ec1 = 17.67
+                     ec2 = 243.5 
+
                      allocate( sp(im, jm) ) 
                      call gfio_getvar ( id,'Surface_pressure',nymd,nhms,im,jm,0,1,sp,rc ) 
                      do j=1,jm
                      do i=1,im
                        if( defined(q(i,j),undef) .and. defined(sp(i,j),undef) )then 
-                          Td = q(i,j)-273.15 ! to C   
+                          Td = q(i,j)-tice ! to C   
                           pp = sp(i,j)/100.  ! to mb 
-                          ee= 6.112*exp((17.67*Td)/(Td + 243.5)) 
-                          q(i,j) = (0.622 * ee)/(pp - (0.378 * ee))
+                          ee= ec0*exp((ec1*Td)/(Td + ec2)) 
+                          q(i,j) = (epsln * ee)/(pp - (1.0-epsln) * ee)
                        else 
                           print*, 'Td conversion fails,set q2m to UNDEF' 
                           q(i,j) = undef 
