@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added statsNx.rc for screen level variable fstats 
+### Changed
+
+- Added options for land-only and screen-level variables in fstats.x and g5fcst_stats.pl  
+
+## [Unreleased]
+
+### Added
+
 ### Changed
 
 - Added a few new tags to `regrid.pl`
