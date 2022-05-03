@@ -73,9 +73,13 @@ set fields = `cat 3CH.rc | grep -v \# | grep  fields: | cut -d: -f2` ; if( "$fie
 set method = `cat 3CH.rc | grep -v \# | grep  interpolation_method: | cut -d: -f2`
 
 if($method != '' ) then
-   if( $method == 'BL' ) set method = "-method 1"
-   if( $method == 'BC' ) set method = "-method 2"
-   if( $method == 'BA' ) set method = "-method 3"
+   if( $method == 'BL' ) then
+        set method = "-method 1"
+   else if( $method == 'BC' ) then
+        set method = "-method 2"
+   else if( $method == 'BA' ) then
+        set method = "-method 3"
+   endif
 endif
 
 # ----------------------------------------------------

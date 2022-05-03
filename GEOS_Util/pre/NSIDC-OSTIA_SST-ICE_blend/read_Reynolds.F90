@@ -1,19 +1,19 @@
 !
-      SUBROUTINE read_Reynolds(ncFileName, NLAT, NLON, LAT, LON, &
-                               SST, ICE, myUNDEF)
-!                              SST, ICE, MASK, myUNDEF)
+      SUBROUTINE read_Reynolds(ncFileName, maskFileName, NLAT, NLON, LAT, LON, &
+                               SST, ICE, MASK, myUNDEF)
 !---------------------------------------------------------------------------
           USE netcdf
           IMPLICIT NONE
 
           CHARACTER (LEN = *),             INTENT(IN)    :: ncFileName
+          CHARACTER (LEN = *),             INTENT(IN)    :: maskFileName
           INTEGER,                         INTENT(IN)    :: NLAT, NLON
           REAL,                            INTENT(IN)    :: myUNDEF
           REAL, DIMENSION(NLAT),           INTENT(OUT)   :: LAT
           REAL, DIMENSION(NLON),           INTENT(OUT)   :: LON
-!         REAL, DIMENSION(NLON,NLAT),      INTENT(OUT)   :: MASK
           REAL, DIMENSION(NLON,NLAT),      INTENT(OUT)   :: SST
           REAL, DIMENSION(NLON,NLAT),      INTENT(OUT)   :: ICE
+          REAL, DIMENSION(NLON,NLAT),      INTENT(OUT)   :: MASK
 
 ! GET TO KNOW THESE BY ncdump -h
           REAL, PARAMETER :: sst_FillValue       = -999
@@ -22,9 +22,10 @@
           REAL, PARAMETER :: ice_FillValue       = -999
           REAL, PARAMETER :: ice_offset          =  0.0
           REAL, PARAMETER :: ice_scale_factor    =  0.01
+
           
 ! netCDF ID for the file and data variable.
-          INTEGER :: ncid, varid1, varid2, varid3, varid4
+          INTEGER :: ncid, varid1, varid2, varid3, varid4, varid_mask
 !         INTEGER :: iLON
 !         REAL    :: dLon
 !---------------------------------------------------------------------------
@@ -64,7 +65,17 @@
           WHERE( ICE == ice_FillValue)
               ICE = myUNDEF
           ENDWHERE
+
 ! .....................................................................
+! Read a land sea mask
+
+          print*, 'Reading mask from: ', maskFileName
+          CALL check( nf90_open(maskFileName, nf90_nowrite, ncid))
+          CALL check( nf90_inq_varid(ncid, "lsmaski", varid_mask))
+          CALL check( nf90_get_var(ncid, varid_mask, MASK))
+          CALL check( nf90_close(ncid))
+! .....................................................................
+
 ! Reynolds has lon: (0, 360). 
 ! IF lon needs to be between (-180, 180) -> Flip.
 !         dLon  = 360.0d0/REAL(NLON)

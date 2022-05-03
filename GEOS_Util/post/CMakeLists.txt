@@ -38,6 +38,7 @@ set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${th
 
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
+set_target_properties(3CH_mpi.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 set (perlscripts
   ecmwf2geos.pl
@@ -86,29 +87,26 @@ target_link_libraries (eta2prs.x ${this} GMAO_gfio_r4 MAPL GEOS_Shared)
 target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
 target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL)
-target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL ${ESMF_LIBRARIES})
+target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL esmf)
 target_link_libraries (flat2hdf.x post_nompi GMAO_gfio_r4)
 target_link_libraries (gg2fv.x post)
 target_link_libraries (rs2hdf.x post)
 target_link_libraries (time_ave.x ${this} GMAO_gfio_r4 MAPL )
-target_link_libraries (3CH_mpi.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
+target_link_libraries (3CH_mpi.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
 
 target_link_libraries (rsg3_vinterp.x ${this} GMAO_hermes)
 target_link_libraries (rs_vinterp.x ${this} GMAO_hermes)
-target_link_libraries (eta2rst.x ${this} GMAO_hermes ${MPI_Fortran_LIBRARIES})
-target_link_libraries (fvrst.x GMAO_gfio_r4 MAPL)
-set_target_properties (fvrst.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
+target_link_libraries (eta2rst.x ${this} GMAO_hermes MPI::MPI_Fortran)
+target_link_libraries (fvrst.x GMAO_gfio_r4 MAPL OpenMP::OpenMP_Fortran)
 target_link_libraries (gg2eta.x ${this} GMAO_gfio_r4)
 target_link_libraries (gg2fv.x ${this} GMAO_gfio_r4)
-target_link_libraries (hdf2rs.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
-target_link_libraries (makeiau.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
-target_link_libraries (merra2scm.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
+target_link_libraries (hdf2rs.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
+target_link_libraries (makeiau.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
+target_link_libraries (merra2scm.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
 target_link_libraries (rs2hdf.x ${this} GMAO_gfio_r4)
-target_link_libraries (rs_hinterp.x ${this} MAPL)
-set_target_properties (rs_hinterp.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
+target_link_libraries (rs_hinterp.x ${this} MAPL OpenMP::OpenMP_Fortran)
 
-target_link_libraries (rs_numtiles.x MAPL)
-set_target_properties (rs_numtiles.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
+target_link_libraries (rs_numtiles.x MAPL OpenMP::OpenMP_Fortran)
 
 # Unit tests?
 #add_executable (checkdate.x checkdate.F)

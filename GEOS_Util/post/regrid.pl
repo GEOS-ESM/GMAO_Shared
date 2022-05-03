@@ -476,10 +476,10 @@ sub init_tag_arrays_and_hashes {
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
     @INL   = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
-    @GITNL = qw( GITNL 10.19 10.20 );
+    @GITNL = qw( GITNL 10.19 10.20 10.21 10.22 10.23 );
     @D525 = qw( 525
                 GEOSadas-5_25_1        GEOSadas-5_25_1_p5     GEOSadas-5_25_p7
-                GEOSadas-5_27_1        GEOSadas-5_29_3                        );
+                GEOSadas-5_27_1        GEOSadas-5_29_3        GEOSadas-5_29_4 );
 
     foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4"          }
     foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0"          }

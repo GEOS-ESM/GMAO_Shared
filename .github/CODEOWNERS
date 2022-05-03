@@ -15,6 +15,9 @@
 /GEOS_Util/plots/ @GEOS-ESM/postprocessing-team
 /GEOS_Util/post/ @GEOS-ESM/postprocessing-team
 
+# Preprocessing team is the CODEOWNER for pre
+/GEOS_Util/pre/ @GEOS-ESM/preprocessing-team
+
 # Yuri owns the coupled plots
 /GEOS_Util/coupled_diagnostics/ @yvikhlya 
 
