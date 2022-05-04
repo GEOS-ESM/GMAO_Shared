@@ -24,9 +24,7 @@ def ask_common_in():
         {
             "type": "path",
             "name": "rst_dir",
-            "message": "Enter the directory with restart files to be regrided: \n \
-                       restart files should be distributed under subdirectories \n \
-                       upperair, surface, analysis",
+            "message": "Enter the directory with restart files to be regrided: \n restart files should be distributed under subdirectories \n upperair, surface, analysis",
             "when": lambda x: not x["MERRA-2"],
         },
         {

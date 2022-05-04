@@ -25,18 +25,19 @@ input:
   surface:
     wemin:
     rst_dir: null
-    catchCNclm40:
+    tile_file: null
+    catchcnclm40:
       regrid: false
-      rst_dir: null
-    catchCNclm45:
+      rst_file: null
+    catchcnclm45:
       regrid: false
-      rst_dir: null
+      rst_file: null
     catchment:
       regrid: false
-      rst_dir: null
+      rst_file: null
     lakelandice:
       regrid: false
-      rst_dir: null
+      rst_file: null
 
 output:
   shared:
@@ -50,9 +51,9 @@ output:
   surface:
     zoom:
     split_saltwater: false
-    rescale: true
     surflay: 20.
-    wemout:
+    wemin:
+    tile_file: none
   analysis:
     bkg: true
     aqua: False

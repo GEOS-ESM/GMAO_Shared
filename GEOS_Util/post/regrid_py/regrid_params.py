@@ -261,8 +261,7 @@ class regrid_params(object):
     print("\nMERRA-2 sources:\n")
     yyyymm = int(self.yyyymm)
     if yyyymm < 197901 :
-      print("Error. MERRA-2 data < 1979 not available\n")
-      exit()
+      exit("Error. MERRA-2 data < 1979 not available\n")
     elif (yyyymm < 199201):
       self.common_in['expid'] = "d5124_m2_jan79"     
     elif (yyyymm < 200106):
@@ -356,8 +355,7 @@ class regrid_params(object):
              bcdir = bc_base+'/Ganymed/'+model+'/'
 
     if not os.path.exists(bcdir):
-       print( "Cannot find bc dir " +  bcdir)
-       exit()
+       exit("Cannot find bc dir " +  bcdir)
 
     gridStr = self.get_grid_subdir(bcdir,opt)
     bcdir =  bcdir + '/' + gridStr
@@ -403,8 +401,7 @@ class regrid_params(object):
      anames = get_name_with_grid(agrid_, dirnames)
      gridID = get_name_with_grid(ogrid_, anames)
      if len(gridID) == 0 :
-       print("cannot find the grid string: " + bcdir)
-       exit()
+       exit("cannot find the grid string: " + bcdir)
      if len(gridID) >=2 :
        print("find too may grid strings in " + bcdir)
        print(" gridIDs found", gridID)
@@ -430,7 +427,7 @@ class regrid_params(object):
      fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
      if not self.common_in.get('MERRA-2'):
        fvcore = ''
-       for f in self.restarts_in:
+       for f in self.restarts_in['UPPERAIR']:
            if 'fvcore' in f:
              fvcore = f
              break
@@ -469,20 +466,32 @@ class regrid_params(object):
 
   def params_for_surface(self, config_tpl):
     config_tpl['output']['surface']['surflay'] = 20.
-    config_tpl['output']['surface']['rescale'] = False
     tagout = self.common_out['tag']
     ogrid = self.common_out['ogrid']
     bctag = self.get_bcTag(tagout, ogrid)
     tagrank = self.tagsRank[bctag]
     if tagrank >=12 :
        config_tpl['output']['surface']['surflay'] = 50.
-    if tagrank > self.tagsRank["Fortuna-2_0"]:
-       config_tpl['output']['surface']['rescale'] = True
     if tagrank >= self.tagsRank["Icarus_Reynolds"]:
        config_tpl['output']['surface']['split_saltwater'] = True
     config_tpl['output']['surface']['zoom']= self.surf_in['zoom']
-    config_tpl['output']['surface']['wemin']= self.surf_in['wemin']
-    config_tpl['output']['surface']['wemout']= self.surf_out['wemout']
+    config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
+    config_tpl['output']['surface']['wemin']= self.surf_out['wemout']
+    config_tpl['output']['surface']['tile_file']= self.out_til
+    config_tpl['input']['surface']['tile_file']= self.in_til
+
+    for f in self.restarts_in['SURFACE'] :
+      fname = os.path.basename(f)       
+      if fname.find('catch_') != -1 :
+        config_tpl['input']['surface']['catchment']['regrid'] = True
+        config_tpl['input']['surface']['catchment']['rst_file'] = f
+      elif fname.find('catchcnclm40_') != -1 :
+        config_tpl['input']['surface']['catchcnclm40']['regrid'] = True
+        config_tpl['input']['surface']['catchcnclm40']['rst_file'] = f
+      elif fname.find('catchcnclm45_') != -1 :
+        config_tpl['input']['surface']['catchcnclm45']['regrid'] = True
+        config_tpl['input']['surface']['catchcnclm45']['rst_file'] = f
+           
     return config_tpl
 
   def params_for_analysis(self, config_tpl):

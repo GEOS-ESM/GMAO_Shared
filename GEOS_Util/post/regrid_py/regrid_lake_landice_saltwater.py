@@ -83,7 +83,7 @@ class lake_landice_saltwater(object):
      print('\n Copy ' + out_tile_file + ' to ' + out_til)
      shutil.copy(out_tile_file, out_til)
 
-     exe = bindir + '/mk_LakeLandiceSaltRestarts '
+     exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
      zoom = config['output']['surface']['zoom']
 
      if (saltwater):
@@ -94,7 +94,7 @@ class lake_landice_saltwater(object):
        # split Saltwater
        if  config['output']['surface']['split_saltwater']:
          print("\nSplitting Saltwater...\n")
-         cmd = bindir+'/SaltIntSplitter ' + out_til + ' ' + 'OutData/' + saltwater
+         cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater
          print('\n'+cmd)
          subprocess.call(shlex.split(cmd))
          openwater = None
@@ -121,7 +121,7 @@ class lake_landice_saltwater(object):
        subprocess.call(shlex.split(cmd))
 
      if (route):
-       route = bindir + '/mk_RouteRestarts '
+       route = bindir + '/mk_RouteRestarts.x '
        cmd = route + out_til + ' ' + yyyymmddhh_[0:6]
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))

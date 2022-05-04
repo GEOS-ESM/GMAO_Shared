@@ -78,8 +78,7 @@ class upperair(object):
      if agrid[0].upper() == 'C':
        imout = int(agrid[1:])
      else:
-       print("Only support cs grid so far")
-       exit()
+       exit("Only support cs grid so far")
 
      if (imout <=90):
        NPE = 12; nwrit = 1

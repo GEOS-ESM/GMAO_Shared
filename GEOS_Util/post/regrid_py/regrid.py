@@ -20,7 +20,7 @@ def main(argv):
     opts, args = getopt.getopt(argv,"hc:", ['config_file='])
   except getopt.GetoptError:
     print('Usage: regrid.py -c regrid.yaml or ./regrid.py ')
-    sys.exit(2)
+    sys.exit('command line error')
   for opt, arg in opts:
     if opt == '-h':
       print('''\nThere are two ways to use this script to regrid restarts. \n 
@@ -32,7 +32,7 @@ def main(argv):
               \nHelp message: \n
               1) The rst_dir directory should have three sub-directories: \n
                 upperair, surface and analysis which contain restart files respectively. \n''')
-      sys.exit()
+      sys.exit(0)
     if opt in("-c", "--config_file"):
       config_yaml = arg
 
@@ -42,7 +42,6 @@ def main(argv):
     params.convert_to_yaml()
     config_yaml = 'regrid_params.yaml'
 
-  sys.exit()
   # upper air
   upper = upperair(config_yaml)
   upper.regrid()
