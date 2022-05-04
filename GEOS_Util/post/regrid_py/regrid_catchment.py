@@ -59,18 +59,17 @@ class catchment(object):
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
+
      InData_dir = out_dir+'/InData/'
-     if not os.path.exists(InData_dir) :
-       print ("mkdir " + InData_dir)
-       os.makedirs(InData_dir)
+     print ("mkdir -p" + InData_dir)
+     os.makedirs(InData_dir, exist_ok = True)
     
      f = os.path.basename(in_rstfile)
      dest = InData_dir+'/'+f
-     if os.path.exists(dest) : shutil.remove(dest)
-       # file got copy because the computing node cannot access archive
-       print('\nCopy ' + rst + ' to ' +dest)
-       shutil.copy(rst,dest)
-       in_rstfile = dest
+     # file got copy because the computing node cannot access archive
+     print('\nCopy ' + rst + ' to ' +dest)
+     shutil.copyfile(rst,dest)
+     in_rstfile = dest
  
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
