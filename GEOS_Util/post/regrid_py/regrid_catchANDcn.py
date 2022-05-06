@@ -8,7 +8,7 @@ import glob
 import ruamel.yaml
 import shlex
 
-class catchment(object):
+class catchANDcn(object):
   def __init__(self, params_file):
      yaml = ruamel.yaml.YAML()
      stream ='' 
@@ -17,7 +17,7 @@ class catchment(object):
      self.config = yaml.load(stream)
 
   def regrid(self):
-     print("\nRegridding catchment.....\n")
+     print("\nRegridding catchment or catchmentCN.....\n")
      config = self.config
      model = ''
      in_rstfile =''
@@ -86,13 +86,13 @@ set echo
 limit stacksize unlimited
 
 set esma_mpirun_X = ( {Bin}/esma_mpirun -np 56 )
-set mk_CatchmentRestarts_X   = ( {Bin}/mk_CatchmentRestarts.x )
+set mk_catchANDcnRestarts_X   = ( {Bin}/mk_catchANDcnRestarts.x )
 
 set params = ( -model {model}  -time {time} -in_tilefile {in_tilefile} )
 set params = ( $params -out_bcs {out_bcs} -out_tilefile {out_tilefile} -out_dir {out_dir} )
 set params = ( $params -surflay {surflay} -in_wemin {in_wemin} -out_wemin {out_wemin} ) 
 set params = ( $params -in_rst {in_rstfile} -out_rst {out_rstfile} ) 
-$esma_mpirun_X $mk_CatchmentRestarts_X $params
+$esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
@@ -100,14 +100,14 @@ $esma_mpirun_X $mk_CatchmentRestarts_X $params
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
 
-     catch_scrpt = open('mk_catchment.j','wt')
+     catch_scrpt = open('mk_catchANDcn.j','wt')
      catch_scrpt.write(catch1script)
      catch_scrpt.close()
-     print("sbatch -W mk_catchment.j")
-     subprocess.call(['sbatch','-W', 'mk_catchment.j'])
+     print("sbatch -W mk_catchANDcn.j")
+     subprocess.call(['sbatch','-W', 'mk_catchANDcn.j'])
 
      os.chdir(bindir)
 
 if __name__ == '__main__' :
-   catch = catchment('regrid_params.yaml')
+   catch = catchANDcn('regrid_params.yaml')
    catch.regrid()

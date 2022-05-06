@@ -12,7 +12,7 @@ from regrid_params import *
 from regrid_upper import *
 from regrid_lake_landice_saltwater import *
 from regrid_analysis  import *
-from regrid_catchment  import *
+from regrid_catchANDcn  import *
 
 def main(argv):
   config_yaml = ''
@@ -50,8 +50,8 @@ def main(argv):
   lls  = lake_landice_saltwater(config_yaml)
   lls.regrid()
 
-  # catchment
-  catch  = catchment(config_yaml)
+  # catchANDcn
+  catch  = catchANDcn(config_yaml)
   catch.regrid()
 
   # analysis
