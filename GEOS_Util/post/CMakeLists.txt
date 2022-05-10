@@ -45,6 +45,7 @@ set (perlscripts
   g5fcst_stats.pl
   ncep2geos.pl
   regrid.pl
+  mk_SurfaceRestarts.pl
   )
 install(
    PROGRAMS ${perlscripts} ec2grd.csh
