@@ -2030,7 +2030,6 @@ sub set_IN_OUT {
 
         # two loop processing for catchment
         #----------------------------------
-        if ($rank{$bcsTagOUT} > $rank{"Fortuna-2_0"}) { $IN{"rescale"} = 1 }
 
         # special landice processing
         #---------------------------
@@ -2209,7 +2208,7 @@ sub set_IN_OUT {
 #           then query user for confirmation
 #=======================================================================
 sub confirm_inputs {
-    my ($ans, $rescale_catch);
+    my ($ans);
 
     # print program parameters to standard output
     #--------------------------------------------
@@ -2251,11 +2250,6 @@ sub confirm_inputs {
     if ($lcvFLG) { print_("yes\n") } else { print_("no\n") }
     print_("namelabel: ");
     if ($lblFLG) { print_("yes\n") } else { print_("no\n") }
-
-    # get rescale flags
-    #------------------
-    if ($IN{"rescale"}) { $rescale_catch = "yes" }
-    else                { $rescale_catch = "no"  }
 
     # print info
     #-----------
@@ -2303,7 +2297,6 @@ sub confirm_inputs {
     print_(  ". BCS tag:      $OUT{bcsTAG}\n");
     print_(  ". wemOUT:       $wemOUT\n") if $mk_catch or $mk_catchcn;
     print_(  ". surflay:      $surflay\n"
-           . ". rescale:      $rescale_catch\n"
            . ". outdir:       " .display($outdir_save) ."\n"
            . ". workdir:      " .display($workdir) ."\n\n");
 
@@ -2979,7 +2972,10 @@ sub regrid_surface_rsts {
     # this breaks the catch regridding. So only
     # link here if catchcn. Note that there is
     # *another* link to clsm below for the catch case
-    if ($mk_catchcn) {
+    # Above is the note from Jana
+    # New note: Since the program mk_catchANDcnRestarts.x combine the scaling,
+    # It should provde bcs here
+    if ($mk_catch or $mk_catchcn) {
        # link clsm directory to OutData
        #-------------------------------
        $clsm = dirname($tile2) ."/clsm";
@@ -3010,92 +3006,6 @@ sub regrid_surface_rsts {
         move_("$mk_catch_log", "$outdir/$mk_catch_log.1") unless $slurmjob;
     }
     rename_surface_rsts(\%H1, \%H2, \@SFC);
-
-    #----------------------------------------------
-    # second regrid iteration for catchment file(s)
-    #----------------------------------------------
-    if ($H1{"rescale"} and ($mk_catch or $mk_catchcn)) {
-
-        printlabel("\nCatch Restart: step 2");
-
-        # output catchment from 1st step becomes input for 2nd step
-        #----------------------------------------------------------
-        $rstdir2   = $H2{"rstdir"};
-        $expid2    = $H2{"expid"};
-        $template2 = $H2{"template"};
-
-        $label  = $H2{"label"};
-        $tagID  = $H2{"bcsTAG"};
-        $gridID = $H2{"gridID"};
-
-        $catchName = rstname($expid2, "catch_internal_rst", $template2);
-        $catchIN = "$InData_dir/$catchName";
-
-        $catch = "$rstdir2/$catchName";
-        $catch .= ".$tagID.$gridID" if $label;
-
-        if ($mk_catchcn) {
-           #$catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", $template2);
-           $catchcnName = rstname($expid2, "catchcn${cnlist[0]}_internal_rst", "%s.%s.${ymd}_${hr}z.nc4");
-           $catchcnIN = "$InData_dir/$catchcnName";
-           $catchcn = "$rstdir2/$catchcnName";
-           $catchcn .= ".$tagID.$gridID" if $label;
-        }
-        # new input directory for step 2
-        #-------------------------------
-        move_($InData_dir, "$InData_dir.step1", $verbose);
-        mkpath_("\n$InData_dir", $verbose);
-
-        if ($mk_catchcn) { copyinput(   $tile2, $InData_dir) }
-        else             { symlinkinput($tile2, $InData_dir) }
-
-        move_("\n$catch", "$catchIN", $verbose)     if $mk_catch;
-        move_("\n$catchcn", "$catchcnIN", $verbose) if $mk_catchcn;
-
-        # Note this was done above if catchcn is being
-        # regridded. It is done here because now catch
-        # needs it, but we don't want to do it twice
-        unless ($mk_catchcn) {
-           # link clsm directory to OutData
-           #-------------------------------
-           $clsm = dirname($tile2) ."/clsm";
-           $clsm = "$H2{bcsdir}/clsm" unless -d $clsm;
-           symlinkinput($clsm, $OutData_dir);
-        }
-
-        # catch and/or catchcn restart only during this pass
-        #---------------------------------------------------
-        $flags = "";
-        $flags .= " -catch"               if $mk_catch;
-        $flags .= " -catchcn $mk_catchcn" if $mk_catchcn;
-        $flags .= " -wemin $wemIN"        if $mk_catch or $mk_catchcn;
-        $flags .= " -wemout $wemOUT"      if $mk_catch or $mk_catchcn;
-        $flags .= " -surflay $surflay"    if $mk_catch or $mk_catchcn;
-        $flags .= " -grpID $grpID"      if ($mk_catch or $mk_catchcn) and $grpID;
-        $flags .= " -rsttime $ymd$hr"   if $mk_catchcn;
-        $flags .= " -rescale"           if $mk_catch or $mk_catchcn;
-        $flags .= " -zoom $zoom"        if $zoom;
-        $flags .= " -qos $qos"          if ($mk_catch or $mk_catchcn) and $qos;
-        $flags .= " -partition $partition" if ($mk_catch or $mk_catchcn) and $partition;
-        $flags .= " -constraint $constraint" if ($mk_catch or $mk_catchcn) and $constraint;
-        #--$flags .= " -walltime 2:00:00"  if $mk_catchcn;
-        #--$flags .= " -ntasks 112"        if $mk_catchcn;
-
-        @SFC = ();
-        push @SFC, "catch_internal_rst"   if $mk_catch;
-        push @SFC, "catchcn${cnlist[0]}_internal_rst" if ($mk_catchcn);
-
-        # run mk_Restarts program
-        #------------------------
-        chdir_($workdir, $verbose);
-        system_("\n$mk_RestartsX $flags") && die "Error with mk_RestartsX;";
-
-        if ($mk_catch or $mk_catchcn) {
-            move_("\n$mk_catch_j", "$outdir/$mk_catch_j.2");
-            move_("$mk_catch_log", "$outdir/$mk_catch_log.2") unless $slurmjob;
-        }
-        rename_surface_rsts(\%H2, \%H2, \@SFC);
-    }
 
     # check vegdyn_internal_rst
     #--------------------------
