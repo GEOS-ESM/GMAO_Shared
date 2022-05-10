@@ -1533,7 +1533,8 @@ sub check_programs {
     if ($bkgFLG) {
         die "Error. Program not found: $mkdrstdateX;" unless -x $mkdrstdateX;
     }
-    $mk_RestartsX = "$ESMABIN/mk_Restarts";
+    
+    $mk_RestartsX =  dirname(__FILE__) ."/mk_SurfaceRestarts.pl";
     die "Error. Program not found: $mk_RestartsX;" unless -x $mk_RestartsX;
 
     $dyn2dynX = "$ESMABIN/dyn2dyn.x";
