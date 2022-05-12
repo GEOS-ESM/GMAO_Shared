@@ -13,13 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix in stoch to allow systems without REAL128 (quad precision) to build
+
 ### Removed
 
 ## [1.5.4] - 2022-05-03
 
 ### Added
 
-- Added statsNx.rc for screen level variable fstats 
+- Added statsNx.rc for screen level variable fstats
 
 ### Changed
 

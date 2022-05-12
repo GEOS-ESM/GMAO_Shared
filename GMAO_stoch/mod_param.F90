@@ -6,13 +6,13 @@
 
     include 'mpif.h'
 
-!   ! Machine   ------------------------------------------------------! 
+!   ! Machine   ------------------------------------------------------!
     integer, parameter :: kind_evod = 8, kind_dbl_prec = 8, kind_io4 = 4
-    integer, parameter :: kind_real = 8, kind_integer = 4                     
-    integer, parameter :: kind_phys = selected_real_kind(13,60) 
-    integer, parameter :: kind_qdt_prec = selected_real_kind(30,90)
+    integer, parameter :: kind_real = 8, kind_integer = 4
+    integer, parameter :: kind_phys = max(kind_real,selected_real_kind(13,60))
+    integer, parameter :: kind_qdt_prec = max(kind_phys,selected_real_kind(30,90))
 
-!   ! Constants ------------------------------------------------------! 
+!   ! Constants ------------------------------------------------------!
     real(kind=kind_phys),parameter:: con_pi     =3.1415926535897931 ! pi
     real(kind=kind_phys),parameter:: con_rerth  =6.3712e+6 ! radius of earth (m)
 
@@ -40,8 +40,8 @@
     integer      :: ens_mem
     character*20 :: ens_nam
     real(kind=kind_evod), dimension(5) :: sppt,sppt_lscale,sppt_tau, &
-                                          skeb,skeb_lscale,skeb_tau 
-    real(kind=kind_evod)     :: sppt_sigtop1,sppt_sigtop2, & 
+                                          skeb,skeb_lscale,skeb_tau
+    real(kind=kind_evod)     :: sppt_sigtop1,sppt_sigtop2, &
                                 skeb_sigtop1,skeb_sigtop2
     real(kind=kind_evod)     :: skeb_diss_smooth
     integer,    dimension(5) :: skeb_vfilt
