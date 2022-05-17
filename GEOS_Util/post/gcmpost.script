@@ -771,6 +771,7 @@ foreach collection ( $collections )
                  if( $#locals != 0 ) then
                      echo "Archiving Dailies for Collection: $collection for Date: $date"
                @ daily_date_node  = $date_node
+               set HIRES = TRUE   # disable daily tarball
                if( $HIRES == FALSE ) then
                   $mytar cf $expid.${collection}.daily.$date.$ext.tar $locals
                   set locals = $expid.${collection}.daily.$date.$ext.tar
@@ -853,7 +854,12 @@ foreach collection ( $collections )
                                                       sed -e "s/%d2/$day/       g" | \
                                                       sed -e "s/%h2/$hour/      g"`
 
-                  $cpvar $local $SOURCE/$collection
+                  if( ${#monthly_attribute} == 0 ) then
+                      $cpvar $local $SOURCE/$collection
+                  else
+                      set yearmonth = `echo $local | sed -n "s|${expid}.${collection}.\([0-9]\{6\}\).*|\1|p"`
+                      $cpvar $local $SOURCE/$collection/${expid}.${collection}.monthly.${yearmonth}.${ext}
+                  endif
 
                   echo "if( -e $local ) then"                                          >> $archfile
                   echo "ssh ${MASTOR} mkdir -p ${MASDIR}/$archive"                     >> $archfile
@@ -1010,7 +1016,8 @@ EOF
          if( $HOST == 'pleiades' ) then
                   ./gcm_archive.$collection.$streamdates[1].j > ./gcm_archive.$collection.$streamdates[1].o
          else
-            $batch_cmd     gcm_archive.$collection.$streamdates[1].j
+            #$batch_cmd     gcm_archive.$collection.$streamdates[1].j
+            echo "skipping archive job"
          endif
          /bin/rm -f $archfile
          /bin/rm -f sedfile

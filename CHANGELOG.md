@@ -13,15 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+## [1.5.4] - 2022-05-03
+
+### Added
+
+- Added statsNx.rc for screen level variable fstats 
+
+### Changed
+
+- Added options for land-only and screen-level variables in `fstats.x` and `g5fcst_stats.pl`
 - Added a few new tags to `regrid.pl`
+- Changes allow `gcmpost.script` and `gcmclim.script` to handle `collection.monthly: 1` output and stop automatic archiving.
 
 ### Fixed
 
 - Fixed a minor CMake issue to keep all mod files in `build/include`
-
-### Added
-
-### Removed
 
 ## [1.5.3] - 2022-03-18
 

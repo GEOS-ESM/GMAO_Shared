@@ -1,0 +1,86 @@
+# -------------------
+# Stats RC Parameters
+# -------------------
+#
+#    COLLECTIONS:   List of Output Collections
+#                   NOTE: A collection name of: default
+#                         will produce stats files with names consistent with older versions.
+#
+#      fields_2d:   List of 2D Fields for each Collection
+#      fields_3d:   List of 3D Fields for each Collection
+#             
+#         TYPE_x:   Type Attribute for Field x (can be from ANY collection)
+#                   Options: scalar ---- (implies wave-0 pole value)
+#                            vector ---- (implies wave-1 pole value)
+#                            aerosol --- (implies wave-0 pole value and math: log(x+0.01))
+#             
+#        ALIAS_x:   All Possible Aliases for Field x
+#
+# ---------------------------------------------------------------------------------------------------
+
+##   COLLECTIONS:  default
+     COLLECTIONS:  inst1_2d_asm_Nx 
+
+# Collection Descriptions:
+# ------------------------
+
+     default.fields_2d: p
+     default.fields_3d: u v t q h
+
+     inst1_2d_asm_Nx.fields_2d: u10m v10m t2m q2m 
+
+     aerosol.fields_2d: tau du ss su bc oc
+
+# ---------------------------------------------------------------------------------------------------
+
+    TYPE_p: scalar
+   ALIAS_p: slp slprs Surface_pressure  Mean_sea_level_pressure msl
+
+    TYPE_u10m: vector
+   ALIAS_u10m: u10m  N10_metre_U_wind
+
+    TYPE_v10m: vector
+   ALIAS_v10m: v10m N10_metre_V_wind
+
+    TYPE_t2m: scalar
+   ALIAS_t2m: t2m  N2_metre_temperature 
+
+   TYPE_q2m: scalar
+  ALIAS_q2m: qv2m N2_metre_dewpoint_temperature 
+
+# ---------------------------------------------------------------------------------------------------
+
+    TYPE_u: vector
+   ALIAS_u: u uwnd ugrd ugrdprs u_velocity
+
+    TYPE_v: vector
+   ALIAS_v: v vwnd vgrd vgrdprs v_velocity
+
+    TYPE_t: scalar
+   ALIAS_t: t tmpu tmp  tmpprs temperature
+
+    TYPE_q: scalar
+   ALIAS_q: q sphu qv
+
+    TYPE_h: scalar
+   ALIAS_h: h hght hgt hgtprs height
+
+# ---------------------------------------------------------------------------------------------------
+
+    TYPE_tau: aerosol
+   ALIAS_tau: totexttau
+
+    TYPE_du: aerosol
+   ALIAS_du: duexttau
+
+    TYPE_ss: aerosol
+   ALIAS_ss: ssexttau
+
+    TYPE_su: aerosol
+   ALIAS_su: suexttau
+
+    TYPE_bc: aerosol
+   ALIAS_bc: bcexttau
+
+    TYPE_oc: aerosol
+   ALIAS_oc: ocexttau
