@@ -45,15 +45,15 @@ class regrid_params(object):
      # params for shared
      config_tpl['input']['shared']['agrid']    = self.common_in['agrid']
      config_tpl['input']['shared']['ogrid']    = self.common_in['ogrid']
-     config_tpl['input']['shared']['bcs_dir']  = self.in_bcsdir
-     config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']
+     config_tpl['input']['shared']['bcs_dir']  = self.in_bcsdir+ '/'
+     config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
      config_tpl['input']['shared']['expid']    = self.common_in['expid']
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
 
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
      config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
-     config_tpl['output']['shared']['bcs_dir'] = self.out_bcsdir
-     config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir']
+     config_tpl['output']['shared']['bcs_dir'] = self.out_bcsdir + '/'
+     config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
      config_tpl['output']['shared']['expid']   = self.common_out['expid']
 
      # params for upper air
@@ -284,17 +284,18 @@ class regrid_params(object):
     print('\nMERRA-2 Restart dir: ' + self.common_in['rst_dir'] +'\n') 
 
     self.restarts_in = {}
-    upperin =[self.common_in['rst_dir']+  expid+'.fvcore_internal_rst.' + surfix,
-              self.common_in['rst_dir']+  expid+'.moist_internal_rst.'  + surfix,
-              self.common_in['rst_dir']+  expid+'.agcm_import_rst.'     + surfix,
-              self.common_in['rst_dir']+  expid+'.gocart_internal_rst.' + surfix,
-              self.common_in['rst_dir']+  expid+'.pchem_internal_rst.'  + surfix ]
+    rst_dir = self.common_in['rst_dir']
+    upperin =[rst_dir +  expid+'.fvcore_internal_rst.' + surfix,
+              rst_dir +  expid+'.moist_internal_rst.'  + surfix,
+              rst_dir +  expid+'.agcm_import_rst.'     + surfix,
+              rst_dir +  expid+'.gocart_internal_rst.' + surfix,
+              rst_dir +  expid+'.pchem_internal_rst.'  + surfix ]
     self.restarts_in['UPPERAIR'] = upperin 
 
-    surfin = [self.common_in['rst_dir']+  expid+'.catch_internal_rst.'    + surfix, 
-              self.common_in['rst_dir']+  expid+'.lake_internal_rst.'     + surfix,
-              self.common_in['rst_dir']+  expid+'.landice_internal_rst.'  + surfix,
-              self.common_in['rst_dir']+  expid+'.saltwater_internal_rst.'+ surfix]
+    surfin = [ rst_dir +  expid+'.catch_internal_rst.'    + surfix, 
+               rst_dir +  expid+'.lake_internal_rst.'     + surfix,
+               rst_dir +  expid+'.landice_internal_rst.'  + surfix,
+               rst_dir +  expid+'.saltwater_internal_rst.'+ surfix]
     self.restarts_in['SURFACE'] = surfin 
     self.restarts_in['ANALYSIS'] = []
 
