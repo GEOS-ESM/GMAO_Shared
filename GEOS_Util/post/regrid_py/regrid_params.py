@@ -367,7 +367,7 @@ class regrid_params(object):
         
   def get_grid_subdir(self, bcdir, opt):
 
-     def get_name_with_grid( grid, names):
+     def get_name_with_grid( grid, names, a_o):
        if not grid :
          return names
        namex = []
@@ -378,18 +378,25 @@ class regrid_params(object):
          s2 =str(n)
          s3 =str(j)
          # first try
-         for name in names:
-           if (name.find(s1) != -1):
-              namex.append(name)
-         if len(namex) ==0:
-           for name in names:
-             if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(name)
+         for aoname in names:
+           name = ''
+           if(a_o == 'a'):
+             name = aoname.split('_')[0]
+           else:
+             name = aoname.split('_')[1]
+           if (name.find(s1) != -1 or (name.find(s2) != -1 and name.find(s3) != -1 )):
+              namex.append(aoname)
        else:
          xy = grid.upper().split('X')
          s2 = xy[0]
          s3 = xy[1]
-         for name in names:
-           if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(name)
+         for aoname in names:
+           name = ''
+           if(a_o == 'a'):
+             name = aoname.split('_')[0]
+           else
+             name = aoname.split('_')[1]
+           if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(aoname)
        return namex
      #v3.5
      #dirnames = [ f.name for f in os.scandir(bcdir) if f.is_dir()]
@@ -401,12 +408,12 @@ class regrid_params(object):
        agrid_ = self.common_out['agrid']   
        ogrid_ = self.common_out['ogrid'] 
           
-     anames = get_name_with_grid(agrid_, dirnames)
-     gridID = get_name_with_grid(ogrid_, anames)
+     anames = get_name_with_grid(agrid_, dirnames, 'a')
+     gridID = get_name_with_grid(ogrid_, anames, 'o')
      if len(gridID) == 0 :
        exit("cannot find the grid string: " + bcdir)
      if len(gridID) >=2 :
-       print("find too may grid strings in " + bcdir)
+       print("find too many grid strings in " + bcdir)
        print(" gridIDs found", gridID)
        print(" pick the first one " + gridID[0])
      return gridID[0]

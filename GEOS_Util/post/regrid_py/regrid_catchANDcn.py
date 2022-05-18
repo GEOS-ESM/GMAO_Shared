@@ -67,8 +67,8 @@ class catchANDcn(object):
      f = os.path.basename(in_rstfile)
      dest = InData_dir+'/'+f
      # file got copy because the computing node cannot access archive
-     print('\nCopy ' + rst + ' to ' +dest)
-     shutil.copyfile(rst,dest)
+     print('\nCopy ' + in_rstfile + ' to ' +dest)
+     shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
  
      mk_catch_j_template = """#!/bin/csh -f
