@@ -394,7 +394,7 @@ class regrid_params(object):
            name = ''
            if(a_o == 'a'):
              name = aoname.split('_')[0]
-           else
+           else:
              name = aoname.split('_')[1]
            if (name.find(s2) != -1 and name.find(s3) != -1): namex.append(aoname)
        return namex
