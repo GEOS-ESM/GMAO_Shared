@@ -146,6 +146,7 @@ set (post_rc
    plot.rc
    post.rc
    stats.rc
+   statsNx.rc
    time_ave.rc
    3CH.rc
    )
@@ -156,7 +157,7 @@ install (
    )
 
 install (
-   FILES stats.rc time_ave.rc
+   FILES stats.rc time_ave.rc statsNx.rc 
    DESTINATION etc
    )
 
