@@ -38,7 +38,8 @@ class regrid_params(object):
      # load input yaml
      yaml = ruamel.yaml.YAML() 
      stream = ''
-     with  open('regrid_params.tpl', 'r') as f:
+     regrid_tpl = os.path.dirname(os.path.realpath(__file__)) + '/regrid_params.tpl'
+     with  open(regrid_tpl, 'r') as f:
        stream = f.read()
      config_tpl = yaml.load(stream)
 
