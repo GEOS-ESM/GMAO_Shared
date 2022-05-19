@@ -117,7 +117,7 @@ class analysis(object):
      local_fs=[]
      for f in anafiles:
        fname    = os.path.basename(f)
-       out_name = fname.replace(expid_in, expid_out)
+       out_name = fname.replace(expid_in + '.', expid_out)
        f_tmp = tmpdir+'/'+out_name
        local_fs.append(f_tmp) 
        shutil.copy(f,f_tmp)
