@@ -54,6 +54,7 @@ class lake_landice_saltwater(object):
      landice   = ''
      lake      = ''
      route     = ''
+     openwater = ''
      for rst in restarts_in:
         f = os.path.basename(rst)
         dest = InData_dir+'/'+f
@@ -65,6 +66,7 @@ class lake_landice_saltwater(object):
         if 'landice'   in f : landice   = f
         if 'lake'      in f : lake      = f
         if 'roue'      in f : route     = f
+        if 'openwater' in f : openwater = f
 
      in_tile_file  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
      out_tile_file = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
@@ -93,8 +95,8 @@ class lake_landice_saltwater(object):
          cmd = bindir+'/SaltIntSplitter.x ' + out_til + ' ' + 'OutData/' + saltwater
          print('\n'+cmd)
          subprocess.call(shlex.split(cmd))
-         openwater = None
-         seaice  = None
+         openwater = ''
+         seaice  = ''
 
      if (openwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/' + openwater + ' 0 ' + str(zoom)

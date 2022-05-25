@@ -58,14 +58,6 @@ def ask_common_in():
             "default": "data",
             "when": lambda x: not x['MERRA-2']
         },
-        {
-            "type": "text",
-            "name": "nlevel",
-            "message": "Enter input atmospheric grid leve:",
-            "default": '72',
-            # if it is merra-2 or has_fvcore, nlevel is deduced
-            "when": lambda x: not x['MERRA-2'] and not has_fvcore(x),
-        },
 
         {
             "type": "select",
@@ -145,8 +137,6 @@ Sample DAS tags \n \
         },
    ]
    common_in = questionary.prompt(questions)
-   if common_in.get('ogrid') == 'CS':
-      common_in['ogrid'] = common_in['agrid']
    if not common_in.get('model') :
       common_in['model'] = 'data'
    return common_in

@@ -11,7 +11,6 @@ input:
   air:
     drymass: 1
     hydrostatic: 0
-    nlevel:
     rst_dir: null
   analysis:
     rst_dir: null

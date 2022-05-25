@@ -22,17 +22,10 @@ class regrid_params(object):
      #self.ana_in   = config_from_question['input']['parameters']['ANALYSIS']
      self.ana_out  = config_from_question['output']['parameters']['ANALYSIS']
 
-     self.init_time()
+     self.init_time(str(config_from_question['input']['parameters']['COMMON']['yyyymmddhh']))
      self.init_tags()
      self.init_merra2()
 
-     # get bc directory and tile file
-     self.in_bcsdir  = self.get_bcdir("IN")
-     self.in_til     = glob.glob(self.in_bcsdir+ '/*-Pfafstetter.til')[0] 
-     print("\ninput tile file: " + self.in_til)
-     self.out_bcsdir = self.get_bcdir("OUT")
-     self.out_til     = glob.glob(self.out_bcsdir+ '/*-Pfafstetter.til')[0] 
-     print("\noutput tile file: " + self.out_til)
 
      # load input yaml
      yaml = ruamel.yaml.YAML() 
@@ -45,14 +38,12 @@ class regrid_params(object):
      # params for shared
      config_tpl['input']['shared']['agrid']    = self.common_in.get('agrid')
      config_tpl['input']['shared']['ogrid']    = self.common_in.get('ogrid')
-     config_tpl['input']['shared']['bcs_dir']  = self.in_bcsdir+ '/'
      config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
      config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
 
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
      config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
-     config_tpl['output']['shared']['bcs_dir'] = self.out_bcsdir + '/'
      config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
      config_tpl['output']['shared']['expid']   = self.common_out['expid']
 
@@ -61,6 +52,18 @@ class regrid_params(object):
      config_tpl = self.params_for_surface(config_tpl)
      config_tpl = self.params_for_analysis(config_tpl)
      config_tpl = self.options_for_slurm(config_tpl)
+
+     # get bc directory and tile file
+     in_bcsdir  = self.get_bcdir("IN")
+     in_til     = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0] 
+     print("\ninput tile file: " + in_til)
+     out_bcsdir = self.get_bcdir("OUT")
+     out_til     = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0] 
+     print("\noutput tile file: " + out_til)
+     config_tpl['input']['shared']['bcs_dir']    = in_bcsdir+ '/'
+     config_tpl['output']['shared']['bcs_dir']   = out_bcsdir + '/'
+     config_tpl['output']['surface']['tile_file']= out_til
+     config_tpl['input']['surface']['tile_file'] = in_til
 
      self.config = config_tpl
 
@@ -238,8 +241,7 @@ class regrid_params(object):
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
-  def init_time(self):
-     yyyymmddhh = str(self.common_in['yyyymmddhh'])
+  def init_time(self, yyyymmddhh):
      self.yyyymm = yyyymmddhh[0:6]
      self.yyyy = yyyymmddhh[0:4]  
      self.mm   = yyyymmddhh[4:6]  
@@ -538,7 +540,11 @@ class regrid_params(object):
      p_status = p.wait()
      ss = output.decode().split()
      config_tpl['input']['shared']['agrid']  = "C"+ss[0]
-     config_tpl['input']['shared']['nlevel'] = ss[2]
+     self.common_in['agrid'] = config_tpl['input']['shared']['agrid']
+     if self.common_in['ogrid'] == 'CS' :
+        config_tpl['input']['shared']['ogrid']  = "C"+ss[0]
+        self.common_in['ogrid'] = config_tpl['input']['shared']['agrid']
+        
      lat = int(ss[0])
      lon = int(ss[1])
      if (lon != lat*6) :
@@ -576,8 +582,6 @@ class regrid_params(object):
     config_tpl['output']['surface']['zoom']= self.surf_in['zoom']
     config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
     config_tpl['output']['surface']['wemin']= self.surf_out['wemout']
-    config_tpl['output']['surface']['tile_file']= self.out_til
-    config_tpl['input']['surface']['tile_file']= self.in_til
 
     rst_dir = self.common_in['rst_dir'] + '/'
     files = glob.glob(rst_dir + '*catch_*')

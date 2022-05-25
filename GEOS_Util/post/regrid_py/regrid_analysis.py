@@ -80,7 +80,8 @@ class analysis(object):
                f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
             f_.close() 
 
-     nlevel = config['output']['air']['nlevel']
+     nlevel    = config['output']['air']['nlevel']
+     agrid_out = config['output']['shared']['agrid']
      flags = "-g5 -res " + self.get_grid_kind(agrid_out.upper()) + " -nlevs " + str(nlevel)
      bkg_files = glob.glob(tmpdir+'/*.bkg??_eta_rst*')
      for f in bkg_files:
