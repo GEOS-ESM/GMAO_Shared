@@ -9,9 +9,19 @@
 import os
 import subprocess
 import shlex
-import yaml
+import ruamel.yaml
 import shutil
 import questionary
+import glob
+
+def has_fvcore(x):
+  files = glob.glob(x['rst_dir']+'/*fvcore_*')
+  if len(files) ==1 :
+    return True
+  else:
+    print('False')
+    return False
+
 
 def ask_common_in():
    questions = [
@@ -24,21 +34,21 @@ def ask_common_in():
         {
             "type": "path",
             "name": "rst_dir",
-            "message": "Enter the directory with restart files to be regrided: \n restart files should be distributed under subdirectories \n upperair, surface, analysis",
-            "when": lambda x: not x["MERRA-2"],
+            "message": "Enter the directory with restart files to be regrided: \n  If it is MERRA-2, files from achives will be copied to this directory. \n",
         },
         {
             "type": "text",
             "name": "yyyymmddhh",
             "message": "What time would you like to regrid from?(yyyymmddhh)",
-            "default": "2000041421"
+            "default": "2000041421",
         },
         {
             "type": "text",
-            "name": "expid",
-            "message": "Enter input restarts expid:",
-            "default": "",
-            "when": lambda x: not x["MERRA-2"],
+            "name": "agrid",
+            "message": "Enter input atmospheric grid, format(Cxxx):",
+            "default": 'C360',
+            # if it is merra-2 or has_fvcore, agrid is deduced
+            "when": lambda x: not x['MERRA-2'] and not has_fvcore(x),
         },
         {
             "type": "select",
@@ -46,14 +56,17 @@ def ask_common_in():
             "message": "Select ocean model:",
             "choices": ["data", "MOM5", "MOM6"],
             "default": "data",
+            "when": lambda x: not x['MERRA-2']
         },
         {
             "type": "text",
-            "name": "agrid",
-            "message": "Enter input atmospheric grid, format(Cxxx):",
-            "default": 'C360',
-            "when": lambda x: not x['MERRA-2'],
+            "name": "nlevel",
+            "message": "Enter input atmospheric grid leve:",
+            "default": '72',
+            # if it is merra-2 or has_fvcore, nlevel is deduced
+            "when": lambda x: not x['MERRA-2'] and not has_fvcore(x),
         },
+
         {
             "type": "select",
             "name": "ogrid",
@@ -65,7 +78,7 @@ def ask_common_in():
              2880X1440  (OSTIA) \n \
              CS = same as atmospere grid (OSTIA cubed-sphere) \n",
             "choices": ['360X180','1440X720','2880X1440','CS'],
-            "when": lambda x: x['model'] == 'data' and not x['MERRA-2'],
+            "when": lambda x: x.get('model') == 'data' and not x['MERRA-2'],
         },
         {
             "type": "select",
@@ -78,7 +91,7 @@ def ask_common_in():
              720X410 \n \
              1440X1080 \n ",
             "choices": ['72X36','360X200','720X410','1440X1080'],
-            "when": lambda x: x['model'] != 'data',
+            "when": lambda x: x.get('model') == 'MOM5' or x.get('model')== 'MOM6'
         },
         {
             "type": "text",
@@ -134,6 +147,8 @@ Sample DAS tags \n \
    common_in = questionary.prompt(questions)
    if common_in.get('ogrid') == 'CS':
       common_in['ogrid'] = common_in['agrid']
+   if not common_in.get('model') :
+      common_in['model'] = 'data'
    return common_in
 
 def ask_common_out():
@@ -372,3 +387,7 @@ def get_config_from_questionary():
 
 if __name__ == "__main__":
   config = get_config_from_questionary()
+  yaml = ruamel.yaml.YAML()
+  with open("raw_answers.yaml", "w") as f:
+    yaml.dump(config, f)
+

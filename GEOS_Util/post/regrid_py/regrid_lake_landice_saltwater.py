@@ -16,12 +16,17 @@ class lake_landice_saltwater(object):
      self.config = yaml.load(stream)
 
   def regrid(self):
+     restarts_in = self.find_rst()
+     if len(restarts_in) == 0:
+       return
+
      print("\nRegridding land, landice, saltwater.....\n")
      config = self.config
      bindir  = os.getcwd()
      in_bcsdir  = config['input']['shared']['bcs_dir']
      out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
+
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
@@ -36,45 +41,36 @@ class lake_landice_saltwater(object):
      print ("mkdir " + OutData_dir)
      os.makedirs(OutData_dir)
 
-     rst_dir = config['input']['surface']['rst_dir']
-     if (not rst_dir): rst_dir = config['input']['shared']['rst_dir']
-     restarts_in = glob.glob(rst_dir +'surface/*') 
+     types = 'z.bin'
+     type_str = subprocess.check_output(['file','-b', restarts_in[0]])
+     type_str = str(type_str)
+     if 'Hierarchical' in type_str:
+        types = 'z.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.nc4'
-     if (not restarts_in) :
-         expid = config['input']['shared']['expid']
-         suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.bin'
-         # from merra-2
-         restarts_in = [rst_dir + expid + '.lake_internal_rst.'     + suffix,
-                        rst_dir + expid + '.landice_internal_rst.'  + suffix,
-                        rst_dir + expid + '.saltwater_internal_rst.'+ suffix]
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
 
-     def find_rst(rsts,rst_name):
-        for rst in rsts:
-           f = os.path.basename(rst)
-           if (f.find(rst_name) != -1):
-              return f
-        return None  
-     
-     saltwater = find_rst(restarts_in,'saltwater')
-     openwater = find_rst(restarts_in,'openwater')
-     seaice  = find_rst(restarts_in,'seaice') 
-     landice = find_rst(restarts_in,'landice')
-     lake  = find_rst(restarts_in,'lake')
-     route = find_rst(restarts_in,'route')
-
+     saltwater = ''
+     seaice    = ''
+     landice   = ''
+     lake      = ''
+     route     = ''
      for rst in restarts_in:
         f = os.path.basename(rst)
         dest = InData_dir+'/'+f
         if os.path.exists(dest) : shutil.remove(dest)
         print('\nCopy ' + rst + ' to ' +dest)
         shutil.copy(rst,dest)
+        if 'saltwater' in f : saltwater = f
+        if 'seaice'    in f : seaice    = f
+        if 'landice'   in f : landice   = f
+        if 'lake'      in f : lake      = f
+        if 'roue'      in f : route     = f
 
      in_tile_file  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
      out_tile_file = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
 
-     in_til = InData_dir+'/' + in_tile_file.split('/')[-1]
-     out_til = OutData_dir+'/'+ out_tile_file.split('/')[-1]
+     in_til = InData_dir+'/' + os.path.basename(in_tile_file)
+     out_til = OutData_dir+'/'+ os.path.basename(out_tile_file)
 
      if os.path.exists(in_til)  : shutil.remove(in_til)
      if os.path.exists(out_til) : shutil.remove(out_til)
@@ -136,9 +132,27 @@ class lake_landice_saltwater(object):
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
        shutil.move(out_rst, out_dir+"/"+filename)
+     print('cd ' + bindir)
      os.chdir(bindir)
+
+  def find_rst(self):
+     surf_restarts =[
+                 "route_internal_rst"       ,
+                 "lake_internal_rst"        ,
+                 "landice_internal_rst"     ,
+                 "openwater_internal_rst"   ,
+                 "saltwater_internal_rst"   ,
+                 "seaicethermo_internal_rst"]
+
+     rst_dir = self.config['input']['air']['rst_dir']
+     if (not rst_dir): rst_dir = self.config['input']['shared']['rst_dir']
+     restarts_in=[]
+     for f in surf_restarts :
+        files = glob.glob(rst_dir+ '/*'+f+'*')
+        if len(files) >0:
+          restarts_in.append(files[0])
+     return restarts_in
 
 if __name__ == '__main__' :
    lls = lake_landice_saltwater('regrid_params.yaml')
    lls.regrid()
-

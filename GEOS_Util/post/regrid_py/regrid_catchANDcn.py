@@ -17,7 +17,6 @@ class catchANDcn(object):
      self.config = yaml.load(stream)
 
   def regrid(self):
-     print("\nRegridding catchment or catchmentCN.....\n")
      config = self.config
      model = ''
      in_rstfile =''
@@ -33,6 +32,7 @@ class catchANDcn(object):
      if model == '':
         return
              
+     print("\nRegridding " + model + ".....\n")
 
      bindir  = os.getcwd()
 
@@ -47,6 +47,7 @@ class catchANDcn(object):
      out_tilefile = config['output']['surface']['tile_file']
      account    = config['slurm']['account']
      yyyymmddhh_= str(config['input']['shared']['yyyymmddhh'])
+     # even the input is binary, the output si nc4
      suffix     = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.nc4'
 
      if (expid) :
@@ -70,14 +71,15 @@ class catchANDcn(object):
      print('\nCopy ' + in_rstfile + ' to ' +dest)
      shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
- 
+     model_log = 'mk_'+model+'_log'
+
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
 #SBATCH --ntasks=56
 #SBATCH --time=1:00:00
-#SBATCH --job-name=mk_catch
+#SBATCH --job-name=mk_{model}
 #SBATCH --qos=debug
-#SBATCH --output={out_dir}/{mk_catch_log}
+#SBATCH --output={out_dir}/{mk_log}
 #
 
 source {Bin}/g5_modules
@@ -96,7 +98,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
-                  model = model, out_dir = out_dir, mk_catch_log = 'mk_catch_log', surflay = surflay,  \
+                  model = model, out_dir = out_dir, mk_log = model_log, surflay = surflay,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
 
@@ -106,6 +108,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      print("sbatch -W mk_catchANDcn.j")
      subprocess.call(['sbatch','-W', 'mk_catchANDcn.j'])
 
+     print( "cd " + bindir)
      os.chdir(bindir)
 
 if __name__ == '__main__' :

@@ -16,12 +16,17 @@ class upperair(object):
      self.config = yaml.load(stream)
 
   def regrid(self):
+     restarts_in = self.find_rst()
+     if len(restarts_in) == 0:
+       return
+
      print( "\nRegridding upper air......\n")
      config = self.config
      bindir  = os.getcwd()
      in_bcsdir  = config['input']['shared']['bcs_dir'] 
      out_bcsdir = config['output']['shared']['bcs_dir'] 
      out_dir    = config['output']['shared']['out_dir']
+
      if not os.path.exists(out_dir) : os.makedirs(out_dir)
      print( "cd " + out_dir)
      os.chdir(out_dir)
@@ -33,23 +38,17 @@ class upperair(object):
 
      print( "cd " + tmpdir)
      os.chdir(tmpdir)
-     print('\nUpper air restart files should end with "_rst" \n')
 
-     rst_dir = config['input']['air']['rst_dir']
-     if (not rst_dir): rst_dir = config['input']['shared']['rst_dir']
-     restarts_in = glob.glob(rst_dir +'upperair/*') 
+     print('\nUpper air restart file names changed from "_rst" to "_restart_in" \n')
+
+     types = 'z.bin'
+     type_str = subprocess.check_output(['file','-b', restarts_in[0]])
+     type_str = str(type_str)
+     if type_str.find('Hierarchical') >=0:
+        types = 'z.nc4'
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
-     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.nc4'
-     if (not restarts_in) :
-         expid = config['input']['shared']['expid']
-         suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.bin'
-         # from merra-2
-         restarts_in =[rst_dir +  expid+'.fvcore_internal_rst.' + suffix,
-                       rst_dir +  expid+'.moist_internal_rst.'  + suffix,
-                       rst_dir +  expid+'.agcm_import_rst.'     + suffix,
-                       rst_dir +  expid+'.gocart_internal_rst.' + suffix,
-                       rst_dir +  expid+'.pchem_internal_rst.'  + suffix ]
-
+     suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
+     
      for rst in restarts_in :
        fs = os.path.basename(rst).split('.')
        f = fs[0]
@@ -193,10 +192,10 @@ endif
      upper.close()
      print('sbatch -W regridder_upper.j\n')
      subprocess.call(['sbatch', '-W', 'regridder_upper.j'])
+
 #
 #    post process
 #
-
      expid = config['output']['shared']['expid']
      if (expid) :
         expid = expid + '.'
@@ -207,4 +206,45 @@ endif
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
        shutil.move(out_rst, out_dir+"/"+filename)
+
+     print('\n Move regridder_upper.j to ' + out_dir)
+     shutil.move('regridder_upper.j', out_dir+"/regridder_upper.j")
+     print('cd ' + bindir)
      os.chdir(bindir)
+
+  def find_rst(self):
+     air_restarts =["fvcore_internal_rst"      , 
+                    "moist_internal_rst"       ,
+                    "agcm_import_rst"          ,
+                    "agcm_internal_rst"        ,
+                    "carma_internal_rst"       ,
+                    "geosachem_internal_rst"   ,
+                    "geoschemchem_internal_rst",
+                    "gmichem_internal_rst"     ,
+                    "gocart_internal_rst"      ,
+                    "hemco_internal_rst"       ,
+                    "mam_internal_rst"         ,
+                    "matrix_internal_rst"      ,
+                    "pchem_internal_rst"       ,
+                    "stratchem_internal_rst"   ,
+                    "ss_internal_rst"          ,
+                    "du_internal_rst"          ,
+                    "cabr_internal_rst"        ,
+                    "cabc_internal_rst"        ,
+                    "caoc_internal_rst"        ,
+                    "ni_internal_rst"          ,
+                    "su_internal_rst"          ,
+                    "tr_internal_rst"]
+
+     rst_dir = self.config['input']['air']['rst_dir']
+     if (not rst_dir): rst_dir = self.config['input']['shared']['rst_dir']
+     restarts_in=[]
+     for f in air_restarts :
+        files = glob.glob(rst_dir+ '/*'+f+'*')
+        if len(files) >0:
+          restarts_in.append(files[0])
+     return restarts_in
+
+if __name__ == '__main__' :
+   air = upperair('regrid_params.yaml')
+   air.regrid()

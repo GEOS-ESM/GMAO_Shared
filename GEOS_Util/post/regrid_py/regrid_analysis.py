@@ -28,12 +28,12 @@ class analysis(object):
      bkg = config['output']['analysis']['bkg']
      if ( not bkg ): return
 
-     agrid_in  = config['input']['shared']['agrid']
-     agrid_out = config['output']['shared']['agrid']
-
-     if (self.get_grid_kind(agrid_in.upper()) == self.get_grid_kind(agrid_out.upper())):
-       print(" No need to regrid anaylysis file")
+     analysis_in = self.find_analysis()
+     if len(analysis_in) ==0 :
+       print("\n There are no analysis files. \n")
        return
+
+     print("\n Regrid or copy analysis files...\n")
 
      bindir  = os.getcwd()
      in_bcsdir  = config['input']['shared']['bcs_dir']
@@ -51,9 +51,6 @@ class analysis(object):
      print( "cd " + tmpdir)
      os.chdir(tmpdir)
 
-     rst_dir_orig = config['input']['analysis']['rst_dir']
-     if (not rst_dir_orig): rst_dir_orig = config['input']['shared']['rst_dir']
-     anafiles = glob.glob(rst_dir_orig +'/analysis/*')
      yyyymmddhh_ = str(config['input']['shared']['yyyymmddhh'])
      yyyy_ = yyyymmddhh_[0:4]
      mm_   = yyyymmddhh_[4:6]
@@ -67,55 +64,10 @@ class analysis(object):
      else:
         expid_out = ''
 
-     if len(anafiles) == 0 :
-       anafiles=[]
-       for h in [3,4,5,6,7,8,9]:
-          delt = timedelta(hours = h-3)
-          new_time = rst_time + delt
-          yyyy = "Y"+str(new_time.year)
-          mm   = 'M%02d'%new_time.month
-          ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
-          hh   = '%02d'%h
-          newhh= '%02d'%new_time.hour
-          rst_dir = rst_dir_orig.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
-          # bkg files
-          for ftype in ['sfc', 'eta']:
-             fname = expid_in+'.bkg'+hh+'_'+ftype+'_rst.'+ymd+'_'+newhh+'z.nc4'
-             f = rst_dir+'/'+fname
-             if(os.path.isfile(f)):
-               anafiles.append(f)
-             else:
-               print('Warning: Cannot find '+f)
-
-          # cbkg file
-          fname = expid_in + '.cbkg' + hh + '_eta_rst.' + ymd + '_' + newhh + 'z.nc4'
-          f = rst_dir+'/'+fname
-          if(os.path.isfile(f)):
-            anafiles.append(f)
-          else:
-            print('Warning: Cannot find '+f)
-          # gaas_bkg_sfc files
-          if (h==6 or h==9):
-             fname = expid_in+'.gaas_bkg_sfc_rst.'+ymd+'_'+newhh+'z.nc4'
-             f = rst_dir+'/'+fname
-             if (os.path.isfile(f)):
-               anafiles.append(f)
-             else:
-               print('Warning: Cannot find '+f)
-       # trak.GDA.rst file
-       delt = timedelta(hours = 3)
-       new_time = rst_time - delt
-       yyyy = "Y"+str(new_time.year)
-       mm   = 'M%02d'%new_time.month
-       ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
-       rst_dir = rst_dir_orig.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
-       fname = expid_in+'.trak.GDA.rst.'+ymdh+'z.txt'
-       f = rst_dir+'/'+fname
-       if (os.path.isfile(f)): anafiles.append(f)
-
      aqua   = config['output']['analysis']['aqua']
      local_fs=[]
-     for f in anafiles:
+     for f in analysis_in:
+       print(f)
        fname    = os.path.basename(f)
        out_name = fname.replace(expid_in + '.', expid_out)
        f_tmp = tmpdir+'/'+out_name
@@ -123,14 +75,11 @@ class analysis(object):
        shutil.copy(f,f_tmp)
        if out_name.find('satbias') != -1 :
          if (aqua):
-            f_orig = f_tmp+'.orig'
-            shutil.move(f_tmp, f_orig)
             f_ = open(f_tmp, 'w')
-            for line in fileinput.input(f_orig):
+            for line in fileinput.input(f):
                f_.write(line.replace('airs281SUBSET_aqua', 'airs281_aqua      '))
             f_.close() 
 
-     
      nlevel = config['output']['air']['nlevel']
      flags = "-g5 -res " + self.get_grid_kind(agrid_out.upper()) + " -nlevs " + str(nlevel)
      bkg_files = glob.glob(tmpdir+'/*.bkg??_eta_rst*')
@@ -140,6 +89,7 @@ class analysis(object):
         cmd = bindir + '/dyn2dyn.x ' + flags + ' -o ' + f + ' ' + f_orig
         print(cmd)
         subprocess.call(shlex.split(cmd))
+
      for f in local_fs:
        fname = os.path.basename(f)
        shutil.move(f, out_dir+'/'+fname)
@@ -153,6 +103,7 @@ class analysis(object):
        cmd = bindir+'/mkdrstdate.x ' + ymd_ + ' ' + hms_ +' ' + rstlcvOut
        print(cmd)
        subprocess.call(shlex.split(cmd))
+     print( "cd " + bindir)
      os.chdir(bindir)
 
   def get_grid_kind(this, grid):
@@ -171,6 +122,16 @@ class analysis(object):
      hgrd['C2880'] = 'e'
      hgrd['C5760'] = 'e'
      return hgrd[grid]
+
+  def find_analysis(self):
+     analysis_in = []
+     rst_dir = self.config['input']['analysis']['rst_dir']
+     if (not rst_dir): rst_dir = self.config['input']['shared']['rst_dir']
+     bkgs = glob.glob(rst_dir + '/*_eta_rst*')
+     sfcs = glob.glob(rst_dir + '/*_sfc_rst*')
+     traks= glob.glob(rst_dir + '/*.trak.GDA.rst*')
+     analysis_in = bkgs + sfcs + traks
+     return analysis_in
 
 if __name__ == '__main__' :
    ana = analysis('regrid_params.yaml')

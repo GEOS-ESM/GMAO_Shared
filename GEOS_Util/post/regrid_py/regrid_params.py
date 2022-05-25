@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-import os
+import os,sys
 import ruamel.yaml
 import shutil
 import glob
@@ -25,7 +25,6 @@ class regrid_params(object):
      self.init_time()
      self.init_tags()
      self.init_merra2()
-     self.init_restarts_in()
 
      # get bc directory and tile file
      self.in_bcsdir  = self.get_bcdir("IN")
@@ -44,11 +43,11 @@ class regrid_params(object):
      config_tpl = yaml.load(stream)
 
      # params for shared
-     config_tpl['input']['shared']['agrid']    = self.common_in['agrid']
-     config_tpl['input']['shared']['ogrid']    = self.common_in['ogrid']
+     config_tpl['input']['shared']['agrid']    = self.common_in.get('agrid')
+     config_tpl['input']['shared']['ogrid']    = self.common_in.get('ogrid')
      config_tpl['input']['shared']['bcs_dir']  = self.in_bcsdir+ '/'
      config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
-     config_tpl['input']['shared']['expid']    = self.common_in['expid']
+     config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
 
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
@@ -248,17 +247,24 @@ class regrid_params(object):
      self.hh   = yyyymmddhh[8:10]  
      self.ymd  = yyyymmddhh[0:8]  
 
-  def init_restarts_in(self):
-    if self.common_in['MERRA-2']:
-      return
-      
-    rst_dir = self.common_in.get('rst_dir')+'/'
-    self.restarts_in={}
-    self.restarts_in['UPPERAIR'] = glob.glob(rst_dir +'upperair/*')
-    self.restarts_in['SURFACE'] = glob.glob(rst_dir +'surface/*')
-    self.restarts_in['ANALYSIS'] = glob.glob(rst_dir +'analysis/*')
-    
   def init_merra2(self):
+    def get_grid_kind(grid):
+      hgrd = {}
+      hgrd['C12']   = 'a'
+      hgrd['C24']   = 'a'
+      hgrd['C48']   = 'b'
+      hgrd['C90']   = 'c'
+      hgrd['C180']  = 'd'
+      hgrd['C360']  = 'd'
+      hgrd['C500']  = 'd'
+      hgrd['C720']  = 'e'
+      hgrd['C1000'] = 'e'
+      hgrd['C1440'] = 'e'
+      hgrd['C2000'] = 'e'
+      hgrd['C2880'] = 'e'
+      hgrd['C5760'] = 'e'
+      return hgrd[grid]
+
     if not self.common_in['MERRA-2']:
       return
     print("\nMERRA-2 sources:\n")
@@ -279,26 +285,105 @@ class regrid_params(object):
     self.common_in['bc_base']= 'discover_ops'
     self.common_in['tag']= 'Ganymed-4_0'
     expid = self.common_in['expid']
-    yyyymmddhh = str(self.common_in['yyyymmddhh'])
-    surfix = yyyymmddhh[0:8]+'_'+self.hh+'z.bin'
-    self.common_in['rst_dir'] = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm+'/'
-    print('\nMERRA-2 Restart dir: ' + self.common_in['rst_dir'] +'\n') 
+    yyyymmddhh_ = str(self.common_in['yyyymmddhh'])
+    surfix = yyyymmddhh_[0:8]+'_'+self.hh+'z.bin'
+    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm+'/'
+    rst_dir = self.common_in['rst_dir'] + '/'
+    os.makedirs(rst_dir, exist_ok = True)
+    print('\n Copy MERRA-2 Restart \n from \n' + merra_2_rst_dir + '\n  to \n '+ rst_dir +'\n') 
 
-    self.restarts_in = {}
-    rst_dir = self.common_in['rst_dir']
-    upperin =[rst_dir +  expid+'.fvcore_internal_rst.' + surfix,
-              rst_dir +  expid+'.moist_internal_rst.'  + surfix,
-              rst_dir +  expid+'.agcm_import_rst.'     + surfix,
-              rst_dir +  expid+'.gocart_internal_rst.' + surfix,
-              rst_dir +  expid+'.pchem_internal_rst.'  + surfix ]
-    self.restarts_in['UPPERAIR'] = upperin 
+    upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + surfix,
+              merra_2_rst_dir +  expid+'.moist_internal_rst.'  + surfix,
+              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + surfix,
+              merra_2_rst_dir +  expid+'.gocart_internal_rst.' + surfix,
+              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + surfix ]
 
-    surfin = [ rst_dir +  expid+'.catch_internal_rst.'    + surfix, 
-               rst_dir +  expid+'.lake_internal_rst.'     + surfix,
-               rst_dir +  expid+'.landice_internal_rst.'  + surfix,
-               rst_dir +  expid+'.saltwater_internal_rst.'+ surfix]
-    self.restarts_in['SURFACE'] = surfin 
-    self.restarts_in['ANALYSIS'] = []
+    surfin = [ merra_2_rst_dir +  expid+'.catch_internal_rst.'    + surfix, 
+               merra_2_rst_dir +  expid+'.lake_internal_rst.'     + surfix,
+               merra_2_rst_dir +  expid+'.landice_internal_rst.'  + surfix,
+               merra_2_rst_dir +  expid+'.saltwater_internal_rst.'+ surfix]
+
+    for f in upperin :
+       fname = os.path.basename(f)
+       dest = rst_dir + '/'+fname
+       shutil.copy(f, dest)
+
+    for f in surfin :
+       fname = os.path.basename(f)
+       dest = rst_dir + '/'+fname
+       shutil.copy(f, dest)
+
+    # prepare analysis files
+    bkg = self.ana_out['bkg']
+    if ( not bkg ): return
+    yyyy_ = yyyymmddhh_[0:4]
+    mm_   = yyyymmddhh_[4:6]
+    dd_   = yyyymmddhh_[6:8]
+    hh_   = yyyymmddhh_[8:10]
+    rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
+    expid_in  = self.common_in['expid']
+    expid_out = self.common_out['expid']
+    if (expid_out) :
+       expid_out = expid_out + '.'
+    else:
+       expid_out = ''
+
+    agrid_in  = self.common_in['agrid']
+    agrid_out = self.common_out['agrid']
+
+    if (get_grid_kind(agrid_in.upper()) == get_grid_kind(agrid_out.upper())):
+      print(" No need to regrid anaylysis file according to air grid in and out")
+      return
+
+    anafiles=[]
+    for h in [3,4,5,6,7,8,9]:
+       delt = timedelta(hours = h-3)
+       new_time = rst_time + delt
+       yyyy = "Y"+str(new_time.year)
+       mm   = 'M%02d'%new_time.month
+       ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
+       hh   = '%02d'%h
+       newhh= '%02d'%new_time.hour
+       m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
+       # bkg files
+       for ftype in ['sfc', 'eta']:
+          fname = expid_in+'.bkg'+hh+'_'+ftype+'_rst.'+ymd+'_'+newhh+'z.nc4'
+          f = m2_rst_dir+'/'+fname
+          if(os.path.isfile(f)):
+             anafiles.append(f)
+          else:
+             print('Warning: Cannot find '+f)
+       # cbkg file
+       fname = expid_in + '.cbkg' + hh + '_eta_rst.' + ymd + '_' + newhh + 'z.nc4'
+       f = m2_rst_dir+'/'+fname
+       if(os.path.isfile(f)):
+         anafiles.append(f)
+       else:
+         print('Warning: Cannot find '+f)
+       # gaas_bkg_sfc files
+       if (h==6 or h==9):
+          fname = expid_in+'.gaas_bkg_sfc_rst.'+ymd+'_'+newhh+'z.nc4'
+          f = m2_rst_dir+'/'+fname
+          if (os.path.isfile(f)):
+            anafiles.append(f)
+          else:
+            print('Warning: Cannot find '+f)
+     # trak.GDA.rst file
+    delt = timedelta(hours = 3)
+    new_time = rst_time - delt
+    yyyy = "Y"+str(new_time.year)
+    mm   = 'M%02d'%new_time.month
+    ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
+    m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
+    fname = expid_in+'.trak.GDA.rst.'+ymdh+'z.txt'
+    f = m2_rst_dir+'/'+fname
+    if (os.path.isfile(f)): anafiles.append(f)
+
+    for f in anafiles:
+      fname    = os.path.basename(f)
+      f_tmp = rst_dir+'/'+fname
+      print("Copy file "+f +" to " + rst_dir)
+      shutil.copy(f,f_tmp)
 
   def get_bcbase(self, opt):
      base = ''
@@ -433,29 +518,32 @@ class regrid_params(object):
     return bctag
 
   def params_for_air(self, config_tpl):
+     if self.common_in['MERRA-2']:
+       return config_tpl 
      # verify agrid
-     agrid = config_tpl['input']['shared']['agrid']
-     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-     if not self.common_in.get('MERRA-2'):
-       fvcore = ''
-       for f in self.restarts_in['UPPERAIR']:
-           if 'fvcore' in f:
-             fvcore = f
-             break
-       cmd = fvrst + fvcore
-       print(cmd +'\n')
-       p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-       (output, err) = p.communicate()
-       p_status = p.wait()
-       ss = output.decode().split()
-       if (agrid):
-         if agrid[0].upper() == "C":
-            n=int(agrid[1:])
-            o=int(ss[0])
-            assert n==o, "input agrid is not consistent with fvcore restart"
-       else:
-         config_tpl['input']['shared']['agrid'] = "C"+ss[0]
+     rst_dir = self.common_in['rst_dir'] + '/'
+     files = glob.glob(rst_dir + '*fvcore_*')
+     if len(files) ==0 :
+       return config_tpl
+     # get expid
+     fname = os.path.basename(files[0])
+     expid = fname.split('fvcore')[0]
+     config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
 
+     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+     cmd = fvrst + files[0]
+     print(cmd +'\n')
+     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+     (output, err) = p.communicate()
+     p_status = p.wait()
+     ss = output.decode().split()
+     config_tpl['input']['shared']['agrid']  = "C"+ss[0]
+     config_tpl['input']['shared']['nlevel'] = ss[2]
+     lat = int(ss[0])
+     lon = int(ss[1])
+     if (lon != lat*6) :
+        sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+    
      ogrid = config_tpl['input']['shared']['ogrid']
      tagout = self.common_out['tag']
      bctag  = self.get_bcTag(tagout, ogrid)
@@ -491,18 +579,20 @@ class regrid_params(object):
     config_tpl['output']['surface']['tile_file']= self.out_til
     config_tpl['input']['surface']['tile_file']= self.in_til
 
-    for f in self.restarts_in['SURFACE'] :
-      fname = os.path.basename(f)       
-      if fname.find('catch_') != -1 :
+    rst_dir = self.common_in['rst_dir'] + '/'
+    files = glob.glob(rst_dir + '*catch_*')
+    if (len(files) > 0) :
         config_tpl['input']['surface']['catchment']['regrid'] = True
-        config_tpl['input']['surface']['catchment']['rst_file'] = f
-      elif fname.find('catchcnclm40_') != -1 :
+        config_tpl['input']['surface']['catchment']['rst_file'] = files[0]
+    files = glob.glob(rst_dir + '*catchcnclm40_*')
+    if (len(files) > 0) :
         config_tpl['input']['surface']['catchcnclm40']['regrid'] = True
-        config_tpl['input']['surface']['catchcnclm40']['rst_file'] = f
-      elif fname.find('catchcnclm45_') != -1 :
+        config_tpl['input']['surface']['catchcnclm40']['rst_file'] = files[0]
+    files = glob.glob(rst_dir + '*catchcnclm45_*')
+    if (len(files) > 0) :
         config_tpl['input']['surface']['catchcnclm45']['regrid'] = True
-        config_tpl['input']['surface']['catchcnclm45']['rst_file'] = f
-           
+        config_tpl['input']['surface']['catchcnclm45']['rst_file'] = files[0]
+
     return config_tpl
 
   def params_for_analysis(self, config_tpl):
@@ -516,4 +606,12 @@ class regrid_params(object):
     if tagrank >= self.tagsRank["Ganymed-4_0_Reynolds"] :
       config_tpl['output']['analysis']['aqua'] = True
     return config_tpl
-    
+
+if __name__ == "__main__":
+  yaml = ruamel.yaml.YAML()
+  stream =''
+  with open("raw_answers.yaml", "r") as f:
+     stream = f.read()
+  config = yaml.load(stream)
+  param = regrid_params(config) 
+  param.convert_to_yaml() 
