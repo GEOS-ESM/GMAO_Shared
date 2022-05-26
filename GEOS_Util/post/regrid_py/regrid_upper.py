@@ -187,11 +187,11 @@ endif
              out_dir = out_dir, out_log = 'regrid_upper_log', drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
              QOS = QOS, nlevel = nlevel, hydrostatic = hydrostatic)
-     upper = open('regridder_upper.j','wt')
+     upper = open('regrid_upper.j','wt')
      upper.write(regrid_upper_script)
      upper.close()
-     print('sbatch -W regridder_upper.j\n')
-     subprocess.call(['sbatch', '-W', 'regridder_upper.j'])
+     print('sbatch -W regrid_upper.j\n')
+     subprocess.call(['sbatch', '-W', 'regrid_upper.j'])
 
 #
 #    post process
@@ -207,8 +207,8 @@ endif
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
        shutil.move(out_rst, out_dir+"/"+filename)
 
-     print('\n Move regridder_upper.j to ' + out_dir)
-     shutil.move('regridder_upper.j', out_dir+"/regridder_upper.j")
+     print('\n Move regrid_upper.j to ' + out_dir)
+     shutil.move('regrid_upper.j', out_dir+"/regrid_upper.j")
      print('cd ' + bindir)
      os.chdir(bindir)
 

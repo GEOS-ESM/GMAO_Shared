@@ -40,7 +40,8 @@ def ask_common_in():
             "type": "text",
             "name": "yyyymmddhh",
             "message": "What time would you like to regrid from?(yyyymmddhh)",
-            "default": "2000041421",
+            "default": "",
+            "when": lambda x:  not has_fvcore(x),
         },
         {
             "type": "text",

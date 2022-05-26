@@ -22,7 +22,7 @@ class regrid_params(object):
      #self.ana_in   = config_from_question['input']['parameters']['ANALYSIS']
      self.ana_out  = config_from_question['output']['parameters']['ANALYSIS']
 
-     self.init_time(str(config_from_question['input']['parameters']['COMMON']['yyyymmddhh']))
+     self.init_time()
      self.init_tags()
      self.init_merra2()
 
@@ -235,13 +235,32 @@ class regrid_params(object):
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
-  def init_time(self, yyyymmddhh):
-     self.yyyymm = yyyymmddhh[0:6]
-     self.yyyy = yyyymmddhh[0:4]  
-     self.mm   = yyyymmddhh[4:6]  
-     self.dd   = yyyymmddhh[6:8]  
-     self.hh   = yyyymmddhh[8:10]  
-     self.ymd  = yyyymmddhh[0:8]  
+  def init_time(self):
+     ymdh = self.common_in.get('yyyymmddhh')
+     self.agrid_ = ''
+     if not ymdh:
+        rst_dir = self.common_in['rst_dir'] + '/'
+        files = glob.glob(rst_dir + '*fvcore_*')
+        if len(files) ==0 :
+           sys.exit("date and time are not provided")
+
+        fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+        cmd = fvrst + files[0]
+        print(cmd +'\n')
+        p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+        (output, err) = p.communicate()
+        p_status = p.wait()
+        ss = output.decode().split()
+        ymdh = str(ss[3]) + str(ss[4])[0:2]
+        self.common_in['yyyymmddhh']=ymdh
+        self.agrid_ = "C"+ss[0] # save for air parameter
+
+     self.yyyymm = ymdh[0:6]
+     self.yyyy = ymdh[0:4]  
+     self.mm   = ymdh[4:6]  
+     self.dd   = ymdh[6:8]  
+     self.hh   = ymdh[8:10]  
+     self.ymd  = ymdh[0:8]  
 
   def init_merra2(self):
     def get_grid_kind(grid):
@@ -263,7 +282,7 @@ class regrid_params(object):
 
     if not self.common_in['MERRA-2']:
       return
-    print("\nMERRA-2 sources:\n")
+    print("\n MERRA-2 sources:\n")
     yyyymm = int(self.yyyymm)
     if yyyymm < 197901 :
       exit("Error. MERRA-2 data < 1979 not available\n")
@@ -286,7 +305,7 @@ class regrid_params(object):
     merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm+'/'
     rst_dir = self.common_in['rst_dir'] + '/'
     os.makedirs(rst_dir, exist_ok = True)
-    print('\n Copy MERRA-2 Restart \n from \n' + merra_2_rst_dir + '\n  to \n '+ rst_dir +'\n') 
+    print(' Copy MERRA-2 Restart \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n') 
 
     upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + surfix,
               merra_2_rst_dir +  expid+'.moist_internal_rst.'  + surfix,
@@ -526,23 +545,25 @@ class regrid_params(object):
      expid = fname.split('fvcore')[0]
      config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
 
-     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-     cmd = fvrst + files[0]
-     print(cmd +'\n')
-     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-     (output, err) = p.communicate()
-     p_status = p.wait()
-     ss = output.decode().split()
-     config_tpl['input']['shared']['agrid']  = "C"+ss[0]
-     self.common_in['agrid'] = config_tpl['input']['shared']['agrid']
+     if not self.agrid_ :
+        fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+        cmd = fvrst + files[0]
+        print(cmd +'\n')
+        p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+        (output, err) = p.communicate()
+        p_status = p.wait()
+        ss = output.decode().split()
+        self.agrid_ = "C"+ss[0]
+        lat = int(ss[0])
+        lon = int(ss[1])
+        if (lon != lat*6) :
+           sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+     config_tpl['input']['shared']['agrid']  = self.agrid_
+     self.common_in['agrid'] = self.agrid_
      if self.common_in['ogrid'] == 'CS' :
-        config_tpl['input']['shared']['ogrid']  = "C"+ss[0]
-        self.common_in['ogrid'] = config_tpl['input']['shared']['agrid']
+        config_tpl['input']['shared']['ogrid']  = self.agrid_ 
+        self.common_in['ogrid'] = self.agrid_
         
-     lat = int(ss[0])
-     lon = int(ss[1])
-     if (lon != lat*6) :
-        sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
     
      ogrid = config_tpl['input']['shared']['ogrid']
      tagout = self.common_out['tag']

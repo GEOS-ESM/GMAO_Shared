@@ -60,7 +60,7 @@ class catchANDcn(object):
      os.chdir(out_dir)
 
      InData_dir = out_dir+'/InData/'
-     print ("mkdir -p" + InData_dir)
+     print ("mkdir -p " + InData_dir)
      os.makedirs(InData_dir, exist_ok = True)
     
      f = os.path.basename(in_rstfile)
@@ -69,19 +69,17 @@ class catchANDcn(object):
      print('\nCopy ' + in_rstfile + ' to ' +dest)
      shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
-     model_log = 'mk_'+model+'_log'
 
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
 #SBATCH --ntasks=56
 #SBATCH --time=1:00:00
-#SBATCH --job-name=mk_{model}
+#SBATCH --job-name=mk_catchANDcn
 #SBATCH --qos=debug
-#SBATCH --output={out_dir}/{mk_log}
+#SBATCH --output={out_dir}/mk_catchANDcn_log
 #
 
 source {Bin}/g5_modules
-set echo
 
 limit stacksize unlimited
 
@@ -96,7 +94,7 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
-                  model = model, out_dir = out_dir, mk_log = model_log, surflay = surflay,  \
+                  model = model, out_dir = out_dir, surflay = surflay,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
 
