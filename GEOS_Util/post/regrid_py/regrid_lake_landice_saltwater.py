@@ -146,8 +146,7 @@ class lake_landice_saltwater(object):
                  "saltwater_internal_rst"   ,
                  "seaicethermo_internal_rst"]
 
-     rst_dir = self.config['input']['air']['rst_dir']
-     if (not rst_dir): rst_dir = self.config['input']['shared']['rst_dir']
+     rst_dir = self.config['input']['shared']['rst_dir']
      restarts_in=[]
      for f in surf_restarts :
         files = glob.glob(rst_dir+ '/*'+f+'*')

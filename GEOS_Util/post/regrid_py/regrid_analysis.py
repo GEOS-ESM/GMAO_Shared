@@ -126,8 +126,7 @@ class analysis(object):
 
   def find_analysis(self):
      analysis_in = []
-     rst_dir = self.config['input']['analysis']['rst_dir']
-     if (not rst_dir): rst_dir = self.config['input']['shared']['rst_dir']
+     rst_dir = self.config['input']['shared']['rst_dir']
      bkgs = glob.glob(rst_dir + '/*_eta_rst*')
      sfcs = glob.glob(rst_dir + '/*_sfc_rst*')
      traks= glob.glob(rst_dir + '/*.trak.GDA.rst*')

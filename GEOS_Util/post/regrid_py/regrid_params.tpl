@@ -11,9 +11,6 @@ input:
   air:
     drymass: 1
     hydrostatic: 0
-    rst_dir: null
-  analysis:
-    rst_dir: null
   shared:
     agrid: 
     bcs_dir:
@@ -23,20 +20,7 @@ input:
     yyyymmddhh:
   surface:
     wemin:
-    rst_dir: null
-    tile_file: null
-    catchcnclm40:
-      regrid: false
-      rst_file: null
-    catchcnclm45:
-      regrid: false
-      rst_file: null
-    catchment:
-      regrid: false
-      rst_file: null
-    lakelandice:
-      regrid: false
-      rst_file: null
+    catch_model: null
 
 output:
   shared:
@@ -52,7 +36,6 @@ output:
     split_saltwater: false
     surflay: 20.
     wemin:
-    tile_file: none
   analysis:
     bkg: true
     aqua: False

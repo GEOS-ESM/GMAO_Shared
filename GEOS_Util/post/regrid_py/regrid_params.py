@@ -55,15 +55,9 @@ class regrid_params(object):
 
      # get bc directory and tile file
      in_bcsdir  = self.get_bcdir("IN")
-     in_til     = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0] 
-     print("\ninput tile file: " + in_til)
      out_bcsdir = self.get_bcdir("OUT")
-     out_til     = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0] 
-     print("\noutput tile file: " + out_til)
      config_tpl['input']['shared']['bcs_dir']    = in_bcsdir+ '/'
      config_tpl['output']['shared']['bcs_dir']   = out_bcsdir + '/'
-     config_tpl['output']['surface']['tile_file']= out_til
-     config_tpl['input']['surface']['tile_file'] = in_til
 
      self.config = config_tpl
 
@@ -586,16 +580,15 @@ class regrid_params(object):
     rst_dir = self.common_in['rst_dir'] + '/'
     files = glob.glob(rst_dir + '*catch_*')
     if (len(files) > 0) :
-        config_tpl['input']['surface']['catchment']['regrid'] = True
-        config_tpl['input']['surface']['catchment']['rst_file'] = files[0]
+        config_tpl['input']['surface']['catch_model'] = 'catch'
+
     files = glob.glob(rst_dir + '*catchcnclm40_*')
     if (len(files) > 0) :
-        config_tpl['input']['surface']['catchcnclm40']['regrid'] = True
-        config_tpl['input']['surface']['catchcnclm40']['rst_file'] = files[0]
+        config_tpl['input']['surface']['catch_model'] = 'catchcnclm40'
+
     files = glob.glob(rst_dir + '*catchcnclm45_*')
     if (len(files) > 0) :
-        config_tpl['input']['surface']['catchcnclm45']['regrid'] = True
-        config_tpl['input']['surface']['catchcnclm45']['rst_file'] = files[0]
+        config_tpl['input']['surface']['catch_model'] = 'catchcnclm45'
 
     return config_tpl
 

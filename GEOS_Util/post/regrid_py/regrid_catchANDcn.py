@@ -18,18 +18,16 @@ class catchANDcn(object):
 
   def regrid(self):
      config = self.config
-     model = ''
-     in_rstfile =''
-     if (config['input']['surface']['catchment']['regrid']):
-        model = 'catch'
-        in_rstfile = config['input']['surface']['catchment']['rst_file']
-     elif (config['input']['surface']['catchcnclm40']['regrid']):
-        model = 'catchcnclm40'
-        in_rstfile = config['input']['surface']['catchcnclm40']['rst_file']
-     elif (config['input']['surface']['catchcnclm45']['regrid']):
-        model = 'catchcnclm45'
-        in_rstfile = config['input']['surface']['catchcnclm45']['rst_file']
-     if model == '':
+     rst_dir = config['input']['shared']['rst_dir']
+     model = config['input']['surface']['catch_model']
+     in_rstfile = ''
+     if model == 'catch' :
+        in_rstfile = glob.glob(rst_dir+'/*catch_*')[0]
+     if model == 'catchcnclm40' :
+        in_rstfile = glob.glob(rst_dir+'/*catchcnclm40_*')[0]
+     if model == 'catchcnclm45' :
+        in_rstfile = glob.glob(rst_dir+'/*catchcnclm45_*')[0]
+     if not in_rstfile:
         return
              
      print("\nRegridding " + model + ".....\n")
@@ -43,8 +41,8 @@ class catchANDcn(object):
      in_wemin   = config['input']['surface']['wemin']
      out_wemin  = config['output']['surface']['wemin']
      surflay    = config['output']['surface']['surflay']
-     in_tilefile = config['input']['surface']['tile_file']
-     out_tilefile = config['output']['surface']['tile_file']
+     in_tilefile  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
+     out_tilefile = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
      account    = config['slurm']['account']
      yyyymmddhh_= str(config['input']['shared']['yyyymmddhh'])
      # even the input is binary, the output si nc4
