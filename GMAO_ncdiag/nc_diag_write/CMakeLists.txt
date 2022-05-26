@@ -9,7 +9,7 @@ set (SRCS
 
 esma_add_library (${this}
   SRCS ${SRCS}
-  INCLUDES ${INC_NETCDF}
+  DEPENDENCIES NetCDF::NetCDF_Fortran
   )
 
 target_compile_definitions (${this} PRIVATE _REAL8_ ERROR_TRACEBACK ENABLE_ACTION_MSGS)
