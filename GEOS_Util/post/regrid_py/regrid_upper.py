@@ -218,7 +218,7 @@ endif
                     "agcm_import_rst"          ,
                     "agcm_internal_rst"        ,
                     "carma_internal_rst"       ,
-                    "geosachem_internal_rst"   ,
+                    "achem_internal_rst"   ,
                     "geoschemchem_internal_rst",
                     "gmichem_internal_rst"     ,
                     "gocart_internal_rst"      ,
