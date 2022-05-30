@@ -21,28 +21,14 @@ module WOA_Eddington_pseudoRayleigh_Mod
   implicit none
   private
 
-? ! constants
+  ! constants
   double precision, parameter :: zero   =  0.0d0
   double precision, parameter :: one    =  1.0d0
   double precision, parameter :: two    =  2.0d0
   double precision, parameter :: three  =  3.0d0
-  double precision, parameter :: four   =  4.0d0
-  double precision, parameter :: five   =  5.0d0
-  double precision, parameter :: seven  =  7.0d0
-  double precision, parameter :: eight  =  8.0d0
-  double precision, parameter :: nine   =  9.0d0
-  double precision, parameter :: ten    = 10.0d0
 
-? double precision, parameter :: half = one / two
+  double precision, parameter :: half = one / two
   double precision, parameter :: third = one / three
-  double precision, parameter :: quarter = one / four
-  double precision, parameter :: eighth = one / eight
-  double precision, parameter :: tenth = one / ten
-
-? double precision, parameter :: three_sevenths = three / seven
-  double precision, parameter :: five_eighths = five / eight
-  double precision, parameter :: seven_ninths = seven / nine
-  double precision, parameter :: fourteen_ninths = two * seven_ninths
 
   double precision, parameter :: pi = MAPL_PI_R8
 
@@ -62,7 +48,7 @@ module WOA_Eddington_pseudoRayleigh_Mod
   double precision, parameter, public :: g_Es_max = +third - 0.000001d0
   ! ranges
   double precision, parameter :: ssae_range = ssae_max - ssae_min
- r ouble precision, parameter :: g_Es_range = g_Es_max - g_Es_min
+  double precision, parameter :: g_Es_range = g_Es_max - g_Es_min
 
   ! fixed matricies
   double precision, parameter, dimension(2,2) :: matA = &
