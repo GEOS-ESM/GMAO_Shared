@@ -273,7 +273,7 @@ def ask_surface_in(common_in):
             "type": "text",
             "name": "zoom",
             "message": "What is value of zoom [1-8]?",
-            "default": '1'
+            "default": '8'
         },
    ]
    return questionary.prompt(questions)
