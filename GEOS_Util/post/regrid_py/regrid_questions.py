@@ -133,13 +133,14 @@ Sample DAS tags \n \
         {
             "type": "path",
             "name": "alt_bcs",
-            "message": "Specify your own bcs path (do not contain grid info) for restarts: \n ",
+            "message": "Specify your own bcs absolute path (do not contain grid info) for restarts: \n ",
             "when": lambda x: x.get("bc_base")=="other",
         },
    ]
    common_in = questionary.prompt(questions)
    if not common_in.get('model') :
       common_in['model'] = 'data'
+   common_in['rst_dir'] = os.path.abspath(common_in['rst_dir'])
    return common_in
 
 def ask_common_out():
@@ -247,6 +248,7 @@ Sample DAS tags \n \
    common_out = questionary.prompt(questions)
    if common_out.get('ogrid') == 'CS':
       common_out['ogrid'] = common_out['agrid']
+   common_out['out_dir'] = os.path.abspath(common_out['out_dir'])
 
    return common_out
 def ask_upper_out():
