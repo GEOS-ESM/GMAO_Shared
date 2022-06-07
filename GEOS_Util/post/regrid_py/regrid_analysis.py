@@ -129,8 +129,9 @@ class analysis(object):
      rst_dir = self.config['input']['shared']['rst_dir']
      bkgs = glob.glob(rst_dir + '/*_eta_rst*')
      sfcs = glob.glob(rst_dir + '/*_sfc_rst*')
+     anasat = glob.glob(rst_dir + '/*ana_satb*')
      traks= glob.glob(rst_dir + '/*.trak.GDA.rst*')
-     analysis_in = bkgs + sfcs + traks
+     analysis_in = bkgs + sfcs + traks + anasat
      return analysis_in
 
 if __name__ == '__main__' :
