@@ -29,12 +29,12 @@ def main(argv):
               1) Use a config file to regrid: \n
                 ./regrid.py -c my_config.yaml \n \n
               2) Use questionary to convert template regrid_params.tpl to \n
-                 regrid_params.yaml and regrid. \n
+                 regrid_params.yaml and then regrid. \n
                 ./regrid.py \n
               \nHelp message: \n
-              1) Each individual script can be excuted indepently
-              2) regrid_questions.py would generate raw_answer.yaml
-              3) regrid_params.py uses raw_answer.yaml and regrid_params.tpl as inputs and generate regrid_params.yaml
+              1) Each individual script can be executed independently
+              2) regrid_questions.py generates raw_answer.yaml
+              3) regrid_params.py uses raw_answer.yaml and regrid_params.tpl as inputs and generates regrid_params.yaml
               4) regrid_upper.py uses regrid_params.yaml as input for regriding
               5) regrid_lake_landice_saltwater.py uses regrid_params.yaml as input for regriding
               6) regrid_catchANDcn.py uses regrid_params.yaml as input for regriding
@@ -66,7 +66,7 @@ def main(argv):
   answer = questionary.prompt(questions)
 
   if not answer['Continue'] :
-     print("\nYou answer not to continue\n")
+     print("\nYou answered not to continue, exiting.\n")
      sys.exit(0)
   # upper air
   upper = upperair(config_yaml)
