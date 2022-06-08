@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Changed restart file geosachem to achem in regrid.pl
+- Updated CI to modern v1 orb
 
 ### Fixed
 
