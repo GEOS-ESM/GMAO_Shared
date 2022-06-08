@@ -263,7 +263,8 @@ def ask_upper_out():
    return questionary.prompt(questions)
 def ask_surface_in(common_in):
    wemin_default = '26'
-   if common_in.get('tag') == 'INL': wemin_default = '13'
+   tag = common_in.get('tag')
+   if tag in ['INL','GITNL'] : wemin_default = '13'
    questions = [
         {
             "type": "text",
@@ -282,7 +283,8 @@ def ask_surface_in(common_in):
 
 def ask_surface_out(common_out):
    wemout_default = '26'
-   if common_out.get('tag') == 'INL': wemout_default = '13'
+   tag = common_out.get('tag')
+   if tag in ['INL','GITNL'] : wemout_default = '13'
    questions = [
         {
             "type": "text",
@@ -320,7 +322,7 @@ def ask_slurm_options():
    questions = [
         {
             "type": "text",
-            "name": "debug",
+            "name": "qos",
             "message": "qos?",
             "default": "debug",
         },

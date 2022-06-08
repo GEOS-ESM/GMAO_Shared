@@ -70,13 +70,14 @@ class catchANDcn(object):
      shutil.copyfile(in_rstfile,dest)
      in_rstfile = dest
 
+     log_name = out_dir+'/'+'mk_catchANDcn_log'
      mk_catch_j_template = """#!/bin/csh -f
 #SBATCH --account={account}
 #SBATCH --ntasks=56
 #SBATCH --time=1:00:00
 #SBATCH --job-name=mk_catchANDcn
 #SBATCH --qos=debug
-#SBATCH --output={out_dir}/mk_catchANDcn_log
+#SBATCH --output={log_name}
 #
 
 source {Bin}/g5_modules
@@ -94,15 +95,30 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
 """
      catch1script =  mk_catch_j_template.format(Bin = bindir, account = account, out_bcs = out_bcsdir, \
-                  model = model, out_dir = out_dir, surflay = surflay,  \
+                  model = model, out_dir = out_dir, surflay = surflay, log_name = log_name,  \
                   in_wemin   = in_wemin, out_wemin = out_wemin, out_tilefile = out_tilefile, in_tilefile = in_tilefile, \
                   in_rstfile = in_rstfile, out_rstfile = out_rstfile, time = yyyymmddhh_ )
 
-     catch_scrpt = open('mk_catchANDcn.j','wt')
+     script_name = './mk_catchANDcn.j'
+
+     catch_scrpt = open(script_name,'wt')
      catch_scrpt.write(catch1script)
      catch_scrpt.close()
-     print("sbatch -W mk_catchANDcn.j")
-     subprocess.call(['sbatch','-W', 'mk_catchANDcn.j'])
+    
+     interactive = os.getenv('SLURM_JOB_ID', default = None)
+     if(interactive ) :
+       print('interactive mode\n')
+       subprocess.call(['chmod', '755', script_name])
+       ntasks = int(os.getenv('SLURM_NTASKS', default = 1))
+       NPE = 56
+       if (ntasks < NPE):
+         print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+       print(script_name+  '  1>' + log_name  + '  2>&1')
+       subprocess.call([script_name, '1>' + log_name, '2>&1'])
+
+     else:
+       print("sbatch -W " + script_name +"\n")
+       subprocess.call(['sbatch','-W', script_name])
 
      print( "cd " + bindir)
      os.chdir(bindir)

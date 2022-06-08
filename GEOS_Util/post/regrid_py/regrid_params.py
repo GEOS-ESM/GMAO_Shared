@@ -321,11 +321,13 @@ class regrid_params(object):
     for f in upperin :
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
+       print("Copy file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
 
     for f in surfin :
        fname = os.path.basename(f)
        dest = rst_dir + '/'+fname
+       print("Copy file "+f +" to " + rst_dir)
        shutil.copy(f, dest)
 
     # prepare analysis files
@@ -580,7 +582,7 @@ class regrid_params(object):
 
   def options_for_slurm(self, config_tpl):
     config_tpl['slurm']['account'] = self.slurm_options['account']
-    config_tpl['slurm']['debug'] = self.slurm_options['debug']
+    config_tpl['slurm']['qos'] = self.slurm_options['qos']
     config_tpl['slurm']['partition'] = self.slurm_options['partition']
     return config_tpl
 

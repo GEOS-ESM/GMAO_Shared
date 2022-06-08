@@ -96,8 +96,11 @@ class upperair(object):
      elif (imout>=2880):
        NPE = 5400; nwrit= 6
 
-     QOS = "#"
+     QOS = "#SBATCH --qos="+config['slurm']['qos']
      if NPE <= 532: QOS = "#SBATCH --qos=debug"
+     CONSTR = "#SBATCH --constrain=" + config['slurm']['partition']    
+
+     log_name = out_dir+'/regrid_upper_log'
 
      regrid_template="""#!/bin/csh -xf
 #!/bin/csh -xf
@@ -105,8 +108,9 @@ class upperair(object):
 #SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
 #SBATCH --job-name=regrid_upper
-#SBATCH --output={out_dir}/{out_log}
+#SBATCH --output={log_name}
 {QOS}
+{CONSTR}
 
 unlimit
 
@@ -184,14 +188,30 @@ endif
      nlevel = config['output']['air']['nlevel']
      
      regrid_upper_script = regrid_template.format(Bin=bindir, account = account, \
-             out_dir = out_dir, out_log = 'regrid_upper_log', drymassFLG = drymassFLG, \
+             out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
-             QOS = QOS, nlevel = nlevel, hydrostatic = hydrostatic)
-     upper = open('regrid_upper.j','wt')
+             QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic)
+
+     script_name = './regrid_upper.j'
+
+     upper = open(script_name,'wt')
      upper.write(regrid_upper_script)
      upper.close()
-     print('sbatch -W regrid_upper.j\n')
-     subprocess.call(['sbatch', '-W', 'regrid_upper.j'])
+
+     interactive = os.getenv('SLURM_JOB_ID', default = None)
+
+     if(interactive ) :
+       print('interactive mode\n')
+       ntasks = int(os.getenv('SLURM_NTASKS', default = 1))
+       if (ntasks < NPE):
+         print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+         
+       subprocess.call(['chmod', '755', script_name])
+       print(script_name+  '  1>' + log_name  + '  2>&1')
+       subprocess.call([script_name, '1>'+log_name, '2>&1'])
+     else : 
+       print('sbatch -W '+ script_name +'\n')
+       subprocess.call(['sbatch', '-W', script_name])
 
 #
 #    post process

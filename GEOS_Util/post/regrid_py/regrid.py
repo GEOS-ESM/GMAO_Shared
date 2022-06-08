@@ -7,6 +7,8 @@
 #
 
 import sys, getopt
+import ruamel.yaml
+import questionary
 from regrid_questions import get_config_from_questionary 
 from regrid_params import *
 from regrid_upper import *
@@ -30,8 +32,13 @@ def main(argv):
                  regrid_params.yaml and regrid. \n
                 ./regrid.py \n
               \nHelp message: \n
-              1) The rst_dir directory should have three sub-directories: \n
-                upperair, surface and analysis which contain restart files respectively. \n''')
+              1) Each individual script can be excuted indepently
+              2) regrid_questions.py would generate raw_answer.yaml
+              3) regrid_params.py uses raw_answer.yaml and regrid_params.tpl as inputs and generate regrid_params.yaml
+              4) regrid_upper.py uses regrid_params.yaml as input for regriding
+              5) regrid_lake_landice_saltwater.py uses regrid_params.yaml as input for regriding
+              6) regrid_catchANDcn.py uses regrid_params.yaml as input for regriding
+              7) regrid_analysis.py uses regrid_params.yaml as input for regriding ''')
       sys.exit(0)
     if opt in("-c", "--config_file"):
       config_yaml = arg
@@ -42,6 +49,25 @@ def main(argv):
     params.convert_to_yaml()
     config_yaml = 'regrid_params.yaml'
 
+  with  open(config_yaml, 'r') as f:
+    for line in f.readlines():
+      trimmed_line = line.rstrip()
+      if trimmed_line: # Don't print blank lines
+          print(trimmed_line)
+
+  print('\n')
+  questions = [
+        {
+            "type": "confirm",
+            "name": "Continue",
+            "message": "Above is the YAML config file, would you like to continue?",
+            "default": True
+        },]  
+  answer = questionary.prompt(questions)
+
+  if not answer['Continue'] :
+     print("\nYou answer not to continue\n")
+     sys.exit(0)
   # upper air
   upper = upperair(config_yaml)
   upper.regrid()
