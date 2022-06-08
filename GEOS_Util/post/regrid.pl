@@ -150,7 +150,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 %UPPERAIR_OPT = ("agcm_import_rst"           => 1,
                  "agcm_internal_rst"         => 1,
                  "carma_internal_rst"        => 1,
-                 "geosachem_internal_rst"    => 1,
+                 "achem_internal_rst"        => 1,
                  "geoschemchem_internal_rst" => 1,
                  "gmichem_internal_rst"      => 1,
                  "gocart_internal_rst"       => 1,
@@ -2467,7 +2467,7 @@ sub regrid_upperair_rsts_CS {
     $DYN       = rstname($expid, "fvcore_internal_rst",       $rstIN_template);
     $MOIST     = rstname($expid, "moist_internal_rst",        $rstIN_template);
 
-    $ACHEM     = rstname($expid, "geosachem_internal_rst",    $rstIN_template);
+    $ACHEM     = rstname($expid, "achem_internal_rst",        $rstIN_template);
     $CCHEM     = rstname($expid, "geoschemchem_internal_rst", $rstIN_template);
     $CARMA     = rstname($expid, "carma_internal_rst",        $rstIN_template);
     $AGCM      = rstname($expid, "agcm_import_rst",           $rstIN_template);
@@ -2554,7 +2554,7 @@ source $g5modules
 
 /bin/touch input.nml
 
-if( ".$ACHEM"     != . ) /bin/ln -s $ACHEM  geosachem_internal_restart_in
+if( ".$ACHEM"     != . ) /bin/ln -s $ACHEM  achem_internal_restart_in
 if( ".$CCHEM"     != . ) /bin/ln -s $CCHEM  geoschemchem_internal_restart_in
 if( ".$CARMA"     != . ) /bin/ln -s $CARMA  carma_internal_restart_in
 if( ".$AGCM"      != . ) /bin/ln -s $AGCM   agcm_import_restart_in
