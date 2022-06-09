@@ -438,7 +438,7 @@ class regrid_params(object):
        tag = self.common_out['tag']
        ogrid = self.common_out['ogrid']
        model = self.common_out['model']
-       bcdir = self.common_in.get('alt_bcs', None)
+       bcdir = self.common_out.get('alt_bcs', None)
 
     if bcdir is None :
        bc_base = self.get_bcbase(opt)
