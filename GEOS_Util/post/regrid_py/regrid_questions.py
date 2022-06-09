@@ -15,11 +15,13 @@ import questionary
 import glob
 
 def has_fvcore(x):
-  files = glob.glob(x['rst_dir']+'/*fvcore_*')
+  ymdh = x['yyyymmddhh']
+  time = ymdh[0:8] + '_'+ymdh[8:10]
+  files = glob.glob(x['rst_dir']+'/*fvcore_*'+time+'*')
   if len(files) ==1 :
     return True
   else:
-    print('False')
+    print('\nDo not have fvcore for this date\n')
     return False
 
 
@@ -34,19 +36,18 @@ def ask_common_in():
         {
             "type": "path",
             "name": "rst_dir",
-            "message": "Enter the directory with restart files to be regrided: \n  If it is MERRA-2, files from achives will be copied to this directory. \n",
+            "message": "Enter the directory containing restart files to be regrided: \n  (If it is MERRA-2, files from achives will be copied to this directory automatically). \n",
         },
         {
             "type": "text",
             "name": "yyyymmddhh",
-            "message": "What time would you like to regrid from?(yyyymmddhh)",
-            "default": "",
-            "when": lambda x:  not has_fvcore(x),
+            "message": "What time would you like to regrid from?(must be 10 digits: yyyymmddhh)",
+            "validate": lambda text: len(text)==10 ,
         },
         {
             "type": "text",
             "name": "agrid",
-            "message": "Enter input atmospheric grid, format(Cxxx):",
+            "message": "Enter input atmospheric grid: \n C12   C180  C1000  \n C24   C360  C1440 \n C48   C500  C2880 \n C90   C720  C5760 \n ",
             "default": 'C360',
             # if it is merra-2 or has_fvcore, agrid is deduced
             "when": lambda x: not x['MERRA-2'] and not has_fvcore(x),
@@ -159,7 +160,7 @@ def ask_common_out():
         {
             "type": "text",
             "name": "agrid",
-            "message": "Enter new atmospheric grid, format(Cxxx):",
+            "message": "Enter new atmospheric grid: \n C12   C180  C1000  \n C24   C360  C1440 \n C48   C500  C2880 \n C90   C720  C5760 \n ",
             "default": 'C360',
         },
         {
@@ -256,7 +257,7 @@ def ask_upper_out():
         {
             "type": "text",
             "name": "nlevel",
-            "message": "Enter new atmospheric levels:",
+            "message": "Enter new atmospheric levels: (71 72 91 127 132 137 144 181)",
             "default": "72",
         },
    ]
@@ -264,7 +265,7 @@ def ask_upper_out():
 def ask_surface_in(common_in):
    wemin_default = '26'
    tag = common_in.get('tag')
-   if tag in ['INL','GITNL'] : wemin_default = '13'
+   if tag in ['INL','GITNL', '525'] : wemin_default = '13'
    questions = [
         {
             "type": "text",
@@ -284,7 +285,7 @@ def ask_surface_in(common_in):
 def ask_surface_out(common_out):
    wemout_default = '26'
    tag = common_out.get('tag')
-   if tag in ['INL','GITNL'] : wemout_default = '13'
+   if tag in ['INL','GITNL', '525'] : wemout_default = '13'
    questions = [
         {
             "type": "text",

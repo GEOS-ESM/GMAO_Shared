@@ -22,7 +22,7 @@ class regrid_params(object):
      #self.ana_in   = config_from_question['input']['parameters']['ANALYSIS']
      self.ana_out  = config_from_question['output']['parameters']['ANALYSIS']
 
-     self.init_time()
+     self.init_time_and_grid()
      self.init_tags()
      self.init_merra2()
 
@@ -235,32 +235,36 @@ class regrid_params(object):
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
-  def init_time(self):
+  def init_time_and_grid(self):
      ymdh = self.common_in.get('yyyymmddhh')
-     self.agrid_ = ''
-     if not ymdh:
-        rst_dir = self.common_in['rst_dir'] + '/'
-        files = glob.glob(rst_dir + '*fvcore_*')
-        if len(files) ==0 :
-           sys.exit("date and time are not provided")
-
-        fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-        cmd = fvrst + files[0]
-        print(cmd +'\n')
-        p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-        (output, err) = p.communicate()
-        p_status = p.wait()
-        ss = output.decode().split()
-        ymdh = str(ss[3]) + str(ss[4])[0:2]
-        self.common_in['yyyymmddhh']=ymdh
-        self.agrid_ = "C"+ss[0] # save for air parameter
-
      self.yyyymm = ymdh[0:6]
      self.yyyy = ymdh[0:4]  
      self.mm   = ymdh[4:6]  
      self.dd   = ymdh[6:8]  
      self.hh   = ymdh[8:10]  
      self.ymd  = ymdh[0:8]  
+
+     self.agrid_ = ''
+     rst_dir = self.common_in['rst_dir'] + '/'
+     time = self.ymd + '_'+self.hh
+     files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
+     if len(files) ==0 :
+        return
+     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+     cmd = fvrst + files[0]
+     print(cmd +'\n')
+     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+     (output, err) = p.communicate()
+     p_status = p.wait()
+     ss = output.decode().split()
+     self.agrid_ = "C"+ss[0] # save for air parameter
+     lat = int(ss[0])
+     lon = int(ss[1])
+     if (lon != lat*6) :
+        sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+     ymdh_ = str(ss[3]) + str(ss[4])[0:2]
+     if (ymdh_ != ymdh) :
+        print("Warning: The date in fvcore is different from the date you input\n")
 
   def init_merra2(self):
     def get_grid_kind(grid):
@@ -539,34 +543,21 @@ class regrid_params(object):
        return config_tpl 
      # verify agrid
      rst_dir = self.common_in['rst_dir'] + '/'
-     files = glob.glob(rst_dir + '*fvcore_*')
-     if len(files) ==0 :
+     time = self.ymd + '_'+ self.hh
+     files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
+     if len(files) == 0 :
        return config_tpl
      # get expid
      fname = os.path.basename(files[0])
      expid = fname.split('fvcore')[0]
      config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
 
-     if not self.agrid_ :
-        fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-        cmd = fvrst + files[0]
-        print(cmd +'\n')
-        p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-        (output, err) = p.communicate()
-        p_status = p.wait()
-        ss = output.decode().split()
-        self.agrid_ = "C"+ss[0]
-        lat = int(ss[0])
-        lon = int(ss[1])
-        if (lon != lat*6) :
-           sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
      config_tpl['input']['shared']['agrid']  = self.agrid_
      self.common_in['agrid'] = self.agrid_
      if self.common_in['ogrid'] == 'CS' :
         config_tpl['input']['shared']['ogrid']  = self.agrid_ 
         self.common_in['ogrid'] = self.agrid_
         
-    
      ogrid = config_tpl['input']['shared']['ogrid']
      tagout = self.common_out['tag']
      bctag  = self.get_bcTag(tagout, ogrid)
@@ -601,15 +592,16 @@ class regrid_params(object):
     config_tpl['output']['surface']['wemin']= self.surf_out['wemout']
 
     rst_dir = self.common_in['rst_dir'] + '/'
-    files = glob.glob(rst_dir + '*catch_*')
+    time = self.ymd + '_'+ self.hh
+    files = glob.glob(rst_dir +'/*catch_*'+time+'*')
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catch'
 
-    files = glob.glob(rst_dir + '*catchcnclm40_*')
+    files = glob.glob(rst_dir +'/*catchcnclm40_*'+time+'*')
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catchcnclm40'
 
-    files = glob.glob(rst_dir + '*catchcnclm45_*')
+    files = glob.glob(rst_dir +'/*catchcnclm45_*'+time+'*')
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catchcnclm45'
 

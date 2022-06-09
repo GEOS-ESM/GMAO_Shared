@@ -35,7 +35,8 @@ class analysis(object):
 
      print("\n Regrid or copy analysis files...\n")
 
-     bindir  = os.getcwd()
+     cwdir  = os.getcwd()
+     bindir = os.path.dirname(os.path.realpath(__file__))
      in_bcsdir  = config['input']['shared']['bcs_dir']
      out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
@@ -104,8 +105,8 @@ class analysis(object):
        cmd = bindir+'/mkdrstdate.x ' + ymd_ + ' ' + hms_ +' ' + rstlcvOut
        print(cmd)
        subprocess.call(shlex.split(cmd))
-     print( "cd " + bindir)
-     os.chdir(bindir)
+     print( "cd " + cwdir)
+     os.chdir(cwdir)
 
   def get_grid_kind(this, grid):
      hgrd = {}

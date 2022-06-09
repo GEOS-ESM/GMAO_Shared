@@ -22,7 +22,8 @@ class upperair(object):
 
      print( "\nRegridding upper air......\n")
      config = self.config
-     bindir  = os.getcwd()
+     cwdir  = os.getcwd()
+     bindir  = os.path.dirname(os.path.realpath(__file__))
      in_bcsdir  = config['input']['shared']['bcs_dir'] 
      out_bcsdir = config['output']['shared']['bcs_dir'] 
      out_dir    = config['output']['shared']['out_dir']
@@ -98,7 +99,7 @@ class upperair(object):
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
      if NPE <= 532: QOS = "#SBATCH --qos=debug"
-     CONSTR = "#SBATCH --constrain=" + config['slurm']['partition']    
+     CONSTR = "#SBATCH --constraint=" + config['slurm']['partition']    
 
      log_name = out_dir+'/regrid_upper_log'
 
@@ -208,7 +209,8 @@ endif
          
        subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
-       subprocess.call([script_name, '1>'+log_name, '2>&1'])
+       #subprocess.call([script_name, '1>'+log_name, '2>&1'], shell = True)
+       os.system(script_name + ' 1>' + log_name+ ' 2>&1')
      else : 
        print('sbatch -W '+ script_name +'\n')
        subprocess.call(['sbatch', '-W', script_name])
@@ -229,8 +231,8 @@ endif
 
      print('\n Move regrid_upper.j to ' + out_dir)
      shutil.move('regrid_upper.j', out_dir+"/regrid_upper.j")
-     print('cd ' + bindir)
-     os.chdir(bindir)
+     print('cd ' + cwdir)
+     os.chdir(cwdir)
 
   def find_rst(self):
      air_restarts =["fvcore_internal_rst"      , 
@@ -257,9 +259,11 @@ endif
                     "tr_internal_rst"]
 
      rst_dir = self.config['input']['shared']['rst_dir']
+     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
+     time = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]
      restarts_in=[]
      for f in air_restarts :
-        files = glob.glob(rst_dir+ '/*'+f+'*')
+        files = glob.glob(rst_dir+ '/*'+f+'*'+time+'*')
         if len(files) >0:
           restarts_in.append(files[0])
      return restarts_in

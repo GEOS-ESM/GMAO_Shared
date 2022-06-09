@@ -22,7 +22,8 @@ class lake_landice_saltwater(object):
 
      print("\nRegridding land, landice, saltwater.....\n")
      config = self.config
-     bindir  = os.getcwd()
+     cwdir  = os.getcwd()
+     bindir  = os.path.dirname(os.path.realpath(__file__)) 
      in_bcsdir  = config['input']['shared']['bcs_dir']
      out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
@@ -134,8 +135,8 @@ class lake_landice_saltwater(object):
        filename = expid + os.path.basename(out_rst).split('_rst')[0].split('.')[-1]+suffix
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
        shutil.move(out_rst, out_dir+"/"+filename)
-     print('cd ' + bindir)
-     os.chdir(bindir)
+     print('cd ' + cwdir)
+     os.chdir(cwdir)
 
   def find_rst(self):
      surf_restarts =[
@@ -147,9 +148,11 @@ class lake_landice_saltwater(object):
                  "seaicethermo_internal_rst"]
 
      rst_dir = self.config['input']['shared']['rst_dir']
+     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
+     time = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]
      restarts_in=[]
      for f in surf_restarts :
-        files = glob.glob(rst_dir+ '/*'+f+'*')
+        files = glob.glob(rst_dir+ '/*'+f+'*'+time+'*')
         if len(files) >0:
           restarts_in.append(files[0])
      return restarts_in

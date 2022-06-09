@@ -21,19 +21,21 @@ class catchANDcn(object):
      rst_dir = config['input']['shared']['rst_dir']
      model = config['input']['surface']['catch_model']
      in_rstfile = ''
+     yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
+     time = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]
      if model == 'catch' :
-        in_rstfile = glob.glob(rst_dir+'/*catch_*')[0]
+        in_rstfile = glob.glob(rst_dir+'/*catch_*'+time+'*')[0]
      if model == 'catchcnclm40' :
-        in_rstfile = glob.glob(rst_dir+'/*catchcnclm40_*')[0]
+        in_rstfile = glob.glob(rst_dir+'/*catchcnclm40_*'+time+'*')[0]
      if model == 'catchcnclm45' :
-        in_rstfile = glob.glob(rst_dir+'/*catchcnclm45_*')[0]
+        in_rstfile = glob.glob(rst_dir+'/*catchcnclm45_*'+time+'*')[0]
      if not in_rstfile:
         return
              
      print("\nRegridding " + model + ".....\n")
 
-     bindir  = os.getcwd()
-
+     cwdir  = os.getcwd()
+     bindir = os.path.dirname(os.path.realpath(__file__))
      in_bcsdir  = config['input']['shared']['bcs_dir']
      out_bcsdir = config['output']['shared']['bcs_dir']
      out_dir    = config['output']['shared']['out_dir']
@@ -44,9 +46,8 @@ class catchANDcn(object):
      in_tilefile  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
      out_tilefile = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
      account    = config['slurm']['account']
-     yyyymmddhh_= str(config['input']['shared']['yyyymmddhh'])
      # even the input is binary, the output si nc4
-     suffix     = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+'z.nc4'
+     suffix     = time+'z.nc4'
 
      if (expid) :
         expid = expid + '.'
@@ -114,14 +115,15 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
        if (ntasks < NPE):
          print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
        print(script_name+  '  1>' + log_name  + '  2>&1')
-       subprocess.call([script_name, '1>' + log_name, '2>&1'])
+       #subprocess.call([script_name, '1>' + log_name, '2>&1'], shell = True)
+       os.system(script_name + ' 1>' + log_name+ ' 2>&1')
 
      else:
        print("sbatch -W " + script_name +"\n")
        subprocess.call(['sbatch','-W', script_name])
 
-     print( "cd " + bindir)
-     os.chdir(bindir)
+     print( "cd " + cwdir)
+     os.chdir(cwdir)
 
 if __name__ == '__main__' :
    catch = catchANDcn('regrid_params.yaml')
