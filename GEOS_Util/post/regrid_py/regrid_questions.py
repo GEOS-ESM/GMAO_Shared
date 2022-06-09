@@ -93,12 +93,6 @@ def ask_common_in():
             "message": "Enter GCM or DAS tag for input: \n \
 Sample GCM tags \n \
 --------------- \n \
-F14   : Fortuna-1_4  .........  Fortuna-1_4_p1 \n \
-F20   : Fortuna-2_0  .........  Fortuna-2_0 \n \
-F21   : Fortuna-2_1  .........  Fortuna-2_5_pp2 \n \
-G10   : Ganymed-1_0  .........  Ganymed-1_0_BETA4 \n \
-G10p  : Ganymed-1_0_p1  ......  Ganymed-1_0_p6 \n \
-G20   : Ganymed-2_0  .........  Ganymed-2_1_p6 \n \
 G30   : Ganymed-3_0  .........  Ganymed-3_0_p1 \n \
 G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
 ICA   : Icarus  ..............  Jason \n \
@@ -108,12 +102,6 @@ GITNL : 10.19  ...............  10.23 \n \
 \n \
 Sample DAS tags \n \
 --------------- \n \
-214  : GEOSdas-2_1_4  .......  GEOSdas-2_1_4-m4 \n \
-540  : GEOSadas-5_4_0  ......  GEOSadas-5_5_3 \n \
-561  : GEOSadas-5_6_1  ......  GEOSadas-5_7_3_p2 \n \
-580  : GEOSadas-5_8_0  ......  GEOSadas-5_9_1 \n \
-591p : GEOSadas-5_9_1_p1  ...  GEOSadas-5_9_1_p9 \n \
-5A0  : GEOSadas-5_10_0  .....  GEOSadas-5_10_0_p1 \n \
 5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
 512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
 517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
