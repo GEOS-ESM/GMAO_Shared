@@ -107,15 +107,20 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      catch_scrpt.close()
     
      interactive = os.getenv('SLURM_JOB_ID', default = None)
-     if(interactive ) :
+     if ( interactive ) :
        print('interactive mode\n')
-       subprocess.call(['chmod', '755', script_name])
-       ntasks = int(os.getenv('SLURM_NTASKS', default = 1))
+       ntasks = os.getenv('SLURM_NTASKS', default = None)
+       if ( not ntasks):
+         nnodes = int(os.getenv('SLURM_NNODES', default = '1'))
+         ncpus  = int(os.getenv('SLURM_CPUS_ON_NODE', default = '28'))
+         ntasks = nnodes * ncpus
+       ntasks = int(ntasks)
        NPE = 56
        if (ntasks < NPE):
          print("\nYou should have at least {NPE} cores. Now you only have {ntasks} cores ".format(NPE=NPE, ntasks=ntasks))
+
+       subprocess.call(['chmod', '755', script_name])
        print(script_name+  '  1>' + log_name  + '  2>&1')
-       #subprocess.call([script_name, '1>' + log_name, '2>&1'], shell = True)
        os.system(script_name + ' 1>' + log_name+ ' 2>&1')
 
      else:
