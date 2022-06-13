@@ -36,12 +36,12 @@ def ask_common_in():
         {
             "type": "path",
             "name": "rst_dir",
-            "message": "Enter the directory containing restart files to be regrided: \n  (If it is MERRA-2, files from achives will be copied to this directory automatically). \n",
+            "message": "Enter the directory containing restart files to be remapped: \n  (If it is MERRA-2, files from achives will be copied to this directory automatically). \n",
         },
         {
             "type": "text",
             "name": "yyyymmddhh",
-            "message": "What time would you like to regrid from?(must be 10 digits: yyyymmddhh)",
+            "message": "What time would you like to remap from?(must be 10 digits: yyyymmddhh)",
             "validate": lambda text: len(text)==10 ,
         },
         {

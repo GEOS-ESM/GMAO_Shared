@@ -9,45 +9,45 @@
 import sys, getopt
 import ruamel.yaml
 import questionary
-from regrid_questions import get_config_from_questionary 
-from regrid_params import *
-from regrid_upper import *
-from regrid_lake_landice_saltwater import *
-from regrid_analysis  import *
-from regrid_catchANDcn  import *
+from remap_questions import get_config_from_questionary 
+from remap_params import *
+from remap_upper import *
+from remap_lake_landice_saltwater import *
+from remap_analysis  import *
+from remap_catchANDcn  import *
 
 def main(argv):
   config_yaml = ''
   try:
     opts, args = getopt.getopt(argv,"hc:", ['config_file='])
   except getopt.GetoptError:
-    print('Usage: regrid.py -c regrid.yaml or ./regrid.py ')
+    print('Usage: remap_restarts.py -c remap_params.yaml or ./remap_restarts.py ')
     sys.exit('command line error')
   for opt, arg in opts:
     if opt == '-h':
-      print('''\nThere are two ways to use this script to regrid restarts. \n 
-              1) Use a config file to regrid: \n
-                ./regrid.py -c my_config.yaml \n \n
-              2) Use questionary to convert template regrid_params.tpl to \n
-                 regrid_params.yaml and then regrid. \n
-                ./regrid.py \n
+      print('''\nThere are two ways to use this script to remap restarts. \n 
+              1) Use an exsiting config file to remap: \n
+                ./remap_restarts.py -c my_config.yaml \n \n
+              2) Use questionary to convert template remap_params.tpl to \n
+                 remap_params.yaml and then remap. \n
+                ./remap_restarts.py \n
               \nHelp message: \n
               1) Each individual script can be executed independently
-              2) regrid_questions.py generates raw_answer.yaml
-              3) regrid_params.py uses raw_answer.yaml and regrid_params.tpl as inputs and generates regrid_params.yaml
-              4) regrid_upper.py uses regrid_params.yaml as input for regriding
-              5) regrid_lake_landice_saltwater.py uses regrid_params.yaml as input for regriding
-              6) regrid_catchANDcn.py uses regrid_params.yaml as input for regriding
-              7) regrid_analysis.py uses regrid_params.yaml as input for regriding ''')
+              2) remap_questions.py generates raw_answer.yaml
+              3) remap_params.py uses raw_answer.yaml and remap_params.tpl as inputs and generates remap_params.yaml
+              4) remap_upper.py uses remap_params.yaml as input for remapping
+              5) remap_lake_landice_saltwater.py uses remap_params.yaml as input for remapping
+              6) remap_catchANDcn.py uses remap_params.yaml as input for remapping
+              7) remap_analysis.py uses remap_params.yaml as input for remapping ''')
       sys.exit(0)
     if opt in("-c", "--config_file"):
       config_yaml = arg
 
   if config_yaml == '':
     config = get_config_from_questionary()
-    params = regrid_params(config)
+    params = remap_params(config)
     params.convert_to_yaml()
-    config_yaml = 'regrid_params.yaml'
+    config_yaml = 'remap_params.yaml'
 
   with  open(config_yaml, 'r') as f:
     for line in f.readlines():
@@ -70,19 +70,19 @@ def main(argv):
      sys.exit(0)
   # upper air
   upper = upperair(config_yaml)
-  upper.regrid()
+  upper.remap()
 
   # lake, landice and saltwater
   lls  = lake_landice_saltwater(config_yaml)
-  lls.regrid()
+  lls.remap()
 
   # catchANDcn
   catch  = catchANDcn(config_yaml)
-  catch.regrid()
+  catch.remap()
 
   # analysis
   ana = analysis(config_yaml)
-  ana.regrid()
+  ana.remap()
 
 if __name__ == '__main__' :
   main(sys.argv[1:])

@@ -11,7 +11,7 @@ import questionary
 from datetime import datetime
 from datetime import timedelta
 
-class regrid_params(object):
+class remap_params(object):
   def __init__(self, config_from_question):
      self.common_in     = config_from_question['input']['parameters']['COMMON']
      self.common_out    = config_from_question['output']['parameters']['COMMON']
@@ -30,8 +30,8 @@ class regrid_params(object):
      # load input yaml
      yaml = ruamel.yaml.YAML() 
      stream = ''
-     regrid_tpl = os.path.dirname(os.path.realpath(__file__)) + '/regrid_params.tpl'
-     with  open(regrid_tpl, 'r') as f:
+     remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
+     with  open(remap_tpl, 'r') as f:
        stream = f.read()
      config_tpl = yaml.load(stream)
 
@@ -62,22 +62,22 @@ class regrid_params(object):
      self.config = config_tpl
 
   def convert_to_yaml(self) :
-     if os.path.exists('regrid_params.yaml') :
-       overwrite = questionary.confirm("Do you want to overwrite regrid_params.yaml file?", default=False).ask()
+     if os.path.exists('remap_params.yaml') :
+       overwrite = questionary.confirm("Do you want to overwrite remap_params.yaml file?", default=False).ask()
        if not overwrite :
          while True:
-           new_name = questionary.text("What's the backup name for existing regrid_params.yaml?", default='regrid_params.yaml.1').ask()
+           new_name = questionary.text("What's the backup name for existing remap_params.yaml?", default='remap_params.yaml.1').ask()
            if os.path.exists(new_name):
               print('\n'+ new_name + ' exists, please enter a new one. \n')
            else:
-              shutil.move('regrid_params.yaml', new_name)
+              shutil.move('remap_params.yaml', new_name)
               break
      yaml = ruamel.yaml.YAML()
-     with open("regrid_params.yaml", "w") as f:
+     with open("remap_params.yaml", "w") as f:
         yaml.dump(self.config, f)
 
   def init_tags(self):
-     # copy and paste from regrid.pl
+     # copy and paste from remap.pl
      # minor change. Add "D" to the number for each group
      # BCS Tag: Fortuna-1_4
      F14  = ( 'F14',              'Fortuna-1_4',            'Fortuna-1_4_p1' )
@@ -353,7 +353,7 @@ class regrid_params(object):
     agrid_out = self.common_out['agrid']
 
     if (get_grid_kind(agrid_in.upper()) == get_grid_kind(agrid_out.upper())):
-      print(" No need to regrid anaylysis file according to air grid in and out")
+      print(" No need to remap anaylysis file according to air grid in and out")
       return
 
     anafiles=[]
@@ -625,5 +625,5 @@ if __name__ == "__main__":
   with open("raw_answers.yaml", "r") as f:
      stream = f.read()
   config = yaml.load(stream)
-  param = regrid_params(config) 
+  param = remap_params(config) 
   param.convert_to_yaml() 

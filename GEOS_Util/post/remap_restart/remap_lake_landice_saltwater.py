@@ -15,12 +15,12 @@ class lake_landice_saltwater(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
      restarts_in = self.find_rst()
      if len(restarts_in) == 0:
        return
 
-     print("\nRegridding land, landice, saltwater.....\n")
+     print("\nRemapping land, landice, saltwater.....\n")
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__)) 
@@ -158,5 +158,5 @@ class lake_landice_saltwater(object):
      return restarts_in
 
 if __name__ == '__main__' :
-   lls = lake_landice_saltwater('regrid_params.yaml')
-   lls.regrid()
+   lls = lake_landice_saltwater('remap_params.yaml')
+   lls.remap()

@@ -15,12 +15,12 @@ class upperair(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
      restarts_in = self.find_rst()
      if len(restarts_in) == 0:
        return
 
-     print( "\nRegridding upper air......\n")
+     print( "\nRemapping upper air......\n")
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__))
@@ -101,14 +101,14 @@ class upperair(object):
      if NPE <= 532: QOS = "#SBATCH --qos=debug"
      CONSTR = "#SBATCH --constraint=" + config['slurm']['partition']    
 
-     log_name = out_dir+'/regrid_upper_log'
+     log_name = out_dir+'/remap_upper_log'
 
-     regrid_template="""#!/bin/csh -xf
+     remap_template="""#!/bin/csh -xf
 #!/bin/csh -xf
 #SBATCH --account={account}
 #SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
-#SBATCH --job-name=regrid_upper
+#SBATCH --job-name=remap_upper
 #SBATCH --output={log_name}
 {QOS}
 {CONSTR}
@@ -188,15 +188,15 @@ endif
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
      
-     regrid_upper_script = regrid_template.format(Bin=bindir, account = account, \
+     remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
              QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic)
 
-     script_name = './regrid_upper.j'
+     script_name = './remap_upper.j'
 
      upper = open(script_name,'wt')
-     upper.write(regrid_upper_script)
+     upper.write(remap_upper_script)
      upper.close()
 
      interactive = os.getenv('SLURM_JOB_ID', default = None)
@@ -233,8 +233,8 @@ endif
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
        shutil.move(out_rst, out_dir+"/"+filename)
 
-     print('\n Move regrid_upper.j to ' + out_dir)
-     shutil.move('regrid_upper.j', out_dir+"/regrid_upper.j")
+     print('\n Move remap_upper.j to ' + out_dir)
+     shutil.move('remap_upper.j', out_dir+"/remap_upper.j")
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
@@ -273,5 +273,5 @@ endif
      return restarts_in
 
 if __name__ == '__main__' :
-   air = upperair('regrid_params.yaml')
-   air.regrid()
+   air = upperair('remap_params.yaml')
+   air.remap()

@@ -16,7 +16,7 @@ class catchANDcn(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
      config = self.config
      rst_dir = config['input']['shared']['rst_dir']
      model = config['input']['surface']['catch_model']
@@ -32,7 +32,7 @@ class catchANDcn(object):
      if not in_rstfile:
         return
              
-     print("\nRegridding " + model + ".....\n")
+     print("\nRemapping " + model + ".....\n")
 
      cwdir  = os.getcwd()
      bindir = os.path.dirname(os.path.realpath(__file__))
@@ -131,5 +131,5 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      os.chdir(cwdir)
 
 if __name__ == '__main__' :
-   catch = catchANDcn('regrid_params.yaml')
-   catch.regrid()
+   catch = catchANDcn('remap_params.yaml')
+   catch.remap()
