@@ -533,7 +533,7 @@ class regrid_params(object):
        xy = ogrid.upper().split('X')
        x = int(xy[0])
        if x == 1440:   bctag=bctag.replace('_Reynolds','_MERRA-2')
-       if x == 2800:  
+       if x == 2880:  
           bctag=bctag.replace('_Reynolds','_Ostia')
           bctag=bctag.replace('_M','_D')
     return bctag
