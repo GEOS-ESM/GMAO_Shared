@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
 
+- Fixed a bug in CICE4 EVP dynamic code to force symmetry across the fold in every subcycle step
+
 ### Removed
 
 ## [1.5.4] - 2022-05-03
@@ -35,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed a minor CMake issue to keep all mod files in `build/include`
-- Fixed a bug in CICE4 EVP dynamic code to force symmetry across teh fold in every subcycle step
 
 ## [1.5.3] - 2022-03-18
 
