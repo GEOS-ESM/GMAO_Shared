@@ -16,6 +16,7 @@ input:
     yyyymmddhh:
   surface:
     wemin:
+    # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: null
 
 output:

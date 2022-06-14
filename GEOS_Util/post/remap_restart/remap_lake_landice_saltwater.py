@@ -155,6 +155,13 @@ class lake_landice_saltwater(object):
         files = glob.glob(rst_dir+ '/*'+f+'*'+time+'*')
         if len(files) >0:
           restarts_in.append(files[0])
+     if (len(restarts_in) == 0) :
+        print("\n try restart file names without time stamp\n")
+        for f in surf_restarts :
+           fname = rst_dir+ '/'+f
+           if os.path.exists(fname):
+             restarts_in.append(fname)
+
      return restarts_in
 
 if __name__ == '__main__' :

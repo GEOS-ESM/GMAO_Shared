@@ -249,7 +249,11 @@ class remap_params(object):
      time = self.ymd + '_'+self.hh
      files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
      if len(files) ==0 :
-        return
+        fname = rst_dir +'/fvcore_internal_rst'
+        if os.path.exists(fname) :
+          files.append(fname)
+        else:
+          return
      fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
      cmd = fvrst + files[0]
      print(cmd +'\n')
@@ -533,7 +537,7 @@ class remap_params(object):
        xy = ogrid.upper().split('X')
        x = int(xy[0])
        if x == 1440:   bctag=bctag.replace('_Reynolds','_MERRA-2')
-       if x == 2800:  
+       if x == 2880:  
           bctag=bctag.replace('_Reynolds','_Ostia')
           bctag=bctag.replace('_M','_D')
     return bctag
@@ -546,7 +550,11 @@ class remap_params(object):
      time = self.ymd + '_'+ self.hh
      files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
      if len(files) == 0 :
-       return config_tpl
+       fname_ = rst_dir +'/fvcore_internal_rst'
+       if os.path.exists(fname_) :
+         files.append(fname_)
+       else:
+         return config_tpl
      # get expid
      fname = os.path.basename(files[0])
      expid = fname.split('fvcore')[0]
@@ -594,14 +602,23 @@ class remap_params(object):
     rst_dir = self.common_in['rst_dir'] + '/'
     time = self.ymd + '_'+ self.hh
     files = glob.glob(rst_dir +'/*catch_*'+time+'*')
+    if (len(files)== 0) :
+       files = glob.glob(rst_dir +'/*catch_*')
+
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catch'
 
     files = glob.glob(rst_dir +'/*catchcnclm40_*'+time+'*')
+    if (len(files)== 0) :
+       files = glob.glob(rst_dir +'/*catchcnclm40_*')
+
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catchcnclm40'
 
     files = glob.glob(rst_dir +'/*catchcnclm45_*'+time+'*')
+    if (len(files)== 0) :
+       files = glob.glob(rst_dir +'/*catchcnclm45_*')
+
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catchcnclm45'
 

@@ -21,7 +21,9 @@ def has_fvcore(x):
   if len(files) ==1 :
     return True
   else:
-    print('\nDo not have fvcore for this date\n')
+    print('\nDo not have fvcore for this date\n try "fvcore_internal_rst"')
+    if os.path.exists(x['rst_dir']+'/fvcore_internal_rst'):
+       return True 
     return False
 
 
