@@ -554,7 +554,7 @@ class remap_params(object):
   def options_for_slurm(self, config_tpl):
     config_tpl['slurm']['account'] = self.slurm_options['account']
     config_tpl['slurm']['qos'] = self.slurm_options['qos']
-    config_tpl['slurm']['partition'] = self.slurm_options['partition']
+    config_tpl['slurm']['constraint'] = self.slurm_options['constraint']
     return config_tpl
 
   def params_for_surface(self, config_tpl):

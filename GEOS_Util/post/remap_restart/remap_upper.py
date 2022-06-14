@@ -118,7 +118,7 @@ class upperair(object):
 
      QOS = "#SBATCH --qos="+config['slurm']['qos']
      if NPE > 532: QOS = "###" + QOS
-     CONSTR = "#SBATCH --constraint=" + config['slurm']['partition']    
+     CONSTR = "#SBATCH --constraint=" + config['slurm']['constraint']    
 
      log_name = out_dir+'/remap_upper_log'
 

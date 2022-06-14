@@ -340,9 +340,9 @@ def ask_slurm_options():
         },
         {
             "type": "select",
-            "name": "partition",
-            "message": "partition?",
-            "choices": ['hasw', 'sky'],
+            "name": "constraint",
+            "message": "constraint?",
+            "choices": ['hasw', 'sky', 'cas'],
         },
    ]
    return questionary.prompt(questions)
