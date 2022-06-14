@@ -22,7 +22,7 @@ class remap_params(object):
      #self.ana_in   = config_from_question['input']['parameters']['ANALYSIS']
      self.ana_out  = config_from_question['output']['parameters']['ANALYSIS']
 
-     self.init_time_and_grid()
+     self.init_time()
      self.init_tags()
      self.init_merra2()
 
@@ -42,6 +42,7 @@ class remap_params(object):
      config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
 
+     config_tpl['output']['air']['nlevel']     = self.upper_out.get('nlevel')
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
      config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
      config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
@@ -235,7 +236,7 @@ class remap_params(object):
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
-  def init_time_and_grid(self):
+  def init_time(self):
      ymdh = self.common_in.get('yyyymmddhh')
      self.yyyymm = ymdh[0:6]
      self.yyyy = ymdh[0:4]  
@@ -243,32 +244,6 @@ class remap_params(object):
      self.dd   = ymdh[6:8]  
      self.hh   = ymdh[8:10]  
      self.ymd  = ymdh[0:8]  
-
-     self.agrid_ = ''
-     rst_dir = self.common_in['rst_dir'] + '/'
-     time = self.ymd + '_'+self.hh
-     files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
-     if len(files) ==0 :
-        fname = rst_dir +'/fvcore_internal_rst'
-        if os.path.exists(fname) :
-          files.append(fname)
-        else:
-          return
-     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-     cmd = fvrst + files[0]
-     print(cmd +'\n')
-     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-     (output, err) = p.communicate()
-     p_status = p.wait()
-     ss = output.decode().split()
-     self.agrid_ = "C"+ss[0] # save for air parameter
-     lat = int(ss[0])
-     lon = int(ss[1])
-     if (lon != lat*6) :
-        sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
-     ymdh_ = str(ss[3]) + str(ss[4])[0:2]
-     if (ymdh_ != ymdh) :
-        print("Warning: The date in fvcore is different from the date you input\n")
 
   def init_merra2(self):
     def get_grid_kind(grid):
@@ -553,18 +528,17 @@ class remap_params(object):
        fname_ = rst_dir +'/fvcore_internal_rst'
        if os.path.exists(fname_) :
          files.append(fname_)
-       else:
-         return config_tpl
-     # get expid
-     fname = os.path.basename(files[0])
-     expid = fname.split('fvcore')[0]
-     config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
 
-     config_tpl['input']['shared']['agrid']  = self.agrid_
-     self.common_in['agrid'] = self.agrid_
+     # get expid
+     if (len(files) >0) : 
+        fname = os.path.basename(files[0])
+        expid = fname.split('fvcore')[0]
+        config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
+
+     agrid_ = self.common_in['agrid']
      if self.common_in['ogrid'] == 'CS' :
-        config_tpl['input']['shared']['ogrid']  = self.agrid_ 
-        self.common_in['ogrid'] = self.agrid_
+        config_tpl['input']['shared']['ogrid']  = agrid_ 
+        self.common_in['ogrid'] = agrid_
         
      ogrid = config_tpl['input']['shared']['ogrid']
      tagout = self.common_out['tag']
@@ -574,8 +548,6 @@ class remap_params(object):
         config_tpl['input']['air']['drymass'] = 0
         if tagrank >=12 :
           config_tpl['input']['air']['drymass'] = 1
-
-     config_tpl['output']['air']['nlevel'] = self.upper_out['nlevel']
 
      return config_tpl
 
@@ -595,7 +567,7 @@ class remap_params(object):
        config_tpl['output']['surface']['surflay'] = 50.
     if tagrank >= self.tagsRank["Icarus_Reynolds"]:
        config_tpl['output']['surface']['split_saltwater'] = True
-    config_tpl['output']['surface']['zoom']= self.surf_in['zoom']
+    config_tpl['input']['surface']['zoom']= self.surf_in['zoom']
     config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
     config_tpl['output']['surface']['wemin']= self.surf_out['wemout']
 

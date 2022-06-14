@@ -133,7 +133,7 @@ class analysis(object):
      anasat = glob.glob(rst_dir + '/*ana_satb*')
      traks= glob.glob(rst_dir + '/*.trak.GDA.rst*')
      analysis_in = bkgs + sfcs + traks + anasat
-     return analysis_in
+     return list(dict.fromkeys(analysis_in))
 
 if __name__ == '__main__' :
    ana = analysis('remap_params.yaml')

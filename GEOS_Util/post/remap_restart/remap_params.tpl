@@ -15,6 +15,7 @@ input:
     rst_dir:
     yyyymmddhh:
   surface:
+    zoom:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: null
@@ -29,7 +30,6 @@ output:
   air:
     nlevel:
   surface:
-    zoom:
     split_saltwater: false
     surflay: 20.
     wemin:

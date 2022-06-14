@@ -14,18 +14,20 @@ import shutil
 import questionary
 import glob
 
-def has_fvcore(x):
+def fvcore_name(x):
   ymdh = x['yyyymmddhh']
   time = ymdh[0:8] + '_'+ymdh[8:10]
   files = glob.glob(x['rst_dir']+'/*fvcore_*'+time+'*')
   if len(files) ==1 :
-    return True
+    fname = files[0]
+    print('\nFound ' + fname) 
+    return fname
   else:
-    print('\nDo not have fvcore for this date\n try "fvcore_internal_rst"')
-    if os.path.exists(x['rst_dir']+'/fvcore_internal_rst'):
-       return True 
+    fname = x['rst_dir']+'/fvcore_internal_rst'
+    if os.path.exists(fname):
+       print('\nFound ' + fname) 
+       return fname
     return False
-
 
 def ask_common_in():
    questions = [
@@ -52,7 +54,7 @@ def ask_common_in():
             "message": "Enter input atmospheric grid: \n C12   C180  C1000  \n C24   C360  C1440 \n C48   C500  C2880 \n C90   C720  C5760 \n ",
             "default": 'C360',
             # if it is merra-2 or has_fvcore, agrid is deduced
-            "when": lambda x: not x['MERRA-2'] and not has_fvcore(x),
+            "when": lambda x: not x['MERRA-2'] and not fvcore_name(x),
         },
         {
             "type": "select",
@@ -159,12 +161,6 @@ def ask_common_out():
             "message": "Enter GCM or DAS tag for new restarts: \n \
 Sample GCM tags \n \
 --------------- \n \
-F14   : Fortuna-1_4  .........  Fortuna-1_4_p1 \n \
-F20   : Fortuna-2_0  .........  Fortuna-2_0 \n \
-F21   : Fortuna-2_1  .........  Fortuna-2_5_pp2 \n \
-G10   : Ganymed-1_0  .........  Ganymed-1_0_BETA4 \n \
-G10p  : Ganymed-1_0_p1  ......  Ganymed-1_0_p6 \n \
-G20   : Ganymed-2_0  .........  Ganymed-2_1_p6 \n \
 G30   : Ganymed-3_0  .........  Ganymed-3_0_p1 \n \
 G40   : Ganymed-4_0  .........  Heracles-5_4_p3 \n \
 ICA   : Icarus  ..............  Jason \n \
@@ -174,12 +170,6 @@ GITNL : 10.19  ...............  10.23 \n \
 \n \
 Sample DAS tags \n \
 --------------- \n \
-214  : GEOSdas-2_1_4  .......  GEOSdas-2_1_4-m4 \n \
-540  : GEOSadas-5_4_0  ......  GEOSadas-5_5_3 \n \
-561  : GEOSadas-5_6_1  ......  GEOSadas-5_7_3_p2 \n \
-580  : GEOSadas-5_8_0  ......  GEOSadas-5_9_1 \n \
-591p : GEOSadas-5_9_1_p1  ...  GEOSadas-5_9_1_p9 \n \
-5A0  : GEOSadas-5_10_0  .....  GEOSadas-5_10_0_p1 \n \
 5B0  : GEOSadas-5_10_0_p2  ..  GEOSadas-5_11_0 \n \
 512  : GEOSadas-5_12_2  .....  GEOSadas-5_16_5\n \
 517  : GEOSadas-5_17_0  .....  GEOSadas-5_24_0_p1\n \
@@ -256,6 +246,31 @@ def ask_surface_in(common_in):
    wemin_default = '26'
    tag = common_in.get('tag')
    if tag in ['INL','GITNL', '525'] : wemin_default = '13'
+
+   zoom_default = '8'   
+   fvcore = fvcore_name(common_in)
+   if fvcore :
+      fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
+      cmd = fvrst + fvcore
+      print(cmd +'\n')
+      p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+      (output, err) = p.communicate()
+      p_status = p.wait()
+      ss = output.decode().split()
+      common_in['agrid'] = "C"+ss[0] # save for air parameter
+      lat = int(ss[0])
+      lon = int(ss[1])
+      if (lon != lat*6) :
+         sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
+      ymdh  = common_in.get('yyyymmddhh')
+      ymdh_ = str(ss[3]) + str(ss[4])[0:2]
+      if (ymdh_ != ymdh) :
+         print("Warning: The date in fvcore is different from the date you input\n")
+      zoom = lat /90.0
+      zoom_default = str(int(zoom))
+      if zoom < 1 : zoom_default = '1'
+      if zoom > 8 : zoom_default = '8'
+      
    questions = [
         {
             "type": "text",
@@ -267,7 +282,7 @@ def ask_surface_in(common_in):
             "type": "text",
             "name": "zoom",
             "message": "What is value of zoom [1-8]?",
-            "default": '8'
+            "default": zoom_default
         },
    ]
    return questionary.prompt(questions)

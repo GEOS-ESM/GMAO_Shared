@@ -83,7 +83,7 @@ class lake_landice_saltwater(object):
      shutil.copy(out_tile_file, out_til)
 
      exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
-     zoom = config['output']['surface']['zoom']
+     zoom = config['input']['surface']['zoom']
 
      if (saltwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater + ' 0 ' + str(zoom)
