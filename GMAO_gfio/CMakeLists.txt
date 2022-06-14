@@ -46,9 +46,9 @@ include_directories (${include_${this}})
 
 if (USE_F2PY)
    if (precision STREQUAL "r4")
-      find_package(F2PY2)
-      if (F2PY2_FOUND)
-         esma_add_f2py2_module(GFIO_ SOURCES GFIO_py.F90
+      find_package(F2PY3)
+      if (F2PY3_FOUND)
+         esma_add_f2py3_module(GFIO_ SOURCES GFIO_py.F90
             DESTINATION lib/Python
             ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
             gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
