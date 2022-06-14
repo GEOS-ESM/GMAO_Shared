@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed a minor CMake issue to keep all mod files in `build/include`
+- Fixed a bug in CICE4 EVP dynamic code to force symmetry across teh fold in every subcycle step
 
 ## [1.5.3] - 2022-03-18
 
