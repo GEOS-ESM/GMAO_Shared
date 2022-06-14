@@ -428,7 +428,7 @@ class GFIO(object):
         """Closes a GFIO file."""
         if self.fid is not None:
             rc = gfioclose(self.fid)
-	    self.fid=None
+        self.fid=None
 
 #---
     def __del__(self):
@@ -645,7 +645,7 @@ class GFIOctl(object):
         self.gfio = gfio
         v = gfio.interp(vname,lon,lat,nymd=nymd,nhms=nhms,
                         algorithm=algorithm,**kwds)
-	if Transpose: v = v.T  # transpose to (nobs,km)
+        if Transpose: v = v.T  # transpose to (nobs,km)
 
         return v
 
@@ -695,7 +695,7 @@ class GFIOctl(object):
                 v = self.interpXY(vname, lon[i], lat[i],dtime=now,
 				  Transpose=True, # shape will be (nobs,km)
 				  squeeze=False,algorithm=algorithm,**kwopts)
-		shp = list(v.shape)
+                shp = list(v.shape)
             else:
                 v = None
             V.append(v)
@@ -722,11 +722,11 @@ class GFIOctl(object):
                 v[j] = (1-a) * v1[j] + a * v2[j]
             n += 1
 
-	if Transpose == False: v = v.T # back to GFIO's (km,nobs)
+        if Transpose == False: v = v.T # back to GFIO's (km,nobs)
         if squeeze == True:    v = v.squeeze()
 
 
-	return v
+        return v
 
 #---
     def sampleVars(self, lon, lat, tyme, npzFile=None, onlyVars=None,
