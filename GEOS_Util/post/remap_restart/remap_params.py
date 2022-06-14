@@ -11,7 +11,7 @@ import questionary
 from datetime import datetime
 from datetime import timedelta
 
-class regrid_params(object):
+class remap_params(object):
   def __init__(self, config_from_question):
      self.common_in     = config_from_question['input']['parameters']['COMMON']
      self.common_out    = config_from_question['output']['parameters']['COMMON']
@@ -22,7 +22,7 @@ class regrid_params(object):
      #self.ana_in   = config_from_question['input']['parameters']['ANALYSIS']
      self.ana_out  = config_from_question['output']['parameters']['ANALYSIS']
 
-     self.init_time_and_grid()
+     self.init_time()
      self.init_tags()
      self.init_merra2()
 
@@ -30,8 +30,8 @@ class regrid_params(object):
      # load input yaml
      yaml = ruamel.yaml.YAML() 
      stream = ''
-     regrid_tpl = os.path.dirname(os.path.realpath(__file__)) + '/regrid_params.tpl'
-     with  open(regrid_tpl, 'r') as f:
+     remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
+     with  open(remap_tpl, 'r') as f:
        stream = f.read()
      config_tpl = yaml.load(stream)
 
@@ -42,6 +42,7 @@ class regrid_params(object):
      config_tpl['input']['shared']['expid']    = self.common_in.get('expid')
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
 
+     config_tpl['output']['air']['nlevel']     = self.upper_out.get('nlevel')
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
      config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
      config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
@@ -62,22 +63,22 @@ class regrid_params(object):
      self.config = config_tpl
 
   def convert_to_yaml(self) :
-     if os.path.exists('regrid_params.yaml') :
-       overwrite = questionary.confirm("Do you want to overwrite regrid_params.yaml file?", default=False).ask()
+     if os.path.exists('remap_params.yaml') :
+       overwrite = questionary.confirm("Do you want to overwrite remap_params.yaml file?", default=False).ask()
        if not overwrite :
          while True:
-           new_name = questionary.text("What's the backup name for existing regrid_params.yaml?", default='regrid_params.yaml.1').ask()
+           new_name = questionary.text("What's the backup name for existing remap_params.yaml?", default='remap_params.yaml.1').ask()
            if os.path.exists(new_name):
               print('\n'+ new_name + ' exists, please enter a new one. \n')
            else:
-              shutil.move('regrid_params.yaml', new_name)
+              shutil.move('remap_params.yaml', new_name)
               break
      yaml = ruamel.yaml.YAML()
-     with open("regrid_params.yaml", "w") as f:
+     with open("remap_params.yaml", "w") as f:
         yaml.dump(self.config, f)
 
   def init_tags(self):
-     # copy and paste from regrid.pl
+     # copy and paste from remap.pl
      # minor change. Add "D" to the number for each group
      # BCS Tag: Fortuna-1_4
      F14  = ( 'F14',              'Fortuna-1_4',            'Fortuna-1_4_p1' )
@@ -235,7 +236,7 @@ class regrid_params(object):
      self.bcbase['discover_lt']  = "/discover/nobackup/ltakacs/bcs"
      self.bcbase['discover_couple']  = "/discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs"
 
-  def init_time_and_grid(self):
+  def init_time(self):
      ymdh = self.common_in.get('yyyymmddhh')
      self.yyyymm = ymdh[0:6]
      self.yyyy = ymdh[0:4]  
@@ -243,28 +244,6 @@ class regrid_params(object):
      self.dd   = ymdh[6:8]  
      self.hh   = ymdh[8:10]  
      self.ymd  = ymdh[0:8]  
-
-     self.agrid_ = ''
-     rst_dir = self.common_in['rst_dir'] + '/'
-     time = self.ymd + '_'+self.hh
-     files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
-     if len(files) ==0 :
-        return
-     fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
-     cmd = fvrst + files[0]
-     print(cmd +'\n')
-     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-     (output, err) = p.communicate()
-     p_status = p.wait()
-     ss = output.decode().split()
-     self.agrid_ = "C"+ss[0] # save for air parameter
-     lat = int(ss[0])
-     lon = int(ss[1])
-     if (lon != lat*6) :
-        sys.exit('This is not a cubed-sphere grid fvcore restart. Please contact SI team')
-     ymdh_ = str(ss[3]) + str(ss[4])[0:2]
-     if (ymdh_ != ymdh) :
-        print("Warning: The date in fvcore is different from the date you input\n")
 
   def init_merra2(self):
     def get_grid_kind(grid):
@@ -353,7 +332,7 @@ class regrid_params(object):
     agrid_out = self.common_out['agrid']
 
     if (get_grid_kind(agrid_in.upper()) == get_grid_kind(agrid_out.upper())):
-      print(" No need to regrid anaylysis file according to air grid in and out")
+      print(" No need to remap anaylysis file according to air grid in and out")
       return
 
     anafiles=[]
@@ -546,17 +525,20 @@ class regrid_params(object):
      time = self.ymd + '_'+ self.hh
      files = glob.glob(rst_dir +'/*fvcore_*'+time+'*')
      if len(files) == 0 :
-       return config_tpl
-     # get expid
-     fname = os.path.basename(files[0])
-     expid = fname.split('fvcore')[0]
-     config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
+       fname_ = rst_dir +'/fvcore_internal_rst'
+       if os.path.exists(fname_) :
+         files.append(fname_)
 
-     config_tpl['input']['shared']['agrid']  = self.agrid_
-     self.common_in['agrid'] = self.agrid_
+     # get expid
+     if (len(files) >0) : 
+        fname = os.path.basename(files[0])
+        expid = fname.split('fvcore')[0]
+        config_tpl['input']['shared']['expid'] = expid[0:-1] #remove the last '.'
+
+     agrid_ = self.common_in['agrid']
      if self.common_in['ogrid'] == 'CS' :
-        config_tpl['input']['shared']['ogrid']  = self.agrid_ 
-        self.common_in['ogrid'] = self.agrid_
+        config_tpl['input']['shared']['ogrid']  = agrid_ 
+        self.common_in['ogrid'] = agrid_
         
      ogrid = config_tpl['input']['shared']['ogrid']
      tagout = self.common_out['tag']
@@ -566,8 +548,6 @@ class regrid_params(object):
         config_tpl['input']['air']['drymass'] = 0
         if tagrank >=12 :
           config_tpl['input']['air']['drymass'] = 1
-
-     config_tpl['output']['air']['nlevel'] = self.upper_out['nlevel']
 
      return config_tpl
 
@@ -587,21 +567,30 @@ class regrid_params(object):
        config_tpl['output']['surface']['surflay'] = 50.
     if tagrank >= self.tagsRank["Icarus_Reynolds"]:
        config_tpl['output']['surface']['split_saltwater'] = True
-    config_tpl['output']['surface']['zoom']= self.surf_in['zoom']
+    config_tpl['input']['surface']['zoom']= self.surf_in['zoom']
     config_tpl['input']['surface']['wemin']= self.surf_in['wemin']
     config_tpl['output']['surface']['wemin']= self.surf_out['wemout']
 
     rst_dir = self.common_in['rst_dir'] + '/'
     time = self.ymd + '_'+ self.hh
     files = glob.glob(rst_dir +'/*catch_*'+time+'*')
+    if (len(files)== 0) :
+       files = glob.glob(rst_dir +'/*catch_*')
+
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catch'
 
     files = glob.glob(rst_dir +'/*catchcnclm40_*'+time+'*')
+    if (len(files)== 0) :
+       files = glob.glob(rst_dir +'/*catchcnclm40_*')
+
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catchcnclm40'
 
     files = glob.glob(rst_dir +'/*catchcnclm45_*'+time+'*')
+    if (len(files)== 0) :
+       files = glob.glob(rst_dir +'/*catchcnclm45_*')
+
     if (len(files) > 0) :
         config_tpl['input']['surface']['catch_model'] = 'catchcnclm45'
 
@@ -625,5 +614,5 @@ if __name__ == "__main__":
   with open("raw_answers.yaml", "r") as f:
      stream = f.read()
   config = yaml.load(stream)
-  param = regrid_params(config) 
+  param = remap_params(config) 
   param.convert_to_yaml() 

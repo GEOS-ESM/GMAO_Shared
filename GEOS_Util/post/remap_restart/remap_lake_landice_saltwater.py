@@ -15,12 +15,12 @@ class lake_landice_saltwater(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
      restarts_in = self.find_rst()
      if len(restarts_in) == 0:
        return
 
-     print("\nRegridding land, landice, saltwater.....\n")
+     print("\nRemapping land, landice, saltwater.....\n")
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__)) 
@@ -83,7 +83,7 @@ class lake_landice_saltwater(object):
      shutil.copy(out_tile_file, out_til)
 
      exe = bindir + '/mk_LakeLandiceSaltRestarts.x '
-     zoom = config['output']['surface']['zoom']
+     zoom = config['input']['surface']['zoom']
 
      if (saltwater):
        cmd = exe + out_til + ' ' + in_til + ' InData/'+ saltwater + ' 0 ' + str(zoom)
@@ -155,8 +155,15 @@ class lake_landice_saltwater(object):
         files = glob.glob(rst_dir+ '/*'+f+'*'+time+'*')
         if len(files) >0:
           restarts_in.append(files[0])
+     if (len(restarts_in) == 0) :
+        print("\n try restart file names without time stamp\n")
+        for f in surf_restarts :
+           fname = rst_dir+ '/'+f
+           if os.path.exists(fname):
+             restarts_in.append(fname)
+
      return restarts_in
 
 if __name__ == '__main__' :
-   lls = lake_landice_saltwater('regrid_params.yaml')
-   lls.regrid()
+   lls = lake_landice_saltwater('remap_params.yaml')
+   lls.remap()

@@ -23,7 +23,7 @@ class analysis(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
      config = self.config
      bkg = config['output']['analysis']['bkg']
      if ( not bkg ): return
@@ -33,7 +33,7 @@ class analysis(object):
        print("\n There are no analysis files. \n")
        return
 
-     print("\n Regrid or copy analysis files...\n")
+     print("\n Remapping or copying analysis files...\n")
 
      cwdir  = os.getcwd()
      bindir = os.path.dirname(os.path.realpath(__file__))
@@ -133,8 +133,8 @@ class analysis(object):
      anasat = glob.glob(rst_dir + '/*ana_satb*')
      traks= glob.glob(rst_dir + '/*.trak.GDA.rst*')
      analysis_in = bkgs + sfcs + traks + anasat
-     return analysis_in
+     return list(dict.fromkeys(analysis_in))
 
 if __name__ == '__main__' :
-   ana = analysis('regrid_params.yaml')
-   ana.regrid()
+   ana = analysis('remap_params.yaml')
+   ana.remap()

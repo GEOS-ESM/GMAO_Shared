@@ -15,12 +15,34 @@ class upperair(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
+     self.air_restarts =["fvcore_internal_rst"      , 
+                    "moist_internal_rst"       ,
+                    "agcm_import_rst"          ,
+                    "agcm_internal_rst"        ,
+                    "carma_internal_rst"       ,
+                    "achem_internal_rst"   ,
+                    "geoschemchem_internal_rst",
+                    "gmichem_internal_rst"     ,
+                    "gocart_internal_rst"      ,
+                    "hemco_internal_rst"       ,
+                    "mam_internal_rst"         ,
+                    "matrix_internal_rst"      ,
+                    "pchem_internal_rst"       ,
+                    "stratchem_internal_rst"   ,
+                    "ss_internal_rst"          ,
+                    "du_internal_rst"          ,
+                    "cabr_internal_rst"        ,
+                    "cabc_internal_rst"        ,
+                    "caoc_internal_rst"        ,
+                    "ni_internal_rst"          ,
+                    "su_internal_rst"          ,
+                    "tr_internal_rst"]
      restarts_in = self.find_rst()
      if len(restarts_in) == 0:
        return
 
-     print( "\nRegridding upper air......\n")
+     print( "\nRemapping upper air......\n")
      config = self.config
      cwdir  = os.getcwd()
      bindir  = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +62,7 @@ class upperair(object):
      print( "cd " + tmpdir)
      os.chdir(tmpdir)
 
-     print('\nUpper air restart file names changed from "_rst" to "_restart_in" \n')
+     print('\nUpper air restart file names link from "_rst" to "_restart_in" \n')
 
      types = 'z.bin'
      type_str = subprocess.check_output(['file','-b', restarts_in[0]])
@@ -51,11 +73,8 @@ class upperair(object):
      suffix = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]+ types
      
      for rst in restarts_in :
-       fs = os.path.basename(rst).split('.')
-       f = fs[0]
-       if (len(fs) >=2): f = fs[1] 
-       f = f.replace('_rst','_restart_in')
-       cmd = '/bin/cp  ' + rst + ' ' + f
+       f = os.path.basename(rst).split('_rst')[0].split('.')[-1]+'_restart_in'
+       cmd = '/bin/ln -s  ' + rst + ' ' + f
        print('\n'+cmd)
        subprocess.call(shlex.split(cmd))
  
@@ -101,14 +120,14 @@ class upperair(object):
      if NPE <= 532: QOS = "#SBATCH --qos=debug"
      CONSTR = "#SBATCH --constraint=" + config['slurm']['partition']    
 
-     log_name = out_dir+'/regrid_upper_log'
+     log_name = out_dir+'/remap_upper_log'
 
-     regrid_template="""#!/bin/csh -xf
+     remap_template="""#!/bin/csh -xf
 #!/bin/csh -xf
 #SBATCH --account={account}
 #SBATCH --time=1:00:00
 #SBATCH --ntasks={NPE}
-#SBATCH --job-name=regrid_upper
+#SBATCH --job-name=remap_upper
 #SBATCH --output={log_name}
 {QOS}
 {CONSTR}
@@ -188,15 +207,15 @@ endif
      hydrostatic = config['input']['air']['hydrostatic']
      nlevel = config['output']['air']['nlevel']
      
-     regrid_upper_script = regrid_template.format(Bin=bindir, account = account, \
+     remap_upper_script = remap_template.format(Bin=bindir, account = account, \
              out_dir = out_dir, log_name = log_name, drymassFLG = drymassFLG, \
              imout = imout, nwrit = nwrit, NPE = NPE, \
              QOS = QOS,CONSTR = CONSTR, nlevel = nlevel, hydrostatic = hydrostatic)
 
-     script_name = './regrid_upper.j'
+     script_name = './remap_upper.j'
 
      upper = open(script_name,'wt')
-     upper.write(regrid_upper_script)
+     upper.write(remap_upper_script)
      upper.close()
 
      interactive = os.getenv('SLURM_JOB_ID', default = None)
@@ -233,45 +252,29 @@ endif
        print('\n Move ' + out_rst + ' to ' + out_dir+"/"+filename)
        shutil.move(out_rst, out_dir+"/"+filename)
 
-     print('\n Move regrid_upper.j to ' + out_dir)
-     shutil.move('regrid_upper.j', out_dir+"/regrid_upper.j")
+     print('\n Move remap_upper.j to ' + out_dir)
+     shutil.move('remap_upper.j', out_dir+"/remap_upper.j")
      print('cd ' + cwdir)
      os.chdir(cwdir)
 
   def find_rst(self):
-     air_restarts =["fvcore_internal_rst"      , 
-                    "moist_internal_rst"       ,
-                    "agcm_import_rst"          ,
-                    "agcm_internal_rst"        ,
-                    "carma_internal_rst"       ,
-                    "achem_internal_rst"   ,
-                    "geoschemchem_internal_rst",
-                    "gmichem_internal_rst"     ,
-                    "gocart_internal_rst"      ,
-                    "hemco_internal_rst"       ,
-                    "mam_internal_rst"         ,
-                    "matrix_internal_rst"      ,
-                    "pchem_internal_rst"       ,
-                    "stratchem_internal_rst"   ,
-                    "ss_internal_rst"          ,
-                    "du_internal_rst"          ,
-                    "cabr_internal_rst"        ,
-                    "cabc_internal_rst"        ,
-                    "caoc_internal_rst"        ,
-                    "ni_internal_rst"          ,
-                    "su_internal_rst"          ,
-                    "tr_internal_rst"]
-
      rst_dir = self.config['input']['shared']['rst_dir']
      yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
      time = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]
      restarts_in=[]
-     for f in air_restarts :
+     for f in self.air_restarts :
         files = glob.glob(rst_dir+ '/*'+f+'*'+time+'*')
         if len(files) >0:
           restarts_in.append(files[0])
+     if (len(restarts_in) == 0) :
+        print("\n try restart file names without time stamp\n")
+        for f in self.air_restarts :
+           fname = rst_dir+ '/'+f
+           if os.path.exists(fname):
+             restarts_in.append(fname)
+        
      return restarts_in
 
 if __name__ == '__main__' :
-   air = upperair('regrid_params.yaml')
-   air.regrid()
+   air = upperair('remap_params.yaml')
+   air.remap()

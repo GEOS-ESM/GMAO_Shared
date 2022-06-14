@@ -16,23 +16,22 @@ class catchANDcn(object):
         stream = f.read()
      self.config = yaml.load(stream)
 
-  def regrid(self):
+  def remap(self):
      config = self.config
      rst_dir = config['input']['shared']['rst_dir']
      model = config['input']['surface']['catch_model']
      in_rstfile = ''
      yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
      time = yyyymmddhh_[0:8]+'_'+yyyymmddhh_[8:10]
-     if model == 'catch' :
-        in_rstfile = glob.glob(rst_dir+'/*catch_*'+time+'*')[0]
-     if model == 'catchcnclm40' :
-        in_rstfile = glob.glob(rst_dir+'/*catchcnclm40_*'+time+'*')[0]
-     if model == 'catchcnclm45' :
-        in_rstfile = glob.glob(rst_dir+'/*catchcnclm45_*'+time+'*')[0]
-     if not in_rstfile:
+     in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*'+time+'*')
+     if len(in_rstfiles) == 0:
+        print('\n try catchXX file without time stamp')
+        in_rstfiles = glob.glob(rst_dir+'/*'+model+'_*')
+     if len(in_rstfiles) == 0:
         return
+     in_rstfile = in_rstfiles[0]  
              
-     print("\nRegridding " + model + ".....\n")
+     print("\nRemapping " + model + ".....\n")
 
      cwdir  = os.getcwd()
      bindir = os.path.dirname(os.path.realpath(__file__))
@@ -131,5 +130,5 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      os.chdir(cwdir)
 
 if __name__ == '__main__' :
-   catch = catchANDcn('regrid_params.yaml')
-   catch.regrid()
+   catch = catchANDcn('remap_params.yaml')
+   catch.remap()
