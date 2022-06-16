@@ -32,6 +32,7 @@
 !  09Oct2014  Weir      Begin adding trace gas support
 !  20May2017  Todling   Add exclusion flag X_ADV_LOCAL
 !  25May2018  wargan    added OMPS
+!  03Mar2022  Jin J./ElAkkraoui  Added AMSRE 
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -318,7 +319,7 @@
      8                 'no impact due to advected local '/)
 
 
-      integer, parameter :: nsats = 51
+      integer, parameter :: nsats = 53
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -336,7 +337,8 @@
      .                 'tmi             ', 'gmi             ', 'acos            ',
      .                 'mopitt          ', 'cris-fsr        ', 'ompslpuv        ', 
      .                 'ompslpvis       ', 'ompsnm          ', 'ompsnp          ',
-     .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        '/)
+     .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
+     .                 'amsre           ', 'ompslp_g'/)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will
@@ -358,8 +360,9 @@
      .                 325               , 330               , 335               ,
      .                 705               , 706               , 998               ,
      .                 999               , 940               , 335               ,
-     .                 336               , 427               , 437               ,
-     .                 550               , 428		     , 438              /)
+     .                 336               , 337               , 427               , 
+     .                 437               , 550               , 428               ,
+     .                 438               , 546               /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/
