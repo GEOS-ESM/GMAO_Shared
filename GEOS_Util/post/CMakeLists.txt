@@ -163,3 +163,5 @@ install(PROGRAMS
   ${CMAKE_CURRENT_BINARY_DIR}/3CH.j
   DESTINATION post
   )
+
+add_subdirectory(tests)
