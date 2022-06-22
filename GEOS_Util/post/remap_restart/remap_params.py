@@ -498,11 +498,18 @@ class remap_params(object):
      gridID = get_name_with_grid(ogrid_, anames, 'o')
      if len(gridID) == 0 :
        exit("cannot find the grid string: " + bcdir)
+     g = ''
+     if len(gridID) == 1 : g = gridID[0]
      if len(gridID) >=2 :
        print("find too many grid strings in " + bcdir)
        print(" gridIDs found", gridID)
-       print(" pick the first one " + gridID[0])
-     return gridID[0]
+       for g_ in gridId:
+         if g_.count('_') == 1 :
+           g = g_ 
+           #WY note, found many string in couple model
+           print(" pick the first directory with only one '_' " + g)
+           break
+     return g
 
   def get_bcTag(self, tag, ogrid):
     bctag = self.bcsTag[tag]
