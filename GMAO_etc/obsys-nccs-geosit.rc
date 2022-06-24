@@ -1,0 +1,588 @@
+#            NCCS Specific Version
+#
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#                   this is file is place-holder 
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#
+#
+# This observation system resource file database will track
+# the whereabout of observation files.
+#   It will be used by scripts require_obsys (hard check the
+# existence of observation files)
+#   and acquire_obsys (will call acquire to get files).
+#
+# Syntax:
+# -------
+# BEGIN observation_file_class => StandardName
+#   startYYYYMMDD_HHz-endYYYYMMDD_HHz incrementHHMMSS remote_file_name_template
+# END
+# Note: set "endYYYYMMDD_HHz" as "present" if new files added to system daily.
+# Note: replacing "present" (see note above) with future date, 21001231_18z
+#
+# Modification History:
+# ---------------------
+# 2002.08.01 da Silva        NCCS specific version
+# 2002.09.13 E. Yeh          Set the starting date of DAOTOVS l1c llk as 2001.12.19
+# 2002.10.07 E. Yeh          Set SSMI/TPW generic name as obsys.ssmi_tpw.f%c%c.%y4%m2%d2.ods
+# 2002.10.31 E. Yeh          Updated qscat
+# 2003.03.31 D. Kokron       Add ERS1, ECMWF, and other obs from dao_it repository and ozone
+# 2003.04.01 D. Kokron       Add ssmi_speed_llk class
+# 2003.04.01 D. Kokron       Extend ssmi_wentz_tpw and ssmi_tpw_llk classes with v5 tpw
+# 2003.04.01 D. Kokron       Add f15 to ssmi_wentz_tpw class
+# 2003.04.01 D. Kokron       Correct qscat class to account for missing data on 20021119
+# 2003.04.02 D. Kokron       Add conv_ncep class
+# 2003.04.02 D. Kokron       Split conv_ncep and conv_ecmwf each into two classes
+# 2003.04.03 D. Kokron       Create ssmi_tpw_v5_v4, ssmi_speed_v5_v4 classes
+# 2003.04.03 D. Kokron       Split qscat class into jpl and llk specific classes
+# 2003.07.09 Todling         Added pointers to llk GADS observations
+# 2003.07.23 C. Cruz         Added NCEP observational data
+# 2003.08.19 Todling         Split NCEP classes into classes that need to be reblocked
+# 2003.12.05 Todling         Added ref to ODS files for Terra MODIS Winds
+# 2004.04.30 Todling         Added classes for latest NCEP data files
+# 2004.07.14 Todling         Added location of NCEP's operational observations under Karki's dir
+# 2004.09.24 Todling/daSilva Added SABER Level 2B data
+# 2004.11.24 Todling         Added NCEP historic data files for G5DAS validation (200011-200112)
+# 2005.03.22 Todling         GSI-NCEP data coming from /input/dao_ops
+# 2005.04.12 Todling         Added reference to Emily Liu's version of AIRS (until OPS has them)
+# 2006.01.05 Todling         Started adding the MERRA observing system
+# 2006.01.21 E. Liu          Added SSU location for MERRA
+# 2006.02.23 Todling         Added SBUV-8 for MERRA
+# 2006.03.17 Meta/RT         Added individual obs files for MERRA for period before 20010101
+# 2006.05.17 Todling         Added gprof and tmi data; updated spssmi location
+# 2006.05.30 Todling         Added sfcbog; fixed initial dates for adpupa and sfcship; loc of GMAO/AIRS
+# 2006.06.05 Todling         Added tcvitals
+# 2006.06.21 Meta/RT         Fixes to final date of avail MERRA SSM/I radiance files
+# 2006.06.22 Todling         Updates to SBUV-8 (MERRA) per Rob and Ivanka
+# 2006.12.13 Todling         Renamed local cp of gmao airs files; "fix" to spssmi; fix to ssmit filename
+# 2007.01.16 Lucchesi/JCS    Corrected SSMI wind speed entry
+# 2007.02.01 Lucchesi/JCS    Added missing pointer for merra_ers1 data; corrected dates on trmm tmi
+#                            data; commented out tmi2 data
+# 2007.02.05 Lucchesi/JCS    Modified SBUV usage for MERRA so that there is no satellite overlap
+# 2007.03.30 Meta/JCS        Removed "prep-qc." from goesnd name
+# 2007.07.17 Stassi          Change /input -> /archive/input, /output/{user} -> /archive/u/{user}
+# 2007.07.19 Lucchesi/JCS    Changes for MERRA validation runs, e.g. CDAS replaced with "runh" data
+# 2007.10.19 Lucchesi/JCS    New SBUV-8 block
+# 2008.02.12 Lucchesi        Set transition dates from MERRA data to operational data (2006 timeframe)
+# 2008.05.20 Lucchesi        Ran Meta's program to QC out the data in the CDAS "runh" data
+# 2009.16.09 Todling         - Fix range of MSU
+#                            - Add MHS, HIRS4, NCEP-AIRS, AMSRE, GOESIMR, GEOSFV, GOME, GPSIPW, GPSRO, MTIASI
+# 2009.07.24 Meta            Added SBUV in version 8 bufr format;
+#                            Update merra conventional types for realtime processing
+# 2012.05.30 Todling         - Add temporary locations for ATM, CrIS, and SatWnd
+# 2012.12.03 Wargan/Guo      - Add MLS/OMI entries in BUFR and text data.
+# 2013.01.15 Guo             - Add aura_omieff_bufr entry
+# 2013.01.18 Wargan/Guo      - replaced aura_omieff_text with aura_omieff_nc
+# 2013.08.15 Wargan          Added mls_nc (for near real time MLS)
+# 2013.09.28 Todling         Remove reference to all ods/oms files (so-called validation obs)
+# 2013.11.06 Todling         Rename all pre-qc merra classes for consistency w/ tag (fvsetup)
+# 2013.12.04 Sienkiewicz     Change SBUV class names to be consistent with NAS obsys.rc and with OPS
+#                              - old V6 format now ncep_osbuv8_6_bufr
+#                              - current V8 format now ncep_osbuv_bufr
+# 2015.05.06 McCarty         Add entry for ISS-RapidScat
+# 2015.06.16 Wargn           Add entry for OMPS-LP
+# 2015.07.28 Sienkiewicz     End date for ncep_sptrmm_bufr
+# 2017.07.06 RT/for/Sienkiewicz Add ncep_acftpfl_bufr
+# 2020.02.13 RT/for/JJin     Add gmao_amsr2_bufr
+# 2020.06.09 Todling         Set final dates for GOESFV and CrIS as in FP
+# 2020.09.30 Mohar           Historical AVHRR (N15,16,17)
+# 2020.10.14 McCarty         COSMIC-2 single file for period before early Mar 2020
+# 2021.05.25 Wargan          Add npp_ompsnmeff_nc, npp_ompsnp_nc, aura_omieff_nc
+# 2021.06.03 RT/McCarty/RL   RO class including commencial data; max used of IASI MetopC
+# 2021.07.31 Todling         Add MLS-T for verification
+# 2021.08.18 Todling         Blacked out a few days of AIRS due to data corruption
+# 2021.12.14 Todling         Update MLST from v3/v4 to simply v5
+#
+#+BEGIN obclass data set description
+#+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
+#+  ncep_osbuv_bufr:  NCEP SBUV Data in bufr format
+#+  ncep_spssmi_bufr: NCEP SSMI Data in bufr format
+#+  ncep_sptrmm_bufr: NCEP TRMM Data in bufr format
+#+  ncep_1bamua_bufr: NCEP Satellite AMSUA Data (bufr)
+#+  ncep_1bamub_bufr: NCEP Satellite AMSUB Data (bufr)
+#+  ncep_1bhrs2_bufr: NCEP Satellite HIRS2 Data (bufr)
+#+  ncep_1bhrs3_bufr: NCEP Satellite HIRS3 Data (bufr)
+#+  ncep_1bmsu_bufr:  NCEP Satellite MSU Data (bufr)
+#+  ncep_ssmis_bufr:  NCEP SSMIS Data in bufr format
+#+  ncep_ssmit_bufr:  NCEP Satellite SSM/I Data (bufr)
+#+  ncep_prep_bufr:   NCEP Conventional Data in bufr format (ops)
+#+  ncep_mhs_bufr:    NCEP MHS bufr format
+#+  ncep_goesfv_bufr:  NCEP GEOS FV bufr format
+#+  ncep_gpsro_bufr:  NCEP GPSRO bufr format
+#+  ncep_gpsro_com_bufr:  NCEP GPSRO bufr format including period w/ commercial data
+#+  ncep_mls_bufr:    NCEP MLS bufr format
+#+  ncep_1bhrs4_bufr:  NCEP Satellite HIRS4 Data (bufr)
+#+  ncep_mtiasi_bufr:  NCEP IASI bufr format
+#+  ncep_aura_omi_bufr:	OMI Ozone from AURA in BUFR
+#+  ncep_acftpfl_bufr:	Metadata for GSI Aircraft Bias Correction
+#+  ncep_atms_bufr:    NCEP ATMS bufr format
+#+  ncep_cris_bufr:	CrIS NPP
+#+  ncep_crisfsr_bufr:	CrIS NOAA-20
+#+  ncep_satwnd_bufr:   NCEP satellite winds bufr format
+#+  ncep_sevcsr_bufr:   NCEP SEVIRI bufr format
+#+  ncep_avcsam_bufr:   NCEP AM-AVHRR bufr format
+#+  ncep_avcspm_bufr:   NCEP PM-AVHRR bufr format
+#+  gmao_amsr2_bufr:	AMSR2
+#+  gmao_gmi_bufr:     GMAO GMI/GPM bufr format
+#+  disc_airs_bufr:    GMAO AIRS bufr format
+#+  mls_nrt_nc:        GMAO MLS near-real-time (nc4 format)
+#+  npp_ompsnm_bufr:   OMPS AM bufr format
+#+  npp_ompsnp_bufr:   OMPS PM bufr format
+#+  npp_ompsnmeff_nc:  OMPS AM netcdf format
+#+  npp_ompsnp_nc:     OMPS PM netcdf format
+#+  aura_omieff_nc:    AURA OMI netcdf format
+#+  gmao_mlst_bufr:    MLS Retrieved Temperature (for verification in x-exp and FP)
+#+  merra2_cdas0_pre-qc_bufr 
+#+  merra2_cdas_pre-qc_bufr 
+#+  merra2_avhrrwnd_pre-qc_bufr
+#+  merra2_ascat_pre-qc_bufr
+#+  merra2_ers1_pre-qc_bufr
+#+  merra2_repro_ers2_pre-qc_bufr
+#+  merra2_qscat_jpl_pre-qc_bufr
+#+  merra2_wspd_pre-qc_bufr 
+#+  merra2_nmodis_pre-qc_bufr
+#+  merra2_prof_pre-qc_bufr 
+#+  merra2_cdas0_pre-qc_bufr
+#+  merra2_cdas_pre-qc_bufr 
+#+  merra2_avhrrwnd_pre-qc_bufr 
+#+  merra2_ascat_pre-qc_bufr 
+#+  merra2_ers1_pre-qc_bufr 
+#+  merra2_repro_ers2_pre-qc_bufr
+#+  merra2_qscat_jpl_pre-qc_bufr
+#+  merra2_wspd_pre-qc_bufr
+#+  merra2_nmodis_pre-qc_bufr 
+#+  merra2_prof_pre-qc_bufr
+#+  merra2_ncep_tcvitals
+#+END
+#
+
+
+# NCEP Pre-bufr conventional data
+# -------------------------------
+
+BEGIN merra2_cdas0_pre-qc_bufr => cdas.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19790101_00z-19841231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/conv/prepbufr/Y%y4/M%m2/ncep2013.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+ 19850101_00z-19970430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/conv/prepbufr_fixvai/Y%y4/M%m2/ncep2013_fixvai.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+ 19970501_00z-20001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/conv/prepbufr_fixvai_no_npn/Y%y4/M%m2/ncep2013_fixvai_no_npn.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+#19790101_00z-19841231_18z 060000 dirac:/archive/input/dao_ops/obs/reanalysis/conv/prepbufr/Y%y4/M%m2/ncep2013.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+#19850101_00z-19970430_18z 060000 dirac:/archive/input/dao_ops/obs/reanalysis/conv/prepbufr_fixvai/Y%y4/M%m2/ncep2013_fixvai.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+#19970501_00z-20001231_18z 060000 dirac:/archive/input/dao_ops/obs/reanalysis/conv/prepbufr_fixvai_no_npn/Y%y4/M%m2/ncep2013_fixvai_no_npn.gdas.prepbufr.%y4%m2%d2.t%h2z.bufr
+END
+
+BEGIN merra2_cdas_pre-qc_bufr => cdas.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 20010101_00z-20040915_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20040916_00z-20040916_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20040917_00z-20050624_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20050625_00z-20050625_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20050626_00z-20050714_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20050715_00z-20050721_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20050722_00z-20051231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+ 20060101_00z-20080915_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/conv/prepbufr/runha/Y%y4/M%m2/prepbufr.gdas_red.%y4%m2%d2%h2
+ 20080916_00z-20081231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/prepbufr_tamdarKXfix/runha/Y%y4/M%m2/prepbufr.gdas_red.%y4%m2%d2%h2
+ 20090101_00z-20111231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/prepbufr_tamdarKXfix/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+ 20120101_00z-20170330_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+ 20170331_00z-20170401_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2_M2
+ 20170402_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+#20010101_00z-20040915_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20040916_00z-20040916_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20040917_00z-20050624_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20050625_00z-20050625_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20050626_00z-20050714_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20050715_00z-20050721_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_gaps_filled_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20050722_00z-20051231_18z 060000 dirac:/archive/input/dao_ops/obs/merra/conv/prepbufr/runh_PAOB_no_land/Y%y4/M%m2/RUNH_prepbufr_%y4%m2%d2%h2
+#20060101_00z-20080915_18z 060000 dirac:/archive/input/dao_ops/ops/merra/conv/prepbufr/runha/Y%y4/M%m2/prepbufr.gdas_red.%y4%m2%d2%h2
+#20080916_00z-20081231_18z 060000 dirac:/archive/input/dao_ops/ops/reanalysis/conv/prepbufr_tamdarKXfix/runha/Y%y4/M%m2/prepbufr.gdas_red.%y4%m2%d2%h2
+#20090101_00z-20111231_18z 060000 dirac:/archive/input/dao_ops/ops/reanalysis/conv/prepbufr_tamdarKXfix/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+#20120101_00z-20170330_18z 060000 dirac:/archive/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+#20170331_00z-20170401_18z 060000 dirac:/archive/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2_M2
+#20170402_00z-21001231_18z 060000 dirac:/archive/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+END
+
+# AVHRR polar AMV data (prepbufr stream)
+BEGIN merra2_avhrrwnd_pre-qc_bufr => avhrr.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19821001_00z-20100630_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
+#19821001_00z-20100630_18z 060000 dirac:/archive/input/dao_ops/obs/reanalysis/avhrr_winds/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
+END
+# AVHRR polar AMV data (satwndbufr stream)
+BEGIN merra2_avhrr_satwnd_bufr => avhrr.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+ 20100701_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+#20100701_00z-21001231_18z 060000 dirac:/archive/input/dao_ops/obs/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+END
+
+BEGIN merra2_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
+ 20100701_00z-20150114_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+ 20150115_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd_tw.tm00.bufr_d
+#20100701_00z-20150114_18z 060000 dirac:/archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+#20150115_00z-21001231_18z 060000 dirac:/archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd_tw.tm00.bufr_d
+END
+
+
+# ASCAT Scatterometer (prepbufr)
+# -------------------
+BEGIN merra2_ascat_pre-qc_bufr => obsys.ascat.pre-qc.%y4%m2%d2_%h2z.bufr.ublk
+ 20080916_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/ascat/prepbufr/Y%y4/M%m2/ascat.%y4%m2%d2.t%h2z.prepbufr
+#20080916_00z-21001231_18z 060000 dirac:/archive/input/dao_ops/ops/reanalysis/conv/ascat/prepbufr/Y%y4/M%m2/ascat.%y4%m2%d2.t%h2z.prepbufr
+END
+
+# MERRA ERS-1 Scatterometer
+# --------------------------
+BEGIN merra2_ers1_pre-qc_bufr => obsys.ers1.pre-qc.%y4%m2%d2.t%h2z.ublk
+ 19910805_00z-19911022_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19911024_00z-19911103_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19911105_00z-19911209_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19911212_00z-19911213_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19911222_00z-19920108_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920110_00z-19920112_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920120_00z-19920201_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920301_00z-19920331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920414_00z-19920625_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920629_00z-19920719_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920724_00z-19920902_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19920904_00z-19940101_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19940103_00z-19940131_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19940406_00z-19940426_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+ 19940428_00z-19960525_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19910805_00z-19911022_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19911024_00z-19911103_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19911105_00z-19911209_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19911212_00z-19911213_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19911222_00z-19920108_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920110_00z-19920112_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920120_00z-19920201_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920301_00z-19920331_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920414_00z-19920625_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920629_00z-19920719_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920724_00z-19920902_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19920904_00z-19940101_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19940103_00z-19940131_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19940406_00z-19940426_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+#19940428_00z-19960525_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers1/prepbufr/Y%y4/M%m2/ers1.%y4%m2%d2.t%h2z.bufr
+END
+# ERS-2 data. (Original processing through 19970519.  Reprocessing after 19970519.)
+BEGIN merra2_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
+ 19960319_00z-19970519_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2/prepbufr/Y%y4/M%m2/ers2.%y4%m2%d2.t%h2z.bufr
+ 19970520_00z-20030217_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_asps20n/bufr/Y%y4/M%m2/ers2_asps20n.%y4%m2%d2.t%h2z.bufr
+ 20030813_00z-20110329_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
+#19960319_00z-19970519_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers2/prepbufr/Y%y4/M%m2/ers2.%y4%m2%d2.t%h2z.bufr
+#19970520_00z-20030217_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers2_asps20n/bufr/Y%y4/M%m2/ers2_asps20n.%y4%m2%d2.t%h2z.bufr
+#20030813_00z-20110329_18z 060000 dirac:/archive/input/dao_ops/obs/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
+END
+# MERRA Quick SCAT Data   (ms - added 2003,2004)
+# ---------------
+BEGIN merra2_qscat_jpl_pre-qc_bufr => obsys.qscat.pre-qc.%y4%m2%d2.t%h2z.ublk
+ 19990719_00z-20001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/qscat/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+ 20010101_00z-20081029_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/merra/qscat_runh/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+ 20081030_00z-20091122_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/jplqscat/bfr/jplqscat/Y%y4/M%m2/jplqscat.%y4%m2%d2%h2.bfr
+#19990719_00z-20001231_18z 060000 dirac:/archive/input/dao_ops/obs/merra/qscat/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+#20010101_00z-20081029_18z 060000 dirac:/archive/input/dao_ops/obs/merra/qscat_runh/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+#20081030_00z-20091122_18z 060000 dirac:/archive/input/dao_ops/ops/llk/jplqscat/bfr/jplqscat/Y%y4/M%m2/jplqscat.%y4%m2%d2%h2.bfr
+END
+# MERRA SSMI Wentz Speed
+BEGIN merra2_wspd_pre-qc_bufr => wentzspd.%y4%m2%d2.t%h2z.pre-qc.bufr.ublk
+ 19870709_00z-20131029_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIwind_wentz/v7/prepbufr/Y%y4/M%m2/ssmiwnd.%y4%m2%d2.%h2z.bufr
+#19870709_00z-20131029_18z 060000 dirac:/archive/input/dao_ops/ops/reanalysis/SSMIwind_wentz/v7/prepbufr/Y%y4/M%m2/ssmiwnd.%y4%m2%d2.%h2z.bufr
+END
+
+BEGIN merra2_nmodis_pre-qc_bufr => modis.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 20020701_00z-20040708_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_combined_runh/prepbufr/Y%y4/M%m2/modisw_c.%y4%m2%d2.t%h2z.bfr
+ 20040709_00z-20040930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_runh/prepbufr/Y%y4/M%m2/modisw.%y4%m2%d2.t%h2z.bfr
+#20020701_00z-20040708_18z 060000 dirac:/archive/input/dao_ops/ops/merra/modisw_combined_runh/prepbufr/Y%y4/M%m2/modisw_c.%y4%m2%d2.t%h2z.bfr
+#20040709_00z-20040930_18z 060000 dirac:/archive/input/dao_ops/ops/merra/modisw_runh/prepbufr/Y%y4/M%m2/modisw.%y4%m2%d2.t%h2z.bfr
+END
+BEGIN merra2_prof_pre-qc_bufr => prof.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19920510_00z-20001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+ 20010101_00z-20080731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler_runh/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+#19920510_00z-20001231_18z 060000 dirac:/archive/input/dao_ops/ops/merra/profiler/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+#20010101_00z-20080731_18z 060000 dirac:/archive/input/dao_ops/ops/merra/profiler_runh/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+END
+
+#--------------------------------- BELOW THIS POINT: NO PRE-QC OBSERVATIONS -----------------------------
+
+BEGIN merra2_ncep_tcvitals => tcvitals.%y4%m2%d2%h2
+ 19790101_00z-20061231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tcvitals/text/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.syndata.tcvitals
+ 20070101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/tcvitals/text/TCVITALS/Y%y4/M%m2/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
+#19790101_00z-20061231_18z 060000 dirac:/archive/input/dao_ops/ops/reanalysis/tcvitals/text/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.syndata.tcvitals
+#20070101_00z-21001231_18z 060000 dirac:/archive/input/dao_ops/obs/flk/tcvitals/text/TCVITALS/Y%y4/M%m2/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
+END
+
+# NCEP unconventional observational data
+# ---------------------------------------
+BEGIN ncep_osbuv8_6_bufr => gdas1.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
+# 20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.osbuv.tm00.bufr_d
+# 20040615_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv.tm00.bufr_d
+# Use merra_sbuv_prep_bufr prior to 20071001
+# 20071001_00z-20080204_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv.tm00.bufr_d
+# 20080205_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8_6.tm00.bufr_d
+  20071215_00z-20181001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8_6.tm00.bufr_d
+  20181002_06z-20190703_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8_6.tm00.bufr_d
+END
+BEGIN ncep_osbuv_bufr => gdas1.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
+# 20071215_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8.tm00.bufr_d
+  20071214_06z-20161105_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8.tm00.bufr_d
+  20161106_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SBUV8/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.osbuv8.tm00.bufr_d
+END
+BEGIN ncep_ssmis_bufr => gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d.ublk
+# 20110228_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_gps/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
+  20110228_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
+END
+
+# NCEP Operational (satellite) data
+# ---------------------------------
+BEGIN ncep_1bamua_bufr => gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d.ublk
+# 20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bamua.tm00.bufr_d
+# 20041001_00z-20041017_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+# 20041019_00z-20041031_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+# 20050201_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+  20040615_06z-20040616_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+  20040617_00z-20041017_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+  20041018_06z-20041231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+  20050201_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+END
+BEGIN ncep_1bamub_bufr => gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d.ublk
+# 20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bamub.tm00.bufr_d
+# 20050201_00z-20140606_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
+  20040615_06z-20040616_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
+  20040617_00z-20041231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
+  20050201_00z-20140319_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
+  20140319_18z-20140611_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUB/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamub.tm00.bufr_d
+END
+BEGIN ncep_1bhrs3_bufr => gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d.ublk
+# 20040410_00z-20040411_18z 060000 /archive/input/dao_ops/geos5/Y%y4/M%m2/D%d2/gdas1.t%h2z.1bhrs3.tm00.bufr_d
+# 20050201_00z-20140606_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
+  20040615_06z-20040616_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
+  20040617_00z-20041231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
+  20050201_00z-20140319_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
+  20140319_18z-20140611_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/HIRS3/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr_d
+END
+
+# NCEP Prep-bufr conventional data
+# -------------------------------
+BEGIN ncep_prep_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.ublk
+#  20020307_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+#  data available from 2002, but we only use from 2006 after merra data ends.
+#  20060101_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+  20050204_00z-20050204_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+  20050301_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+END
+
+###############################################################################################################
+###############################################################################################################
+#                                Modern Era Reanalysis Observing System
+###############################################################################################################
+###############################################################################################################
+
+BEGIN ncep_mhs_bufr => gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d.ublk
+# 20081021_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080201_00z-20080203_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080203_18z-20080618_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080618_18z-20080714_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080716_00z-20080726_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080726_18z-20080810_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080811_18z-20080911_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080911_18z-20080923_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080924_00z-20080924_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+  20080924_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+END
+
+BEGIN ncep_1bhrs4_bufr => gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d.ublk
+# 20090129_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BHRS4/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d
+  20090129_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BHRS4/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d
+END
+
+BEGIN ncep_goesfv_bufr => gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d.ublk
+# 20070222_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
+  20070222_00z-20200303_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
+END
+
+BEGIN ncep_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
+# 20080811_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20010519_00z-20190930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20191001_00z-20200316_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1_w_C2.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20200316_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+END
+
+BEGIN ncep_gpsro_com_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
+# 20080811_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20010519_00z-20190930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20191001_00z-20200316_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1_w_C2.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20200316_18z-20201217_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20201218_00z-20210114_18z 060000 /discover/nobackup/projects/gmao/obsdev/wrmccart/RO_BUFR/x0045_merge/gdas1_com.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20210115_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+END
+
+BEGIN ncep_mtiasi_bufr => gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d.ublk
+# 20090129_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
+  20080916_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
+END
+
+BEGIN ncep_atms_bufr => gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d.ublk
+# 20120213_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/ATMS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d
+  20111115_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/ATMS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d
+END
+BEGIN ncep_cris_bufr => gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d.ublk
+# 20120107_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
+  20120106_06z-20120112_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
+  20120406_12z-20200422_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
+END
+BEGIN ncep_crisfsr_bufr => gdas1.%y4%m2%d2.t%h2z.crisfsr.tm00.bufr_d.ublk
+# 20171020_00z-20180930_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/CRISF4/Y%y4/M%m2/crisf4.gdas.%y4%m2%d2%h2
+# 20181001_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
+  20171020_00z-20180930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/crisf4.gdas.%y4%m2%d2%h2
+  20181001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
+END
+BEGIN ncep_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
+# 20100701_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+  20100701_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+END
+BEGIN ncep_sevcsr_bufr => gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d.ublk
+# 20120502_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
+  20120214_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
+END
+BEGIN ncep_avcsam_bufr => gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+# 20120207_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+  20120207_00z-20160227_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+  20160227_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+END
+BEGIN ncep_avcspm_bufr => gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
+# 20120207_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20120207_00z-20140731_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20140801_00z-20160226_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20160228_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+END
+BEGIN ncep_avcsam_n15_bufr => gdas1_n15.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  19981101_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n15.bufr_d
+END
+BEGIN ncep_avcspm_n16_bufr => gdas1_n16.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
+  20010301_00z-20050430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.n16.bufr_d
+END
+BEGIN ncep_avcsam_n17_bufr => gdas1_n17.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  20021101_00z-20100131_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.n17.bufr_d
+END
+BEGIN ncep_avcspm_n18_bufr => gdas1_n18.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
+  20050701_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcspm.tm00.n18.bufr_d
+END
+BEGIN ncep_avcsam_metopa_bufr => gdas1_metopa.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  20070601_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.avcsam.tm00.metopA.bufr_d
+END
+BEGIN ncep_aura_omi_bufr => gdas1.%y4%m2%d2.t%h2z.omi.tm00.bufr_d.ublk
+# 20091212_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20120201_00z-20130316_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20130316_18z-20131003_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20131004_12z-20140302_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20140303_18z-20140708_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20140709_12z-20160308_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20160308_18z-20160309_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20160310_00z-20160408_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+  20160409_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/OMI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.omi.tm00.bufr_d
+END
+
+# New Aqua data from DISC NRT server
+#-----------------------------------
+BEGIN disc_airs_bufr => airs.%y4%m2%d2.t%h2z.bufr
+# 20100801_00z-20100818_18z 060000 /archive/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc.%y4%m2%d2.t%h2z.bufr
+# 20100819_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20100721_00z-20100810_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc.%y4%m2%d2.t%h2z.bufr
+  20100811_06z-20100818_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc.%y4%m2%d2.t%h2z.bufr
+  20100819_00z-20130405_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20130406_18z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20131012_00z-20170306_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20170307_00z-20201112_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201114_00z-20201123_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201125_00z-20201130_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+  20201202_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+# 20131001_00z-20131031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
+END
+BEGIN disc_amsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
+# 20100801_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100701_06z-20100701_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100702_06z-20100702_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100703_06z-20100703_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100704_06z-20100704_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100705_06z-20100705_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100705_18z-20100705_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100706_06z-20100706_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100706_18z-20100706_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100707_06z-20100707_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100708_06z-20100708_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100709_06z-20100709_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100710_06z-20100710_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100711_06z-20100711_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100712_06z-20100712_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100713_06z-20100713_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100714_06z-20100714_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100715_06z-20100715_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100716_06z-20100716_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100717_06z-20100717_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100718_06z-20100718_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100719_06z-20100719_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100720_06z-20100821_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20100822_06z-20130125_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20130126_06z-20131001_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20131012_00z-20190727_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20190728_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc.%y4%m2%d2.t%h2z.bufr
+  20101001_00z-20101031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
+  20131001_00z-20131031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
+END
+
+# GPM GMI 1CR brightness temperature
+#-------------------------
+BEGIN gmao_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
+# V03A
+# 20140304_18z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
+  20140304_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
+END
+
+# AURA MLS near real time
+BEGIN mls_nrt_nc => mlsnc.%y4%m2%d2.t%h2z.nc
+# 20140723_00z-20140815_18z 060000  /archive/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
+# 20140818_00z-20180331_18z 060000  /archive/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
+# 20180401_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+  20140717_00z-20180331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
+  20180401_00z-20180306_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+  20180306_18z-20180307_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+  20180307_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+END
+
+# GMAO AMSR2
+BEGIN gmao_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
+  20171101_00z-20180228_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20180401_00z-20180909_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20181001_06z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20200616_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
+END
+
+# OMPS-NPP
+# --------
+BEGIN npp_ompsnm_bufr => OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
+# 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20180227_00z-20200115_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20200118_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+END
+BEGIN npp_ompsnp_bufr => OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
+# 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20180227_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+END
+
+# Aircraft metadata for GSI temperature bias correction
+BEGIN ncep_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
+# 20160511_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_NotUsed/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+  20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+END
+
+BEGIN npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
+ 20120201_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+END
+
+BEGIN npp_ompsnp_nc => ompsnpnc.%y4%m2%d2.t%h2z.nc
+ 20120201_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnp/Y%y4/M%m2/OMPSNP.%y4%m2%d2_%h2z.nc
+END
+
+BEGIN aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
+ 20041001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+END
+
+# MLS retrieved temperature
+BEGIN gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
+#20040813_00z-20150531_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v3/bufr/Y%y4/M%m2/MLSt.%y4%m2%d2.t%h2z.bufr
+#20150601_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v4/bufr/Y%y4/M%m2/MLSt_v4.%y4%m2%d2.t%h2z.bufr
+ 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v5/bufr/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
+END

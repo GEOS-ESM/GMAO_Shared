@@ -14,8 +14,7 @@ ecbuild_add_executable (
 ecbuild_add_executable (
   TARGET gethdftinc.x
   SOURCES gethdftinc.f
-  LIBS GMAO_mpeu ${NETCDF_LIBRARIES} Threads::Threads
-  INCLUDES ${INC_NETCDF}
+  LIBS GMAO_mpeu NetCDF::NetCDF_Fortran Threads::Threads
   FFLAGS ${FREAL8})
 
 ecbuild_add_executable (
@@ -53,7 +52,7 @@ ecbuild_add_executable (
 file(GLOB perl_files CONFIGURE_DEPENDS *.pl)
 # We must remove two files because of DASPERL
 list(REMOVE_ITEM perl_files
-   ${CMAKE_CURRENT_SOURCE_DIR}/Err_Log.pl 
+   ${CMAKE_CURRENT_SOURCE_DIR}/Err_Log.pl
    ${CMAKE_CURRENT_SOURCE_DIR}/fndate.pl
    )
 
@@ -86,6 +85,7 @@ set(perlscripts
 set(otherbin
    Functions.csh
    pyrob
+   pyrob_CF
    RmShmKeys_sshmpi.csh
    rmshmkeyhere.sh
    protex

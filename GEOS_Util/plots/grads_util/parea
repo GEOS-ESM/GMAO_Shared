@@ -14,13 +14,13 @@ yloc = subwrd(args,2)
 xmax = subwrd(args,3)
 ymax = subwrd(args,4)
 
+   top = 0.5
    bot = 0.4
   left = 0.5
  right = 0.2
 
 scalex = 1.0
 scaley = 1.0
-   top = 0.5
 
        num = 0
 while( num < numargs )
@@ -28,6 +28,9 @@ while( num < numargs )
 if( subwrd(args,num)='-scalex' ) ; scalex = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-scaley' ) ; scaley = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-top'    ) ; top    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-bot'    ) ; bot    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-left'   ) ; left   = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-right'  ) ; right  = subwrd(args,num+1) ; endif
 endwhile
 
 say ' parea: 'xloc' 'yloc' 'xmax' 'ymax
@@ -43,6 +46,11 @@ pagex = subwrd(result,1)
 pagey = subwrd(result,2)
 sizex = pagex
 sizey = pagey
+
+say ' '
+say 'page sizex: 'sizex
+say 'page sizey: 'sizey
+say ' '
 
 pagex = pagex - left - right
 pagey = pagey - top  - bot
@@ -106,7 +114,9 @@ xleft  = x1 - 0.20*delx
 xright = x2 + 0.10*delx
 ybot =   y1 - 0.12*dely
 ytop =   y2 + 0.03*dely
+ytop =   y2 + 0.04*dely
 ymid = ( ybot + ytop )/2
 
+say 'xmid: 'xmid'  ybot: 'ybot'  ytop: 'ytop'  ymid: 'ymid'  xleft: 'xleft'  xright: 'xright
 return xmid' 'ybot' 'ytop' 'ymid' 'xleft' 'xright
 

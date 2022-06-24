@@ -36,53 +36,51 @@ set (ODSSRC
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
    string (REPLACE "${OPTREPORT0}" "${BIG_ENDIAN}" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
-   string (REPLACE "${FTZ}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
-   string (REPLACE "${ALIGN_ALL}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
-   string (REPLACE "${NO_ALIAS}" "" CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
-else ()
-   set_target_properties (${this}     PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (saber2ods.x PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (dconv2ods.x PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (odsmatch    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (odslist     PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (odsselect   PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (odsshuffle  PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (odsstats    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
-   set_target_properties (odsemean    PROPERTIES COMPILE_FLAGS ${BIG_ENDIAN})
+   string (REPLACE "${FTZ}"        ""              CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
+   string (REPLACE "${ALIGN_ALL}"  ""              CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
+   string (REPLACE "${NO_ALIAS}"   ""              CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
 endif ()
 
 esma_add_library (${this}
   SRCS ${MODSRC} ${ODSSRC}
-  DEPENDENCIES GMAO_mpeu GMAO_pilgrim
-  INCLUDES ${INC_NETCDF}
+  DEPENDENCIES GMAO_mpeu GMAO_pilgrim NetCDF::NetCDF_Fortran
   )
 
-ecbuild_add_executable (TARGET ods_scan.x SOURCES ods_scan.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET dconv2ods.x SOURCES dconv2ods.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET ods_blank.x SOURCES ods_blank.f90 LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET ods_maker.x SOURCES ods_maker.f90 LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET ods_sample.x SOURCES ods_sample.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET ods_synX2Y.x SOURCES ods_synX2Y.f90 LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET ods_tally.x SOURCES ods_tally.f90 LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET saber2ods.x SOURCES saber2ods.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET odslist SOURCES odslist.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET odsmatch SOURCES odsmatch.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET odsselect SOURCES odsselect.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET odsshuffle SOURCES odsshuffle.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET odsstats SOURCES odsstats.f LIBS ${this} ${NETCDF_LIBRARIES})
-ecbuild_add_executable (TARGET odsemean SOURCES odsemean.f LIBS ${this} ${NETCDF_LIBRARIES})
+ecbuild_add_executable (TARGET ods_scan.x   SOURCES ods_scan.f     LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET dconv2ods.x  SOURCES dconv2ods.f    LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET ods_blank.x  SOURCES ods_blank.f90  LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET ods_maker.x  SOURCES ods_maker.f90  LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET ods_sample.x SOURCES ods_sample.f   LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET ods_synX2Y.x SOURCES ods_synX2Y.f90 LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET ods_tally.x  SOURCES ods_tally.f90  LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET saber2ods.x  SOURCES saber2ods.f    LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET odslist      SOURCES odslist.f      LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET odsmatch     SOURCES odsmatch.f     LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET odsselect    SOURCES odsselect.f    LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET odsshuffle   SOURCES odsshuffle.f   LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET odsstats     SOURCES odsstats.f     LIBS ${this} NetCDF::NetCDF_Fortran)
+ecbuild_add_executable (TARGET odsemean     SOURCES odsemean.f     LIBS ${this} NetCDF::NetCDF_Fortran)
 
-if (EXTENDED_SOURCE)
-  set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (saber2ods.x PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (dconv2ods.x PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (odsmatch  PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (odslist  PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (odsselect  PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (odsshuffle  PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (odsstats  PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-  set_target_properties (odsemean  PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
-endif()
+set (targets_for_extra_flags
+   ${this}
+   saber2ods.x
+   dconv2ods.x
+   odsmatch
+   odslist
+   odsselect
+   odsshuffle
+   odsstats
+   odsemean
+   )
+
+foreach (target ${targets_for_extra_flags})
+   if (EXTENDED_SOURCE)
+      set_target_properties (${target} PROPERTIES COMPILE_OPTIONS ${EXTENDED_SOURCE})
+   endif()
+   if (NOT CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+      set_target_properties (${target} PROPERTIES COMPILE_OPTIONS ${BIG_ENDIAN})
+   endif ()
+endforeach ()
 
 install(
    PROGRAMS unique_instruments.csh obimp_summary.pl diag2ods
@@ -105,10 +103,10 @@ if (USE_F2PY)
    if (F2PY2_FOUND)
       esma_add_f2py2_module(pyods_
          SOURCES pyods_.F90
-         LIBRARIES GMAO_ods GMAO_mpeu ${NETCDF_LIBRARIES}
-         INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
+         LIBRARIES GMAO_ods GMAO_mpeu
+         INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
          DESTINATION lib/Python/pyods
-         USE_MPI
+         USE_MPI USE_NETCDF
          )
       add_dependencies(pyods_ ${this})
    endif ()

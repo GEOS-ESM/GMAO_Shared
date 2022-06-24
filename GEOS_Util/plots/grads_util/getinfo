@@ -25,6 +25,8 @@ endif
 
   'query ctlinfo 'file
          ctlinfo = result
+            dset = sublin(result,1)
+            dset = subwrd(dset,2)
 
   'query file 'file
   xlab       = sublin(result,1)
@@ -316,6 +318,7 @@ pagey = subwrd(pagey ,6)
 
 * Return Options
 * --------------
+ if (name="dset" ) ; return dset          ; endif
  if (name="file" ) ; return file          ; endif
  if (name="desc" ) ; return desc          ; endif
  if (name="page" ) ; return pagex' 'pagey ; endif

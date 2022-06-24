@@ -4,7 +4,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(z_time inc_time dec_time date8 year4 date6 mmm_yr now token_resolve
-             jdoy zpad cpad tick num_days_in_month get_hours);
+             jdoy zpad cpad tick num_days_in_month get_htype get_hours);
 
 use FindBin;
 use lib "$FindBin::Bin";
@@ -886,6 +886,25 @@ sub num_days_in_month {
     }
 
     return $lastday{$mnth};
+}
+
+#.........................................
+#
+# get_htype - extract htype from ftype
+#
+#
+sub get_htype {
+    my ($ftype, @fparts, $numparts, $htype);
+    $ftype = shift @_;
+    @fparts = split(/_/, $ftype);
+    $numparts = scalar(@fparts);
+
+    if ($numparts == 4) { $htype = $fparts[0] }
+    elsif ($numparts > 4) {
+        $htype = $fparts[1] .substr($fparts[2], 0, 1);
+    }
+    die "Error. Cannot determine htype from $ftype;" unless $htype;
+    return $htype
 }
 
 #.........................................

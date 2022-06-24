@@ -5,12 +5,170 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
 
 ### Added
-### Fixed
+
 ### Changed
+
+- Changed restart file geosachem to achem in regrid.pl
+- Updated CI to modern v1 orb
+
+### Fixed
+
+- More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
+
 ### Removed
+
+## [1.5.4] - 2022-05-03
+
+### Added
+
+- Added statsNx.rc for screen level variable fstats 
+
+### Changed
+
+- Added options for land-only and screen-level variables in `fstats.x` and `g5fcst_stats.pl`
+- Added a few new tags to `regrid.pl`
+- Changes allow `gcmpost.script` and `gcmclim.script` to handle `collection.monthly: 1` output and stop automatic archiving.
+
+### Fixed
+
+- Fixed a minor CMake issue to keep all mod files in `build/include`
+
+## [1.5.3] - 2022-03-18
+
+### Changed
+
+- Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
+
+## [1.5.2] - 2022-03-18
+
+### Added
+
+- Added preprocessing team as CODEOWNER for the GEOS_Util/pre directory
+- added a way to process Reynolds only for producing SST and Ice Concentration data, using a land-sea mask.
+  The _new_ file is: `proc_SST_FRACI_reynolds_quart.F90` and modified: `read_Reynolds.F90`, `CMakeLists.txt`
+  **Note**: the contents of this directory will be defunct once `ExtData` mechanics are implemented, WIP with @bena-nasa
+
+### Changed
+
+- bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
+
+### Fixed
+
+- Updates to CMake to support Spack
+
+### Added
+
+- Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
+
+## [1.5.1] - 2022-02-04
+
+### Changed
+
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
+
+## [1.5.0] - 2021-12-16
+
+### Added
+
+- Add support for GOCART2G restarts in `regrid.pl`
+
+### Removed
+
+- Moved lightning files to Chem_Shared
+
+## [1.4.13] - 2021-12-15
+
+### Fixed
+
+- Quickplot and quickstat bugs
+
+### Added
+
+- Quickplot now supports plotting GOCART-2G collections
+- Support for Three Corner Hat (3CH) Analysis
+
+## [1.4.12] - 2021-12-09
+
+### Changed
+
+- Update `regrid.pl`
+  - Add options for MOM5 and MOM6 tile files
+  - Add ability to use git tags for "tagin" and "tagout"
+
+### Fixed
+
+- Update to `idcheck.pl` to allow fvsetup to check whether the expid already exists in the SemperPy databases
+
+- Moved Lightning_mod.F90 and lightning_toolbox_mod.F90 from GEOS_Shared to a different repository (GEOSchem_GridComp)
+
+## [1.4.11] - 2021-11-03
+
+### Changed
+
+- add Cascade knob to g5fcst_stats.pl and regrid.pl
+- revised dyn_blob: more general on the blobs
+- make sure echorc.x exits w/ success code when applicable
+- Updated CI to use Baselibs 6.2.8
+- Updated `pyrob` to work with GEOS-IT files
+- Changed the Intel MPI and MVAPICH2 flags in `regrid.pl` to be modern
+
+## [1.4.10] - 2021-10-08
+
+### Added
+
+- Added a new `GMAO_eu` target to create a `libGMAO_eu.a` like in GNU Make days
+- Added `parallel_untar.py` script
+- Added `dyn_blob.x` and `dyn_fsens_conv.x` to Hermes
+
+### Fixed
+
+- CMake fix for non-Intel compilers in GMAO_ods
+
+### Changed
+
+- Updates to documentation tables for KX values
+- Updates to `obsys-nccs.rc`
+- Updates to `g5fcst_stats.pl`
+- Updated the CI for GMAO_Shared to do Intel and GNU
+
+## [1.4.9] - 2021-10-06
+
+### Fixed
+
+- Fixed issue with `regrid.pl` and regridding `catch_internal_rst`
+
+## [1.4.8] - 2021-10-05
+
+### Fixed
+
+- Fixed issue with CICE4 by compiling with old non-vectorized `Release` flags when compiling with Intel. Requires ESMA_cmake v3.6.1
+
+## [1.4.7] - 2021-10-04
+
+### Added
+
+- Added `pyrob_CF` script
+
+### Changed
+
+- Updates to support Catchment-CN.4.5 in addition to Catchment-CN.4.0
+
+## [1.4.6] - 2021-09-15
+
+### Changed
+
+- Updates to `regrid.pl` to allow processing of restarts for two different versions of Catchment-CN land model
+- change is zero-diff for Catchment and Catchment-CN4.0
+
+## [1.4.6] - 2021-07-21
+
+### Changed
+
+- Updates to plots package from L. Takacs
 
 ## [1.4.5] - 2021-06-25
 
@@ -249,7 +407,7 @@ be deleted in future releases of MAPL
 ### Changed
 
 - Rolls back the constraint on gcmpost.script to only operate on pressure-level collections.
- 
+
 ### Fixed
 
 - Enables correct post proccessing of MAPL monthly collections.
@@ -331,7 +489,7 @@ be deleted in future releases of MAPL
 
 ## [1.0.12] - 2019-09-27
 
-### Changed 
+### Changed
 
 - Updates for s2s
 

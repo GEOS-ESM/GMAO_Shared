@@ -3,6 +3,8 @@ function makplot (args)
 'numargs  'args
  numargs = result
 
+qname = NULL
+
 * Initialize INPUT Parameters
 * ---------------------------
         num = 0
@@ -11,6 +13,7 @@ while ( num < numargs )
 
 if( subwrd(args,num) = '-MVAR'     ) ; mvar     = subwrd(args,num+1) ; say 'mvar  = 'mvar  ; endif
 if( subwrd(args,num) = '-MNAME'    ) ; mname    = subwrd(args,num+1) ; say 'mname = 'mname ; endif
+if( subwrd(args,num) = '-QNAME'    ) ; qname    = subwrd(args,num+1) ; say 'qname = 'qname ; endif
 if( subwrd(args,num) = '-MFILE'    ) ; mfile    = subwrd(args,num+1) ; say 'mfile = 'mfile ; endif
 if( subwrd(args,num) = '-MDESC'    ) ; mdesc    = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-MBEGDATE' ) ; bdate    = subwrd(args,num+1) ; endif
@@ -28,7 +31,7 @@ if( subwrd(args,num) = '-PREFIX'   ) ; prefix   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-SEASON'   ) ; season   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-OUTPUT'   ) ; output   = subwrd(args,num+1) ; endif
 if( subwrd(args,num) = '-CLIMATE'  ) ; climate  = subwrd(args,num+1) ; endif
-if( subwrd(args,num) = '-GC'       ) ; gridcomp = subwrd(args,num+1) ; endif
+if( subwrd(args,num) = '-GC'       ) ; gridcomp = subwrd(args,num+1) ; say '   gc = 'gridcomp ; endif
 if( subwrd(args,num) = '-MATH'     ) ; math     = subwrd(args,num+1) ; endif
 
 endwhile
@@ -37,6 +40,7 @@ endwhile
 if(     math = NULL ) ;     math = '' ; endif
 if(   season = NULL ) ;   season = '' ; endif
 if( gridcomp = NULL ) ; gridcomp = '' ; endif
+if(    qname = NULL ) ; qname = mname ; endif
 
 'set t 1'
 'run getenv "GEOSUTIL"'
@@ -51,6 +55,7 @@ if( prefix != NULL )
 else
     PFX = ''
 endif
+
 say ''
 
 title = 'NULL'
@@ -92,6 +97,11 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DLEVS'   ; endif
                         'getresource 'PLOTRC' 'PFX'DCOLS'
 if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DCOLS' ; endif
                                                    dcols  = result
+
+                        'getresource 'PLOTRC' 'PFX'DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC'      DPCT' ; endif
+                                                   dpct  = result
+
 factor = 1
 
 else
@@ -124,9 +134,17 @@ if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CCOLS' ; endif
 if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_CLEVS' ; endif
                                                                 clevs = result
 
+                        'getresource 'PLOTRC' 'mname'_'gridcomp'_'level'_DPCT'
+if( result = 'NULL' ) ; 'getresource 'PLOTRC' 'mname'_'gridcomp'_DPCT' ; endif
+                                                                 dpct = result
+
                         'getresource 'PLOTRC' 'mname'_'gridcomp'_REGRID'
                                                                 method = result
 endif
+
+if( dpct = 'NULL' ) ; dpct = 0.1 ; endif
+                  'd 'dpct
+                      dpct = subwrd(result,4)
 
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
@@ -135,7 +153,7 @@ endif
 say ''
 if( factor = 'NULL' ) ; factor = 1 ; endif
 if( title  = 'NULL' )
-   'getdesc 'mname
+   'getdesc 'qname
              desc = result
     title = mname':'gridcomp'  'desc
    "rmstring '"title"' '[column]'"
@@ -150,16 +168,13 @@ endif
 'define qmod = 'mvar''season'*'factor
 'define qobs = 'ovar''season'*'factor
 
-'d log10('factor')'
-        m = subwrd(result,4)
-if( ccols = NULL )
    'set gxout stat'
    'd qmod'
    qminmax = sublin(result,8)
    qmin    = subwrd(qminmax,4)
    qmax    = subwrd(qminmax,5)
-   say 'Original  QMIN: 'qmin
    say 'Original  QMAX: 'qmax
+   say 'Original  QMIN: 'qmin
    say 'Original STATS: 'result
    'set gxout shaded'
    'd abs('qmin')'
@@ -173,7 +188,7 @@ if( ccols = NULL )
    else
        m = 0
    endif
-   say '    Log Factor: 'm
+   say '    Log Factor for qmod: 'm
    if( m<0 ) ; m = m-2 ; endif
    'getint 'm
             m = result
@@ -184,8 +199,10 @@ if( ccols = NULL )
            m = m-2
        endif
    endif
-   say 'Field Scaling Factor: 'm
+   say 'Field Scaling Factor for qmod: 'm
    minv = -m
+
+if( ccols = NULL )
    'define qmod = qmod * 1e'minv
    'define qobs = qobs * 1e'minv
    'set gxout stat'
@@ -193,15 +210,15 @@ if( ccols = NULL )
    qminmax = sublin(result,8)
    qmin    = subwrd(qminmax,4)
    qmax    = subwrd(qminmax,5)
-   say 'Final  QMIN: 'qmin
    say 'Final  QMAX: 'qmax
+   say 'Final  QMIN: 'qmin
    say 'Final STATS: 'result
    'set gxout shaded'
 endif
 
 if( math = LOG )
-   'define qmod = log(qmod+0.00001)'
-   'define qobs = log(qobs+0.00001)'
+   'define qmod = log10(qmod)'
+   'define qobs = log10(qobs)'
 endif
 
 'set vpage off'
@@ -229,6 +246,22 @@ endif
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 7.70 10.50'
 'set grads off'
+
+   'set gxout stat'
+   'd qmod'
+   qmodminmax = sublin(result,8)
+   qmodmin    = subwrd(qmodminmax,4)
+   qmodmax    = subwrd(qmodminmax,5)
+   say 'QMOD_Max Value: 'qmodmax
+   say 'QMOD_Min Value: 'qmodmin
+   'set gxout shaded'
+   'd abs('qmodmin')'
+          aqmodmin = subwrd(result,4)
+   'd abs('qmodmax')'
+          aqmodmax = subwrd(result,4)
+   if( aqmodmin > aqmodmax ) ; aqmodmax = aqmodmin ; endif
+   say 'Absolute QMOD_MAX: ' aqmodmax
+
 if( ccols != NULL )
    'set clevs 'clevs
    'set ccols 'ccols
@@ -249,6 +282,22 @@ endif
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 4.30 7.10'
 'set grads off'
+
+   'set gxout stat'
+   'd qobs'
+   qobsminmax = sublin(result,8)
+   qobsmin    = subwrd(qobsminmax,4)
+   qobsmax    = subwrd(qobsminmax,5)
+   say 'QOBS_Max Value: 'qobsmax
+   say 'QOBS_Min Value: 'qobsmin
+   'set gxout shaded'
+   'd abs('qobsmin')'
+          aqobsmin = subwrd(result,4)
+   'd abs('qobsmax')'
+          aqobsmax = subwrd(result,4)
+   if( aqobsmin > aqobsmax ) ; aqobsmax = aqobsmin ; endif
+   say 'Absolute QOBS_MAX: ' aqobsmax
+
 if( ccols != NULL )
    'set clevs 'clevs
    'set ccols 'ccols
@@ -267,6 +316,8 @@ endif
 'set vpage 0 8.5 0.0 11'
 'set parea 1.5 7.0 0.90 3.70'
 'set grads off'
+
+
 'rgbset'
 'getinfo lon'
          lon = result
@@ -285,9 +336,32 @@ else
    'stats difg'
      avgdif = subwrd(result,1)
      stddif = subwrd(result,2)
-       qmax = stddif/3
-   if( qmax > 0 )
-      'd log10('qmax')'
+      dqmax = stddif/3
+
+     say '1/3 Diff. Std.Dev.: 'dqmax'  QMax: 'aqmodmax
+     'd 'aqmodmax
+         aqmodmax = subwrd(result,4)
+     say 'aqmodmax = 'aqmodmax
+     if(  aqmodmax = 0 )
+         dqrel = 100 * 100
+     else
+     dqrel = dqmax / aqmodmax  * 100 * 100
+     endif
+
+    'getint 'dqrel
+             dqrel = result/100
+
+     say '       Relative % Difference for Plots: 'dqrel' (100* 1/3*Std.Dev / QMAX)'
+     say 'Minimum Allowed % Difference for Plots: 'dpct
+
+     if( dqrel < dpct )
+         dqrel = dpct
+     endif
+         dqmax = dqrel * aqmodmax / 100
+         say 'Setting CINT using DQREL: 'dqrel'%, DQMAX: 'dqmax
+
+   if( dqmax > 0 )
+      'd log10('dqmax')'
        n = subwrd(result,4)
    else
        n = 0
@@ -304,12 +378,28 @@ else
         endif
    endif
    say 'Diff Scaling Factor: 'n
-      'd 'qmax'/1e'n
+      'd 'dqmax'/1e'n
        cint = subwrd(result,4)
       'shades 'cint
       'define difg = difg/1e'n
       'd difg'
 endif
+
+      'set gxout stat'
+      'd difg'
+      qdifminmax = sublin(result,8)
+      qdifmin    = subwrd(qdifminmax,4)
+      qdifmax    = subwrd(qdifminmax,5)
+      say 'QDIF_Max Value: 'qdifmax
+      say 'QDIF_Min Value: 'qdifmin
+      'set gxout shaded'
+      'd abs('qdifmin')'
+             aqdifmin = subwrd(result,4)
+      'd abs('qdifmax')'
+             aqdifmax = subwrd(result,4)
+      if( aqdifmin > aqdifmax ) ; aqdifmax = aqdifmin ; endif
+      say 'Absolute QDIF_MAX: ' aqdifmax
+
 'cbarn -snum 0.55 -xmid 4.25 -ymid 0.4'
 
 'stats maskout(modg,abs(obsg))'
@@ -368,17 +458,35 @@ eyearo = subwrd(date,2)
 
 'set string 1 l 4'
 'set strsiz .08'
-'draw string 0.050 10.50 Beg: 'bmnthm' 'byearm
-'draw string 0.050 10.35 End: 'emnthm' 'eyearm
-'draw string 0.050 7.10 Beg: 'bmntho' 'byearo
-'draw string 0.050 6.95 End: 'emntho' 'eyearo
 
-'draw string 0.050 9.85 Mean: 'avgmod
-'draw string 0.050 9.70  Std: 'stdmod
-'draw string 0.050 6.45 Mean: 'avgobs
-'draw string 0.050 6.30  Std: 'stdobs
-'draw string 0.050 3.05 Mean: 'avgdif
-'draw string 0.050 2.90  Std: 'stddif
+'draw string 0.050 10.25 Beg: 'bmnthm' 'byearm
+'draw string 0.050 10.10 End: 'emnthm' 'eyearm
+'draw string 0.050 9.85  QMax: 'qmodmax
+'draw string 0.050 9.70  QMin: 'qmodmin
+'draw string 0.050 9.40 Mean: 'avgmod
+'draw string 0.050 9.25  Std: 'stdmod
+
+'draw string 0.050 6.85 Beg: 'bmntho' 'byearo
+'draw string 0.050 6.70 End: 'emntho' 'eyearo
+'draw string 0.050 6.45 QMax: 'qobsmax
+'draw string 0.050 6.30 QMin: 'qobsmin
+'draw string 0.050 6.00 Mean: 'avgobs
+'draw string 0.050 5.85  Std: 'stdobs
+
+'draw string 0.050 3.45 Beg: 'bmntho' 'byearo
+'draw string 0.050 3.30 End: 'emntho' 'eyearo
+'draw string 0.050 3.05 DQMax: 'qdifmax
+'draw string 0.050 2.90 DQMin: 'qdifmin
+'draw string 0.050 2.60 Mean: 'avgdif
+'draw string 0.050 2.45  Std: 'stddif
+
+if( CINTDIFF != 'NULL' )
+   'set strsiz .07'
+   'draw string 0.050 1.77 Plot represents'
+   'draw string 0.050 1.62 values > 'dqrel' %'
+   'draw string 0.050 1.47 Relative Difference'
+   'draw string 0.050 1.32 ( DQ/QMax )'
+endif
 
 if( output != 'NULL' )
 if( math = LOG )

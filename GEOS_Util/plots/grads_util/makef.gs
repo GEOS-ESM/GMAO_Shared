@@ -123,7 +123,10 @@ alias = subwrd(args,2)
     say '   DT: 'dt
     say ' LEVS: 'levs
     say ''
-    say ' LONMIN:LONMAX = 'lonmin':'lonmax
+
+    beglon = lonmin
+    endlon = lonmax-dlon
+    say ' BEGLON:ENDLON = 'beglon':'endlon
     say ''
 
   '!remove sedfile'
@@ -138,10 +141,16 @@ alias = subwrd(args,2)
     say '          Computing Data for Variable: 'alias'  for t = 't
    'set t 't
    'sety'
-   'set z 'zmin' 'zmax
-   'set x 1 'xdim
-*  'set lon 'lonmin' 'lonmax
-   'd 'name
+    z = zmin
+    while( z<=zmax )
+   'set z 'z 
+*  'set z 'zmin' 'zmax
+*  'set x 1 'xdim
+   'set lon 'beglon' 'endlon
+   'define dum = 'name
+   'd 'dum
+    z = z+1
+    endwhile
     t = t+1
     endwhile
     say ''

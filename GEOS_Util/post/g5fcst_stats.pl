@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #=======================================================================
-# name - g5fcst_stats.pl
+# name - g5fcst_stats.pl 
 # purpose - script to submit jobs to calculate forecast statistics
 #
 # key global variables -
@@ -22,13 +22,18 @@ use WriteLog qw(chdir_ query setprompt);
 # global variables
 #-----------------
 my ($EXP_ARCHIVE);
+my ($EXP_DATAMOVE_CONSTRAINT);
 my ($anadir, $arcfile, $archiveFLG, $dasFLG, $nodes, $dryrun, $etcdir);
 my ($expid, $fhours, $fhours_dflt, $fs_tag, $fv_etcdir);
 my ($idate, $ihh, $jobdir, $localID, $ncsuffix, $ndays, $noprompt, $nver);
 my ($offset_sec, $pesto, $progdir, $progtype, $secs_per_day, $secs_per_hour);
 my ($statsX, $storedir, $tau_freq, $tau_fsec, $vanadir, $vanatype, $vexpid);
 my (%opts, @acqIDs, @statsIDs);
+my ($landonly, $landonly_dflt);
+my ($nxonly, $nxonly_dflt);
 
+$landonly_dflt = "no";
+$nxonly_dflt = "no" ;
 $fhours_dflt = 123;
 $localID = $$;
 $ncsuffix = ".nc4";
@@ -134,7 +139,11 @@ $secs_per_day  = 24 * $secs_per_hour;
 
             if ($ihh eq "00" and $nv == 1) {
                 $fdir = "$vanadir/Y$nyyyy/M$nmm";
-                $fname = "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";
+                if ($nxonly eq "yes") {
+                   $fname = "$vexpid.$vanatype.${vdate}_${vhh}${vmn}z";
+                } else {
+                   $fname = "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";                 
+                }     
                 $ffile0 = "$fdir/$fname$ncsuffix";
             }
             else {
@@ -166,7 +175,11 @@ $secs_per_day  = 24 * $secs_per_hour;
                 push @alist, "$vexpid.$vanatype.${vdate}_${vhh}z+${vdate}_${vhh}${vmn}z";
             }
             else {
-                push @alist, "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z";
+                if ($nxonly eq "yes" ) {
+                   push @alist, "$vexpid.$vanatype.${vdate}_${vhh}${vmn}z";
+                } else {
+                   push @alist, "$vexpid.$vanatype.inst3d_met_p.${vdate}_${vhh}${vmn}z"; 
+                }
             }
 
             # loop through naming convention options
@@ -191,9 +204,12 @@ $secs_per_day  = 24 * $secs_per_hour;
             #----------------------------------------------------
             ($vdate, $vtime) = tick($vdate, $vtime, $tau_fsec);
         }
-
+        if ($nxonly eq "yes") {
+        @climfiles = (<$ENV{SHARE}/dao_ops/verification/stats/MERRA-2.inst1_2d_asm_Nx.198501_201412.clim_??z.576x361.data.nc4>);
+        } else {
         @climfiles = (<$ENV{SHARE}/dao_ops/verification/stats/MERRA-2.inst3_3d_asm_Np.198501_201412.clim_??z.576x361.data.nc4>);
         #--@climfiles = (<$ENV{SHARE}/dao_ops/verification/stats/merrasc.197901-200812.clim_??z.144x91.data.nc>);
+        }
         $climfilecnt = scalar(@climfiles);
         if ($climfilecnt < 4) {
             rmtree($fstatswork) if -d $fstatswork;
@@ -220,15 +236,23 @@ $secs_per_day  = 24 * $secs_per_hour;
             }
             else {
                 push @fcst_fnames, $ffile0 if $ffile0;
-                push @fcst_fnames, "$expid.prog.$progtype.${ndate}_${ihh}z+*$ncsuffix";
-                push @ana_fnames, "$vexpid.asm.inst3d_met_p.*$ncsuffix";
+                push @fcst_fnames, "$expid.prog.$progtype.${ndate}_${ihh}z+*$ncsuffix"; 
+                if ($nxonly eq "yes" ) {
+                     push @ana_fnames, "$vexpid.$vanatype.*$ncsuffix";
+                } else {
+                     push @ana_fnames, "$vexpid.asm.inst3d_met_p.*$ncsuffix";
+                }
             }
         }
         else {
             push @fcst_fnames, $ffile0 if $ffile0;
             push @fcst_fnames, "$expid.prog.$progtype.${ndate}_${ihh}z+*$ncsuffix";
-            push @ana_fnames, "$vexpid.asm.inst3d_met_p.*$ncsuffix";
-            push @ana_fnames, "$vexpid.ana.inst3d_met_p.*$ncsuffix";
+            if ($nxonly eq "yes" ) {
+               push @ana_fnames, "$vexpid.$vanatype.*$ncsuffix" 
+            } else {
+               push @ana_fnames, "$vexpid.asm.inst3d_met_p.*$ncsuffix";
+               push @ana_fnames, "$vexpid.ana.inst3d_met_p.*$ncsuffix";
+            }
         }
         @fcstlist = sort keys %fcsthash;
         @vanalist = sort keys %vanahash;
@@ -281,6 +305,8 @@ $secs_per_day  = 24 * $secs_per_hour;
         $args{"vhh0"}             = $vhh0;
         $args{"vhh1"}             = $vhh1;
         $args{"nodes"}            = $nodes;
+        $args{"landonly"}         = $landonly;
+        $args{"nxonly"}           = $nxonly;
 
         # submit job to calculate stats
         #------------------------------
@@ -318,6 +344,8 @@ sub init {
     $EXP_ARCHIVE = $ENV{"ARCHIVE"};
     $EXP_ARCHIVE = $ENV{"FVARCH"} if $ENV{"FVARCH"};
 
+    $EXP_DATAMOVE_CONSTRAINT = $ENV{"DATAMOVE_CONSTRAINT"};
+
     # flush buffer after each output operation
     #-----------------------------------------
     $| = 1;
@@ -341,6 +369,10 @@ sub init {
 
                "nodes=s"  => \$nodes,
 
+               "landonly=s" => \$landonly,
+
+               "nxonly=s"   => \$nxonly,
+
                "das"      => \$dasFLG,
                "np"       => \$noprompt,
 
@@ -356,7 +388,15 @@ sub init {
     $expid = shift @ARGV;
     $idate = shift @ARGV;
     $ndays = shift @ARGV;
-               
+    
+    # landonly option
+    #----------------
+    $landonly = $landonly_dflt unless $landonly;
+  
+    #nxonly option
+    #--------------
+    $nxonly = $nxonly_dflt unless $nxonly;
+           
     # initial fcst hour and offset
     #-----------------------------
     unless ($ihh) {
@@ -428,11 +468,11 @@ sub init {
     until (-d $anadir) {
         unless ($noprompt) {
             print "ANA directory does not exist: $anadir\n\n";
-            $anadir = query("forecast ana directory:", $anadir);
+            $anadir = query("verification ana directory:", $anadir);
         }
-        else { die "forecast ana directory does not exist: $anadir;" }
+        #else { die "verification ana directory does not exist: $anadir;" }
     }
-    $progdir = dirname($anadir) ."/prog" unless $progdir;
+    $progdir = "$EXP_ARCHIVE/$expid/prog" unless $progdir;
     until (-d $progdir) {
         unless ($noprompt) {
             print "forecase prog directory does not exist: $progdir\n\n";
@@ -533,9 +573,12 @@ sub init {
     # find stats.rc
     #--------------
     $fv_etcdir = dirname($Bin) ."/etc";
-    die "Error. Cannot find $fv_etcdir/stats.rc" unless -e "$fv_etcdir/stats.rc";
+    if ($nxonly eq "yes" ) {
+        die "Error. Cannot find $fv_etcdir/statsNx.rc" unless -e "$fv_etcdir/statsNx.rc"; 
+    } else {
+        die "Error. Cannot find $fv_etcdir/stats.rc" unless -e "$fv_etcdir/stats.rc";
+    }
 }
-
 #=======================================================================
 # name - das_check
 # purpose - check for hidden files in $FVHOME/fcst and $FVHOME directories
@@ -633,11 +676,14 @@ sub submit_calcjob {
     my (@rmfilelist, $yyyy, $mm, $dd);
     my ($logdir, $logfile1, $logfile2, $jobname, $jobdate, $jobfile, $jobtype);
     my ($cmd, $jobID, $jobIDline);
-    my (@levs, @levels_19, @levels_11);
+    my (@levs, @levels_19, @levels_11, @levels_1);
     my ($mynodes,$usrnodes);
     my ($qos, $partition);
     my ($ntspn, $npn);
-
+    my ($landonly, $landmaskdirfile); 
+    my ($nxonly);
+    my ($whichrc);
+    
     @levels_19 = ( 1000.0, 975.0, 950.0, 925.0,
                     900.0, 850.0, 800.0, 750.0,
                     700.0, 600.0, 500.0, 400.0,
@@ -647,6 +693,8 @@ sub submit_calcjob {
     @levels_11 = ( 1000.0, 925.0, 850.0, 700.0,
                     500.0, 400.0, 300.0, 250.0,
                     200.0, 150.0, 100.0 );
+
+    @levels_1  =  ( 1000.0 ) ;
 
     if ($vexpid eq "ecmwf") { @levs = @levels_11 }
     else                    { @levs = @levels_19 }
@@ -665,6 +713,22 @@ sub submit_calcjob {
     $vdate1      = $args{"vdate1"};
     $vhh1        = $args{"vhh1"};
     $usrnodes    = $args{"nodes"};
+    $landonly    = $args{"landonly"};
+    $nxonly      = $args{"nxonly"};
+    print "nxonly: $nxonly\n";
+    print "landonly: $landonly\n";
+
+    if ($landonly eq "yes") {
+     $landmaskdirfile = "$jobdir/landmaskfile.nc4";
+     die "Error. Cannot find $landmaskdirfile" unless -e "$landmaskdirfile";
+    }
+    
+    $whichrc = "stats.rc";
+    if ($nxonly eq "yes") {
+     @levs = @levels_1;
+     $whichrc = "statsNx.rc";
+     print "whichrc: $whichrc\n"; 
+    }
 
     foreach (@fcstlist, @vanalist) { push @rmfilelist, basename($_) };
 
@@ -685,11 +749,18 @@ sub submit_calcjob {
       $ntspn   = 36;
       $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use SKY
       $partition = "#SBATCH --partition=preops"; # wired for now since only way to use SKY
+    } elsif ( $npn == 48 ) {
+      $mynodes = "cas";
+      $ntspn   = 42;
+      $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use CAS
+      $partition = "#SBATCH --partition=preops"; # wired for now since only way to use CAS
     } else {
       $mynodes = "hasw";
       $ntspn   = 24;
       $qos     = "";
       $partition = "";
+#     $qos     = "#SBATCH --qos=dastest";        # wired for now since only way to use HASW
+#     $partition = "#SBATCH --partition=preops"; # wired for now since only way to use HASW
     }
     if ( $usrnodes ne "null" ) { $mynodes = $usrnodes }; # overwrite with specification from command line
 
@@ -726,12 +797,24 @@ $dryrun \$mympi -np 1 $statsX -fcst @fcst_fnames \\
                     -cli @climfiles \\
                     -tag $expid.${ihh}z \\
                     -nfreq ${tau_freq}0000 \\
+EOF
+if ( $landonly eq "yes" ) {
+print  FH <<"EOF";
+                    -land ${landmaskdirfile} \\
+EOF
+}
+
+print  FH <<"EOF";
                     -levs @levs \\
                     -o $expid.fstats.log.$jobdate.txt \\
                     -verif gmao \\
                     -fcsrc gmao \\
                     -fhour $fhours \\
-                    -rc $fv_etcdir/stats.rc
+                    -rc $fv_etcdir/$whichrc
+EOF
+
+print  FH <<"EOF";
+
 @ calc_status = \$status
 
 $pesto -arc $arcfile \\
@@ -809,6 +892,7 @@ sub submit_archivejob {
 #SBATCH --time=1:00:00
 #SBATCH --job-name=$jobname
 #SBATCH --partition=datamove
+#$EXP_DATAMOVE_CONSTRAINT
 #SBATCH --output=$logfile1
 #SBATCH --export=NONE
 
@@ -929,7 +1013,8 @@ sub verify_values {
     print "progdir:     $progdir\n";
     print "progtype:    $progtype\n";
     print "fs_tag:      $fs_tag\n\n";
-
+    print "landonly:    $landonly\n\n";
+    print "nxonly:      $nxonly\n\n";
     print "dryrun:      $dryrun\n\n" if $dryrun;
 
     $ans = query("Continue (y/n):", "y");
@@ -975,7 +1060,13 @@ OPTIONS [defaults in brackets]
                        [dirname(\$FVHOME) or \$NOBACKUP]
     -noarchive         do not archive outputs [archives by default]
 
-    -nodes nodesname   specify nodes (e.g., sky or hasw)
+    -landonly          calculate stats only over land surface (yes/no) 
+                       [no by default]
+
+    -nxonly            calculate stats of 2d Nx collection only (yes/no) 
+                       [no by default] 
+
+    -nodes nodesname   specify nodes (e.g., sky, hasw, or cas)
     -das               check for DAS hidden files before attempting to fetch files
                        and set no prompt; requires \$FVHOME environment variable;
 
