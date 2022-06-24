@@ -503,7 +503,7 @@ class remap_params(object):
      if len(gridID) >=2 :
        print("find too many grid strings in " + bcdir)
        print(" gridIDs found", gridID)
-       for g_ in gridId:
+       for g_ in gridID:
          if g_.count('_') == 1 :
            g = g_ 
            #WY note, found many string in couple model
