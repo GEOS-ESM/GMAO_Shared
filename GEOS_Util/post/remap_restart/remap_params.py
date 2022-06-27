@@ -146,7 +146,7 @@ class remap_params(object):
     # BCS Tags: Ganymed-1_0_Reynolds and Ganymed-1_0_Ostia
     #-----------------------------------------------------
      G30  = ( 'G30',                  'Ganymed-3_0',         'Ganymed-3_0_p1' )
-     D5B0 = ( 'D5B0',                  'GEOSadas-5_10_0_p2',  'GEOSadas-5_11_0' )
+     D5B0 = ( '5B0',                  'GEOSadas-5_10_0_p2',  'GEOSadas-5_11_0' )
 
     # BCS Tags: Ganymed-4_0_Reynolds, Ganymed-4_0_MERRA-2, and Ganymed-4_0_Ostia
     #---------------------------------------------------------------------------
@@ -154,7 +154,7 @@ class remap_params(object):
               'Ganymed-4_1',          'Heracles-1_0',        'Heracles-1_1',
               'Heracles-2_0',         'Heracles-2_1',        'Heracles-3_0',
               'Heracles-4_0',         'Heracles-5_4_p3' )
-     D512 = ( 'D512',                  'GEOSadas-5_12_2',     'GEOSadas-5_12_4',
+     D512 = ( '512',                  'GEOSadas-5_12_2',     'GEOSadas-5_12_4',
               'GEOSadas-5_12_4_p1',   'GEOSadas-5_12_4_p2',  'GEOSadas-5_12_4_p3',
               'GEOSadas-5_12_5',      'GEOSadas-5_13_0_p1',  'GEOSadas-5_13_0_p2',
               'GEOSadas-5_13_1',      'GEOSadas-5_16_5' )
@@ -162,7 +162,7 @@ class remap_params(object):
     # BCS Tags: Icarus (New Land Parameters, New Topography)
     #---------------------------------------------------------------------------
      ICA  = ( 'ICA',                  'Icarus',              'Jason' )
-     D517 = ( 'D517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
+     D517 = ( '517', 'GEOSadas-5_17_0',      'GEOSadas-5_17_1',     'GEOSadas-5_18_0',
               'GEOSadas-5_18_1',      'GEOSadas-5_18_2',     'GEOSadas-5_18_3',
               'GEOSadas-5_18_3_p1',   'GEOSadas-5_19_0',     'GEOSadas-5_20_0',
               'GEOSadas-5_20_0_p1',   'GEOSadas-5_20_0_p2',  'GEOSadas-5_21_0',
