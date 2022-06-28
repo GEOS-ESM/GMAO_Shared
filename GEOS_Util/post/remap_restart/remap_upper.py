@@ -176,7 +176,7 @@ end
 set interp_restartsX = {Bin}/interp_restarts.x
 if ( $#infiles ) then
     set ioflag = "-input_files $infiles -output_files $outfils"
-    set ftype = `file -b --mime-type fvcore_internal_restart_in`
+    set ftype = `file -Lb --mime-type fvcore_internal_restart_in`
     if ($ftype =~ *stream*) then
       set interp_restartsX = {Bin}/interp_restarts_bin.x
     endif

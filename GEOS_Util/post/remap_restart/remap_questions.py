@@ -270,7 +270,9 @@ def ask_surface_in(common_in):
       zoom_default = str(int(zoom))
       if zoom < 1 : zoom_default = '1'
       if zoom > 8 : zoom_default = '8'
-      
+   if common_in['MERRA-2'] :
+      zoom_default = '2'
+
    questions = [
         {
             "type": "text",
