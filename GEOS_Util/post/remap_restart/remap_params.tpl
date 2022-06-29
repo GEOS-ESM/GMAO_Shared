@@ -28,11 +28,17 @@ output:
     ogrid: 
     out_dir:
   air:
+    # remap upper air or not
+    remap: true
     nlevel:
   surface:
     split_saltwater: false
     surflay: 20.
     wemin:
+    # remap lake, saltwater, landicet
+    remap_water: true
+    # remap catch(cn)
+    remap_catch: true
   analysis:
     bkg: true
     aqua: False

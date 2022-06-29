@@ -35,7 +35,7 @@ def ask_common_in():
             "type": "confirm",
             "name": "MERRA-2",
             "message": "Would you like to get restarts from MERRA-2 archive?",
-            "default": False
+            "default": False,
         },
         {
             "type": "path",
@@ -240,6 +240,12 @@ def ask_upper_out():
             "message": "Enter new atmospheric levels: (71 72 91 127 132 137 144 181)",
             "default": "72",
         },
+        {
+            "type": "confirm",
+            "name": "remap",
+            "message": "Would you like to remap upper air?",
+            "default": True,
+        },
    ]
    return questionary.prompt(questions)
 def ask_surface_in(common_in):
@@ -299,6 +305,12 @@ def ask_surface_out(common_out):
             "name": "wemout",
             "message": "What is value of Wemout?",
             "default": wemout_default
+        },
+        {
+            "type": "confirm",
+            "name": "remap",
+            "message": "Would you like to remap surface?",
+            "default": True,
         },
    ]
    return questionary.prompt(questions)

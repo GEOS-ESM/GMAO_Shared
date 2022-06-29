@@ -22,6 +22,14 @@ class analysis(object):
      with  open(params_file, 'r') as f:
         stream = f.read()
      self.config = yaml.load(stream)
+     f = os.path.basename(params_file)
+     out_dir    = self.config['output']['shared']['out_dir']
+     if not os.path.exists(out_dir) : os.makedirs(out_dir)
+     dest = out_dir+'/'+f
+     try:
+       shutil.copy(params_file, dest)
+     except shutil.SameFileError:
+       pass
 
   def remap(self):
      config = self.config

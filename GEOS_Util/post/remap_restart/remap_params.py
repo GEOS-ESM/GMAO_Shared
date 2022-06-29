@@ -43,6 +43,9 @@ class remap_params(object):
      config_tpl['input']['shared']['yyyymmddhh'] = self.common_in['yyyymmddhh']
 
      config_tpl['output']['air']['nlevel']     = self.upper_out.get('nlevel')
+     config_tpl['output']['air']['remap']      = self.upper_out.get('remap')
+     config_tpl['output']['surface']['remap_water']      = self.surf_out.get('remap')
+     config_tpl['output']['surface']['remap_catch']      = self.surf_out.get('remap')
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
      config_tpl['output']['shared']['ogrid']   = self.common_out['ogrid']
      config_tpl['output']['shared']['out_dir'] = self.common_out['out_dir'] + '/'
