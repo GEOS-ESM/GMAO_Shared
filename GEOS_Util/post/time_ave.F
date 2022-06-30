@@ -877,26 +877,19 @@ c ----------
                       kbeg = 1
                       kend = kmvar2(qloc(1,nv))
              endif
-             print *,' set kbeg, kend '
              loc1 = nloc( qloc(1,nv) )
              loc2 = nloc( qloc(2,nv) )
              if( .not.lzstar(nv) ) then
-                 print *,' in not lzstar section '
                  where( q(:,:,nloc(mv):nloc(mv)+kend-1,0).ne.undef )
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0) - q(:,:,loc1:loc1+kend-1,0)
      .                                                                    * q(:,:,loc2:loc2+kend-1,0)
                  elsewhere
                       dum(:,:,1:kend) = undef
                  endwhere
-                 print *,' set dum to q but subtracted one q* '
              else
-                 print *,' in lzstar section '
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0)
-                 print *,' set dum to q '
              endif 
-             print *,' about to call putvar '
              call mpi_gfio_putVar ( id,trim(vname2(mv)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
-             print *,' back from call putvar '
          endif
       enddo
 
