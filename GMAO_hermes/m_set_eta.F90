@@ -1164,7 +1164,7 @@ CONTAINS
       end select
 
       ! This select case is to set the ks output integer. In most cases, this is
-      ! equal to one less that the number of 0's in bk. However, in two places,
+      ! equal to one less than the number of 0's in bk. However, in two places,
       ! km=1 and km=64 with SIGMA_LEVS, that formula fails, so those are done
       ! by hand
       select case (km)
