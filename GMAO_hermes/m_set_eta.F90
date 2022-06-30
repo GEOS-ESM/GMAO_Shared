@@ -1023,7 +1023,6 @@ CONTAINS
 
 ! Fake single-level for util codes
         case (1)
-          ks = 1
           do k=1,km+1
             ak(k) = a01(k)
             bk(k) = b01(k)
@@ -1031,7 +1030,6 @@ CONTAINS
 
 ! *** Original CCM3 18-Level setup ***
         case (18)
-          ks = 4
           do k=1,km+1
             ak(k) = a18(k)
             bk(k) = b18(k)
@@ -1039,7 +1037,6 @@ CONTAINS
 
         case (26)
 ! CCM4 26-Level setup ***
-          ks = 7
           do k=1,km+1
             ak(k) = a26(k)
             bk(k) = b26(k)
@@ -1047,7 +1044,6 @@ CONTAINS
 
         case (30)
 ! CCM4 30-Level setup ***
-          ks = 12
           do k=1,km+1
             ak(k) = a30(k)
             bk(k) = b30(k)
@@ -1056,14 +1052,12 @@ CONTAINS
 ! *** Revised 32-L setup with ptop at 0.4 mb ***
 ! SJL: 04/01/2002
         case (32)
-          ks = 21
           do k=1,km+1
             ak(k) = a32(k)
             bk(k) = b32(k)
           enddo
 
         case (48)                   ! adeed Aug 21, 2002
-          ks = 30
           do k=1,km+1
             ak(k) = a48(k)
             bk(k) = b48(k)
@@ -1071,7 +1065,6 @@ CONTAINS
 
 ! *** Revised 55-L setup with ptop at 0.01 mb ***
         case (55)
-          ks = 41
           do k=1,km+1
             ak(k) = a55(k)
             bk(k) = b55(k)
@@ -1080,13 +1073,11 @@ CONTAINS
         case (64)                       !NCEP sigma and hybrid eta levels
           if ( SIGMA_LEVS ) then
             print *, 'set_eta: setting up sigma levels instead of eta levels'
-            ks = 0
             do k=1,km+1
               ak(k) = a64_sig(k)
               bk(k) = b64_sig(k)
             enddo
           else
-            ks = 21
             do k=1,km+1
               ak(k) = a64(k)
               bk(k) = b64(k)
@@ -1095,14 +1086,12 @@ CONTAINS
 
 ! *** GEOS-5
         case (44)
-          ks = 16
           do k=1,km+1
             ak(k) = a44(k)
             bk(k) = b44(k)
           enddo
 
         case (71)
-        ks = 31
         do k=1,km+1
           ak(k) = a71(k)
           bk(k) = b71(k)
@@ -1110,13 +1099,11 @@ CONTAINS
 
         case (72)
           if ( NCEP72_4GMAO ) then
-             ks = 29
              do k=1,km+1
                ak(k) = a72_ncep(k)
                bk(k) = b72_ncep(k)
              enddo
           else
-             ks = 40
              do k=1,km+1
                ak(k) = a72(k)
                bk(k) = b72(k)
@@ -1125,14 +1112,12 @@ CONTAINS
 
 #ifdef ECMWF_91L_NR
         case (91)
-        ks = 33
         do k=1,km+1
           ak(k) = a91_EC(k)
           bk(k) = b91_EC(k)
         end do
 #else
         case (91)
-        ks = 39
         do k=1,km+1
           ak(k) = a91(k)
           bk(k) = b91(k)
@@ -1140,42 +1125,36 @@ CONTAINS
 #endif
 
         case (96)
-          ks = 77
           do k=1,km+1
             ak(k) = a96(k)
             bk(k) = b96(k)
           enddo
 
         case (137 )
-          ks = 54
           do k=1,km+1
             ak(k) = a137(k)
             bk(k) = b137(k)
           enddo
 
         case (127 )
-          ks = 39
           do k=1,km+1
             ak(k) = a127(k)
             bk(k) = b127(k)
           enddo
 
         case (144 )
-          ks = 56
           do k=1,km+1
             ak(k) = a144(k)
             bk(k) = b144(k)
           enddo
 
         case (132 )
-          ks = 54
           do k=1,km+1
             ak(k) = a132(k)
             bk(k) = b132(k)
           enddo
 
         case (181)
-        ks = 71
         do k=1,km+1
           ak(k) = a181(k)
           bk(k) = b181(k)
@@ -1184,8 +1163,25 @@ CONTAINS
 
       end select
 
-          ptop = ak(1)
-          pint = ak(ks+1) 
+      ! This select case is to set the ks output integer. In most cases, this is
+      ! equal to one less that the number of 0's in bk. However, in two places,
+      ! km=1 and km=64 with SIGMA_LEVS, that formula fails, so those are done
+      ! by hand
+      select case (km)
+        case (1)
+          ks = 1
+        case (64)                       !NCEP sigma and hybrid eta levels
+          if ( SIGMA_LEVS ) then
+             ks = 0
+          else
+             ks = count(bk == 0.0) - 1
+          end if
+       case default
+          ks = count(bk == 0.0) - 1
+       end select
+
+       ptop = ak(1)
+       pint = ak(ks+1)
 
       return
     end subroutine set_eta_r8_
