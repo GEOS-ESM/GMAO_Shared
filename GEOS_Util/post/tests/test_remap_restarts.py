@@ -61,7 +61,7 @@ if __name__ == '__main__' :
 
   yaml = ruamel.yaml.YAML()
   stream =''
-  cases_yaml = 'test_cases.yaml'
+  cases_yaml = 'test_remap_cases.yaml'
   with  open(cases_yaml, 'r') as f:
      stream = f.read()
   cases = yaml.load(stream)
