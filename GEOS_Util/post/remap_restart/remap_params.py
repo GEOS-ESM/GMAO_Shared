@@ -336,7 +336,7 @@ class remap_params(object):
 
     if (get_grid_kind(agrid_in.upper()) == get_grid_kind(agrid_out.upper())):
       print(" No need to remap anaylysis file according to air grid in and out")
-      return
+      #return
 
     anafiles=[]
     for h in [3,4,5,6,7,8,9]:

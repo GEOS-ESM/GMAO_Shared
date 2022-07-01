@@ -89,18 +89,18 @@ class upperair(object):
  
      # link topo file
      topoin = glob.glob(in_bcsdir+'/topo_DYN_ave*')[0]
-     cmd = '/bin/cp ' + topoin + ' .'
+     cmd = '/bin/ln -s ' + topoin + ' .'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
 
      topoout = glob.glob(out_bcsdir+'/topo_DYN_ave*')[0]
-     cmd = '/bin/cp ' + topoout + ' .'
+     cmd = '/bin/ln -s ' + topoout + ' topo_dynave.data'
      print('\n'+cmd)
      subprocess.call(shlex.split(cmd))
-     fname = os.path.basename(topoout)
-     cmd = '/bin/ln -s ' + fname + ' topo_dynave.data'
-     print('\n'+cmd)
-     subprocess.call(shlex.split(cmd))
+     #fname = os.path.basename(topoout)
+     #cmd = '/bin/ln -s ' + fname + ' topo_dynave.data'
+     #print('\n'+cmd)
+     #subprocess.call(shlex.split(cmd))
 
      agrid  = config['output']['shared']['agrid']
      if agrid[0].upper() == 'C':
