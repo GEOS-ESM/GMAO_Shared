@@ -34,7 +34,7 @@ def ask_common_in():
         {
             "type": "confirm",
             "name": "MERRA-2",
-            "message": "Would you like to remap from MERRA-2 archive?",
+            "message": "Would you like to remap archived MERRA-2 restarts?",
             "default": False,
         },
         {
@@ -46,13 +46,13 @@ def ask_common_in():
         {
             "type": "path",
             "name": "rst_dir",
-            "message": "Enter the directory MERRA-2 archive files to be copied to: ",
+            "message": "Enter a directory to which the archived MERRA-2 archive files can be copied: ",
             "when": lambda x: x['MERRA-2'],
         },
         {
             "type": "text",
             "name": "yyyymmddhh",
-            "message": "What time would you like to remap from?(must be 10 digits: yyyymmddhh)",
+            "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)",
             "validate": lambda text: len(text)==10 ,
         },
         {
