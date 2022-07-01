@@ -34,13 +34,20 @@ def ask_common_in():
         {
             "type": "confirm",
             "name": "MERRA-2",
-            "message": "Would you like to get restarts from MERRA-2 archive?",
+            "message": "Would you like to remap from MERRA-2 archive?",
             "default": False,
         },
         {
             "type": "path",
             "name": "rst_dir",
-            "message": "Enter the directory containing restart files to be remapped: \n  (If it is MERRA-2, files from achives will be copied to this directory automatically). \n",
+            "message": "Enter the directory containing restart files to be remapped:",
+            "when": lambda x: not x['MERRA-2'],
+        },
+        {
+            "type": "path",
+            "name": "rst_dir",
+            "message": "Enter the directory MERRA-2 archive files to be copied to: ",
+            "when": lambda x: x['MERRA-2'],
         },
         {
             "type": "text",
