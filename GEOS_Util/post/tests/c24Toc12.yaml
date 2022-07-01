@@ -28,11 +28,14 @@ output:
     ogrid: 360X180
     out_dir: /home/wjiang/swdev/github/GEOSgcm_newRegrid/install/bin/remap_c24Toc12/
   air:
+    remap: true
     nlevel: '72'
   surface:
     split_saltwater: true
     surflay: 50.0
     wemin: '13'
+    remap_water: true
+    remap_catch: true
   analysis:
     bkg: false
     aqua: true

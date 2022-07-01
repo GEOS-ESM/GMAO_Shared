@@ -80,7 +80,7 @@ if __name__ == '__main__' :
  
      rc = compare(base_line, out_dir)
      if (not rc) :
-       print ("failed in "// case)
+       print ("failed in " + case)
      else :
-       print (case //" test is successful")
+       print (case +" test is successful")
  
