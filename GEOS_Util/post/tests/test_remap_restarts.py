@@ -44,7 +44,9 @@ def compare(base, result):
             print ( f + ' is different from ' + r)
             return False
   return True
+
 def test_remap(config_yaml):
+
   upper = upperair(config_yaml)
   upper.remap()
   lls  = lake_landice_saltwater(config_yaml)
@@ -57,20 +59,28 @@ def test_remap(config_yaml):
 
 if __name__ == '__main__' :
 
-  # test c24_to_c12
-  base_c12 = '/gpfsm/dnb32/wjiang/pl_c24Tc12'
   yaml = ruamel.yaml.YAML()
   stream =''
-  config_yaml = 'c24Toc12.yaml'
-  with  open(config_yaml, 'r') as f:
+  cases_yaml = 'test_cases.yaml'
+  with  open(cases_yaml, 'r') as f:
      stream = f.read()
-  results_c12 = yaml.load(stream)['output']['shared']['out_dir']
+  cases = yaml.load(stream)
+  
+  for case, values in cases.items():
+     base_line        = values['base_line']
+     config_yaml_file = values['config']
+     # test c24_to_c12
+     stream =''
+     with  open(config_yaml_file, 'r') as f:
+       stream = f.read()
+     config  = yaml.load(stream)
+     out_dir = config['output']['shared']['out_dir']
 
-  #test_remap(config_yaml)
+     test_remap(config_yaml_file)
  
-  rc = compare(base_c12, results_c12)
-  if (not rc) :
-    print ("failed in c24Toc12")
-  else :
-    print ("c24Toc12 tests is successful")
+     rc = compare(base_line, out_dir)
+     if (not rc) :
+       print ("failed in "// case)
+     else :
+       print (case //" test is successful")
  
