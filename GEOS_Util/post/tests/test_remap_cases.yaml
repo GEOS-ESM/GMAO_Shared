@@ -1,3 +1,7 @@
 c24Tc12:
   base_line: '/gpfsm/dnb32/wjiang/pl_c24Tc12'
   config: 'c24Toc12.yaml'
+f522Toc360:
+  base_line: '/gpfsm/dnb32/wjiang/f522_fp_pl'
+  config: 'f522Toc360.yaml'
+  
