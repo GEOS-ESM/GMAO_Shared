@@ -79,7 +79,7 @@ if __name__ == '__main__' :
        stream = f.read()
      config  = yaml.load(stream)
 
-     out_dir = '/discover/nobackup/'+user+'/RemapTesti_tmp/'+case+'/'
+     out_dir = '/discover/nobackup/'+user+'/RemapTest_tmp/'+case+'/'
      config['output']['shared']['out_dir'] = out_dir
      
      test_remap(config)
