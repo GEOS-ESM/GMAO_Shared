@@ -8,7 +8,7 @@ class remap_base(object):
   def __init__(self, **configs):
      for key, value in configs.items():
         if (key == 'params_file'):
-          print( "use Config yaml file" + value)
+          print( "use Config yaml file: " + value)
           yaml = ruamel.yaml.YAML()
           stream =''
           with  open(value, 'r') as f:

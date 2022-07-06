@@ -8,7 +8,7 @@ import shutil
 import glob
 from remap_base import remap_base
 
-class upperair(object):
+class upperair(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
 

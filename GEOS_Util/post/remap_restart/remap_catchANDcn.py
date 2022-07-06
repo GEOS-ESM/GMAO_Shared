@@ -9,7 +9,7 @@ import ruamel.yaml
 import shlex
 from remap_base import remap_base
 
-class catchANDcn(object):
+class catchANDcn(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
 
