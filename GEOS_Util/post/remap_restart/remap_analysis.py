@@ -14,22 +14,11 @@ import shutil
 import glob
 import fileinput
 import ruamel.yaml
+from remap_base import remap_base
 
-class analysis(object):
-  def __init__(self, params_file):
-     yaml = ruamel.yaml.YAML()
-     stream =''
-     with  open(params_file, 'r') as f:
-        stream = f.read()
-     self.config = yaml.load(stream)
-     f = os.path.basename(params_file)
-     out_dir    = self.config['output']['shared']['out_dir']
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
-     dest = out_dir+'/'+f
-     try:
-       shutil.copy(params_file, dest)
-     except shutil.SameFileError:
-       pass
+class analysis(remap_base):
+  def __init__(self, **configs):
+     super().__init__(**configs)
 
   def remap(self):
      config = self.config
@@ -144,5 +133,5 @@ class analysis(object):
      return list(dict.fromkeys(analysis_in))
 
 if __name__ == '__main__' :
-   ana = analysis('remap_params.yaml')
+   ana = analysis(params_file='remap_params.yaml')
    ana.remap()

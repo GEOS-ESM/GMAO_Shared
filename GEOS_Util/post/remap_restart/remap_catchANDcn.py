@@ -7,22 +7,11 @@ import shutil
 import glob
 import ruamel.yaml
 import shlex
+from remap_base import remap_base
 
 class catchANDcn(object):
-  def __init__(self, params_file):
-     yaml = ruamel.yaml.YAML()
-     stream ='' 
-     with  open(params_file, 'r') as f:
-        stream = f.read()
-     self.config = yaml.load(stream)
-     f = os.path.basename(params_file)
-     out_dir    = self.config['output']['shared']['out_dir']
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
-     dest = out_dir+'/'+f
-     try:
-       shutil.copy(params_file, dest)
-     except shutil.SameFileError:
-       pass
+  def __init__(self, **configs):
+     super().__init__(**configs)
 
   def remap(self):
      if not self.config['output']['surface']['remap_catch']:
@@ -141,5 +130,5 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
      os.chdir(cwdir)
 
 if __name__ == '__main__' :
-   catch = catchANDcn('remap_params.yaml')
+   catch = catchANDcn(params_file='remap_params.yaml')
    catch.remap()

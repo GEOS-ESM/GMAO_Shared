@@ -6,22 +6,12 @@ import subprocess
 import shlex
 import shutil
 import glob
+from remap_base import remap_base
 
 class upperair(object):
-  def __init__(self, params_file):
-     yaml = ruamel.yaml.YAML()
-     stream ='' 
-     with  open(params_file, 'r') as f:
-        stream = f.read()
-     self.config = yaml.load(stream)
-     f = os.path.basename(params_file)
-     out_dir    = self.config['output']['shared']['out_dir']
-     if not os.path.exists(out_dir) : os.makedirs(out_dir)
-     dest = out_dir+'/'+f
-     try:
-       shutil.copy(params_file, dest)  
-     except shutil.SameFileError:
-       pass
+  def __init__(self, **configs):
+     super().__init__(**configs)
+
   def remap(self):
      if not self.config['output']['air']['remap'] :
         return
@@ -278,5 +268,5 @@ endif
      return restarts_in
 
 if __name__ == '__main__' :
-   air = upperair('remap_params.yaml')
+   air = upperair(params_file='remap_params.yaml')
    air.remap()

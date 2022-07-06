@@ -69,19 +69,19 @@ def main(argv):
      print("\nYou answered not to continue, exiting.\n")
      sys.exit(0)
   # upper air
-  upper = upperair(config_yaml)
+  upper = upperair(params_file=config_yaml)
   upper.remap()
 
   # lake, landice and saltwater
-  lls  = lake_landice_saltwater(config_yaml)
+  lls  = lake_landice_saltwater(params_file=config_yaml)
   lls.remap()
 
   # catchANDcn
-  catch  = catchANDcn(config_yaml)
+  catch  = catchANDcn(params_file=config_yaml)
   catch.remap()
 
   # analysis
-  ana = analysis(config_yaml)
+  ana = analysis(params_file=config_yaml)
   ana.remap()
 
 if __name__ == '__main__' :
