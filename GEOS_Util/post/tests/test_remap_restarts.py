@@ -43,15 +43,15 @@ def compare(base, result):
         return False
   return True
 
-def test_remap(config_yaml):
+def test_remap(config):
 
-  upper = upperair(config_yaml)
+  upper = upperair(confg_obj=config)
   upper.remap()
-  lls  = lake_landice_saltwater(config_yaml)
+  lls  = lake_landice_saltwater(config_obj=config)
   lls.remap()
-  catch  = catchANDcn(config_yaml)
+  catch  = catchANDcn(config_obj=config)
   catch.remap()
-  ana = analysis(config_yaml)
+  ana = analysis(config_obj=config)
   ana.remap()
 
 
@@ -63,6 +63,12 @@ if __name__ == '__main__' :
   with  open(cases_yaml, 'r') as f:
      stream = f.read()
   cases = yaml.load(stream)
+
+  cmd = 'whoami'
+  p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+  (user, err) = p.communicate()
+  p_status = p.wait()
+  user = user.decode().split()  
   
   for case, values in cases.items():
      base_line        = values['base_line']
@@ -73,9 +79,10 @@ if __name__ == '__main__' :
        stream = f.read()
      config  = yaml.load(stream)
 
-     out_dir = config['output']['shared']['out_dir']
-
-     test_remap(config_yaml_file)
+     out_dir = '/discover/nobackup/'+user+'/RemapTesti_tmp/'+case+'/'
+     config['output']['shared']['out_dir'] = out_dir
+     
+     test_remap(config)
  
      rc = compare(base_line, out_dir)
      if (not rc) :
