@@ -27,22 +27,20 @@ def compare(base, result):
      print(len(bases), len(results))
      print (" number of restart out should be the same")
      return False
-  for f in bases:
-     bname = os.path.basename(f)
-     core = bname.split('_rst')[0].split('.')[-1]+'_rst'
-     for r in results:
-        if core in r :
-          cmd = 'nccmp -dmgfs '+ f + ' ' + r
-          print(cmd)
-          p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-          (out, err) = p.communicate()
-          rc = p.wait()
-          out = out.decode().split()
-          if "identical." in out :
-             print('identical')
-          else: 
-            print ( f + ' is different from ' + r)
-            return False
+  bases.sort()
+  results.sort()
+  for b, r in zip(bases, results):
+     cmd = 'nccmp -dmgfs '+ b + ' ' + r
+     print(cmd)
+     p = sp.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+     (out, err) = p.communicate()
+     rc = p.wait()
+     out = out.decode().split()
+     if "identical." in out :
+        print('identical')
+     else: 
+        print ( f + ' is different from ' + r)
+        return False
   return True
 
 def test_remap(config_yaml):
@@ -69,11 +67,12 @@ if __name__ == '__main__' :
   for case, values in cases.items():
      base_line        = values['base_line']
      config_yaml_file = values['config']
-     # test c24_to_c12
+
      stream =''
      with  open(config_yaml_file, 'r') as f:
        stream = f.read()
      config  = yaml.load(stream)
+
      out_dir = config['output']['shared']['out_dir']
 
      test_remap(config_yaml_file)

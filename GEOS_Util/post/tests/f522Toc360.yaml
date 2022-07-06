@@ -15,6 +15,7 @@ input:
     rst_dir: /gpfsm/dnb32/wjiang/f522_fp/
     yyyymmddhh: '2019061421'
   surface:
+    zoom: '8'
     wemin: '26'
     catch_model: catch
 
@@ -29,7 +30,6 @@ output:
     nlevel: '72'
     remap: true
   surface:
-    zoom: '8'
     split_saltwater: true
     surflay: 50.0
     wemin: '13'
@@ -43,4 +43,4 @@ output:
 slurm:
   account: g0610
   qos: debug
-  partition: hasw
+  constraint: hasw
