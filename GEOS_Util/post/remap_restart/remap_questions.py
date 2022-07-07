@@ -30,6 +30,14 @@ def fvcore_name(x):
     return False
 
 def ask_common_in():
+   cmd = 'whoami'
+   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+   (user, err) = p.communicate()
+   p_status = p.wait()
+   print(user)
+   user = user.decode().split()
+   tmp_merra2 = '/discover/nobackup/'+user[0]+'/merra2_tmp'
+
    questions = [
         {
             "type": "confirm",
@@ -44,16 +52,17 @@ def ask_common_in():
             "when": lambda x: not x['MERRA-2'],
         },
         {
-            "type": "path",
-            "name": "rst_dir",
-            "message": "Enter a directory to which the archived MERRA-2 archive files can be copied: ",
-            "when": lambda x: x['MERRA-2'],
-        },
-        {
             "type": "text",
             "name": "yyyymmddhh",
             "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)",
             "validate": lambda text: len(text)==10 ,
+        },
+        {
+            "type": "path",
+            "name": "rst_dir",
+            "message": "Enter a directory to which the archived MERRA-2 archive files can be copied: ",
+            "default": lambda x: tmp_merra2+x['yyyymmddhh']+'/',
+            "when": lambda x: x['MERRA-2'],
         },
         {
             "type": "text",
@@ -408,8 +417,8 @@ def get_config_from_questionary():
     return config
 
 if __name__ == "__main__":
-  config = get_config_from_questionary()
-  yaml = ruamel.yaml.YAML()
-  with open("raw_answers.yaml", "w") as f:
-    yaml.dump(config, f)
+   config = get_config_from_questionary()
+   yaml = ruamel.yaml.YAML()
+   with open("raw_answers.yaml", "w") as f:
+     yaml.dump(config, f)
 
