@@ -43,6 +43,7 @@ def main(argv):
     if opt in("-c", "--config_file"):
       config_yaml = arg
 
+  params = ''
   if config_yaml == '':
     config = get_config_from_questionary()
     params = remap_params(config)
@@ -68,6 +69,11 @@ def main(argv):
   if not answer['Continue'] :
      print("\nYou answered not to continue, exiting.\n")
      sys.exit(0)
+  
+  # copy merra2 files from archives
+  if params:
+     params.copy_merra2()
+
   # upper air
   upper = upperair(params_file=config_yaml)
   upper.remap()

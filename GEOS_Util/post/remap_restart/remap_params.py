@@ -248,23 +248,6 @@ class remap_params(object):
      self.ymd  = ymdh[0:8]  
 
   def init_merra2(self):
-    def get_grid_kind(grid):
-      hgrd = {}
-      hgrd['C12']   = 'a'
-      hgrd['C24']   = 'a'
-      hgrd['C48']   = 'b'
-      hgrd['C90']   = 'c'
-      hgrd['C180']  = 'd'
-      hgrd['C360']  = 'd'
-      hgrd['C500']  = 'd'
-      hgrd['C720']  = 'e'
-      hgrd['C1000'] = 'e'
-      hgrd['C1440'] = 'e'
-      hgrd['C2000'] = 'e'
-      hgrd['C2880'] = 'e'
-      hgrd['C5760'] = 'e'
-      return hgrd[grid]
-
     if not self.common_in['MERRA-2']:
       return
     print("\n MERRA-2 sources:\n")
@@ -284,6 +267,11 @@ class remap_params(object):
     self.common_in['ogrid'] = '1440x720'
     self.common_in['bc_base']= 'discover_ops'
     self.common_in['tag']= 'Ganymed-4_0'
+
+  def copy_merra2(self):
+    if not self.common_in['MERRA-2']:
+      return
+    print("\n Copy MERRA-2 :\n")
     expid = self.common_in['expid']
     yyyymmddhh_ = str(self.common_in['yyyymmddhh'])
     surfix = yyyymmddhh_[0:8]+'_'+self.hh+'z.bin'
@@ -332,10 +320,6 @@ class remap_params(object):
 
     agrid_in  = self.common_in['agrid']
     agrid_out = self.common_out['agrid']
-
-    if (get_grid_kind(agrid_in.upper()) == get_grid_kind(agrid_out.upper())):
-      print(" No need to remap anaylysis file according to air grid in and out")
-      #return
 
     anafiles=[]
     for h in [3,4,5,6,7,8,9]:
