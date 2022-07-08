@@ -13,14 +13,13 @@ from datetime import timedelta
 
 class remap_params(object):
   def __init__(self, config_from_question):
-     self.common_in     = config_from_question['input']['parameters']['COMMON']
-     self.common_out    = config_from_question['output']['parameters']['COMMON']
-     self.upper_out     = config_from_question['output']['parameters']['UPPERAIR']
-     self.slurm_options = config_from_question['slurm_options']
-     self.surf_in  = config_from_question['input']['parameters']['SURFACE']
-     self.surf_out = config_from_question['output']['parameters']['SURFACE']
-     #self.ana_in   = config_from_question['input']['parameters']['ANALYSIS']
-     self.ana_out  = config_from_question['output']['parameters']['ANALYSIS']
+     self.common_in     = config_from_question['input']['shared']
+     self.common_out    = config_from_question['output']['shared']
+     self.upper_out     = config_from_question['output']['air']
+     self.slurm_options = config_from_question['slurm']
+     self.surf_in  = config_from_question['input']['surface']
+     self.surf_out = config_from_question['output']['surface']
+     self.ana_out  = config_from_question['output']['analysis']
 
      self.init_time()
      self.init_tags()
@@ -500,7 +499,7 @@ class remap_params(object):
      anames = get_name_with_grid(agrid_, dirnames, 'a')
      gridID = get_name_with_grid(ogrid_, anames, 'o')
      if len(gridID) == 0 :
-       exit("cannot find the grid string: " + bcdir)
+       exit("cannot find the grid subdirctory of agrid: " +agrid_+ " and ogrid " + ogrid_ + " under "+ bcdir)
      g = ''
      if len(gridID) == 1 : g = gridID[0]
      if len(gridID) >=2 :
