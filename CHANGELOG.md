@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
 
+- Added check for infinity in time_ave.F and replace with undef
+
 ### Removed
 
 ## [1.5.4] - 2022-05-03
