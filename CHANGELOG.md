@@ -13,10 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed restart file geosachem to achem in regrid.pl
 - Updated CI to modern v1 orb
+- Updated CI to use Baselibs 7.5.0
 
 ### Fixed
 
 - More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
+- Fixed setting of `ks` in `m_set_eta.F90` to be based on `bk`
+
+- Added check for infinity in time_ave.F and replace with undef
 
 ### Removed
 
