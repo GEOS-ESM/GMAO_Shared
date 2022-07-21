@@ -137,7 +137,7 @@ class analysis(remap_base):
   def copy_merra2(self):
     if not self.config['input']['shared']['MERRA-2']:
       return
-    bkg = self.config['output']['shared'][['bkg']
+    bkg = self.config['output']['analysis']['bkg']
     if ( not bkg ): return
 
     expid = self.config['input']['shared']['expid']

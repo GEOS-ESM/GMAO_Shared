@@ -35,6 +35,7 @@ class remap_params(object):
      config_tpl = yaml.load(stream)
 
      # params for shared
+     config_tpl['input']['shared']['MERRA-2']  = self.common_in.get('MERRA-2')
      config_tpl['input']['shared']['agrid']    = self.common_in.get('agrid')
      config_tpl['input']['shared']['ogrid']    = self.common_in.get('ogrid')
      config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
@@ -43,6 +44,7 @@ class remap_params(object):
 
      config_tpl['output']['air']['nlevel']     = self.upper_out.get('nlevel')
      config_tpl['output']['air']['remap']      = self.upper_out.get('remap')
+     config_tpl['input']['surface']['catch_model']       = self.surf_in.get('catch_model')
      config_tpl['output']['surface']['remap_water']      = self.surf_out.get('remap')
      config_tpl['output']['surface']['remap_catch']      = self.surf_out.get('remap')
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
@@ -267,6 +269,7 @@ class remap_params(object):
     self.common_in['ogrid'] = '1440x720'
     self.common_in['bc_base']= 'discover_ops'
     self.common_in['tag']= 'Ganymed-4_0'
+    self.surf_in['catch_model'] = 'catch'
 
   def get_bcbase(self, opt):
      base = ''
