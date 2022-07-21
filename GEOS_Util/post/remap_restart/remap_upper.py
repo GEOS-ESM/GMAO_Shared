@@ -11,6 +11,8 @@ from remap_base import remap_base
 class upperair(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
+     if self.config['input']['shared']['MERRA-2']:
+       self.copy_merra2()
 
   def remap(self):
      if not self.config['output']['air']['remap'] :
@@ -266,6 +268,35 @@ endif
              restarts_in.append(fname)
         
      return restarts_in
+
+  def copy_merra2(self):
+    if not self.config['input']['shared']['MERRA-2']:
+      return
+
+    expid = self.config['input']['shared']['expid']
+    yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
+    yyyy_ = yyyymmddhh_[0:4]
+    mm_   = yyyymmddhh_[4:6]
+    dd_   = yyyymmddhh_[6:8]
+    hh_   = yyyymmddhh_[8:10]
+
+    suffix = yyyymmddhh_[0:8]+'_'+ hh_ + 'z.bin'
+    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
+    rst_dir = self.config['input']['shared']['rst_dir'] + '/'
+    os.makedirs(rst_dir, exist_ok = True)
+    print(' Copy MERRA-2 upper air restarts \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
+
+    upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + suffix,
+              merra_2_rst_dir +  expid+'.moist_internal_rst.'  + suffix,
+              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + suffix,
+              merra_2_rst_dir +  expid+'.gocart_internal_rst.' + suffix,
+              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + suffix ]
+
+    for f in upperin :
+       fname = os.path.basename(f)
+       dest = rst_dir + '/'+fname
+       print("Copy file "+f +" to " + rst_dir)
+       shutil.copy(f, dest)
 
 if __name__ == '__main__' :
    air = upperair(params_file='remap_params.yaml')

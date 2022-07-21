@@ -30,13 +30,7 @@ def fvcore_name(x):
     return False
 
 def tmp_merra2_dir(x):
-   cmd = 'whoami'
-   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (user, err) = p.communicate()
-   p_status = p.wait()
-   print(user)
-   user = user.decode().split()
-   tmp_merra2 = '/discover/nobackup/'+user[0]+'/merra2_tmp'+x['input:shared:yyyymmddhh']+'/'
+   tmp_merra2 = x['output:shared:out_dir']+ '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
    return tmp_merra2
 
 def we_default(tag):
@@ -101,18 +95,19 @@ def ask_questions():
             "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)",
             "validate": lambda text: len(text)==10 ,
         },
-        {
-            "type": "path",
-            "name": "input:shared:rst_dir",
-            "message": "Enter a directory to which the archived MERRA-2 archive files can be copied: ",
-            "default": lambda x: tmp_merra2_dir(x),
-            "when": lambda x: x['input:shared:MERRA-2'],
-        },
 
         {
             "type": "path",
             "name": "output:shared:out_dir",
             "message": "Enter the directory for new restarts:\n"
+        },
+
+        {
+            "type": "path",
+            "name": "input:shared:rst_dir",
+            "message": "Enter a temporary directory for archived MERRA-2 files: ",
+            "default": lambda x: tmp_merra2_dir(x),
+            "when": lambda x: x['input:shared:MERRA-2'],
         },
 
         {

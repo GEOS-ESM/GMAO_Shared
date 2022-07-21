@@ -8,6 +8,7 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
+    MERRA-2: false
     agrid: 
     bcs_dir:
     expid:

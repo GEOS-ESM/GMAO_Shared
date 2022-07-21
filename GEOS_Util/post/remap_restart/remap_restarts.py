@@ -70,10 +70,6 @@ def main(argv):
      print("\nYou answered not to continue, exiting.\n")
      sys.exit(0)
   
-  # copy merra2 files from archives
-  if params:
-     params.copy_merra2()
-
   # upper air
   upper = upperair(params_file=config_yaml)
   upper.remap()

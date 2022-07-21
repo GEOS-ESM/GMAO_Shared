@@ -19,6 +19,8 @@ from remap_base import remap_base
 class analysis(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
+     if self.config['input']['shared']['MERRA-2']:
+       self.copy_merra2()
 
   def remap(self):
      config = self.config
@@ -131,6 +133,70 @@ class analysis(remap_base):
      traks= glob.glob(rst_dir + '/*.trak.GDA.rst*')
      analysis_in = bkgs + sfcs + traks + anasat
      return list(dict.fromkeys(analysis_in))
+
+  def copy_merra2(self):
+    if not self.config['input']['shared']['MERRA-2']:
+      return
+    bkg = self.config['output']['shared'][['bkg']
+    if ( not bkg ): return
+
+    expid = self.config['input']['shared']['expid']
+    yyyymmddhh_ = str(self.config['input']['shared']['yyyymmddhh'])
+    yyyy_ = yyyymmddhh_[0:4]
+    mm_   = yyyymmddhh_[4:6]
+    dd_   = yyyymmddhh_[6:8]
+    hh_   = yyyymmddhh_[8:10]
+
+    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+yyyy_ +'/M'+mm_+'/'
+    rst_dir = self.config['input']['shared']['rst_dir'] + '/'
+    os.makedirs(rst_dir, exist_ok = True)
+    print(' Copy MERRA-2 analysis files \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n')
+
+    rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
+
+    anafiles=[]
+    for h in [3,4,5,6,7,8,9]:
+       delt = timedelta(hours = h-3)
+       new_time = rst_time + delt
+       yyyy = "Y"+str(new_time.year)
+       mm   = 'M%02d'%new_time.month
+       ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
+       hh   = '%02d'%h
+       newhh= '%02d'%new_time.hour
+       m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
+       # bkg files
+       for ftype in ['sfc', 'eta']:
+          fname = expid + '.bkg'+hh+'_'+ftype+'_rst.'+ymd+'_'+newhh+'z.nc4'
+          f = m2_rst_dir+'/'+fname
+          if(os.path.isfile(f)):
+             anafiles.append(f)
+          else:
+             print('Warning: Cannot find '+f)
+
+       # gaas_bkg_sfc files
+       if (h==6 or h==9):
+          fname = expid+'.gaas_bkg_sfc_rst.'+ymd+'_'+newhh+'z.nc4'
+          f = m2_rst_dir+'/'+fname
+          if (os.path.isfile(f)):
+            anafiles.append(f)
+          else:
+            print('Warning: Cannot find '+f)
+    # trak.GDA.rst file
+    delt = timedelta(hours = 3)
+    new_time = rst_time - delt
+    yyyy = "Y"+str(new_time.year)
+    mm   = 'M%02d'%new_time.month
+    ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
+    m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
+    fname = expid+'.trak.GDA.rst.'+ymdh+'z.txt'
+    f = m2_rst_dir+'/'+fname
+    if (os.path.isfile(f)): anafiles.append(f)
+
+    for f in anafiles:
+      fname    = os.path.basename(f)
+      f_tmp = rst_dir+'/'+fname
+      print("Copy file "+f +" to " + rst_dir)
+      shutil.copy(f,f_tmp)
 
 if __name__ == '__main__' :
    ana = analysis(params_file='remap_params.yaml')
