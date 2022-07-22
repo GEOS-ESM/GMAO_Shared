@@ -8,11 +8,12 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
+    MERRA-2: false
     agrid: C720
     bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus_Updated/Icarus_Ostia//CF0720x6C_CF0720x6C/
     expid: f522_fp
     ogrid: C720
-    rst_dir: /gpfsm/dnb32/wjiang/f522_fp/
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/inputs/ 
     yyyymmddhh: '2019061421'
   surface:
     zoom: '8'
@@ -25,7 +26,7 @@ output:
     bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0360x6C_DE0360xPE0180/
     expid: remap
     ogrid: 360X180
-    out_dir: /home/wjiang/swdev/github/GEOSgcm_newRegrid/install/bin/f522_out/
+    out_dir: $NOBACKUP/REMAP_TESTS/f522Toc360/
   air:
     nlevel: '72'
     remap: true

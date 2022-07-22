@@ -45,7 +45,7 @@ def compare(base, result):
 
 def test_remap(config):
 
-  upper = upperair(confg_obj=config)
+  upper = upperair(config_obj=config)
   upper.remap()
   lls  = lake_landice_saltwater(config_obj=config)
   lls.remap()
@@ -68,8 +68,8 @@ if __name__ == '__main__' :
   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
   (user, err) = p.communicate()
   p_status = p.wait()
-  user = user.decode().split()  
-  
+  user = user.decode().split()[0]  
+
   for case, values in cases.items():
      base_line        = values['base_line']
      config_yaml_file = values['config']
@@ -79,7 +79,7 @@ if __name__ == '__main__' :
        stream = f.read()
      config  = yaml.load(stream)
 
-     out_dir = '/discover/nobackup/'+user+'/RemapTest_tmp/'+case+'/'
+     out_dir = '/discover/nobackup/'+user+'/REMAP_TESTS/'+case+'/'
      config['output']['shared']['out_dir'] = out_dir
      
      test_remap(config)

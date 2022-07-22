@@ -8,11 +8,12 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
+    MERRA-2: false
     agrid: C24
     bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0024x6C_DE0360xPE0180/
     expid: ''
     ogrid: 360X180
-    rst_dir: /discover/nobackup/mathomp4/Restarts-J10/nc4/Reynolds/c24-NLv3/
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c24Toc12/inputs
     yyyymmddhh: '2000041421'
   surface:
     zoom: '1'
@@ -26,7 +27,7 @@ output:
     bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0012x6C_DE0360xPE0180/
     expid: hello
     ogrid: 360X180
-    out_dir: /home/wjiang/swdev/github/GEOSgcm_newRegrid/install/bin/remap_c24Toc12/
+    out_dir: $NOBACKUP/REMAP_TESTS/c24Toc12/
   air:
     remap: true
     nlevel: '72'

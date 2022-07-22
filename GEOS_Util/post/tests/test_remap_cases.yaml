@@ -1,7 +1,7 @@
 c24Toc12:
-  base_line: '/gpfsm/dnb32/wjiang/pl_c24Tc12'
+  base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c24Toc12/baseline/'
   config: 'c24Toc12.yaml'
 f522Toc360:
-  base_line: '/gpfsm/dnb32/wjiang/f522_fp_pl'
+  base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/baseline/'
   config: 'f522Toc360.yaml'
   
