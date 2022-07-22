@@ -1,0 +1,48 @@
+#
+# This template file can be filled with questionary or manually
+# 
+# 
+
+input:
+  air:
+    drymass: 1
+    hydrostatic: 0
+  shared:
+    MERRA-2: false
+    agrid: C24
+    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0024x6C_DE0360xPE0180/
+    expid: ''
+    ogrid: 360X180
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c24Toc12/inputs
+    yyyymmddhh: '2000041421'
+  surface:
+    zoom: '1'
+    wemin: '13'
+    # it supports three models: catch, catchcnclm40, catchcnclm45
+    catch_model: catch
+
+output:
+  shared:
+    agrid: C12
+    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0012x6C_DE0360xPE0180/
+    expid: hello
+    ogrid: 360X180
+    out_dir: $NOBACKUP/REMAP_TESTS/c24Toc12/
+  air:
+    remap: true
+    nlevel: '72'
+  surface:
+    split_saltwater: true
+    surflay: 50.0
+    wemin: '13'
+    remap_water: true
+    remap_catch: true
+  analysis:
+    bkg: false
+    aqua: true
+    lcv: false
+
+slurm:
+  account: g0610
+  qos: debug
+  constraint: hasw

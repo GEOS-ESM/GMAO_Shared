@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- series of regrid*.py are added to GEOS_Util/post
+- Introduce series of remap_restarts Python scripts to GEOS_Util/post
+- Add a series of tests for remap_restarts
 
 ### Changed
 
