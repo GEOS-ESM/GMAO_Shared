@@ -2,8 +2,20 @@ import os
 import subprocess
 import ruamel.yaml
 from collections import OrderedDict
+import shutil
+import questionary
 
 def config_to_yaml(config, yaml_file):
+   if os.path.exists(yaml_file) :
+      overwrite = questionary.confirm("Do you want to overwrite " + yaml_file + "?" , default=False).ask()
+      if not overwrite :
+         while True:
+           new_name = questionary.text("What's the backup name?  ", default=yaml_file +'.1').ask()
+           if os.path.exists(new_name):
+              print('\n'+ new_name + ' exists, please enter a new one. \n')
+           else:
+              shutil.move(yaml_file, new_name)
+              break
    yaml = ruamel.yaml.YAML()
    with open(yaml_file, "w") as f:
       yaml.dump(config, f)

@@ -7,9 +7,9 @@ import glob
 import time
 import shlex
 import subprocess
-import questionary
 from datetime import datetime
 from datetime import timedelta
+from remap_utils import config_to_yaml
 
 class remap_params(object):
   def __init__(self, config_from_question):
@@ -65,21 +65,6 @@ class remap_params(object):
      config_tpl['output']['shared']['bcs_dir']   = out_bcsdir + '/'
 
      self.config = config_tpl
-
-  def convert_to_yaml(self) :
-     if os.path.exists('remap_params.yaml') :
-       overwrite = questionary.confirm("Do you want to overwrite remap_params.yaml file?", default=False).ask()
-       if not overwrite :
-         while True:
-           new_name = questionary.text("What's the backup name for existing remap_params.yaml?", default='remap_params.yaml.1').ask()
-           if os.path.exists(new_name):
-              print('\n'+ new_name + ' exists, please enter a new one. \n')
-           else:
-              shutil.move('remap_params.yaml', new_name)
-              break
-     yaml = ruamel.yaml.YAML()
-     with open("remap_params.yaml", "w") as f:
-        yaml.dump(self.config, f)
 
   def init_tags(self):
      # copy and paste from remap.pl
@@ -508,4 +493,4 @@ if __name__ == "__main__":
      stream = f.read()
   config = yaml.load(stream)
   param = remap_params(config) 
-  param.convert_to_yaml() 
+  config_to_yaml(param.config, 'remap_params.yaml') 
