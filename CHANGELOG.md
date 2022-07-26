@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- change the location of the temporary folder for remap_restarts MERRA-2 case 
+- Generated command line to run the program
+- changed the location of the temporary folder for remap_restarts MERRA-2 case 
 
 ### Fixed
 
