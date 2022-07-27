@@ -11,8 +11,7 @@ from remap_base import remap_base
 class lake_landice_saltwater(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     if self.config['input']['shared']['MERRA-2']:
-       self.copy_merra2()
+     self.copy_merra2()
 
   def remap(self):
      if not self.config['output']['surface']['remap_water']:
@@ -139,6 +138,8 @@ class lake_landice_saltwater(remap_base):
        shutil.move(out_rst, out_dir+"/"+filename)
      print('cd ' + cwdir)
      os.chdir(cwdir)
+
+     self.remove_merra2()
 
   def find_rst(self):
      surf_restarts =[

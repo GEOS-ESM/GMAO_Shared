@@ -12,8 +12,7 @@ from remap_base import remap_base
 class catchANDcn(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     if self.config['input']['shared']['MERRA-2']:
-       self.copy_merra2()
+     self.copy_merra2()
 
   def remap(self):
      if not self.config['output']['surface']['remap_catch']:
@@ -130,6 +129,8 @@ $esma_mpirun_X $mk_catchANDcnRestarts_X $params
 
      print( "cd " + cwdir)
      os.chdir(cwdir)
+
+     self.remove_merra2()
 
   def copy_merra2(self):
     if not self.config['input']['shared']['MERRA-2']:

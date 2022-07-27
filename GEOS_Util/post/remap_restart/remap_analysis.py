@@ -19,8 +19,7 @@ from remap_base import remap_base
 class analysis(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     if self.config['input']['shared']['MERRA-2']:
-       self.copy_merra2()
+     self.copy_merra2()
 
   def remap(self):
      config = self.config
@@ -106,6 +105,8 @@ class analysis(remap_base):
        subprocess.call(shlex.split(cmd))
      print( "cd " + cwdir)
      os.chdir(cwdir)
+
+     self.remove_merra2()
 
   def get_grid_kind(this, grid):
      hgrd = {}

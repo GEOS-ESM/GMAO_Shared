@@ -11,8 +11,7 @@ from remap_base import remap_base
 class upperair(remap_base):
   def __init__(self, **configs):
      super().__init__(**configs)
-     if self.config['input']['shared']['MERRA-2']:
-       self.copy_merra2()
+     self.copy_merra2()
 
   def remap(self):
      if not self.config['output']['air']['remap'] :
@@ -250,6 +249,8 @@ endif
      shutil.move('remap_upper.j', out_dir+"/remap_upper.j")
      print('cd ' + cwdir)
      os.chdir(cwdir)
+
+     self.remove_merra2()
 
   def find_rst(self):
      rst_dir = self.config['input']['shared']['rst_dir']
