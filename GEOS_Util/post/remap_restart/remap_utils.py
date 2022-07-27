@@ -52,15 +52,14 @@ def write_cmd(config) :
 
    k = 1   
    for key, value in flat_dict.items():
-     if isinstance(value, int) :   value = str(value)
-     if isinstance(value, float) : value = str(value)
+     if isinstance(value, int) or isinstance(value, float) :   value = str(value)
      if k == 1:
-       cmd = cmd + 'set FLATYAML="' + key+"="+ value+ '"\n'
+       cmd = cmd + 'set FLAT_YAML="' + key+"="+ value+ '"\n'
      else:
-       cmd = cmd + 'set FLATYAML="$FLATYAML '+ key+"="+ value+ '"\n'
+       cmd = cmd + 'set FLAT_YAML="$FLAT_YAML '+ key+"="+ value+ '"\n'
      k = k+1
 
-   cmd = cmd + '$BINPATH/remap_restarts.py -o $FLATYAML'
+   cmd = cmd + '$BINPATH/remap_restarts.py -o $FLAT_YAML'
 
    with open(out_dir + '/remap_restarts.CMD', 'w') as f:
      f.write(cmd)
@@ -81,7 +80,7 @@ def args_to_config(args):
    for values in args:
      [keys, value] = values.split("=")
      key = keys.split(':')
-     if value.lower() in ['false', 'null'] :
+     if value.lower() in ['false', 'null', 'none'] :
         value = False
      elif value.lower() in ['true'] :
         value = True
