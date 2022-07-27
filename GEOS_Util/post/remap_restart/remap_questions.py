@@ -17,13 +17,15 @@ import glob
 def fvcore_name(x):
   ymdh = x['input:shared:yyyymmddhh']
   time = ymdh[0:8] + '_'+ymdh[8:10]
-  files = glob.glob(x['input:shared:rst_dir']+'/*fvcore_*'+time+'*')
+  rst_dir = x.get('input:shared:rst_dir')
+  if not rst_dir : return False
+  files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
   if len(files) ==1 :
     fname = files[0]
     print('\nFound ' + fname) 
     return fname
   else:
-    fname = x['input:shared:rst_dir']+'/fvcore_internal_rst'
+    fname = rst_dir+'/fvcore_internal_rst'
     if os.path.exists(fname):
        print('\nFound ' + fname) 
        return fname
@@ -100,14 +102,6 @@ def ask_questions():
             "type": "path",
             "name": "output:shared:out_dir",
             "message": "Enter the directory for new restarts:\n"
-        },
-
-        {
-            "type": "path",
-            "name": "input:shared:rst_dir",
-            "message": "Enter a temporary directory for archived MERRA-2 files: ",
-            "default": lambda x: tmp_merra2_dir(x),
-            "when": lambda x: x['input:shared:MERRA-2'],
         },
 
         {
@@ -328,6 +322,8 @@ Sample DAS tags \n \
    answers = questionary.prompt(questions)
    if not answers.get('input:shared:model') :
       answers['input:shared:model'] = 'data'
+   if answers['input:shared:MERRA-2']:
+     answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
    answers['input:shared:rst_dir'] = os.path.abspath(answers['input:shared:rst_dir'])
    if answers.get('output:shared:ogrid') == 'CS':
       answers['output:shared:ogrid'] = answers['output:shared:agrid']
