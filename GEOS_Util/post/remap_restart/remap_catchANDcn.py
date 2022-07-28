@@ -43,8 +43,12 @@ class catchANDcn(remap_base):
      in_wemin   = config['input']['surface']['wemin']
      out_wemin  = config['output']['surface']['wemin']
      surflay    = config['output']['surface']['surflay']
-     in_tilefile  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
-     out_tilefile = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
+     in_tilefile = config['input']['surface']['catch_tilefile']
+     if not in_tilefile :
+        in_tilefile  = glob.glob(in_bcsdir+ '/*-Pfafstetter.til')[0]
+     out_tilefile = config['output']['surface']['catch_tilefile']
+     if not out_tilefile :
+        out_tilefile = glob.glob(out_bcsdir+ '/*-Pfafstetter.til')[0]
      account    = config['slurm']['account']
      # even the input is binary, the output si nc4
      suffix     = time+'z.nc4'
