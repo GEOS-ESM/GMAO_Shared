@@ -9,16 +9,12 @@ set (SRCS
 
 esma_add_library (${this}
   SRCS ${SRCS}
-  DEPENDENCIES nc_diag_write
-  INCLUDES ${INC_NETCDF}
+  DEPENDENCIES nc_diag_write NetCDF::NetCDF_Fortran
   )
 target_compile_definitions (${this} PRIVATE _REAL8_ ERROR_TRACEBACK QUIET)
 
 ecbuild_add_executable (TARGET test_nc_unlimdims.x SOURCES test_nc_unlimdims.F90)
-target_link_libraries (test_nc_unlimdims.x PUBLIC ${this} ${ESMF_LIBRARIES})
+target_link_libraries (test_nc_unlimdims.x PUBLIC ${this} esmf)
 
 ecbuild_add_executable (TARGET nc_diag_cat.x SOURCES nc_diag_cat.F90)
-target_link_libraries (nc_diag_cat.x PUBLIC ${this} ${ESMF_LIBRARIES})
-
-
-  
+target_link_libraries (nc_diag_cat.x PUBLIC ${this} esmf)
