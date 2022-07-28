@@ -20,7 +20,8 @@ input:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: null
-
+    # if catch_tilefile is null, it searches bcs_dir     
+    catch_tilefile: null
 output:
   shared:
     agrid:
@@ -40,6 +41,8 @@ output:
     remap_water: true
     # remap catch(cn)
     remap_catch: true
+    # if catch_tilefile is null, it searches bcs_dir     
+    catch_tilefile: null
   analysis:
     bkg: true
     aqua: False

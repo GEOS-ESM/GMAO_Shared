@@ -66,17 +66,10 @@ def write_cmd(config) :
    subprocess.call(['chmod', '+x',out_dir + '/remap_restarts.CMD'])
 
 def args_to_config(args):
-   config  = {}
-   config['input'] = {}
-   config['input']['air'] = {}
-   config['input']['shared'] = {}
-   config['input']['surface'] = {}
-   config['output'] = {}
-   config['output']['shared'] = {}
-   config['output']['air'] = {}
-   config['output']['surface'] = {}
-   config['output']['analysis'] = {}
-   config['slurm'] = {}
+   # template file should be with this util file
+   remap_tpl = os.path.dirname(os.path.realpath(__file__)) + '/remap_params.tpl'
+   config = yaml_to_config(remap_tpl)
+   # fill in the config with args
    for values in args:
      [keys, value] = values.split("=")
      key = keys.split(':')
