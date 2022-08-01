@@ -11,14 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed restart file geosachem to achem in regrid.pl
+### Fixed
+
+### Removed
+
+## [1.5.6] - 2022-07-22
+
+### Added
+
+- Introduce series of remap_restarts Python scripts to GEOS_Util/post
+- Add a series of tests for remap_restarts
+
+### Changed
+
 - Updated CI to modern v1 orb
+- Updated CI to use Baselibs 7.5.0
 
 ### Fixed
 
-- More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
+- Implemented a more robust check to test if a history's monthly attribute is 1 (on) and not commented out.
+- Fixed setting of `ks` in `m_set_eta.F90` to be based on `bk`
+- Added check for infinity in time_ave.F and replace with undef
 
-### Removed
+## [1.5.5] - 2022-06-08
+
+### Changed
+
+- Changed restart file geosachem to achem in regrid.pl
+- More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
 
 ## [1.5.4] - 2022-05-03
 
