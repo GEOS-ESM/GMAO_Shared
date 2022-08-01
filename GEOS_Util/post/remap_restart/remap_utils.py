@@ -91,3 +91,23 @@ def print_config( config, indent = 0 ):
         print_config(v, indent+1)
      else:
         print("   " * indent, f"{k}: {v}")
+
+def merra2_expid(config):
+   if not config['MERRA-2']:
+      return config
+   yyyymm = int(config.get('yyyymmddhh')[0:6])
+   if yyyymm < 197901 :
+      exit("Error. MERRA-2 data < 1979 not available\n")
+   elif (yyyymm < 199201):
+      expid = "d5124_m2_jan79"
+   elif (yyyymm < 200106):
+      expid = "d5124_m2_jan91"
+   elif (yyyymm < 201101):
+      expid = "d5124_m2_jan00"
+   else:
+      expid = "d5124_m2_jan10"
+   config['expid'] = expid
+
+   return config
+ 
+

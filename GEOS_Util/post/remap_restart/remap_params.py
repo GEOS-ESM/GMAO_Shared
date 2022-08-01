@@ -9,7 +9,7 @@ import shlex
 import subprocess
 from datetime import datetime
 from datetime import timedelta
-from remap_utils import config_to_yaml
+from remap_utils import config_to_yaml, merra2_expid
 
 class remap_params(object):
   def __init__(self, config_from_question):
@@ -237,18 +237,7 @@ class remap_params(object):
   def init_merra2(self):
     if not self.common_in['MERRA-2']:
       return
-    print("\n MERRA-2 sources:\n")
-    yyyymm = int(self.yyyymm)
-    if yyyymm < 197901 :
-      exit("Error. MERRA-2 data < 1979 not available\n")
-    elif (yyyymm < 199201):
-      self.common_in['expid'] = "d5124_m2_jan79"     
-    elif (yyyymm < 200106):
-      self.common_in['expid'] = "d5124_m2_jan91"
-    elif (yyyymm < 201101):
-      self.common_in['expid'] = "d5124_m2_jan00"
-    else:
-      self.common_in['expid'] = "d5124_m2_jan10"
+    self.common_in = merra2_expid(self.common_in)
 
     self.common_in['agrid'] = 'C180'
     self.common_in['ogrid'] = '1440x720'

@@ -1,0 +1,52 @@
+#
+# This template file can be filled with questionary or manually
+# 
+# 
+
+input:
+  air:
+    drymass: 1
+    hydrostatic: 0
+  shared:
+    MERRA-2: false
+    agrid: C180
+    bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_MERRA-2//CF0180x6C_DE1440xPE0720/
+    expid: Jason-3_4_NL_REAMIP_MERRA2_C180
+    ogrid: 1440X720
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c180Toc360/inputs/ 
+    yyyymmddhh: '1985050921'
+  surface:
+    zoom: '2'
+    wemin: '13'
+    # it supports three models: catch, catchcnclm40, catchcnclm45
+    catch_model: catch
+    catch_tilefile: null
+output:
+  shared:
+    agrid: C360
+    bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_Ostia//CF0360x6C_CF0360x6C/
+    expid: C360CS_Jason-3_4_NL_REAMIP_MERRA2_C180
+    ogrid: C360
+    out_dir: $NOBACKUP/REMAP_TESTS/c360Toc24/
+  air:
+    # remap upper air or not
+    remap: true
+    nlevel: '91'
+  surface:
+    split_saltwater: true
+    surflay: 50.0
+    wemin: '13'
+    # remap lake, saltwater, landicet
+    remap_water: true
+    # remap catch(cn)
+    remap_catch: true
+    catch_tilefile: null
+  analysis:
+    bkg: false
+    aqua: true
+    lcv: false
+
+slurm:
+  account: g0620
+  qos: debug
+  constraint: sky
