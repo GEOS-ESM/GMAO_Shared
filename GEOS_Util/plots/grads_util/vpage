@@ -2,7 +2,7 @@ function vpage (args)
 
 *************************************************************
 *****                                                   *****
-*****  Usage:  vpage xloc yloc xmax ymax <ytop>         *****
+*****  Usage:  vpage xloc yloc xmax ymax                *****
 *****                                                   *****
 *************************************************************
 
@@ -14,7 +14,16 @@ yloc = subwrd(args,2)
 xmax = subwrd(args,3)
 ymax = subwrd(args,4)
 
-  ytop = 0.5
+  top = 0.5
+  bot = 0.2
+ left = 0.2
+right = 0.2
+
+  top = 0.0
+  bot = 0.0
+ left = 0.0
+right = 0.0
+
 scalex = 1
 scaley = 1
 
@@ -23,81 +32,73 @@ while( num < numargs )
        num = num + 1
 if( subwrd(args,num)='-scalex' ) ; scalex = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-scaley' ) ; scaley = subwrd(args,num+1) ; endif
-if( subwrd(args,num)='-ytop'   ) ; ytop   = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-top'    ) ; top    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-bot'    ) ; bot    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-left'   ) ; left   = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-right'  ) ; right  = subwrd(args,num+1) ; endif
 endwhile
 
 'set vpage off'
 'getinfo page'
+
 pagex = subwrd(result,1)
-pagey = subwrd(result,2)-ytop
+pagey = subwrd(result,2)
 
+dx0 = ( pagex / xmax )
+dy0 = ( pagey / ymax )
 
-*'set mproj latlon'
-*'set mproj scaled'
-*diff  = (pagex-pagey/1.75)*0.5
-*pagex = pagey/1.65
+dx  = ( pagex / xmax ) - ( left + right )
+dy  = ( pagey / ymax ) - ( top  + bot   )
 
-dx = pagex / xmax
-dy = pagey / ymax
+      x1 = (xloc-1)*dx0 + left
+      x2 =  x1 + dx - 1e-3
 
-delx = dx * (scalex - 1)
-dely = dy * (scaley - 1)
+       y2 = pagey - (yloc-1)*dy0 - top
+       y1 = y2 - dy - 1e-3
 
-if( xloc = 1 )
-      x1 = (xloc-1)*dx
-      x2 = (xloc-0)*dx + delx
-*     say 'a  x1: 'x1'  x2: 'x2'  delx: 'x2-x1'  xloc: 'xloc' xmax: 'xmax'  dx: 'dx
-endif
-if( xloc = xmax )
-      x1 = (xloc-1)*dx - delx
-      x2 = (xloc-0)*dx
-*     say 'b  x1: 'x1'  x2: 'x2'  delx: 'x2-x1'  xloc: 'xloc' xmax: 'xmax'  dx: 'dx
-endif
-if( xloc != 1 & xloc != xmax )
-      x1 = (xloc-1)*dx - (delx/2)
-      x2 = (xloc-0)*dx + (delx/2)
-*     say 'c  x1: 'x1'  x2: 'x2' x2-x1: 'x2-x1'  xloc: 'xloc' xmax: 'xmax'  dx: 'dx'  delx: 'delx
-endif
-
-if( yloc = 1 )
-      y2 = pagey - (yloc-1)*dy
-      y1 = pagey - (yloc-0)*dy - dely
-endif
-if( yloc = ymax )
-      y2 = pagey - (yloc-1)*dy + dely
-      y1 = pagey - (yloc-0)*dy
-endif
-if( yloc != 1 & yloc != ymax )
-      y2 = pagey - (yloc-1)*dy + dely/2
-      y1 = pagey - (yloc-0)*dy - dely/2
-endif
-*say 'delx: 'x2-x1'  dely: 'y2-y1'  xloc: 'xloc' yloc: 'yloc'  xmax: 'xmax'  ymax: 'ymax' dx: 'dx'  dy: 'dy' x1: 'x1' x2: 'x2' y1: 'y1' y2: 'y2'  pagex: 'pagex'  pagey: 'pagey
+say 'Default page sizex: 'pagex
+say 'Default page sizey: 'pagey
+say 'Offsets top: 'top'  bot: 'bot'  left: 'left'  right: 'right
 
 if( x1 < 0 )
-x1 = 0
+    x1 = left
 endif
 if( y1 < 0 )
-y1 = 0
+    y1 = bot
 endif
-if( x2 > pagex )
-x2 = pagex
+if( x2 > pagex-right )
+    x2 = pagex-right
 endif
-if( y2 > pagey )
-y2 = pagey
+if( y2 > pagey-top )
+    y2 = pagey-top
 endif
 
- say 'vpage 'x1' 'x2' 'y1' 'y2
+say 'set vpage 'x1' 'x2' 'y1' 'y2
 'set  vpage 'x1' 'x2' 'y1' 'y2
 'set  grads off'
 
-xmid   = ( x1 + x2 )/2
-xleft  = x1 - 0.20*delx
-xright = x2 + 0.10*delx
-ybot =   y1 - 0.12*dely
-ytop =   y2 + 0.03*dely
-ytop =   y2 + 0.04*dely
-ymid = ( ybot + ytop )/2
+pagex = x2-x1
+pagey = y2-y1
+'run setenv PAGEX 'pagex
+'run setenv PAGEY 'pagey
 
+*'getinfo page'
+*pagex = subwrd(result,1)
+*pagey = subwrd(result,2)
+
+say 'Final page sizex: 'pagex
+say 'Final page sizey: 'pagey
+
+xmid   = ( x1 + x2 )/2
+ymid   = ( y1 + y2 )/2
+xleft  =   x1
+xright =   x2
+ybot   =   y1
+ytop   =   y2
+
+say ' '
 say 'xmid: 'xmid'  ybot: 'ybot'  ytop: 'ytop'  ymid: 'ymid'  xleft: 'xleft'  xright: 'xright
+say ' '
+
 return xmid' 'ybot' 'ytop' 'ymid' 'xleft' 'xright
 

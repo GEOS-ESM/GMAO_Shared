@@ -115,6 +115,8 @@ endwhile
   ysiz = subwrd(rec2,6)
   ylo  = subwrd(rec4,4)
 
+  xmiddle = ( subwrd(rec3,4) + subwrd(rec3,6) )/2
+
   if( vpos = 'r' )
       xhi  = subwrd(rec3,6)
       xd   = xsiz - xhi
@@ -159,17 +161,17 @@ endwhile
 
     if(xmid = '') ; xmid = xhi+xd/2 ; endif
     xwid = 0.2
-    ywid = 0.5*scaley
-
+    ywid = 0.5
     xl = xmid-xwid/2
     xr = xl + xwid
     if (ywid*cint > ysiz*barsf)
       ywid = ysiz*barsf/cint
     endif
+      xwid = xwid*sbar*scalex
       ywid = ywid*sbar*scaley
     if(ymid = '') ; ymid = ysiz/2 ; endif
     yb = ymid - ywid*cint/2
-    'set string 1 l 4'
+    'set string 1 l 2'
     vert = 1
 
   else
@@ -184,14 +186,15 @@ endwhile
     if(ymid = '') ; ymid = ylo/2-ywid/2 ; endif
     yt = ymid + yoffset
     yb = ymid
-    if(xmid = '') ; xmid = xsiz/2 ; endif
+    if(xmid = '') ; xmid = xsiz/2 ; xmid = xmiddle ; endif
     if (xwid*cint > xsiz*barsf)
       xwid = xsiz*barsf/cint
     endif
 
     xwid = xwid*sbar*scalex
+    ywid = ywid*sbar*scaley
     xl = xmid - xwid*cint/2
-    'set string 1 tc 4'
+    'set string 1 tc 2'
     vert = 0
   endif
 
