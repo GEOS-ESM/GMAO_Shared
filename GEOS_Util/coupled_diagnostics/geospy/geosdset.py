@@ -51,18 +51,18 @@ def _load_tripolar(exp, vardata):
         ds=ds.rename({'Xdim':'x', 'Ydim':'y'})
         ds=ds.rename({'lons': 'lon', 'lats': 'lat'})
     else:
-        ds=ds.assign_coords({'LON':(('lat','lon'),ds['LON'][0]), 
-                             'LAT':(('lat','lon'),ds['LAT'][0])})
+        ds=ds.assign_coords({'LON':(('lat','lon'),ds['LON'][0].values), 
+                             'LAT':(('lat','lon'),ds['LAT'][0].values)})
         ds=ds.rename({'lon':'x', 'lat':'y'})
         ds=ds.rename({'LON': 'lon', 'LAT': 'lat'})
         ds.coords.update({'x': ds.lon[0,:], 'y': ds.lat[:,0]})
 
-    ds.update({'dx': (('y','x'), dx), 
-               'dy': (('y','x'), dy),
-               'mask': (('y','x'), grid['mask']),
-               'area': (('y','x'), grid['areat']),
-               'basin': (('y','x'), grid['basin']),               
-               'atl_mask': (('y','x'), grid['atl_mask'])})
+    ds.update({'dx': (('y','x'), dx.values), 
+               'dy': (('y','x'), dy.values),
+               'mask': (('y','x'), grid['mask'].values),
+               'area': (('y','x'), grid['areat'].values),
+               'basin': (('y','x'), grid['basin'].values),               
+               'atl_mask': (('y','x'), grid['atl_mask'].values)})
     
     return ds
 
@@ -78,10 +78,10 @@ def _load_mom(exp, vardata):
     ds.coords.update({'time': [np.datetime64(xx) for xx in time]})
 
     grid=xr.open_dataset(f'{exp["griddir"]}/MAPL_Tripolar.nc')
-    ds.update({'mask': (('yh','xh'), grid['mask']),
-               'area': (('yh','xh'), grid['areat']),
-               'basin': (('yh','xh'), grid['basin']),               
-               'atl_mask': (('yh','xh'), grid['atl_mask'])})
+    ds.update({'mask': (('yh','xh'), grid['mask'].values),
+               'area': (('yh','xh'), grid['areat'].values),
+               'basin': (('yh','xh'), grid['basin'].values),               
+               'atl_mask': (('yh','xh'), grid['atl_mask'].values)})
 
     return ds 
 
