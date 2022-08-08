@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 import os
 import subprocess
 import ruamel.yaml
@@ -110,4 +112,6 @@ def merra2_expid(config):
 
    return config
  
-
+if __name__ == '__main__' :
+   config = yaml_to_config('c24Toc12.yaml')
+   print_config(config)
