@@ -113,7 +113,7 @@ def check(filename="obsys.rc",
 
       # set thresh gap value
       #---------------------
-      if threshold.__contains__("all"):
+      if "all" in threshold:
          threshHrs = threshold["all"]
       else:
          threshHrs = 1   # default to one hour
@@ -153,7 +153,7 @@ def check(filename="obsys.rc",
          start += "00"
          stop  += "00"
 
-         if dict(template_info_list).__contains__((template, interval)):
+         if (template, interval) in dict(template_info_list):
             dict(template_info_list)[(template, interval)].append((start, stop))
          else:
             template_info_list.append(((template, interval), [(start, stop)]))
