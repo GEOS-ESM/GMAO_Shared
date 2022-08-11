@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 "Check obsys_rc file against available data."
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
@@ -113,7 +113,7 @@ def check(filename="obsys.rc",
 
       # set thresh gap value
       #---------------------
-      if threshold.has_key("all"):
+      if threshold.__contains__("all"):
          threshHrs = threshold["all"]
       else:
          threshHrs = 1   # default to one hour
@@ -153,7 +153,7 @@ def check(filename="obsys.rc",
          start += "00"
          stop  += "00"
 
-         if dict(template_info_list).has_key((template, interval)):
+         if dict(template_info_list).__contains__((template, interval)):
             dict(template_info_list)[(template, interval)].append((start, stop))
          else:
             template_info_list.append(((template, interval), [(start, stop)]))
@@ -198,7 +198,7 @@ def check(filename="obsys.rc",
                raise Exception(msg.format(num_times, template))
             intervalMins = int(intervalMins)
 
-            hh = intervalMins / 60
+            hh = int(intervalMins / 60)
             if hh == 0:
                nn = intervalMins
             else:
