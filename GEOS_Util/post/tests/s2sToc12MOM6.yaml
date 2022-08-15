@@ -8,26 +8,25 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
-    MERRA-2: false
     agrid: C180
-    bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_MERRA-2//CF0180x6C_DE1440xPE0720/
-    expid: JM_v10.22.2_L072_C180_AMIP
-    ogrid: 1440X720
-    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/amip_c180Toc90/inputs/
-    yyyymmddhh: '1990062621'
+    bcs_dir: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs/Ganymed/MOM5//CF0180x6C_TM0720xTM0410/
+    expid: S2S-2_1_ANA_001
+    ogrid: 720X410
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/s2sToc12MOM6/inputs
+    yyyymmddhh: '2021041600'
   surface:
     zoom: '2'
-    wemin: '13'
+    wemin: '26'
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: catch
-    catch_tilefile: null
+
 output:
   shared:
-    agrid: C90
-    bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_Ostia//CF0090x6C_CF0090x6C/
-    expid: C90CS_JM_v10.22.2_L072_C180_AMIP
-    ogrid: C90
-    out_dir: $NOBACKUP/REMAP_TESTS/amip_c180Toc90/
+    agrid: C12
+    bcs_dir: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs/Icarus-NLv3/MOM6//CF0012x6C_TM0072xTM0036/
+    expid: c12-MOM6
+    ogrid: 72X36
+    out_dir: $NOBACKUP/REMAP_TESTS/s2sToc12MOM6/
   air:
     # remap upper air or not
     remap: true
@@ -40,7 +39,6 @@ output:
     remap_water: true
     # remap catch(cn)
     remap_catch: true
-    catch_tilefile: null
   analysis:
     bkg: false
     aqua: true
@@ -49,4 +47,4 @@ output:
 slurm:
   account: g0620
   qos: debug
-  constraint: sky
+  constraint: cas
