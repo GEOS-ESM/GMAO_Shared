@@ -20,7 +20,7 @@ input:
     wemin: '13'
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: catch
-
+    catch_tilefile: null
 output:
   shared:
     agrid: C12
@@ -37,6 +37,7 @@ output:
     wemin: '13'
     remap_water: true
     remap_catch: true
+    catch_tilefile: null
   analysis:
     bkg: false
     aqua: true
