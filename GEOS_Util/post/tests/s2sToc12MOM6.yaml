@@ -8,6 +8,7 @@ input:
     drymass: 1
     hydrostatic: 0
   shared:
+    MERRA-2: false
     agrid: C180
     bcs_dir: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs/Ganymed/MOM5//CF0180x6C_TM0720xTM0410/
     expid: S2S-2_1_ANA_001
