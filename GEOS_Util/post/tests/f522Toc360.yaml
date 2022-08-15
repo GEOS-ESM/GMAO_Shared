@@ -19,7 +19,7 @@ input:
     zoom: '8'
     wemin: '26'
     catch_model: catch
-
+    catch_tilefile: null
 output:
   shared:
     agrid: C360
@@ -35,6 +35,7 @@ output:
     surflay: 50.0
     wemin: '13'
     remap_catch: true
+    catch_tilefile: null
     remap_water: true
   analysis:
     bkg: true
