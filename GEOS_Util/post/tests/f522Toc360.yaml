@@ -37,6 +37,7 @@ output:
     remap_catch: true
     catch_tilefile: null
     remap_water: true
+    catch_tilefile: null
   analysis:
     bkg: true
     aqua: true
