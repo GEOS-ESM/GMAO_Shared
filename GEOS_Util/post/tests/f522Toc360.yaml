@@ -35,7 +35,6 @@ output:
     surflay: 50.0
     wemin: '13'
     remap_catch: true
-    catch_tilefile: null
     remap_water: true
     catch_tilefile: null
   analysis:
