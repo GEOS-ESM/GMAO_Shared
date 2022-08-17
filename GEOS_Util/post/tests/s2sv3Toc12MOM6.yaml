@@ -10,24 +10,25 @@ input:
   shared:
     MERRA-2: false
     agrid: C180
-    bcs_dir: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs/Ganymed/MOM5//CF0180x6C_TM0720xTM0410/
-    expid: S2S-2_1_ANA_001
-    ogrid: 720X410
-    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/s2sToc12MOM6/inputs
-    yyyymmddhh: '2021041600'
+    bcs_dir: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs/Icarus/MOM5//CF0180x6C_TM1440xTM1080/
+    expid: M2OCEAN_S2SV3
+    ogrid: 1440X1080
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/s2sv3Toc12MOM6/inputs
+    yyyymmddhh: '1982010100'
   surface:
     zoom: '2'
     wemin: '26'
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: catch
-    catch_tilefile: null
+    # if catch_tilefile is null, it searches bcs_dir
+    catch_tilefile:
 output:
   shared:
     agrid: C12
     bcs_dir: /discover/nobackup/projects/gmao/ssd/aogcm/atmosphere_bcs/Icarus-NLv3/MOM6//CF0012x6C_TM0072xTM0036/
-    expid: c12-MOM6
+    expid: C12-MOM6-from-S2Sv3
     ogrid: 72X36
-    out_dir: $NOBACKUP/REMAP_TESTS/s2sToc12MOM6/
+    out_dir: $NOBACKUP/REMAP_TESTS/s2sv3Toc12MOM6/
   air:
     # remap upper air or not
     remap: true
@@ -40,7 +41,8 @@ output:
     remap_water: true
     # remap catch(cn)
     remap_catch: true
-    catch_tilefile: null
+    # if catch_tilefile is null, it searches bcs_dir
+    catch_tilefile:
   analysis:
     bkg: false
     aqua: true

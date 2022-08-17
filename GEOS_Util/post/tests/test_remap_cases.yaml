@@ -13,6 +13,6 @@ c180Toc360:
 c360Toc24:
   base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c360Toc24/baseline/'
   config: 'c360Toc24.yaml'
-s2sToc12MOM6:
-  base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/s2sToc12MOM6/baseline/'
-  config: 's2sToc12MOM6.yaml'
+s2sv3Toc12MOM6:
+  base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/s2sv3Toc12MOM6/baseline/'
+  config: 's2sv3Toc12MOM6.yaml'
