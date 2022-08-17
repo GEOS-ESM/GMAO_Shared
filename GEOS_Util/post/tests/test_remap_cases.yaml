@@ -6,11 +6,13 @@ f522Toc360:
   config: 'f522Toc360.yaml'
 amip_c180Toc90:
   base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/amip_c180Toc90/baseline/'
-  config: 'amip_c180Toc90.yaml' 
+  config: 'amip_c180Toc90.yaml'
 c180Toc360:
   base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c180Toc360/baseline/'
   config: 'c180Toc360.yaml'
 c360Toc24:
   base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c360Toc24/baseline/'
   config: 'c360Toc24.yaml'
-
+s2sv3Toc12MOM6:
+  base_line: '/discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/s2sv3Toc12MOM6/baseline/'
+  config: 's2sv3Toc12MOM6.yaml'

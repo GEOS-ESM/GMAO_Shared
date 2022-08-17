@@ -1,7 +1,7 @@
 #
 # This template file can be filled with questionary or manually
-# 
-# 
+#
+#
 
 input:
   air:
@@ -29,13 +29,16 @@ output:
     ogrid: 360X180
     out_dir: $NOBACKUP/REMAP_TESTS/c24Toc12/
   air:
+    # remap upper air or not
     remap: true
     nlevel: '72'
   surface:
     split_saltwater: true
     surflay: 50.0
     wemin: '13'
+    # remap lake, saltwater, landicet
     remap_water: true
+    # remap catch(cn)
     remap_catch: true
     catch_tilefile: null
   analysis:

@@ -52,9 +52,9 @@ def write_cmd(config) :
 
    flat_dict = flatten_nested(config)
 
-   k = 1   
+   k = 1
    for key, value in flat_dict.items():
-     if isinstance(value, int) or isinstance(value, float) :   value = str(value)
+     if isinstance(value, int) or isinstance(value, float) or isinstance(value, bool) or isinstance(value, type(None)): value = str(value)
      if k == 1:
        cmd = cmd + 'set FLAT_YAML="' + key+"="+ value+ '"\n'
      else:
@@ -111,7 +111,7 @@ def merra2_expid(config):
    config['expid'] = expid
 
    return config
- 
+
 if __name__ == '__main__' :
    config = yaml_to_config('c24Toc12.yaml')
    print_config(config)

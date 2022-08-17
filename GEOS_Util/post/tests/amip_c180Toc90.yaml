@@ -1,7 +1,7 @@
 #
 # This template file can be filled with questionary or manually
-# 
-# 
+#
+#
 
 input:
   air:
@@ -13,7 +13,7 @@ input:
     bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_MERRA-2//CF0180x6C_DE1440xPE0720/
     expid: JM_v10.22.2_L072_C180_AMIP
     ogrid: 1440X720
-    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/amip_c180Toc90/inputs/ 
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/amip_c180Toc90/inputs/
     yyyymmddhh: '1990062621'
   surface:
     zoom: '2'
@@ -27,7 +27,7 @@ output:
     bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_Ostia//CF0090x6C_CF0090x6C/
     expid: C90CS_JM_v10.22.2_L072_C180_AMIP
     ogrid: C90
-    out_dir: $NOBACKUP/REMAP_TESTS/amip_c180Toc90/ 
+    out_dir: $NOBACKUP/REMAP_TESTS/amip_c180Toc90/
   air:
     # remap upper air or not
     remap: true
