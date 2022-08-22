@@ -498,7 +498,31 @@
                                   l_stop,                     &
                                   istop,        jstop)
 
-      if (l_stop) return
+      if (l_stop) then
+
+         l_stop= .false.
+          
+         call fixed_vertical_profile (nx_block,     ny_block, &
+                                  my_task,      istep1,       &
+                                  icells,                     &
+                                  indxi,        indxj,        &
+                                  aicen(:,:),                 &
+                                  vicen(:,:),   vsnon(:,:),   &
+                                  Tsfcn(:,:),                 &
+                                  eicen(:,:,:), esnon(:,:,:), &
+                                  hin,          hilyr,        &
+                                  hsn,          hslyr,        &
+                                  qin,          Tin,          &
+                                  qsn,          Tsn,          &
+                                  Tsf,          einit,        &
+#ifdef GEOS
+                                  Tbot,                       &
+                                  tlat, tlon,                 &
+#endif
+                                  l_stop,                     &
+                                  istop,        jstop)
+         if (l_stop) return   
+      endif
 
       do ij = 1, icells
          ! Save initial ice and snow thickness (for fresh and fsalt)
@@ -1530,6 +1554,485 @@
 !#endif
 
       end subroutine init_vertical_profile
+
+!=======================================================================
+!BOP
+!
+! !ROUTINE: fixed_vertical_profile - initial thickness, enthalpy, temperature
+!
+! !DESCRIPTION:
+!
+! correct eicen and esnon by prescribing a linear temp profile
+! this correction is done if init_vertical_profile emits errors  
+!
+! !REVISION HISTORY:
+!
+! authors Bin Zhao 
+!
+! !INTERFACE:
+!
+      subroutine fixed_vertical_profile(nx_block, ny_block, &
+                                       my_task,  istep1,   &
+                                       icells,             &
+                                       indxi,    indxj,    &
+                                       aicen,    vicen,    &
+                                       vsnon,    Tsfcn,    &
+                                       eicen,    esnon,    &
+                                       hin,      hilyr,    &
+                                       hsn,      hslyr,    &
+                                       qin,      Tin,      &
+                                       qsn,      Tsn,      &
+                                       Tsf,      einit,    &
+                                       Tbot,               &    
+                                       tlat,     tlon,     &
+                                       l_stop,             &
+                                       istop,    jstop)
+!
+! !USES:
+!
+! !INPUT/OUTPUT PARAMETERS:
+!
+      integer (kind=int_kind), intent(in) :: &
+         nx_block, ny_block, & ! block dimensions
+         my_task           , & ! task number (diagnostic only)
+         istep1            , & ! time step index (diagnostic only)
+         icells                ! number of cells with aicen > puny
+
+      integer (kind=int_kind), dimension(nx_block*ny_block), &
+         intent(in) :: &
+         indxi, indxj    ! compressed indices for cells with aicen > puny
+
+      real (kind=dbl_kind), dimension (nx_block,ny_block), intent(in) :: &
+         aicen , & ! concentration of ice
+         vicen , & ! volume per unit area of ice          (m)
+         vsnon , & ! volume per unit area of snow         (m)
+         Tsfcn     ! temperature of ice/snow top surface  (C)
+
+      real (kind=dbl_kind), dimension(nx_block,ny_block,nilyr), &
+         intent(inout) :: &
+         eicen     ! energy of melting for each ice layer (J/m^2)
+
+      real (kind=dbl_kind), dimension(nx_block,ny_block,nslyr), &
+         intent(inout) :: &
+         esnon     ! energy of melting for each snow layer (J/m^2)
+
+      real (kind=dbl_kind), dimension(icells), intent(out):: &
+         hilyr       , & ! ice layer thickness
+         hslyr       , & ! snow layer thickness
+         Tsf         , & ! ice/snow surface temperature, Tsfcn
+         einit           ! initial energy of melting (J m-2)
+
+      real (kind=dbl_kind), dimension(icells), intent(out):: &
+         hin         , & ! ice thickness (m)
+         hsn             ! snow thickness (m)
+
+      real (kind=dbl_kind), dimension (icells,nilyr), &
+         intent(out) :: &
+         qin         , & ! ice layer enthalpy (J m-3)
+         Tin             ! internal ice layer temperatures
+
+      real (kind=dbl_kind), dimension (icells,nslyr), &
+         intent(out) :: &
+         qsn         , & ! snow enthalpy
+         Tsn             ! snow temperature
+
+      real (kind=dbl_kind), dimension (nx_block,ny_block), intent(in) :: &
+         Tbot
+#ifdef GEOS
+      real (kind=dbl_kind), dimension (nx_block,ny_block), intent(in):: &
+         tlat, tlon
+#endif
+      logical (kind=log_kind), intent(inout) :: &
+         l_stop          ! if true, print diagnostics and abort model
+
+      logical (kind=log_kind) :: &   ! for vector-friendly error checks
+         tsno_high   , & ! flag for Tsn > Tmax
+         tice_high   , & ! flag for Tin > Tmlt
+         tsno_low    , & ! flag for Tsn < Tmin
+         tice_low        ! flag for Tin < Tmin
+
+      integer (kind=int_kind), intent(inout) :: &
+         istop, jstop    ! i and j indices of cell where model fails
+!
+!EOP
+!
+      real (kind=dbl_kind), parameter :: &
+         Tmin = -100._dbl_kind ! min allowed internal temperature (deg C)
+
+      integer (kind=int_kind) :: &
+         i, j        , & ! horizontal indices
+         ij, nls     , & ! horizontal index, combines i and j loops
+         k               ! ice layer index
+
+      real (kind=dbl_kind) :: &
+         rnslyr,        & ! real(nslyr)
+         aa1, bb1, cc1, & ! terms in quadratic formula
+         Tmax             ! maximum allowed snow/ice temperature (deg C)
+
+      real (kind=dbl_kind) :: &
+         slope
+
+#ifdef GEOS
+      real (kind=dbl_kind) :: &
+         mypuny
+#endif
+      real (kind=dbl_kind), dimension (icells,nslyr) :: &
+         esn          ! snow enthalpy
+      real (kind=dbl_kind), dimension (icells) :: &
+         vsn          ! snow temperature
+      real (kind=dbl_kind) :: &
+         height,      &
+         Tskin,       &
+         Ti
+      integer :: kl
+      !-----------------------------------------------------------------
+      ! Initialize
+      !-----------------------------------------------------------------
+
+      rnslyr = real(nslyr,kind=dbl_kind)
+
+      do ij = 1, icells
+         einit(ij) = c0
+      enddo
+
+#ifdef GEOS
+      mypuny = 1.e-4_dbl_kind
+      !mypuny = puny
+#endif
+      !-----------------------------------------------------------------
+      ! Load arrays for vertical thermo calculation.
+      !-----------------------------------------------------------------
+!DIR$ CONCURRENT !Cray
+!cdir nodep      !NEC
+!ocl novrec      !Fujitsu
+      do ij = 1, icells
+         i = indxi(ij)
+         j = indxj(ij)
+
+      !-----------------------------------------------------------------
+      ! Surface temperature, ice and snow thickness
+      ! Initialize internal energy
+      !-----------------------------------------------------------------
+
+         Tsf(ij)    = max(Tsfcn(i,j), -55.0) ! let's not go crazy here
+         hin(ij)    = vicen(i,j) / aicen(i,j)
+         hsn(ij)    = vsnon(i,j) / aicen(i,j)
+         hilyr(ij)  = hin(ij) / real(nilyr,kind=dbl_kind)
+         hslyr(ij)  = hsn(ij) / rnslyr
+         vsn(ij)    = vsnon(i,j)
+
+         Tskin   = min(Tsf(ij), c0)
+         height = hin(ij)
+         nls = nilyr
+         if (vsnon(i,j) > c0) then
+            height = height + hsn(ij)  
+            nls = nls + nslyr
+         endif  
+         slope = (Tbot(i,j) - Tskin) / height
+         do k = 1, nls
+            if (k <= nls - nilyr) then
+               Ti =  Tskin + slope*real(k+p5,kind=dbl_kind)*  &
+                     hslyr(ij)
+               Tsn(ij,k) = Ti
+               esnon(i,j,k) = (-rhos * (-cp_ice*Ti + Lfresh)) *  &
+                               vsnon(i,j)/rnslyr
+            else
+               if (nls == nilyr) then
+                  kl = k 
+               else
+                  kl = k-nslyr
+               endif  
+               Ti =  Tskin + slope*(hsn(ij) +                  &
+                     real(kl+p5,kind=dbl_kind)*hilyr(ij))
+               Ti = min(Ti, Tmlt(kl)-0.01) ! never go above Tmelt
+               eicen(i,j,kl) =                               &
+                      -(rhoi * (cp_ice*(Tmlt(kl)-Ti)         & 
+                      + Lfresh*(c1-Tmlt(kl)/Ti) - cp_ocn*Tmlt(kl))) &
+                      * vicen(i,j)/real(nilyr, kind=dbl_kind)
+            endif
+         enddo
+
+         do k = 1, nslyr
+           esn(ij,k) = esnon(i,j,k)
+         enddo
+      enddo                     ! ij
+
+      !-----------------------------------------------------------------
+      ! Snow enthalpy and maximum allowed snow temperature
+      ! If heat_capacity = F, qsn and Tsn are never used.
+      !-----------------------------------------------------------------
+
+      do k = 1, nslyr
+!DIR$ CONCURRENT !Cray
+!cdir nodep      !NEC
+!ocl novrec      !Fujitsu
+         do ij = 1, icells
+            i = indxi(ij)
+            j = indxj(ij)
+
+      !-----------------------------------------------------------------
+      !
+      ! Tmax based on the idea that dT ~ dq / (rhos*cp_ice)
+      !                             dq ~ q dv / v
+      !                             dv ~ puny = eps11
+      ! where 'd' denotes an error due to roundoff.
+      !-----------------------------------------------------------------
+
+            if (hslyr(ij) > hs_min/rnslyr .and. heat_capacity) then
+               ! qsn, esnon < 0              
+               qsn  (ij,k) = esnon(i,j,k)*rnslyr/vsnon(i,j) 
+#ifdef GEOS
+               Tmax = -qsn(ij,k)*mypuny*rnslyr / &
+#else
+               Tmax = -qsn(ij,k)*puny*rnslyr / &
+#endif
+                       (rhos*cp_ice*vsnon(i,j))
+            else
+               qsn  (ij,k) = -rhos * Lfresh
+               Tmax = puny
+            endif
+
+      !-----------------------------------------------------------------
+      ! Compute snow temperatures from enthalpies.
+      ! Note: qsn <= -rhos*Lfresh, so Tsn <= 0.
+      !-----------------------------------------------------------------
+            Tsn(ij,k) = (Lfresh + qsn(ij,k)/rhos)/cp_ice
+  
+      !-----------------------------------------------------------------
+      ! Check for Tsn > Tmax (allowing for roundoff error) and Tsn < Tmin.
+      !-----------------------------------------------------------------
+            if (Tsn(ij,k) > Tmax) then
+               tsno_high = .true.
+            elseif (Tsn(ij,k) < Tmin) then
+               tsno_low  = .true.
+            endif
+
+         enddo                  ! ij
+      enddo                     ! nslyr
+
+      !-----------------------------------------------------------------
+      ! If Tsn is out of bounds, print diagnostics and exit.
+      !-----------------------------------------------------------------
+
+      if (tsno_high .and. heat_capacity) then
+         do k = 1, nslyr
+            do ij = 1, icells
+               i = indxi(ij)
+               j = indxj(ij)
+
+               if (hslyr(ij) > hs_min/rnslyr) then
+#ifdef GEOS
+                  Tmax = -qsn(ij,k)*mypuny*rnslyr / &
+#else
+                  Tmax = -qsn(ij,k)*puny*rnslyr / &
+#endif
+                           (rhos*cp_ice*vsnon(i,j))
+               else
+                  Tmax = puny
+               endif
+
+               if (Tsn(ij,k) > Tmax) then
+                  write(nu_diag,*) ' '
+                  write(nu_diag,*) 'Fixed, Tsn > Tmax'
+                  write(nu_diag,*) 'Tsn=',Tsn(ij,k)
+                  write(nu_diag,*) 'Tmax=',Tmax
+                  write(nu_diag,*) 'istep1, my_task, i, j:', &
+                                    istep1, my_task, i, j
+                  write(nu_diag,*) 'qsn',qsn(ij,k)
+                  write(nu_diag,*) 'hsn', hsn(ij)
+                  write(nu_diag,*) 'esn', esn(ij,k)
+                  write(nu_diag,*) 'vsn', vsn(ij)
+                  write(nu_diag,*) 'Tsf=', Tsf(ij)
+                  write(nu_diag,*) 'Lfresh=', Lfresh
+                  write(nu_diag,*) 'rhos=', rhos
+                  write(nu_diag,*) 'cp_ice=', cp_ice
+#ifdef GEOS
+                  write(nu_diag,*) 'lat= ', tlat(i,j), &
+                                   'lon= ', tlon(i,j)
+#endif
+                  l_stop = .true.
+                  istop = i
+                  jstop = j
+                  return
+               endif
+
+            enddo               ! ij
+         enddo                  ! nslyr
+      endif                     ! tsno_high
+
+      if (tsno_low .and. heat_capacity) then
+         do k = 1, nslyr
+            do ij = 1, icells
+               i = indxi(ij)
+               j = indxj(ij)
+
+               if (Tsn(ij,k) < Tmin) then ! allowing for roundoff error
+                  write(nu_diag,*) ' '
+                  write(nu_diag,*) 'Fixed, Tsn < Tmin'
+                  write(nu_diag,*) 'Tsn=', Tsn(ij,k)
+                  write(nu_diag,*) 'Tmin=', Tmin
+                  write(nu_diag,*) 'istep1, my_task, i, j:', &
+                                    istep1, my_task, i, j
+                  write(nu_diag,*) 'qsn', qsn(ij,k)
+                  write(nu_diag,*) 'hsn', hsn(ij)
+                  write(nu_diag,*) 'esn', esn(ij,k)
+                  write(nu_diag,*) 'vsn', vsn(ij)
+                  write(nu_diag,*) 'Tsf=', Tsf(ij)
+#ifdef GEOS
+                  write(nu_diag,*) 'lat= ', tlat(i,j), &
+                                   'lon= ', tlon(i,j)
+#endif
+                  l_stop = .true.
+                  istop = i
+                  jstop = j
+                  return
+               endif
+
+            enddo               ! ij
+         enddo                  ! nslyr
+      endif                     ! tsno_low
+
+      do k = 1, nslyr
+!DIR$ CONCURRENT !Cray
+!cdir nodep      !NEC
+!ocl novrec      !Fujitsu
+         do ij = 1, icells
+
+            if (Tsn(ij,k) > c0) then   ! correct roundoff error
+               Tsn(ij,k) = c0
+               qsn(ij,k) = -rhos*Lfresh
+            endif
+
+      !-----------------------------------------------------------------
+      ! initial energy per unit area of ice/snow, relative to 0 C
+      !-----------------------------------------------------------------
+            einit(ij) = einit(ij) + hslyr(ij)*qsn(ij,k)
+
+         enddo                  ! ij
+      enddo                     ! nslyr
+
+      do k = 1, nilyr
+!DIR$ CONCURRENT !Cray
+!cdir nodep      !NEC
+!ocl novrec      !Fujitsu
+         do ij = 1, icells
+            i = indxi(ij)
+            j = indxj(ij)
+
+      !-----------------------------------------------------------------
+      ! Compute ice enthalpy
+      ! If heat_capacity = F, qin and Tin are never used.
+      !-----------------------------------------------------------------
+            ! qin, eicen < 0
+            qin(ij,k) = eicen(i,j,k)*real(nilyr,kind=dbl_kind) &
+                        /vicen(i,j)  
+
+      !-----------------------------------------------------------------
+      ! Compute ice temperatures from enthalpies using quadratic formula
+      !-----------------------------------------------------------------
+
+            if (l_brine) then
+               aa1 = cp_ice
+               bb1 = (cp_ocn-cp_ice)*Tmlt(k) - qin(ij,k)/rhoi - Lfresh 
+               cc1 = Lfresh * Tmlt(k)
+               Tin(ij,k) =  (-bb1 - sqrt(bb1*bb1 - c4*aa1*cc1)) /  &
+                             (c2*aa1)
+               Tmax = Tmlt(k)
+
+            else                ! fresh ice
+               Tin(ij,k) = (Lfresh + qin(ij,k)/rhoi) / cp_ice
+#ifdef GEOS
+               Tmax = -qin(ij,k)*mypuny/(rhos*cp_ice*vicen(i,j))
+#else
+               Tmax = -qin(ij,k)*puny/(rhos*cp_ice*vicen(i,j))
+#endif
+                         ! as above for snow
+            endif
+
+      !-----------------------------------------------------------------
+      ! Check for Tin > Tmax and Tin < Tmin
+      !-----------------------------------------------------------------
+            if (Tin(ij,k) > Tmax) then
+               tice_high = .true.
+            elseif (Tin(ij,k) < Tmin) then
+               tice_low  = .true.
+            endif
+
+         enddo                  ! ij
+
+      !-----------------------------------------------------------------
+      ! If Tin is out of bounds, print diagnostics and exit.
+      !-----------------------------------------------------------------
+
+         if (tice_high .and. heat_capacity) then
+            do ij = 1, icells
+               i = indxi(ij)
+               j = indxj(ij)
+
+               if (l_brine) then
+                  Tmax = Tmlt(k)
+               else             ! fresh ice
+#ifdef GEOS
+                  Tmax = -qin(ij,k)*mypuny/(rhos*cp_ice*vicen(i,j))
+#else
+                  Tmax = -qin(ij,k)*puny/(rhos*cp_ice*vicen(i,j))
+#endif
+               endif
+
+               if (Tin(ij,k) > Tmax) then
+                  write(nu_diag,*) ' '
+                  write(nu_diag,*) 'Fixed, T > Tmax, layer', k
+                  write(nu_diag,*) 'Tin=',Tin(ij,k),', Tmax=',Tmax
+                  write(nu_diag,*) 'istep1, my_task, i, j:', &
+                                    istep1, my_task, i, j
+                  write(nu_diag,*) 'qin',qin(ij,k)
+                  l_stop = .true.
+                  istop = i
+                  jstop = j
+                  return
+               endif
+            enddo               ! ij
+         endif                  ! tice_high
+
+         if (tice_low .and. heat_capacity) then
+            do ij = 1, icells
+               i = indxi(ij)
+               j = indxj(ij)
+
+               if (Tin(ij,k) < Tmin) then
+                  write(nu_diag,*) ' '
+                  write(nu_diag,*) 'Fixed, T < Tmin, layer', k
+                  write(nu_diag,*) 'Tin =', Tin(ij,k)
+                  write(nu_diag,*) 'Tmin =', Tmin
+                  write(nu_diag,*) 'istep1, my_task, i, j:', &
+                                    istep1, my_task, i, j
+                  l_stop = .true.
+                  istop = i
+                  jstop = j
+                  return
+               endif
+            enddo               ! ij
+         endif                  ! tice_low
+
+      !-----------------------------------------------------------------
+      ! initial energy per unit area of ice/snow, relative to 0 C
+      !-----------------------------------------------------------------
+
+!DIR$ CONCURRENT !Cray
+!cdir nodep      !NEC
+!ocl novrec      !Fujitsu
+         do ij = 1, icells
+
+            if (Tin(ij,k) > c0) then ! correct roundoff error
+               Tin(ij,k) = c0
+               qin(ij,k) = -rhoi*Lfresh
+            endif
+            einit(ij) = einit(ij) + hilyr(ij)*qin(ij,k) 
+         enddo                  ! ij
+
+      enddo                     ! nilyr
+
+      end subroutine fixed_vertical_profile
 
 !=======================================================================
 !BOP
