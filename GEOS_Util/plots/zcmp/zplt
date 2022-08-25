@@ -586,10 +586,10 @@ endif
    say ' fact = ' fact
    say ' cint = ' cint
 
- while( cint < 2 & count < 20 )
+ while( cint < 1 & count < 20 )
  count = count + 1
- fact = fact  * 10
- cint = fact * (aqmax-aqmin) / nint
+ fact = fact * 10
+ cint = fact * dqmax
 'getint 'cint
  cint = result
  say 'Count = 'count'  Computed CINT: 'cint
