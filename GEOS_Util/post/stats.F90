@@ -1031,6 +1031,38 @@
               write(6,1003) int(pref),nymd,nhms,hour,corr(iregion,lev,nfield,nt),fmean,amean,cmean
               printout = .true.
           endif
+          if( trim(fields_3d(n)%name).eq.'q' .and. iregion.eq.3 .and. zlev(lev).eq.925 ) then
+              write(6,1006) int(925),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+           if( trim(fields_3d(n)%name).eq.'q' .and. iregion.eq.3 .and. zlev(lev).eq.850 ) then
+              write(6,1006) int(850),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+           if( trim(fields_3d(n)%name).eq.'q' .and. iregion.eq.3 .and. zlev(lev).eq.700 ) then
+              write(6,1006) int(700),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+          if( trim(fields_3d(n)%name).eq.'t' .and. iregion.eq.3 .and. zlev(lev).eq.925 ) then
+              write(6,1005) int(925),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+           if( trim(fields_3d(n)%name).eq.'t' .and. iregion.eq.3 .and. zlev(lev).eq.850 ) then
+              write(6,1005) int(850),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+           if( trim(fields_3d(n)%name).eq.'t' .and. iregion.eq.3 .and. zlev(lev).eq.700 ) then
+              write(6,1005) int(700),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+          if( trim(fields_3d(n)%name).eq.'t' .and. iregion.eq.3 .and. zlev(lev).eq.200 ) then
+              write(6,1005) int(200),nymd,nhms,hour,rms(iregion,lev,nfield,nt,1),fmean,amean,cmean
+              printout = .true.
+          endif
+          if( trim(fields_3d(n)%name).eq.'h' .and. iregion.eq.4 .and. zlev(lev).eq.pref ) then
+              write(6,1002) int(pref),nymd,nhms,hour,corr(iregion,lev,nfield,nt),fmean,amean,cmean
+              printout = .true.
+          endif
       endif
 
           ! if requested, write out stats info for GMAOpy
@@ -1264,9 +1296,15 @@
  5009 format(a,2x,i3,' 0 ',a)
  5010 format('ENDVARS')
 
+ 1002 format(1x,i4,'-mb SH Height at ',i8,2x,i6.6,' (',i3,' hrs)  corr: ',f9.7, &
+             3x,'fcst: ',f7.2,2x,'ana: ',f7.2,2x,'cli: ',f7.2,' (m)')
  1003 format(1x,i4,'-mb NH Height at ',i8,2x,i6.6,' (',i3,' hrs)  corr: ',f9.7, &
              3x,'fcst: ',f7.2,2x,'ana: ',f7.2,2x,'cli: ',f7.2,' (m)')
  1004 format(1x,'Date: ',i8,2x,i6.6,' (',i3,' hrs)')
+ 1005 format(1x,i4,'-mb TR Temp   at ',i8,2x,i6.6,' (',i3,' hrs)  rmse: ',f9.7, &
+             3x,'fcst: ',f7.2,2x,'ana: ',f7.2,2x,'cli: ',f7.2,' (m)')
+ 1006 format(1x,i4,'-mb TR SpHum  at ',i8,2x,i6.6,' (',i3,' hrs)  rmse: ',f9.7, &
+             3x,'fcst: ',f7.2,2x,'ana: ',f7.2,2x,'cli: ',f7.2,' (m)')
 
 ! **********************************************************************
 ! ****                       End Collection Loop                    ****

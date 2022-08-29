@@ -43,7 +43,7 @@ endwhile
         qname.2  = subwrd(result,1)
         qfile.2  = subwrd(result,2)
         scale.2  = subwrd(result,3)
-'run getvar DUDT_RAY GWD'
+'run getvar DUDT_RAY DYN'
         qname.3  = subwrd(result,1)
         qfile.3  = subwrd(result,2)
         scale.3  = subwrd(result,3)
@@ -56,7 +56,7 @@ endwhile
         qname.5  = subwrd(result,1)
         qfile.5  = subwrd(result,2)
         scale.5  = subwrd(result,3)
-'run getvar DVDT_RAY GWD'
+'run getvar DVDT_RAY DYN'
         qname.6  = subwrd(result,1)
         qfile.6  = subwrd(result,2)
         scale.6  = subwrd(result,3)
@@ -69,7 +69,7 @@ endwhile
         qname.8  = subwrd(result,1)
         qfile.8  = subwrd(result,2)
         scale.8  = subwrd(result,3)
-'run getvar DTDT_RAY GWD'
+'run getvar DTDT_RAY DYN'
         qname.9  = subwrd(result,1)
         qfile.9  = subwrd(result,2)
         scale.9  = subwrd(result,3)

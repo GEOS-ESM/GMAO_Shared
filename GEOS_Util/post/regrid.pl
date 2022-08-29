@@ -1648,6 +1648,7 @@ sub check_rst_files {
         foreach $type (keys %notfound) {
             $SURFACE{$type} = 0;
             $swFLG = 1;
+            if ($mk_catchcn) {
             if ($type eq "catchcn${cnlist[0]}_internal_rst") { 
                $SURFACE{$type} = 1;
                if (scalar(@cnlist) eq 4) {
@@ -1671,6 +1672,7 @@ sub check_rst_files {
                     die("File $file not found;");
               }
               next;
+            }
             }
             if ($type eq "saltwater_internal_rst") {
                 $swFLG = 0 if $notfound{"openwater_internal_rst"};
@@ -2306,7 +2308,9 @@ sub confirm_inputs {
            . ". outdir:       " .display($outdir_save) ."\n"
            . ". workdir:      " .display($workdir) ."\n\n");
 
-    confirm("y");
+    unless ($noprompt) { 
+        confirm("y");
+    }
 }
 
 #=======================================================================
@@ -2860,8 +2864,10 @@ sub regrid_surface_rsts {
     foreach $type (sort keys %SURFACE) {
         next unless $SURFACE{$type};
         if ($type eq "catch_internal_rst")      { next unless $mk_catch }
-        if ($type eq "catchcn_internal_rst")    { next }
-        if ($type eq "catchcn${cnlist[0]}_internal_rst") { next unless $mk_catchcn};
+        if ($mk_catchcn) {
+          if ($type eq "catchcn_internal_rst")    { next }
+          if ($type eq "catchcn${cnlist[0]}_internal_rst") { next unless $mk_catchcn};
+        }
 
         if ($type eq "route_internal_rst")      { next unless $mk_route }
 
@@ -2928,7 +2934,9 @@ sub regrid_surface_rsts {
         $template1 = $H1{"template"};
 
         $catchtype{"catch_internal_rst"} = 1;
-        $catchtype{"catchcn${cnlist[0]}_internal_rst"} = 1;
+        if ($mk_catchcn) {
+          $catchtype{"catchcn${cnlist[0]}_internal_rst"} = 1;
+        }
 
         foreach $type (@SFC) {
             next if $type eq "route_internal_rst";
@@ -2946,6 +2954,7 @@ sub regrid_surface_rsts {
 
                 # use catch for catchcn, if needed. WJ note: use catch for cnclm40 only
                 #---------------------------------
+                if ($mk_catchcn) {
                 if ($type eq "catchcn${cnlist[0]}_internal_rst") {
                     $alt = "catch_internal_rst";
                     $src = $input_restarts{$alt};
@@ -2956,6 +2965,7 @@ sub regrid_surface_rsts {
                     else {
                         print_("$alt not found.\n");
                     }
+                }
                 }
             }
         }
