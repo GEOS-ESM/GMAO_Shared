@@ -9,25 +9,25 @@ input:
     hydrostatic: 0
   shared:
     MERRA-2: false
-    agrid: C24
-    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0024x6C_DE0360xPE0180/
-    expid: ''
-    ogrid: 360X180
-    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/c24Toc12/inputs
-    yyyymmddhh: '2000041421'
+    agrid: C180
+    bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_MERRA-2//CF0180x6C_DE1440xPE0720/
+    expid: JM_v10.22.2_L072_C180_AMIP
+    ogrid: 1440X720
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/amip_c180Toc90/inputs/
+    yyyymmddhh: '1990062621'
   surface:
-    zoom: '1'
+    zoom: '2'
     wemin: '13'
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: catch
     catch_tilefile: null
 output:
   shared:
-    agrid: C12
-    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0012x6C_DE0360xPE0180/
-    expid: hello
-    ogrid: 360X180
-    out_dir: $NOBACKUP/REMAP_TESTS/c24Toc12/
+    agrid: C90
+    bcs_dir: /discover/nobackup/ltakacs/bcs/Icarus-NLv3/Icarus-NLv3_Ostia//CF0090x6C_CF0090x6C/
+    expid: C90CS_JM_v10.22.2_L072_C180_AMIP
+    ogrid: C90
+    out_dir: $NOBACKUP/REMAP_TESTS/amip_c180Toc90/
   air:
     # remap upper air or not
     remap: true
@@ -47,6 +47,6 @@ output:
     lcv: false
 
 slurm:
-  account: g0610
+  account: g0620
   qos: debug
-  constraint: hasw
+  constraint: sky

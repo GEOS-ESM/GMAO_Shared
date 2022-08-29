@@ -1,7 +1,7 @@
 #
 # This template file can be filled with questionary or manually
-# 
-# 
+#
+#
 
 input:
   air:
@@ -13,13 +13,13 @@ input:
     bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus_Updated/Icarus_Ostia//CF0720x6C_CF0720x6C/
     expid: f522_fp
     ogrid: C720
-    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/inputs/ 
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/inputs/
     yyyymmddhh: '2019061421'
   surface:
     zoom: '8'
     wemin: '26'
     catch_model: catch
-
+    catch_tilefile: null
 output:
   shared:
     agrid: C360
@@ -36,6 +36,7 @@ output:
     wemin: '13'
     remap_catch: true
     remap_water: true
+    catch_tilefile: null
   analysis:
     bkg: true
     aqua: true

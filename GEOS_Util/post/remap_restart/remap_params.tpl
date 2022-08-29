@@ -1,14 +1,15 @@
 #
 # This template file can be filled with questionary or manually
-# 
-# 
+#
+#
 
 input:
   air:
     drymass: 1
     hydrostatic: 0
   shared:
-    agrid: 
+    MERRA-2: false
+    agrid:
     bcs_dir:
     expid:
     ogrid:
@@ -19,13 +20,14 @@ input:
     wemin:
     # it supports three models: catch, catchcnclm40, catchcnclm45
     catch_model: null
-
+    # if catch_tilefile is null, it searches bcs_dir
+    catch_tilefile: null
 output:
   shared:
     agrid:
-    bcs_dir: 
-    expid: 
-    ogrid: 
+    bcs_dir:
+    expid:
+    ogrid:
     out_dir:
   air:
     # remap upper air or not
@@ -39,12 +41,14 @@ output:
     remap_water: true
     # remap catch(cn)
     remap_catch: true
+    # if catch_tilefile is null, it searches bcs_dir
+    catch_tilefile: null
   analysis:
     bkg: true
     aqua: False
     lcv: false
 
 slurm:
-  account: 
-  qos: 
-  constraint: 
+  account:
+  qos:
+  constraint:

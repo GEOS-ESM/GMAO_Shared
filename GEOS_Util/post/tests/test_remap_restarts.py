@@ -69,7 +69,8 @@ if __name__ == '__main__' :
   (user, err) = p.communicate()
   p_status = p.wait()
   user = user.decode().split()[0]  
-
+  
+  report ={}
   for case, values in cases.items():
      base_line        = values['base_line']
      config_yaml_file = values['config']
@@ -87,6 +88,11 @@ if __name__ == '__main__' :
      rc = compare(base_line, out_dir)
      if (not rc) :
        print ("failed in " + case)
+       report[case] = "Failed"
      else :
+       report[case] = "Succeeded"
        print (case +" test is successful")
  
+  print("\n\n")
+  for case, result in report.items():
+     print(case + ":   " + result)
