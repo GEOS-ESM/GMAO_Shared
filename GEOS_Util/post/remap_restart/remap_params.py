@@ -7,9 +7,9 @@ import glob
 import time
 import shlex
 import subprocess
-import questionary
 from datetime import datetime
 from datetime import timedelta
+from remap_utils import config_to_yaml, merra2_expid
 
 class remap_params(object):
   def __init__(self, config_from_question):
@@ -35,6 +35,7 @@ class remap_params(object):
      config_tpl = yaml.load(stream)
 
      # params for shared
+     config_tpl['input']['shared']['MERRA-2']  = self.common_in.get('MERRA-2')
      config_tpl['input']['shared']['agrid']    = self.common_in.get('agrid')
      config_tpl['input']['shared']['ogrid']    = self.common_in.get('ogrid')
      config_tpl['input']['shared']['rst_dir']  = self.common_in['rst_dir']+'/'
@@ -43,6 +44,7 @@ class remap_params(object):
 
      config_tpl['output']['air']['nlevel']     = self.upper_out.get('nlevel')
      config_tpl['output']['air']['remap']      = self.upper_out.get('remap')
+     config_tpl['input']['surface']['catch_model']       = self.surf_in.get('catch_model')
      config_tpl['output']['surface']['remap_water']      = self.surf_out.get('remap')
      config_tpl['output']['surface']['remap_catch']      = self.surf_out.get('remap')
      config_tpl['output']['shared']['agrid']   = self.common_out['agrid']
@@ -63,21 +65,6 @@ class remap_params(object):
      config_tpl['output']['shared']['bcs_dir']   = out_bcsdir + '/'
 
      self.config = config_tpl
-
-  def convert_to_yaml(self) :
-     if os.path.exists('remap_params.yaml') :
-       overwrite = questionary.confirm("Do you want to overwrite remap_params.yaml file?", default=False).ask()
-       if not overwrite :
-         while True:
-           new_name = questionary.text("What's the backup name for existing remap_params.yaml?", default='remap_params.yaml.1').ask()
-           if os.path.exists(new_name):
-              print('\n'+ new_name + ' exists, please enter a new one. \n')
-           else:
-              shutil.move('remap_params.yaml', new_name)
-              break
-     yaml = ruamel.yaml.YAML()
-     with open("remap_params.yaml", "w") as f:
-        yaml.dump(self.config, f)
 
   def init_tags(self):
      # copy and paste from remap.pl
@@ -250,126 +237,13 @@ class remap_params(object):
   def init_merra2(self):
     if not self.common_in['MERRA-2']:
       return
-    print("\n MERRA-2 sources:\n")
-    yyyymm = int(self.yyyymm)
-    if yyyymm < 197901 :
-      exit("Error. MERRA-2 data < 1979 not available\n")
-    elif (yyyymm < 199201):
-      self.common_in['expid'] = "d5124_m2_jan79"     
-    elif (yyyymm < 200106):
-      self.common_in['expid'] = "d5124_m2_jan91"
-    elif (yyyymm < 201101):
-      self.common_in['expid'] = "d5124_m2_jan00"
-    else:
-      self.common_in['expid'] = "d5124_m2_jan10"
+    self.common_in = merra2_expid(self.common_in)
 
     self.common_in['agrid'] = 'C180'
     self.common_in['ogrid'] = '1440x720'
     self.common_in['bc_base']= 'discover_ops'
     self.common_in['tag']= 'Ganymed-4_0'
-
-  def copy_merra2(self):
-    if not self.common_in['MERRA-2']:
-      return
-    print("\n Copy MERRA-2 :\n")
-    expid = self.common_in['expid']
-    yyyymmddhh_ = str(self.common_in['yyyymmddhh'])
-    surfix = yyyymmddhh_[0:8]+'_'+self.hh+'z.bin'
-    merra_2_rst_dir = '/archive/users/gmao_ops/MERRA2/gmao_ops/GEOSadas-5_12_4/'+expid +'/rs/Y'+self.yyyy +'/M'+self.mm+'/'
-    rst_dir = self.common_in['rst_dir'] + '/'
-    os.makedirs(rst_dir, exist_ok = True)
-    print(' Copy MERRA-2 Restart \n from \n    ' + merra_2_rst_dir + '\n to\n    '+ rst_dir +'\n') 
-
-    upperin =[merra_2_rst_dir +  expid+'.fvcore_internal_rst.' + surfix,
-              merra_2_rst_dir +  expid+'.moist_internal_rst.'  + surfix,
-              merra_2_rst_dir +  expid+'.agcm_import_rst.'     + surfix,
-              merra_2_rst_dir +  expid+'.gocart_internal_rst.' + surfix,
-              merra_2_rst_dir +  expid+'.pchem_internal_rst.'  + surfix ]
-
-    surfin = [ merra_2_rst_dir +  expid+'.catch_internal_rst.'    + surfix, 
-               merra_2_rst_dir +  expid+'.lake_internal_rst.'     + surfix,
-               merra_2_rst_dir +  expid+'.landice_internal_rst.'  + surfix,
-               merra_2_rst_dir +  expid+'.saltwater_internal_rst.'+ surfix]
-
-    for f in upperin :
-       fname = os.path.basename(f)
-       dest = rst_dir + '/'+fname
-       print("Copy file "+f +" to " + rst_dir)
-       shutil.copy(f, dest)
-
-    for f in surfin :
-       fname = os.path.basename(f)
-       dest = rst_dir + '/'+fname
-       print("Copy file "+f +" to " + rst_dir)
-       shutil.copy(f, dest)
-
-    # prepare analysis files
-    bkg = self.ana_out['bkg']
-    if ( not bkg ): return
-    yyyy_ = yyyymmddhh_[0:4]
-    mm_   = yyyymmddhh_[4:6]
-    dd_   = yyyymmddhh_[6:8]
-    hh_   = yyyymmddhh_[8:10]
-    rst_time = datetime(year=int(yyyy_), month=int(mm_), day=int(dd_), hour = int(hh_))
-    expid_in  = self.common_in['expid']
-    expid_out = self.common_out['expid']
-    if (expid_out) :
-       expid_out = expid_out + '.'
-    else:
-       expid_out = ''
-
-    agrid_in  = self.common_in['agrid']
-    agrid_out = self.common_out['agrid']
-
-    anafiles=[]
-    for h in [3,4,5,6,7,8,9]:
-       delt = timedelta(hours = h-3)
-       new_time = rst_time + delt
-       yyyy = "Y"+str(new_time.year)
-       mm   = 'M%02d'%new_time.month
-       ymd  = '%04d%02d%02d'%(new_time.year,new_time.month, new_time.day)
-       hh   = '%02d'%h
-       newhh= '%02d'%new_time.hour
-       m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
-       # bkg files
-       for ftype in ['sfc', 'eta']:
-          fname = expid_in+'.bkg'+hh+'_'+ftype+'_rst.'+ymd+'_'+newhh+'z.nc4'
-          f = m2_rst_dir+'/'+fname
-          if(os.path.isfile(f)):
-             anafiles.append(f)
-          else:
-             print('Warning: Cannot find '+f)
-       # cbkg file
-       fname = expid_in + '.cbkg' + hh + '_eta_rst.' + ymd + '_' + newhh + 'z.nc4'
-       f = m2_rst_dir+'/'+fname
-       if(os.path.isfile(f)):
-         anafiles.append(f)
-       else:
-         print('Warning: Cannot find '+f)
-       # gaas_bkg_sfc files
-       if (h==6 or h==9):
-          fname = expid_in+'.gaas_bkg_sfc_rst.'+ymd+'_'+newhh+'z.nc4'
-          f = m2_rst_dir+'/'+fname
-          if (os.path.isfile(f)):
-            anafiles.append(f)
-          else:
-            print('Warning: Cannot find '+f)
-     # trak.GDA.rst file
-    delt = timedelta(hours = 3)
-    new_time = rst_time - delt
-    yyyy = "Y"+str(new_time.year)
-    mm   = 'M%02d'%new_time.month
-    ymdh = '%04d%02d%02d%02d'%(new_time.year, new_time.month, new_time.day, new_time.hour)
-    m2_rst_dir = merra_2_rst_dir.replace('Y'+yyyy_,yyyy).replace('M'+mm_,mm)
-    fname = expid_in+'.trak.GDA.rst.'+ymdh+'z.txt'
-    f = m2_rst_dir+'/'+fname
-    if (os.path.isfile(f)): anafiles.append(f)
-
-    for f in anafiles:
-      fname    = os.path.basename(f)
-      f_tmp = rst_dir+'/'+fname
-      print("Copy file "+f +" to " + rst_dir)
-      shutil.copy(f,f_tmp)
+    self.surf_in['catch_model'] = 'catch'
 
   def get_bcbase(self, opt):
      base = ''
@@ -608,4 +482,4 @@ if __name__ == "__main__":
      stream = f.read()
   config = yaml.load(stream)
   param = remap_params(config) 
-  param.convert_to_yaml() 
+  config_to_yaml(param.config, 'remap_params.yaml') 

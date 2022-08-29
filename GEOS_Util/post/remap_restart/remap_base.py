@@ -3,6 +3,7 @@
 import os
 import ruamel.yaml
 import shutil
+import subprocess
 
 class remap_base(object):
   def __init__(self, **configs):
@@ -28,3 +29,7 @@ class remap_base(object):
           out_dir    = self.config['output']['shared']['out_dir']
           if not os.path.exists(out_dir) : os.makedirs(out_dir)
         break
+  def remove_merra2(self):
+    if self.config['input']['shared']['MERRA-2']:
+      print(" remove temporary folder that contains MERRA-2 archived files ... \n")
+      subprocess.call(['/bin/rm', '-rf', self.config['input']['shared']['rst_dir']])
