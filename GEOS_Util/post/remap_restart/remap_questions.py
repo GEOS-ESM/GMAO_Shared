@@ -17,26 +17,22 @@ import glob
 def fvcore_name(x):
   ymdh = x['input:shared:yyyymmddhh']
   time = ymdh[0:8] + '_'+ymdh[8:10]
-  files = glob.glob(x['input:shared:rst_dir']+'/*fvcore_*'+time+'*')
+  rst_dir = x.get('input:shared:rst_dir')
+  if not rst_dir : return False
+  files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
   if len(files) ==1 :
     fname = files[0]
     print('\nFound ' + fname) 
     return fname
   else:
-    fname = x['input:shared:rst_dir']+'/fvcore_internal_rst'
+    fname = rst_dir+'/fvcore_internal_rst'
     if os.path.exists(fname):
        print('\nFound ' + fname) 
        return fname
     return False
 
 def tmp_merra2_dir(x):
-   cmd = 'whoami'
-   p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-   (user, err) = p.communicate()
-   p_status = p.wait()
-   print(user)
-   user = user.decode().split()
-   tmp_merra2 = '/discover/nobackup/'+user[0]+'/merra2_tmp'+x['input:shared:yyyymmddhh']+'/'
+   tmp_merra2 = x['output:shared:out_dir']+ '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
    return tmp_merra2
 
 def we_default(tag):
@@ -100,13 +96,6 @@ def ask_questions():
             "name": "input:shared:yyyymmddhh",
             "message": "From what restart date/time would you like to remap? (must be 10 digits: yyyymmddhh)",
             "validate": lambda text: len(text)==10 ,
-        },
-        {
-            "type": "path",
-            "name": "input:shared:rst_dir",
-            "message": "Enter a directory to which the archived MERRA-2 archive files can be copied: ",
-            "default": lambda x: tmp_merra2_dir(x),
-            "when": lambda x: x['input:shared:MERRA-2'],
         },
 
         {
@@ -333,6 +322,8 @@ Sample DAS tags \n \
    answers = questionary.prompt(questions)
    if not answers.get('input:shared:model') :
       answers['input:shared:model'] = 'data'
+   if answers['input:shared:MERRA-2']:
+     answers['input:shared:rst_dir'] = tmp_merra2_dir(answers)
    answers['input:shared:rst_dir'] = os.path.abspath(answers['input:shared:rst_dir'])
    if answers.get('output:shared:ogrid') == 'CS':
       answers['output:shared:ogrid'] = answers['output:shared:agrid']

@@ -9,9 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add YAML validator
+
 ### Changed
 - Converted obsys_rc.py, check_obsysrc.py, and associated unittests to Python 3
 - Added features to cmpdir.pl (option to toggle between diff and xxdiff; added -B to -bwi flags)
+
+- Generated command line to run the program
+- changed the location of the temporary folder for remap_restarts MERRA-2 case
+- Added new remap tests
+  - amip_c180Toc90
+  - c180Toc360
+  - c360Toc24
+  - s2sv3Toc12MOM6
 
 ### Fixed
 
@@ -46,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added statsNx.rc for screen level variable fstats 
+- Added statsNx.rc for screen level variable fstats
 
 ### Changed
 
