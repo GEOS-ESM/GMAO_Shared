@@ -54,7 +54,7 @@ END
 #-----------------------
 BEGIN myd04_061_his
 #  20020801_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/iesa/aerosol/data/MODIS/Level2/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
-  20020801_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/MODIS/Level2/061/MOD04/aerosol/data/MODIS/Level2/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
+  20020801_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/MODIS/Level2/061/MOD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
 END
 BEGIN myd04_061_flk => MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
   20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
