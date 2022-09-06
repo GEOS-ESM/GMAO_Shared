@@ -298,7 +298,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   integer, parameter :: noz = 16
   character(len=*), parameter :: oztype(noz)=(/'sbuv2', 'omi', 'mls',    & 
        'mls20', 'mls22', 'mls30', 'mls55', 'tomseff', 'omieff', 'o3lev', &
-       'gome','ompslp_g','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
+       'gome','ompslpnc','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
 
 !     ODS variables
 !     -------------

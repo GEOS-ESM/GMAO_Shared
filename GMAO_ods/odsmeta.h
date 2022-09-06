@@ -338,7 +338,7 @@
      .                 'mopitt          ', 'cris-fsr        ', 'ompslpuv        ', 
      .                 'ompslpvis       ', 'ompsnm          ', 'ompsnp          ',
      .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
-     .                 'amsre           ', 'ompslp_g'/)
+     .                 'amsre           ', 'ompslpnc'/)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will

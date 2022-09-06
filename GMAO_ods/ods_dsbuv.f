@@ -146,7 +146,7 @@
            exit
         endif
         select case(obstype)
-	case('o3lev','mls','mls20','mls22','mls30','mls55','ompslp_g','ompslpuv','ompslpvis')
+	case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
          kt(kobs)   = kto3mx              ! ozone mixing ratio (ppmv)
          lev(kobs)  = pdata(4,i)
         case('acos')

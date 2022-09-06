@@ -412,7 +412,7 @@ BEGIN r21c_ompslpvis_nc => ompslpvisnc.%y4%m2%d2.t%h2z.nc
 END
 
 # OMPS Limb Profiler profiles (future version)
-#BEGIN r21c_ompslp_g_nc => ompslpgnc.%y4%m2%d2.t%h2z.nc
+#BEGIN r21c_ompslpnc_nc => ompslpgnc.%y4%m2%d2.t%h2z.nc
 # 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp_v_2.7/Y%y4/M%m2/OMPS-LPoz-v2_7.%y4%m2%d2_%h2z.nc
 #END
 
