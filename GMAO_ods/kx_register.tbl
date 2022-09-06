@@ -355,7 +355,7 @@
    330  gsi_diag    aura        mls55                      0    #
    335  gsi_diag    npp         ompslpuv                   0    #
    336  gsi_diag    npp         ompslpvis                  0    #
-   337  gsi_diag    npp         ompslp_g                   0    #
+   337  gsi_diag    npp         ompslpnc                   0    #
    335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    # ???
    355  gsi_diag    tirosn      ssu                        5    # ssu_tirosn
    356  gsi_diag    n06         ssu                        6    # ssu_n06
