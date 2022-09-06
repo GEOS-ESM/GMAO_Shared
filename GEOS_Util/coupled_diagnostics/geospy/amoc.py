@@ -10,7 +10,7 @@ import cmocean
 import geosdset, plots
 
 plotname='AMOC'
-defaults={'name': ['ty_trans','ty_trans_gm'] 
+defaults={'name': ['ty_trans','ty_trans_gm'],
           'colname': 'ocean_month', 
           'coltype': 'MOM'}
 
@@ -26,7 +26,8 @@ def mkamoc(exp,dset):
 
     # Add GM transport
     try:
-        gm=dset[varname][1].resample(time='1Y').mean('time')
+        varname=vardata['name'][1]
+        gm=dset[varname].resample(time='1Y').mean('time')
         gm=gm*dset['atl_mask'].values
         gm=gm.sum('xt_ocean',skipna=True)
     except KeyError:
