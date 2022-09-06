@@ -374,7 +374,7 @@
      &	       trim(satype)/='omieff'.and. trim(satype)/='o3lev' .and.
      &	       trim(satype)/='acos'.and. trim(satype)/='mopitt' .and.
      &         trim(satype)/='gome'  .and. trim(satype)/='ompslpvis' .and.
-     &         trim(satype)/='ompslp_g' .and. trim(satype)/='ompslpuv'.and.
+     &         trim(satype)/='ompslpnc' .and. trim(satype)/='ompslpuv'.and.
      &         trim(satype)/='ompsnm'.and. trim(satype)/='ompsnp' .and.
      &         trim(satype)/='ompsnmeff' .and. trim(satype)/='ompsnpnc') then
       
@@ -474,7 +474,7 @@
 	 iouse (:)=+1.
          
 	 select case(satype)
-	 case('o3lev','mls','mls20','mls22','mls30','mls55','ompslp_g','ompslpuv','ompslpvis')
+	 case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
 	 case default
            read (lu,iostat=ios) pobs,gross,tnoise,iouse
            if (ios/=0) then
