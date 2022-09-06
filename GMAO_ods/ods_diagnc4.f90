@@ -295,10 +295,10 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   integer, parameter :: nnln = 8
   character(len=*), parameter :: nlnqct(nnln)=(/ ' dw', ' ps', 'tcp', '  q', &
        'spd', '  t', ' uv', 'sst'/)
-  integer, parameter :: noz = 15
+  integer, parameter :: noz = 16
   character(len=*), parameter :: oztype(noz)=(/'sbuv2', 'omi', 'mls',    & 
        'mls20', 'mls22', 'mls30', 'mls55', 'tomseff', 'omieff', 'o3lev', &
-       'gome','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
+       'gome','ompslp_g','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
 
 !     ODS variables
 !     -------------

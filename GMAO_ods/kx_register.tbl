@@ -159,6 +159,9 @@
    234  gsi_conv    234         uv                         0    # TAMDAR aircraft (U,V)
    235  gsi_conv    235         uv                         0    # Canadian AMDAR (U,V)
    240  gsi_conv    240         uv                         0    # NESDIS short wave IR CTW (U,V)
+   240  gsi_conv    240         uv                       252    # ?
+   240  gsi_conv    240         uv                       253    # ?
+   240  gsi_conv    240         uv                       254    # ?
    240  gsi_conv    240         uv                       257    # ?
    240  gsi_conv    240         uv                       259    # ?
    241  gsi_conv    241         uv                         0    # INDIAN IR/VIS CTW (U,V)
@@ -179,12 +182,21 @@
    244  gsi_conv    244         uv                       209    # ?
    244  gsi_conv    244         uv                       223    # ?
    245  gsi_conv    245         uv                         0    # NESDIS IR CTW (U,V)
+   245  gsi_conv    245         uv                       252    # ?
+   245  gsi_conv    245         uv                       253    # ?
+   245  gsi_conv    245         uv                       254    # ?
    245  gsi_conv    245         uv                       257    # ?
    245  gsi_conv    245         uv                       259    # ?
    246  gsi_conv    246         uv                         0    # NESDIS imager cloud top (U,V)
+   246  gsi_conv    246         uv                       252    # ?
+   246  gsi_conv    246         uv                       253    # ?
+   246  gsi_conv    246         uv                       254    # ?
    246  gsi_conv    246         uv                       257    # ?
    246  gsi_conv    246         uv                       259    # ?
    247  gsi_conv    247         uv                         0    # NESDIS imager deep layer (U,V)
+   247  gsi_conv    247         uv                       252    # ?
+   247  gsi_conv    247         uv                       253    # ?
+   247  gsi_conv    247         uv                       254    # ?
    247  gsi_conv    247         uv                       257    # ?
    247  gsi_conv    247         uv                       259    # ?
    248  gsi_conv    248         uv                         0    # NESDIS sounder cloud top (U,V)
@@ -194,6 +206,9 @@
    250  gsi_conv    250         uv                       172    # ?
    250  gsi_conv    250         uv                       173    # ?
    251  gsi_conv    251         uv                         0    # NESDIS VIS CTW (U,V)
+   251  gsi_conv    251         uv                       252    # ?
+   251  gsi_conv    251         uv                       253    # ?
+   251  gsi_conv    251         uv                       254    # ?
    251  gsi_conv    251         uv                       257    # ?
    251  gsi_conv    251         uv                       259    # ?
    252  gsi_conv    252         uv                         0    # JMA IR CTW (U,V)
@@ -241,6 +256,7 @@
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
    270  gsi_conv    270         uv                         0    # ?
+   275  gsi_conv    275         uv                         0    # Loon Ballon winds
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
@@ -337,6 +353,9 @@
    325  gsi_diag    metop-a     amsua                     25    # amsua_metop-a         -- conflict 325
    326  gsi_diag    metop-b     amsua                     26    # amsua_metop-b
    330  gsi_diag    aura        mls55                      0    #
+   335  gsi_diag    npp         ompslpuv                   0    #
+   336  gsi_diag    npp         ompslpvis                  0    #
+   337  gsi_diag    npp         ompslp_g                   0    #
    335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    # ???
    355  gsi_diag    tirosn      ssu                        5    # ssu_tirosn
    356  gsi_diag    n06         ssu                        6    # ssu_n06
@@ -470,6 +489,7 @@
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
+   546  gsi_diag    aqua        amsre                      0    # amsre_aqua
    547  gsi_diag    aqua        amsre_low                  0    # amsre_aqua(low)
    548  gsi_diag    aqua        amsre_mid                  0    # amsre_aqua(mid)
    549  gsi_diag    aqua        amsre_hig                  0    # amsre_aqua(hi)
