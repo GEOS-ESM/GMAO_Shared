@@ -26,7 +26,7 @@
 # AVHRR MERRA-2-extracted ODS files
 #----------------------------------
 BEGIN patmosx_ods => patmosx.%y4%m2%d2_%h2z.ods
-  19961201_00z-20020731_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AVHRR/MERRA2_ods/patmosx.obs.%y4%m2%d2_%h2z.ods
+  19961201_00z-20020731_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AVHRR/MERRA2_ods/Y%y4/M%m2/patmosx.obs.%y4%m2%d2_%h2z.ods
 END
 
 # AVHRR ascending and descending Synoptic npz files
