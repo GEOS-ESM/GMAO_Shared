@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [1.5.7] - 2022-09-08
+## [1.5.8] - 2022-09-08
 
 ### Added
 
@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Add `target` attribute to variables in `nc_diag_cat`. Needed to build with Intel 2022.1
+
+## [1.5.7] - 2022-08-01
+
+### Changed
+
+Updates consistent with CVS Jason-4_0_p1_sky. Releases non-needed memory from zcmp/progz. Otherwise, minor plot updates.
 
 ## [1.5.6] - 2022-07-22
 
