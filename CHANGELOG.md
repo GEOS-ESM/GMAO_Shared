@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add YAML validator
 
 ### Changed
+- Converted obsys_rc.py, check_obsysrc.py, and associated unittests to Python 3
+- Added features to cmpdir.pl (option to toggle between diff and xxdiff; added -B to -bwi flags)
 
 - Generated command line to run the program
 - changed the location of the temporary folder for remap_restarts MERRA-2 case
