@@ -150,7 +150,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
 %UPPERAIR_OPT = ("agcm_import_rst"           => 1,
                  "agcm_internal_rst"         => 1,
                  "carma_internal_rst"        => 1,
-                 "geosachem_internal_rst"    => 1,
+                 "achem_internal_rst"        => 1,
                  "geoschemchem_internal_rst" => 1,
                  "gmichem_internal_rst"      => 1,
                  "gocart_internal_rst"       => 1,
@@ -476,10 +476,10 @@ sub init_tag_arrays_and_hashes {
     # BCS Tags: Icarus-NLv3 (New Land Parameters)
     #---------------------------------------------------------------------------
     @INL   = qw( INL Icarus-NL Icarus-NLv3 Jason-NL );
-    @GITNL = qw( GITNL 10.19 10.20 );
+    @GITNL = qw( GITNL 10.19 10.20 10.21 10.22 10.23 );
     @D525 = qw( 525
                 GEOSadas-5_25_1        GEOSadas-5_25_1_p5     GEOSadas-5_25_p7
-                GEOSadas-5_27_1        GEOSadas-5_29_3                        );
+                GEOSadas-5_27_1        GEOSadas-5_29_3        GEOSadas-5_29_4 );
 
     foreach (@F14)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-1_4"          }
     foreach (@F20)   { $landIceVER{$_} = 1; $bcsTAG{$_} = "Fortuna-2_0"          }
@@ -2467,7 +2467,7 @@ sub regrid_upperair_rsts_CS {
     $DYN       = rstname($expid, "fvcore_internal_rst",       $rstIN_template);
     $MOIST     = rstname($expid, "moist_internal_rst",        $rstIN_template);
 
-    $ACHEM     = rstname($expid, "geosachem_internal_rst",    $rstIN_template);
+    $ACHEM     = rstname($expid, "achem_internal_rst",        $rstIN_template);
     $CCHEM     = rstname($expid, "geoschemchem_internal_rst", $rstIN_template);
     $CARMA     = rstname($expid, "carma_internal_rst",        $rstIN_template);
     $AGCM      = rstname($expid, "agcm_import_rst",           $rstIN_template);
@@ -2554,7 +2554,7 @@ source $g5modules
 
 /bin/touch input.nml
 
-if( ".$ACHEM"     != . ) /bin/ln -s $ACHEM  geosachem_internal_restart_in
+if( ".$ACHEM"     != . ) /bin/ln -s $ACHEM  achem_internal_restart_in
 if( ".$CCHEM"     != . ) /bin/ln -s $CCHEM  geoschemchem_internal_restart_in
 if( ".$CARMA"     != . ) /bin/ln -s $CARMA  carma_internal_restart_in
 if( ".$AGCM"      != . ) /bin/ln -s $AGCM   agcm_import_restart_in

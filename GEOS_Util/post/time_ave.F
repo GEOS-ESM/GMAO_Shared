@@ -216,6 +216,8 @@ c ---------------------------
            if( mdiurnal ) diurnal = .FALSE.
       endif
 
+      if (ignore_nan) print *,' ignore nan is true'
+
 
 c Read RC Quadratics
 c ------------------
@@ -673,11 +675,11 @@ c --------------
                    do L=1,max(1,kmvar2(nv))
                    do j=1,jm
                    do i=1,im
-                   if( isnan( dum(i,j,nloc(nv)+L-1) ) ) then
-                       print *, 'Warning!  Nan detected for ',trim(vname2(nv)),
+                   if( isnan( dum(i,j,nloc(nv)+L-1) ). or. ( dum(i,j,nloc(nv)+L-1).gt.HUGE(dum(i,j,nloc(nv)+L-1)) ) ) then
+                       print *, 'Warning!  Nan or Infinity detected for ',trim(vname2(nv)),
      .                          ' at lat: ',lattice%jglobal(j),' lon: ',lattice%iglobal(i)
                        if( ignore_nan ) then
-                           print *, 'Setting Nan to UNDEF'
+                           print *, 'Setting Nan or Infinity to UNDEF'
                            print *
                        else
                            rc = 1
@@ -886,7 +888,7 @@ c ----------
                  endwhere
              else
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0)
-             endif
+             endif 
              call mpi_gfio_putVar ( id,trim(vname2(mv)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
          endif
       enddo

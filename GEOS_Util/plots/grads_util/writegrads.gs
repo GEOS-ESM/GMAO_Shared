@@ -27,6 +27,8 @@ function writegrads(args)
          ydim = result
 'getinfo zdim'
          zdim = result
+'getinfo edim'
+         edim = result
 'getinfo tdim'
          tdim  = result
 
@@ -93,6 +95,8 @@ else
   '!echo vars 'numargs' >> grads.ctl'
 endif
 
+* --------------------------------------------------------------------
+
 'set gxout fwrite'
 'set fwrite grads.data'
 
@@ -139,7 +143,12 @@ endif
       '!echo "'desc'" >> grads.ctl'
 *      say 'Writing Variable: 'name
       'set z 1'
+       e = 1
+       while( e<=edim )
+      'set e 'e
       'd 'name
+       e = e + 1
+       endwhile
    else
       '!echo "'desc'" >> grads.ctl'
 
@@ -150,7 +159,12 @@ endif
             'getinfo level'
              lev = result
 *            say 'Writing Variable: 'name' for Level: 'lev
+             e = 1
+             while( e<=edim )
+            'set e 'e
             'd 'name
+             e = e + 1
+             endwhile
          z=z+1
          endwhile
       else
@@ -160,7 +174,12 @@ endif
             'getinfo level'
              lev = result
 *            say 'Writing Variable: 'name' for Level: 'lev
+             e = 1
+             while( e<=edim )
+            'set e 'e
             'd 'name
+             e = e + 1
+             endwhile
          z=z-1
          endwhile
       endif

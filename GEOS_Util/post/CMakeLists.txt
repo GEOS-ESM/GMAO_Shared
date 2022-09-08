@@ -38,6 +38,7 @@ set_target_properties(stats.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${th
 
 ecbuild_add_executable (TARGET convert_aerosols.x SOURCES convert_aerosols.F)
 ecbuild_add_executable (TARGET 3CH_mpi.x SOURCES 3CH.F90)
+set_target_properties(3CH_mpi.x PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
 set (perlscripts
   ecmwf2geos.pl
@@ -47,6 +48,11 @@ set (perlscripts
   )
 install(
    PROGRAMS ${perlscripts} ec2grd.csh
+   DESTINATION bin)
+
+file(GLOB pythonscripts CONFIGURE_DEPENDS ./remap_restart/remap*)
+install(
+   PROGRAMS ${pythonscripts} 
    DESTINATION bin)
 
 set_property(SOURCE rsg3_vinterp.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${BYTERECLEN} ${EXTENDED_SOURCE}")
@@ -82,33 +88,30 @@ set_property(SOURCE PWSSSP.F APPEND_STRING PROPERTY COMPILE_FLAGS "${FREAL8} ${E
 set_property(SOURCE alias.F APPEND_STRING PROPERTY COMPILE_FLAGS "${BYTERECLEN}")
 
 target_link_libraries (convert_eta.x ${this} GMAO_hermes MAPL)
-target_link_libraries (eta2prs.x ${this} MAPL GEOS_Shared)
-target_link_libraries (ec_prs2eta.x ${this} MAPL)
-target_link_libraries (era5_prs2eta.x ${this} MAPL)
-target_link_libraries (ec_prs2fv.x ${this} MAPL)
-target_link_libraries (stats.x post_nompi MAPL ${ESMF_LIBRARIES})
-target_link_libraries (flat2hdf.x post_nompi)
+target_link_libraries (eta2prs.x ${this} GMAO_gfio_r4 MAPL GEOS_Shared)
+target_link_libraries (ec_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
+target_link_libraries (era5_prs2eta.x ${this} GMAO_gfio_r4 MAPL)
+target_link_libraries (ec_prs2fv.x ${this} GMAO_gfio_r4 MAPL)
+target_link_libraries (stats.x post_nompi GMAO_gfio_r4 MAPL esmf)
+target_link_libraries (flat2hdf.x post_nompi GMAO_gfio_r4)
 target_link_libraries (gg2fv.x post)
 target_link_libraries (rs2hdf.x post)
 target_link_libraries (time_ave.x ${this} GMAO_gfio_r4 MAPL )
-target_link_libraries (3CH_mpi.x ${this} GMAO_gfio_r4 ${MPI_Fortran_LIBRARIES})
+target_link_libraries (3CH_mpi.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
 
 target_link_libraries (rsg3_vinterp.x ${this} GMAO_hermes)
 target_link_libraries (rs_vinterp.x ${this} GMAO_hermes)
-target_link_libraries (eta2rst.x ${this} GMAO_hermes ${MPI_Fortran_LIBRARIES})
-target_link_libraries (fvrst.x GMAO_gfio_r4 MAPL)
-set_target_properties (fvrst.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
-target_link_libraries (gg2eta.x ${this})
-target_link_libraries (gg2fv.x ${this} )
-target_link_libraries (hdf2rs.x ${this} ${MPI_Fortran_LIBRARIES})
-target_link_libraries (makeiau.x ${this} ${MPI_Fortran_LIBRARIES})
-target_link_libraries (merra2scm.x ${this} ${MPI_Fortran_LIBRARIES})
-target_link_libraries (rs2hdf.x ${this} )
-target_link_libraries (rs_hinterp.x ${this} MAPL)
-set_target_properties (rs_hinterp.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
+target_link_libraries (eta2rst.x ${this} GMAO_hermes MPI::MPI_Fortran)
+target_link_libraries (fvrst.x GMAO_gfio_r4 MAPL OpenMP::OpenMP_Fortran)
+target_link_libraries (gg2eta.x ${this} GMAO_gfio_r4)
+target_link_libraries (gg2fv.x ${this} GMAO_gfio_r4)
+target_link_libraries (hdf2rs.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
+target_link_libraries (makeiau.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
+target_link_libraries (merra2scm.x ${this} GMAO_gfio_r4 MPI::MPI_Fortran)
+target_link_libraries (rs2hdf.x ${this} GMAO_gfio_r4)
+target_link_libraries (rs_hinterp.x ${this} MAPL OpenMP::OpenMP_Fortran)
 
-target_link_libraries (rs_numtiles.x MAPL)
-set_target_properties (rs_numtiles.x PROPERTIES LINK_FLAGS "${OpenMP_Fortran_FLAGS}")
+target_link_libraries (rs_numtiles.x MAPL OpenMP::OpenMP_Fortran)
 
 # Unit tests?
 #add_executable (checkdate.x checkdate.F)
@@ -143,6 +146,7 @@ set (post_rc
    plot.rc
    post.rc
    stats.rc
+   statsNx.rc
    time_ave.rc
    3CH.rc
    )
@@ -153,7 +157,7 @@ install (
    )
 
 install (
-   FILES stats.rc time_ave.rc
+   FILES stats.rc time_ave.rc statsNx.rc 
    DESTINATION etc
    )
 
@@ -164,3 +168,5 @@ install(PROGRAMS
   ${CMAKE_CURRENT_BINARY_DIR}/3CH.j
   DESTINATION post
   )
+
+add_subdirectory(tests)

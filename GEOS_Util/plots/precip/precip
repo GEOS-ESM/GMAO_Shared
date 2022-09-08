@@ -44,7 +44,7 @@ endwhile
         qfile.3 = subwrd(result,2)
         scale.3 = subwrd(result,3)
 
-if( qname.1 = 'NULL' & qname.2  = 'NULL' & qname.3  = 'NULL')
+if( qname.1 = 'NULL' | qname.2  = 'NULL' | qname.3  = 'NULL')
    'run getvar TPREC MOIST'
            qname.1 = subwrd(result,1)
            qfile.1 = subwrd(result,2)

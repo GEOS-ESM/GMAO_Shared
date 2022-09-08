@@ -475,7 +475,7 @@ end
      set numlocs  = ''
      @    nstream = 0
      foreach collection (  $collections )
-          set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+          set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
      @    nstream =                   $nstream  + 1
      @  date_node = $expdots + $ndots[$nstream] + 3
 
@@ -569,7 +569,7 @@ set monthly_collections = "FALSE"
 @ m      = 1
 @ begloc = 1
 foreach collection ( $collections )
-        set   monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+        set   monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
         if( ${monthly_collections} == "FALSE" & ${#monthly_attribute} != 0 ) set monthly_collections = "TRUE"
 
       @ endloc = $begloc + $numdates[$m] - 1
@@ -730,7 +730,7 @@ if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE
 @ begloc  = 1
 @ nstream = 0
 foreach collection ( $collections )
-     set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+     set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
    @ nstream   =                   $nstream  + 1
    @ date_node = $expdots + $ndots[$nstream] + 3
    @ endloc = $begloc + $numdates[$m] - 1
@@ -771,6 +771,7 @@ foreach collection ( $collections )
                  if( $#locals != 0 ) then
                      echo "Archiving Dailies for Collection: $collection for Date: $date"
                @ daily_date_node  = $date_node
+               set HIRES = TRUE   # disable daily tarball
                if( $HIRES == FALSE ) then
                   $mytar cf $expid.${collection}.daily.$date.$ext.tar $locals
                   set locals = $expid.${collection}.daily.$date.$ext.tar
@@ -834,9 +835,9 @@ foreach collection ( $collections )
                if( ${#monthly_attribute} != 0 ) @ monthly_date_node  = $date_node
 
                if( ${#monthly_attribute} == 0 ) then
-               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  monthly | grep -v diurnal`
+                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.*${ext}"   | grep  monthly | grep -v diurnal`
                else
-                   set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
+                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.[0-9]\{6\}01_0000z.${ext}" | grep -v diurnal`
                endif
 
                echo "Archiving Monthlies for Collection: $collection for Date: $date"
@@ -853,7 +854,11 @@ foreach collection ( $collections )
                                                       sed -e "s/%d2/$day/       g" | \
                                                       sed -e "s/%h2/$hour/      g"`
 
-                  $cpvar $local $SOURCE/$collection
+                  if( ${#monthly_attribute} == 0 ) then
+                      $cpvar $local $SOURCE/$collection
+                  else
+                      $cpvar $local $SOURCE/$collection/${expid}.${collection}.monthly.${year}${month}.${ext}
+                  endif
 
                   echo "if( -e $local ) then"                                          >> $archfile
                   echo "ssh ${MASTOR} mkdir -p ${MASDIR}/$archive"                     >> $archfile
@@ -1010,7 +1015,8 @@ EOF
          if( $HOST == 'pleiades' ) then
                   ./gcm_archive.$collection.$streamdates[1].j > ./gcm_archive.$collection.$streamdates[1].o
          else
-            $batch_cmd     gcm_archive.$collection.$streamdates[1].j
+            #$batch_cmd     gcm_archive.$collection.$streamdates[1].j
+            echo "skipping archive job"
          endif
          /bin/rm -f $archfile
          /bin/rm -f sedfile
@@ -1034,7 +1040,7 @@ wait
 
 @ nstream = 0
 foreach collection ( $collections )
-     set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+     set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
     @ nstream   =                   $nstream  + 1
 
      if( ( ($MOVEFILES != "TRUE") & ${#monthly_attribute} == 0 ) | \
@@ -1260,7 +1266,7 @@ if( $PLOTS[1] == "NULL" ) then
                                       lockfile LOCKFILE
 @ count = 0
 foreach stream ($streams)
-    set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+    set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
     echo Checking stream: $stream for date: $date
     if( ${#monthly_attribute} == 0 ) then
         set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.monthly.${date}* | grep -v clim`

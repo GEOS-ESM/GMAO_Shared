@@ -1361,7 +1361,7 @@
                                          ( (jmglobal-1)*jratio .eq. (jm-1) )  ) then
                                          do j=1,jmglobal
                                          do i=1,imglobal
-                                            qglo(i,j,L) = q( i*iratio-1, j*jratio-1,L )
+                                            qglo(i,j,L) = q( 1+(i-1)*iratio, 1+(j-1)*jratio,L )
                                          enddo
                                          enddo
                                      else
@@ -1380,7 +1380,7 @@
                                          ( (jmglobal-1)*jratio .eq. (jm-1) )  ) then
                                          do j=1,jmglobal
                                          do i=1,imglobal
-                                            qglo(i,j,L) = q( i*iratio-1, j*jratio-1,L )
+                                            qglo(i,j,L) = q( 1+(i-1)*iratio, 1+(j-1)*jratio,L )
                                          enddo
                                          enddo
                                      else

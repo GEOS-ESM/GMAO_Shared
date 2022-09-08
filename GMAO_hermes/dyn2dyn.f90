@@ -271,9 +271,11 @@ CONTAINS
       character*10 str
       character(len=255) trnames
 
-      integer, dimension(6), parameter :: IMS4 = (/ 72, 144, 288, 576, 1152, 2304 /)
-      integer, dimension(6), parameter :: IMS5 = (/ 72, 144, 288, 576, 1152, 2304 /)
-      integer, dimension(6), parameter :: JMSG = (/ 46,  91, 181, 361,  721, 1441 /)
+      !                                          C  48   90  180  360   720  1440   ?  24  12
+      !                                              a    b    c    d     e     f   x   y   z
+      integer, dimension(9), parameter :: IMS4 = (/ 72, 144, 288, 576, 1152, 2304, 48, 36, 12 /)
+      integer, dimension(9), parameter :: IMS5 = (/ 72, 144, 288, 576, 1152, 2304, 48, 36, 12 /)
+      integer, dimension(9), parameter :: JMSG = (/ 46,  91, 181, 361,  721, 1441, 25, 25, 13 /)
 
       ! in most cases ...
       ! nlat=(jcap+2)+2
@@ -364,6 +366,12 @@ CONTAINS
                      ires=5
                case ("f")
                      ires=6
+               case ("x")
+                     ires=size(IMS5)-2
+               case ("y")
+                     ires=size(IMS5)-1
+               case ("z")
+                     ires=size(IMS5)
                case default
                      print *, 'Sorry this resolution not supported'
                      error stop 1
