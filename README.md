@@ -1,5 +1,7 @@
 # GEOS Shared Libraries Repository
 
+This edit was made on GitHub directly
+
 ## Contributing
 
 Please check out our [contributing guidelines](CONTRIBUTING.md).
