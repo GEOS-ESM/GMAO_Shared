@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Add `target` attribute to variables in `nc_diag_cat`. Needed to build with Intel 2022.1
+
 ### Removed
 
 ## [1.5.6] - 2022-07-22
