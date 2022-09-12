@@ -11,11 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updates the plot package with the renamed carbon species.
-
 ### Fixed
 
 ### Removed
+
+## [1.6.0] - 2022-09-12
+
+### Changed
+
+- Updates the plot package with the renamed carbon species.
 
 ## [1.5.8] - 2022-09-08
 
