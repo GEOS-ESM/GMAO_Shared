@@ -7,6 +7,10 @@ endif
 'run getenv GEOSUTIL'
         geosutil = result
 
+'q gxout'
+   gxout = sublin(result,4)
+   gxout = subwrd(gxout,6)
+
 'getinfo latmin'
          latmin = result
 'getinfo latmax'
@@ -43,5 +47,11 @@ endif
 'set ccols 'color' 0'
 'set clevs 0.5'
 'd mask'
+'set gxout contour'
+'set cthick 6'
+'set clevs 0.99'
+'set ccolor 1'
+'d mask'
+'set gxout 'gxout
 
 return

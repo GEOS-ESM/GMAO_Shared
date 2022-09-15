@@ -97,9 +97,44 @@ if( mfile = "NULL" ) ; return ; endif
                      ' alias ' mname
                       malias = result
 'chckname            'malias
+
 'seasonalf -FUNCTION 'malias'*'scale' -NAME mod0'
  modfile  = subwrd(result,1)
  
+* Release memory for DEFINEd variables not needed
+* -----------------------------------------------
+'undefine qdata'
+say 'Releasing variables not needed ...'
+      months = 'jan feb mar apr may jun jul aug sep oct nov dec djf jja son mam ann clim'
+           m = 1
+       month = subwrd(months,m)
+while( month != '' )
+            k = 1
+       season = subwrd(seasons,k)
+      'lowercase 'season
+                  season = result
+       needed = FALSE
+       while( season != '' )
+          if( season = month )
+              needed = TRUE
+          endif
+               k = k+1
+          season = subwrd(seasons,k)
+         'lowercase 'season
+                     season = result
+       endwhile
+       if( needed = FALSE )
+          say ''month' is not NEEDED, needed = 'needed
+       else
+          say ''month' is     NEEDED, needed = 'needed
+       endif
+       if( needed = FALSE )
+          'undefine mod0'month
+       endif
+       m = m+1
+       month = subwrd(months,m)
+endwhile
+
 *******************************************************************
 ****   Loop over Possible Experiment Datasets for Comparison   ****
 *******************************************************************
@@ -189,6 +224,39 @@ say 'seasonalf -FUNCTION 'oalias'*'cscal.numexp' -NAME exp'numexp
     'seasonalf -FUNCTION 'oalias'*'cscal.numexp' -NAME exp'numexp
  expfile.numexp  = subwrd(result,1)
  
+* Release memory for DEFINEd variables not needed
+* -----------------------------------------------
+'undefine qdata'
+say 'Releasing variables not needed ...'
+      months = 'jan feb mar apr may jun jul aug sep oct nov dec djf jja son mam ann clim'
+           m = 1
+       month = subwrd(months,m)
+while( month != '' )
+            k = 1
+       season = subwrd(seasons,k)
+      'lowercase 'season
+                  season = result
+       needed = FALSE
+       while( season != '' )
+          if( season = month )
+              needed = TRUE
+          endif
+               k = k+1
+          season = subwrd(seasons,k)
+         'lowercase 'season
+                     season = result
+       endwhile
+       if( needed = FALSE )
+          say ''month' is not NEEDED, needed = 'needed
+       else
+          say ''month' is     NEEDED, needed = 'needed
+       endif
+       if( needed = FALSE )
+          'undefine exp'numexp''month
+       endif
+       m = m+1
+       month = subwrd(months,m)
+endwhile
 
 * Loop over Seasons to Process
 * ----------------------------

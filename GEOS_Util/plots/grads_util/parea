@@ -2,7 +2,7 @@ function parea (args)
 
 *************************************************************
 *****                                                   *****
-*****  Usage:  parea xloc yloc xmax ymax <ytop>         *****
+*****  Usage:  parea xloc yloc xmax ymax                *****
 *****                                                   *****
 *************************************************************
 
@@ -14,101 +14,88 @@ yloc = subwrd(args,2)
 xmax = subwrd(args,3)
 ymax = subwrd(args,4)
 
+   top = 0.5
    bot = 0.4
   left = 0.5
  right = 0.2
 
+   top = 0.0
+   bot = 0.0
+  left = 0.0
+ right = 0.0
+
 scalex = 1.0
 scaley = 1.0
-   top = 0.5
 
        num = 0
 while( num < numargs )
        num = num + 1
+if( subwrd(args,num)='-top'    ) ; top    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-bot'    ) ; bot    = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-left'   ) ; left   = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-right'  ) ; right  = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-scalex' ) ; scalex = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-scaley' ) ; scaley = subwrd(args,num+1) ; endif
-if( subwrd(args,num)='-top'    ) ; top    = subwrd(args,num+1) ; endif
 endwhile
 
 say ' parea: 'xloc' 'yloc' 'xmax' 'ymax
-say 'scalex: 'scalex
-say 'scaley: 'scaley
+say ' '
 say '   top: 'top
+say '   bot: 'bot
+say '  left: 'left
+say ' right: 'right
 
-*'set vpage off'
-
-'set parea off'
 'getinfo page'
-pagex = subwrd(result,1)
-pagey = subwrd(result,2)
-sizex = pagex
-sizey = pagey
+ pagex = subwrd(result,1)
+ pagey = subwrd(result,2)
 
-pagex = pagex - left - right
-pagey = pagey - top  - bot
+dx0 = pagex / xmax
+dy0 = pagey / ymax
+dx  = dx0 - left - right - (1.0-scalex)*dx0
+dy  = dy0 - top  - bot   - (1.0-scaley)*dy0
 
-dx = pagex / xmax
-dy = pagey / ymax
+say ' '
+say 'page sizex: 'pagex
+say 'page sizey: 'pagey
+say ' '
 
-delx = 0.8* dx
-dely = 0.8* dy
+      x1 = (xloc-1)*dx0 + left
+      x2 =  x1 + dx - 1e-3
 
-if( xloc = 1 )
-      x1 = left + (dx-delx)/2
-      x2 = x1   + delx
-*     say 'a  x1: 'x1'  x2: 'x2'  delx: 'x2-x1'  xloc: 'xloc' xmax: 'xmax'  dx: 'dx
-endif
-if( xloc = xmax )
-      x2 = sizex - right - (dx-delx)/2 
-      x1 = x2 - delx
-*     say 'b  x1: 'x1'  x2: 'x2'  delx: 'x2-x1'  xloc: 'xloc' xmax: 'xmax'  dx: 'dx
-endif
-if( xloc != 1 & xloc != xmax )
-      x1 = (xloc-1)*dx + left + (dx-delx)/2
-      x2 = x1 + delx
-*     say 'c  x1: 'x1'  x2: 'x2' x2-x1: 'x2-x1'  xloc: 'xloc' xmax: 'xmax'  dx: 'dx'  delx: 'delx
-endif
+      y2 = pagey - (yloc-1)*dy0 - top - 1e-3
+      y1 = y2 - dy
 
-if( yloc = 1 )
-      y2 = sizey - top - (dy-dely)/2
-      y1 = y2 - dely
-endif
-if( yloc = ymax )
-      y2 = bot + dy - (dy-dely)/2
-      y1 = y2 - dely
-endif
-if( yloc != 1 & yloc != ymax )
-      y2 = sizey - (yloc-1)*dy - top - (dy-dely)/2
-      y1 = y2 - dely
-endif
+say 'Initial parea: 'x1' 'x2' 'y1' 'y2
 
  if( x1 < 0 )
- x1 = 0
+     x1 = left
  endif
  if( y1 < 0 )
- y1 = 0
+     y1 = bot
  endif
- if( x2 > sizex )
- x2 = sizex
+ if( x2 > pagex )
+     x2 = pagex-(x2-pagex)
+*    x2 = pagex-right
  endif
- if( y2 > sizey )
- y2 = sizey
+ if( y2 > pagey )
+     y2 = pagey-(y2-pagey)
+*    y2 = pagey-top
  endif
 
-*'set  vpage 0 'sizex' 0 'sizey
-'set  mproj scaled'
- say 'parea 'x1' 'x2' (dx: 'x2-x1') 'y1' 'y2' (dy: 'y2-y1')'
-'set  parea 'x1' 'x2' 'y1' 'y2
+say '  Final parea: 'x1' 'x2' 'y1' 'y2
+        'set parea  'x1' 'x2' 'y1' 'y2
 'set  grads off'
 
 xmid   = ( x1 + x2 )/2
-xleft  = x1 - 0.20*delx
-xright = x2 + 0.10*delx
-ybot =   y1 - 0.12*dely
-ytop =   y2 + 0.03*dely
-ytop =   y2 + 0.04*dely
-ymid = ( ybot + ytop )/2
+ymid   = ( y1 + y2 )/2
+xleft  =   x1
+xright =   x2
+ybot   =   y1
+ytop   =   y2
 
+say ' '
 say 'xmid: 'xmid'  ybot: 'ybot'  ytop: 'ytop'  ymid: 'ymid'  xleft: 'xleft'  xright: 'xright
+say ' '
+
 return xmid' 'ybot' 'ytop' 'ymid' 'xleft' 'xright
 

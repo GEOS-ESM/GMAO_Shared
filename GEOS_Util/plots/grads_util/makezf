@@ -69,7 +69,14 @@ tag   = subwrd(args,3)
              line = sublin(result,n)
              word = subwrd(line,1)
          if( word = 'tdef' )
-             dt = subwrd(line,5)
+               dt = subwrd(line,5)
+           length = strlen(dt)
+                 unit = substr( dt,length-1,length )
+             if( unit = 'yr' ) ; tunit = year   ; endif
+             if( unit = 'mo' ) ; tunit = month  ; endif
+             if( unit = 'dy' ) ; tunit = day    ; endif
+             if( unit = 'hr' ) ; tunit = hour   ; endif
+             if( unit = 'mn' ) ; tunit = minute ; endif
              n  = 0
           else
              n  = n + 1
@@ -129,6 +136,8 @@ tag   = subwrd(args,3)
   '!touch  sedfile'
   '!remove 'alias''tag'.ddf'
 
+  'set looping off'
+
     t = tmin
     while( t<=tmax )
     say '          Computing Zonal Mean Variable: 'alias''tag' for t = 't
@@ -151,27 +160,29 @@ tag   = subwrd(args,3)
             month = result
             month = getnum(month)
 
-   'getinfo tunit'
-            tunit = result
-   if( tunit = 'day' | tunit = 'hour' )
+   if( tunit = 'day' | tunit = 'hour' | tunit = 'minute' )
     'getinfo date'
              date = result
                    delim = substr( date,3,1 )
        'uppercase 'delim
                    delim = result
        if( delim = 'Z' )
-            hour = substr( date,1,2 )
              day = substr( date,4,2 )
-           fname = alias''tag'.'year''month''day'_'hour'z.nc4'
-          tstamp = '%y4%m2%d2_%h2z'
+            hour = substr( date,1,2 )
+          minute = 00
        endif
        if( delim = ':' )
+             day = substr( date,7,2 )
             hour = substr( date,1,2 )
           minute = substr( date,4,2 )
-             day = substr( date,7,2 )
-           fname = alias''tag'.'year''month''day'_'hour''minute'z.nc4'
-          tstamp = '%y4%m2%d2_%h2%n2z'
        endif
+          if( tunit = 'minute' )
+              fname = alias''tag'.'year''month''day'_'hour''minute'z.nc4'
+             tstamp = '%y4%m2%d2_%h2%n2z'
+          else
+              fname = alias''tag'.'year''month''day'_'hour'z.nc4'
+             tstamp = '%y4%m2%d2_%h2z'
+          endif
    else
            fname = alias''tag'.'year''month'.nc4'
           tstamp = '%y4%m2'

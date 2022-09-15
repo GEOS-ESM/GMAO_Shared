@@ -15,131 +15,182 @@ set arch = `uname`
 set expdsc = NULL
 set alias  = NULL
 set output = NULL
-set format = NULL
+set format = flat
 set scale  = 1.0
-@   ncoll  = 0
+set DOLLAR = '$'
+
+#######################################################################
+
+set           FILE = strip
+/bin/rm -f   $FILE
+cat << EOF > $FILE
+#!/bin/ksh
+/bin/mv \$1 \$1.tmp
+touch   \$1
+while read line
+do
+echo \$line >> \$1
+done < \$1.tmp
+exit
+EOF
+chmod +x $FILE
+
+#######################################################################
+
+# Check for SUFFIX appended to EXPORT (as EXPORT:SUFFIX)
+# ------------------------------------------------------
+set SUFFIX = `echo $EXPORT | grep : | cut -d: -f2`
+set EXPORT = `echo $EXPORT          | cut -d: -f1`
+
+#######################################################################
 
 # Create true comma-separated HISTORY variable
 # --------------------------------------------
 if(! -e HISTORY.T ) then
    cat $HISTORYRC | sed -e 's/,/ , /g' | sed -e 's/*/@/g' | sed -e 's/?/ /g' > HISTORY.T
 endif
-    set expid    = `grep EXPID HISTORY.T | cut -d: -f 2`
+
+./strip HISTORY.T
+
+    set expid    = `grep EXPID:  HISTORY.T | cut -d: -f2`
+    set expdsc   = `grep EXPDSC: HISTORY.T | cut -d: -f2`
     set expid    = `echo $expid`  # to remove preceding blanks
+    set expdsc   = `echo $expdsc` # to remove preceding blanks
+
     set HISTORY  = `cat  HISTORY.T`
-    set numwords =     $#HISTORY
 
+#######################################################################
+#              Find and Split HISTORY Collections 
+#######################################################################
 
-# Find Experiment Description
-# ---------------------------
-@ n = 0
-      @ numword  = 1
-while( $numword <= $numwords )
-       set word = $HISTORY[$numword]
-      @ numword = $numword + 1
-@ n = $n + 1
-@ m = $n + 1
-if( $word == EXPDSC: )  then
-     set expdsc = $HISTORY[$m]
-endif
-end
-
-
-# Find Collections
-# ----------------
+# Define Collections
+# ------------------
 set     collections = `$GEOSUTIL/post/get_streams HISTORY.T`
 set num_collections = $#collections
 
+# ---------------------------------
+# csplit file based on :: delimiter
+# ---------------------------------
+# Note we need the +1 so that we keep the :: at the end
 
-# Find EXPORT and GC within Collection
-# ------------------------------------
-if( $arch == 'IRIX64' ) set catargs = "-ve"
-if( $arch == 'Linux'  ) set catargs = "-E"
-if( $arch == 'OSF1'   ) set catargs = "-E"
-                        set    temp = `cat $catargs HISTORY.T`
-                        set   ntemp = $#temp
-                        set   found = FALSE
-      @ n  = 1
-while( $n <= $ntemp )
-      @ m  = 0
-      foreach collection ($collections)
-        @ m = $m + 1
-        if( $temp[$n] == ${collection}.fields: )  then
-             set dum = ''
-             @ k = $n
-             while( "$dum" != "::" )
-               @ k = $k + 1 
+csplit HISTORY.T '/:: *$/+1' '{*}' --prefix=possible_collection > /dev/null
 
-#                  Create String to End-Of-Line
-#                  ----------------------------
-                   set lastbit = ''
-                   set string = ''
-                   while( "$lastbit" != '$' )
-                   @ i = 1
-                   set bit = `echo $temp[$k] | cut -b${i}-${i}`
-                   while ( "$bit" != '' )
-                   @ i = $i + 1
-                   set bit = `echo $temp[$k] | cut -b${i}-${i}`
-                   end
-                   @ i = $i - 1
-                   set lastbit = `echo $temp[$k] | cut -b${i}-${i}`
-                   set string = `echo $string $temp[$k]`
-                   @ k = $k + 1 
-                   end
-                   
-                set numwords  = $#string
-                set  QEXPORT  = `echo $string[1] | sed -e "s/'//g"`
-                set  QGC      = `echo $string[3] | sed -e "s/'//g"`
-                if( $numwords >= 5 ) then
-                     if( $string[5] != '$' ) then
-                     set  QALIAS = `echo $string[5] | sed -e "s/'//g" | sed -e 's/\$//g'`
-                     else
-                     set  QALIAS = $QEXPORT
-                     endif
-                else
-                     set  QALIAS = $QEXPORT
-                endif
-                if( $numwords >= 7 ) then
-                     if( $string[7] != '$' ) then
-                     set  QSCALE = `echo $string[7] | sed -e 's/\$//g'`
-                     else
-                     set  QSCALE = $scale
-                     endif
-                else
-                     set  QSCALE = $scale
-                endif
+# Now we need the actual "collection" bits
 
-#               echo "k: $k  STRING: $string"
-#               echo "       EXPORT: $QEXPORT"
-#               echo "           GC: $QGC"
-#               echo "        ALIAS: $QALIAS"
-#               echo "        SCALE: $QSCALE"
-#               echo " "
+set finalcolls = ''
+foreach collection ($collections)
+   #echo "Checking for $collection..."
+   foreach file (`/bin/ls possible_collection*`)
+      grep "$collection.fields" $file > /dev/null
+      if ($status == 0) then
 
-                set dum = `echo $temp[$k] | cut -b1-2`
-                @ k = $k - 1 
-                set  XEXPORT = `echo $QEXPORT | cut -d';' -f1`
-                set  YEXPORT = `echo $QEXPORT | cut -d';' -f2`
-                set  XALIAS  = `echo $QALIAS  | cut -d';' -f1`
-                set  YALIAS  = `echo $QALIAS  | cut -d';' -f2`
-                if(  $EXPORT == $XEXPORT && $GC == $QGC ) then
-                     set found = TRUE
-                     set alias = $XALIAS
-                     set scale = $QSCALE
-                     @   ncoll = $m
-                endif
-                if(  $EXPORT == $YEXPORT && $GC == $QGC ) then
-                     set found = TRUE
-                     set alias = $YALIAS
-                     set scale = $QSCALE
-                     @   ncoll = $m
-                endif
-             end
-        endif
-      end
-      if( $found == TRUE ) @ n = $ntemp
-@ n = $n + 1
+         # If we found collection.fields, then it's a collection bit...
+         # echo "Found $collection.fields in $file"
+         /bin/mv $file TMP.$collection.rcx
+
+         # This removes any fluff at the top of a file
+         sed -n "/$collection/,${DOLLAR}p" TMP.$collection.rcx > $collection.rcx
+
+         set finalcolls = `echo $finalcolls $collection`
+      endif
+   end
 end
+# Remove failed files
+/bin/rm possible_collection*
+
+# Remove TMP files
+/bin/rm TMP*
+
+#######################################################################
+#######################################################################
+
+set found = FALSE
+foreach collection ($finalcolls)
+    strip  ${collection}.rcx
+
+    foreach line ("`cat ${collection}.rcx`")
+
+       set  string = `echo $line | awk '{print $1}'`
+
+       if( $string =~ ${collection}.* ) then
+           if( $string == ${collection}.format: ) set FORMAT = `echo $line | cut -d" " -f2 | sed -e "s/'//g"`
+           if( $string != ${collection}.fields: ) continue
+               set QEXPORT = `echo $line | awk '{print $2}'`
+               set QGC     = `echo $line | awk '{print $4}'`
+               set QALIAS  = `echo $line | awk '{print $6}'`
+               set QSCALE  = `echo $line | awk '{print $8}'`
+       else
+               set QEXPORT = `echo $line | awk '{print $1}'`
+               set QGC     = `echo $line | awk '{print $3}'`
+               set QALIAS  = `echo $line | awk '{print $5}'`
+               set QSCALE  = `echo $line | awk '{print $7}'`
+       endif
+
+                           set QGC    = `echo $QGC | sed -e "s/'//g"`
+       if( .$QSCALE == . ) set QSCALE = 1.0
+
+    #  echo LINE: $line
+    #  echo QALIAS: $QALIAS  SUFFIX: $SUFFIX
+    #  echo " "
+
+    #  CASE 1:  SUFFIX = ''
+    #           This is the traditional case following original GOCART/GOCART_2G standards
+    #  -----------------------------------------------------------------------------------
+       if( .$SUFFIX == . ) then
+            if( .$QALIAS == . )  set QALIAS = $QEXPORT
+            set  XEXPORT = `echo $QEXPORT            | cut -d";" -f1 | sed -e "s/'//g"`
+            set  YEXPORT = `echo $QEXPORT | grep ";" | cut -d";" -f2 | sed -e "s/'//g"`
+            set  XALIAS  = `echo $QALIAS             | cut -d";" -f1 | sed -e "s/'//g"`
+            set  YALIAS  = `echo $QALIAS  | grep ";" | cut -d";" -f2 | sed -e "s/'//g"`
+
+            if( "$EXPORT"  == "$XEXPORT" && $GC == $QGC ) then
+                 set found  = TRUE
+                 set alias  = $XALIAS
+                 set scale  = $QSCALE
+                 set hisout = $collection
+                 echo "COLLECTION: $hisout   EXPORT: $XEXPORT GC: $QGC  ALIAS: $alias  SCALE: $scale  SUFFIX: $SUFFIX"
+                 break
+            endif
+            if( "$EXPORT"  == "$YEXPORT" && $GC == $QGC ) then
+                 set found  = TRUE
+                 set alias  = $YALIAS
+                 set scale  = $QSCALE
+                 set hisout = $collection
+                 echo "COLLECTION: $hisout   EXPORT: $YEXPORT GC: $QGC  ALIAS: $alias  SCALE: $scale  SUFFIX: $SUFFIX"
+                 break
+            endif
+       endif
+
+    #  CASE 2:  SUFFIX != ''
+    #           This implies use of GOCART_2G requiring ALT_EXPORTS (Note: scalars only, no Aerosol vector exports)
+    #  ------------------------------------------------------------------------------------------------------------
+       if( .$SUFFIX != . ) then
+            if( .$QALIAS == . ) then
+                  set XEXPORT = `echo $QEXPORT                         | sed -e "s/'//g"`
+                  set XALIAS  = `echo $QEXPORT                         | sed -e "s/'//g"`${SUFFIX} # Append SUFFIX to EXPORT name
+            else                    
+                  set XEXPORT = `echo $QEXPORT                         | sed -e "s/'//g"`
+                  set XALIAS  = `echo $QALIAS  | cut -d';' -f${SUFFIX} | sed -e "s/'//g"` # Select QALIAS based on SUFFIX Index
+            endif
+            if( "$EXPORT"  == "$XEXPORT" && $GC == $QGC ) then
+                 set found  = TRUE
+                 set alias  = $XALIAS
+                 set scale  = $QSCALE
+                 set hisout = $collection
+                 echo "COLLECTION: $hisout   EXPORT: $XEXPORT GC: $QGC  ALIAS: $alias  SCALE: $scale  SUFFIX: $SUFFIX"
+                 break
+            endif
+       endif
+
+    end  # End Line Loop
+
+    if( $found == TRUE ) break
+
+end      # End Collection Loop
+
+#######################################################################
+#              Find HISTORY Collections 
+#######################################################################
 
 if(! $?TBEG )      set TBEG = "NULL"
 if(! $?TEND )      set TEND = "NULL"
@@ -160,12 +211,9 @@ if(! $?PLOT_QUAD ) set PLOT_QUAD = "false"
 #
 # ------------------------------------------------------------------------------
 
-if( $ncoll != 0 ) then
+if( $found == TRUE ) then
     set numseas = `echo $SEASONS`
-    set output  = ''
-    set format  = ''
-
-foreach collection ($collections)
+    set collection = $hisout
 
   if( -e ${source}/${collection}/$DDFFILE ) then
       set dummy  = `echo ${source}/${collection}/$DDFFILE`
@@ -234,23 +282,19 @@ foreach collection ($collections)
     endif
 
   endif
-                          set output = `echo $output $dummy`
+                          set output = `echo $dummy`
 
-                          set dummy  = `grep ${collection}.format    HISTORY.T | cut -d: -f2 | cut -d, -f1 | sed -e "s/'//g"`
-     if( "$dummy" == "" ) set dummy  =  flat
-                          set format = `echo $format $dummy`
-end
-else
-@ ncoll = 1
-endif
+endif # Endif found=TRUE
 
+
+#endif
 
 # Export Results
 # --------------
 setenv EXPDSC $expdsc
 setenv ALIAS  $alias
-setenv OUTPUT $output[$ncoll]
-setenv FORMAT $format[$ncoll]
+setenv OUTPUT $output
+setenv FORMAT $format
 setenv BASE   $expid
 
         echo '   '
@@ -278,3 +322,4 @@ echo $OUTPUT >> hist.txt
 echo $scale  >> hist.txt
 echo $FORMAT >> hist.txt
 echo $BASE   >> hist.txt
+
