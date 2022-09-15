@@ -97,6 +97,7 @@ if( mfile = "NULL" ) ; return ; endif
                      ' alias ' mname
                       malias = result
 'chckname            'malias
+
 'seasonalf -FUNCTION 'malias'*'scale' -NAME mod0'
  modfile  = subwrd(result,1)
  

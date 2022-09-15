@@ -160,6 +160,7 @@ ylow  = sublin (read(name),2)
 xhigh = sublin (read(name),2)
 yhigh = sublin (read(name),2)
 endif
+say 'xhigh = 'xhigh
 
 * White-out Legend Region
 * -----------------------
@@ -179,6 +180,9 @@ xtspot = x2spot + (xhigh-xlow)/10
 
 vsize = (yhigh-ylow)/(2.5*numline)
 hsize = (xhigh-(xhigh-xlow)/10-xtspot)/maxlength
+*hsize = (xhigh-(xhigh-xlow)/50-xtspot)/maxlength
+*hsize = hsize + 0.07
+say 'hsize = 'hsize
 'set strsiz 'hsize' 'vsize
 
 'set string 1 l 1'

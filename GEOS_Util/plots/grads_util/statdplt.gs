@@ -77,10 +77,17 @@ if( hour < 100 )    ; hour = 0hour ; endif
 'run getenv "SYSCMP_TDIM"'
                     tdim  = result
 
-'parea 'xloc' 'yloc' 'xmax' 'ymax
- xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+if( yloc = 1 )
+   'parea 'xloc' 'yloc' 'xmax' 'ymax' -top 1.0 -bot 0.3 -left 0.5 -right 0.3'
+    xmid = subwrd(result,1)
+    ybot = subwrd(result,2) - 0.4
+    ytop = subwrd(result,3) + 0.1
+else
+   'parea 'xloc' 'yloc' 'xmax' 'ymax' -top 0.5 -bot 0.9 -left 0.5 -right 0.3'
+    xmid = subwrd(result,1)
+    ybot = subwrd(result,2) - 0.4
+    ytop = subwrd(result,3) + 0.1
+endif
 
 if( xloc = 1 & yloc = 1 )
     x1 = 1.014 + ( 4.12 / 4 )
@@ -89,6 +96,8 @@ if( xloc = 1 & yloc = 1 )
     y2 = 7.62
    'set parea 'x1' 'x2' 'y1' 'y2
     xmid = ( x1 + x2 )/2
+    ybot =   y1 - 0.4
+    ytop =   y2 + 0.1
 endif
 
 'set datawarn off'

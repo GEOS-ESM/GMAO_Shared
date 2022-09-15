@@ -291,7 +291,7 @@ setenv LONSENV "$lonbeg $lonend"
 setenv LATSENV "$latbeg $latend"
 
 if( $lonbeg != 0 | $lonend != 360 | $latbeg != -90 | $latend != 90 | $cintdiff != NULL ) then
-    setenv CINTDIFF ON
+    setenv CINTDIFF $cintdiff
 endif
 
 if( -e $source/.HOMDIR ) then
