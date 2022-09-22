@@ -1477,6 +1477,8 @@ if( face = GLOBAL | face = 6 | face = 65 )
 if( face = GLOBAL )
 *  'set parea 8.0 10.5 0.5 3.0'
    'parea 4 3 4 3'
+    xmid = subwrd(result,1)
+    ybot = subwrd(result,2)
    'set xyrev on'
    'set xflip off'
    'set yflip on'
@@ -1585,6 +1587,20 @@ endif
 *******************************************************
 *******************************************************
 
+*if( face = GLOBAL )
+**  'set parea 8.0 10.5 0.5 3.0'
+*   'parea 4 3 4 3'
+*   'set line 0 1 10'
+*   'draw line 2.75 0.230041 2.75 8.25846l'
+*   'draw line 0.246349 2.8 10.7644 2.8'
+*   'draw line 0.246349 5.6 10.7644 5.6'
+*   'draw line 5.5 0.230041 5.5 8.25846l'
+*   'draw line 8.247 0.230041 8.247 8.25846l'
+*endif
+
+*******************************************************
+*******************************************************
+
 'close 'topofile
 *if( gxout != Contour ) ; 'set gxout 'gxout ; endif
 'set gxout 'gxout
@@ -1600,3 +1616,4 @@ if( face = GLOBAL )
    'set parea off'
 endif
 
+return xmid' 'ybot

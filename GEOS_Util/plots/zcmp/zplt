@@ -369,7 +369,9 @@ if( Lbit = L ) ; 'setlevs' ; endif
  dfact = 1
 'run getenv "CINTDIFF"'
              CINTDIFF  = result
+
 if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
+
    'set clevs 'dlevs
    'set ccols 'dcols
    'd qz'
@@ -378,45 +380,17 @@ if( CINTDIFF = 'NULL' & dlevs != 'NULL' & dcols != 'NULL' )
    'set clevs 'dlevs
    'd qz'
    'cbarn -snum 0.65 -xmid 4.25 -ymid 0.4'
+
 else
-   'stats qz'
-     avgdif = subwrd(result,1)
-     stddif = subwrd(result,2)
-      dqmax = stddif/3
 
-     dqrel = dqmax / qmax  * 100 * 100
-    'getint 'dqrel
-             dqrel = result/100
-             dqact = dqrel
-         'd 'dpct
-             dpct  = subwrd(result,4)
-     say 'QMAX: 'qmax'  DQMAX: 'dqmax
-     say 'Relative PCT Difference: 'dqrel' (100*DQMAX/QMAX)'
-     say ' Minimum PCT for  Plots: 'dpct
+* -----------------------
 
-     if( dqrel < dpct )
-         dqrel = dpct
-     endif
-         dqmax = dqrel * qmax / 100
-         say 'Setting CINT using DQREL: 'dqrel'%, DQMAX: 'dqmax
+       dummy = getcint ('qz',qmax,dpct)
 
-  if( dqmax > 0 )
-      'd log10('dqmax')'
-       n = subwrd(result,4)
-  else
-       n = 0
-  endif
-   say '    Log Factor: 'n
-   if( n<0 ) ; n = n-2 ; endif
-   'getint 'n
-            n = result
-   if( n>0 )
-       if( n<=2 )
-           n = 0
-        else
-           n = n+2
-        endif
-   endif
+           n = -1 * subwrd(dummy,1)
+        cint = subwrd(dummy,2)
+       dqmax = subwrd(dummy,3)
+       dqrel = subwrd(dummy,4)
 
    if( fixpltfact != NULL )
        'd 'fixpltfact
@@ -424,14 +398,11 @@ else
    endif
 
    say 'Diff Scaling Factor: 'n
-      'd 'dqmax'/1e'n
-       cint = subwrd(result,4)
 
-       if( fixpltcint != NULL )
+   if( fixpltcint != NULL )
        'd 'fixpltcint
-           fixpltcint =subwrd(result,4)
-           cint = fixpltcint
-       endif
+           cint = subwrd(result,4)
+   endif
 
       'shades 'cint
       'define qzplt = qz/1e'n
@@ -521,6 +492,8 @@ endif
 
 return
 
+************************************************************
+
 function getdate (date,month,year)
        num = 1
        bit = substr(date,num,1)
@@ -532,6 +505,8 @@ endwhile
      month = substr(date,loc  ,3)
       year = substr(date,loc+3,4)
 return month' 'year
+
+************************************************************
 
 function get_length (string)
 tb = ""
@@ -546,3 +521,85 @@ i = i + 1
 endif
 endwhile
 return length
+
+************************************************************
+
+function getcint (name,qmax,dpct)
+'getinfo  ydim'
+          ydim = result
+'set y 2 'ydim-1
+
+'run getenv "CINTDIFF"'
+             CINTDIFF  = result
+
+    'stats 'name
+     avgdif = subwrd(result,1)
+     stddif = subwrd(result,2)
+
+if( CINTDIFF = 'DYNAMIC' )
+      aqmax =   3 * stddif
+      aqmin = - 3 * stddif
+   nint  = 10
+   dqmax = (aqmax-aqmin) / nint
+else
+   dqmax = stddif/3
+endif
+   dqrel = 100 * dqmax / qmax
+
+           dqrel = dqrel *1000
+  'getint 'dqrel
+           dqrel = result/1000
+
+   say '                     QMAX  : 'qmax
+   say '                    DQMAX  : 'dqmax
+   say 'Computed DQREL (dqmax/qmax): 'dqrel' %'
+   say '    Hardwired Default Value: 'dpct ' %'
+
+if( CINTDIFF != 'DYNAMIC' )
+    if( dqrel < dpct )
+        dqrel = dpct
+        dqmax = dqrel * qmax / 100
+        say 'Resetting DQMAX based on Hardwired Default Value ('dqrel'%), DQMAX: 'dqmax
+        cint = dqmax
+        say 'CINT based on Updated DQMAX, CINT: 'cint
+    else
+        cint = dqmax
+        say 'CINT based on DQMAX, CINT: 'cint
+    endif
+else
+    cint = dqmax
+    say 'CINT based on DQMAX, CINT: 'cint
+endif
+
+   count = 0
+   log   = math_log10(cint)
+   if( log  < 0 )
+       log  = log - 0.5
+      'getint 'math_abs(log)
+       count = result
+       fact = 1e''count
+   else
+       fact = 1
+   endif
+   cint  = cint *fact
+   say 'count = 'count
+   say ' fact = ' fact
+   say ' cint = ' cint
+
+ while( cint < 1 & count < 20 )
+ count = count + 1
+ fact = fact * 10
+ cint = fact * dqmax
+'getint 'cint
+ cint = result
+ say 'Count = 'count'  Computed CINT: 'cint
+ endwhile
+
+   cint = cint * 10
+'getint ' cint
+          cint = result / 10
+    say ' cint = 'cint
+
+'sety'
+return count' 'cint' 'dqmax' 'dqrel
+

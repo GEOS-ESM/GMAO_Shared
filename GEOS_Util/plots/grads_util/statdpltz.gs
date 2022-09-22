@@ -63,10 +63,17 @@ if( hour < 100 )    ; hour = 0hour ; endif
                     tdim  = result
 say 'TDIM: 'tdim
 
-'parea 'xloc' 'yloc' 'xmax' 'ymax
- xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+if( yloc = 1 )
+   'parea 'xloc' 'yloc' 'xmax' 'ymax' -top 1.0 -bot 0.3 -left 0.5 -right 0.3'
+    xmid = subwrd(result,1)
+    ybot = subwrd(result,2) - 0.4
+    ytop = subwrd(result,3) + 0.1
+else
+   'parea 'xloc' 'yloc' 'xmax' 'ymax' -top 0.5 -bot 0.9 -left 0.5 -right 0.3'
+    xmid = subwrd(result,1)
+    ybot = subwrd(result,2) - 0.4
+    ytop = subwrd(result,3) + 0.1
+endif
 
 if( xloc = 1 & yloc = 1 )
     x1 = 1.014 + ( 4.12 / 4 )
@@ -75,6 +82,8 @@ if( xloc = 1 & yloc = 1 )
     y2 = 7.62
    'set parea 'x1' 'x2' 'y1' 'y2
     xmid = ( x1 + x2 )/2
+    ybot =   y1 - 0.4
+    ytop =   y2 + 0.1
 endif
 
 'set datawarn off'
@@ -140,8 +149,8 @@ endif
 'define delDamp = 'field'Damp'tag2'z'
 'define delDphz = 'field'Dphz'tag2'z'
 
-* To Unify Contour Interval and Scaling, use: delDmse , otherwise use: del'type'
-* ------------------------------------------------------------------------------
+*   To Unify Contour Interval and Scaling, use: delDmse , otherwise use: del'type'
+*   ------------------------------------------------------------------------------
 *      dummy  = getstuff( 'delDmse' )
        dummy  = getstuff(  del''type'' )
    diff_cint  = subwrd(dummy,1)
@@ -170,7 +179,7 @@ endif
 'define delDphz = 'field'Dphz'tag2'z'
 
 if( tipe = Dres )
-       'define  delDmse = delDmse - ( delDmes + delDamp + delDphz)'
+   'define  delDmse = delDmse - ( delDmes + delDamp + delDphz)'
 endif
 
 'define diff  = del'type
@@ -276,28 +285,28 @@ say 'MONTH_LABEL: 'month
 
 if( tipe = Dmse )
    'set strsiz 0.10'
-   'draw string 'xmid' 'ytop' MSE: Mean Square Error  (x10**'diffm')' ;
+   'draw string 'xmid' 'ytop' MSE: Mean Square Error  (x10**'diffm')' ; 
    'cbarn -sbar  0.5   -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.5 -scalex 1.0'
 endif
 
 if( tipe = Dres )
    'set strsiz 0.08'
-   'draw string 'xmid' 'ytop' MSE - [ BIAS + AMPLITUDE + PHASE] (x10**'diffm')' ;
+   'draw string 'xmid' 'ytop' MSE - [ BIAS + AMPLITUDE + PHASE] (x10**'diffm')' ; 
    'cbarn -sbar  0.4   -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.5 -scalex 0.9'
 endif
 if( type = Dmes )
    'set strsiz 0.08'
-   'draw string 'xmid' 'ytop' BIAS Error Difference  (x10**'diffm')' ;
+   'draw string 'xmid' 'ytop' BIAS Error Difference  (x10**'diffm')' ; 
    'cbarn -sbar  0.4   -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.5 -scalex 0.9'
 endif
 if( type = Damp )
    'set strsiz 0.08'
-   'draw string 'xmid' 'ytop' AMPL Error Difference  (x10**'diffm')' ;
+   'draw string 'xmid' 'ytop' AMPL Error Difference  (x10**'diffm')' ; 
    'cbarn -sbar  0.4   -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.5 -scalex 0.9'
 endif
 if( type = Dphz )
    'set strsiz 0.08'
-   'draw string 'xmid' 'ytop' PHASE Error Difference  (x10**'diffm')' ;
+   'draw string 'xmid' 'ytop' PHASE Error Difference  (x10**'diffm')' ; 
    'cbarn -sbar  0.4   -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.5 -scalex 0.9'
 endif
 
@@ -305,15 +314,15 @@ endif
 if( tipe = Dres )
 'set vpage off'
 'set string 1 c 6'
-
 'set strsiz 0.16'
 'draw string 5.50 8.40 Zonal Mean 'UFIELD'   'month' 'year'   Forecast Hour: 'hour
 'set strsiz 0.12'
 'draw string 5.50 8.18 'exp2' - 'exp1'  'numf'-member Ensemble   (Contour > 'confidence'% Confidence)'
 'set strsiz .10'
 'draw string 5.50 7.95 'title
-
 endif
+
+return
 
 function getstuff( q )
 

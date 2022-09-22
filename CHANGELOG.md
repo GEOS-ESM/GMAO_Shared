@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.6.1] - 2022-09-22
+
+### Changed
+
+Apply latest updates from L. Takacs to the plot package
+
 ## [1.6.0] - 2022-09-12
 
 ### Changed

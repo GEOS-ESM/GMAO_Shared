@@ -614,17 +614,18 @@ endif
 ****                                       Make Plots
 **********************************************************************************************
 
-sbar = 0.32
+sbar = 1.00
 lopts = '1 3 0.08'
 strsiz = '0.066'
 
 * Forecast (MEAN)
 * ---------------
 'set vpage 0 11 0 8.5'
-'parea 1 1 4 2'
+'set mproj scaled'
+'parea 1 1 4 2 -left 0.5 -right 0.1 -top 1.0 -bot 0.3'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -658,10 +659,10 @@ Fmean_scale = subwrd(dummy,2)
 
 * Forecast-Climatology (MEAN)
 * ---------------------------
-'parea 2 1 4 2'
+'parea 2 1 4 2 -left 0.375 -right 0.225 -top 1.0 -bot 0.3'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -698,15 +699,15 @@ else
 endif
    'd maskout( diff,abs(diff)-'FmCmean_CINT')'
 'draw string 'xmid' 'ytop' Forecast-Climatology  (x 10**'fmcm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
 * Forecast-Analysis (MEAN)
 * ------------------------
-'parea 3 1 4 2'
+'parea 3 1 4 2 -left 0.225 -right 0.375 -top 1.0 -bot 0.3'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -730,15 +731,14 @@ FmAmean_scale = subwrd(dummy,2)
 'shades 'FmAmean_CINT
 'd maskout( diff,abs(diff)-'FmAmean_CINT')'
 'draw string 'xmid' 'ytop' Mean Error (Forecast-Analysis)  (x 10**'fmam')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
-
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 * Forecast-Analysis (RMS)
 * -----------------------
-'parea 4 1 4 2'
+'parea 4 1 4 2 -left 0.1 -right 0.5 -top 1.0 -bot 0.3'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -762,15 +762,15 @@ FmArms_scale = subwrd(dummy,2)
 'shades diff 0 -cint 'FmArms_CINT' -minval 0'
 'd maskout( diff,abs(diff)-'FmArms_CINT')'
 'draw string 'xmid' 'ytop' Root Mean Square Error (F-A)  (x 10**'rmsm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
 * Forecast-Analysis (root Bias)
 * -----------------------------
-'parea 1 2 4 2'
+'parea 1 2 4 2 -left 0.5 -right 0.1 -top 0.5 -bot 0.8'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -792,16 +792,16 @@ FmAramp_scale = subwrd(dummy,2)
 'shades diff 0 -cint 'FmArms_CINT' -minval 0'
 'd maskout( diff,abs(diff)-'FmArms_CINT')'
 'draw string 'xmid' 'ytop' Root Bias Error (F-A)  (x 10**'rmsm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
 
 * Forecast-Analysis (root AMP)
 * ----------------------------
-'parea 2 2 4 2'
+'parea 2 2 4 2 -left 0.375 -right 0.225 -top 0.5 -bot 0.8'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -824,16 +824,16 @@ FmAramp_scale = subwrd(dummy,2)
 'shades diff 0 -cint 'FmArms_CINT' -minval 0'
 'd maskout( diff,abs(diff)-'FmArms_CINT')'
 'draw string 'xmid' 'ytop' Root Amplitude Error (F-A)  (x 10**'rmsm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
 
 * Forecast-Analysis (root PHZ)
 * ----------------------------
-'parea 3 2 4 2'
+'parea 3 2 4 2 -left 0.225 -right 0.375 -top 0.5 -bot 0.8'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -857,14 +857,14 @@ FmArphz_scale = subwrd(dummy,2)
 'shades diff 0 -cint 'FmArms_CINT' -minval 0'
 'd maskout( diff,abs(diff)-'FmArms_CINT')'
 'draw string 'xmid' 'ytop' Root Phase Error (F-A)  (x 10**'rmsm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 * Residual
 * --------
-'parea 4 2 4 2'
+'parea 4 2 4 2 -left 0.1 -right 0.5 -top 0.5 -bot 0.8'
  xmid = subwrd(result,1)
- ybot = subwrd(result,2)
- ytop = subwrd(result,3)
+ ybot = subwrd(result,2) - 0.3
+ ytop = subwrd(result,3) + 0.1
 'set xlopts 'lopts  
 'set ylopts 'lopts  
 'set string 1 c 5'
@@ -895,7 +895,7 @@ FmArphz_scale = subwrd(dummy,2)
 'shades 'residual_CINT
 'd maskout( residual,abs(residual)-'residual_CINT')'
 'draw string 'xmid' 'ytop' MSE - [Bias + Ampl + Phaz]  (x 10**'residual_order')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
 
