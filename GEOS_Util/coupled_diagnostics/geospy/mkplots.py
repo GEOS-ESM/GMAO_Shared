@@ -13,7 +13,7 @@ def main(exp_conf):
 
     plot_modules=['sst', 'sst_tp', 'sss', 'surf_stress', 
                   'zonal_stress_tp', 'surf_current', 'precip', 
-                  'temp', 'salt', 'amoc']
+                  'ssh','temp', 'salt', 'amoc']
 
     for module in plot_modules:
         print(f'\nPlotting {module}\n'.upper())
