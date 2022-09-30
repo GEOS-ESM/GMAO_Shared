@@ -44,7 +44,6 @@ def plot_clim(plotter, exp, clim):
     pl.savefig(f'{exp["plot_path"]}/Usurf_jja.png')
 
 def mkplots(exps,dsets):
-    # Calculate climatologies for experiments to comapre
     clim=mkclim(exps[0],dsets[0])
 
     # Plot parameters
