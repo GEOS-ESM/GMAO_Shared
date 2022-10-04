@@ -14,8 +14,7 @@ ecbuild_add_executable (
 ecbuild_add_executable (
   TARGET gethdftinc.x
   SOURCES gethdftinc.f
-  LIBS GMAO_mpeu ${NETCDF_LIBRARIES} Threads::Threads
-  INCLUDES ${INC_NETCDF}
+  LIBS GMAO_mpeu NetCDF::NetCDF_Fortran Threads::Threads
   FFLAGS ${FREAL8})
 
 ecbuild_add_executable (
@@ -29,7 +28,7 @@ ecbuild_add_executable (
   SOURCES zeit_co.f zeit_usage.f
   LIBS GMAO_mpeu
   FFLAGS ${FREAL8})
-
+ 
 ecbuild_add_executable (
   TARGET zeit_pr.x
   SOURCES zeit_pr.f zeit_usage.f zeit_read.f zeit_jday.f
