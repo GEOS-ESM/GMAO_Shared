@@ -230,7 +230,9 @@ BEGIN ncep_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
 # 20080811_00z-21001231_18z 060000 /archive/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
   20010519_00z-20190930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
   20191001_00z-20200316_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1_w_C2.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
-  20200316_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20200316_18z-20210331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20210401_00z-20220705_06z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO_R/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20220705_12z-20210331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
 BEGIN ncep_gpsro_com_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
@@ -372,7 +374,8 @@ BEGIN mls_nrt_nc => mlsnc.%y4%m2%d2.t%h2z.nc
   20140717_00z-20180331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRToz.%y4%m2%d2_%h2z.nc
   20180401_00z-20180306_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
   20180306_18z-20180307_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
-  20180307_18z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+  20180307_18z-20220630_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v4.2-oz.%y4%m2%d2_%h2z.nc
+  20220701_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/mls_oz_nrt/netcdf/mls_oz_nrt/Y%y4/M%m2/MLSNRT-v5.0-oz.%y4%m2%d2_%h2z.nc
 END
 
 # GMAO AMSR2
@@ -388,7 +391,8 @@ END
 BEGIN npp_ompsnm_bufr => OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
 # 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
   20180227_00z-20200115_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
-  20200118_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20200118_00z-20220721_12z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v2r0_npp.t%y4%m2%d2.%h2z.bufr
+  20220721_18z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-TC/bufr/OMPS-TC/Y%y4/M%m2/OMPS-TC_v4r2_npp.t%y4%m2%d2.%h2z.bufr
 END
 BEGIN npp_ompsnp_bufr => OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.ubufr
 # 20180227_00z-21001231_18z 060000  /archive/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v2r0_npp.t%y4%m2%d2.%h2z.bufr
