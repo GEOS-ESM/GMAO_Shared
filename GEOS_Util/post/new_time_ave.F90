@@ -92,7 +92,7 @@
 
       integer timinc,i,j,k,nmax,kbeg,kend,loc1,loc2
       integer nstar
-      logical defined, tend, first, strict, diurnal, mdiurnal, lquad, ldquad
+      logical tend, first, strict, diurnal, mdiurnal, lquad, ldquad
       logical ignore_nan
       data first  /.true./
       data strict /.true./
@@ -359,10 +359,10 @@ config = ESMF_ConfigCreate    ( rc=rc )
       allocate ( lev(lm)         )
       allocate ( yymmdd(  ntime) )
       allocate ( hhmmss(  ntime) )
-      allocate (  vname(  nvars) )
+      !allocate (  vname(  nvars) )
       allocate ( vtitle(  nvars) )
       allocate ( vunits(  nvars) )
-      allocate (  kmvar(  nvars) )
+      !allocate (  kmvar(  nvars) )
       allocate ( vrange(2,nvars) )
       allocate ( prange(2,nvars) )
       allocate ( coords(  nvars) )
@@ -529,6 +529,9 @@ config = ESMF_ConfigCreate    ( rc=rc )
               kmvar2(mv) =  kmvar(qloc(1,nv))
            vrange2(:,mv) = undef
            prange2(:,mv) = undef
+
+             call add_new_field_to_bundle(primary_bundle,grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
+
          if( root ) write(6,7001) mv,trim(vname2(mv)),nloc(mv),trim(vtitle2(mv)),max(1,kmvar(qloc(1,nv))),qloc(1,nv),qloc(2,nv)
  7001    format(1x,'   Quad Field:  ',i4,'  Name: ',a12,'  at location: ',i4,3x,a50,2x,i2,3x,i3,3x,i3)
          endif
@@ -1151,15 +1154,14 @@ config = ESMF_ConfigCreate    ( rc=rc )
             end if
          end function get_level_info
 
-      end program
+         function defined ( q,undef )
+         implicit none
+         logical  defined
+         real     q,undef
+         defined = abs(q-undef).gt.0.1*abs(undef)
+         end
 
-      function defined ( q,undef )
-      implicit none
-      logical  defined
-      real     q,undef
-      defined = abs(q-undef).gt.0.1*abs(undef)
-      return
-      end
+      end program
 
       subroutine mpi_gfio_getvar ( id,name,nymd,nhms,im,jm,lbeg,lm,q,lattice )
       use dynamics_lattice_module
