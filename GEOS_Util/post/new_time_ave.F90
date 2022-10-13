@@ -326,9 +326,11 @@ config = ESMF_ConfigCreate    ( rc=rc )
       im = local_dims(1)
       jm = local_dims(2)
       lm = local_dims(3)
+      imglobal = global_dims(1)
+      jmglobal = global_dims(1)
 
       call file_metadata%create(basic_metadata,trim(name))
-      call get_file_times(file_metadata,ntime,time_series,timinc,_RC)
+      call get_file_times(file_metadata,ntime,time_series,timinc,yymmdd,hhmmss,_RC)
       primary_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
       call ESMF_FieldBundleSet(primary_bundle,grid=grid,_RC)
       call MAPL_Read_Bundle(primary_bundle,trim(name),time=time_series(1),_RC)
@@ -357,8 +359,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
          allocate(lat2(0,0))
       endif
       allocate ( lev(lm)         )
-      allocate ( yymmdd(  ntime) )
-      allocate ( hhmmss(  ntime) )
+      !allocate ( yymmdd(  ntime) )
+      !allocate ( hhmmss(  ntime) )
       !allocate (  vname(  nvars) )
       allocate ( vtitle(  nvars) )
       allocate ( vunits(  nvars) )
@@ -530,7 +532,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
            vrange2(:,mv) = undef
            prange2(:,mv) = undef
 
-             call add_new_field_to_bundle(primary_bundle,grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
+           call add_new_field_to_bundle(primary_bundle,grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
 
          if( root ) write(6,7001) mv,trim(vname2(mv)),nloc(mv),trim(vtitle2(mv)),max(1,kmvar(qloc(1,nv))),qloc(1,nv),qloc(2,nv)
  7001    format(1x,'   Quad Field:  ',i4,'  Name: ',a12,'  at location: ',i4,3x,a50,2x,i2,3x,i3,3x,i3)
@@ -1098,16 +1100,18 @@ config = ESMF_ConfigCreate    ( rc=rc )
             end if
          end subroutine add_new_field_to_bundle
 
-         subroutine get_file_times(file_metadata,num_times,time_series,time_interval,rc)
+         subroutine get_file_times(file_metadata,num_times,time_series,time_interval,yymmdd,hhmmss,rc)
             type(FileMetadataUtils), intent(inout) :: file_metadata
             integer, intent(out) :: num_times
             type(ESMF_Time), allocatable, intent(inout) :: time_series(:)
+            integer, intent(inout), allocatable :: yymmdd(:)
+            integer, intent(inout), allocatable :: hhmmss(:)
             integer, intent(out) :: time_interval
             integer, intent(out), optional :: rc
 
             integer :: status
             type(ESMF_TimeInterval) :: esmf_time_interval
-            integer :: hour, minute, second
+            integer :: hour, minute, second, year, month, day, i
 
             num_times = file_metadata%get_dimension('time',_RC)
             call file_metadata%get_time_info(timeVector=time_series,_RC)
@@ -1119,6 +1123,12 @@ config = ESMF_ConfigCreate    ( rc=rc )
                time_interval = hour*10000+minute*100+second
             end if
 
+            allocate(yymmdd(num_times),hhmmss(num_times))
+            do i = 1,num_times
+               call ESMF_TimeGet(time_series(i),yy=year,mm=month,dd=day,h=hour,m=minute,s=second,_RC)
+               yymmdd(i)=year*10000+month*100+day
+               hhmmss(i)=hour*10000+minute*100+second
+            enddo
             if (present(rc)) then
                rc=_SUCCESS
             end if
@@ -1159,6 +1169,30 @@ config = ESMF_ConfigCreate    ( rc=rc )
          logical  defined
          real     q,undef
          defined = abs(q-undef).gt.0.1*abs(undef)
+         end
+
+         subroutine zstar (q,qp,im,jm,undef,lattice)
+         use dynamics_lattice_module
+         implicit none
+         type ( dynamics_lattice_type ) lattice
+         integer im,jm,i,j
+         real  q(im,jm),undef,qz(jm)
+         real qp(im,jm)
+         logical defined
+         call zmean ( q,qz,im,jm,undef,lattice )
+         do j=1,jm
+              if( qz(j).eq. undef ) then
+                  qp(:,j) = undef
+              else
+                  do i=1,im
+                     if( defined( q(i,j),undef) ) then
+                                 qp(i,j) = q(i,j) - qz(j)
+                     else
+                                 qp(i,j) = undef
+                     endif
+                  enddo
+              endif
+         enddo
          end
 
       end program
@@ -1212,31 +1246,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
       endif
       call timeend ('  PutVar')
       deallocate ( glo )
-      return
-      end
-
-      subroutine zstar (q,qp,im,jm,undef,lattice)
-      use dynamics_lattice_module
-      implicit none
-      type ( dynamics_lattice_type ) lattice
-      integer im,jm,i,j
-      real  q(im,jm),undef,qz(jm)
-      real qp(im,jm)
-      logical defined
-      call zmean ( q,qz,im,jm,undef,lattice )
-      do j=1,jm
-           if( qz(j).eq. undef ) then
-               qp(:,j) = undef
-           else
-               do i=1,im
-                  if( defined( q(i,j),undef) ) then
-                              qp(i,j) = q(i,j) - qz(j)
-                  else
-                              qp(i,j) = undef
-                  endif
-               enddo
-           endif
-      enddo
       return
       end
 
