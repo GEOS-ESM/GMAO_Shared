@@ -1,14 +1,16 @@
+#define I_AM_MAIN
+#include "MAPL_Generic.h"
+
       program  time_ave
 
       use ESMF
+      use MAPL
+      use gFTL_StringVector
+      use MPI
 
       use dynamics_lattice_module
       implicit none
       type ( dynamics_lattice_type ) lattice
-
-#ifdef mpi
-      include 'mpif.h'
-#endif
 
       integer  comm,myid,npes,ierror
       integer  imglobal
@@ -16,13 +18,13 @@
       integer  npex,npey
       logical  root
 
-c **********************************************************************
-c **********************************************************************
-c ****                                                              ****
-c ****        Program to create time-averaged HDF files             ****
-c ****                                                              ****
-c **********************************************************************
-c **********************************************************************
+! **********************************************************************
+! **********************************************************************
+! ****                                                              ****
+! ****        Program to create time-averaged HDF files             ****
+! ****                                                              ****
+! **********************************************************************
+! **********************************************************************
 
       integer  im,jm,lm
 
@@ -110,13 +112,26 @@ c **********************************************************************
       integer NSECF, ntmin, ntcrit, nhmsf, nc
               NSECF(N) = N/10000*3600 + MOD(N,10000)/100* 60 + MOD(N,100)
 
-C **********************************************************************
-C ****                       Initialization                         ****
-C **********************************************************************
+      type(FileMetadata) :: basic_metadata
+      type(FileMetadataUtils) :: file_metadata
+      type(NetCDF4_FileFormatter) :: file_handle
+      integer :: status
+      class(AbstractGridfactory), allocatable :: factory
+      type(ESMF_Grid) :: grid
+      integer :: global_dims(3), local_dims(3)
+      type(ESMF_Time), allocatable :: time_series(:)
+      type(ESMF_Clock) :: clock
+      type(ESMF_TimeInterval) :: time_interval
+      type(ESMF_FieldBundle) :: primary_bundle
+      type(ServerManager) :: io_server
+      type(FieldBundleWriter) :: bundle_writer
+
+! **********************************************************************
+! ****                       Initialization                         ****
+! **********************************************************************
 
       call timebeg ('main')
 
-#ifdef mpi
       call mpi_init                ( ierror ) ; comm = mpi_comm_world
       call mpi_comm_rank ( comm,myid,ierror )
       call mpi_comm_size ( comm,npes,ierror )
@@ -126,20 +141,14 @@ C **********************************************************************
          npex = npex-1
          npey = nint ( float(npes)/float(npex) )
       enddo
-      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_NONE,
-     .                     mpiCommunicator=MPI_COMM_WORLD, rc=rc)
-#else
-      comm = 0
-      npes = 1
-      npex = 1
-      npey = 1
-      myid = 0
-      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_NONE, rc=rc)
-#endif
+      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_NONE,mpiCommunicator=MPI_COMM_WORLD, _RC)
+      call MAPL_Initialize(_RC)
+      call io_server%initialize(MPI_COMM_WORLD,_RC)
       root = myid.eq.0
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_GREGORIAN,_RC)
 
-c Read Command Line Arguments
-c ---------------------------
+! Read Command Line Arguments
+! ---------------------------
         begdate = -999
         begtime = -999
         enddate = -999
@@ -193,8 +202,8 @@ c ---------------------------
                  endif
              endif
 
-             if( trim(arg(n)).eq.'-eta'  .or. 
-     .           trim(arg(n)).eq.'-hdf' ) then  ! Backward compatable for old interface
+             if( trim(arg(n)).eq.'-eta'  .or. &
+                 trim(arg(n)).eq.'-hdf' ) then  ! Backward compatable for old interface
                  nfiles = 1
                  read(arg(n+nfiles),fmt='(a1)') char
                  do while (char.ne.'-' .and. n+nfiles.ne.nargs )
@@ -219,14 +228,13 @@ c ---------------------------
       if (ignore_nan) print *,' ignore nan is true'
 
 
-c Read RC Quadratics
-c ------------------
+! Read RC Quadratics
+! ------------------
       if( trim(rcfile).eq.'NULL' ) then
           nquad  = 0
           nalias = 0
       else
-
-      config = ESMF_ConfigCreate    ( rc=rc )
+config = ESMF_ConfigCreate    ( rc=rc )
         call   ESMF_ConfigLoadFile  ( config, trim(rcfile),  rc=rc )
         call   ESMF_ConfigFindLabel ( config, 'QUADRATICS:', rc=rc )
         tend = .false.
@@ -261,8 +269,8 @@ c ------------------
        enddo
        nquad = m
 
-c Read RC Aliases
-c ---------------
+! Read RC Aliases
+! ---------------
         call   ESMF_ConfigFindLabel ( config, 'ALIASES:', rc=rc )
         tend = .false.
         m = 0
@@ -293,9 +301,9 @@ c ---------------
        endif
        if (.not. allocated(aliases)) allocate(aliases(0,0))
 
-C **********************************************************************
-C ****                        Read HDF File                         ****
-C **********************************************************************
+! **********************************************************************
+! ****                        Read HDF File                         ****
+! **********************************************************************
 
       call timebeg(' initialize')
 
@@ -307,6 +315,27 @@ C **********************************************************************
 
          n = index(trim(name),'.',back=.true.)
        ext = trim(name(n+1:))
+
+      call file_handle%open(trim(name),PFIO_READ,_RC)
+      basic_metadata = file_handle%read(_RC)
+      call file_handle%close(_RC)
+
+      allocate(factory, source=grid_manager%make_factory(trim(name)))
+      grid = grid_manager%make_grid(factory)
+      call MAPL_GridGet(grid,localCellCountPerDim=local_dims,globalCellCountPerDim=global_dims,_RC)
+      im = local_dims(1)
+      jm = local_dims(2)
+      lm = local_dims(3)
+
+      call file_metadata%create(basic_metadata,trim(name))
+      call get_file_times(file_metadata,ntime,time_series,timinc,_RC)
+      primary_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
+      call ESMF_FieldBundleSet(primary_bundle,grid=grid,_RC)
+      call MAPL_Read_Bundle(primary_bundle,trim(name),time=time_series(1),_RC)
+      call ESMF_FieldBundleGet(primary_bundle,fieldCount=nvars,_RC)
+      allocate(vname(nvars))
+      call ESMF_FieldBundleGet(primary_bundle,fieldNameList=vname,_RC)
+      kmvar = get_level_info(primary_bundle,_RC)
 
       call gfio_open ( trim(name),1,ID,rc )
       call gfio_diminquireCF(id,imglobal,jmglobal,lm,ntime,nvars,ngatts,twoDimLat,rc)
@@ -338,16 +367,16 @@ C **********************************************************************
       allocate ( prange(2,nvars) )
       allocate ( coords(  nvars) )
 
-      call gfio_inquireCF ( id,imglobal,jmglobal,lm,ntime,nvars,
-     .                      title,source,contact,undef,
-     .                      lon,lat,lev,levunits,
-     .                      yymmdd,hhmmss,timinc,
-     .                      vname,vtitle,vunits,kmvar,
-     .                      vrange,prange,coords, twoDimLat, lat2, lon2, rc)
-      call gfio_close   ( id,rc )
+      call gfio_inquireCF ( id,imglobal,jmglobal,lm,ntime,nvars, &
+                           title,source,contact,undef, &
+                           lon,lat,lev,levunits, &
+                           yymmdd,hhmmss,timinc, &
+                           vname,vtitle,vunits,kmvar, &
+                           vrange,prange,coords, twoDimLat, lat2, lon2, rc)
+     call gfio_close   ( id,rc )
 
-c Set NDT for Strict Time Testing
-c -------------------------------
+! Set NDT for Strict Time Testing
+! -------------------------------
       if( ntod.ne.-999 ) ndt = 86400
       if( ndt .eq.-999 ) ndt = nsecf (timinc)
       if( timinc .eq. 0 ) then
@@ -365,15 +394,15 @@ c -------------------------------
           ndt = nsecf (timinc)
       endif
 
-c Determine Number of Time Periods within 1-Day
-c ---------------------------------------------
+! Determine Number of Time Periods within 1-Day
+! ---------------------------------------------
           ntods = 0
       if( diurnal .or. mdiurnal ) then
           if( ndt.lt.86400 ) ntods = 86400/ndt
       endif
 
-c Set Minimum Required Times for Time Average (Default: 10 Days for Monthly Mean)
-c -------------------------------------------------------------------------------
+! Set Minimum Required Times for Time Average (Default: 10 Days for Monthly Mean)
+! -------------------------------------------------------------------------------
       if( ntmin.eq.-999 ) then
           if( ntod.eq.-999 ) then
               ntcrit = 10 * ( 86400.0/real(nsecf(timinc)) )
@@ -384,8 +413,8 @@ c ------------------------------------------------------------------------------
           ntcrit = ntmin
       endif
 
-c Determine Location Index for Each Variable in File
-c --------------------------------------------------
+! Determine Location Index for Each Variable in File
+! --------------------------------------------------
       if( root ) print *
       allocate ( nloc(nvars) )
       nloc(1) = 1
@@ -401,8 +430,8 @@ c --------------------------------------------------
       allocate( dumz1(im,jm) )
       allocate( dumz2(im,jm) )
 
-c Append Default Quadratics to User-Supplied List
-c -----------------------------------------------
+! Append Default Quadratics to User-Supplied List
+! -----------------------------------------------
       if( lquad ) then
       if( nquad.eq.0 ) then
           allocate( quadratics(3,nvars) )
@@ -433,8 +462,8 @@ c -----------------------------------------------
       allocate ( qloc(2,nquad) )
       allocate ( lzstar(nquad) ) ; lzstar = .FALSE.
 
-c Determine Possible Quadratics
-c -----------------------------
+! Determine Possible Quadratics
+! -----------------------------
         km=kmvar(nvars)
          m=      nvars
       do n=1,nquad
@@ -492,8 +521,7 @@ c -----------------------------
                nstar = index( trim(quadratics(1,nv)),'star',back=.true. )
            if( nstar.ne.0 ) then
               lzstar(nv) = .TRUE.
-             vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_" 
-     .                   // trim(vname(qloc(1,nv))) // "_and_" // trim(vname(qloc(2,nv)))
+             vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_" // trim(vname(qloc(1,nv))) // "_and_" // trim(vname(qloc(2,nv)))
            endif
 
              vunits2(mv) = trim(vunits(qloc(1,nv))) // " " // trim(vunits(qloc(2,nv)))
@@ -531,9 +559,9 @@ c -----------------------------
       if( root ) then
       print *
       write(6,7002) mvars,nmax,im,jm,nmax,ntods
- 7002 format(1x,'Total Number of Variables: ',i3,/
-     .       1x,'Total Size: ',i5,/
-     .       1x,'Allocating q(',i4,',',i3,',',i5,',0:',i2.2,')')
+ 7002 format(1x,'Total Number of Variables: ',i3,/ &
+            1x,'Total Size: ',i5,/ &
+            1x,'Allocating q(',i4,',',i3,',',i5,',0:',i2.2,')')
       print *
       print *, 'Files: '
       do n=1,nfiles
@@ -559,9 +587,9 @@ c -----------------------------
 
       call timeend(' initialize')
 
-C **********************************************************************
-C ****                      Read HDF Files                          ****
-C **********************************************************************
+! **********************************************************************
+! ****                      Read HDF Files                          ****
+! **********************************************************************
 
       k = 0
 
@@ -571,13 +599,11 @@ C **********************************************************************
       call gfio_diminquireCF ( id,imglobal,jmglobal,lm,ntime,nvars,ngatts,twoDimLat,rc )
       endif
 
-#ifdef mpi
       call mpi_bcast ( imglobal,1,mpi_integer,0,comm,ierror )
       call mpi_bcast ( jmglobal,1,mpi_integer,0,comm,ierror )
       call mpi_bcast (       lm,1,mpi_integer,0,comm,ierror )
       call mpi_bcast (    ntime,1,mpi_integer,0,comm,ierror )
       call mpi_bcast (    nvars,1,mpi_integer,0,comm,ierror )
-#endif
 
       allocate ( lon(imglobal)   )
       allocate ( lat(jmglobal)   )
@@ -593,20 +619,18 @@ C **********************************************************************
       allocate ( coords(  nvars) )
 
       if( root ) then
-      call gfio_inquireCF ( id,imglobal,jmglobal,lm,ntime,nvars,
-     .                      title,source,contact,undef,
-     .                      lon,lat,lev,levunits,
-     .                      yymmdd,hhmmss,timinc,
-     .                      vname,vtitle,vunits,kmvar,
-     .                      vrange,prange,coords,twoDimLat, lat2, lon2, rc )
+      call gfio_inquireCF ( id,imglobal,jmglobal,lm,ntime,nvars, &
+                           title,source,contact,undef,&
+                           lon,lat,lev,levunits,&
+                           yymmdd,hhmmss,timinc,&
+                           vname,vtitle,vunits,kmvar,&
+                           vrange,prange,coords,twoDimLat, lat2, lon2, rc )
       endif
 
-#ifdef mpi
       call mpi_bcast ( yymmdd,ntime,mpi_integer,0,comm,ierror )
       call mpi_bcast ( hhmmss,ntime,mpi_integer,0,comm,ierror )
       call mpi_bcast ( timinc,1,    mpi_integer,0,comm,ierror )
       call mpi_bcast ( kmvar,nvars, mpi_integer,0,comm,ierror )
-#endif
 
            do m=1,ntime
               nymd = yymmdd(m)
@@ -616,13 +640,13 @@ C **********************************************************************
                   call tick (nymd,nhms,-86400)
               endif
 
-              if( ( begdate.ne.-999 .and. begtime.ne.-999 ) .and. 
-     .            ( begdate.gt.nymd .or. 
-     .            ( begdate.eq.nymd.and.begtime.gt.nhms ) ) ) cycle
+              if( ( begdate.ne.-999 .and. begtime.ne.-999 ) .and. &
+                  ( begdate.gt.nymd .or. &
+                  ( begdate.eq.nymd.and.begtime.gt.nhms ) ) ) cycle
 
-              if( ( enddate.ne.-999 .and. endtime.ne.-999 ) .and. 
-     .            ( enddate.lt.nymd .or. 
-     .            ( enddate.eq.nymd.and.endtime.lt.nhms ) ) ) cycle
+              if( ( enddate.ne.-999 .and. endtime.ne.-999 ) .and. &
+                  ( enddate.lt.nymd .or. &
+                  ( enddate.eq.nymd.and.endtime.lt.nhms ) ) ) cycle
 
                                k = k+1
               if( k.gt.ntods ) k = 1
@@ -632,8 +656,8 @@ C **********************************************************************
               year  =     nymd/10000
               month = mod(nymd,10000)/100
 
-c Check for Correct First Dataset
-c -------------------------------
+! Check for Correct First Dataset
+! -------------------------------
               if( strict .and. first ) then
                   nymdm = nymd
                   nhmsm = nhms
@@ -647,8 +671,8 @@ c -------------------------------
                   endif
               endif
 
-c Check Date and Time for STRICT Time Testing
-c -------------------------------------------
+! Check Date and Time for STRICT Time Testing
+! -------------------------------------------
               if( strict .and. .not.first ) then
                   if( nymd.ne.nymdp .or. nhms.ne.nhmsp ) then
                       if( root ) print *, 'Date: ',nymdp,' Time: ',nhmsp,' not found!'
@@ -659,8 +683,8 @@ c -------------------------------------------
               nymdp = nymd
               nhmsp = nhms
 
-c Primary Fields
-c --------------
+! Primary Fields
+! --------------
               do nv=1,nvars2
                    call timebeg('   PRIME')
                    if( kmvar2(nv).eq.0 ) then
@@ -679,9 +703,8 @@ c --------------
                    do L=1,max(1,kmvar2(nv))
                    do j=1,jm
                    do i=1,im
-                   if( isnan( dum(i,j,nloc(nv)+L-1) ). or. ( dum(i,j,nloc(nv)+L-1).gt.HUGE(dum(i,j,nloc(nv)+L-1)) ) ) then
-                       print *, 'Warning!  Nan or Infinity detected for ',trim(vname2(nv)),
-     .                          ' at lat: ',lattice%jglobal(j),' lon: ',lattice%iglobal(i)
+                   if( isnan( dum(i,j,nloc(nv)+L-1) ) .or. ( dum(i,j,nloc(nv)+L-1).gt.HUGE(dum(i,j,nloc(nv)+L-1)) ) ) then
+                       print *, 'Warning!  Nan or Infinity detected for ',trim(vname2(nv)),' at lat: ',lattice%jglobal(j),' lon: ',lattice%iglobal(i)
                        if( ignore_nan ) then
                            print *, 'Setting Nan or Infinity to UNDEF'
                            print *
@@ -705,10 +728,8 @@ c --------------
                    enddo
                    call timeend('   PRIME')
 
-#ifdef mpi
                    call mpi_allreduce ( rc,sumrc,1,mpi_integer,mpi_sum,lattice%comm,ierror )
                    rc = sumrc
-#endif
                    if( .not.ignore_nan .and. rc.ne.0 ) then
                        call my_finalize
                        stop 1
@@ -716,8 +737,8 @@ c --------------
 
               enddo
 
-c Quadratics
-c ----------
+! Quadratics
+! ----------
               call timebeg('   QUAD')
                  mv=  nvars2
               do nv=1,nquad
@@ -729,8 +750,8 @@ c ----------
                             call zstar (dum(1,1,nloc(qloc(2,nv))+L-1),dumz2,im,jm,undef,lattice)
                             do j=1,jm
                             do i=1,im
-                            if( defined(dumz1(i,j),undef)  .and.
-     .                          defined(dumz2(i,j),undef) ) then
+                            if( defined(dumz1(i,j),undef)  .and. &
+                                defined(dumz2(i,j),undef) ) then
                                      q(i,j,nloc(mv)+L-1,0) =      q(i,j,nloc(mv)+L-1,0) + dumz1(i,j)*dumz2(i,j)
                                 ntimes(i,j,nloc(mv)+L-1,0) = ntimes(i,j,nloc(mv)+L-1,0) + 1
                                 if( ntods.ne.0 ) then
@@ -743,14 +764,14 @@ c ----------
                         else
                             do j=1,jm
                             do i=1,im
-                            if( defined(dum(i,j,nloc(qloc(1,nv))+L-1),undef)  .and.
-     .                          defined(dum(i,j,nloc(qloc(2,nv))+L-1),undef) ) then
-                                          q(i,j,nloc(mv)+L-1,0) = q(i,j,nloc(mv)+L-1,0) + dum(i,j,nloc(qloc(1,nv))+L-1)
-     .                                                                                  * dum(i,j,nloc(qloc(2,nv))+L-1)
+                            if( defined(dum(i,j,nloc(qloc(1,nv))+L-1),undef)  .and. &
+                                defined(dum(i,j,nloc(qloc(2,nv))+L-1),undef) ) then
+                                          q(i,j,nloc(mv)+L-1,0) = q(i,j,nloc(mv)+L-1,0) + dum(i,j,nloc(qloc(1,nv))+L-1) &
+                                                                                        * dum(i,j,nloc(qloc(2,nv))+L-1)
                                      ntimes(i,j,nloc(mv)+L-1,0) = ntimes(i,j,nloc(mv)+L-1,0) + 1
                                 if( ntods.ne.0 ) then
-                                          q(i,j,nloc(mv)+L-1,k) = q(i,j,nloc(mv)+L-1,k) + dum(i,j,nloc(qloc(1,nv))+L-1)
-     .                                                                                  * dum(i,j,nloc(qloc(2,nv))+L-1)
+                                          q(i,j,nloc(mv)+L-1,k) = q(i,j,nloc(mv)+L-1,k) + dum(i,j,nloc(qloc(1,nv))+L-1) &
+                                                                                        * dum(i,j,nloc(qloc(2,nv))+L-1)
                                      ntimes(i,j,nloc(mv)+L-1,k) = ntimes(i,j,nloc(mv)+L-1,k) + 1
                                 endif
                             endif
@@ -768,8 +789,8 @@ c ----------
                   first = .false.
               endif
 
-c Update Date and Time for Strict Test
-c ------------------------------------
+! Update Date and Time for Strict Test
+! ------------------------------------
               call tick (nymdp,nhmsp,ndt)
               yearp  =     nymdp/10000
               monthp = mod(nymdp,10000)/100
@@ -815,14 +836,14 @@ c ------------------------------------
       enddo
       enddo
 
-C **********************************************************************
-C ****               Write HDF Monthly Output File                  ****
-C **********************************************************************
+! **********************************************************************
+! ****               Write HDF Monthly Output File                  ****
+! **********************************************************************
 
       call timebeg(' Write_AVE')
 
-c Check for Correct Last Dataset
-c ------------------------------
+! Check for Correct Last Dataset
+! ------------------------------
       if( strict .and. ( year.eq.yearp .and. month.eq.monthp ) ) then
           if( root ) print *, 'Date: ',nymd,' Time: ',nhms,' is NOT correct Last Time Period!'
           call my_finalize
@@ -842,16 +863,16 @@ c ------------------------------
       precision = 0 ! 32-bit
       timeinc   = 060000
       if( root ) then
-      call GFIO_CreateCF ( trim(hdfile), title, source, contact, undef,
-     .                     imglobal, jmglobal, lm, lon, lat, lev, levunits,
-     .                     nymd0, nhms0, timeinc,
-     .                     mvars, vname2, vtitle2, vunits2, kmvar2,
-     .                     vrange2, prange2, precision,
-     .                     id, coords2, twoDimLat, lat2, lon2, rc )
+      call GFIO_CreateCF ( trim(hdfile), title, source, contact, undef, &
+                          imglobal, jmglobal, lm, lon, lat, lev, levunits, &
+                          nymd0, nhms0, timeinc, &
+                          mvars, vname2, vtitle2, vunits2, kmvar2, &
+                          vrange2, prange2, precision, &
+                          id, coords2, twoDimLat, lat2, lon2, rc )
       endif
 
-c Primary Fields
-c --------------
+! Primary Fields
+! --------------
       if( root ) print *
       do n=1,nvars2
          if( kmvar2(n).eq.0 ) then
@@ -867,8 +888,8 @@ c --------------
          call mpi_gfio_putVar ( id,trim(vname2(n)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
       enddo
 
-c Quadratics
-c ----------
+! Quadratics
+! ----------
          mv=  nvars2
       do nv=1,nquad
          if( qloc(1,nv)*qloc(2,nv).ne.0 ) then
@@ -885,8 +906,8 @@ c ----------
              loc2 = nloc( qloc(2,nv) )
              if( .not.lzstar(nv) ) then
                  where( q(:,:,nloc(mv):nloc(mv)+kend-1,0).ne.undef )
-                      dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0) - q(:,:,loc1:loc1+kend-1,0)
-     .                                                                    * q(:,:,loc2:loc2+kend-1,0)
+                      dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0) - q(:,:,loc1:loc1+kend-1,0) &
+                                                                          * q(:,:,loc2:loc2+kend-1,0)
                  elsewhere
                       dum(:,:,1:kend) = undef
                  endwhere
@@ -905,9 +926,9 @@ c ----------
       endif
       call timeend(' Write_AVE')
 
-C **********************************************************************
-C ****               Write HDF Monthly Diurnal Output File          ****
-C **********************************************************************
+! **********************************************************************
+! ****               Write HDF Monthly Diurnal Output File          ****
+! **********************************************************************
 
       if( ntods.ne.0 ) then
       call timebeg(' Write_Diurnal')
@@ -932,17 +953,17 @@ C **********************************************************************
               ndvars = nvars2 ! Only Include Primary Fields in Diurnal Files (Default)
           endif
           if( root ) then
-          call GFIO_CreateCF ( trim(hdfile), title, source, contact, undef,
-     .                       imglobal, jmglobal, lm, lon, lat, lev, levunits,
-     .                       nymd0, nhms0, timeinc,
-     .                       ndvars, vname2(1:ndvars), vtitle2(1:ndvars), vunits2(1:ndvars), kmvar2(1:ndvars),
-     .                       vrange2(:,1:ndvars), prange2(:,1:ndvars), precision,
-     .                       id, coords2(1:ndvars), twoDimLat, lat2, lon2, rc )
+          call GFIO_CreateCF ( trim(hdfile), title, source, contact, undef, &
+                            imglobal, jmglobal, lm, lon, lat, lev, levunits, &
+                            nymd0, nhms0, timeinc, &
+                            ndvars, vname2(1:ndvars), vtitle2(1:ndvars), vunits2(1:ndvars), kmvar2(1:ndvars), &
+                            vrange2(:,1:ndvars), prange2(:,1:ndvars), precision, &
+                            id, coords2(1:ndvars), twoDimLat, lat2, lon2, rc )
           endif
       endif
 
-c Primary Fields
-c --------------
+! Primary Fields
+! --------------
       do n=1,nvars2
          if( kmvar2(n).eq.0 ) then
                   kbeg = 0
@@ -955,8 +976,8 @@ c --------------
          call mpi_gfio_putVar ( id,trim(vname2(n)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
       enddo
 
-c Quadratics
-c ----------
+! Quadratics
+! ----------
       if( ndvars.eq.mvars ) then
          mv=  nvars2
       do nv=1,nquad
@@ -973,8 +994,8 @@ c ----------
              loc2 = nloc( qloc(2,nv) )
              if( .not.lzstar(nv) ) then
                  where( q(:,:,nloc(mv):nloc(mv)+kend-1,0).ne.undef )
-                      dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,k) - q(:,:,loc1:loc1+kend-1,k)
-     .                                                                    * q(:,:,loc2:loc2+kend-1,k)
+                      dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,k) - q(:,:,loc1:loc1+kend-1,k) &
+                                                                          * q(:,:,loc2:loc2+kend-1,k)
                  elsewhere
                       dum(:,:,1:kend) = undef
                  endwhere
@@ -1002,9 +1023,9 @@ c ----------
       call timeend(' Write_Diurnal')
       endif
 
-C **********************************************************************
-C ****                 Write Min/Max Information                    ****
-C **********************************************************************
+! **********************************************************************
+! ****                 Write Min/Max Information                    ****
+! **********************************************************************
 
       if( root ) print *
       do n=1,nvars2
@@ -1015,13 +1036,8 @@ C **********************************************************************
                   plev = lev(L)
          endif
 
-#ifdef mpi
          call mpi_reduce( qmin(nloc(n)+L-1),qming,1,mpi_real,mpi_min,0,comm,ierror )
          call mpi_reduce( qmax(nloc(n)+L-1),qmaxg,1,mpi_real,mpi_max,0,comm,ierror )
-#else
-         qming = qmin(nloc(n)+L-1)
-         qmaxg = qmax(nloc(n)+L-1)
-#endif
          if( root ) then
          if(L.eq.1) then
             write(6,3101) trim(vname2(n)),plev,qming,qmaxg
@@ -1037,16 +1053,105 @@ C **********************************************************************
       enddo
       if( root ) print *
 
-C **********************************************************************
-C ****                     Timing Information                       ****
-C **********************************************************************
+! **********************************************************************
+! ****                     Timing Information                       ****
+! **********************************************************************
 
                  call timeend ('main')
       if( root ) call timepri (6)
 
+      call io_server%finalize()
+      call MAPL_Finalize()
       call my_finalize
       stop
-      end
+
+      contains
+
+         subroutine add_new_field_to_bundle(bundle,grid,lm,field_name,long_name,units,rc)
+            type(ESMF_FieldBundle), intent(inout) :: bundle
+            type(ESMF_Grid), intent(in) :: grid
+            integer, intent(in) :: lm
+            character(len=*), intent(in) :: field_name
+            character(len=*), intent(in) :: long_name
+            character(len=*), intent(in) :: units
+            integer, intent(out), optional :: rc
+
+            integer :: status
+            type(ESMF_Field) :: field
+            type(ESMF_Info) :: infoh
+
+            if (lm == 0) then
+               field = ESMF_FieldCreate(grid,name=trim(field_name),typekind=ESMF_TYPEKIND_R4,_RC)
+            else if (lm > 0) then
+               field = ESMF_FieldCreate(grid,name=trim(field_name),typekind=ESMF_TYPEKIND_R4, &
+                       ungriddedLBound=[0],ungriddedUBound=[lm],_RC)
+            end if
+            call ESMF_InfoGetFromHost(field,infoh,_RC)
+            call ESMF_InfoSet(infoh,key='LONG_NAME',value=trim(long_name),_RC)
+            call ESMF_InfoSet(infoh,key='UNITS',value=trim(units),_RC)
+            call MAPL_FieldBundleAdd(bundle,field,_RC)
+            if (present(rc)) then
+               RC=_SUCCESS
+            end if
+         end subroutine add_new_field_to_bundle
+
+         subroutine get_file_times(file_metadata,num_times,time_series,time_interval,rc)
+            type(FileMetadataUtils), intent(inout) :: file_metadata
+            integer, intent(out) :: num_times
+            type(ESMF_Time), allocatable, intent(inout) :: time_series(:)
+            integer, intent(out) :: time_interval
+            integer, intent(out), optional :: rc
+
+            integer :: status
+            type(ESMF_TimeInterval) :: esmf_time_interval
+            integer :: hour, minute, second
+
+            num_times = file_metadata%get_dimension('time',_RC)
+            call file_metadata%get_time_info(timeVector=time_series,_RC)
+            if (num_times == 1) then
+               time_interval = 240000
+            else if (num_times > 1) then
+               esmf_time_interval = time_series(2)-time_series(1)
+               call ESMF_TimeIntervalGet(esmf_time_interval,h=hour,m=minute,s=second,_RC)
+               time_interval = hour*10000+minute*100+second
+            end if
+
+            if (present(rc)) then
+               rc=_SUCCESS
+            end if
+         end subroutine get_file_times
+
+         function get_level_info(bundle,rc) result(kmvar)
+            integer, allocatable :: kmvar(:)
+            type(ESMF_FieldBundle), intent(in) :: bundle
+            integer, optional, intent(out) :: rc
+
+            integer :: status
+            character(len=ESMF_MAXSTR), allocatable :: field_list(:)
+            type(ESMF_Field) :: field
+            integer :: rank,i,num_fields,lb(1),ub(1)
+            call ESMF_FieldBundleGet(bundle,fieldCount=num_fields,_RC)
+            allocate(field_list(num_fields))
+            allocate(kmvar(num_fields))
+            call ESMF_FieldBundleGet(bundle,fieldNameList=field_list,_RC)
+            do i=1,num_fields
+               call ESMF_FieldBundleGet(bundle,field_list(i),field=field,_RC)
+               call ESMF_FieldGet(field,rank=rank,_RC)
+               if (rank==2) then
+                  kmvar(i)=0
+               else if (rank==3) then
+                  call ESMF_FieldGet(field,ungriddedLBound=lb,ungriddedUBound=ub,_RC)
+                  kmvar(i)=ub(1)-lb(1)+1
+               else
+                  _FAIL("Unsupported rank")
+               end if
+            end do
+            if (present(rc)) then
+               RC=_SUCCESS
+            end if
+         end function get_level_info
+
+      end program
 
       function defined ( q,undef )
       implicit none
@@ -1139,24 +1244,24 @@ C **********************************************************************
       integer  nvars, nalias, qloc(2)
       integer  m,n
 
-c Initialize Location of Quadratics
-c ---------------------------------
+! Initialize Location of Quadratics
+! ---------------------------------
       qloc = 0
 
-c Check Quadratic Name against HDF Variable Names
-c -----------------------------------------------
+! Check Quadratic Name against HDF Variable Names
+! -----------------------------------------------
       do n=1,nvars
              if( trim(vname(n)).eq.trim(quad(1)) ) qloc(1) = n
              if( trim(vname(n)).eq.trim(quad(2)) ) qloc(2) = n
       enddo
 
-c Check Quadratic Name against Aliases
-c ------------------------------------
+! Check Quadratic Name against Aliases
+! ------------------------------------
       do m=1,nalias
          if( trim(quad(1)).eq.trim(aliases(1,m)) ) then
              do n=1,nvars
-             if( trim(vname(n)).eq.trim(quad(1)) .or.
-     .           trim(vname(n)).eq.trim(aliases(2,m)) ) then
+             if( trim(vname(n)).eq.trim(quad(1)) .or. &
+                 trim(vname(n)).eq.trim(aliases(2,m)) ) then
              qloc(1) = n
              exit
              endif
@@ -1164,8 +1269,8 @@ c ------------------------------------
          endif
          if( trim(quad(2)).eq.trim(aliases(1,m)) ) then
              do n=1,nvars
-             if( trim(vname(n)).eq.trim(quad(2)) .or.
-     .           trim(vname(n)).eq.trim(aliases(2,m)) ) then
+             if( trim(vname(n)).eq.trim(quad(2)) .or. &
+                 trim(vname(n)).eq.trim(aliases(2,m)) ) then
              qloc(2) = n
              exit
              endif
@@ -1176,13 +1281,13 @@ c ------------------------------------
       end
 
       function nsecf (nhms)
-C***********************************************************************
-C  Purpose
-C     Converts NHMS format to Total Seconds
-C
-C***********************************************************************
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
-C***********************************************************************
+!***********************************************************************
+!  Purpose
+!     Converts NHMS format to Total Seconds
+!
+!***********************************************************************
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+!***********************************************************************
       implicit none
       integer  nhms, nsecf
       nsecf =  nhms/10000*3600 + mod(nhms,10000)/100*60 + mod(nhms,100)
@@ -1190,13 +1295,13 @@ C***********************************************************************
       end function nsecf
 
       function nhmsf (nsec)
-C***********************************************************************
-C  Purpose
-C     Converts Total Seconds to NHMS format
-C
-C***********************************************************************
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
-C***********************************************************************
+!***********************************************************************
+!  Purpose
+!     Converts Total Seconds to NHMS format
+!
+!***********************************************************************
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+!***********************************************************************
       implicit none
       integer  nhmsf, nsec
       nhmsf =  nsec/3600*10000 + mod(nsec,3600)/60*100 + mod(nsec,60)
@@ -1204,13 +1309,13 @@ C***********************************************************************
       end function nhmsf
 
       subroutine tick (nymd,nhms,ndt)
-C***********************************************************************
-C  Purpose
-C     Tick the Date (nymd) and Time (nhms) by NDT (seconds)
-C
-C***********************************************************************
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
-C***********************************************************************
+!***********************************************************************
+!  Purpose
+!     Tick the Date (nymd) and Time (nhms) by NDT (seconds)
+!
+!***********************************************************************
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
+!***********************************************************************
 
       IF(NDT.NE.0) THEN
       NSEC = NSECF(NHMS) + NDT
@@ -1241,25 +1346,25 @@ C***********************************************************************
       end subroutine tick
 
       function incymd (NYMD,M)
-C***********************************************************************        
-C  PURPOSE                                                                      
-C     INCYMD:  NYMD CHANGED BY ONE DAY                                          
-C     MODYMD:  NYMD CONVERTED TO JULIAN DATE                                    
-C  DESCRIPTION OF PARAMETERS                                                    
-C     NYMD     CURRENT DATE IN YYMMDD FORMAT                                    
-C     M        +/- 1 (DAY ADJUSTMENT)                                           
-C                                                                               
-C***********************************************************************        
-C*                  GODDARD LABORATORY FOR ATMOSPHERES                 *        
-C***********************************************************************        
+!***********************************************************************        
+!  PURPOSE                                                                      
+!     INCYMD:  NYMD CHANGED BY ONE DAY                                          
+!     MODYMD:  NYMD CONVERTED TO JULIAN DATE                                    
+!  DESCRIPTION OF PARAMETERS                                                    
+!     NYMD     CURRENT DATE IN YYMMDD FORMAT                                    
+!     M        +/- 1 (DAY ADJUSTMENT)                                           
+!                                                                               
+!***********************************************************************        
+!*                  GODDARD LABORATORY FOR ATMOSPHERES                 *        
+!***********************************************************************        
 
       INTEGER NDPM(12)
       DATA    NDPM /31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/
       LOGICAL LEAP
       LEAP(NY) = MOD(NY,4).EQ.0 .AND. (MOD(NY,100).NE.0 .OR. MOD(NY,400).EQ.0)
 
-C***********************************************************************        
-C
+!***********************************************************************        
+!
       NY = NYMD / 10000
       NM = MOD(NYMD,10000) / 100
       ND = MOD(NYMD,100) + M
@@ -1289,9 +1394,9 @@ C
       INCYMD = NY*10000 + NM*100 + ND
       RETURN
 
-C***********************************************************************        
-C                      E N T R Y    M O D Y M D                                 
-C***********************************************************************        
+!***********************************************************************        
+!                      E N T R Y    M O D Y M D                                 
+!***********************************************************************        
 
       ENTRY MODYMD (NYMD)
       NY = NYMD / 10000
@@ -1314,35 +1419,35 @@ C***********************************************************************
       logical root
       if(root) then
       write(6,100)
- 100  format(  "Usage:  ",/,/
-     .         " time_ave.x -hdf      Filenames (in HDF format)",/
-     .         "           <-template TEMPLATE>"    ,/
-     .         "           <-tag      TAG>"    ,/
-     .         "           <-rc       RCFILE>" ,/
-     .         "           <-ntod     NTOD>"   ,/
-     .         "           <-ntmin    NTMIN>"  ,/
-     .         "           <-strict   STRICT>" ,/
-     .         "           <-d>"               ,/
-     .         "           <-md>"              ,/,/
-     .         "where:",/,/
-     .         "  -hdf      Filenames:  Filenames (in HDF format) to average",/
-     .         "  -template  TEMPLATE:  Filename to use as template if HDF files differ (default: 1st Filename)",/
-     .         "  -begdate   yyyymmdd:  Optional Parameter for Date to Begin Averaging",/
-     .         "  -begtime     hhmmss:  Optional Parameter for Time to Begin Averaging",/
-     .         "  -enddate   yyyymmdd:  Optional Parameter for Date to   End Averaging",/
-     .         "  -endtime     hhmmss:  Optional Parameter for Time to   End Averaging",/
-     .         "  -tag            TAG:  Optional TAG for Output File (default: monthly_ave)",/
-     .         "  -rc          RCFILE:  Optional Resource Filename for Quadratics (default: no quadratics)",/
-     .         "  -ntod          NTOD:  Optional Time-Of-Day (HHMMSS) to average (default: all time periods)",/
-     .         "  -ntmin        NTMIN:  Optional Parameter for Required Min. TimePeriods (default: 10 days equiv)",/
-     .         "  -strict      STRICT:  Optional Logical Parameter for Strict Time Testing (default: .true.)",/
-     .         "  -d             DTAG:  Optional Parameter to Create & Tag          Monthly Mean Diurnal File  ",
-     .                                  "(all times included)",/
-     .         "  -md            DTAG:  Optional Parameter to Create & Tag Multiple Monthly Mean Diurnal Files ",
-     .                                  "(one time  per file)",/
-     .         "  -dv            DTAG:  Like -d  but includes Diurnal Variances",/
-     .         "  -mdv           DTAG:  Like -md but includes Diurnal variances",/
-     .         )
+ 100  format(  "Usage:  ",/,/ &
+              " time_ave.x -hdf      Filenames (in HDF format)",/ &
+              "           <-template TEMPLATE>"    ,/ &
+              "           <-tag      TAG>"    ,/ &
+              "           <-rc       RCFILE>" ,/ &
+              "           <-ntod     NTOD>"   ,/ &
+              "           <-ntmin    NTMIN>"  ,/ &
+              "           <-strict   STRICT>" ,/ &
+              "           <-d>"               ,/ &
+              "           <-md>"              ,/,/ &
+              "where:",/,/ &
+              "  -hdf      Filenames:  Filenames (in HDF format) to average",/ &
+              "  -template  TEMPLATE:  Filename to use as template if HDF files differ (default: 1st Filename)",/ &
+              "  -begdate   yyyymmdd:  Optional Parameter for Date to Begin Averaging",/ &
+              "  -begtime     hhmmss:  Optional Parameter for Time to Begin Averaging",/ &
+              "  -enddate   yyyymmdd:  Optional Parameter for Date to   End Averaging",/ &
+              "  -endtime     hhmmss:  Optional Parameter for Time to   End Averaging",/ &
+              "  -tag            TAG:  Optional TAG for Output File (default: monthly_ave)",/ &
+              "  -rc          RCFILE:  Optional Resource Filename for Quadratics (default: no quadratics)",/ &
+              "  -ntod          NTOD:  Optional Time-Of-Day (HHMMSS) to average (default: all time periods)",/ &
+              "  -ntmin        NTMIN:  Optional Parameter for Required Min. TimePeriods (default: 10 days equiv)",/ &
+              "  -strict      STRICT:  Optional Logical Parameter for Strict Time Testing (default: .true.)",/ &
+              "  -d             DTAG:  Optional Parameter to Create & Tag          Monthly Mean Diurnal File  ", &
+                                       "(all times included)",/ &
+              "  -md            DTAG:  Optional Parameter to Create & Tag Multiple Monthly Mean Diurnal Files ", &
+                                       "(one time  per file)",/ &
+              "  -dv            DTAG:  Like -d  but includes Diurnal Variances",/ &
+              "  -mdv           DTAG:  Like -md but includes Diurnal variances",/ &
+              )
       endif
       call my_finalize
       stop
