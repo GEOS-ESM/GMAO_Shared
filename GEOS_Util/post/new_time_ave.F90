@@ -115,6 +115,8 @@
       type(ServerManager) :: io_server
       type(FieldBundleWriter) :: standard_writer, diurnal_writer
       real(ESMF_KIND_R4), pointer :: ptr2d(:,:),ptr3d(:,:,:)
+      character(len=ESMF_MAXSTR) :: grid_type
+      logical :: allow_zonal_means
 
 ! **********************************************************************
 ! ****                       Initialization                         ****
@@ -312,6 +314,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       allocate(factory, source=grid_manager%make_factory(trim(name)))
       grid = grid_manager%make_grid(factory)
+      call ESMF_AttributeGet(grid,'GridType',grid_type,_RC)
+      allow_zonal_means = trim(grid_type) == 'LatLon'
       call MAPL_GridGet(grid,localCellCountPerDim=local_dims,globalCellCountPerDim=global_dims,_RC)
       im = local_dims(1)
       jm = local_dims(2)
@@ -485,6 +489,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
                nstar = index( trim(quadratics(1,nv)),'star',back=.true. )
            if( nstar.ne.0 ) then
+             _ASSERT(allow_zonal_means,"grid is not lat-lon so cannot compute zonal means")
               lzstar(nv) = .TRUE.
              vtitle2(mv) = "Product_of_Zonal_Mean_Deviations_of_" // trim(vname(qloc(1,nv))) // "_and_" // trim(vname(qloc(2,nv)))
            endif
