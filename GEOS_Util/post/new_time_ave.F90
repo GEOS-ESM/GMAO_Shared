@@ -8,9 +8,7 @@
       use gFTL_StringVector
       use MPI
 
-      use dynamics_lattice_module
       implicit none
-      type ( dynamics_lattice_type ) lattice
 
       integer  comm,myid,npes,ierror
       integer  imglobal
@@ -39,18 +37,18 @@
       integer  begdate, begtime
       integer  enddate, endtime
 
-      integer id,rc,sumrc,precision,timeinc,timeid
-      integer ntime,nvars,ngatts,ncvid,nvars2
+      integer id,rc,timeinc,timeid
+      integer ntime,nvars,ncvid,nvars2
 
-      character*256, allocatable ::   arg(:)
-      character*256, allocatable :: fname(:)
-      character*256  template
-      character*256  name
-      character*256  ext
-      character*256  output, doutput, hdfile, rcfile
-      character*8    date0
-      character*2    time0
-      character*1    char
+      character(len=ESMF_MAXSTR), allocatable ::   arg(:)
+      character(len=ESMF_MAXSTR), allocatable :: fname(:)
+      character(len=ESMF_MAXSTR)  template
+      character(len=ESMF_MAXSTR)  name
+      character(len=ESMF_MAXSTR)  ext
+      character(len=ESMF_MAXSTR)  output, doutput, hdfile, rcfile
+      character(len=8)    date0
+      character(len=2)    time0
+      character(len=1)    char
       data output  /'monthly_ave'/
       data rcfile  /'NULL'/
       data doutput /'NULL'/
@@ -60,27 +58,16 @@
 
       real     plev,qming,qmaxg
       real     undef
-      real,    allocatable ::    lat(:)
-      real,    allocatable ::    lon(:)
       real,    allocatable ::    lev(:)
-      real*8,    allocatable ::    lon2(:,:), lat2(:,:)
-      logical              :: twoDimLat
-      real,    allocatable :: vrange(:,:), vrange2(:,:)
-      real,    allocatable :: prange(:,:), prange2(:,:)
       integer, allocatable ::  kmvar(:)  ,  kmvar2(:)
       integer, allocatable :: yymmdd(:)
       integer, allocatable :: hhmmss(:)
       integer, allocatable ::   nloc(:)
       integer, allocatable ::   iloc(:)
 
-      character*256  title
-      character*256  source
-      character*256  contact
-      character*256  levunits
-      character*256, allocatable ::  vname(:),  vname2(:)
-      character*256, allocatable :: vtitle(:), vtitle2(:)
-      character*256, allocatable :: vunits(:), vunits2(:)
-      character*256, allocatable :: coords(:), coords2(:)
+      character(len=ESMF_MAXSTR), allocatable ::  vname(:),  vname2(:)
+      character(len=ESMF_MAXSTR), allocatable :: vtitle(:), vtitle2(:)
+      character(len=ESMF_MAXSTR), allocatable :: vunits(:), vunits2(:)
 
       real,    allocatable ::   qmin(:)
       real,    allocatable ::   qmax(:)
@@ -100,11 +87,11 @@
       type(ESMF_Config)   :: config
 
       integer,       allocatable ::       qloc(:,:)
-      character*256, allocatable :: quadratics(:,:)
-      character*256, allocatable ::    quadtmp(:,:)
-      character*256, allocatable ::    aliases(:,:)
-      character*256, allocatable ::   aliastmp(:,:)
-      character*256  name1, name2, name3, dummy
+      character(len=ESMF_MAXSTR), allocatable :: quadratics(:,:)
+      character(len=ESMF_MAXSTR), allocatable ::    quadtmp(:,:)
+      character(len=ESMF_MAXSTR), allocatable ::    aliases(:,:)
+      character(len=ESMF_MAXSTR), allocatable ::   aliastmp(:,:)
+      character(len=ESMF_MAXSTR)  name1, name2, name3, dummy
       integer        nquad
       integer        nalias
       logical,       allocatable :: lzstar(:)
@@ -120,11 +107,14 @@
       type(ESMF_Grid) :: grid
       integer :: global_dims(3), local_dims(3)
       type(ESMF_Time), allocatable :: time_series(:)
+      type(ESMF_TIme) :: etime
       type(ESMF_Clock) :: clock
       type(ESMF_TimeInterval) :: time_interval
-      type(ESMF_FieldBundle) :: primary_bundle
+      type(ESMF_FieldBundle) :: primary_bundle,final_bundle
+      type(ESMF_Field) :: field
       type(ServerManager) :: io_server
-      type(FieldBundleWriter) :: bundle_writer
+      type(FieldBundleWriter) :: standard_writer, diurnal_writer
+      real(ESMF_KIND_R4), pointer :: ptr2d(:,:),ptr3d(:,:,:)
 
 ! **********************************************************************
 ! ****                       Initialization                         ****
@@ -141,7 +131,7 @@
          npex = npex-1
          npey = nint ( float(npes)/float(npex) )
       enddo
-      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_NONE,mpiCommunicator=MPI_COMM_WORLD, _RC)
+      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_MULTI,logAppendFlag=.false.,mpiCommunicator=MPI_COMM_WORLD, _RC)
       call MAPL_Initialize(_RC)
       call io_server%initialize(MPI_COMM_WORLD,_RC)
       root = myid.eq.0
@@ -327,7 +317,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
       jm = local_dims(2)
       lm = local_dims(3)
       imglobal = global_dims(1)
-      jmglobal = global_dims(1)
+      jmglobal = global_dims(2)
 
       call file_metadata%create(basic_metadata,trim(name))
       call get_file_times(file_metadata,ntime,time_series,timinc,yymmdd,hhmmss,_RC)
@@ -338,44 +328,25 @@ config = ESMF_ConfigCreate    ( rc=rc )
       allocate(vname(nvars))
       call ESMF_FieldBundleGet(primary_bundle,fieldNameList=vname,_RC)
       kmvar = get_level_info(primary_bundle,_RC)
+      vtitle = get_long_names(primary_bundle,_RC) 
+      vunits = get_units(primary_bundle,_RC) 
 
-      call gfio_open ( trim(name),1,ID,rc )
-      call gfio_diminquireCF(id,imglobal,jmglobal,lm,ntime,nvars,ngatts,twoDimLat,rc)
+      final_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
+      call ESMF_FieldBundleSet(final_bundle,grid=grid,_RC)
+      call copy_bundle_to_bundle(primary_bundle,final_bundle,_RC)
+
+      if (size(time_series)>1) then
+         time_interval = time_series(2) - time_series(1)
+      else if (size(time_series)==1) then
+         call ESMF_TimeIntervalSet(time_interval,h=6,_RC)
+      end if
+      clock = ESMF_ClockCreate(startTime=time_series(1),timeStep=time_interval,_RC)
+
       nvars2 = nvars
 
-      call create_dynamics_lattice ( lattice,npex,npey )
-      call   init_dynamics_lattice ( lattice,comm,imglobal,jmglobal,lm )
-
-      im = lattice%im( lattice%pei )
-      jm = lattice%jm( lattice%pej )
-
-      allocate ( lon(imglobal)   )
-      allocate ( lat(jmglobal)   )
-      if (twoDimLat) then
-         allocate ( lon2(imglobal,jmglobal) )
-         allocate ( lat2(imglobal,jmglobal) )
-      else
-         allocate(lon2(0,0))
-         allocate(lat2(0,0))
-      endif
       allocate ( lev(lm)         )
-      !allocate ( yymmdd(  ntime) )
-      !allocate ( hhmmss(  ntime) )
-      !allocate (  vname(  nvars) )
-      allocate ( vtitle(  nvars) )
-      allocate ( vunits(  nvars) )
-      !allocate (  kmvar(  nvars) )
-      allocate ( vrange(2,nvars) )
-      allocate ( prange(2,nvars) )
-      allocate ( coords(  nvars) )
 
-      call gfio_inquireCF ( id,imglobal,jmglobal,lm,ntime,nvars, &
-                           title,source,contact,undef, &
-                           lon,lat,lev,levunits, &
-                           yymmdd,hhmmss,timinc, &
-                           vname,vtitle,vunits,kmvar, &
-                           vrange,prange,coords, twoDimLat, lat2, lon2, rc)
-     call gfio_close   ( id,rc )
+      undef = MAPL_UNDEF !bmaa
 
 ! Set NDT for Strict Time Testing
 ! -------------------------------
@@ -490,19 +461,11 @@ config = ESMF_ConfigCreate    ( rc=rc )
       allocate ( vtitle2(  mvars) )
       allocate ( vunits2(  mvars) )
       allocate (  kmvar2(  mvars) )
-      allocate ( vrange2(2,mvars) )
-      allocate ( prange2(2,mvars) )
-      allocate ( coords2(  mvars) )
 
        vname2(  1:nvars) = vname
       vtitle2(  1:nvars) = vtitle
       vunits2(  1:nvars) = vunits
        kmvar2(  1:nvars) = kmvar
-      vrange2(:,1:nvars) = vrange
-      prange2(:,1:nvars) = prange
-
-      coords2            = ''
-      coords2(  1:nvars) = coords
 
       if( root .and. mvars.gt.nvars ) print *
          mv=  nvars
@@ -527,20 +490,15 @@ config = ESMF_ConfigCreate    ( rc=rc )
            endif
 
              vunits2(mv) = trim(vunits(qloc(1,nv))) // " " // trim(vunits(qloc(2,nv)))
-             coords2(mv) = coords(qloc(1,nv))
               kmvar2(mv) =  kmvar(qloc(1,nv))
-           vrange2(:,mv) = undef
-           prange2(:,mv) = undef
 
-           call add_new_field_to_bundle(primary_bundle,grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
+           call add_new_field_to_bundle(final_bundle,grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
 
          if( root ) write(6,7001) mv,trim(vname2(mv)),nloc(mv),trim(vtitle2(mv)),max(1,kmvar(qloc(1,nv))),qloc(1,nv),qloc(2,nv)
  7001    format(1x,'   Quad Field:  ',i4,'  Name: ',a12,'  at location: ',i4,3x,a50,2x,i2,3x,i3,3x,i3)
          endif
       enddo
 
-      deallocate ( lon )
-      deallocate ( lat )
       deallocate ( lev )
       deallocate ( yymmdd )
       deallocate ( hhmmss )
@@ -548,9 +506,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
       deallocate ( vtitle )
       deallocate ( vunits )
       deallocate (  kmvar )
-      deallocate ( vrange )
-      deallocate ( prange )
-      deallocate ( coords )
 
       allocate(   qmin(nmax) )
       allocate(   qmax(nmax) )
@@ -599,43 +554,16 @@ config = ESMF_ConfigCreate    ( rc=rc )
       k = 0
 
       do n=1,nfiles
-      if( root ) then
-      call gfio_open ( trim(fname(n)),1,ID,rc )
-      call gfio_diminquireCF ( id,imglobal,jmglobal,lm,ntime,nvars,ngatts,twoDimLat,rc )
-      endif
 
-      call mpi_bcast ( imglobal,1,mpi_integer,0,comm,ierror )
-      call mpi_bcast ( jmglobal,1,mpi_integer,0,comm,ierror )
-      call mpi_bcast (       lm,1,mpi_integer,0,comm,ierror )
-      call mpi_bcast (    ntime,1,mpi_integer,0,comm,ierror )
-      call mpi_bcast (    nvars,1,mpi_integer,0,comm,ierror )
+      if (allocated(time_series)) deallocate(time_series)
+      if (allocated(yymmdd)) deallocate(yymmdd)
+      if (allocated(hhmmss)) deallocate(hhmmss)
+      call file_handle%open(trim(fname(n)),PFIO_READ,_RC)
+      basic_metadata = file_handle%read(_RC)
+      call file_handle%close(_RC)
+      call file_metadata%create(basic_metadata,trim(fname(n)))
+      call get_file_times(file_metadata,ntime,time_series,timinc,yymmdd,hhmmss,_RC)
 
-      allocate ( lon(imglobal)   )
-      allocate ( lat(jmglobal)   )
-      allocate ( lev(lm)         )
-      allocate ( yymmdd(  ntime) )
-      allocate ( hhmmss(  ntime) )
-      allocate (  vname(  nvars) )
-      allocate ( vtitle(  nvars) )
-      allocate ( vunits(  nvars) )
-      allocate (  kmvar(  nvars) )
-      allocate ( vrange(2,nvars) )
-      allocate ( prange(2,nvars) )
-      allocate ( coords(  nvars) )
-
-      if( root ) then
-      call gfio_inquireCF ( id,imglobal,jmglobal,lm,ntime,nvars, &
-                           title,source,contact,undef,&
-                           lon,lat,lev,levunits,&
-                           yymmdd,hhmmss,timinc,&
-                           vname,vtitle,vunits,kmvar,&
-                           vrange,prange,coords,twoDimLat, lat2, lon2, rc )
-      endif
-
-      call mpi_bcast ( yymmdd,ntime,mpi_integer,0,comm,ierror )
-      call mpi_bcast ( hhmmss,ntime,mpi_integer,0,comm,ierror )
-      call mpi_bcast ( timinc,1,    mpi_integer,0,comm,ierror )
-      call mpi_bcast ( kmvar,nvars, mpi_integer,0,comm,ierror )
 
            do m=1,ntime
               nymd = yymmdd(m)
@@ -690,18 +618,24 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
 ! Primary Fields
 ! --------------
+  
+              etime = local_esmf_timeset(nymd,nhms,_RC) 
+              call MAPL_Read_Bundle(primary_bundle,trim(fname(n)),time=etime,_RC)
               do nv=1,nvars2
+                   call ESMF_FieldBundleGet(primary_bundle,trim(vname2(nv)),field=field,_RC)
                    call timebeg('   PRIME')
                    if( kmvar2(nv).eq.0 ) then
                             kbeg = 0
                             kend = 1
+                            call ESMF_FieldGet(field,0,farrayPtr=ptr2d,_RC)
+                            dum(:,:,nloc(nv))=ptr2d
                    else
                             kbeg = 1
                             kend = kmvar2(nv)
+                            call ESMF_FieldGet(field,0,farrayPtr=ptr3d,_RC)
+                            dum(:,:,nloc(nv):nloc(nv)+kmvar2(nv)-1) = ptr3d
                    endif
                    call timeend('   PRIME')
-
-                   call mpi_gfio_getvar ( id,vname2(nv),nymd,nhms,im,jm,kbeg,kend,dum(1,1,nloc(nv)),lattice )
 
                    call timebeg('   PRIME')
                           rc = 0
@@ -709,7 +643,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
                    do j=1,jm
                    do i=1,im
                    if( isnan( dum(i,j,nloc(nv)+L-1) ) .or. ( dum(i,j,nloc(nv)+L-1).gt.HUGE(dum(i,j,nloc(nv)+L-1)) ) ) then
-                       print *, 'Warning!  Nan or Infinity detected for ',trim(vname2(nv)),' at lat: ',lattice%jglobal(j),' lon: ',lattice%iglobal(i)
+                       !print *, 'Warning!  Nan or Infinity detected for ',trim(vname2(nv)),' at lat: ',lattice%jglobal(j),' lon: ',lattice%iglobal(i)
                        if( ignore_nan ) then
                            print *, 'Setting Nan or Infinity to UNDEF'
                            print *
@@ -733,13 +667,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
                    enddo
                    call timeend('   PRIME')
 
-                   call mpi_allreduce ( rc,sumrc,1,mpi_integer,mpi_sum,lattice%comm,ierror )
-                   rc = sumrc
-                   if( .not.ignore_nan .and. rc.ne.0 ) then
-                       call my_finalize
-                       stop 1
-                   endif
-
               enddo
 
 ! Quadratics
@@ -751,8 +678,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
                      mv=mv+1
                      do L=1,max(1,kmvar2(qloc(1,nv)))
                         if( lzstar(nv) ) then
-                            call zstar (dum(1,1,nloc(qloc(1,nv))+L-1),dumz1,im,jm,undef,lattice)
-                            call zstar (dum(1,1,nloc(qloc(2,nv))+L-1),dumz2,im,jm,undef,lattice)
+                            call latlon_zstar (dum(:,:,nloc(qloc(1,nv))+L-1),dumz1,undef,grid,_RC)
+                            call latlon_zstar (dum(:,:,nloc(qloc(2,nv))+L-1),dumz2,undef,grid,_RC)
                             do j=1,jm
                             do i=1,im
                             if( defined(dumz1(i,j),undef)  .and. &
@@ -803,22 +730,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
               endif ! End ntod  Test
            enddo    ! End ntime Loop within file
 
-      if( root ) call gfio_close ( id,rc )
-      if( n.ne.nfiles ) then
-          deallocate ( lon )
-          deallocate ( lat )
-          deallocate ( lev )
-          deallocate ( yymmdd )
-          deallocate ( hhmmss )
-          deallocate (  vname )
-          deallocate ( vtitle )
-          deallocate ( vunits )
-          deallocate (  kmvar )
-          deallocate ( vrange )
-          deallocate ( prange )
-          deallocate ( coords )
-      endif
-
       call my_barrier (comm)
       enddo
 
@@ -864,33 +775,27 @@ config = ESMF_ConfigCreate    ( rc=rc )
  2000 format(i2.2)
  4000 format(i6.6)
 
-      precision = 1 ! 64-bit
-      precision = 0 ! 32-bit
       timeinc   = 060000
-      if( root ) then
-      call GFIO_CreateCF ( trim(hdfile), title, source, contact, undef, &
-                          imglobal, jmglobal, lm, lon, lat, lev, levunits, &
-                          nymd0, nhms0, timeinc, &
-                          mvars, vname2, vtitle2, vunits2, kmvar2, &
-                          vrange2, prange2, precision, &
-                          id, coords2, twoDimLat, lat2, lon2, rc )
-      endif
 
 ! Primary Fields
 ! --------------
       if( root ) print *
       do n=1,nvars2
+         call ESMF_FieldBundleGet(final_bundle,trim(vname2(n)),field=field,_RC)
          if( kmvar2(n).eq.0 ) then
                   kbeg = 0
                   kend = 1
+                  call ESMF_FieldGet(field,0,farrayPtr=ptr2d,_RC)
+                  ptr2d = q(:,:,nloc(n),0)
          else
                   kbeg = 1
                   kend = kmvar2(n)
+                  call ESMF_FieldGet(field,0,farrayPtr=ptr3d,_RC)
+                  ptr3d = q(:,:,nloc(n):nloc(n)+kend-1,0) 
          endif
          if( root ) write(6,3001) trim(vname2(n)),nloc(n),trim(hdfile)
  3001    format(1x,'Writing ',a,' at location ',i6,' into File: ',a)
          dum(:,:,1:kend) = q(:,:,nloc(n):nloc(n)+kend-1,0)
-         call mpi_gfio_putVar ( id,trim(vname2(n)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
       enddo
 
 ! Quadratics
@@ -900,6 +805,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
          if( qloc(1,nv)*qloc(2,nv).ne.0 ) then
              mv=mv+1
              if( root ) write(6,3001) trim(vname2(mv)),nloc(mv),trim(hdfile)
+             call ESMF_FieldBundleGet(final_bundle,trim(vname2(mv)),field=field,_RC)
+
              if( kmvar2(qloc(1,nv)).eq.0 ) then
                       kbeg = 0
                       kend = 1
@@ -919,17 +826,28 @@ config = ESMF_ConfigCreate    ( rc=rc )
              else
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,0)
              endif 
-             call mpi_gfio_putVar ( id,trim(vname2(mv)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
+             if( kmvar2(qloc(1,nv)).eq.0 ) then
+                      call ESMF_FieldGet(field,0,farrayPtr=ptr2d,_RC)
+                      ptr2d = dum(:,:,1)
+             else
+                      kend = kmvar2(qloc(1,nv))
+                      call ESMF_FieldGet(field,0,farrayPtr=ptr3d,_RC)
+                      ptr3d = dum(:,:,1:kend) 
+             endif
          endif
       enddo
 
       if( root ) then
-          call gfio_close ( id,rc )
           print * 
           print *, 'Created: ',trim(hdfile)
           print * 
       endif
       call timeend(' Write_AVE')
+      etime = local_esmf_timeset(nymd0,nhms0,_RC) 
+      call ESMF_ClockSet(clock,currTime=etime, _RC)
+      call standard_writer%create_from_bundle(final_bundle,clock,n_steps=1,time_interval=timeinc,_RC)
+      call standard_writer%start_new_file(trim(hdfile),_RC)
+      call standard_writer%write_to_file(_RC)
 
 ! **********************************************************************
 ! ****               Write HDF Monthly Diurnal Output File          ****
@@ -938,8 +856,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
       if( ntods.ne.0 ) then
       call timebeg(' Write_Diurnal')
 
-      precision = 1 ! 64-bit
-      precision = 0 ! 32-bit
       timeinc   = nhmsf( 86400/ntods )
 
       do k=1,ntods
@@ -957,14 +873,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
           else
               ndvars = nvars2 ! Only Include Primary Fields in Diurnal Files (Default)
           endif
-          if( root ) then
-          call GFIO_CreateCF ( trim(hdfile), title, source, contact, undef, &
-                            imglobal, jmglobal, lm, lon, lat, lev, levunits, &
-                            nymd0, nhms0, timeinc, &
-                            ndvars, vname2(1:ndvars), vtitle2(1:ndvars), vunits2(1:ndvars), kmvar2(1:ndvars), &
-                            vrange2(:,1:ndvars), prange2(:,1:ndvars), precision, &
-                            id, coords2(1:ndvars), twoDimLat, lat2, lon2, rc )
-          endif
       endif
 
 ! Primary Fields
@@ -978,7 +886,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
                   kend = kmvar2(n)
          endif
          dum(:,:,1:kend) = q(:,:,nloc(n):nloc(n)+kend-1,k)
-         call mpi_gfio_putVar ( id,trim(vname2(n)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
       enddo
 
 ! Quadratics
@@ -1007,20 +914,23 @@ config = ESMF_ConfigCreate    ( rc=rc )
              else
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,k)
              endif
-             call mpi_gfio_putVar ( id,trim(vname2(mv)),nymd0,nhms0,im,jm,kbeg,kend,dum,lattice )
          endif
       enddo
       endif
 
+      
+      etime = local_esmf_timeset(nymd0,nhms0,_RC) 
+      call ESMF_ClockSet(clock,currTime=etime, _RC)
+      call diurnal_writer%create_from_bundle(final_bundle,clock,n_steps=1,time_interval=timeinc,_RC)
+      call diurnal_writer%start_new_file(trim(hdfile),_RC)
+      call diurnal_writer%write_to_file(_RC)
       if( root .and. mdiurnal ) then
-          call gfio_close ( id,rc )
           print *, 'Created: ',trim(hdfile)
       endif
       call tick (nymd0,nhms0,ndt)
       enddo
 
       if( root .and. diurnal ) then
-          call gfio_close ( id,rc )
           print *, 'Created: ',trim(hdfile)
       endif
       if( root ) print * 
@@ -1038,7 +948,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
          if( kmvar2(n).eq.0 ) then
                   plev = 0
          else
-                  plev = lev(L)
+                  plev = L!lev(L) !bmaa
          endif
 
          call mpi_reduce( qmin(nloc(n)+L-1),qming,1,mpi_real,mpi_min,0,comm,ierror )
@@ -1072,6 +982,27 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       contains
 
+         
+         subroutine copy_bundle_to_bundle(input_bundle,output_bundle,rc)
+            type(ESMF_FieldBundle), intent(inout) :: input_bundle
+            type(ESMF_FieldBundle), intent(inout) :: output_bundle
+            integer, intent(out), optional :: rc
+            integer :: status
+            character(len=ESMF_MAXSTR), allocatable :: field_list(:)
+            type(ESMF_Field) :: field
+            integer :: i,num_fields
+            call ESMF_FieldBundleGet(input_bundle,fieldCount=num_fields,_RC)
+            allocate(field_list(num_fields))
+            call ESMF_FieldBundleGet(input_bundle,fieldNameList=field_list,_RC)
+            do i=1,num_fields
+               call ESMF_FieldBundleGet(input_bundle,field_list(i),field=field,_RC)
+               call MAPL_FieldBundleAdd(output_bundle,field,_RC)
+            enddo 
+            if (present(rc)) then
+               RC=_SUCCESS
+            end if
+         end subroutine copy_bundle_to_bundle
+ 
          subroutine add_new_field_to_bundle(bundle,grid,lm,field_name,long_name,units,rc)
             type(ESMF_FieldBundle), intent(inout) :: bundle
             type(ESMF_Grid), intent(in) :: grid
@@ -1083,17 +1014,22 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
             integer :: status
             type(ESMF_Field) :: field
-            type(ESMF_Info) :: infoh
 
             if (lm == 0) then
                field = ESMF_FieldCreate(grid,name=trim(field_name),typekind=ESMF_TYPEKIND_R4,_RC)
             else if (lm > 0) then
                field = ESMF_FieldCreate(grid,name=trim(field_name),typekind=ESMF_TYPEKIND_R4, &
-                       ungriddedLBound=[0],ungriddedUBound=[lm],_RC)
+                       ungriddedLBound=[1],ungriddedUBound=[lm],_RC)
             end if
-            call ESMF_InfoGetFromHost(field,infoh,_RC)
-            call ESMF_InfoSet(infoh,key='LONG_NAME',value=trim(long_name),_RC)
-            call ESMF_InfoSet(infoh,key='UNITS',value=trim(units),_RC)
+            call ESMF_AttributeSet(field,name='LONG_NAME',value=trim(long_name),_RC)
+            call ESMF_AttributeSet(field,name='UNITS',value=trim(units),_RC)
+            if (lm == 0) then
+               call ESMF_AttributeSet(field,name='DIMS',value=MAPL_DimsHorzOnly,_RC)
+               call ESMF_AttributeSet(field,name='VLOCATION',value=MAPL_VLocationNone,_RC)
+            else if (lm > 0) then
+               call ESMF_AttributeSet(field,name='DIMS',value=MAPL_DimsHorzVert,_RC)
+               call ESMF_AttributeSet(field,name='VLOCATION',value=MAPL_VLocationCenter,_RC)
+            end if
             call MAPL_FieldBundleAdd(bundle,field,_RC)
             if (present(rc)) then
                RC=_SUCCESS
@@ -1164,94 +1100,232 @@ config = ESMF_ConfigCreate    ( rc=rc )
             end if
          end function get_level_info
 
+         function get_long_names(bundle,rc) result(long_names)
+            character(len=ESMF_MAXSTR), allocatable :: long_names(:)
+            type(ESMF_FieldBundle), intent(in) :: bundle
+            integer, optional, intent(out) :: rc
+
+            integer :: status
+            character(len=ESMF_MAXSTR), allocatable :: field_list(:)
+            type(ESMF_Field) :: field
+            integer :: i,num_fields
+
+            call ESMF_FieldBundleGet(bundle,fieldCount=num_fields,_RC)
+            allocate(field_list(num_fields))
+            allocate(long_names(num_fields))
+            call ESMF_FieldBundleGet(bundle,fieldNameList=field_list,_RC)
+            do i=1,num_fields
+               call ESMF_FieldBundleGet(bundle,field_list(i),field=field,_RC)
+               call ESMF_AttributeGet(field,name='LONG_NAME',value=long_names(i),_RC)
+            enddo
+            if (present(rc)) then
+               RC=_SUCCESS
+            end if
+         end function get_long_names
+
+         function get_units(bundle,rc) result(units)
+            character(len=ESMF_MAXSTR), allocatable :: units(:)
+            type(ESMF_FieldBundle), intent(in) :: bundle
+            integer, optional, intent(out) :: rc
+
+            integer :: status
+            character(len=ESMF_MAXSTR), allocatable :: field_list(:)
+            type(ESMF_Field) :: field
+            integer :: i,num_fields
+
+            call ESMF_FieldBundleGet(bundle,fieldCount=num_fields,_RC)
+            allocate(field_list(num_fields))
+            allocate(units(num_fields))
+            call ESMF_FieldBundleGet(bundle,fieldNameList=field_list,_RC)
+            do i=1,num_fields
+               call ESMF_FieldBundleGet(bundle,field_list(i),field=field,_RC)
+               call ESMF_AttributeGet(field,name='UNITS',value=units(i),_RC)
+            enddo
+            if (present(rc)) then
+               RC=_SUCCESS
+            end if
+         end function get_units
+
+         function local_esmf_timeset(yymmdd,hhmmss,rc) result(etime)
+            type(ESMF_Time) :: etime
+            integer, intent(in) :: yymmdd
+            integer, intent(in) :: hhmmss
+            integer, intent(out), optional :: rc
+ 
+            integer :: year,month,day,hour,minute,second,status
+            year = yymmdd/10000
+            month = mod(yymmdd/100,100)
+            day = mod(yymmdd,100)
+
+            hour = hhmmss/10000
+            minute = mod(hhmmss/100,100)
+            second = mod(hhmmss,100)
+
+            call ESMF_TimeSet(etime,yy=year,mm=month,dd=day,h=hour,m=minute,s=second,_RC)
+            if (present(rc)) then
+               rc=_SUCCESS
+            endif
+         end function local_esmf_timeset
+
          function defined ( q,undef )
          implicit none
          logical  defined
          real     q,undef
          defined = abs(q-undef).gt.0.1*abs(undef)
-         end
+         end function defined
 
-         subroutine zstar (q,qp,im,jm,undef,lattice)
-         use dynamics_lattice_module
-         implicit none
-         type ( dynamics_lattice_type ) lattice
-         integer im,jm,i,j
-         real  q(im,jm),undef,qz(jm)
-         real qp(im,jm)
-         logical defined
-         call zmean ( q,qz,im,jm,undef,lattice )
-         do j=1,jm
-              if( qz(j).eq. undef ) then
-                  qp(:,j) = undef
-              else
-                  do i=1,im
-                     if( defined( q(i,j),undef) ) then
-                                 qp(i,j) = q(i,j) - qz(j)
-                     else
-                                 qp(i,j) = undef
-                     endif
-                  enddo
-              endif
-         enddo
-         end
+         subroutine latlon_zstar (q,qp,undef,grid,rc)
+            real, intent(inout) :: q(:,:)
+            real, intent(out) :: qp(:,:)
+            real, intent(in) :: undef
+            type (ESMF_Grid), intent(inout) :: grid
+            integer, optional, intent(out) :: rc
+
+            integer :: local_dims(3)
+            integer im,jm,i,j,status
+            real, allocatable :: qz(:)
+            logical defined
+
+            call MAPL_GridGet(grid,localCellCountPerDim=local_dims,_RC)
+            im = local_dims(1)
+            jm = local_dims(2)
+            allocate(qz(jm))
+
+            call latlon_zmean ( q,qz,undef,grid )
+            do j=1,jm
+                 if( qz(j).eq. undef ) then
+                     qp(:,j) = undef
+                 else
+                     do i=1,im
+                        if( defined( q(i,j),undef) ) then
+                                    qp(i,j) = q(i,j) - qz(j)
+                        else
+                                    qp(i,j) = undef
+                        endif
+                     enddo
+                 endif
+            enddo
+            if (present(rc)) then
+               rc=_SUCCESS
+            endif
+         end subroutine latlon_zstar
+
+         subroutine latlon_zmean ( q,qz,undef,grid,rc)
+            real, intent(inout) ::  q(:,:)
+            real, intent(inout) ::  qz(:)
+            real, intent(in) :: undef
+            type(ESMF_Grid), intent(inout) :: grid
+            integer, optional, intent(out) :: rc
+
+            integer :: im,jm,im_global,jm_global,local_dims(3),global_dims(3),status,nx,ny
+            real, allocatable ::   qg(:,:)
+            real, allocatable :: buf(:,:)
+            real :: qsum
+            integer :: mpi_status(mpi_status_size)
+            integer, allocatable :: ims(:),jms(:)
+            integer j,n,peid,peid0,i1,j1,in,jn,mypet,i_start,i_end,isum
+            type(ESMF_VM) :: vm
+             
+            call ESMF_VMGetCurrent(vm,_RC)
+            call ESMF_VMGet(vm,localPet=mypet,_RC)
+            call MAPL_GridGet(grid,localCellCountPerDim=local_dims,globalCellCountPerDim=global_dims,_RC)
+            im = local_dims(1)
+            jm = local_dims(2)
+            im_global = global_dims(1)
+            jm_global = global_dims(2)
+            call get_esmf_grid_layout(grid,nx,ny,ims,jms,_RC)
+            call mapl_grid_interior(grid,i1,in,j1,jn)
+
+            qz = 0.0
+            allocate( qg(im_global,jm) )
+            peid0 = (mypet/nx)*ny
+            if (i1==1) then
+               i_start = 1
+               i_end = ims(1)
+               qg(i_start:i_end,:)=q
+               do n=1,nx-1
+                  allocate(buf(ims(n+1),jm))
+                  peid = mypet + n
+                  call mpi_recv(buf,ims(n+1)*jm,MPI_FLOAT,peid,peid,MPI_COMM_WORLD,mpi_status,status)
+                  _VERIFY(status)
+                  i_start=i_end+1
+                  i_end = i_start+ims(n)-1
+                  qg(i_start:i_end,:)=buf
+                  deallocate(buf)
+               enddo
+            else
+               call mpi_send(q,im*jm,MPI_FLOAT,peid0,mypet,MPI_COMM_WORLD,status)
+               _VERIFY(status)
+            end if
+
+           ! compute zonal mean
+            if (i1 == 1) then
+               do j=1,jm
+                  isum = count(qg(:,j) /= undef)
+                  qsum = sum(qg(:,j),mask=qg(:,j)/=undef)
+                  if (isum == 0) then
+                     qz(j)=undef
+                  else
+                     qz(j)=qsum/float(isum)
+                  end if
+               enddo
+
+               ! send mean back to other ranks
+               do n=1,nx-1
+                  peid = peid0+n
+                  call mpi_send(qz,jm,MPI_FLOAT,peid,peid0,MPI_COMM_WORLD,status)
+                  _VERIFY(status)
+               enddo
+            else
+               call mpi_recv(qz,jm,MPI_FLOAT,peid0,peid0,MPI_COMM_WORLD,mpi_status,status)
+               _VERIFY(status)
+            end if
+
+            if (present(rc)) then
+               rc=_SUCCESS
+            endif
+
+         end subroutine latlon_zmean
+
+         subroutine get_esmf_grid_layout(grid,nx,ny,ims_out,jms_out,rc)
+            type(ESMF_Grid), intent(inout) :: grid
+            integer, intent(out) :: nx
+            integer, intent(out) :: ny
+            integer, intent(inout), allocatable :: ims_out(:)
+            integer, intent(inout), allocatable :: jms_out(:)
+            integer, optional, intent(out) :: rc
+
+            type(ESMF_VM) :: vm
+            integer :: status
+            type(ESMF_DistGrid) :: dist_grid 
+            integer, allocatable :: minindex(:,:),maxindex(:,:)
+            integer :: dim_count, ndes
+            integer, pointer :: ims(:),jms(:)
+        
+            call ESMF_VMGetCurrent(vm,_RC)
+            call ESMF_VMGet(vm,petCount=ndes,_RC)
+            call ESMF_GridGet(grid,distgrid=dist_grid,dimCOunt=dim_count,_RC)
+            allocate(minindex(dim_count,ndes),maxindex(dim_count,ndes))
+            call MAPL_DistGridGet(dist_grid,minIndex=minindex,maxIndex=maxindex,_RC)
+            call MAPL_GetImsJms(minindex(1,:),maxindex(1,:),minindex(2,:),maxindex(2,:),ims,jms,_RC)
+            nx = size(ims)
+            ny = size(jms)
+            allocate(ims_out(nx),jms_out(ny))
+            ims_out = ims
+            jms_out = jms
+
+            if (present(rc)) then
+               rc=_SUCCESS
+            endif
+
+         end subroutine get_esmf_grid_layout
 
       end program
 
-      subroutine mpi_gfio_getvar ( id,name,nymd,nhms,im,jm,lbeg,lm,q,lattice )
-      use dynamics_lattice_module
-      implicit none
-      type ( dynamics_lattice_type ) lattice
-      integer L,id,nymd,nhms,im,jm,img,jmg,lbeg,lm
-      real   q(im,jm,lm)
-      real,allocatable :: glo(:,:,:)
-      character(*) name
-      integer rc
-      img = lattice%imglobal
-      jmg = lattice%jmglobal
-      allocate ( glo(img,jmg,lm) )
-      call timebeg ('  GetVar')
-      if( lattice%myid.eq.0 ) then
-          call gfio_getvar ( id,trim(name),nymd,nhms,img,jmg,lbeg,lm,glo,rc )
-      endif
-      call timeend ('  GetVar')
-      call timebeg ('   Scatter')
-      do L=1,lm
-      call scatter_2d ( glo(1,1,L),q(1,1,L),lattice )
-      enddo
-      call timeend ('   Scatter')
-      deallocate ( glo )
-      return
-      end
-
-      subroutine mpi_gfio_putvar ( id,name,nymd,nhms,im,jm,lbeg,lm,q,lattice )
-      use dynamics_lattice_module
-      implicit none
-      type ( dynamics_lattice_type ) lattice
-      integer L,id,nymd,nhms,im,jm,img,jmg,lbeg,lm
-      real   q(im,jm,lm)
-      real,allocatable :: glo(:,:,:)
-      character(*) name
-      integer rc
-      img = lattice%imglobal
-      jmg = lattice%jmglobal
-      allocate ( glo(img,jmg,lm) )
-      call timebeg ('   Gather')
-      do L=1,lm
-      call gather_2d ( glo(1,1,L),q(1,1,L),lattice )
-      enddo
-      call timeend ('   Gather')
-      call timebeg ('  PutVar')
-      if( lattice%myid.eq.0 ) then
-          call gfio_putvar ( id,trim(name),nymd,nhms,img,jmg,lbeg,lm,glo,rc )
-      endif
-      call timeend ('  PutVar')
-      deallocate ( glo )
-      return
-      end
-
       subroutine check_quad ( quad,vname,nvars,aliases,nalias,qloc )
+      use esmf
       implicit none
-      character*256  quad(2), aliases(2,nalias), vname(nvars)
+      character(len=ESMF_MAXSTR)  quad(2), aliases(2,nalias), vname(nvars)
       integer  nvars, nalias, qloc(2)
       integer  m,n
 
