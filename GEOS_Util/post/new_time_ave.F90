@@ -316,6 +316,9 @@ config = ESMF_ConfigCreate    ( rc=rc )
       grid = grid_manager%make_grid(factory)
       call ESMF_AttributeGet(grid,'GridType',grid_type,_RC)
       allow_zonal_means = trim(grid_type) == 'LatLon'
+      if (trim(grid_type) == "Cubed-Sphere") then
+         _ASSERT(mod(npes,6)==0,"If input files are Cubed-Sphere, must be run on multiple of 6 proccessors")
+      end if
       call MAPL_GridGet(grid,localCellCountPerDim=local_dims,globalCellCountPerDim=global_dims,_RC)
       im = local_dims(1)
       jm = local_dims(2)
@@ -643,6 +646,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
                    else
                             kbeg = 1
                             kend = kmvar2(nv)
+ 
                             call ESMF_FieldGet(field,0,farrayPtr=ptr3d,_RC)
                             dum(:,:,nloc(nv):nloc(nv)+kmvar2(nv)-1) = ptr3d
                    endif
