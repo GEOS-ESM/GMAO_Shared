@@ -57,7 +57,7 @@
       integer n,m,nargs,iargc,L,nfiles,nv,km,mvars,mv,ndvars
 
       real     plev,qming,qmaxg
-      real     undef
+      real     previous_undef,undef
       real,    allocatable ::    lev(:)
       integer, allocatable ::  kmvar(:)  ,  kmvar2(:)
       integer, allocatable :: yymmdd(:)
@@ -133,7 +133,7 @@
          npex = npex-1
          npey = nint ( float(npes)/float(npex) )
       enddo
-      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_MULTI,logAppendFlag=.false.,mpiCommunicator=MPI_COMM_WORLD, _RC)
+      call ESMF_Initialize(logKindFlag=ESMF_LOGKIND_NONE,mpiCommunicator=MPI_COMM_WORLD, _RC)
       call MAPL_Initialize(_RC)
       call io_server%initialize(MPI_COMM_WORLD,_RC)
       root = myid.eq.0
@@ -350,7 +350,13 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       allocate ( lev(lm)         )
 
-      undef = MAPL_UNDEF !bmaa
+      previous_undef = file_metadata%var_get_missing_value(trim(vname(1)),_RC)
+      do i=2,size(vname)
+         undef = file_metadata%var_get_missing_value(trim(vname(i)),_RC)
+         _ASSERT(undef == previous_undef,"conflicting undefined values in your variables")
+         previous_undef = undef
+      enddo
+         
 
 ! Set NDT for Strict Time Testing
 ! -------------------------------
