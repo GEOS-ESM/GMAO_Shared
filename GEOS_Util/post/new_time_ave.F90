@@ -116,6 +116,7 @@
       real(ESMF_KIND_R4), pointer :: ptr2d(:,:),ptr3d(:,:,:)
       character(len=ESMF_MAXSTR) :: grid_type
       logical :: allow_zonal_means
+      character(len=ESMF_MAXPATHLEN) :: arg_str
 
 ! **********************************************************************
 ! ****                       Initialization                         ****
@@ -145,66 +146,115 @@
       if( nargs.eq.0 ) then
           call usage(root)
       else
-           lquad     = .TRUE.
-           ldquad    = .FALSE.
-           diurnal   = .FALSE.
-          mdiurnal   = .FALSE.
-          ignore_nan = .FALSE.
-          allocate ( arg(nargs) )
-          do n=1,nargs
-          call getarg(n,arg(n))
-          enddo
-          do n=1,nargs
-             if( trim(arg(n)).eq.'-template'   )  template = arg(n+1)
-             if( trim(arg(n)).eq.'-tag'        )    output = arg(n+1)
-             if( trim(arg(n)).eq.'-rc'         )    rcfile = arg(n+1)
-             if( trim(arg(n)).eq.'-begdate'    )      read ( arg(n+1),* ) begdate
-             if( trim(arg(n)).eq.'-begtime'    )      read ( arg(n+1),* ) begtime
-             if( trim(arg(n)).eq.'-enddate'    )      read ( arg(n+1),* ) enddate
-             if( trim(arg(n)).eq.'-endtime'    )      read ( arg(n+1),* ) endtime
-             if( trim(arg(n)).eq.'-ntmin'      )      read ( arg(n+1),* ) ntmin
-             if( trim(arg(n)).eq.'-ntod'       )      read ( arg(n+1),* ) ntod
-             if( trim(arg(n)).eq.'-ndt'        )      read ( arg(n+1),* ) ndt
-             if( trim(arg(n)).eq.'-strict'     )      read ( arg(n+1),* ) strict
-             if( trim(arg(n)).eq.'-ogrid'      )      read ( arg(n+1),*) output_grid_name
-             if( trim(arg(n)).eq.'-noquad'     )      lquad = .FALSE.
-             if( trim(arg(n)).eq.'-ignore_nan' ) ignore_nan = .TRUE.
-
-             if( trim(arg(n)).eq.'-dv'.or. trim(arg(n)).eq.'-mdv') ldquad = .true.
-
-             if( trim(arg(n)).eq.'-d' .or. trim(arg(n)).eq.'-dv' ) then
-                 diurnal = .TRUE. 
-                 if( n+1.le.nargs ) then
-                     read(arg(n+1),fmt='(a1)') char
-                     if( char.ne.'-' ) doutput = arg(n+1)
-                 endif
-             endif
-
-             if( trim(arg(n)).eq.'-md' .or. trim(arg(n)).eq.'-mdv' ) then
-                 mdiurnal = .TRUE. 
-                 if( n+1.le.nargs ) then
-                     read(arg(n+1),fmt='(a1)') char
-                     if( char.ne.'-' ) doutput = arg(n+1)
-                 endif
-             endif
-
-             if( trim(arg(n)).eq.'-eta'  .or. &
-                 trim(arg(n)).eq.'-hdf' ) then  ! Backward compatable for old interface
-                 nfiles = 1
-                 read(arg(n+nfiles),fmt='(a1)') char
-                 do while (char.ne.'-' .and. n+nfiles.ne.nargs )
-                 nfiles = nfiles+1
-                 read(arg(n+nfiles),fmt='(a1)') char
-                 enddo
-                 if( char.eq.'-' ) nfiles = nfiles-1
-                 allocate ( fname(nfiles) )
-                 do m=1,nfiles
-                 fname(m) = arg(n+m)
-                 enddo
-             endif
-
-           enddo
-      endif
+         lquad     = .TRUE.
+         ldquad    = .FALSE.
+         diurnal   = .FALSE.
+         mdiurnal   = .FALSE.
+         ignore_nan = .FALSE.
+         allocate ( arg(nargs) )
+         do n=1,nargs
+            call getarg(n,arg(n))
+         enddo
+         do n=1,nargs
+            call get_command_argument(n,arg_str)
+            select case(trim(arg_str)) 
+            case('-template')
+               call get_command_argument(n+1,template)
+            case('-tag')
+               call get_command_argument(n+1,output)
+            case('-rc')
+               call get_command_argument(n+1,rcfile)
+            case('-begdate')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)begdate
+            case('-begtime')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)begtime
+            case('-enddate')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)enddate
+            case('-endtime')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)endtime
+            case('-ntmin')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)ntmin
+            case('-ntod')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)ntod
+            case('-ndt')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)ndt
+            case('-strict')
+               call get_command_argument(n+1,arg_str)
+               read(arg_str,*)strict
+            case('-ogrid')
+               call get_command_argument(n+1,output_grid_name)
+            case('-noquad')
+               lquad = .FALSE.
+            case('-ignore_nan')
+               ignore_nan = .TRUE.
+            case('-d')
+               diurnal = .true.
+               if (n+1 .le. nargs) then
+                  call get_command_argument(n+1,arg_str)
+                  read(arg_str,fmt='(a1)') char
+                  if (char.ne.'-') doutput=arg_str
+               end if
+            case('-md')
+               mdiurnal = .true.
+               if (n+1 .le. nargs) then
+                  call get_command_argument(n+1,arg_str)
+                  read(arg_str,fmt='(a1)') char
+                  if (char.ne.'-') doutput=arg_str
+               end if
+            case('-dv')
+               ldquad = .true.
+               diurnal = .true.
+               if (n+1 .le. nargs) then
+                  call get_command_argument(n+1,arg_str)
+                  read(arg_str,fmt='(a1)') char
+                  if (char.ne.'-') doutput=arg_str
+               end if
+            case('-mdv')
+               ldquad = .true.
+               mdiurnal = .true.
+               if (n+1 .le. nargs) then
+                  call get_command_argument(n+1,arg_str)
+                  read(arg_str,fmt='(a1)') char
+                  if (char.ne.'-') doutput=arg_str
+               end if
+            case('-eta')
+               nfiles = 1
+               call get_command_argument(n+nfiles,arg_str)
+               read(arg_str,fmt='(a1)') char
+               do while (char .ne. '-' .and. n+nfiles.ne.nargs)
+                  nfiles = nfiles + 1
+                  call get_command_argument(n+nfiles,arg_str)
+                  read(arg_str,fmt='(a1)') char
+               enddo
+               if (char.eq.'-') nfiles = nfiles-1
+               allocate(fname(nfiles))
+               do m=1,nfiles
+                  call get_command_argument(n+m,fname(m))
+               enddo
+            case('-hdf')
+               nfiles = 1
+               call get_command_argument(n+nfiles,arg_str)
+               read(arg_str,fmt='(a1)') char
+               do while (char .ne. '-' .and. n+nfiles.ne.nargs)
+                  nfiles = nfiles + 1
+                  call get_command_argument(n+nfiles,arg_str)
+                  read(arg_str,fmt='(a1)') char
+               enddo
+               if (char.eq.'-') nfiles = nfiles-1
+               allocate(fname(nfiles))
+               do m=1,nfiles
+                  call get_command_argument(n+m,fname(m))
+               enddo
+            end select
+         enddo
+      end if
 
       if( (diurnal.or.mdiurnal) .and. trim(doutput).eq.'NULL' ) then
            doutput = trim(output) // "_diurnal"
