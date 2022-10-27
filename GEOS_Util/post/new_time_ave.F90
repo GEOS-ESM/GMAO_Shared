@@ -5,8 +5,10 @@
 
       use ESMF
       use MAPL
+      use MAPL_FileMetadataUtilsMod
       use gFTL_StringVector
       use MPI
+      use, intrinsic :: iso_fortran_env, only: int32, int64, int16, real32, real64
 
       implicit none
 
@@ -109,7 +111,7 @@
       type(ESMF_TIme) :: etime
       type(ESMF_Clock) :: clock
       type(ESMF_TimeInterval) :: time_interval
-      type(ESMF_FieldBundle) :: primary_bundle,final_bundle
+      type(ESMF_FieldBundle) :: primary_bundle,final_bundle,diurnal_bundle
       type(ESMF_Field) :: field
       type(ServerManager) :: io_server
       type(FieldBundleWriter) :: standard_writer, diurnal_writer
@@ -117,6 +119,9 @@
       character(len=ESMF_MAXSTR) :: grid_type
       logical :: allow_zonal_means
       character(len=ESMF_MAXPATHLEN) :: arg_str
+      character(len=:), allocatable :: lev_name
+      character(len=ESMF_MAXSTR) :: lev_units
+      integer :: n_times
 
 ! **********************************************************************
 ! ****                       Initialization                         ****
@@ -384,6 +389,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       final_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
       call ESMF_FieldBundleSet(final_bundle,grid=grid,_RC)
+      diurnal_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
+      call ESMF_FieldBundleSet(diurnal_bundle,grid=grid,_RC)
       call copy_bundle_to_bundle(primary_bundle,final_bundle,_RC)
 
       if (size(time_series)>1) then
@@ -395,7 +402,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       nvars2 = nvars
 
-      allocate ( lev(lm)         )
+      lev_name = file_metadata%get_level_name(_RC)
+      call file_metadata%get_coordinate_info(lev_name,coords=lev,coordUnits=lev_units,_RC)
 
       previous_undef = file_metadata%var_get_missing_value(trim(vname(1)),_RC)
       do i=2,size(vname)
@@ -557,7 +565,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
          endif
       enddo
 
-      deallocate ( lev )
+      !deallocate ( lev )
       deallocate ( yymmdd )
       deallocate ( hhmmss )
       deallocate (  vname )
@@ -926,20 +934,34 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
           if( ldquad ) then
               ndvars = mvars  ! Include Quadratics in Diurnal Files
+              if (k==1) then
+                 call copy_bundle_to_bundle(final_bundle,diurnal_bundle,_RC)
+              end if
           else
               ndvars = nvars2 ! Only Include Primary Fields in Diurnal Files (Default)
+              if (k==1) then
+                 do n=1,nvars
+                    call ESMF_FieldBundleGet(final_bundle,trim(vname2(n)),field=field,_RC)
+                    call MAPL_FieldBundleAdd(diurnal_bundle,field,_RC)
+                 enddo
+              endif
           endif
       endif
 
 ! Primary Fields
 ! --------------
       do n=1,nvars2
+         call ESMF_FieldBundleGet(diurnal_bundle,trim(vname2(n)),field=field,_RC)
          if( kmvar2(n).eq.0 ) then
                   kbeg = 0
                   kend = 1
+                  call ESMF_FieldGet(field,0,farrayPtr=ptr2d,_RC)
+                  ptr2d = q(:,:,nloc(n),k)
          else
                   kbeg = 1
                   kend = kmvar2(n)
+                  call ESMF_FieldGet(field,0,farrayPtr=ptr3d,_RC)
+                  ptr3d = q(:,:,nloc(n):nloc(n)+kend-1,k)
          endif
          dum(:,:,1:kend) = q(:,:,nloc(n):nloc(n)+kend-1,k)
       enddo
@@ -951,6 +973,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
       do nv=1,nquad
          if( qloc(1,nv)*qloc(2,nv).ne.0 ) then
              mv=mv+1
+             call ESMF_FieldBundleGet(diurnal_bundle,trim(vname2(mv)),field=field,_RC)
              if( kmvar2(qloc(1,nv)).eq.0 ) then
                       kbeg = 0
                       kend = 1
@@ -970,6 +993,17 @@ config = ESMF_ConfigCreate    ( rc=rc )
              else
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,k)
              endif
+             write(*,*)'bmaa count ',count(dum(:,:,1:kend)==undef)
+             write(*,*)'bmaa count ',count(dum(:,:,1)==undef)
+             write(*,*)'bmaa count ',count(dum(:,:,2)==undef)
+             if( kmvar2(qloc(1,nv)).eq.0 ) then
+                      call ESMF_FieldGet(field,0,farrayPtr=ptr2d,_RC)
+                      ptr2d = dum(:,:,1)
+             else
+                      kend = kmvar2(qloc(1,nv))
+                      call ESMF_FieldGet(field,0,farrayPtr=ptr3d,_RC)
+                      ptr3d = dum(:,:,1:kend)
+             endif
          endif
       enddo
       endif
@@ -977,8 +1011,19 @@ config = ESMF_ConfigCreate    ( rc=rc )
       
       etime = local_esmf_timeset(nymd0,nhms0,_RC) 
       call ESMF_ClockSet(clock,currTime=etime, _RC)
-      call diurnal_writer%create_from_bundle(final_bundle,clock,n_steps=1,time_interval=timeinc,_RC)
-      call diurnal_writer%start_new_file(trim(hdfile),_RC)
+      if (k==1 .or. mdiurnal) then
+         write(*,*)"bmaa creating new file: ",k,trim(hdfile)
+         write(*,*)"bmaa creating new writer"
+         if (mdiurnal) then
+            n_times = 1
+         else
+            n_times = ntods
+         end if
+         if (k==1) then
+            call diurnal_writer%create_from_bundle(diurnal_bundle,clock,n_steps=n_times,time_interval=timeinc,_RC)
+         end if
+         call diurnal_writer%start_new_file(trim(hdfile),_RC)
+      end if
       call diurnal_writer%write_to_file(_RC)
       if( root .and. mdiurnal ) then
           print *, 'Created: ',trim(hdfile)
@@ -1004,7 +1049,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
          if( kmvar2(n).eq.0 ) then
                   plev = 0
          else
-                  plev = L!lev(L) !bmaa
+                  plev = lev(L) 
          endif
 
          call mpi_reduce( qmin(nloc(n)+L-1),qming,1,mpi_real,mpi_min,0,comm,ierror )
@@ -1108,7 +1153,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
             num_times = file_metadata%get_dimension('time',_RC)
             call file_metadata%get_time_info(timeVector=time_series,_RC)
             if (num_times == 1) then
-               time_interval = 240000
+               time_interval = file_metadata%get_var_attr_int32('time','time_increment',_RC)
             else if (num_times > 1) then
                esmf_time_interval = time_series(2)-time_series(1)
                call ESMF_TimeIntervalGet(esmf_time_interval,h=hour,m=minute,s=second,_RC)
@@ -1227,7 +1272,9 @@ config = ESMF_ConfigCreate    ( rc=rc )
          implicit none
          logical  defined
          real     q,undef
-         defined = abs(q-undef).gt.0.1*abs(undef)
+         defined = abs(q-undef).gt.0.1*abs(undef) !bmaa orig
+         !defined = abs(q-undef).gt.tiny(1.0)
+         !defined = q /= undef
          end function defined
 
          subroutine latlon_zstar (q,qp,undef,grid,rc)
@@ -1240,7 +1287,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
             integer :: local_dims(3)
             integer im,jm,i,j,status
             real, allocatable :: qz(:)
-            logical defined
 
             call MAPL_GridGet(grid,localCellCountPerDim=local_dims,_RC)
             im = local_dims(1)
