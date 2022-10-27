@@ -104,7 +104,7 @@
       type(NetCDF4_FileFormatter) :: file_handle
       integer :: status
       class(AbstractGridfactory), allocatable :: factory
-      type(ESMF_Grid) :: grid
+      type(ESMF_Grid) :: output_grid
       character(len=:), allocatable :: output_grid_name
       integer :: global_dims(3), local_dims(3)
       type(ESMF_Time), allocatable :: time_series(:)
@@ -122,6 +122,8 @@
       character(len=:), allocatable :: lev_name
       character(len=ESMF_MAXSTR) :: lev_units
       integer :: n_times
+      type(verticalData) :: vertical_data
+      logical :: file_has_lev
 
 ! **********************************************************************
 ! ****                       Initialization                         ****
@@ -362,13 +364,17 @@ config = ESMF_ConfigCreate    ( rc=rc )
       call file_handle%close(_RC)
 
       allocate(factory, source=grid_manager%make_factory(trim(name)))
-      grid = grid_manager%make_grid(factory)
-      call ESMF_AttributeGet(grid,'GridType',grid_type,_RC)
+      output_grid = grid_manager%make_grid(factory)
+      file_has_lev = has_level(output_grid,_RC)
+      if (file_has_lev) then
+          call get_file_levels(trim(name),vertical_data,_RC)
+      end if
+      call ESMF_AttributeGet(output_grid,'GridType',grid_type,_RC)
       allow_zonal_means = trim(grid_type) == 'LatLon'
       if (trim(grid_type) == "Cubed-Sphere") then
          _ASSERT(mod(npes,6)==0,"If input files are Cubed-Sphere, must be run on multiple of 6 proccessors")
       end if
-      call MAPL_GridGet(grid,localCellCountPerDim=local_dims,globalCellCountPerDim=global_dims,_RC)
+      call MAPL_GridGet(output_grid,localCellCountPerDim=local_dims,globalCellCountPerDim=global_dims,_RC)
       im = local_dims(1)
       jm = local_dims(2)
       lm = local_dims(3)
@@ -378,7 +384,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
       call file_metadata%create(basic_metadata,trim(name))
       call get_file_times(file_metadata,ntime,time_series,timinc,yymmdd,hhmmss,_RC)
       primary_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
-      call ESMF_FieldBundleSet(primary_bundle,grid=grid,_RC)
+      call ESMF_FieldBundleSet(primary_bundle,grid=output_grid,_RC)
       call MAPL_Read_Bundle(primary_bundle,trim(name),time=time_series(1),_RC)
       call ESMF_FieldBundleGet(primary_bundle,fieldCount=nvars,_RC)
       allocate(vname(nvars))
@@ -388,9 +394,9 @@ config = ESMF_ConfigCreate    ( rc=rc )
       vunits = get_units(primary_bundle,_RC) 
 
       final_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
-      call ESMF_FieldBundleSet(final_bundle,grid=grid,_RC)
+      call ESMF_FieldBundleSet(final_bundle,grid=output_grid,_RC)
       diurnal_bundle = ESMF_FieldBundleCreate(name="first_file",_RC)
-      call ESMF_FieldBundleSet(diurnal_bundle,grid=grid,_RC)
+      call ESMF_FieldBundleSet(diurnal_bundle,grid=output_grid,_RC)
       call copy_bundle_to_bundle(primary_bundle,final_bundle,_RC)
 
       if (size(time_series)>1) then
@@ -558,7 +564,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
              vunits2(mv) = trim(vunits(qloc(1,nv))) // " " // trim(vunits(qloc(2,nv)))
               kmvar2(mv) =  kmvar(qloc(1,nv))
 
-           call add_new_field_to_bundle(final_bundle,grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
+           call add_new_field_to_bundle(final_bundle,output_grid,kmvar(qloc(1,nv)),vname2(mv),vtitle2(mv),vunits2(mv),_RC)
 
          if( root ) write(6,7001) mv,trim(vname2(mv)),nloc(mv),trim(vtitle2(mv)),max(1,kmvar(qloc(1,nv))),qloc(1,nv),qloc(2,nv)
  7001    format(1x,'   Quad Field:  ',i4,'  Name: ',a12,'  at location: ',i4,3x,a50,2x,i2,3x,i3,3x,i3)
@@ -743,8 +749,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
                      mv=mv+1
                      do L=1,max(1,kmvar2(qloc(1,nv)))
                         if( lzstar(nv) ) then
-                            call latlon_zstar (dum(:,:,nloc(qloc(1,nv))+L-1),dumz1,undef,grid,_RC)
-                            call latlon_zstar (dum(:,:,nloc(qloc(2,nv))+L-1),dumz2,undef,grid,_RC)
+                            call latlon_zstar (dum(:,:,nloc(qloc(1,nv))+L-1),dumz1,undef,output_grid,_RC)
+                            call latlon_zstar (dum(:,:,nloc(qloc(2,nv))+L-1),dumz2,undef,output_grid,_RC)
                             do j=1,jm
                             do i=1,im
                             if( defined(dumz1(i,j),undef)  .and. &
@@ -909,7 +915,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
       call timeend(' Write_AVE')
       etime = local_esmf_timeset(nymd0,nhms0,_RC) 
       call ESMF_ClockSet(clock,currTime=etime, _RC)
-      call standard_writer%create_from_bundle(final_bundle,clock,n_steps=1,time_interval=timeinc,_RC)
+      call standard_writer%create_from_bundle(final_bundle,clock,n_steps=1,time_interval=timeinc,vertical_data=vertical_data,_RC)
       call standard_writer%start_new_file(trim(hdfile),_RC)
       call standard_writer%write_to_file(_RC)
 
@@ -1020,7 +1026,7 @@ config = ESMF_ConfigCreate    ( rc=rc )
             n_times = ntods
          end if
          if (k==1) then
-            call diurnal_writer%create_from_bundle(diurnal_bundle,clock,n_steps=n_times,time_interval=timeinc,_RC)
+            call diurnal_writer%create_from_bundle(diurnal_bundle,clock,n_steps=n_times,time_interval=timeinc,vertical_data=vertical_data)
          end if
          call diurnal_writer%start_new_file(trim(hdfile),_RC)
       end if
@@ -1083,6 +1089,51 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       contains
 
+         subroutine get_file_levels(filename,vertical_data,rc)
+            character(len=*), intent(in) :: filename
+            type(VerticalData), intent(inout) :: vertical_data
+            integer, intent(out), optional :: rc
+
+            integer :: status
+            type(NetCDF4_fileFormatter) :: formatter
+            type(FileMetadata) :: basic_metadata
+            type(FileMetadataUtils) :: metadata
+            character(len=:), allocatable :: lev_name
+            character(len=ESMF_MAXSTR) :: long_name
+            character(len=ESMF_MAXSTR) :: standard_name
+            character(len=ESMF_MAXSTR) :: vcoord
+            character(len=ESMF_MAXSTR) :: lev_units
+            real, allocatable, target :: levs(:)
+            real, pointer :: plevs(:)
+
+            call formatter%open(trim(filename),pFIO_Read,_RC)
+            basic_metadata=formatter%read(_RC)
+            call metadata%create(basic_metadata,trim(filename))
+            lev_name = metadata%get_level_name(_RC)
+            call metadata%get_coordinate_info(lev_name,coords=levs,coordUnits=lev_units,long_name=long_name,&
+                 standard_name=standard_name,coordinate_attr=vcoord,_RC)
+            plevs => levs
+            vertical_data = VerticalData(levels=plevs,vunit=lev_units,vcoord=vcoord,standard_name=standard_name,long_name=long_name, &
+            force_no_regrid=.true.,_RC)
+            nullify(plevs)
+
+            if (present(rc)) then
+               rc=_SUCCESS
+            end if
+
+         end subroutine get_file_levels
+
+         function has_level(grid,rc) result(grid_has_level)
+            logical :: grid_has_level
+            type(ESMF_Grid), intent(in) :: grid
+            integer, intent(out), optional :: rc
+            integer :: status, global_dims(3)
+            call MAPL_GridGet(grid,globalCellCountPerDim=global_dims,_RC)
+            grid_has_level = (global_dims(3)/=0)
+            if (present(rc)) then
+               RC=_SUCCESS
+            end if
+         end function
          
          subroutine copy_bundle_to_bundle(input_bundle,output_bundle,rc)
             type(ESMF_FieldBundle), intent(inout) :: input_bundle
