@@ -1378,7 +1378,8 @@ config = ESMF_ConfigCreate    ( rc=rc )
          implicit none
          logical  defined
          real     q,undef
-         defined = abs(q-undef).gt.0.1*abs(undef) !bmaa orig
+         defined = abs(q-undef).gt.0.1*abs(undef) 
+         ! these seem like better ways but for zero-diff sake, do above from time_ave.F
          !defined = abs(q-undef).gt.tiny(1.0)
          !defined = q /= undef
          end function defined
