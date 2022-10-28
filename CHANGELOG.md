@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Add a dependency on GMAO_perllib in GMAO_etc
+
 ### Removed
 
 ## [1.6.1] - 2022-09-22
