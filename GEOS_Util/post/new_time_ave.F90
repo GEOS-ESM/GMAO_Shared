@@ -104,7 +104,7 @@
       type(NetCDF4_FileFormatter) :: file_handle
       integer :: status
       class(AbstractGridfactory), allocatable :: factory
-      type(ESMF_Grid) :: output_grid
+      type(ESMF_Grid) :: output_grid,input_grid
       character(len=:), allocatable :: output_grid_name
       integer :: global_dims(3), local_dims(3)
       type(ESMF_Time), allocatable :: time_series(:)
@@ -196,7 +196,8 @@
                call get_command_argument(n+1,arg_str)
                read(arg_str,*)strict
             case('-ogrid')
-               call get_command_argument(n+1,output_grid_name)
+               call get_command_argument(n+1,arg_str)
+               output_grid_name = trim(arg_str)
             case('-noquad')
                lquad = .FALSE.
             case('-ignore_nan')
@@ -364,10 +365,19 @@ config = ESMF_ConfigCreate    ( rc=rc )
       call file_handle%close(_RC)
 
       allocate(factory, source=grid_manager%make_factory(trim(name)))
-      output_grid = grid_manager%make_grid(factory)
-      file_has_lev = has_level(output_grid,_RC)
+      input_grid = grid_manager%make_grid(factory)
+      file_has_lev = has_level(input_grid,_RC)
+      call MAPL_GridGet(input_grid,globalCellCountPerDim=global_dims,_RC)
+      lm = global_dims(3)
+
       if (file_has_lev) then
           call get_file_levels(trim(name),vertical_data,_RC)
+      end if
+
+      if (allocated(output_grid_name)) then
+         output_grid = create_output_grid(output_grid_name,lm,_RC)
+      else
+         output_grid = input_grid
       end if
       call ESMF_AttributeGet(output_grid,'GridType',grid_type,_RC)
       allow_zonal_means = trim(grid_type) == 'LatLon'
@@ -999,9 +1009,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
              else
                       dum(:,:,1:kend) = q(:,:,nloc(mv):nloc(mv)+kend-1,k)
              endif
-             write(*,*)'bmaa count ',count(dum(:,:,1:kend)==undef)
-             write(*,*)'bmaa count ',count(dum(:,:,1)==undef)
-             write(*,*)'bmaa count ',count(dum(:,:,2)==undef)
              if( kmvar2(qloc(1,nv)).eq.0 ) then
                       call ESMF_FieldGet(field,0,farrayPtr=ptr2d,_RC)
                       ptr2d = dum(:,:,1)
@@ -1018,8 +1025,6 @@ config = ESMF_ConfigCreate    ( rc=rc )
       etime = local_esmf_timeset(nymd0,nhms0,_RC) 
       call ESMF_ClockSet(clock,currTime=etime, _RC)
       if (k==1 .or. mdiurnal) then
-         write(*,*)"bmaa creating new file: ",k,trim(hdfile)
-         write(*,*)"bmaa creating new writer"
          if (mdiurnal) then
             n_times = 1
          else
@@ -1089,6 +1094,56 @@ config = ESMF_ConfigCreate    ( rc=rc )
 
       contains
 
+         function create_output_grid(grid_name,lm,rc) result(new_grid)
+            type(ESMF_Grid) :: new_grid
+            character(len=*), intent(inout) :: grid_name
+            integer, intent(in) :: lm
+            integer, optional, intent(out) :: rc
+
+            type(ESMF_Config) :: cf
+            integer :: nn,im_world,jm_world,nx, ny
+            character(len=5) :: imsz,jmsz
+            character(len=2) :: pole,dateline
+  
+            nn   = len_trim(grid_name)
+            imsz = grid_name(3:index(grid_name,'x')-1)
+            jmsz = grid_name(index(grid_name,'x')+1:nn-3)
+            pole = grid_name(1:2)
+            dateline = grid_name(nn-1:nn)
+            read(IMSZ,*) im_world
+            read(JMSZ,*) jm_world
+
+            cf = MAPL_ConfigCreate(_RC)
+            call MAPL_ConfigSetAttribute(cf,value=lm, label=trim(grid_name)//".LM:",_RC)
+            if (dateline=='CF') then
+               call MAPL_MakeDecomposition(nx,ny,reduceFactor=6,_RC)
+               call MAPL_ConfigSetAttribute(cf,value=NX, label=trim(grid_name)//".NX:",_RC)
+               call MAPL_ConfigSetAttribute(cf,value="Cubed-Sphere", label=trim(grid_name)//".GRID_TYPE:",_RC)
+               call MAPL_ConfigSetAttribute(cf,value=6, label=trim(grid_name)//".NF:",_RC)
+               call MAPL_ConfigSetAttribute(cf,value=im_world,label=trim(grid_name)//".IM_WORLD:",_RC)
+               call MAPL_ConfigSetAttribute(cf,value=ny, label=trim(grid_name)//".NY:",_RC)
+           else if (dateline=='TM') then
+               _FAIL("Tripolar not yet implemented for outpout")
+           else
+              call MAPL_MakeDecomposition(nx,ny,_RC)
+              call MAPL_ConfigSetAttribute(cf,value=NX, label=trim(grid_name)//".NX:",_RC)
+              call MAPL_ConfigSetAttribute(cf,value="LatLon", label=trim(grid_name)//".GRID_TYPE:",_RC)
+              call MAPL_ConfigSetAttribute(cf,value=im_world,label=trim(grid_name)//".IM_WORLD:",_RC)
+              call MAPL_ConfigSetAttribute(cf,value=jm_world,label=trim(grid_name)//".JM_WORLD:",_RC)
+              call MAPL_ConfigSetAttribute(cf,value=ny, label=trim(grid_name)//".NY:",_RC)
+              call MAPL_ConfigSetAttribute(cf,value=pole, label=trim(grid_name)//".POLE:",_RC)
+              call MAPL_ConfigSetAttribute(cf,value=dateline, label=trim(grid_name)//".DATELINE:",_RC)
+              if (pole=='XY' .and. dateline=='XY') then
+                 _FAIL("regional lat-lon output not supported")
+              end if
+            end if
+
+            new_grid = grid_manager%make_grid(cf,prefix=trim(grid_name)//".",_RC)
+            if (present(rc)) then
+               rc=_SUCCESS
+            end if
+         end function create_output_grid
+        
          subroutine get_file_levels(filename,vertical_data,rc)
             character(len=*), intent(in) :: filename
             type(VerticalData), intent(inout) :: vertical_data
