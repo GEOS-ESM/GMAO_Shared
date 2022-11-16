@@ -59,6 +59,7 @@
       258      MODIS cloud top WV CTW             U,V
       259      MODIS deep layer WV CTW            U,V
       260      VIIRS IR CTW                       U,V
+      275      LOON Balloon Winds                 U,V
       280      Surface marine with stn pres       U,V
       281      Surface land/METAR with stn pres   U,V
       282      Atlas buoy                         U,V
@@ -76,6 +77,7 @@
       294      Sfc marine missing SLP,stnP        U,V
       295      Sfc mesonet missing ps, altim.     U,V
       299      Drifting buoy                      U,V
+      311      MLS Temperature                    T
 
 !
 !  GPS KX are assigned by satellite ID

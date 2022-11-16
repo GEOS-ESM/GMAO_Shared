@@ -252,7 +252,7 @@
          if (ios==0) then
             print*, myname, ': Trying satype as one of ozone limb types ...'
 	    select case(satype)
-	    case('o3lev','mls','mls20','mls22','mls30','mls55','ompslp_g','ompslpuv','ompslpvis')
+	    case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
 	    case default
                print *, myname, 
      &              ': Unrecognized sensor on diag_ file: satype = ', trim(satype)

@@ -75,6 +75,7 @@
 #+  r21c_mls_nc 
 #+  r21c_gmao_mlst_bufr 
 #+  r21c_loon_bufr 
+#+  r21c_prep_bufr
 #+END
 #
 #  ----------------------------------------------------------------------------------------
@@ -110,7 +111,7 @@ END
 
 BEGIN r21c_cdas_conv_pre-qc_bufr => reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
  19970101_00z-20211231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/prepbufr_work/prepbufr_noRAOB/noRAOB/Y%y4/M%m2/reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
- 20220101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+# 20220101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
 END
 
 #  NPN WIND PROFILER DATA
@@ -126,8 +127,10 @@ END
 #  for R21C the transition date between prepbufr format (including reprocessed AMVs) to 
 #  operational satwndbufr is moved to 20130101 00z
 #  AVHRR polar AMV data (prepbufr stream) [copy converted data from Akira's archive]
+#  AVHRR winds not used prior to 2009 due to issues with historical AVHRR winds in MERRA-2.  
 BEGIN r21c_avhrrwnd_pre-qc_bufr => avhrr.%y4%m2%d2.t%h2z.pre-qc.ublk
- 19821001_00z-20100630_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
+# 19821001_00z-20100630_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
+ 20090201_00z-20100630_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avhgac.%y4%m2%d2.%h2z.bufr
  20100701_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avh_wnd_ext.%y4%m2%d2.%h2z.bufr
 END
 
@@ -160,15 +163,16 @@ END
 # ASCAT Scatterometer (prepbufr)
 # -------------------
 BEGIN r21c_ascat_pre-qc_bufr => obsys.ascat.pre-qc.%y4%m2%d2_%h2z.bufr.ublk
- 20080916_00z-21001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/ascat/prepbufr/Y%y4/M%m2/ascat.%y4%m2%d2.t%h2z.prepbufr
+ 20080916_00z-20211231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/ascat/prepbufr/Y%y4/M%m2/ascat.%y4%m2%d2.t%h2z.prepbufr
 END
 
 # ERS-2 data. (Original processing through 19970519.  Reprocessing after 19970519.) (Historic only)
+# ERS-2 data not used after 20030813 due to inconsistent results in MERRA-2. 
 # -----------
 BEGIN r21c_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
  19960319_00z-19970519_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2/prepbufr/Y%y4/M%m2/ers2.%y4%m2%d2.t%h2z.bufr
  19970520_00z-20030217_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2_asps20n/bufr/Y%y4/M%m2/ers2_asps20n.%y4%m2%d2.t%h2z.bufr
- 20030813_00z-20110329_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
+# 20030813_00z-20110329_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
 END
 
 # MERRA Quick SCAT Data   (ms - added 2003,2004)  (jplqscat_elv10 fixed error with sfc elevation)  (Historic only)
@@ -197,6 +201,14 @@ BEGIN r21c_gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
 END
 
 #--------------------------------- BELOW THIS POINT: NO PREP-QC OBSERVATIONS -----------------------------
+#NRT 
+BEGIN r21c_prep_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.ublk
+ 20220101_00z-21001231_18z      240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+END
+# Aircraft metadata for GSI temperature bias correction
+BEGIN r21c_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
+ 20220101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+END
 
 # SATELLITE WINDS IN SATWND BUFR FORMAT
 # -------------------------------------
@@ -246,6 +258,7 @@ BEGIN r21c_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20060501_00z-20181231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GPSRO/bufr/COSMIC/Y%y4/M%m2/gdas1_modified.%y4%m2%d2.t%h2z.gpsro.tm00.bufr_d
   20190101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
+
 
 # GOES Sounder Radiances   (Not used?   prepbufr is historic, goesfv same as real time)
 # 5x5 averaged in goesnd.* files 
@@ -399,9 +412,9 @@ BEGIN r21c_ompslpvis_nc => ompslpvisnc.%y4%m2%d2.t%h2z.nc
 END
 
 # OMPS Limb Profiler profiles (future version)
-BEGIN r21c_ompslp_g_nc => ompslpgnc.%y4%m2%d2.t%h2z.nc
- 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp_v_2.7/Y%y4/M%m2/OMPS-LPoz-v2_7.%y4%m2%d2_%h2z.nc
-END
+#BEGIN r21c_ompslpnc_nc => ompslpgnc.%y4%m2%d2.t%h2z.nc
+# 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp_v_2.7/Y%y4/M%m2/OMPS-LPoz-v2_7.%y4%m2%d2_%h2z.nc
+#END
 
 # Total Ozone data
 #-----------------
@@ -438,10 +451,6 @@ BEGIN hist_ssmis_bufr => gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d.ublk
   20110228_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
 END
 
-# aircraft profile files will be generated by prepqc so these probably won't be used until transition to real-time system
-BEGIN r21c_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
-  20160511_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
-END
 
 # AMSR2 SAME AS REAL-TIME STREAM at present
 BEGIN r21c_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
@@ -457,5 +466,6 @@ END
 
 # GMI data  REAL TIME?
 BEGIN r21c_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
-  20140401_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
+  20140401_00z-20211231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/gmi_v7/bufr/Y%y4/M%m2/gmi_v7_L1CR.%y4%m2%d2.t%h2z.bufr
+  20220101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
 END
