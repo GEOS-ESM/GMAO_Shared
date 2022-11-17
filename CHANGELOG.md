@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed `gcmpost.script` logic to generate `xdf.tabl` files for collections with `monthly: 1` attribute
 - Update EASE grid tile file name to contain pfafxxx
 - Add a dependency on GMAO_perllib in GMAO_etc
 
