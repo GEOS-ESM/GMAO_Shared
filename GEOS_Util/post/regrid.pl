@@ -885,8 +885,8 @@ sub check_inputs {
     if ($bcsTagOUT) { print_("OUTPUT tag: $bcsTagOUT\n") }
     else {
        until ($bcsTagOUT) {
-          print_("\nNOTE: 'bcs' with MODIS snow albedo (v09) cannot be remapped with regrid.pl and remap_restarts.py should be used instead\n");
-          print_("\n       regrid.pl is being phased out and replaced with remap_restarts.py\n");
+          print_("\nNOTE: ‘regrid.pl’ is being phased out and replaced with ‘remap_restarts.py’.\n");
+          print_("\n      ‘regrid.pl’ does not work for remapping (to/from) restarts with MODIS snow albedo (e.g., 'v06' or newer bcs).\n");
           print_("\nType 'bcs' to see BCS tags or\n");
           $tagOUT = query("Enter GCM or DAS tag for outputs:", $current_tag);
           $bcsTagOUT = resolve_bcsTAG($tagOUT, $grOUTocean, "out");
