@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.6.3] - 2022-11-22
+
+### Fixed
+
+- Fix an issue with `regrid.pl` and `remap_restarts.py` regridding from MERRA-2 from 2021-06 to 2021-09
+
 ## [1.6.2] - 2022-11-17
 
 ### Fixed
