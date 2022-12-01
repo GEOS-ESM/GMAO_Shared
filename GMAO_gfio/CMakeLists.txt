@@ -19,7 +19,7 @@ set_source_files_properties (m_GFIO_PutFld.f PROPERTIES COMPILE_FLAGS ${PP})
 
 
 # Need to build r4 and r8 versions.  See details at bottom
-esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu esmf NetCDF::NetCDF_Fortran)
+esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NetCDF::NetCDF_Fortran)
 set_property(TARGET ${this} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if (EXTENDED_SOURCE)
