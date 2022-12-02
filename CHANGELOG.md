@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Moved to GitHub Actions for label enforcement
+- Updated CircleCI to Baselibs 7.7.0
 
 ### Fixed
 
