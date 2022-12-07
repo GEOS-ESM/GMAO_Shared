@@ -104,8 +104,10 @@ def merra2_expid(config):
       expid = "d5124_m2_jan79"
    elif (yyyymm < 200106):
       expid = "d5124_m2_jan91"
-   elif (yyyymm < 202106):
+   elif (yyyymm < 201101):
       expid = "d5124_m2_jan00"
+   elif (yyyymm < 202106):
+      expid = "d5124_m2_jan10"
    # There was a rewind in MERRA2 from Jun 2021 to Sept 2021
    elif (yyyymm < 202110):
       expid = "d5124_m2_jun21"
