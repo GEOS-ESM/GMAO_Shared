@@ -11,19 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Moved to GitHub Actions for label enforcement
-- Updated CircleCI to Baselibs 7.7.0
 - Updated `remap_restarts.py` to use argparse
 
 ### Fixed
 
 ### Removed
 
-## [1.6.3] - 2022-11-22
+## [1.6.3] - 2022-12-07
+
+### Changed
+
+- Moved to GitHub Actions for label enforcement
+- Updated CircleCI to Baselibs 7.7.0
+- Set default data ocean to be `CS` at C90+ resolution in `remap_restarts.py`
 
 ### Fixed
 
 - Fix an issue with `regrid.pl` and `remap_restarts.py` regridding from MERRA-2 from 2021-06 to 2021-09
+- Fix an issue with `remap_restarts.py` for post 2011 regridding from MERRA2
 
 ## [1.6.2] - 2022-11-17
 
