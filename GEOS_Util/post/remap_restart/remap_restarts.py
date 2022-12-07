@@ -96,7 +96,7 @@ def main():
      print("\nYou answered not to continue, exiting.\n")
      sys.exit(0)
 
-  if config_file   or question_flag: write_cmd(config)
+  if config_yaml or question_flag: write_cmd(config)
   if flattend_yaml or question_flag: config_to_yaml(config, config_yaml)
 
   # upper air
