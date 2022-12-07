@@ -152,6 +152,7 @@ def ask_questions():
              2880X1440  (OSTIA) \n \
              CS = same as atmosphere grid (OSTIA cubed-sphere) \n",
             "choices": ['360X180','1440X720','2880X1440','CS'],
+            "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
             "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
         },
 
