@@ -96,16 +96,16 @@ endif
 ****                                  Make Plots
 *****************************************************************************************
 
-sbar = 0.32
+sbar = 1.00
 
 'set vpage 0 11 0 8.5'
 'set xlopts 1 3 0.08'
 'set ylopts 1 3 0.08'
 
-'parea 1 1 4 2'
+'parea 1 1 4 2 -left 0.5 -right 0.1 -top 1.0 -bot 0.3'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -134,10 +134,10 @@ ytop = subwrd(result,3)
 'draw string 'xmid' 'ytop' Forecast  (x10**'Fm')  CINT: 'F_CINT'  CMIN: 'cmin
 
 
-'parea 2 1 4 2'
+'parea 2 1 4 2 -left 0.375 -right 0.225 -top 1.0 -bot 0.3'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -159,13 +159,13 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' Forecast-Climatology  (x10**'FMCm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
-'parea 3 1 4 2'
+'parea 3 1 4 2 -left 0.225 -right 0.375 -top 1.0 -bot 0.3'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -187,13 +187,13 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' Mean (Forecast-Analysis)  (x10**'FMAm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
-'parea 4 1 4 2'
+'parea 4 1 4 2 -left 0.1 -right 0.5 -top 1.0 -bot 0.3'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -215,13 +215,13 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' Root Mean Square Error (F-A)  (x10**'FMAm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
-'parea 1 2 4 2'
+'parea 1 2 4 2 -left 0.5 -right 0.1 -top 0.5 -bot 0.8'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -238,13 +238,13 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' Root Bias Error (F-A)  (x10**'FMAm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
-'parea 2 2 4 2'
+'parea 2 2 4 2 -left 0.375 -right 0.225 -top 0.5 -bot 0.8'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -261,13 +261,13 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' Root Amplitude Error (F-A)  (x10**'FMAm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
-'parea 3 2 4 2'
+'parea 3 2 4 2 -left 0.225 -right 0.375 -top 0.5 -bot 0.8'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 
 'set grads off'
 'set grid  off'
@@ -284,13 +284,13 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' Root Phase Error (F-A)  (x10**'FMAm')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
-'parea 4 2 4 2'
+'parea 4 2 4 2 -left 0.1 -right 0.5 -top 0.5 -bot 0.8'
 xmid = subwrd(result,1)
-ybot = subwrd(result,2)
-ytop = subwrd(result,3)
+ybot = subwrd(result,2) - 0.3
+ytop = subwrd(result,3) + 0.1
 'set grads off'
 'set grid  off'
  if( levmin < 100 )
@@ -317,7 +317,7 @@ ytop = subwrd(result,3)
 'set string 1 c 5'
 'set strsiz 0.066'
 'draw string 'xmid' 'ytop' MSE - [Bias + Ampl + Phaz]  (x 10**'residual_order')'
-'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.8'
+'cbarn -sbar 'sbar' -snum 0.35 -xmid 'xmid' -ymid 'ybot' -scaley 0.4 -scalex 0.15'
 
 
 * -----------------------------------------------------------------------------------------

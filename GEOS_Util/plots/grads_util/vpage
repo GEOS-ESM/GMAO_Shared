@@ -74,8 +74,8 @@ if( y2 > pagey-top )
 endif
 
 say 'set vpage 'x1' 'x2' 'y1' 'y2
-'set  vpage 'x1' 'x2' 'y1' 'y2
-'set  grads off'
+    'set vpage 'x1' 'x2' 'y1' 'y2
+    'set grads off'
 
 pagex = x2-x1
 pagey = y2-y1

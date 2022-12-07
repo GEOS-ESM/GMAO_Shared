@@ -46,8 +46,8 @@ say '  left: 'left
 say ' right: 'right
 
 'getinfo page'
-pagex = subwrd(result,1)
-pagey = subwrd(result,2)
+ pagex = subwrd(result,1)
+ pagey = subwrd(result,2)
 
 dx0 = pagex / xmax
 dy0 = pagey / ymax
@@ -83,7 +83,7 @@ say 'Initial parea: 'x1' 'x2' 'y1' 'y2
  endif
 
 say '  Final parea: 'x1' 'x2' 'y1' 'y2
-'set  parea 'x1' 'x2' 'y1' 'y2
+        'set parea  'x1' 'x2' 'y1' 'y2
 'set  grads off'
 
 xmid   = ( x1 + x2 )/2

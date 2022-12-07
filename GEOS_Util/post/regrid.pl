@@ -187,7 +187,7 @@ foreach (keys %jmo) { $jmo4{$_} = sprintf "%04i", $jmo{$_} }
     check_programs();
     check_rst_files();
     create_logfile();
-    
+
     getLandIceInput() if $landIceFLG;
     set_IN_OUT();
     confirm_inputs();
@@ -630,7 +630,7 @@ sub check_inputs {
     until ($hr and $hr =~ /^\d{2}$/) {
         $hr = query("Enter hour (hh):");
         $hr = "0.$hr" if length($hr) == 1;
-    }        
+    }
     $year  = substr($ymd, 0, 4);
     $month = substr($ymd, 4, 2);
 
@@ -676,6 +676,8 @@ sub check_inputs {
         elsif ("$year$month" < 199201) { $expid = "d5124_m2_jan79" }
         elsif ("$year$month" < 200106) { $expid = "d5124_m2_jan91" }
         elsif ("$year$month" < 201101) { $expid = "d5124_m2_jan00" }
+        elsif ("$year$month" < 202106) { $expid = "d5124_m2_jan10" }
+        elsif ("$year$month" < 202110) { $expid = "d5124_m2_jun21" }
         else                           { $expid = "d5124_m2_jan10" }
     }
     die "\nError. Cannot find restart dir: $rstdir" unless -d $rstdir;
@@ -743,7 +745,7 @@ sub check_inputs {
             .  "to $levsOUT atmospheric levels.";
         push @warnings, $msg;
     }
-        
+
     # input ocean grid: $grINocean
     #-----------------------------
     # The value, "CSi", is used to represent the input cubed-sphere ocean grid
@@ -885,6 +887,8 @@ sub check_inputs {
     if ($bcsTagOUT) { print_("OUTPUT tag: $bcsTagOUT\n") }
     else {
        until ($bcsTagOUT) {
+          print_("\nNOTE: ‘regrid.pl’ is being phased out and replaced with ‘remap_restarts.py’.\n");
+          print_("\n      ‘regrid.pl’ does not work for remapping (to/from) restarts with MODIS snow albedo (e.g., 'v06' or newer bcs).\n");
           print_("\nType 'bcs' to see BCS tags or\n");
           $tagOUT = query("Enter GCM or DAS tag for outputs:", $current_tag);
           $bcsTagOUT = resolve_bcsTAG($tagOUT, $grOUTocean, "out");
@@ -991,7 +995,7 @@ sub check_inputs {
 
       unless ( $cnlist[0] eq "clm40" or $cnlist[0] eq "clm45") {
          die "Error. CN_VERSION should be clm40 or clm45\n";
-      } 
+      }
     }
 
     # get zoom value
@@ -1310,7 +1314,7 @@ sub get_fvrst {
         chomp($fvrstname = `tar tf $rst_tarfile | grep fvcore_internal_rst`);
         if ($fvrstname !~ m/fvcore_internal_rst/) {
             die "Error. Cannot find fvcore in $rst_tarfile;";
-        }            
+        }
         $fvrst = "$workdir/$fvrstname";
         $fname = &$getinput($fvrstname, $fvrst);
     } else {
@@ -1555,7 +1559,7 @@ sub check_programs {
         die "Error. Program not found: $rs_scaleX;" unless -x $rs_scaleX;
     }
     if ($CS{$grOUT}) {
-       
+
         if ($binRST) {
             $interp_restartsX = "$ESMABIN/interp_restarts_bin.x";
         } else {
@@ -1631,7 +1635,7 @@ sub check_rst_files {
     %notfound = ();
     if ($surfFLG) {
         foreach $type (sort keys %SURFACE) {
-            if ($type eq "catchcn_internal_rst")    { 
+            if ($type eq "catchcn_internal_rst")    {
                next unless $mk_catchcn;
                delete($SURFACE{$type});
                $type = "catchcn${cnlist[0]}_internal_rst";
@@ -1641,26 +1645,26 @@ sub check_rst_files {
 
             $fname = rstname($expid, $type, $rstIN_template);
             $file  = findinput($fname);
-            
+
             if ($file) { $input_restarts{$type} = $file }
             else       { $notfound{$type} = 1 }
         }
         foreach $type (keys %notfound) {
             $SURFACE{$type} = 0;
             $swFLG = 1;
-            if ($type eq "catchcn${cnlist[0]}_internal_rst") { 
+            if ($type eq "catchcn${cnlist[0]}_internal_rst") {
                $SURFACE{$type} = 1;
                if (scalar(@cnlist) eq 4) {
                   # find GEOSldas file first
                   $fname = rstname($cnlist[1], $type, "%s.%s.${ymd}_${hr}00");
                   my $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
                   $file = findinput($fname, $ldas_rst_dir);
-                  # find LDASsa file 
+                  # find LDASsa file
                   unless ($file) {
                      $fname = rstname($cnlist[1], $type, "%s.ens0000.%s.${ymd}_${hr}00z");
                      $ldas_rst_dir = "$cnlist[2]/$cnlist[1]/output/$cnlist[3]/rs/ens0000/Y${year}/M${month}/";
                      $file = findinput($fname, $ldas_rst_dir);
-                  }         
+                  }
                }
                elsif (scalar(@cnlist) eq 1) {
                   $fname = rstname($expid, $type, "%s.%s.${ymd}_${hr}00");
@@ -1731,7 +1735,7 @@ sub check_rst_files {
 
             # cbkg eta file
             #--------------
-            $fname = "$expid.cbkg${num}_eta_rst.${bymd}_${bhr}z.nc4"; 
+            $fname = "$expid.cbkg${num}_eta_rst.${bymd}_${bhr}z.nc4";
             $cbkg = findinput($fname, $altdir);
 
             if ($cbkg) { push @anafiles, $cbkg }
@@ -1799,7 +1803,7 @@ sub create_logfile {
             exit;
         }
         unlink_($logfile) if -e $logfile;
-    }        
+    }
     openLOG($logfile);
     printLOG_("\$ESMABIN/$capture\n");
 }
@@ -1954,7 +1958,7 @@ sub getLandIceInput {
 
 #=======================================================================
 # name - set_IN_OUT
-# purpose - set values in the %IN and %OUT hashes 
+# purpose - set values in the %IN and %OUT hashes
 #=======================================================================
 sub set_IN_OUT {
     my ($HH, $agrid, $atmosID1, $atmosID2, $atmosID3, $atmosID4);
@@ -2337,7 +2341,7 @@ sub dmget_input_restarts {
 #           1. are on the same grid
 #           2. have the same number of levels
 #           3. use identical topological files
-#           
+#
 # return value -
 # => $copyFLG
 #    == 0 if upperair restarts were not copied
@@ -2419,9 +2423,9 @@ sub regrid_upperair_rsts_CS {
     $QOS = $qos;
     $QOS = 0 if $QOS eq "debug" and $NPE > 532;
     $QOS = "high" if $im > 2000 and ! $QOS;
-    
+
     if ($QOS) { $QOSline = "SBATCH --qos=$QOS" }
-    else      { $QOSline = "" }        
+    else      { $QOSline = "" }
 
     $PART = $partition;
     if ($PART) { $PARTline = "SBATCH --partition=$PART" }
@@ -2445,7 +2449,7 @@ sub regrid_upperair_rsts_CS {
 
     $regridj = "$workdir/regrid.j";
     $qcmdlog = "$outdir/$newid.upperair.${ymd}_${hr}z.log.o%j";
-    unlink_($regridj) if -e $regridj; 
+    unlink_($regridj) if -e $regridj;
 
     # get group ID for batch job
     #---------------------------
@@ -2574,7 +2578,7 @@ if( ".$CABRCHEM"  != . ) /bin/ln -s $CABRCHEM cabr_internal_restart_in
 if( ".$CABCCHEM"  != . ) /bin/ln -s $CABCCHEM cabc_internal_restart_in
 if( ".$CAOCCHEM"  != . ) /bin/ln -s $CAOCCHEM caoc_internal_restart_in
 
-# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting 
+# The MERRA fvcore_internal_restarts don't include W or DZ, but we can add them by setting
 # HYDROSTATIC = 0 which means HYDROSTATIC = FALSE
 set HYDROSTATIC = 0
 
@@ -2584,7 +2588,7 @@ if (\$?I_MPI_ROOT) then
 
   # Based on GEOSgcm NCCS Intel MPI settings
   #-----------------------------------------
-  
+
   setenv I_MPI_ADJUST_ALLREDUCE 12
   setenv I_MPI_ADJUST_GATHERV 3
 
@@ -2799,7 +2803,7 @@ sub set_dry_mass {
             return;
         }
     }
-        
+
     # get names of fvcore and moist restarts
     #---------------------------------------
     $fvrst = rstname($newid, "fvcore_internal_rst", "$outdir/$rst_template");
@@ -3211,7 +3215,7 @@ sub check_vegdyn {
     $hashAddr    = shift @_;
     $OutData_dir = shift @_;
     %H = %$hashAddr;
-    
+
     $vegdyn_rst = "vegdyn_internal_rst";
     $vegdyn_regrid = "$OutData_dir/$vegdyn_rst";
     $vegdyn_bcs = "$H{bcsdir}/vegdyn_$H{atmos2}.dat";
@@ -3246,7 +3250,7 @@ sub check_vegdyn {
 
 #=======================================================================
 # name - maxlength
-# purpose - returns length of longest line in a string (presumably a 
+# purpose - returns length of longest line in a string (presumably a
 #           multi-line string)
 #=======================================================================
 sub maxlength {
@@ -3362,7 +3366,7 @@ sub regrid_bkg_eta {
 
     if (basename($bkg_eta) =~ m/(\bbkg\d{2}_eta_rst\b)/) { $bkgname = $1 }
     else { $bkgname = "bkg_eta_rst" }
-        
+
     printlabel("\nregrid $bkgname", 2);
 
     # rename bkg_eta file
@@ -3536,7 +3540,7 @@ sub cleanup {
 
 #=======================================================================
 # name - alt_rstdir
-# purpose - take the restart directory for a given date ($rstdir1 and $ymd1), 
+# purpose - take the restart directory for a given date ($rstdir1 and $ymd1),
 #           and use it to determine the restart directory for a different
 #           date ($rstdir2 and $ymd2)
 #
@@ -3565,7 +3569,7 @@ sub alt_rstdir {
     $ymd1    = shift @_;
     $ymd2    = shift @_;
     %replace = @_;
-    
+
     # extract year and month values
     #------------------------------
     $year1  = substr($ymd1, 0, 4);
@@ -3804,7 +3808,7 @@ sub maxnum {
         else                  { $maxval = $_ }
     }
     return $maxval;
-} 
+}
 
 #=======================================================================
 # name - pause
@@ -3879,7 +3883,7 @@ sub rstname {
     ($id, $type, $template) = @_;
     $name = sprintf $template, $id, $type;
     return $name;
-}    
+}
 
 #=======================================================================
 # name - rstnameI
@@ -3898,7 +3902,7 @@ sub rstnameI {
     $dir = shift @_;
     $type = shift @_;
     return "${dir}/${type}_c$im4{$grOUT}_$atmLevs{$levsOUT}L";
-}    
+}
 
 #=======================================================================
 # name - strip_and_print_CRs
@@ -3921,7 +3925,7 @@ sub strip_and_print_CRs {
 # purpose - rename and copy input to a specified directory
 # note
 # - if input is contained in a rst tarfile, it will be copied, since it
-#   cannot be linked 
+#   cannot be linked
 #=======================================================================
 sub symlinkinput {
     my ($target, $linkname, $linkname_, $cpFLG, $lbase, $ldir, $verboseFLG);
@@ -4011,7 +4015,7 @@ INTERACTIVE OPTION
 
 OTHER OPTIONS
    -levsout   levsout   number of atmosphere levels in output
-   -ocnmdlin  ocnMDLIN  ocean input model 
+   -ocnmdlin  ocnMDLIN  ocean input model
                           =data : data ocean (Reynolds, MERRA-2, Ostia, CS)
                           =MOM5 : MOM5
                           =MOM6 : MOM6
@@ -4051,14 +4055,14 @@ OTHER OPTIONS
                           =2 for land-surface restarts only
                           =3 for both upper-air and land-surface restarts (default)
    -catchcn             offers 2 options:
-                        = 0, cold start for CLM40 using an archived restart file. For e.g. 
+                        = 0, cold start for CLM40 using an archived restart file. For e.g.
                           -catchcn 0, - Notice the trailing comma
-                        = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN 
+                        = CN_VERSION, RESTART_ID, RESTART_PATH, RESTART_DOMAIN
                           to start from a GEOSldas restart file (Note, keywords are comma-separated).
-                          where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords 
-                          are same as those in GEOSldas exeinp file. For e.g. 
+                          where CN_VERSION is the 2-digit CLM version (40, 45, etc.) while other keywords
+                          are same as those in GEOSldas exeinp file. For e.g.
                           -catchcn 45,GEOSldas45_M36_rst_ldas06_16,/discover/nobackup/elee15/GEOSldas_4_5/sims/,SMAP_EASEv2_M36
-                          IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.  
+                          IMPORTANT GEOSldas restart file at 0z on the AGCM restart date must be available in GEOSldas directory.
                         Not valid for tags prior to Heracles; Note: This option will add
                         10-20 minutes to the regrid process.
    -wemin wemIN         minimum water snow water equivalent for input catch/cn
