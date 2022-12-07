@@ -27,7 +27,7 @@ def parse_args():
 
       There are three ways to use this script to remap restarts.
 
-      1. Use an exsiting config file to remap:
+      1. Use an existing config file to remap:
            ./remap_restarts.py -c my_config.yaml
 
       2. Use questionary to convert template remap_params.tpl to
@@ -97,7 +97,7 @@ def main():
      sys.exit(0)
 
   if config_yaml or question_flag: write_cmd(config)
-  if flattend_yaml or question_flag: config_to_yaml(config, config_yaml)
+  if flattened_yaml or question_flag: config_to_yaml(config, config_yaml)
 
   # upper air
   upper = upperair(params_file=config_yaml)
