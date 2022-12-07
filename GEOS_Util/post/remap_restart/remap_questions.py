@@ -22,12 +22,12 @@ def fvcore_name(x):
   files = glob.glob(rst_dir+'/*fvcore_*'+time+'*')
   if len(files) ==1 :
     fname = files[0]
-    print('\nFound ' + fname) 
+    print('\nFound ' + fname)
     return fname
   else:
     fname = rst_dir+'/fvcore_internal_rst'
     if os.path.exists(fname):
-       print('\nFound ' + fname) 
+       print('\nFound ' + fname)
        return fname
     return False
 
@@ -35,13 +35,18 @@ def tmp_merra2_dir(x):
    tmp_merra2 = x['output:shared:out_dir']+ '/merra2_tmp_'+x['input:shared:yyyymmddhh']+'/'
    return tmp_merra2
 
+def data_ocean_default(resolution):
+   default_ = 'CS'
+   if resolution in ['C12','C24', 'C48'] : default_ = '360X180'
+   return default_
+
 def we_default(tag):
    default_ = '26'
    if tag in ['INL','GITNL', '525'] : default_ = '13'
    return default_
 
 def zoom_default(x):
-   zoom_ = '8'   
+   zoom_ = '8'
    fvcore = fvcore_name(x)
    if fvcore :
       fvrst = os.path.dirname(os.path.realpath(__file__)) + '/fvrst.x -h '
@@ -145,8 +150,9 @@ def ask_questions():
              360X180  (Reynolds) \n \
              1440X720 (MERRA-2) \n \
              2880X1440  (OSTIA) \n \
-             CS = same as atmospere grid (OSTIA cubed-sphere) \n",
+             CS = same as atmosphere grid (OSTIA cubed-sphere) \n",
             "choices": ['360X180','1440X720','2880X1440','CS'],
+            "default": lambda x: data_ocean_default(x.get('input:shared:agrid')),
             "when": lambda x: x.get('input:shared:model') == 'data' and not x['input:shared:MERRA-2'],
         },
 
@@ -160,8 +166,9 @@ def ask_questions():
         {
             "type": "select",
             "name": "output:shared:ogrid",
-            "message": "Select new ocean grid:", 
+            "message": "Select new ocean grid:",
             "choices": ['360X180','1440X720','2880X1440','CS'],
+            "default": lambda x: data_ocean_default(x.get('output:shared:agrid')),
             "when": lambda x: x['output:shared:model'] == 'data',
         },
 
@@ -342,13 +349,13 @@ def get_config_from_questionary():
    config['output']['air'] = {}
    config['output']['surface'] = {}
    config['output']['analysis'] = {}
-   config['slurm'] = {} 
+   config['slurm'] = {}
    for key, value in answers.items():
      keys = key.split(":")
      if len(keys) == 2:
-       config[keys[0]][keys[1]] = value 
+       config[keys[0]][keys[1]] = value
      if len(keys) == 3:
-       config[keys[0]][keys[1]][keys[2]] = value 
+       config[keys[0]][keys[1]][keys[2]] = value
 
    return config
 
