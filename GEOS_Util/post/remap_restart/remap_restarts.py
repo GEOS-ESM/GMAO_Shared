@@ -65,7 +65,6 @@ def main():
 
   # Parse the command line arguments from parse_args() capturing the arguments and the rest
   command_line_args, extra_args = parse_args()
-  print(f'command_line_args: {command_line_args}')
   config_yaml = command_line_args.config_file
   flattened_yaml = command_line_args.flattened_yaml
 
