@@ -1,7 +1,6 @@
-*
+* --------------------------------------------------
 * script to draw a legend for multiple line plots
-*
-* (a stupid one - it asks all kinds of questions)
+* --------------------------------------------------
 *
 function lines(args)
 'set vpage off'
@@ -14,6 +13,11 @@ ioflag = 0
 else
 name   = subwrd(args,1)
 ioflag = subwrd(args,2)
+xfact  = subwrd(args,3)
+
+if( xfact = '' )
+    xfact = 4
+endif
 
 * Extract name between quotes
 * ---------------------------
@@ -156,6 +160,7 @@ ylow  = sublin (read(name),2)
 xhigh = sublin (read(name),2)
 yhigh = sublin (read(name),2)
 endif
+say 'xhigh = 'xhigh
 
 * White-out Legend Region
 * -----------------------
@@ -164,8 +169,7 @@ endif
 'set line 1'
  
 x1spot = xlow   + (xhigh-xlow)/10
- x2spot = x1spot + (xhigh-xlow)/4
-*x2spot = x1spot + (xhigh-xlow)/2
+x2spot = x1spot + (xhigh-xlow)/xfact
 xtspot = x2spot + (xhigh-xlow)/10
  
 'set line 1 1 1'
@@ -176,6 +180,9 @@ xtspot = x2spot + (xhigh-xlow)/10
 
 vsize = (yhigh-ylow)/(2.5*numline)
 hsize = (xhigh-(xhigh-xlow)/10-xtspot)/maxlength
+*hsize = (xhigh-(xhigh-xlow)/50-xtspot)/maxlength
+*hsize = hsize + 0.07
+say 'hsize = 'hsize
 'set strsiz 'hsize' 'vsize
 
 'set string 1 l 1'
@@ -187,10 +194,11 @@ while (i<=numline)
 yspot = yhigh - i*yspace
 *'set  line 1 'style.i' 'thick.i
  'set  line 'color.i' 'style.i' 'thick.i
-'draw line 'x1spot' 'yspot' 'x2spot' 'yspot
+ 'draw line 'x1spot' 'yspot' 'x2spot' 'yspot
 ytspot = yspot-0.00
-'set  line 1 'style.i' 'thick.i
-'draw string 'xtspot' 'ytspot' 'title.i
+ 'set  line 1 'style.i' 'thick.i
+if( color.i = 0 ) ; 'set string 'color.i' l 3' ; endif
+ 'draw string 'xtspot' 'ytspot' 'title.i
 i = i+1
 endwhile
 break
