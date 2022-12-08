@@ -15,13 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [1.6.3] - 2022-12-07
+## [1.6.3] - 2022-12-08
 
 ### Changed
 
 - Moved to GitHub Actions for label enforcement
 - Updated CircleCI to Baselibs 7.7.0
 - Set default data ocean to be `CS` at C90+ resolution in `remap_restarts.py`
+- Updated `remap_restarts.py` to use argparse
 
 ### Fixed
 
