@@ -223,7 +223,7 @@
 
 !  All done
 !  --------
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -266,7 +266,7 @@ CONTAINS
 
       character*4, parameter :: myname = 'init'
 
-      integer i, iarg, argc, iargc
+      integer i, iarg, argc
       character(len=255) :: etafile, argv
 
       print *
@@ -278,7 +278,7 @@ CONTAINS
 !     Parse command line
 !     ------------------
       prsfile = 'dyn.prs.hdf'
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
 
       iarg = 0
@@ -291,32 +291,32 @@ CONTAINS
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          select case (argv)
            case ("-South")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, argv )
+             call get_command_argument ( iarg, argv )
              read(argv, *) ySouth
              if (ySouth .ne. 90. .and. ySouth .ne. -90.) call usage()
            case ("-o")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, prsfile )
+             call get_command_argument ( iarg, prsfile )
            case ("-im")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, argv )
+             call get_command_argument ( iarg, argv )
              read(argv, *) imOut
            case ("-jm")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, argv )
+             call get_command_argument ( iarg, argv )
              read(argv, *) jmOut
            case ("-West")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, argv )
+             call get_command_argument ( iarg, argv )
              read(argv, *) xWest
              if (xWest .gt. 0.0) xWest = xWest - 360.
            case default
@@ -388,7 +388,7 @@ CONTAINS
       print *, '-etafile(s)   input dynamics vector file in'
       print *, '              hybrid (eta) coordinates'
       print *
-      call exit(1)
+      error stop 1
       end subroutine usage
       
 !.................................................................
@@ -396,7 +396,7 @@ CONTAINS
       subroutine die ( myname, msg )
       character(len=*) :: myname, msg
       write(*,'(a)') trim(myname) // ': ' // trim(msg)
-      call exit(1)
+      error stop 1
       end subroutine die
 
 !.................................................................

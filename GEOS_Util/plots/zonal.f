@@ -44,15 +44,15 @@
       real         undef, lat0
       integer      im,jm,lm,tm
       integer      j,L,n,nt,lrec
-      integer      rc,nargs,iargc
+      integer      rc,nargs
 
       undef = 1e15
 
-      nargs = iargc()
+      nargs = command_argument_count()
       if( nargs.ne.0 ) then
           allocate( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-tag' ) tag = '.' // arg(n+1)

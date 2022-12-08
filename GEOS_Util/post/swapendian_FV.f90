@@ -11,20 +11,17 @@ program swapFV
   real*8,allocatable  :: A(:,:)
   character(128) :: str, f_in, f_out
 
-  integer*4 :: iargc
-  external  :: iargc
-
 
 ! Begin
 
-  if (iargc() /= 2) then
-     call getarg(0,str)
+  if (command_argument_count() /= 2) then
+     call get_command_argument(0,str)
      write(*,*) "Usage:",trim(str)," <big_endian_FV_internal_in> <native_FV_interal_out>"
-     call exit(2)
+     error stop 2
   end if
 
-  call getarg(1,f_in)
-  call getarg(2,f_out)
+  call get_command_argument(1,f_in)
+  call get_command_argument(2,f_out)
 
   unitR = 7
   unitW = 8
@@ -45,7 +42,7 @@ program swapFV
   print *, '           Resolution: ',im,jm,km
 
   allocate(C(KM+1), A(IM,JM), stat=status)
-  if (status /=0 ) call exit(1)
+  if (status /=0 ) error stop 1
 
   read (unitR) C !AK
   write(unitW) C

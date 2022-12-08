@@ -48,7 +48,7 @@ PROGRAM lake_data_EIGTHdeg
 
 !---------------------------------------------------------------------------
 !       Read all input data parameters (time to proc, files to proc, output resolution)
-        CALL getarg(1,inputBuffer)
+        CALL get_command_argument(1,inputBuffer)
         READ(inputBuffer, *) inputFile
         CALL read_input(inputFile, iDebug, today, tomrw, fileNames, NLAT_out, NLON_out, iMerra, iAdjust_SST_SIC, SST_Thr, iERR)
 !---------------------------------------------------------------------------

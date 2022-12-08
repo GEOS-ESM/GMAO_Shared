@@ -19,9 +19,9 @@ Program binarytile
   character(len=128) :: filenameOUT
   integer, parameter :: max_rec=2 
 
-  call getarg(1,filenameIN)
+  call get_command_argument(1,filenameIN)
   if (filenameIN == "") filenameIN = 'input'
-  call getarg(2,filenameOUT)
+  call get_command_argument(2,filenameOUT)
   if (filenameOUT == "") filenameOUT = 'output'
 
   open(unit=unitR, file=filenameIN, form='FORMATTED')

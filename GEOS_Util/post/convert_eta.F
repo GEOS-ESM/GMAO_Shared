@@ -1,5 +1,7 @@
       program convert_eta
 
+      use iso_fortran_env
+
       implicit none
 
 c **********************************************************************
@@ -57,7 +59,7 @@ c -----------------------------
       character*2    hour0,mins0
       character*1    char
 
-      integer n,m,nargs,iargc,nfiles
+      integer n,m,nargs,nfiles
 
       real    undef
       integer ndt
@@ -107,13 +109,13 @@ C **********************************************************************
 
       phisname = 'NULL'
  
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
 
@@ -419,6 +421,7 @@ c ------------------------------------------------
 
       use MAPL_ConstantsMod
       use m_set_eta, only: set_eta
+      use iso_fortran_env
       implicit none
 
 c Input Variables
@@ -428,6 +431,7 @@ c ---------------
       real   q2d(im,jm,   n2d)
       real   q3d(im,jm,lm,n3d)
 
+      integer    imo,jmo,lmo
       real  phis(imo,jmo)
       real    ps(imo,jmo)
       real    dp(imo,jmo,lm)
@@ -436,7 +440,6 @@ c ---------------
       real     t(imo,jmo,lm)
       real     q(imo,jmo,lm,2)
 
-      integer    imo,jmo,lmo
       real   z2d(imo,jmo,   n2d)
       real   z3d(imo,jmo,lm,n3d)
 
@@ -476,7 +479,7 @@ c ---------------
       integer nu,nv,kdum
 
       real    undef, pi,dx,dy, qmin, qmax
-      real*8  ptop, rdum
+      real(kind=REAL64)  ptop, rdum
       integer precision,id,timeinc,rc,nhmsf
 
       character*256  title
@@ -495,8 +498,8 @@ c ---------------
       real,   allocatable ::    ple(:,:,:)
       real,   allocatable ::  logpl(:,:,:)
       real,   allocatable :: logplo(:,:,:)
-      real*8, allocatable ::     ak(:)
-      real*8, allocatable ::     bk(:)
+      real(kind=REAL64), allocatable ::     ak(:)
+      real(kind=REAL64), allocatable ::     bk(:)
 
       real   dpref 
              dpref(L) = ( ak(L+1)-ak(L) ) + ( bk(L+1)-bk(L) ) * 98400.0
@@ -1082,7 +1085,7 @@ C***********************************************************************
      .         "  -tag    output_tag:  Optional Filename Tag for output: fname(s).tag (default: grid.IMxJM)"            ,/
      .                                                                                                                  ,/
      .         ) 
-      call exit(7)
+      error stop 7
       end subroutine usage
 
       subroutine hinterp ( qin,iin,jin,qout,iout,jout,mlev,undef )
@@ -2819,6 +2822,7 @@ c ******************************************************************************
 
       use MAPL_ConstantsMod
       use m_set_eta, only: set_eta
+      use iso_fortran_env
       implicit none
       integer  im,jm,lm1,lm2,nt
 
@@ -2852,13 +2856,13 @@ c ---------------
       real  phi2(im,jm,lm2+1)
       real ptop1(im,jm)
 
-      real*8  rdum
+      real(kind=REAL64)  rdum
       real    kappa,cp,dum1,dum2
       real    rgas,eps,rvap,grav
       integer i,j,L,kdum
 
-      real*8, allocatable :: ak(:)
-      real*8, allocatable :: bk(:)
+      real(kind=REAL64), allocatable :: ak(:)
+      real(kind=REAL64), allocatable :: bk(:)
 
       kappa = MAPL_KAPPA
       rgas  = MAPL_RGAS

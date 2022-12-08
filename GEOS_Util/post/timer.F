@@ -55,7 +55,7 @@ c --------------------
 #if mpi
          call mpi_finalize (n)
 #endif
-         call exit (101)
+         error stop 101
          endif
          call clocks ( wclk )
           tasks(ntasks) = task
@@ -103,7 +103,7 @@ C***********************************************************************
 #if mpi
          call mpi_finalize (n)
 #endif
-         call exit (101)
+         error stop 101
       endif
    
       call clocks ( wclk )

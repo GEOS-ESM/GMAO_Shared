@@ -52,7 +52,7 @@
       character*120, allocatable :: arg(:)
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,i,j,L
+      integer n,nargs,i,j,L
       integer id,rc,timinc,nmax,kbeg,kend,freq
       integer ntime,nvars,ngatts
 
@@ -67,11 +67,11 @@
       freq   = 6  ! default: frequency of bkg is 6-hrs
 
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs==0) call usage()
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage()
@@ -461,6 +461,6 @@
       print *, "  -prec    PREC           where PREC=32 or 64 for 32 or 64 bits output"
       print *, "  -freq    FREQ           specify frequency of background; default: 6 (hr)"
       print *
-      call exit(7)
+      error stop 7
       end
 

@@ -47,7 +47,7 @@ c -----------------------------
       character*2    time0
       character*1    char
 
-      integer n,m,nargs,iargc,L,nfiles
+      integer n,m,nargs,L,nfiles
 
       real     undef
 
@@ -90,13 +90,13 @@ C **********************************************************************
       yrev    =  .false.
       ecmwf   =  .false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-nymd' ) read(arg(n+1),*) nymd0
@@ -857,7 +857,7 @@ c -----
       print *, "  ALL Grads Keywords MUST BE lowercase (eg: xdef, options, sequential, etc.)"
       print *
       print *
-      call exit(7)
+      error stop 7
       end subroutine usage
 
       subroutine qsat (tt,p,q,dqdt,ldqdt)

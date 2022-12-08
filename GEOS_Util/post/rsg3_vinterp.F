@@ -71,7 +71,7 @@ c --------------------------------
       character*8    date
       character*2    hour,clm
       character*3    cim,cjm
-      integer n,nargs,iargc,i,j,L
+      integer n,nargs,i,j,L
 
 C **********************************************************************
 C ****                      Initialize Filenames                    ****
@@ -82,11 +82,11 @@ C **********************************************************************
       moistrst = 'moist_internal_restart'
         iaurst = 'xxx'
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs == 0 ) call usage()
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage()
@@ -1125,7 +1125,7 @@ c Positive definite constraint
       print *, "-------"
       print *, "     New dynrst & moistrst restart files for ARIES"
       print *
-      call exit(7)
+      error stop 7
       end
 
       SUBROUTINE CTOA ( qc,qa,im,jm,km,itype )

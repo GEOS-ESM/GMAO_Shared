@@ -48,7 +48,7 @@ c ------------------
       character*120, allocatable :: arg(:)
 
       integer precision
-      integer n,nargs,iargc
+      integer n,nargs
 
 c NCEP Grads CTL File Variables
 c -----------------------------
@@ -86,13 +86,13 @@ C **********************************************************************
             ext = 'nc4'
             tag = ''
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-ncep' ) ana_data = trim(arg(n+1))
@@ -462,7 +462,7 @@ c ----------------------------
  1002     continue
           print *, 'ERROR!!  File: ',trim(filename)
           print *, 'ERROR!!  is neither BIG nor LITTLE ENDIAN'
-          call exit(7)
+          error stop 7
 
       endif
       end
@@ -562,7 +562,7 @@ c --------------------
       print *, "  -ctl  ncep.ctl : Filename of NCEP sigma-level analysis ctl  (from ss2gg)"
       print *, "  -tag       tag : Optional Prefix tag for output files"
       print *
-      call exit(7)
+      error stop 7
       end
 
       subroutine read_ctl ( ctlfile,im,jm,lm,undef,format,

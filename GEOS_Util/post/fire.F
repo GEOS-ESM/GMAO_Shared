@@ -68,7 +68,7 @@ c -----------------------------
       character*1    char
       data output  /'ascii'/
 
-      integer n,m,nargs,iargc,L,nbeg,nfiles,nsfiles,npfiles,mlev
+      integer n,m,nargs,L,nbeg,nfiles,nsfiles,npfiles,mlev
 
       real*8   lonbeg
       real     undef
@@ -138,13 +138,13 @@ C **********************************************************************
       quad    =  .true.
       nopres  =  .false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           stop
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
 

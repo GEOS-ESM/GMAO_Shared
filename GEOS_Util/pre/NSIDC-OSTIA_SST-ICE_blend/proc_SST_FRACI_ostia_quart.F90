@@ -48,7 +48,7 @@ PROGRAM proc_SST_FRACI_quart
 
 !---------------------------------------------------------------------------
 !       Read all input data parameters (time to proc, files to proc, output resolution)
-        CALL getarg(1,inputBuffer)
+        CALL get_command_argument(1,inputBuffer)
         READ(inputBuffer, *) inputFile
         CALL read_input_quart(inputFile, iDebug, today, tomrw, fileNames, NLAT_out, NLON_out, iERR, &
                               max_diff_SST, max_diff_ICE)

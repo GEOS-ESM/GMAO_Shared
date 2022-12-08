@@ -32,7 +32,7 @@ program rs_numtiles
      write (output_unit,*) "         This program looks at the first record of a binary restart. If"
      write (output_unit,*) "         that record has subtiles, it will be a multiple of the number"
      write (output_unit,*) "         of tiles."
-     call exit(2)
+     error stop 2
   end if
 
   call get_command_argument(1, fname1)
@@ -57,7 +57,12 @@ program rs_numtiles
   else
      bpos=0
      read (10)
+#ifdef __NAG_COMPILER_RELEASE
+     write (*,*) 'NAG does not provide ftell. Use only netCDF'
+     error stop 1
+#else
      epos = ftell(10)            ! ending position of file pointer
+#endif
      ntiles = (epos-bpos)/4-2    ! record size (in 4 byte words; 
      rewind 10
   end if

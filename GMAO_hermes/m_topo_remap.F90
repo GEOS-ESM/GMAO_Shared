@@ -102,8 +102,7 @@ CONTAINS
          deallocate ( ple )
       else 
           print *, ' not coded for old dyn'
-          call exit(1)
-          stop
+          error stop 1
       endif
 
       call dyn_topo_remap( w_f%ps,w_f%delp,w_f%u,w_f%v,thv,w_f%q,w_f%phis,phis_new, &
@@ -192,8 +191,7 @@ CONTAINS
          deallocate ( pke )
       else 
           print *, ' not coded for old dyn'
-          call exit(1)
-          stop
+          error stop 1
       endif
 
       call ps_remap0_( ple_cur,ple_new,w_f%u,w_f%v,thv,w_f%q, &

@@ -13,7 +13,7 @@
 
       character*256 :: filename,filename1,filename2
       character*256 :: arg(2)
-      integer       :: n,nargs,iargc,id,rc
+      integer       :: n,nargs,id,rc
 
 ! First File
 ! ----------
@@ -82,13 +82,13 @@
 
 ! READ INPUT
 ! ----------
-  nargs = iargc()
+  nargs = command_argument_count()
   if( nargs<1 .or. nargs>2 ) then
      call usage()
   end if
 
   do n=1,nargs
-  call getarg(n,arg(n))
+  call get_command_argument(n,arg(n))
   enddo
 
   read(arg(1),'(a)') filename1
@@ -103,12 +103,12 @@
       call gfio_open      ( trim(filename1),0,id1,rc )
       if( rc.ne.0 ) then
           print *, 'File: ',trim(filename1),' not found!'
-          call exit(1)
+          error stop 1
       endif
       call gfio_diminquire ( id1,im,jm,lm,ntimes,nvars,ngatts,rc )
       if( rc.ne.0 ) then
           print *, 'Failed GFIO_DIMINQUIRE on File: ',trim(filename1)
-          call exit(1)
+          error stop 1
       endif
 
       allocate ( lon(im) )
@@ -131,7 +131,7 @@
                           vrange,prange,rc )
       if( rc.ne.0 ) then
           print *, 'Failed GFIO_INQUIRE on File: ',trim(filename1)
-          call exit(1)
+          error stop 1
       endif
 
       if( lev(lm).gt.lev(1) ) then
@@ -140,7 +140,7 @@
           print *, 'contains Levels ordered top -> bottom (Eta?)'
           print *, 'LEVS: ',lev
           print *
-	  call exit(1)
+	  error stop 1
       endif
 
       found_ps = .FALSE.
@@ -157,18 +157,18 @@
       call gfio_open      ( trim(filename2),2,id2,rc )
       if( rc.ne.0 ) then
           print *, 'File: ',trim(filename2),' not found!'
-          call exit(1)
+          error stop 1
       endif
       call gfio_diminquire ( id2,im2,jm2,lm2,ntimes2,nvars2,ngatts2,rc )
       if( rc.ne.0 ) then
           print *, 'Failed GFIO_DIMINQUIRE on File: ',trim(filename2)
-          call exit(1)
+          error stop 1
       endif
       if( im2.ne.im .or. jm2.ne.jm ) then
           print *, 'File Horizontal Dimensions do not match!'
           print *, 'File: ',trim(filename1),' IM: ',im, ' JM: ',jm
           print *, 'File: ',trim(filename2),' IM: ',im2,' JM: ',jm2
-          call exit(1)
+          error stop 1
       endif
 
       allocate ( lon2(im2) )
@@ -194,7 +194,7 @@
           print *, 'File Time Frequencies do not match!'
           print *, 'File: ',trim(filename1),' TIMINC: ',timinc
           print *, 'File: ',trim(filename2),' TIMINC: ',timinc2
-          call exit(1)
+          error stop 1
       endif
 
       found_ps2 = .FALSE.
@@ -210,11 +210,11 @@
 
      if( nargs.eq.1 .and. .not.found_ps ) then
           print *, 'Cannot find PS in File: ',trim(filename1)
-          call exit(1)
+          error stop 1
      endif
      if( nargs.eq.2 .and. .not.found_ps .and. .not.found_ps2 ) then
           print *, 'Cannot find PS in File: ',trim(filename1),' or ',trim(filename2)
-          call exit(1)
+          error stop 1
      endif
 
 ! *************************************************************************
@@ -241,7 +241,7 @@
             call gfio_getvar ( id1,trim(PSNAME),nymd,nhms,im,jm,0, 1,ps,rc )
             if( rc.ne.0 ) then
                 print *, 'Failed to get PS from ',trim(filename1),' for: ',nymd,nhms
-                call exit(1)
+                error stop 1
             endif
         endif
 
@@ -250,13 +250,13 @@
                 call gfio_getvar ( id2,trim(PSNAME),nymd,nhms,im,jm,0, 1,ps2,rc )
                 if( rc.ne.0 ) then
                     print *, 'Failed to get PS from ',trim(filename1),' for: ',nymd,nhms
-                    call exit(1)
+                    error stop 1
                 endif
                 if( found_ps ) then
                     checkps(1) = count( ps.ne.ps2 ) 
                     if( checkps(1).ne.0 ) then
                         print *, 'PS from ',trim(filename1),' and ',trim(filename2),' do not match!'
-                        call exit(1)
+                        error stop 1
                     endif
                 else
                     ps = ps2
@@ -278,14 +278,14 @@
                   call gfio_getvar ( id1,trim(vname(k)),nymd,nhms,im,jm,L,1,q,rc )
                   if( rc.ne.0 ) then
                       print *, 'Failed to get ',trim(vname(k)),' for: ',nymd,nhms,' at Level: ',L
-                      call exit(1)
+                      error stop 1
                   endif
                   plev = lev(L)*100
                   where( ps.lt.plev ) q = undef
                   call gfio_putvar ( id1,trim(vname(k)),nymd,nhms,im,jm,L,1,q,rc )
                   if( rc.ne.0 ) then
                       print *, 'Failed to write ',trim(vname(k)),' for: ',nymd,nhms,' at Level: ',L
-                      call exit(1)
+                      error stop 1
                   endif
               endif
               enddo
@@ -310,6 +310,6 @@
                                                                                                 ,/  &
                "      PRS_filename (required)  is the name of the PRS file which is to be fixed"  ,/  &
                "       PS_filename (optional)  is the name of the file containing PS (if not present in PRS_filename)" ,/  )
-      call exit(1)
+      error stop 1
       end subroutine usage
 

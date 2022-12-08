@@ -393,7 +393,7 @@
       print *, '--------------------------'
       print *
 
-      call exit(0)
+      stop
 
 !...................................................................................
 
@@ -429,7 +429,7 @@
 !EOP
 !-----------------------------------------------------------------------
 
-      integer i, iarg, argc, iargc, ires
+      integer i, iarg, argc, ires
       character(len=255) argv
 
       logical sin, sout, pin, pout, geos4res, gsires
@@ -451,23 +451,23 @@
       dyn_sout = 'NONE'
       dyn_pout = 'NONE'
 
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage_()
 
       iarg = 0
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          select case ( argv )
          case ("-pick")
             pick = .true.
             if ( iarg+2 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) nymd_s
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) nhms_s
          case ("-realp")
             realp = .true.
@@ -494,7 +494,7 @@
          case ("-res")
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, res )
+            call get_command_argument ( iArg, res )
             select case (res)
               case ("a")
                     ires=1
@@ -508,38 +508,38 @@
                     ires=5
               case default
                     print *, 'Sorry this resolution not supported'
-                    call exit(1)
+                    error stop 1
             end select
             interp = .true.
          case ("-os")
             sout = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_sout )
+            call get_command_argument ( iArg, dyn_sout )
          case ("-op")
             pout = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_pout )
+            call get_command_argument ( iArg, dyn_pout )
          case ("-s")
             sin = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_sin )
+            call get_command_argument ( iArg, dyn_sin )
          case ("-p")
             pin = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_pin )
+            call get_command_argument ( iArg, dyn_pin )
          case ("-a")
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) pcoef
          case ("-scale")
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) pscal
          end select
       end do
@@ -670,7 +670,7 @@
       print *
       print *, trim(myname) // ': ' // trim(msg)
       print *
-      call exit(1)
+      error stop 1
       end subroutine die
 !.......................................................................
 

@@ -75,7 +75,7 @@ c -----------------------------
       character*2    time,hour0,mins0
       character*1    char
 
-      integer n,m,nargs,iargc,L,nbeg,nfiles,npfiles,mlev
+      integer n,m,nargs,L,nbeg,nfiles,npfiles,mlev
 
       real    undef,psmax,psmin
       integer i,j,ndt,ks
@@ -119,13 +119,13 @@ C **********************************************************************
        lmout  = -999
        psnetcdf = .true.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
 
@@ -960,7 +960,7 @@ C***********************************************************************
      .         "  -tag    output_tag:  Optional Filename Tag for output: fname(s).tag (default: grid.IMxJM)"            ,/
      .                                                                                                                  ,/
      .         ) 
-      call exit(7)
+      error stop 7
       end subroutine usage
 
       subroutine hinterp ( qin,iin,jin,qout,iout,jout,mlev,undef,msgn,norder,check )

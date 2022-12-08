@@ -125,7 +125,7 @@ c ------------------
       logical recon
       logical ihavetv,agridw
       integer precision
-      integer i,j,k,L,n,nargs,iargc
+      integer i,j,k,L,n,nargs
 
 c Analysis Grads CTL File Variables
 c ---------------------------------
@@ -158,13 +158,13 @@ C **********************************************************************
            nymd = -999
            nhms = -999
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-dyn'   ) dynrst = trim(arg(n+1))
@@ -790,7 +790,7 @@ c ------------------
       call gfio_getvar     ( id,'ps',nymd,nhms,imana,jmana,0,1 ,dum2d ,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find NCEP Surface Pressure variable'
-          call exit(7)
+          error stop 7
       endif
       if( lonbeg.eq.0.0 ) call hflip( dum2d,imana,jmana,1 )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -802,7 +802,7 @@ c ------------------
       call gfio_getvar ( id,'hght',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find NCEP Height variable'
-          call exit(7)
+          error stop 7
       endif
       if( lonbeg.eq.0.0 ) call hflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -816,12 +816,12 @@ c -----
       call gfio_getvar ( id,'uwnd',nymd,nhms,imana,jmana,1,lmana,dumu,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find NCEP U-Wind variable'
-          call exit(7)
+          error stop 7
       endif
       call gfio_getvar ( id,'vwnd',nymd,nhms,imana,jmana,1,lmana,dumv,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find NCEP V-Wind variable'
-          call exit(7)
+          error stop 7
       endif
 
 #if 0
@@ -855,7 +855,7 @@ c -----------
       call gfio_getvar ( id,'tmpu',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find NCEP Temperature variable'
-          call exit(7)
+          error stop 7
       endif
       if( lonbeg.eq.0.0 ) call hflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -869,7 +869,7 @@ c -----------------
       call gfio_getvar ( id,'rh',nymd,nhms,imana,jmana,1,lmana,dum3d,rc )
       if( rc.ne.0 ) then
           print *, 'Could not find NCEP Rel.Hum. variable'
-          call exit(7)
+          error stop 7
       endif
       if( lonbeg.eq.0.0 ) call hflip( dum3d,imana,jmana,lmana )
       if( im.ne.imana .or. jm.ne.jmana ) then
@@ -2250,7 +2250,7 @@ C***********************************************************************
       print *, "  -tag          tag:  Optional Prefix tag for output files"
       print *, "  -ozone              Optional Flag to add ozone"
       print *
-      call exit(7)
+      error stop 7
       end
 
       subroutine get_slp ( ps,phis,slp,pe,pk,tv,rgas,grav,im,jm,km )

@@ -56,7 +56,7 @@
       character*5    extn
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,i,j,L,nymd0,nhms0
+      integer n,nargs,i,j,L,nymd0,nhms0
       integer precision
       logical file_exists
       logical dtoa
@@ -78,14 +78,14 @@
       precision = 0  ! 32-bit: 0, 64-bit: 1
            extn = 'nc4'
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
 
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage()
@@ -903,7 +903,7 @@
       print *, "-------"
       print *, "     tag.bkg.eta.yyyymmdd_hhz.nc4"
       print *
-      call exit(7)
+      error stop 7
       end
 
       subroutine dtoa_winds ( ud,vd,ua,va,im,jm,lm )

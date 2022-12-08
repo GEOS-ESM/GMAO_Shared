@@ -192,7 +192,7 @@
 !  All done
 !  --------
    if(associated(xtrnames)) deallocate(xtrnames)
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -263,7 +263,7 @@ CONTAINS
 
       character*4, parameter :: myname = 'init'
 
-      integer iret, i, iarg, argc, iargc
+      integer iret, i, iarg, argc
       integer ii,jj,ie,il
       integer uprec, iprec, ires, jcapusr
       logical verb, setres, geos4res, setjcap
@@ -320,7 +320,7 @@ CONTAINS
 !     Parse command line
 !     ------------------
       dynfile = 'DEFAULT'
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
 
       iarg = 0
@@ -329,30 +329,30 @@ CONTAINS
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          select case (argv)
            case ("-vdc")
              dophys = .true.
            case ("-o")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, dynfile )
+             call get_command_argument ( iarg, dynfile )
            case ("-lwi")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, lwifile )
+             call get_command_argument ( iarg, lwifile )
            case ("-rc")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, RCfile )
+             call get_command_argument ( iarg, RCfile )
            case ("-expid")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, expid )
+             call get_command_argument ( iarg, expid )
            case ("-res")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, res )
+             call get_command_argument ( iarg, res )
              select case (res)
                case ("a")
                      ires=1
@@ -374,13 +374,13 @@ CONTAINS
                      ires=size(IMS5)
                case default
                      print *, 'Sorry this resolution not supported'
-                     call exit(1)
+                     error stop 1
              end select
              setres = .true.
            case ("-jcap")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, argv )
+             call get_command_argument ( iarg, argv )
              read(argv,*) jcapusr
              select case (jcapusr)
                case (62)
@@ -397,7 +397,7 @@ CONTAINS
                      ires=6
                case default
                      print *, 'Sorry this resolution not supported'
-                     call exit(1)
+                     error stop 1
              end select
              setjcap = .true.
            case ('-verb')
@@ -413,38 +413,38 @@ CONTAINS
            case ('-nlevs')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iarg, str )
+            call get_command_argument ( iarg, str )
             read(str,*) kn
             if (count(kn==KMS).eq.0) then
                 print *, 'Cannot handle this vertical number of levels'
-                call exit(1)
+                error stop 1
             endif
            case ('-tracers')
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, trnames )
+             call get_command_argument ( iarg, trnames )
            case ('-pick')
                if ( iarg+2 .gt. argc ) call usage()
                iarg = iarg + 1
-               call GetArg ( iarg, argv )
+               call get_command_argument ( iarg, argv )
                read(argv,*) nymd
                iarg = iarg + 1
-               call GetArg ( iarg, argv )
+               call get_command_argument ( iarg, argv )
                read(argv,*) nhms
                pick = .true.
            case ('-fakedate')
                if ( iarg+2 .gt. argc ) call usage()
                iarg = iarg + 1
-               call GetArg ( iarg, argv )
+               call get_command_argument ( iarg, argv )
                read(argv,*) nymdf
                iarg = iarg + 1
-               call GetArg ( iarg, argv )
+               call get_command_argument ( iarg, argv )
                read(argv,*) nhmsf
                fakedate = .true.
            case ('-freq')
                if ( iarg+1 .gt. argc ) call usage()
                iarg = iarg + 1
-               call GetArg ( iarg, argv )
+               call get_command_argument ( iarg, argv )
                read(argv,*) myfreq
            case ('-indxlevs')
                indxlevs = .true.
@@ -458,7 +458,7 @@ CONTAINS
            case ('-prec')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iarg, str )
+            call get_command_argument ( iarg, str )
             read(str,*) iprec
             if(iprec==32)prec=0
             if(iprec==64)prec=1
@@ -609,7 +609,7 @@ CONTAINS
       print *
       print *, ' Last updated: 05 Jan 2006; Todling '
       print *
-      call exit(1)
+      error stop 1
       end subroutine usage
       
 !.................................................................
@@ -617,7 +617,7 @@ CONTAINS
       subroutine die ( myname, msg )
       character(len=*) :: myname, msg
       write(*,'(a)') trim(myname) // ': ' // trim(msg)
-      call exit(1)
+      error stop 1
       end subroutine die
 
 !.................................................................

@@ -63,7 +63,7 @@ c -----------------------------
       character*1    char
       data output  /'eta2prs'/
 
-      integer n,m,nargs,iargc,L,nfiles,npfiles,mlev
+      integer n,m,nargs,L,nfiles,npfiles,mlev
 
       real*8   lonbeg
       real     undef
@@ -118,13 +118,13 @@ C **********************************************************************
       nopres  =  .false.
       underg  =  .false.
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.eq.0 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-ptop'   ) read(arg(n+1),*) ptop
@@ -2534,7 +2534,7 @@ c ---------------------------------
      .         "  -noquad           :  Implies No Computation of Quadratics (default: quadratics are computed )"        ,/
      .         "  -hdf              :  Logical Flag for HDF Output (default: .TRUE., .FALSE. implies flat binary file)" ,/
      .         ) 
-      call exit(7)
+      error stop 7
       end subroutine usage
       subroutine get_slp ( ps,phis,slp,pe,pk,thv,rgas,grav,im,jm,km )
       implicit   none

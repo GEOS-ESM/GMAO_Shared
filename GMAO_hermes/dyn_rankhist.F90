@@ -247,7 +247,7 @@
       print*, 'Error: something is not adding up'
       print*, 'sum(hist)     = ', sum(hist)
       print*, 'total samples = ', icnt
-      call exit(1)
+      error stop 1
    endif
    print *, 'total number of samples: ', icnt
    write(fnout,'(2a,i3.3,2a)')  &
@@ -278,7 +278,7 @@
    close(999)
    open (999,file='DYN_RANKHIST',form='formatted')
    close(999)
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -320,7 +320,7 @@ CONTAINS
 
       character*4, parameter :: myname = 'init'
 
-      integer i, iarg, argc, iargc
+      integer i, iarg, argc
       character(len=255) :: argv
 
       files = 'NONE'
@@ -343,7 +343,7 @@ CONTAINS
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
 
       iarg = 0
@@ -352,7 +352,7 @@ CONTAINS
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          
          select case (argv)
            case ("-g5")
@@ -360,39 +360,39 @@ CONTAINS
            case ("-o")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, dyn_out )
+             call get_command_argument ( iArg, dyn_out )
            case ("-mem")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) members
            case ("-plev")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) plev
            case ("-normal")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) mean
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) sigma
            case ("-reg")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, reg )
+             call get_command_argument ( iArg, reg )
            case ("-seed")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) seed
            case ("-var")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, var )
+             call get_command_argument ( iArg, var )
            case ("-h")
              if ( iarg+1 .gt. argc ) call usage()
            case ("-verbose")
@@ -449,7 +449,7 @@ CONTAINS
       print *
       print *, ' Remarks: '
       print *
-      call exit(1)
+      error stop 1
       end subroutine usage
 
 !.................................................................

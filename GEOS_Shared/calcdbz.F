@@ -160,8 +160,8 @@ c      Calculate variable intercept parameters
 
                   IF (IVARINT.EQ.1) THEN
 
-                      TEMP_C = DMIN1(-0.001D0,TMK(I,J,K)-CELKEL)
-                      SONV = DMIN1(2.0D8,2.0D6*EXP(-0.12D0*TEMP_C))
+                      TEMP_C = MIN(-0.001D0,TMK(I,J,K)-CELKEL)
+                      SONV = MIN(2.0D8,2.0D6*EXP(-0.12D0*TEMP_C))
 
                       GONV = GON
                       IF (QGR(I,J,K).GT.R1) THEN

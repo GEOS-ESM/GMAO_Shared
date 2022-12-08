@@ -10,6 +10,7 @@
 ! !USES:
 !
       use m_dyn
+      use iso_fortran_env
 
       implicit NONE
       private
@@ -460,8 +461,8 @@ CONTAINS
         tlat=tlat+rlat
         glats(j,1)=pi180*ulat
         glats(j,2)=pi180*tlat
-        slats(j,1)=dsin(real(ulat,8))
-        slats(j,2)=dsin(real(tlat,8))
+        slats(j,1)=sin(real(ulat,REAL64))
+        slats(j,2)=sin(real(tlat,REAL64))
       enddo
 !
        jweights(1,1)=0.d0  ! not used

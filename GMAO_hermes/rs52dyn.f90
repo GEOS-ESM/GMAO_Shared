@@ -53,7 +53,7 @@
       character*120, allocatable :: arg(:)
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,i,j,L,rc
+      integer n,nargs,i,j,L,rc
 
       integer prec, ks
       real*8  ptop, pint
@@ -80,11 +80,11 @@
       nhms_ana = -999
           prec = 0
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs==0) call usage()
       allocate ( arg(nargs) )
       do n=1,nargs
-        call getarg(n,arg(n))
+        call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage()
@@ -365,6 +365,6 @@
       print *
       print *, " Last updated 26Jan2006, Elena N."
       print *
-      call exit(7)
+      error stop 7
       end
 

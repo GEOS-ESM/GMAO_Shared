@@ -1370,10 +1370,10 @@ c ---------------------------------
       integer irc
 #if (mpi)
       integer  ierror
-      call system ('touch gcm_error')
+      call execute_command_line ('touch gcm_error')
       call mpi_finalize (ierror)
 #endif
-      call exit (irc)
+      error stop irc
       return
       end
 
