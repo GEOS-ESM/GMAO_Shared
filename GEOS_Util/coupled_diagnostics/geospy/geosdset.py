@@ -48,14 +48,15 @@ def _load_tripolar(exp, vardata):
 
     # Rename coords for XESMF
     if monthly:
-        ds=ds.rename({'Xdim':'x', 'Ydim':'y'})
-        ds=ds.rename({'lons': 'lon', 'lats': 'lat'})
+        xname='Xdim'; yname='Ydim'; lonname='lons'; latname='lats'
     else:
-        ds=ds.assign_coords({'LON':(('lat','lon'),ds['LON'][0].values), 
-                             'LAT':(('lat','lon'),ds['LAT'][0].values)})
-        ds=ds.rename({'lon':'x', 'lat':'y'})
-        ds=ds.rename({'LON': 'lon', 'LAT': 'lat'})
-        ds.coords.update({'x': ds.lon[0,:], 'y': ds.lat[:,0]})
+        xname='lon'; yname='lat'; lonname='LON'; latname='LAT'
+
+    ds=ds.assign_coords({lonname:((yname,xname),ds[lonname][0].values), 
+                         latname:((yname,xname),ds[latname][0].values)})
+    ds=ds.rename({xname:'x', yname:'y'})
+    ds=ds.rename({lonname: 'lon', latname: 'lat'})
+    ds.coords.update({'x': ds.lon[0,:], 'y': ds.lat[:,0]})
 
     ds.update({'dx': (('y','x'), dx.values), 
                'dy': (('y','x'), dy.values),
