@@ -20,6 +20,5 @@ def main(exp_conf):
         print(f'\nPlotting {module}\n'.upper())
         importlib.import_module(module).main(exps)
 
-    
 if __name__ == "__main__":
     main(sys.argv[1])
