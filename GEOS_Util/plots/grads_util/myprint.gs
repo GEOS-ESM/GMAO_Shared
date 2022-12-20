@@ -90,22 +90,25 @@ if( XDIM = 'NULL' & YDIM != 'NULL' )
     endif
 endif
 
-if( (LOGNAME = 'dao_ops_' & HOST = 'discover') )
+*if( (LOGNAME = 'dao_ops_' & HOST = 'discover') )
 
-say 'printim 'NAME'.gif 'TYPE' x'XDIM' y'YDIM
-    'printim 'NAME'.gif 'TYPE' x'XDIM' y'YDIM
+*say 'printim 'NAME'.gif 'TYPE' x'XDIM' y'YDIM
+*    'printim 'NAME'.gif 'TYPE' x'XDIM' y'YDIM
 
-else
+say 'gxprint 'NAME'.gif 'TYPE' x'XDIM' y'YDIM
+    'gxprint 'NAME'.gif 'TYPE' x'XDIM' y'YDIM
 
-'enable  print 'NAME'.out'
-'print'
-'disable print'
-if( BW = 'NULL' )
-    '!'GEOSUTIL'/plots/grads_util/make_gif -name 'NAME' -rotate 'ROTATE' 'ANTIALIAS' -density 'DENSITY'     -xdim 'XDIM' -ydim 'YDIM' -ext 'EXT' &'
-else
-    '!'GEOSUTIL'/plots/grads_util/make_gif -name 'NAME' -rotate 'ROTATE' 'ANTIALIAS' -density 'DENSITY' -bw -xdim 'XDIM' -ydim 'YDIM' -ext 'EXT' &'
-endif
-
-endif
+*else
+*
+*'enable  print 'NAME'.out'
+*'print'
+*'disable print'
+*if( BW = 'NULL' )
+*    '!'GEOSUTIL'/plots/grads_util/make_gif -name 'NAME' -rotate 'ROTATE' 'ANTIALIAS' -density 'DENSITY'     -xdim 'XDIM' -ydim 'YDIM' -ext 'EXT' &'
+*else
+*    '!'GEOSUTIL'/plots/grads_util/make_gif -name 'NAME' -rotate 'ROTATE' 'ANTIALIAS' -density 'DENSITY' -bw -xdim 'XDIM' -ydim 'YDIM' -ext 'EXT' &'
+*endif
+*
+*endif
 
 return

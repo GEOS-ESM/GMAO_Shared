@@ -36,7 +36,7 @@ if( $arch == 'Linux'    ) then
                               setenv NCCS_SHARE   ${SHARE}/gmao_ops/
                               setenv VERIFICATION ${NCCS_SHARE}/verification
                               setenv OPENGADIR    ${SHARE}/gmao_ops/opengrads/Contents
-                              setenv GAVERSION    2.0.1.oga.1
+                              setenv GAVERSION    2.1.0.oga.1
                               setenv GRADS_LOC    ${OPENGADIR}
 
                               setenv PATH         ${OPENGADIR}:${PATH}
