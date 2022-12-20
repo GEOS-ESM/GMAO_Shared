@@ -725,6 +725,7 @@ if( toplev >= 100 )
     levmin  = 100
 endif
 
+if (1 = 0)
 loop = 1
 while( loop <= loopdim )
            if( loop = 1 ) ; levmin = 100 ; loopflag = ""  ; endif
@@ -826,6 +827,7 @@ endwhile
 
 loop = loop + 1
 endwhile
+endif
 
 ************************************************************************
 
@@ -890,7 +892,7 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
          newfile = result
 'close ' newfile
 
-'set gxout shaded'
+'set gxout grfill'
 'rgbset'
 
 * Define New Variables for Montage Plots
@@ -954,7 +956,7 @@ while( loop <= loopdim )
 'set t 'tbeg.m' 'tdif.m
 'set lev 1000 'levmin
 
-         critvalue   = 90
+         critvalue   = 95
 ' define sigdiffcrit = sigdiff'critvalue
 
 ' minmax sigdiffcrit'
@@ -1109,26 +1111,26 @@ say 'MIN_THICKNESS for plots: 'min_thickness
 ************************************************************************
 ****        To hardwire contour levels within Montage plots     ********
 ************************************************************************
-* if( field = 'h' )
-* say 'Hardwire values for plots,         dcint = '350 ; dcint = 350
-* say 'Hardwire values for plots, min_thickness = '100 ; min_thickness = 100
-* endif
-* if( field = 't' )
-* say 'Hardwire values for plots,         dcint = '35 ; dcint = 35
-* say 'Hardwire values for plots, min_thickness = '7 ; min_thickness = 7
-* endif
-* if( field = 'u' )
-* say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
-* say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
-* endif
-* if( field = 'v' )
-* say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
-* say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
-* endif
-* if( field = 'q' )
-* say 'Hardwire values for plots,         dcint = '20 ; dcint = 20
-* say 'Hardwire values for plots, min_thickness = '0.05 ; min_thickness = 0.05
-* endif
+ if( field = 'h' )
+ say 'Hardwire values for plots,         dcint = '350 ; dcint = 350
+ say 'Hardwire values for plots, min_thickness = '100 ; min_thickness = 100
+ endif
+ if( field = 't' )
+ say 'Hardwire values for plots,         dcint = '35 ; dcint = 35
+ say 'Hardwire values for plots, min_thickness = '7 ; min_thickness = 7
+ endif
+ if( field = 'u' )
+ say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
+ say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
+ endif
+ if( field = 'v' )
+ say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
+ say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
+ endif
+ if( field = 'q' )
+ say 'Hardwire values for plots,         dcint = '20 ; dcint = 20
+ say 'Hardwire values for plots, min_thickness = '0.05 ; min_thickness = 0.05
+ endif
 ************************************************************************
 
 flag = ''
@@ -1155,7 +1157,6 @@ endif
  ' set csmooth off'
  ' shades 'dcint
 
- ' set ccols 59 57 55 47 44    36 34 32 30 0 20 21    23 24 25 26 27 28 29'
  ' run getenv SHADES_CLEVS'
               SHADES_CLEVS = result
   clevs = subwrd( SHADES_CLEVS,1 )
@@ -1177,19 +1178,30 @@ endif
  if( levmin = 100 )
     'set gxout grfill'
  else
-    'set gxout shaded'
+    'set gxout grfill'
  endif
 
+* fill high confidence
+* -------------------------------
  'set clevs 'clevs
  'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
+ say 'DISPLAY sigdiff99:'
+ say 'CLEVS: 'clevs
+ say 'CCOLS: 'ccols
+ ' d sigdiff99 '
+ ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
+* Fill stippled patterns
+* -------------------------------
+ 'set clevs 'clevs
+ 'set ccols 159 157 155 147 144 137 136 134 132 130 0 120 121 122 123 124 125 126 127 128 129'
+*'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
  say 'DISPLAY sigdiffcrit:'
  say 'CLEVS: 'clevs
  say 'CCOLS: 'ccols
-
  ' d sigdiffcrit '
- ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
+if (1 = 0)
 * Contour sigdiff that is = 90, 95, & 99% confidence diffs (black lines without label)
 * ------------------------------------------------------------------------------------
 'set gxout contour'
@@ -1265,6 +1277,7 @@ endif
 'set ccolor 32'
 'set clevs  0'
 'd sigdiffm90'
+endif
 
 * reset some background values
 * ----------------------------
@@ -1287,11 +1300,11 @@ dcintx = dcint * 100
          dcintx = result / 100
 
 'set  strsiz .132'
-'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'name'   'region
-'draw string 6.0 7.90 'rms_label' (x10`a-3`n) > 'critvalue'% Confidence (Shaded)'
+'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')'
+'draw string 6.0 7.90 'rms_label' (x10`a-3`n) >95% (Hatched) >'critvalue'% (Shaded)'
 
 'set  strsiz .125'
-'draw string 6.0 7.65 'desc
+'draw string 6.0 7.65 'name' 'region
 'set  strsiz .12'
 'draw string 6.0 0.72 Forecast Day'
 
@@ -1305,9 +1318,9 @@ dcintx = dcint * 100
 
 'set  string 1 l 3 0'
 'set  strsiz .087'
-'draw string 0.23 1.50 Solid Line       (=90%)'
-'draw string 0.23 1.35 Dot-Dash Line  (=95%)'
-'draw string 0.23 1.20 Long-Dash Line (=99%)'
+*'draw string 0.23 1.50 Solid Line     (=90%)'
+*'draw string 0.23 1.35 Dot-Dash Line  (=95%)'
+*'draw string 0.23 1.20 Long-Dash Line (=99%)'
 
 'set  string 1 c 6 90'
 'set  strsiz .18'

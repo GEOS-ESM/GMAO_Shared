@@ -142,7 +142,8 @@
       character*3   months(12)
       data months /'JAN','FEB','MAR','APR','MAY','JUN',  &
                    'JUL','AUG','SEP','OCT','NOV','DEC'/
-
+      character*2   regions(4)
+      data regions/'GL','NH','TR','SH'/
       integer  ndates
       integer  dates(3,1000)
       integer  iargc
@@ -1031,6 +1032,30 @@
               write(6,1003) int(pref),nymd,nhms,hour,corr(iregion,lev,nfield,nt),fmean,amean,cmean
               printout = .true.
           endif
+          if( trim(fields_3d(n)%name).eq.'h' .and. iregion.eq.4 .and. zlev(lev).eq.pref ) then
+              write(6,1002) int(pref),nymd,nhms,hour,corr(iregion,lev,nfield,nt),fmean,amean,cmean
+              printout = .true.
+          endif
+          if (iregion.eq.2 .or. iregion.eq.3 .or. iregion.eq.4) then
+          if ( trim(fields_3d(n)%name).eq.'u' .or. &
+               trim(fields_3d(n)%name).eq.'v' .or. &
+               trim(fields_3d(n)%name).eq.'t' .or. &
+               trim(fields_3d(n)%name).eq.'h' .or. &
+               trim(fields_3d(n)%name).eq.'q' ) then 
+               if ( zlev(lev).eq.925 .or. zlev(lev).eq.850 .or. &
+                    zlev(lev).eq.750 .or. zlev(lev).eq.600 .or. &
+                    zlev(lev).eq.500 .or. zlev(lev).eq.400 .or. &
+                    zlev(lev).eq.300 .or. zlev(lev).eq.200 .or. &
+                    zlev(lev).eq.100 .or. zlev(lev).eq.70  .or. &
+                    zlev(lev).eq.30  .or. zlev(lev).eq.10  ) then
+                    write(6,1005) int(zlev(lev)),trim(regions(iregion)),&
+                                  trim(fields_3d(n)%name),nymd,nhms,hour,&
+                                  rms(iregion,lev,nfield,nt,1),&
+                                  fmean,amean,cmean
+                    printout = .true.
+               endif
+          endif
+          endif
       endif
 
           ! if requested, write out stats info for GMAOpy
@@ -1264,9 +1289,14 @@
  5009 format(a,2x,i3,' 0 ',a)
  5010 format('ENDVARS')
 
+ 1002 format(1x,i4,'-mb SH Height at ',i8,2x,i6.6,' (',i3,' hrs)  corr: ',f9.7, &
+             3x,'fcst: ',f7.2,2x,'ana: ',f7.2,2x,'cli: ',f7.2,' (m)')
  1003 format(1x,i4,'-mb NH Height at ',i8,2x,i6.6,' (',i3,' hrs)  corr: ',f9.7, &
              3x,'fcst: ',f7.2,2x,'ana: ',f7.2,2x,'cli: ',f7.2,' (m)')
  1004 format(1x,'Date: ',i8,2x,i6.6,' (',i3,' hrs)')
+
+ 1005 format(1x,i4,'-mb ',a,' ',a,' at ',i8,2x,i6.6,' (',i3,' hrs) rmse: ',es9.2, &
+             3x,'fcst: ',es9.2,2x,'ana: ',es9.2,2x,'cli: ',es9.2,' (m)')
 
 ! **********************************************************************
 ! ****                       End Collection Loop                    ****
