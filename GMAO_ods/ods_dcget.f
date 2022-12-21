@@ -67,6 +67,7 @@
 !       12Nov2014 - Weir        - add mopitt terra and acos/gosat+oco2 support
 !       2018-05-25  wargan      - added OMPS
 !       2019-04-15  Sienkiewicz - add handling of netcdf4 diag files.
+!       12Dec2022 - Weir        - improved trace gas support
 !
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -366,16 +367,19 @@
 
          end do
 
-	 
-      else if (trim(satype)/='sbuv2' .and. trim(satype)/='omi' .and.
-     &         trim(satype)/='mls'   .and. trim(satype)/='mls20' .and.
-     &         trim(satype)/='mls22' .and. trim(satype)/='mls30' .and.
-     &         trim(satype)/='mls55' .and. trim(satype)/='tomseff' .and.
-     &	       trim(satype)/='omieff'.and. trim(satype)/='o3lev' .and.
-     &	       trim(satype)/='acos'.and. trim(satype)/='mopitt' .and.
-     &         trim(satype)/='gome'  .and. trim(satype)/='ompslpvis' .and.
-     &         trim(satype)/='ompslpnc' .and. trim(satype)/='ompslpuv'.and.
-     &         trim(satype)/='ompsnm'.and. trim(satype)/='ompsnp' .and.
+
+      else if (trim(satype)/='sbuv2'  .and. trim(satype)/='omi'     .and.
+     &         trim(satype)/='mls'    .and. trim(satype)/='mls20'   .and.
+     &         trim(satype)/='mls22'  .and. trim(satype)/='mls30'   .and.
+     &         trim(satype)/='mls55'  .and. trim(satype)/='tomseff' .and.
+     &         trim(satype)/='omieff' .and. trim(satype)/='o3lev'   .and.
+     &         trim(satype)/='acos'   .and. trim(satype)/='mlstgas' .and.
+     &         trim(satype)/='tgez'   .and. trim(satype)/='tgev'    .and.
+     &         trim(satype)/='tgav'   .and. trim(satype)/='tgaz'    .and.
+     &         trim(satype)/='tgop'   .and.
+     &         trim(satype)/='gome'   .and. trim(satype)/='ompslpvis' .and.
+     &         trim(satype)/='ompslpnc'  .and. trim(satype)/='ompslpuv' .and.
+     &         trim(satype)/='ompsnm'    .and. trim(satype)/='ompsnp'   .and.
      &         trim(satype)/='ompsnmeff' .and. trim(satype)/='ompsnpnc') then
       
 !        Radiance data:
@@ -386,7 +390,7 @@
 
          read (lu,iostat=ios) isis,dplat,satype,jiter,nchanl,npred,idate,ireal,ipchan,iextra,jextra,
      &                        idiag,angord,iversion_radiag,inewpc,ioff,ijacob
-	 
+
          lextra=iextra>0
          if (ios==0) then
 

@@ -179,8 +179,13 @@
      &           .not. trim(satype)=='omi'     .and.
      &           .not. trim(satype)=='tomseff' .and.
      &           .not. trim(satype)=='gome'    .and.
-     &           .not. trim(satype)=='mopitt'  .and.
      &           .not. trim(satype)=='acos'    .and.
+     &           .not. trim(satype)=='mlstgas' .and.
+     &           .not. trim(satype)=='tgez'    .and.
+     &           .not. trim(satype)=='tgev'    .and.
+     &           .not. trim(satype)=='tgav'    .and.
+     &           .not. trim(satype)=='tgaz'    .and.
+     &           .not. trim(satype)=='tgop'    .and.
      &           .not. trim(satype)=='ompsnm'  .and.
      &           .not. trim(satype)=='ompsnmeff'  .and.
      &           .not. trim(satype)=='ompsnp' .and.
