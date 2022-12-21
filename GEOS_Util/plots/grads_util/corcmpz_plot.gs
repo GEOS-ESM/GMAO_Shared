@@ -599,10 +599,6 @@ endwhile
 'q defval astudtout 1 1'
 critval99=subwrd(result,3)
 
-'astudt 'dof' 0.02'  ;* 98% Confidence
-'q defval astudtout 1 1'
-critval98=subwrd(result,3)
-
 'astudt 'dof' 0.05'  ;* 95% Confidence
 'q defval astudtout 1 1'
 critval95=subwrd(result,3)
@@ -614,10 +610,6 @@ critval90=subwrd(result,3)
 'astudt 'dof' 0.20'  ;* 80% Confidence
 'q defval astudtout 1 1'
 critval80=subwrd(result,3)
-
-'astudt 'dof' 0.32'  ;* 68% Confidence
-'q defval astudtout 1 1'
-critval68=subwrd(result,3)
 
 * Estimate Statistically Significant Range for Zero-Mean Hypothesis in a Paired t-Test)
 * -------------------------------------------------------------------------------------
@@ -633,10 +625,6 @@ while( m<=mexps )
 'define rUp99'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp99'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
-'define dx = se*'critval98
-'define rUp98'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
-'define rLp98'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
-
 'define dx = se*'critval95
 'define rUp95'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp95'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
@@ -648,10 +636,6 @@ while( m<=mexps )
 'define dx = se*'critval80
 'define rUp80'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp80'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
-
-'define dx = se*'critval68
-'define rUp68'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
-'define rLp68'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
 m = m + 1
 endwhile
@@ -755,13 +739,6 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
          newfile = result
 'close ' newfile
 
-* Compute difference between 98% Confidence and zero: rUp98diff
-* -------------------------------------------------------------
-'makezdif3 -q1   rUp98'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp98'
-'getinfo numfiles'
-         newfile = result
-'close ' newfile
-
 * Compute difference between 95% Confidence and zero: rUp95diff
 * -------------------------------------------------------------
 'makezdif3 -q1   rUp95'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp95'
@@ -783,13 +760,6 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
          newfile = result
 'close ' newfile
 
-* Compute difference between 68% Confidence and zero: rUp68diff
-* -------------------------------------------------------------
-'makezdif3 -q1   rUp68'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp68'
-'getinfo numfiles'
-         newfile = result
-'close ' newfile
-
 'set gxout grfill'
 'rgbset'
 
@@ -803,29 +773,24 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 * ----------------
 'define sigdiffp90   = 1000 * ( ravediff-rUp90diff )'
 'define sigdiffp95   = 1000 * ( ravediff-rUp95diff )'
-'define sigdiffp98   = 1000 * ( ravediff-rUp98diff )'
 'define sigdiffp99   = 1000 * ( ravediff-rUp99diff )'
 
 * For ravediff < 0
 * ----------------
 'define sigdiffm90 = 1000 * ( ravediff+rUp90diff )'
 'define sigdiffm95 = 1000 * ( ravediff+rUp95diff )'
-'define sigdiffm98 = 1000 * ( ravediff+rUp98diff )'
 'define sigdiffm99 = 1000 * ( ravediff+rUp99diff )'
 
 'define maskm90 = ( sigdiffm90 - abs(sigdiffm90) )/2'
 'define maskm95 = ( sigdiffm95 - abs(sigdiffm95) )/2'
-'define maskm98 = ( sigdiffm98 - abs(sigdiffm98) )/2'
 'define maskm99 = ( sigdiffm99 - abs(sigdiffm99) )/2'
 
 'define maskp90 = ( sigdiffp90 + abs(sigdiffp90) )/2'
 'define maskp95 = ( sigdiffp95 + abs(sigdiffp95) )/2'
-'define maskp98 = ( sigdiffp98 + abs(sigdiffp98) )/2'
 'define maskp99 = ( sigdiffp99 + abs(sigdiffp99) )/2'
 
 'define sigdiff90 = maskm90 + maskp90'
 'define sigdiff95 = maskm95 + maskp95'
-'define sigdiff98 = maskm95 + maskp98'
 'define sigdiff99 = maskm99 + maskp99'
 
 
@@ -1003,6 +968,10 @@ endwhile
 
 if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
 
+* Hardwire values for correlation plots
+dcint = 2.0
+min_thickness = 1.0
+
 say '        DCINT for plots: 'dcint
 say 'MIN_THICKNESS for plots: 'min_thickness
 
@@ -1028,25 +997,14 @@ endif
  ' rgbset'
  ' set gxout grfill '
  ' set csmooth off'
- ' shades 'dcint
 
- ' run getenv SHADES_CLEVS'
-              SHADES_CLEVS = result
-  clevs = subwrd( SHADES_CLEVS,1 )
-  ii = 2
-  while( ii <= 9 )
-  clev  = subwrd( SHADES_CLEVS,ii )
-  clevs = clevs' 'clev
-  ii = ii + 1
-  endwhile
-  dcintfrac = min_thickness
-  clevs = clevs' -'dcintfrac' 'dcintfrac
-  ii = 10
-  while( ii <= 18 )
-  clev  = subwrd( SHADES_CLEVS,ii )
-  clevs = clevs' 'clev
-  ii = ii + 1
-  endwhile
+ clevs = ''
+ n = -10
+ while ( n <= 9 )
+   val = n * dcint + min_thickness 
+   clevs = clevs' 'val
+   n = n + 1
+ endwhile
 
  if( levmin = 100 )
     'set gxout grfill'
@@ -1064,93 +1022,23 @@ endif
  ' d sigdiff99 '
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
-* Fill stippled patterns
+* Fill dotted patterns
+* -------------------------------
+ 'set clevs 'clevs
+ 'set ccols 259 257 255 247 244 237 236 234 232 230 0 220 221 222 223 224 225 226 227 228 229'
+ say 'DISPLAY sigdiff90:'
+ say 'CLEVS: 'clevs
+ say 'CCOLS: 'ccols
+ ' d sigdiff90 '
+
+* Fill hatched patterns
 * -------------------------------
  'set clevs 'clevs
  'set ccols 159 157 155 147 144 137 136 134 132 130 0 120 121 122 123 124 125 126 127 128 129'
-*'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
- say 'DISPLAY sigdiffcrit:'
+ say 'DISPLAY sigdiff95:'
  say 'CLEVS: 'clevs
  say 'CCOLS: 'ccols
- ' d sigdiffcrit '
-
-if (1 = 0)
-* Contour sigdiff that is = 90, 95, & 99% confidence diffs (black lines without label)
-* ------------------------------------------------------------------------------------
-'set gxout contour'
-'set csmooth on'
-'set clab off'
-
-* First Contour using Black Lines
-* -------------------------------
-'set cstyle 2'
-'set cthick 8'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffp99'
-'set cstyle 2'
-'set cthick 8'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffm99'
-
-'set cstyle 6'
-'set cthick 6'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffp95'
-'set cstyle 6'
-'set cthick 6'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffm95'
-
-'set cstyle 1'
-'set cthick 5'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffp90'
-'set cstyle 1'
-'set cthick 5'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffm90'
-
-* Next Contour using Colored Lines
-* --------------------------------
-'set cstyle 2'
-'set cthick 7'
-'set ccolor 24'
-'set clevs  0'
-'d sigdiffp99'
-'set cstyle 2'
-'set cthick 7'
-'set ccolor 37'
-'set clevs  0'
-'d sigdiffm99'
-
-'set cstyle 6'
-'set cthick 5'
-'set ccolor 22'
-'set clevs  0'
-'d sigdiffp95'
-'set cstyle 6'
-'set cthick 5'
-'set ccolor 34'
-'set clevs  0'
-'d sigdiffm95'
-
-'set cstyle 1'
-'set cthick 4'
-'set ccolor 21'
-'set clevs  0'
-'d sigdiffp90'
-'set cstyle 1'
-'set cthick 4'
-'set ccolor 32'
-'set clevs  0'
-'d sigdiffm90'
-endif
+ ' d sigdiff95 '
 
 * reset some background values
 * ----------------------------
@@ -1168,7 +1056,7 @@ dcintx = dcint * 100
 
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')'
-'draw string 6.0 7.90 Anomaly Correlation Difference (x10`a-3`n) >95% (Hatched) >'critvalue'% (Shaded)'
+'draw string 6.0 7.90 ACORR Difference (x10`a-3`n) >90% (Dotted) >95% (Hatched) >99% (Shaded)'
 'set  strsiz .125'
 'draw string 6.0 7.65 'name' 'region
 'set  strsiz .12'
@@ -1181,12 +1069,6 @@ dcintx = dcint * 100
 'set  strsiz .32'
 'draw string 0.70 7.38 'reg
 'draw string 0.70 7.01 'FIELD
-
-'set  string 1 l 3 0'
-'set  strsiz .087'
-*'draw string 0.23 1.50 Solid Line     (=90%)'
-*'draw string 0.23 1.35 Dot-Dash Line  (=95%)'
-*'draw string 0.23 1.20 Long-Dash Line (=99%)'
 
 'set  string 1 c 6 90'
 'set  strsiz .18'
