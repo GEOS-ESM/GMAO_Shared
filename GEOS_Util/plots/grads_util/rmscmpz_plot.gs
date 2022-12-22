@@ -1118,7 +1118,6 @@ endif
 * Shade where sigdiff > critvalue confidence error bar (color shaded)
 * -------------------------------------------------------------------
  ' rgbset'
- ' set gxout grfill '
  ' set csmooth off'
 
  clevs = ''
@@ -1129,39 +1128,39 @@ endif
    n = n + 1
  endwhile
 
- if( levmin = 100 )
-    'set gxout grfill'
- else
-    'set gxout grfill'
- endif
-
-* fill high confidence
-* -------------------------------
- 'set clevs 'clevs
- 'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
- say 'DISPLAY sigdiff99:'
- say 'CLEVS: 'clevs
- say 'CCOLS: 'ccols
- ' d sigdiff99 '
- ' cbarn -xmid 6 -snum 0.70 -ndot 1'
+ clevm = -1 * dcint + min_thickness
+ clevp = min_thickness
 
 * Fill dotted 90% patterns
 * -------------------------------
- 'set clevs 'clevs
- 'set ccols 259 257 255 247 244 237 236 234 232 230 0 220 221 222 223 224 225 226 227 228 229'
- say 'DISPLAY sigdiff90:'
- say 'CLEVS: 'clevs
- say 'CCOLS: 'ccols
- ' d sigdiff90 '
+*'set csmooth on'
+*'set gxout shade2'
+*'set clevs 'clevs
+*'set ccols 259 257 255 247 244 237 236 234 232 230 -1 220 221 222 223 224 225 226 227 228 229'
+*' d sigdiff90 '
+*' d maskout(sigdiff90,abs(sigdiff90)-'min_thickness')'
+*' set csmooth off'
 
-* Fill hatched 95% patterns
+* Fill 95% confidence
 * -------------------------------
+ 'set gxout grfill'
  'set clevs 'clevs
- 'set ccols 159 157 155 147 144 137 136 134 132 130 0 120 121 122 123 124 125 126 127 128 129'
- say 'DISPLAY sigdiff95:'
- say 'CLEVS: 'clevs
- say 'CCOLS: 'ccols
+*'set ccols 159 157 155 147 144 137 136 134 132 130 -1 120 121 122 123 124 125 126 127 128 129'
+ 'set ccols 59 57 55 47 44 37 36 34 32 30 -1 20 21 22 23 24 25 26 27 28 29'
  ' d sigdiff95 '
+ ' cbarn -xmid 6 -snum 0.70 -ndot 1'
+
+* Fill 99% shaded
+* -------------------------------
+ 'set csmooth on'
+ 'set gxout shade2'
+ 'set clevs 'clevm
+ 'set ccols 200 -1'
+ ' d sigdiff99 '
+ 'set clevs 'clevp
+ 'set ccols -1 200' 
+ ' d sigdiff99 '
+ ' set csmooth off'
 
 * reset some background values
 * ----------------------------
@@ -1185,7 +1184,7 @@ dcintx = dcint * 100
 
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')'
-'draw string 6.0 7.90 'rms_label' (x10`a-3`n) >90% (Dotted) >95% (Hatched) >99% (Shaded)'
+'draw string 6.0 7.90 'rms_label' (x10`a-3`n) >95% (Filled) >99% (Dotted)'
 
 'set  strsiz .125'
 'draw string 6.0 7.65 'name' 'region
