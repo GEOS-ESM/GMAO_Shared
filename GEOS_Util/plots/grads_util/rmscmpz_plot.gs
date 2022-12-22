@@ -615,6 +615,10 @@ endwhile
 * ------------------------------------------------------------------------
  dof = numfiles-1    ;* Degrees of Freedom (dof)
 
+'astudt 'dof' 0.0001';* 99.99% Confidence
+'q defval astudtout 1 1'
+critval99p99=subwrd(result,3)
+
 'astudt 'dof' 0.01'  ;* 99% Confidence
 'q defval astudtout 1 1'
 critval99=subwrd(result,3)
@@ -640,6 +644,10 @@ while( m<=mexps )
 'set t 'tmin.m' 'tmax.m
 'set lev 1000 'toplev
 'define se  = sqrt( zvard'm'/'numfiles' )'
+
+'define dx = se*'critval99p99
+'define rUp99p99'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
+'define rLp99p99'm' =  pow( abs(zave0-dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
 
 'define dx = se*'critval99
 'define rUp99'm' =  pow( abs(zave0+dx),'irmsfact' ) - pow( abs(zave0),'irmsfact' )'
@@ -834,6 +842,13 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
          newfile = result
 'close ' newfile
 
+* Compute difference between 99.99% Confidence and zero: rUp99p99diff
+* -------------------------------------------------------------
+'makezdif3 -q1   rUp99p99'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp99p99'
+'getinfo numfiles'
+         newfile = result
+'close ' newfile
+
 * Compute difference between 99% Confidence and zero: rUp99diff
 * -------------------------------------------------------------
 'makezdif3 -q1   rUp99'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp99'
@@ -876,24 +891,29 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 'define sigdiffp90   = 1000 * ( ravediff-rUp90diff )'
 'define sigdiffp95   = 1000 * ( ravediff-rUp95diff )'
 'define sigdiffp99   = 1000 * ( ravediff-rUp99diff )'
+'define sigdiffp99p99= 1000 * ( ravediff-rUp99p99diff )'
 
 * For ravediff < 0
 * ----------------
 'define sigdiffm90 = 1000 * ( ravediff+rUp90diff )'
 'define sigdiffm95 = 1000 * ( ravediff+rUp95diff )'
 'define sigdiffm99 = 1000 * ( ravediff+rUp99diff )'
+'define sigdiffm99p99 = 1000 * ( ravediff+rUp99p99diff )'
 
 'define maskm90 = ( sigdiffm90 - abs(sigdiffm90) )/2'
 'define maskm95 = ( sigdiffm95 - abs(sigdiffm95) )/2'
 'define maskm99 = ( sigdiffm99 - abs(sigdiffm99) )/2'
+'define maskm99p99 = ( sigdiffm99p99 - abs(sigdiffm99p99) )/2'
 
 'define maskp90 = ( sigdiffp90 + abs(sigdiffp90) )/2'
 'define maskp95 = ( sigdiffp95 + abs(sigdiffp95) )/2'
 'define maskp99 = ( sigdiffp99 + abs(sigdiffp99) )/2'
+'define maskp99p99 = ( sigdiffp99p99 + abs(sigdiffp99p99) )/2'
 
 'define sigdiff90 = maskm90 + maskp90'
 'define sigdiff95 = maskm95 + maskp95'
 'define sigdiff99 = maskm99 + maskp99'
+'define sigdiff99p99 = maskm99p99 + maskp99p99'
 
 
 * Find maximum value of critical sigdiff across all levels and times
@@ -1150,7 +1170,7 @@ endif
  ' d sigdiff95 '
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
-* Fill 99% shaded
+* Fill 99% dotted
 * -------------------------------
  'set csmooth on'
  'set gxout shade2'
@@ -1160,6 +1180,18 @@ endif
  'set clevs 'clevp
  'set ccols -1 200' 
  ' d sigdiff99 '
+ ' set csmooth off'
+
+* Fill 99.99% dotted
+* -------------------------------
+ 'set csmooth on'
+ 'set gxout shade2'
+ 'set clevs 'clevm
+ 'set ccols 100 -1'
+ ' d sigdiff99p99 '
+ 'set clevs 'clevp
+ 'set ccols -1 100'
+ ' d sigdiff99p99 '
  ' set csmooth off'
 
 * reset some background values
@@ -1184,7 +1216,7 @@ dcintx = dcint * 100
 
 'set  strsiz .132'
 'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')'
-'draw string 6.0 7.90 'rms_label' (x10`a-3`n) >95% (Filled) >99% (Dotted)'
+'draw string 6.0 7.90 'rms_label' (x10`a-3`n) >95% (Filled) >99% (Dotted) >99.99% (Hatched)'
 
 'set  strsiz .125'
 'draw string 6.0 7.65 'name' 'region
