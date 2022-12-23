@@ -94,7 +94,7 @@
 'set tile 200 2 10 10 2 0'
 'set rgb 200 tile 200'
 * black hatched
-'set tile 100 5 10 10 2 0'
+'set tile 100 5 20 20 2 0'
 'set rgb 100 tile 100'
 
 *Hatched Scale
