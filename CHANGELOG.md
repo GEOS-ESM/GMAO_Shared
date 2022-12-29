@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## feature/bweir/#305-codas
+
+### Added
+
+- Added trace gas support to GMAO_ods
 
 ## [1.4.10] - 2021-10-08
 
