@@ -121,8 +121,7 @@
         integer, parameter :: ktlon  = 93       !   position-type obs: longitude
         integer, parameter :: ktdw   = 94       !   doppler wind lidar
                                                 ! Trace gases
-        integer, parameter  :: ktco   = 127     !   layer co (ppbv)
-        integer, parameter  :: ktxco2 = 126     !   average column co2 (ppmv)
+        integer, parameter  :: ktgas  = 128     !   trace gases
 
         integer, dimension(29), parameter :: ktSurfAll = (/ ktus, ktvs, ktslp,
      &                                                      ktus10, ktTs10, ktTds, ktrhs, ktqs10,
@@ -318,7 +317,7 @@
      8                 'no impact due to advected local '/)
 
 
-      integer, parameter :: nsats = 51
+      integer, parameter :: nsats = 56
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -334,9 +333,11 @@
      .                 'mls             ', 'mls20           ', 'mls22           ',
      .                 'mls30           ', 'mls55           ', 'ompslp          ',
      .                 'tmi             ', 'gmi             ', 'acos            ',
-     .                 'mopitt          ', 'cris-fsr        ', 'ompslpuv        ', 
+     .                 'mlstgas         ', 'cris-fsr        ', 'ompslpuv        ', 
      .                 'ompslpvis       ', 'ompsnm          ', 'ompsnp          ',
-     .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        '/)
+     .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
+     .                 'tgez            ', 'tgev            ', 'tgav            ',
+     .                 'tgaz            ', 'tgop            ' /)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will
@@ -356,10 +357,12 @@
      .                 304               , 440               , 445               ,
      .                 310               , 315               , 320               ,
      .                 325               , 330               , 335               ,
-     .                 705               , 706               , 998               ,
+     .                 705               , 706               , 999               ,
      .                 999               , 940               , 335               ,
      .                 336               , 427               , 437               ,
-     .                 550               , 428		     , 438              /)
+     .                 550               , 428		     , 438               ,
+     .                 999               , 999               , 999               ,
+     .                 999               , 999                 /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/

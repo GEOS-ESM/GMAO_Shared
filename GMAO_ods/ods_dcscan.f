@@ -163,24 +163,29 @@
  301  continue
 
       if (icount==0) then
-      
-!     Try ozone next
-!     --------------                         
-         rewind (lu) 
-	 ios = 0
+
+!     Try ozone/trace gas next
+!     ------------------------
+         rewind (lu)
+         ios = 0
 ! try to read the header record
          read (lu,iostat=ios) isis,dplat,satype,jiter,nlevs,idate,iint,ireal,irdim1,ioff0 ! header
-	 
-         if (ios==0) then     
-	                                                         
+
+         if (ios==0) then
+
             print*, myname, ': Trying satype as one of sbuv2/omi/omieff/tomseff ...'
-            if ( .not. trim(satype)=='sbuv2'   .and. 
+            if ( .not. trim(satype)=='sbuv2'   .and.
      &           .not. trim(satype)=='omieff'  .and.
      &           .not. trim(satype)=='omi'     .and.
      &           .not. trim(satype)=='tomseff' .and.
      &           .not. trim(satype)=='gome'    .and.
-     &           .not. trim(satype)=='mopitt'  .and.
      &           .not. trim(satype)=='acos'    .and.
+     &           .not. trim(satype)=='mlstgas' .and.
+     &           .not. trim(satype)=='tgez'    .and.
+     &           .not. trim(satype)=='tgev'    .and.
+     &           .not. trim(satype)=='tgav'    .and.
+     &           .not. trim(satype)=='tgaz'    .and.
+     &           .not. trim(satype)=='tgop'    .and.
      &           .not. trim(satype)=='ompsnm'  .and.
      &           .not. trim(satype)=='ompsnmeff'  .and.
      &           .not. trim(satype)=='ompsnp' .and.
