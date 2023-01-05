@@ -163,16 +163,16 @@
  301  continue
 
       if (icount==0) then
-      
+
 !     Try ozone next
-!     --------------                         
+!     --------------
          rewind (lu) 
-	 ios = 0
+         ios = 0
 ! try to read the header record
          read (lu,iostat=ios) isis,dplat,satype,jiter,nlevs,idate,iint,ireal,irdim1,ioff0 ! header
-	 
-         if (ios==0) then     
-	                                                         
+
+         if (ios==0) then
+
             print*, myname, ': Trying satype as one of sbuv2/omi/omieff/tomseff ...'
             if ( .not. trim(satype)=='sbuv2'   .and. 
      &           .not. trim(satype)=='omieff'  .and.
@@ -187,7 +187,7 @@
      &           .not. trim(satype)=='tgaz'    .and.
      &           .not. trim(satype)=='tgop'    .and.
      &           .not. trim(satype)=='ompsnm'  .and.
-     &           .not. trim(satype)=='ompsnmeff'  .and.
+     &           .not. trim(satype)=='ompsnmeff' .and.
      &           .not. trim(satype)=='ompsnp' .and.
      &           .not. trim(satype)=='ompsnpnc') then
                print*, myname, ': Unrecognized sensor on diag_ file: satype = ', trim(satype)
@@ -247,8 +247,7 @@
  303  continue
 
 !     Try ozone level (MLS) data next
-!     ------------------------
-
+!     -------------------------------
       if (icount==0) then
          rewind(lu)
          ios = 0
@@ -256,12 +255,12 @@
          read(lu,iostat=ios) isis,dplat,satype,jiter,nlevs,idate,ninfo,ireal,irdim1,ioff0
          if (ios==0) then
             print*, myname, ': Trying satype as one of ozone limb types ...'
-	    select case(satype)
-	    case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
-	    case default
-               print *, myname, 
+            select case(satype)
+            case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
+            case default
+               print *, myname,
      &              ': Unrecognized sensor on diag_ file: satype = ', trim(satype)
-	       goto 304
+               goto 304
             end select
          end if
 
@@ -293,7 +292,7 @@
          print*, myname, ': All attempt failed'
          print*, myname, ': Unrecognized header on file ', fname
          return
-	    
+
       end if
 
 ! Summarize what's found so far
