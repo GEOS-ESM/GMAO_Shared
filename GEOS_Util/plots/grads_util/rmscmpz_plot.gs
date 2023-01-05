@@ -1080,7 +1080,6 @@ endwhile
 'set t 'tbeg.m' 'tdif.m
 'set lev 1000 'levmin
 
-           dcint = qmax / 9
   mean_thickness = zsum
    min_thickness = zmin
 
@@ -1088,33 +1087,34 @@ endwhile
 'c'
 ************************************************************************
 
+                               dcint = qmax / 9
 if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
-
 say '        DCINT for plots: 'dcint
+                               min_thickness = dcint / 2
 say 'MIN_THICKNESS for plots: 'min_thickness
 
 ************************************************************************
 ****        To hardwire contour levels within Montage plots     ********
 ************************************************************************
  if( field = 'h' )
- say 'Hardwire values for plots,         dcint = '350 ; dcint = 300
- say 'Hardwire values for plots, min_thickness = '100 ; min_thickness = 150
+ say 'Hardwire values for plots,         dcint = '400 ; dcint = 400
+ say 'Hardwire values for plots, min_thickness = '200 ; min_thickness = 200
  endif
  if( field = 't' )
- say 'Hardwire values for plots,         dcint = '35 ; dcint = 20
- say 'Hardwire values for plots, min_thickness = '7 ; min_thickness = 10
+ say 'Hardwire values for plots,         dcint = '20 ; dcint = 20
+ say 'Hardwire values for plots, min_thickness = '10 ; min_thickness = 10
  endif
  if( field = 'u' )
- say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
- say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 25
+ say 'Hardwire values for plots,         dcint = '40 ; dcint = 40
+ say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
  endif
  if( field = 'v' )
- say 'Hardwire values for plots,         dcint = '50 ; dcint = 50
- say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 25
+ say 'Hardwire values for plots,         dcint = '40 ; dcint = 40
+ say 'Hardwire values for plots, min_thickness = '20 ; min_thickness = 20
  endif
  if( field = 'q' )
- say 'Hardwire values for plots,         dcint = '20 ; dcint = 20
- say 'Hardwire values for plots, min_thickness = '0.05 ; min_thickness = 10
+ say 'Hardwire values for plots,         dcint = '10 ; dcint = 10
+ say 'Hardwire values for plots, min_thickness = '5  ; min_thickness = 5
  endif
 ************************************************************************
 
