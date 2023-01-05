@@ -6,7 +6,7 @@
 !
 ! !INTERFACE:
 !
-      subroutine ods_dsbuv ( isat, obstype, pinfo, pdata, 
+      subroutine ods_dsbuv ( isat, obstype, pinfo, pdata,
      .                       pobs, tnoise, iouse,
      .                       ireal, nlevs, ndiag,
      .                       ods, mobs, kobs, iks, ioff, rc )
@@ -28,7 +28,7 @@
       real(4),          intent(in)    :: pobs(nlevs)
       real(4),          intent(in)    :: tnoise(nlevs)
       character(len=*), intent(in)    :: obstype
-             
+
 ! !INPUT/OUTPUT PARAMETERS:
 
       integer,          intent(inout) :: kobs      ! current obs counter
@@ -50,15 +50,16 @@
 !       08Apr2006 - Sienkiewicz - obs_sens test now in if(lobsdiagsave) block
 !       26Aug2010 - Todling - update to Mar2010 GSI (obs impact handle)
 !       01Nov2014 - Weir - add support for trace gases
-!       04Jan2022 - Weir - more trace gas support; fixing whitespace
-!                          (TABS AREN'T VALID FORTRAN)
+!       04Nov2014 - Weir - fixing whitespace so I don't go (more) insane
+!                          tabs are not a valid Fortran character FYI
+!       12Dec2022 - Weir - more trace gas support
 !
 !EOP
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       character(len=*), parameter :: myname = 'ods_dsbuv'
-
       integer, parameter   :: r_single = selected_real_kind(6)
+
       real(r_single)  zero_single,tiny_single
       real small_num, nlomx, tlomx
 
@@ -138,7 +139,7 @@
 
       kobs0 = kobs
       do i = 1, nlevs
-      
+
         kobs = kobs + 1
         if (kobs>mobs) then
            rc = 99
@@ -150,9 +151,9 @@
         kx(kobs) = kidsat
         ks(kobs) = iks
 
-!       bweir: it's ok to indent consistently; it doesn't hurt anyone
         select case(obstype)
-        case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpuv','ompslpvis')
+        case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc',
+     &       'ompslpuv','ompslpvis')
            kt(kobs)   = kto3mx                  ! ozone mixing ratio (ppmv)
            lev(kobs)  = pdata(4,i)
         case('acos','mlstgas','tgez','tgev','tgav','tgaz','tgop')
@@ -177,9 +178,9 @@
 
         lat(kobs)  = pinfo(1)                   ! latitude
         lon(kobs)  = pinfo(2)                   ! longitude
-        time(kobs) = int(pinfo(3)*60.0)         ! minutes from ana time
+        time(kobs) = int(pinfo(3)*60.0)         ! minutes from ana time	 
         obs(kobs)  = pdata(1,i)                 ! obs
-        omf(kobs)  = pdata(2,i)	                ! omf
+        omf(kobs)  = pdata(2,i)                 ! omf
         oma(kobs)  = undef                      ! no info available
 
         qch(kobs)  = 0                          ! no info available
@@ -199,12 +200,12 @@
         endif
 
 !       write(*,'(i2,i3,i5,i6,i5,3(1x,f8.3),1x,i3,6(1x,e8.3e1))') qcx(kobs),i,kobs,kx(kobs),kt(kobs),
-!     &         lat(kobs),lon(kobs),lev(kobs),time(kobs),obs(kobs),omf(kobs),oma(kobs),sigo(kobs)
+!     &	       lat(kobs),lon(kobs),lev(kobs),time(kobs),obs(kobs),omf(kobs),oma(kobs),sigo(kobs)
       end do
 
 
 !     Nullify pointers
-!     -----------------
+!     ----------------
       if(associated(lat) ) nullify(lat)
       if(associated(lon) ) nullify(lon)
       if(associated(lev) ) nullify(lev)

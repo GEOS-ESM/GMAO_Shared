@@ -163,18 +163,18 @@
  301  continue
 
       if (icount==0) then
-
-!     Try ozone/trace gas next
-!     ------------------------
-         rewind (lu)
-         ios = 0
+      
+!     Try ozone next
+!     --------------                         
+         rewind (lu) 
+	 ios = 0
 ! try to read the header record
          read (lu,iostat=ios) isis,dplat,satype,jiter,nlevs,idate,iint,ireal,irdim1,ioff0 ! header
-
-         if (ios==0) then
-
+	 
+         if (ios==0) then     
+	                                                         
             print*, myname, ': Trying satype as one of sbuv2/omi/omieff/tomseff ...'
-            if ( .not. trim(satype)=='sbuv2'   .and.
+            if ( .not. trim(satype)=='sbuv2'   .and. 
      &           .not. trim(satype)=='omieff'  .and.
      &           .not. trim(satype)=='omi'     .and.
      &           .not. trim(satype)=='tomseff' .and.
@@ -257,7 +257,7 @@
          if (ios==0) then
             print*, myname, ': Trying satype as one of ozone limb types ...'
 	    select case(satype)
-	    case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpuv','ompslpvis')
+	    case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
 	    case default
                print *, myname, 
      &              ': Unrecognized sensor on diag_ file: satype = ', trim(satype)

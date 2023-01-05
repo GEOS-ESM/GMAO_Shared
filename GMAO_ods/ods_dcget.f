@@ -68,7 +68,6 @@
 !       2018-05-25  wargan      - added OMPS
 !       2019-04-15  Sienkiewicz - add handling of netcdf4 diag files.
 !       12Dec2022 - Weir        - improved trace gas support
-!       04Jan2022 - Weir        - removed some tabs (NOT A VALID FORTRAN CHAR)
 !
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -378,10 +377,10 @@
      &         trim(satype)/='tgez'   .and. trim(satype)/='tgev'    .and.
      &         trim(satype)/='tgav'   .and. trim(satype)/='tgaz'    .and.
      &         trim(satype)/='tgop'   .and.
-     &         trim(satype)/='gome'   .and. trim(satype)/='ompslpuv'  .and.
-     &         trim(satype)/='ompslpvis' .and. trim(satype)/='ompsnm' .and.
-     &         trim(satype)/='ompsnp' .and. trim(satype)/='ompsnmeff' .and.
-     &         trim(satype)/='ompsnpnc') then
+     &         trim(satype)/='gome'   .and. trim(satype)/='ompslpvis' .and.
+     &         trim(satype)/='ompslpnc'  .and. trim(satype)/='ompslpuv' .and.
+     &         trim(satype)/='ompsnm'    .and. trim(satype)/='ompsnp'   .and.
+     &         trim(satype)/='ompsnmeff' .and. trim(satype)/='ompsnpnc') then
       
 !        Radiance data:
 !        -------------
@@ -479,7 +478,7 @@
 	 iouse (:)=+1.
          
 	 select case(satype)
-	 case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpuv','ompslpvis')
+	 case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
 	 case default
            read (lu,iostat=ios) pobs,gross,tnoise,iouse
            if (ios/=0) then
