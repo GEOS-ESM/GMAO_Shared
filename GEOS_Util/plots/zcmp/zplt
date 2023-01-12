@@ -35,7 +35,7 @@ endwhile
           if( bit = ":" )
               ptop = substr(ptops,1,len-2)
               Lbit = substr(ptops,len,1)
-              if( ptop < 20 ) ; scale = 'LOG' ; endif
+              if( ptop < 10 ) ; scale = 'LOG' ; endif
           else
               ptop = ptops
           endif
