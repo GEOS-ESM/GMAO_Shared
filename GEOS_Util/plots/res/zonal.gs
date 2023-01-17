@@ -61,7 +61,7 @@ say 'Checking for 'source'/residual.'expid'.ctl'
 
 * Perform residual calculations
 * -----------------------------
-if( expid.rc = 'NULL' & expid.ctl = 'NULL' )
+if( expid.ctl = 'NULL' )
  
 * Initialize Environment using V-Wind File
 * ----------------------------------------
