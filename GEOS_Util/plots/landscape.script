@@ -330,6 +330,7 @@ end
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT      LAI:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT      GRN:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT   SNOMAS:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
+    if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT   TSLAND:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT      T2M:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT      Q2M:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1
     if( $plot == $plotname.$n ) $grads $batch -l -c "run template  -EXPID $expid  -EXPORT     WET1:SURFACE  -SEASON $seasons  -OUTPUT $output  -DEBUG $debug " ; set plots = `echo $plots $plotname.$n` ; @ n = $n + 1

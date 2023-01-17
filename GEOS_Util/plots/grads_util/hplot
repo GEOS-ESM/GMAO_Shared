@@ -247,6 +247,14 @@ if( export = 'SNOMAS' )
      clevs = "0.1 0.2 0.4 0.6 0.8 1 5 10 25 50 75 100 150 200 250 300 400 500"
 endif
 
+if( export = 'TSLAND' )
+     title  = 'Total snow storage over land (kg/m`a2`n [mm])'
+     fact  =  1
+   prefix  = "0"
+   cbscale = 0.9
+     clevs = "0.1 0.2 0.4 0.6 0.8 1 5 10 25 50 75 100 150 200 250 300 400 500"
+endif
+
 * Moist
 *******
 

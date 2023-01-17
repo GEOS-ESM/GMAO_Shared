@@ -12,6 +12,9 @@ function getdates
 'run getinfo date'
              time = substr(result,1,5)
 
+say 'Pre-set Environment Variables BEGDATE: 'begdate
+say 'Pre-set Environment Variables ENDDATE: 'enddate
+
 tmin = 0
 tmax = tdim + 1
 
