@@ -16,6 +16,9 @@ function zonal (args)
 'run getvar U DYN'
         uname  = subwrd(result,1)
         ufile  = subwrd(result,2)
+'run getvar OMEGA DYN'
+        wname  = subwrd(result,1)
+        wfile  = subwrd(result,2)
 
 say ' EXPID: 'expid
 say 'EXPDSC: 'expdsc
@@ -34,6 +37,32 @@ say 'EXPDSC: 'expdsc
 
 '!/bin/cp 'geosutil'/plots/res/VERIFICATION*rc .'
 
+* Check for exp/residual.data
+* ---------------------------
+'run getenv "SOURCE"'
+             source = result
+say 'Checking for 'source'/residual.'expid'.ctl'
+'!remove   CHECKFILE.txt'
+'!chckfile 'source'/residual.'expid'.ctl'
+ 'run getenv CHECKFILE'
+             expid.ctl = result
+         if( expid.ctl != 'NULL' )
+             '!/bin/cp 'source'/residual.'expid'.ctl  .'
+             '!/bin/cp 'source'/residual.'expid'.data .'
+             '!remove sedfile'
+             '!touch  sedfile'
+             '!echo "s?@EXPID?"'expid'?g   >> sedfile'
+             '!echo "s?@EXPDSC?"'expdsc'?g >> sedfile'
+             '!echo "s?@pwd?"'pwd'?g       >> sedfile'
+             '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
+             '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
+             '!remove VERIFICATION.rc.tmpl'
+         endif
+
+* Perform residual calculations
+* -----------------------------
+if( expid.ctl = 'NULL' )
+ 
 * Initialize Environment using V-Wind File
 * ----------------------------------------
 'set dfile 'vfile
@@ -47,24 +76,47 @@ say 'EXPDSC: 'expdsc
          ydim = result
 'getinfo zdim'
          zdim = result
+
+'run getenv "TBEG"'
+             tbeg = result
+'run getenv "TEND"'
+             tend = result
+
+if( (tbeg != "NULL") & (tend != "NULL") )
+    'run setdates'
+endif
+
+'getdates'
+'getinfo tmin'
+         tmin = result
+     if( tmin < 1 )
+         tmin = 1
+     endif
 'getinfo tdim'
          tdim = result
+'getinfo tmax'
+         tmax = result
+     if( tmax > tdim )
+         tmax = tdim
+     endif
+         tdim = tmax-tmin+1
 
-'set t '1
+'set t 'tmin
 'getinfo date'
       begdate = result
+'run setenv "BEGDATE.'expid'" 'begdate
+
 
 'run setenv    "LAT0.'expid'" 'lat0
 'run setenv    "XDIM.'expid'" 'xdim
 'run setenv    "YDIM.'expid'" 'ydim
 'run setenv    "ZDIM.'expid'" 'zdim
 'run setenv    "TDIM.'expid'" 'tdim
-'run setenv "BEGDATE.'expid'" 'begdate
 
 'setx'
 'sety'
 'setz'
-'set t '1' 'tdim
+'set t 'tmin' 'tmax
 
 'makezf lev-lev zeros z'
 
@@ -80,6 +132,9 @@ say 'EXPDSC: 'expdsc
     'set dfile 'ufile
     'makezf    'uname' 'uname' z0'
 
+    'set dfile 'wfile
+    'makezf    'wname' 'wname' z0'
+
 
 * Assume VSTS Quadratic is in TFILE
 * ---------------------------------
@@ -92,7 +147,7 @@ say 'EXPDSC: 'expdsc
        'set x 1'
        'sety'
        'setz'
-       'set t '1' 'tdim
+       'set t 'tmin' 'tmax
        'define vstsz0 = zerosz'
      endif
 
@@ -108,6 +163,7 @@ say 'EXPDSC: 'expdsc
        'sety'
        'setz'
        'set t '1' 'tdim
+       'set t 'tmin' 'tmax
        'define usvsz0 = zerosz'
      endif
 
@@ -123,6 +179,7 @@ say 'EXPDSC: 'expdsc
        'sety'
        'setz'
        'set t '1' 'tdim
+       'set t 'tmin' 'tmax
        'define uswsz0 = zerosz'
      endif
 
@@ -133,7 +190,7 @@ say 'EXPDSC: 'expdsc
 'set x 1'
 'sety'
 'setz'
-'set t '1
+'set t 'tmin
 
 'define pl = lat-lat + lev'
 'define pk = pow(pl,2/7)'
@@ -144,8 +201,8 @@ say 'EXPDSC: 'expdsc
 'set gxout fwrite'
 'set fwrite grads.'expid'.fwrite'
 
-t=1
-while(t<=tdim)
+t=tmin
+while(t<=tmax)
   'set t 't
    say 'Writing Data Time = 't'  zdim = 'zdim'  EXPID = 'expid
 
@@ -212,8 +269,16 @@ while(t<=tdim)
    if(  ufile != "NULL" ) ; 'd     uswsz0' ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
-   say ' '
 
+   say '          Writing WZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  wfile != "NULL" ) ; 'd ' wname'z0' ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
+
+say ' '
 t=t+1
 endwhile
 'disable fwrite'
@@ -233,16 +298,7 @@ say ' 'geosutil'/bin/zonal_'arch'.x -tag 'expid' -desc 'descm
 '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'expid'.rc'
 '!remove VERIFICATION.rc.tmpl'
 
-*'!cat sedfile'
-*'quit'
-*return
-
-*'!remove LAT0.txt'
-*'!remove XDIM.txt'
-*'!remove YDIM.txt'
-*'!remove ZDIM.txt'
-*'!remove TDIM.txt'
-
+endif
 * -----------------------------------------------------
 
 'run setdates'
@@ -263,6 +319,7 @@ say ' '
 say 'Comparing  with: 'exp
 say 'Comparison type: 'type
 
+'!remove   CHECKFILE.txt'
 '!chckfile 'exp'/.HOMDIR'
  'run getenv CHECKFILE'
              CHECKFILE  = result
@@ -272,7 +329,6 @@ say 'Comparison type: 'type
             '!/bin/cp 'exp'/HISTORY.rc .'
          endif
 
-'!remove CHECKFILE.txt'
 '!cat HISTORY.rc | sed -e "s/,/ , /g" | sed -e "s/*/@/g" > HISTORY.T'
 
 'run getvar V DYN 'exp
@@ -288,16 +344,42 @@ say 'GETVAR output: 'result
 'run getvar U DYN 'exp
         uname  = subwrd(result,1)
         ufile  = subwrd(result,2)
+'run getvar OMEGA DYN 'exp
+        wname  = subwrd(result,1)
+        wfile  = subwrd(result,2)
 
 say 'Comparison   ID: 'obsid
 say 'Comparison Desc: 'obsdsc
 
-* VERIFICATION.obsid.rc CHECKFILE Test
-* ------------------------------------
+* Check for VERIFICATION.obsid.rc
+* -------------------------------
+'!remove   CHECKFILE.txt'
 '!chckfile VERIFICATION.'obsid'.rc'
  'run getenv CHECKFILE'
-             CHECKFILE = result
-         if( CHECKFILE = 'NULL' )
+             obsid.rc = result
+
+* Check for exp/residual.data
+* ---------------------------
+'!remove   CHECKFILE.txt'
+'!chckfile 'exp'/residual.'obsid'.ctl'
+ 'run getenv CHECKFILE'
+             obsid.ctl = result
+         if( obsid.ctl != 'NULL' )
+             '!/bin/cp 'exp'/residual.'obsid'.ctl  .'
+             '!/bin/cp 'exp'/residual.'obsid'.data .'
+             '!remove sedfile'
+             '!touch  sedfile'
+             '!echo "s?@EXPID?"'obsid'?g   >> sedfile'
+             '!echo "s?@EXPDSC?"'obsdsc'?g >> sedfile'
+             '!echo "s?@pwd?"'pwd'?g       >> sedfile'
+             '!/bin/cp 'geosutil'/plots/res/VERIFICATION.rc.tmpl .'
+             '!sed -f   sedfile VERIFICATION.rc.tmpl > VERIFICATION.'obsid'.rc'
+             '!remove VERIFICATION.rc.tmpl'
+         endif
+
+* Perform residual calculations
+* -----------------------------
+         if( obsid.rc = 'NULL' & obsid.ctl = 'NULL' & obsid != 'ERA5' )
  
 'set dfile 'vfile
 'set y 1'
@@ -352,6 +434,9 @@ say 'Comparison Desc: 'obsdsc
 
     'set dfile 'ufile
     'makezf    'uname' 'uname' z'num
+
+    'set dfile 'wfile
+    'makezf    'wname' 'wname' z'num
 
 * Assume VSTS Quadratic is in TFILE
 * ---------------------------------
@@ -413,7 +498,7 @@ endif
 'set gxout fwrite'
 'set fwrite grads.'obsid'.fwrite'
 
-t=tmin
+      t =tmin
 while(t<=tmax)
   'set t 't
    say 'Writing Data Time = 't'  zdim = 'zdim'  CMPID = 'obsid
@@ -481,9 +566,16 @@ while(t<=tmax)
    if(  ufile != "NULL" ) ; 'd     uswsz'num ; else ; 'd zerosz' ; endif
    z=z+1
    endwhile
-   say ' '
 
+   say '          Writing WZ'
+   z=1
+   while(z<=zdim)
+  'set z 'z
+   if(  wfile != "NULL" ) ; 'd ' wname'z'num ; else ; 'd zerosz' ; endif
+   z=z+1
+   endwhile
 
+say ' '
 t=t+1
 endwhile
 'disable fwrite'

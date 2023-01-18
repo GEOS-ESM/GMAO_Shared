@@ -323,7 +323,7 @@ Sample DAS tags \n \
             "type": "select",
             "name": "slurm:constraint",
             "message": "constraint?",
-            "choices": ['hasw', 'sky', 'cas'],
+            "choices": ['sky', 'cas'],
         },
    ]
    answers = questionary.prompt(questions)

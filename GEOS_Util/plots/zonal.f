@@ -7,6 +7,7 @@
       real,   allocatable ::     vz(:,:)
       real,   allocatable ::     tz(:,:)
       real,   allocatable ::     wz(:,:)
+      real,   allocatable ::    omg(:,:)
       real,   allocatable ::    thz(:,:)
       real,   allocatable ::  upvpz(:,:)
       real,   allocatable ::  upwpz(:,:)
@@ -17,6 +18,7 @@
       real,   allocatable ::   strm(:,:)
       real,   allocatable ::    res(:,:)
       real,   allocatable ::  vstar(:,:)
+      real,   allocatable ::  veddy(:,:)
       real,   allocatable ::  wstar(:,:)
       real,   allocatable ::  wmean(:,:)
       real,   allocatable ::  weddy(:,:)
@@ -27,6 +29,10 @@
       real,   allocatable ::   epfz(:,:)  ! Eliassen-Palm Flux in    Upward Direction
       real,   allocatable :: epfdiv(:,:)  ! Eliassen-Palm Flux Divergence
       real,   allocatable ::   vstr(:,:)
+      real,   allocatable ::  vstar2(:,:)
+      real,   allocatable ::  wstar2(:,:)
+      real,   allocatable ::  wmean2(:,:)
+      real,   allocatable ::  weddy2(:,:)
       real*4, allocatable ::    dum(:)
 
       real,allocatable :: upvp  (:,:)
@@ -91,6 +97,7 @@ c --------------------------------------
       allocate(     vz(jm,lm) )
       allocate(     tz(jm,lm) )
       allocate(     wz(jm,lm) )
+      allocate(    omg(jm,lm) )
       allocate(    thz(jm,lm) )
       allocate(  upvpz(jm,lm) )
       allocate(  upwpz(jm,lm) )
@@ -101,6 +108,7 @@ c --------------------------------------
       allocate(   strm(jm,lm) )
       allocate(    res(jm,lm) )
       allocate(  vstar(jm,lm) )
+      allocate(  veddy(jm,lm) )
       allocate(  wstar(jm,lm) )
       allocate(  wmean(jm,lm) )
       allocate(  weddy(jm,lm) )
@@ -112,6 +120,10 @@ c --------------------------------------
       allocate( epfdiv(jm,lm) )
       allocate(   vstr(jm,lm) )
       allocate(    dum(jm)    )
+      allocate(  vstar2(jm,lm) )
+      allocate(  wstar2(jm,lm) )
+      allocate(  wmean2(jm,lm) )
+      allocate(  weddy2(jm,lm) )
                                                                                                                                 
       allocate     (upvp  (jm,LM)  )
       allocate     (upwp  (jm,LM)  )
@@ -223,6 +235,19 @@ c ---------------------------
             endif
             lrec = lrec+1
          enddo
+         if(n.eq.1) print *, 'Reading OMG'
+         do L=1,lm
+            read(10,rec=lrec,iostat=rc)  dum
+            if( rc.eq.0 ) then
+               omg(:,L) = dum(:)
+            else
+               omg(:,L) = undef
+                if( L.eq.1 ) print *, 'Error Reading OMG, setting to UNDEF'
+            endif
+            lrec = lrec+1
+         enddo
+
+! ------------------------------------------------------------------------------
 
       nt = nt+1
       do L=1,lm
@@ -244,16 +269,17 @@ c Compute Meridional Streamfunction
 c ---------------------------------
       call stream ( vz,pl,jm,lm,strm,undef )
  
-      call make_psi ( uz,vz,thz,upvpz,upwpz,vpthpz,pl,jm,lm,psi1,psi2,psim,epfy,epfz,epfdiv,undef,
-     .                     upvp,upwp,dudp,dudphi,psie,dfdphi,dfdp,plz,delp)
+      call make_psi ( uz,vz,thz,omg,upvpz,upwpz,vpthpz,pl,jm,lm,psi1,psi2,psim,epfy,epfz,epfdiv,
+     .                undef,upvp,upwp,dudp,dudphi,psie,dfdphi,dfdp,vstar2,veddy,wstar2,wmean2,weddy2,plz,delp)
 
 c Compute Mean Vertical Velocity from Continuity
 c ----------------------------------------------
       call make_w ( vz,pl,jm,lm,wz,undef )
 
-c Compute Residual Circulation
-c ----------------------------
-      call residual ( vz,vpthpz,thz,wz,pl,jm,lm,res,vstar,wstar,wmean,weddy,undef )
+c Compute Residual Circulation using wmean2 from model data rather than wz from continuity
+c ----------------------------------------------------------------------------------------
+      call residual ( vz,vpthpz,thz,wmean2,pl,jm,lm,res,vstar,wstar,wmean,weddy,undef )
+    ! call residual ( vz,vpthpz,thz,wz    ,pl,jm,lm,res,vstar,wstar,wmean,weddy,undef )
  
       call GLAWRT  (strm  ,jm,LM,20)
       call GLAWRT  (res   ,jm,LM,20)
@@ -277,6 +303,11 @@ c ----------------------------
       call GLAWRT  (dfdp  ,jm,LM,20)
       call GLAWRT  (plz   ,jm,LM,20)
       call GLAWRT  (delp  ,jm,LM,20)
+      call GLAWRT  (vstar2,jm,LM,20)
+      call GLAWRT  (veddy ,jm,LM,20)
+      call GLAWRT  (wstar2,jm,LM,20)
+      call GLAWRT  (wmean2,jm,LM,20)
+      call GLAWRT  (weddy2,jm,LM,20)
 
       enddo
       close(10)
@@ -293,7 +324,7 @@ c ------------------------
       enddo
       print *, 'Finished   , nt = ',nt
       write(30,103) nt,trim(begdate),lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,
-     .                               lm,lm,lm,lm,lm,lm,lm,lm,lm
+     .                               lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,lm,lm
   101 format('dset  ',a,/,
      .       'title ',a,/,
      .       'options sequential ',/,
@@ -303,7 +334,7 @@ c ------------------------
      .       'zdef ',i3,' levels ')
   102 format(10x,f8.3)
   103 format('tdef ',i3,' linear ',a,' 1mo',/,
-     .       'vars 21',/,
+     .       'vars 26',/,
      .       'str   ',i3,' 0 Streamfunction',/,
      .       'res   ',i3,' 0 Residual Circulation',/,
      .       'vstar ',i3,' 0 Vstar',/,
@@ -325,6 +356,11 @@ c ------------------------
      .       'dfdp   ',i3,' 0 DfDp',/,
      .       'plz    ',i3,' 0 Pressure',/,
      .       'delp   ',i3,' 0 Pressure Thickness',/,
+     .       'vstar2 ',i3,' 0 vstar2',/,
+     .       'veddy2 ',i3,' 0 veddy2 ',/,
+     .       'wstar2 ',i3,' 0 wstar2',/,
+     .       'wmean2 ',i3,' 0 wmean2',/,
+     .       'weddy2 ',i3,' 0 weddy2',/,
      .       'endvars')
 
       stop
@@ -364,12 +400,12 @@ c ------------------------
       RETURN
       END
 
-      subroutine make_psi( u0,v0,th0,upvp0,upwp0,vpthp0,p0,jm,lm,psi1,psi2,psim,epfy,epfz,epfdiv,undef,
-     .                     upvp,upwp,dudp,dudphi,psie,dfdphi,dfdp,p,delp)
+      subroutine make_psi( u0,v0,th0,w0,upvp0,upwp0,vpthp0,p0,jm,lm,psi1,psi2,psim,epfy,epfz,epfdiv,undef,
+     .                     upvp,upwp,dudp,dudphi,psie,dfdphi,dfdp,vstar,veddy,wstar,wmean,weddy,p,delp)
       use MAPL_ConstantsMod
       implicit none
       integer j,k,L,jm,lm
-      real undef,dphi,a,g,pi,phi,pk0
+      real undef,dphi,a,g,pi,phi,pk0,H
       logical defined
        
       real    th0(jm,lm),    th(jm,lm)
@@ -379,6 +415,7 @@ c ------------------------
       real     u0(jm,lm),     u(jm,lm)
       real     v0(jm,lm),     v(jm,lm)
       real     p0(jm,lm),     p(jm,lm)
+      real     w0(jm,lm),     w(jm,lm)
 
       real   psi1(jm,lm)
       real   psi2(jm,lm)
@@ -396,14 +433,26 @@ c ------------------------
       real   delp(jm,lm)
       real  veddy(jm,lm)
       real  vstar(jm,lm)
+      real  weddy(jm,lm)
+      real  wstar(jm,lm)
+      real  wmean(jm,lm)
       real  stuff(jm,lm)
+      real   dume(jm,0:lm) ! dummy edge
       real    the(jm,0:lm) ! theta_edge
       real    ple(jm,0:lm) !     p_edge
+      real     pm(jm,1:lm) ! mid-point of p_edges
       real     ue(jm,0:lm) !     u_edge
       real  epfze(jm,0:lm) !  epfz_edge
       real      f(jm)
       real    dum(jm)
       integer method
+      real airmw,runiv,cpd,rgas,akap
+
+      PARAMETER ( AIRMW  = MAPL_AIRMW  )
+      PARAMETER ( RUNIV  = MAPL_RUNIV  )
+      PARAMETER ( CPD    = MAPL_CP     )
+      PARAMETER ( RGAS   = RUNIV/AIRMW )
+      PARAMETER ( AKAP   = MAPL_KAPPA  )
 
 c Define Constants
 c ----------------
@@ -411,19 +460,21 @@ c ----------------
       dphi = pi/(jm-1)
         a  = MAPL_RADIUS
         g  = MAPL_GRAV
+        H  = 7000.0
 
       Method = 0
 
 c Invert level index (in order to be top=>bottom)
 c -----------------------------------------------
       do L=1,lm
-          u(:,L) =     u0(:,lm-L+1)  ! m/sec
-          v(:,L) =     v0(:,lm-L+1)  ! m/sec
-          p(:,L) =     p0(:,lm-L+1)  ! mb
-         th(:,L) =    th0(:,lm-L+1)  ! K/mb**kappa
-       upvp(:,L) =  upvp0(:,lm-L+1)  ! m/sec m/sec
-       upwp(:,L) =  upwp0(:,lm-L+1)  ! m/sec Pa/sec
-      vpthp(:,L) = vpthp0(:,lm-L+1)  ! m/sec K/mb**kappa
+           u(:,L) =     u0(:,lm-L+1)  ! m/sec
+           v(:,L) =     v0(:,lm-L+1)  ! m/sec
+           w(:,L) =     w0(:,lm-L+1)  ! Pa/sec
+           p(:,L) =     p0(:,lm-L+1)  ! mb
+          th(:,L) =    th0(:,lm-L+1)  ! K/mb**kappa
+        upvp(:,L) =  upvp0(:,lm-L+1)  ! m/sec m/sec
+        upwp(:,L) =  upwp0(:,lm-L+1)  ! m/sec Pa/sec
+       vpthp(:,L) = vpthp0(:,lm-L+1)  ! m/sec K/mb**kappa
       enddo
 
       pk0 = (1000.0)**(2.0/7.0)      ! mb**kappa
@@ -446,6 +497,12 @@ c -----------------------
         delp(:,L) = ple(:,L)-ple(:,L-1)
       enddo
 
+c Compute Mid-Point of PLE Edge Values
+c ------------------------------------
+      do L=1,lm
+        pm(:,L) = ( ple(:,L)+ple(:,L-1) )*0.5
+      enddo
+
 c Compute Mass Streamfunction
 c ---------------------------
         pi = 4.*atan(1.)
@@ -466,12 +523,13 @@ c ---------------------------
          enddo
       enddo
 
-c Define Eddy Streamfunction = vpthp/dthdp
-c ----------------------------------------
+c Define Eddy Streamfunction:  psie = vpthp/dthdp
+c -----------------------------------------------
 
    !  call compute_edge( th,p,ple,jm,lm,undef,the )
       call map1_cubic( lm,p,th, lm+1,ple,the, jm, Method, undef)
-      call compute_dqdp( the,delp,jm,lm,undef,dthdp )
+      call compute_d_dp( the,delp,jm,lm,undef,stuff )
+      call map1_cubic( lm,pm,stuff, lm,p,dthdp, jm, Method, undef)
 
       do L=1,lm
       do j=1,jm
@@ -487,20 +545,10 @@ c ----------------------------------------
 
 c Compute Veddy = D/Dp[ psie ]
 c ----------------------------
-      do L=2,lm-1
-      do j=1,jm
-      if( defined(psie(j,L+1),undef)  .and.
-     .    defined(psie(j,L-1),undef) ) then
-               veddy(j,L) = ( psie(j,L+1)-psie(j,L-1) )/ ( 2*(ple(j,L)-ple(j,L-1)) )
-      else
-               veddy(j,L) = undef
-      endif
-      enddo
-      enddo
-      do j=1,jm
-      veddy(j,1)  = veddy(j,2)
-      veddy(j,lm) = veddy(j,lm-1)
-      enddo
+
+      call map1_cubic( lm,p,psie, lm+1,ple,dume, jm, Method, undef)
+      call compute_d_dp( dume,delp,jm,lm,undef,stuff )
+      call map1_cubic( lm,pm,stuff, lm,p,veddy, jm, Method, undef)
 
 c Compute Vstar = v - veddy
 c -------------------------
@@ -511,6 +559,50 @@ c -------------------------
              vstar(j,L) = v(j,L) - veddy(j,L)
          else
              vstar(j,L) = undef
+         endif
+      enddo
+      enddo
+
+
+c Compute weddy = -d(psie*cos)/(a*cos*dphi)
+c -----------------------------------------
+
+      do L=1,lm
+      do j=1,jm
+         if( defined( psie(j,L),undef ) ) then
+             stuff(j,L) = psie(j,L)
+      else
+             stuff(j,L) = undef
+      endif
+      enddo
+      enddo
+
+      call compute_d_dphi( stuff,jm,lm,undef,weddy )
+
+
+c Compute wstar = w - weddy
+c -------------------------
+      do L=1,lm
+      do j=1,jm
+         if( defined( weddy(j,L),undef)  .and.
+     .       defined(     w(j,L),undef) ) then
+             wstar(j,L) = w(j,L) + weddy(j,L)
+         else
+             wstar(j,L) = undef
+         endif
+      enddo
+      enddo
+
+      do L=1,lm
+      do j=1,jm
+         if( defined( wstar(j,L),undef) ) then
+             wstar(j,L) = -H*wstar(j,L)/p(j,L)
+         endif
+         if( defined( w(j,L),undef) ) then
+             wmean(j,L) = -H*w(j,L)/p(j,L)
+         endif
+         if( defined( weddy(j,L),undef) ) then
+             weddy(j,L) = -H*weddy(j,L)/p(j,L)
          endif
       enddo
       enddo
@@ -566,34 +658,12 @@ c --------------------------
 
    !  call compute_edge( u,p,ple,jm,lm,undef,ue )
       call map1_cubic( lm,p,u, lm+1,ple,ue, jm, Method, undef)
-      call compute_dqdp( ue,delp,jm,lm,undef,dudp )
+      call compute_d_dp( ue,delp,jm,lm,undef,stuff )
+      call map1_cubic( lm,pm,stuff, lm,p,dudp, jm, Method, undef)
 
       !--------------------- Compute d(u*cos)/(a*cos*dphi) ---------------------
 
-      do L=1,lm
-      do j=1,jm
-                  phi = -pi/2 + (j-1)*dphi
-          if( defined(u(j,L),undef) ) then
-                  stuff(j,L) = u(j,L)*cos(phi)
-          else
-                  stuff(j,L) = undef
-          endif
-      enddo
-      enddo
-
-      do L=1,lm
-         dudphi(1 ,L) = undef
-         dudphi(jm,L) = undef
-      do j=2,jm-1
-          phi = -pi/2 + (j-1)*dphi
-          if( defined(stuff(j+1,L),undef)  .and. 
-     .        defined(stuff(j-1,L),undef) ) then 
-              dudphi(j,L) = ( stuff(j+1,L)-stuff(j-1,L) )/(a*cos(phi)*2*dphi)
-          else
-              dudphi(j,L) = undef
-          endif
-      enddo
-      enddo
+      call compute_d_dphi( u,jm,lm,undef,dudphi )
 
       !----------------------- Compute epfy & epfz ----------------------------
 
@@ -619,36 +689,14 @@ c --------------------------
 
       !----------------------- Compute d(epfy*cos)/(a*cos*dphi) -----------------------
 
-      do L=1,lm
-      do j=1,jm
-                  phi = -pi/2 + (j-1)*dphi
-          if( defined(epfy(j,L),undef) ) then
-                  stuff(j,L) = epfy(j,L)*cos(phi)
-          else
-                  stuff(j,L) = undef
-          endif
-      enddo
-      enddo
-
-      do L=1,lm
-         dfdphi(1 ,L) = undef
-         dfdphi(jm,L) = undef
-      do j=2,jm-1
-         phi = -pi/2 + (j-1)*dphi
-         if( defined(stuff(j+1,L),undef)  .and. 
-     .       defined(stuff(j-1,L),undef) ) then 
-             dfdphi(j,L) = ( stuff(j+1,L)-stuff(j-1,L) )/(a*cos(phi)*2*dphi)
-         else
-             dfdphi(j,L) = undef
-         endif
-      enddo
-      enddo
+      call compute_d_dphi( epfy,jm,lm,undef,dfdphi )
 
       !------------------------- Compute d(epfz)/dp ---------------------------
 
    !  call compute_edge( epfz,p,ple,jm,lm,undef,epfze )
       call map1_cubic( lm,p,epfz, lm+1,ple,epfze, jm, Method, undef)
-      call compute_dqdp( epfze,delp,jm,lm,undef,dfdp )
+      call compute_d_dp( epfze,delp,jm,lm,undef,stuff )
+      call map1_cubic( lm,pm,stuff, lm,p,dfdp, jm, Method, undef)
 
       !----------------------- Compute EPFlux Divergence ----------------------
 
@@ -682,6 +730,12 @@ c -------------------------------------------------------------------
       call flipz( dfdp  ,jm,lm,1.0            ,undef )
       call flipz( p     ,jm,lm,1.0            ,undef )
       call flipz( delp  ,jm,lm,1.0            ,undef )
+
+      call flipz( vstar ,jm,lm,1.0            ,undef )
+      call flipz( veddy ,jm,lm,1.0            ,undef )
+      call flipz( wstar ,jm,lm,1.0            ,undef )
+      call flipz( wmean ,jm,lm,1.0            ,undef )
+      call flipz( weddy ,jm,lm,1.0            ,undef )
 
       return
       end
@@ -793,11 +847,14 @@ c -------------------------------------------------------------------
       real  wstar(jm,lm), wmean(jm,lm), weddy(jm,lm)
       real    s  (jm,lm)
       real p0(jm,lm), p(jm,lm), rho0(jm,lm)
+      real pm(jm,lm)
       real   cosp(jm), dum(jm,lm)
       real ddcosp(jm,lm)
       real    the(jm,0:lm)
       real    ple(jm,0:lm)
+      real stuffe(jm,0:lm)
       real   delp(jm,  lm)
+      integer method
       logical defined
 
       PARAMETER ( AIRMW  = MAPL_AIRMW  )
@@ -825,6 +882,7 @@ c -----------------------------------------------------------------
       ts =  240.0
       rhos = ps/(rgas*ts)
 
+      Method = 0
       print *, '  rhos = ',    rhos
       print *, '1/rhos = ',1.0/rhos
 
@@ -849,31 +907,36 @@ c ------------------------------------
       do L=1,lm-1
       do j=1,jm
         ple(j,L) = (  p(j,L)+ p(j,L+1) )*0.5
-                                                                    the(j,L) =   undef
-        if( defined(th(j,L  ),undef)                              ) the(j,L) =   th(j,L)
-        if( defined(th(j,L+1),undef)                              ) the(j,L) =   th(j,L+1)
-        if( defined(th(j,L+1),undef) .and. defined(th(j,L),undef) ) the(j,L) = ( th(j,L+1)+th(j,L) )*0.5
       enddo
       enddo
       ple(:,lm) =  p(:,lm) + 0.5*( p(:,lm)-p(:,lm-1) )
-
-                 the(:,lm) = undef
-      where(  abs(th(:,lm)-undef).gt.0.1 .and. abs(the(:,lm-1)-undef).gt.0.1 )
-                 the(:,lm) = the(:,lm-1) + ( th(:,lm)-the(:,lm-1) ) * ( ple(:,lm)-ple(:,lm-1) )/( p(:,lm)-ple(:,lm-1) )
-      endwhere
 
       do L=1,lm
         delp(:,L) = ple(:,L)-ple(:,L-1)
       enddo
 
+c Compute Mid-Point of PLE Edge Values
+c ------------------------------------
+      do L=1,lm
+        pm(:,L) = ( ple(:,L)+ple(:,L-1) )*0.5
+      enddo
+
+
+c Compute THE at PLE Edge Values
+c ------------------------------
+      call map1_cubic( lm,p,th, lm+1,ple,the, jm, Method, undef)
+
 
 c Compute D(Theta)/DZ (with a forced minimum to prevent dthdz => 0)
 c -----------------------------------------------------------------
+      call compute_d_dp( the,delp,jm,lm,undef,stuff )
+      call map1_cubic( lm,pm,stuff, lm,p,dthdp, jm, Method, undef)
+
       do L=1,lm
       do j=1,jm
          if( defined(the(j,L  ),undef )  .and.
      .       defined(the(j,L-1),undef ) ) then
-             dthdp(j,L) = min( -0.003, ( the(j,L)-the(j,L-1) )/ delp(j,L) )
+             dthdp(j,L) = min( -0.003, dthdp(j,L) )
          else
              dthdp(j,L) = undef
          endif
@@ -894,19 +957,16 @@ c --------------------------------------------
       enddo
       enddo
 
-      do L=2,lm-1
+      call map1_cubic( lm,p,stuff, lm+1,ple,stuffe, jm, Method, undef)
+      call compute_d_dp( stuffe,delp,jm,lm,undef,stuff )
+      call map1_cubic( lm,pm,stuff, lm,p,vtlda, jm, Method, undef)
+
+      do L=1,lm
       do j=1,jm
-      if( defined(stuff(j,L+1),undef)  .and. 
-     .    defined(stuff(j,L-1),undef) ) then 
-               vtlda(j,L) = p(j,L)/rho0(j,L) * ( stuff(j,L+1)-stuff(j,L-1) )/ ( 2*(ple(j,L)-ple(j,L-1)) )
-      else
-               vtlda(j,L) = undef
+      if( defined(vtlda(j,L),undef) ) then
+                  vtlda(j,L) = p(j,L)/rho0(j,L) * vtlda(j,L)
       endif
       enddo
-      enddo
-      do j=1,jm
-      vtlda(j,1)  = vtlda(j,2)
-      vtlda(j,lm) = vtlda(j,lm-1)
       enddo
 
 c Compute Vstar
@@ -960,34 +1020,21 @@ c -----------------------------------------------------------------------------
       enddo
       enddo
 
-c Compute D(cos*vpthp/dthdz)/Dphi
-c -------------------------------
+c Compute D(cos*vpthp/dthdz)/(a*cos*Dphi)
+c ---------------------------------------
       do L=1,lm
       do j=1,jm
       if( defined(vpthp(j,L),undef)  .and. 
      .    defined(dthdp(j,L),undef)  .and.
      .            dthdp(j,L).ne.0.0 ) then
-                  stuff(j,L) = -H*cosp(j)*vpthp(j,L)/(p(j,L)*dthdp(j,L))
+                  stuff(j,L) = -H*vpthp(j,L)/(p(j,L)*dthdp(j,L))
       else
                   stuff(j,L) = undef
       endif
       enddo
       enddo
 
-      do L=1,lm
-      do j=1,jm
-      if( j.gt.1 .and. j.lt.jm ) then
-          if( defined(stuff(j+1,L),undef)  .and. 
-     .        defined(stuff(j-1,L),undef) ) then 
-              ddcosp(j,L) = ( stuff(j+1,L)-stuff(j-1,L) )/(2*dp)
-          else
-              ddcosp(j,L) = undef
-          endif
-      else
-              ddcosp(j,L) = undef
-      endif
-      enddo
-      enddo
+      call compute_d_dphi( stuff,jm,lm,undef,ddcosp )
 
 c Compute Wstar
 c -------------
@@ -995,8 +1042,8 @@ c -------------
       do j=1,jm
       if( defined(ddcosp(j,L),undef) ) then
             wmean(j,Lm-L+1) = w(j,L)
-            weddy(j,Lm-L+1) = ddcosp(j,L)/(a*cosp(j))
-            wstar(j,Lm-L+1) = w(j,L) + ddcosp(j,L)/(a*cosp(j))
+            weddy(j,Lm-L+1) =          ddcosp(j,L)
+            wstar(j,Lm-L+1) = w(j,L) + ddcosp(j,L)
       else
             wstar(j,Lm-L+1) = undef
             wmean(j,Lm-L+1) = undef
@@ -1136,14 +1183,11 @@ c -------------------------------------------------------------------
                                                                      qe(j,L) =   undef
         if( defined( q(j,L  ),undef)                              )  qe(j,L) =   q(j,L)
         if( defined( q(j,L+1),undef)                              )  qe(j,L) =   q(j,L+1)
-      ! if( defined( q(j,L+1),undef) .and. defined( q(j,L),undef) )  qe(j,L) = ( q(j,L+1)+ q(j,L) )*0.5
 
       ! Linear Interpolation to Pressure Edge
       ! -------------------------------------
         if( defined( q(j,L+1),undef) .and. defined( q(j,L),undef) ) then
-               qe(j,L) = q(j,L)   + ( q(j,L+1)-q(j,L) )*( log(pe(j,L)/p(j,L)) )/( log(p(j,L+1)/p(j,L)) )
-          !    qe(j,L) = q(j,L)   + ( q(j,L+1)-q(j,L) )*( pe(j,L)  - p(j,L) )/( p(j,L+1)-p(j,L) )
-          ! or qe(j,L) = q(j,L+1) - ( q(j,L+1)-q(j,L) )*(  p(j,L+1)-pe(j,L) )/( p(j,L+1)-p(j,L) )
+               qe(j,L) = q(j,L) + ( q(j,L+1)-q(j,L) ) * log(pe(j,L)/p(j,L)) / log(p(j,L+1)/p(j,L))
         endif
 
       enddo
@@ -1151,7 +1195,6 @@ c -------------------------------------------------------------------
                   qe(:,lm) = undef
       where(  abs( q(:,lm)-undef).gt.0.1 .and. abs( qe(:,lm-1)-undef).gt.0.1 )
                   qe(:,lm) =  qe(:,lm-1) + (  q(:,lm)- qe(:,lm-1) ) * ( log(pe(:,lm)/pe(:,lm-1)) )/( log(p(:,lm)/pe(:,lm-1)) )
-               !  qe(:,lm) =  qe(:,lm-1) + (  q(:,lm)- qe(:,lm-1) ) * ( pe(:,lm)-pe(:,lm-1) )/( p(:,lm)-pe(:,lm-1) )
       endwhere
 
       return
@@ -1159,7 +1202,7 @@ c -------------------------------------------------------------------
 
     ! ************************************************************************************************************
 
-      subroutine compute_dqdp( qe,dp,jm,lm,undef,dqdp )
+      subroutine compute_d_dp( qe,dp,jm,lm,undef,dqdp )
       implicit none
       integer j,L,jm,lm
       real undef
@@ -1174,6 +1217,51 @@ c -------------------------------------------------------------------
              dqdp(j,L) = ( qe(j,L)-qe(j,L-1) )/ dp(j,L)
          else
              dqdp(j,L) = undef
+         endif
+      enddo
+      enddo
+
+      return
+      end
+
+    ! ************************************************************************************************************
+
+      subroutine compute_d_dphi( q,jm,lm,undef,dqdphi )
+      use MAPL_ConstantsMod
+      implicit none
+      integer j,L,jm,lm
+      real      q(jm,lm)
+      real dqdphi(jm,lm)
+
+      real undef, dphi, phi, pi, a
+      real stuff(jm,lm)
+      logical defined
+
+        pi = 4.*atan(1.)
+      dphi = pi/(jm-1)
+        a  = MAPL_RADIUS
+
+      do L=1,lm
+      do j=1,jm
+                  phi = -pi/2 + (j-1)*dphi
+          if( defined(q(j,L),undef) ) then
+                  stuff(j,L) = q(j,L)*cos(phi)
+          else
+                  stuff(j,L) = undef
+          endif
+      enddo
+      enddo
+
+      do L=1,lm
+         dqdphi(1 ,L) = undef
+         dqdphi(jm,L) = undef
+      do j=2,jm-1
+         phi = -pi/2 + (j-1)*dphi
+         if( defined(stuff(j+1,L),undef)  .and. 
+     .       defined(stuff(j-1,L),undef) ) then 
+             dqdphi(j,L) = ( stuff(j+1,L)-stuff(j-1,L) )/(a*cos(phi)*2*dphi)
+         else
+             dqdphi(j,L) = undef
          endif
       enddo
       enddo

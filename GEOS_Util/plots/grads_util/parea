@@ -19,6 +19,7 @@ ymax = subwrd(args,4)
   left = 0.5
  right = 0.2
 
+ shift = 0.0
    top = 0.0
    bot = 0.0
   left = 0.0
@@ -36,7 +37,13 @@ if( subwrd(args,num)='-left'   ) ; left   = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-right'  ) ; right  = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-scalex' ) ; scalex = subwrd(args,num+1) ; endif
 if( subwrd(args,num)='-scaley' ) ; scaley = subwrd(args,num+1) ; endif
+if( subwrd(args,num)='-shift'  ) ; shift  = subwrd(args,num+1) ; endif
 endwhile
+
+if( top   = 0 ) ; top   = shift ; endif
+if( bot   = 0 ) ; bot   = shift ; endif
+if( left  = 0 ) ; left  = shift ; endif
+if( right = 0 ) ; right = shift ; endif
 
 say ' parea: 'xloc' 'yloc' 'xmax' 'ymax
 say ' '
