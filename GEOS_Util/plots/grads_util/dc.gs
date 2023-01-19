@@ -25,7 +25,7 @@ say
 say 'You may plot the entire globe, or specify a particular face:'
 say 'example:  dc q1 -cint 5 -face N  (N=1,2,3,4,5, or 6)'
 say
-say 'You may shade the background topography when the input field is contoured (i.e., not shaded or grfill)'
+say 'You may shade the background topography '
 say 'example:  dc q1 -cint 5 -toposhade -face N  (N=1,2,3,4,5, or 6)'
 say
 return
@@ -259,14 +259,15 @@ endif
 *******************************************************
 
 if( face = GLOBAL ) 
-   'set vpage 0 11 0 8.5'
-   'set parea 0.5 3.0 3.0 5.5'
+*  'set vpage 0 11 0 8.5'
+*  'set parea 0.5 3.0 3.0 5.5'
+   'parea 1 2 4 3'
 endif
 'set grads off'
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 1) )
+if( toposhade = TRUE & (face = GLOBAL | face = 1) )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -277,6 +278,7 @@ if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 1) )
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -326,7 +328,8 @@ if( face = GLOBAL | face = 1 )
 
 if( scalar = true )
    'set gxout 'gxout
-   'd 'q.1
+    if( gxout = Contour ) ; 'd 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'd maskout('q.1',abs('q.1')-abs('cint'))' ; endif
 endif
 if( vector = true )
    'set ccolor 1'
@@ -347,6 +350,7 @@ endif
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -355,14 +359,15 @@ endif
 *******************************************************
 
 if( face = GLOBAL )
-   'set parea 3.0 5.5 3.00 5.50'
+*  'set parea 3.0 5.5 3.00 5.50'
+   'parea 2 2 4 3'
 endif
 'set xlab off'
 'set ylab off'
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 2) )
+if( toposhade = TRUE & (face = GLOBAL | face = 2) )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -375,6 +380,7 @@ ytopo2 = ytopo.2 + 0.5
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -426,7 +432,8 @@ if( face = GLOBAL | face = 2 )
 
 if( scalar = true )
    'set gxout 'gxout
-   'd 'q.1
+    if( gxout = Contour ) ; 'd 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'd maskout('q.1',abs('q.1')-abs('cint'))' ; endif
 endif
 if( vector = true )
    'set ccolor 1'
@@ -449,6 +456,7 @@ ytopo2 = ytopo.2 + 0.5
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -457,7 +465,8 @@ endif
 *******************************************************
 
 if( face = GLOBAL )
-   'set parea 5.5 8.0 3.0 5.5'
+*  'set parea 5.5 8.0 3.0 5.5'
+   'parea 3 2 4 3'
 endif
 'set xlab off'
 'set ylab off'
@@ -467,7 +476,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 4) )
+if( toposhade = TRUE & (face = GLOBAL | face = 4) )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -478,6 +487,7 @@ if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 4) )
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -527,7 +537,8 @@ endif
 if( face = GLOBAL | face = 4 )
 if( scalar = true )
    'set gxout 'gxout
-   'd 'q.1
+    if( gxout = Contour ) ; 'd 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'd maskout('q.1',abs('q.1')-abs('cint'))' ; endif
 endif
 if( vector = true )
    'set ccolor 1'
@@ -548,6 +559,7 @@ endif
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -557,7 +569,8 @@ endif
 
 
 if( face = GLOBAL )
-   'set parea 8.0 10.5 3.0 5.5'
+*  'set parea 8.0 10.5 3.0 5.5'
+   'parea 4 2 4 3'
 endif
 'set xlab off'
 'set ylab off'
@@ -566,7 +579,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 5) )
+if( toposhade = TRUE & (face = GLOBAL | face = 5) )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -577,6 +590,7 @@ if( toposhade = TRUE & gxout = Contour & (face = GLOBAL | face = 5) )
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -624,7 +638,8 @@ endif
 if( face = GLOBAL | face = 5 )
 if( scalar = true )
    'set gxout 'gxout
-   'd 'q.1
+    if( gxout = Contour ) ; 'd 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'd maskout('q.1',abs('q.1')-abs('cint'))' ; endif
 endif
 if( vector = true )
    'set ccolor 1'
@@ -645,6 +660,7 @@ endif
 'd topo'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -655,7 +671,8 @@ endif
 if( face = GLOBAL | face = 3 | face = 31 )
 
 if( face = GLOBAL )
-   'set parea 0.5 3.0 5.5 8.0'
+*  'set parea 0.5 3.0 5.5 8.0'
+   'parea 1 1 4 3'
    'set xyrev on'
    'set xflip on'
    'set yflip off'
@@ -665,7 +682,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -676,6 +693,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,ynptopo-xxtopo+1) , 'xdimtopo'-ynptopo-xxtopo+2 )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -723,7 +741,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1',ynp-xx+1) , 'xdim'-ynp-xx+2 )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq,ynp-xx+1) , 'xdim'-ynp-xx+2 )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -757,6 +777,7 @@ endif
 'd maskout( maskout( topo,ynptopo-xxtopo+1) , 'xdimtopo'-ynptopo-xxtopo+2 )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -767,7 +788,8 @@ endif
 if( face = GLOBAL | face = 3 | face = 32 )
 
 if( face = GLOBAL )
-   'set parea 3.0 5.5 5.5 8.0'
+*  'set parea 3.0 5.5 5.5 8.0'
+   'parea 2 1 4 3'
    'set xyrev off'
    'set xflip off'
    'set yflip off'
@@ -778,7 +800,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -789,6 +811,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,xxtopo-ynptopo) , 'xdimtopo'-ynptopo-xxtopo )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -837,7 +860,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1',xx-ynp  ) , 'xdim'-ynp-xx+1 )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq,xx-ynp  ) , 'xdim'-ynp-xx+1 )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -866,6 +891,7 @@ endif
 'd maskout( maskout( topo,xxtopo-ynptopo) , 'xdimtopo'-ynptopo-xxtopo )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -876,7 +902,8 @@ endif
 if( face = GLOBAL | face = 3 | face = 34 )
 
 if( face = GLOBAL )
-   'set parea 5.5 8.0 5.5 8.0'
+*  'set parea 5.5 8.0 5.5 8.0'
+   'parea 3 1 4 3'
    'set xyrev on'
    'set xflip off'
    'set yflip on'
@@ -886,7 +913,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -897,6 +924,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,xxtopo-ynptopo+1) , ynptopo+xxtopo-'xdimtopo' )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -944,7 +972,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1', xx-ynp+1 ), ynp+xx-'xdim' )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq, xx-ynp+1 ), ynp+xx-'xdim' )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -978,6 +1008,7 @@ endif
 'd maskout( maskout( topo,xxtopo-ynptopo+1) , ynptopo+xxtopo-'xdimtopo' )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -988,7 +1019,8 @@ endif
 if( face = GLOBAL | face = 3 | face = 35 )
 
 if( face = GLOBAL )
-   'set parea 8.0 10.5 5.5 8.0'
+*  'set parea 8.0 10.5 5.5 8.0'
+   'parea 4 1 4 3'
    'set xyrev off'
    'set xflip on'
    'set yflip on'
@@ -999,7 +1031,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -1010,6 +1042,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,ynptopo-xxtopo) , ynptopo+xxtopo-'xdimtopo'-1 )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -1057,7 +1090,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1', ynp-xx ), ynp+xx-'xdim'-1 )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq, ynp-xx ), ynp+xx-'xdim'-1 )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -1091,6 +1126,7 @@ endif
 'd maskout( maskout( topo,ynptopo-xxtopo) , ynptopo+xxtopo-'xdimtopo'-1 )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -1101,7 +1137,8 @@ endif
 if( face = GLOBAL | face = 6 | face = 61 )
 
 if( face = GLOBAL )
-   'set parea 0.5 3.0 0.5 3.0'
+*  'set parea 0.5 3.0 0.5 3.0'
+   'parea 1 3 4 3'
    'set xyrev off'
    'set xflip off'
    'set yflip off'
@@ -1112,7 +1149,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -1123,6 +1160,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,ysptopo-xxtopo+1) , ysptopo+xxtopo-'xdimtopo' )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -1169,7 +1207,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1', ysp-xx+1 ), xx+ysp-'xdim' )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq, ysp-xx+1 ), xx+ysp-'xdim' )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -1198,6 +1238,7 @@ endif
 'd maskout( maskout( topo,ysptopo-xxtopo+1) , ysptopo+xxtopo-'xdimtopo' )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -1208,7 +1249,8 @@ endif
 if( face = GLOBAL | face = 6 | face = 62 )
 
 if( face = GLOBAL )
-   'set parea 3.0 5.5 0.5 3.0'
+*  'set parea 3.0 5.5 0.5 3.0'
+   'parea 2 3 4 3'
    'set xyrev on'
    'set xflip on'
    'set yflip off'
@@ -1218,7 +1260,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -1229,6 +1271,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,xxtopo-ysptopo) , ysptopo+xxtopo-'xdimtopo' )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -1275,7 +1318,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1', xx-ysp ), ysp+xx-'xdim' )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq, xx-ysp ), ysp+xx-'xdim' )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -1304,6 +1349,7 @@ endif
 'd maskout( maskout( topo,xxtopo-ysptopo) , ysptopo+xxtopo-'xdimtopo' )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -1314,7 +1360,8 @@ endif
 if( face = GLOBAL | face = 6 | face = 64 )
 
 if( face = GLOBAL )
-   'set parea 5.5 8.0 0.5 3.0'
+*  'set parea 5.5 8.0 0.5 3.0'
+   'parea 3 3 4 3'
    'set xyrev off'
    'set xflip on'
    'set yflip on'
@@ -1325,7 +1372,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -1337,6 +1384,7 @@ ytopo5 = ytopo.5 + 0.5
 'd maskout( maskout( topo,xxtopo-ysptopo) , 'xdimtopo'-xxtopo-ysptopo )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -1384,7 +1432,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1', xx-ysp ), 'xdim'-xx-ysp )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq, xx-ysp ), 'xdim'-xx-ysp )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -1414,6 +1464,7 @@ ytopo5 = ytopo.5 + 0.5
 'd maskout( maskout( topo,xxtopo-ysptopo) , 'xdimtopo'-xxtopo-ysptopo )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 
 endif
 
@@ -1424,7 +1475,10 @@ endif
 if( face = GLOBAL | face = 6 | face = 65 )
 
 if( face = GLOBAL )
-   'set parea 8.0 10.5 0.5 3.0'
+*  'set parea 8.0 10.5 0.5 3.0'
+   'parea 4 3 4 3'
+    xmid = subwrd(result,1)
+    ybot = subwrd(result,2)
    'set xyrev on'
    'set xflip off'
    'set yflip on'
@@ -1435,7 +1489,7 @@ endif
 
 * Shade Topo
 * ----------
-if( toposhade = TRUE & gxout = Contour )
+if( toposhade = TRUE )
 'set dfile 'topofile
 'set gxout shaded'
 'setx'
@@ -1446,6 +1500,7 @@ if( toposhade = TRUE & gxout = Contour )
 'd maskout( maskout( topo,ysptopo-xxtopo+1) , 'xdimtopo'-ysptopo-xxtopo+1 )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 endif
 * ----------
 
@@ -1492,7 +1547,9 @@ endif
 
 if( scalar = true )
    'set gxout 'gxout
-   'd maskout( maskout( 'q.1', ysp-xx+1 ), 'xdim'-ysp-xx+1 )'
+    if( gxout = Contour ) ; 'define maskq = 'q.1                              ; endif
+    if( gxout = Shaded  ) ; 'define maskq = maskout('q.1',abs('q.1')-abs('cint'))' ; endif
+   'd maskout( maskout( maskq, ysp-xx+1 ), 'xdim'-ysp-xx+1 )'
 endif
 if( vector = true )
    'set ccolor 1'
@@ -1521,6 +1578,7 @@ endif
 'd maskout( maskout( topo,ysptopo-xxtopo+1) , 'xdimtopo'-ysptopo-xxtopo+1 )'
 'set cthick 4'
 'set dfile 'file
+'set gxout 'gxout
 'setx'
 'sety'
 
@@ -1529,8 +1587,23 @@ endif
 *******************************************************
 *******************************************************
 
+*if( face = GLOBAL )
+**  'set parea 8.0 10.5 0.5 3.0'
+*   'parea 4 3 4 3'
+*   'set line 0 1 10'
+*   'draw line 2.75 0.230041 2.75 8.25846l'
+*   'draw line 0.246349 2.8 10.7644 2.8'
+*   'draw line 0.246349 5.6 10.7644 5.6'
+*   'draw line 5.5 0.230041 5.5 8.25846l'
+*   'draw line 8.247 0.230041 8.247 8.25846l'
+*endif
+
+*******************************************************
+*******************************************************
+
 'close 'topofile
-if( gxout != Contour ) ; 'set gxout 'gxout ; endif
+*if( gxout != Contour ) ; 'set gxout 'gxout ; endif
+'set gxout 'gxout
 'set arrlab on'
 
 'set dfile 'file
@@ -1543,3 +1616,4 @@ if( face = GLOBAL )
    'set parea off'
 endif
 
+return xmid' 'ybot

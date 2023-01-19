@@ -475,7 +475,7 @@ end
      set numlocs  = ''
      @    nstream = 0
      foreach collection (  $collections )
-          set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+          set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
      @    nstream =                   $nstream  + 1
      @  date_node = $expdots + $ndots[$nstream] + 3
 
@@ -569,7 +569,7 @@ set monthly_collections = "FALSE"
 @ m      = 1
 @ begloc = 1
 foreach collection ( $collections )
-        set   monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+        set   monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
         if( ${monthly_collections} == "FALSE" & ${#monthly_attribute} != 0 ) set monthly_collections = "TRUE"
 
       @ endloc = $begloc + $numdates[$m] - 1
@@ -730,7 +730,7 @@ if( $AGCM_IM >= 1152 | ($AGCM_IM >= 360 & $CUBE == TRUE ) ) set HIRES = TRUE
 @ begloc  = 1
 @ nstream = 0
 foreach collection ( $collections )
-     set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+     set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
    @ nstream   =                   $nstream  + 1
    @ date_node = $expdots + $ndots[$nstream] + 3
    @ endloc = $begloc + $numdates[$m] - 1
@@ -835,9 +835,9 @@ foreach collection ( $collections )
                if( ${#monthly_attribute} != 0 ) @ monthly_date_node  = $date_node
 
                if( ${#monthly_attribute} == 0 ) then
-               set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep  monthly | grep -v diurnal`
+                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.*${ext}"   | grep  monthly | grep -v diurnal`
                else
-                   set locals = `/bin/ls -1 | grep ${expid}.${collection} | grep -v diurnal`
+                   set locals = `/bin/ls -1 | grep "${expid}.${collection}.[0-9]\{6\}01_0000z.${ext}" | grep -v diurnal`
                endif
 
                echo "Archiving Monthlies for Collection: $collection for Date: $date"
@@ -857,8 +857,7 @@ foreach collection ( $collections )
                   if( ${#monthly_attribute} == 0 ) then
                       $cpvar $local $SOURCE/$collection
                   else
-                      set yearmonth = `echo $local | sed -n "s|${expid}.${collection}.\([0-9]\{6\}\).*|\1|p"`
-                      $cpvar $local $SOURCE/$collection/${expid}.${collection}.monthly.${yearmonth}.${ext}
+                      $cpvar $local $SOURCE/$collection/${expid}.${collection}.monthly.${year}${month}.${ext}
                   endif
 
                   echo "if( -e $local ) then"                                          >> $archfile
@@ -1041,121 +1040,105 @@ wait
 
 @ nstream = 0
 foreach collection ( $collections )
-     set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
-    @ nstream   =                   $nstream  + 1
+   set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
+   @ nstream   =                   $nstream  + 1
 
-     if( ( ($MOVEFILES != "TRUE") & ${#monthly_attribute} == 0 ) | \
-         ( ($MOVEFILES == "TRUE") & ${#monthly_attribute} != 0 ) | \
-           ( $RECDATE  != "NULL") ) then
+   if( ($MOVEFILES == "TRUE") | ( $RECDATE  != "NULL") ) then
 
-         if( ${#monthly_attribute} != 0 ) @ date_node = $expdots + $ndots[$nstream] + 3
-         if( ${#monthly_attribute} == 0 ) @ date_node = $expdots + $ndots[$nstream] + 4
+      @ date_node = $expdots + $ndots[$nstream] + 4
 
-    cd $SOURCE/${collection}
+      cd $SOURCE/${collection}
 
-    if( ${#monthly_attribute} == 0 ) then
-        set monthlies = `/bin/ls -1 $expid.${collection}.monthly* | grep -v clim`
-    else
-        set monthlies = `/bin/ls -1 $expid.${collection}.*        | grep -v clim`
-    endif
+      set monthlies = `/bin/ls -1 $expid.${collection}.monthly* | grep -v clim`
+      set num = `/bin/ls -1 $monthlies | wc -l`
 
-    set       num = `/bin/ls -1 $monthlies | wc -l`
+      # Create DDF File
+      # ---------------
+      if( $num != 0 ) then
 
-if( $num != 0 ) then
+         # Extract Extension (last node) from Monthly Mean File 
+         # ----------------------------------------------------
+         @ m = 1
+         while( $m != 0 )
+            set   dum  = `echo $monthlies[1] | cut -d "." -f$m`
+            if( .$dum != . ) then
+               set ext = $dum
+               @ m = $m + 1
+            else
+               @ m = 0
+            endif
+         end
 
-# Create DDF File
-# ---------------
-   /bin/rm -f xdf.tabl
+         set edate  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
+         set eyear  = `echo $edate           | cut -c1-4`
+         set emonth = `echo $edate           | cut -c5-6`
+         set eday   = `echo $edate           | cut -c7-8`
+         set ehour  = `echo $edate           | cut -c10-11`
 
-# Extract Extension (last node) from Monthly Mean File 
-# ----------------------------------------------------
-@ m = 1
-while( $m != 0 )
-    set   dum  = `echo $monthlies[1] | cut -d "." -f$m`
-    if( .$dum != . ) then
-         set ext = $dum
-         @ m = $m + 1
-    else
-         @ m = 0
-    endif
-end
+         set date  = `echo $monthlies[1] | cut -d "." -f${date_node}`
+         set year  = `echo $date         | cut -c1-4`
+         set month = `echo $date         | cut -c5-6`
+         set day   = `echo $date         | cut -c7-8`
+         set hour  = `echo $date         | cut -c10-11`
 
-    set edate  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
-    set eyear  = `echo $edate           | cut -c1-4`
-    set emonth = `echo $edate           | cut -c5-6`
-    set eday   = `echo $edate           | cut -c7-8`
-    set ehour  = `echo $edate           | cut -c10-11`
+         set expdsc = `grep EXPDSC: $HISTORYRC | cut -d" " -f2`
+         set perpyr = `grep PERPETUAL_YEAR:  $HOMDIR/CAP.rc | grep -v \#`
+         set perpmo = `grep PERPETUAL_MONTH: $HOMDIR/CAP.rc | grep -v \#`
 
-    set date  = `echo $monthlies[1] | cut -d "." -f${date_node}`
-    set year  = `echo $date         | cut -c1-4`
-    set month = `echo $date         | cut -c5-6`
-    set day   = `echo $date         | cut -c7-8`
-    set hour  = `echo $date         | cut -c10-11`
+         if( $#perpyr != 0 & $#perpmo != 0 ) then
+            set timinc = "yr"
+         else
+            set timinc = "mo"
+         endif
 
-    set expdsc = `grep EXPDSC: $HISTORYRC | cut -d" " -f2`
-    set perpyr = `grep PERPETUAL_YEAR:  $HOMDIR/CAP.rc | grep -v \#`
-    set perpmo = `grep PERPETUAL_MONTH: $HOMDIR/CAP.rc | grep -v \#`
+         if( $month == "01" ) set MON = JAN
+         if( $month == "02" ) set MON = FEB
+         if( $month == "03" ) set MON = MAR
+         if( $month == "04" ) set MON = APR
+         if( $month == "05" ) set MON = MAY
+         if( $month == "06" ) set MON = JUN
+         if( $month == "07" ) set MON = JUL
+         if( $month == "08" ) set MON = AUG
+         if( $month == "09" ) set MON = SEP
+         if( $month == "10" ) set MON = OCT
+         if( $month == "11" ) set MON = NOV
+         if( $month == "12" ) set MON = DEC
 
-    if( $#perpyr != 0 & $#perpmo != 0 ) then
-        set timinc = "yr"
-    else
-        set timinc = "mo"
-    endif
+         @ nmonths = ( $eyear - $year ) * 12 + ( $emonth - $month ) + 1
 
-    if( $month == "01" ) set MON = JAN
-    if( $month == "02" ) set MON = FEB
-    if( $month == "03" ) set MON = MAR
-    if( $month == "04" ) set MON = APR
-    if( $month == "05" ) set MON = MAY
-    if( $month == "06" ) set MON = JUN
-    if( $month == "07" ) set MON = JUL
-    if( $month == "08" ) set MON = AUG
-    if( $month == "09" ) set MON = SEP
-    if( $month == "10" ) set MON = OCT
-    if( $month == "11" ) set MON = NOV
-    if( $month == "12" ) set MON = DEC
+         /bin/rm -f xdf.tabl
+         echo DSET $SOURCE/${collection}/$expid.${collection}.monthly.%y4%m2.$ext >  xdf.tabl
+         echo TITLE $expdsc                                                       >> xdf.tabl
+         echo OPTIONS template                                                    >> xdf.tabl
+         echo TDEF time $nmonths  LINEAR  00:00Z01$MON$year 1$timinc              >> xdf.tabl
 
-@   nmonths = ( $eyear - $year ) * 12 + ( $emonth - $month ) + 1
+      endif  # Endif for monthlies NUM = 0 check
 
-
-    if( ${#monthly_attribute} == 0 ) then
-    echo DSET $SOURCE/${collection}/$expid.${collection}.monthly.%y4%m2.$ext >  xdf.tabl
-    else
-        set  template = `grep -i $collection.template: $HISTORYRC | cut -d: -f2 | cut -d"'" -f2`
-        echo DSET $SOURCE/${collection}/$expid.${collection}.$template           > xdf.tabl
-    endif
-    echo TITLE $expdsc                                                       >> xdf.tabl
-    echo OPTIONS template                                                    >> xdf.tabl
-    echo TDEF time $nmonths  LINEAR  00:00Z01$MON$year 1$timinc              >> xdf.tabl
-
-endif  # Endif for monthlies NUM = 0 check
-
-# Create/Update Climatology Files for 2 or more years if locals were processed
-# ----------------------------------------------------------------------------
-if( $RECDATE == "NULL" || $CLIMO == "TRUE" ) then
-    if( $numlocs[$nstream] != 0 && $num >= 24 ) then
-        set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
-        set month = `echo $date            | cut -c5-6`
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-        if( -e $SOURCE/${collection}/diurnal ) then
+      # Create/Update Climatology Files for 2 or more years if locals were processed
+      # ----------------------------------------------------------------------------
+      if( $RECDATE == "NULL" || $CLIMO == "TRUE" ) then
+         if( $numlocs[$nstream] != 0 && $num >= 24 ) then
+            set date  = `echo $monthlies[$num] | cut -d "." -f${date_node}`
+            set month = `echo $date            | cut -c5-6`
+            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
+            if( -e $SOURCE/${collection}/diurnal ) then
                $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-        endif
-        if( $DDF == "NULL" ) set DDF = clim
-    endif
-else if( $RECDATE != "NULL" ) then
-    set date  = $RECDATE
-    set month = `echo $date | cut -c5-6`
-    set num_recdates = `/bin/ls -1 $monthlies | grep ${month}.$ext | wc -l`
-    if( $numlocs[$nstream] != 0 && $num_recdates >= 2 ) then
-               $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
-        if( -e $SOURCE/${collection}/diurnal ) then
+            endif
+            if( $DDF == "NULL" ) set DDF = clim
+         endif
+      else if( $RECDATE != "NULL" ) then
+         set date  = $RECDATE
+         set month = `echo $date | cut -c5-6`
+         set num_recdates = `/bin/ls -1 $monthlies | grep ${month}.$ext | wc -l`
+         if( $numlocs[$nstream] != 0 && $num_recdates >= 2 ) then
+            $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -ncpus $NCPUS
+            if( -e $SOURCE/${collection}/diurnal ) then
                $GEOSUTIL/post/gcmclim.script -source $SOURCE -collection $collection -month $month -diurnal -ncpus $NCPUS
-        endif
-        if( $DDF == "NULL" ) set DDF = clim
-    endif
-endif
-
-endif
+            endif
+            if( $DDF == "NULL" ) set DDF = clim
+         endif
+      endif
+   endif
 end    # End ForEach Collection Loop
 
 endif  # End PLOTS Option
@@ -1267,7 +1250,7 @@ if( $PLOTS[1] == "NULL" ) then
                                       lockfile LOCKFILE
 @ count = 0
 foreach stream ($streams)
-    set monthly_attribute = `grep -i $collection.monthly: $HISTORYRC`
+    set monthly_attribute = `grep -i "^[\t ]*$collection.monthly:[\t ]*1" $HISTORYRC`
     echo Checking stream: $stream for date: $date
     if( ${#monthly_attribute} == 0 ) then
         set checkstream = `/bin/ls -1 $SOURCE/$stream/$expid.$stream.monthly.${date}* | grep -v clim`

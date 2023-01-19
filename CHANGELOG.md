@@ -11,20 +11,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed restart file geosachem to achem in regrid.pl
-- Updated CI to modern v1 orb
+### Fixed
+
+### Removed
+
+## [1.6.4] - 2023-01-17
+
+### Changed
+
+Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+
+### Removed
+
+- Remove `hasw` _constraint_ choice from remapping questions since they are being [decommissioned by NCCS](https://www.nccs.nasa.gov/nccs-users/SCU10%2613-Decommismion)
+
+## [1.6.3] - 2022-12-08
+
+### Changed
+
+- Moved to GitHub Actions for label enforcement
+- Updated CircleCI to Baselibs 7.7.0
+- Set default data ocean to be `CS` at C90+ resolution in `remap_restarts.py`
+- Updated `remap_restarts.py` to use argparse
 
 ### Fixed
 
-- More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
+- Fix an issue with `regrid.pl` and `remap_restarts.py` regridding from MERRA-2 from 2021-06 to 2021-09
+- Fix an issue with `remap_restarts.py` for post 2011 regridding from MERRA2
 
-### Removed
+## [1.6.2] - 2022-11-17
+
+### Fixed
+
+- Fixed `gcmpost.script` logic to generate `xdf.tabl` files for collections with `monthly: 1` attribute
+- Update EASE grid tile file name to contain pfafxxx
+- Add a dependency on GMAO_perllib in GMAO_etc
+
+## [1.6.1] - 2022-09-22
+
+### Changed
+
+Apply latest updates from L. Takacs to the plot package
+
+## [1.6.0] - 2022-09-12
+
+### Changed
+
+- Updates the plot package with the renamed carbon species.
+
+## [1.5.8] - 2022-09-08
+
+### Added
+
+- Add YAML validator
+
+### Changed
+- Converted obsys_rc.py, check_obsysrc.py, and associated unittests to Python 3
+- Added features to cmpdir.pl (option to toggle between diff and xxdiff; added -B to -bwi flags)
+
+- Generated command line to run the program
+- changed the location of the temporary folder for remap_restarts MERRA-2 case
+- Added new remap tests
+  - amip_c180Toc90
+  - c180Toc360
+  - c360Toc24
+  - s2sv3Toc12MOM6
+
+### Fixed
+
+- Add `target` attribute to variables in `nc_diag_cat`. Needed to build with Intel 2022.1
+
+## [1.5.7] - 2022-08-01
+
+### Changed
+
+Updates consistent with CVS Jason-4_0_p1_sky. Releases non-needed memory from zcmp/progz. Otherwise, minor plot updates.
+
+## [1.5.6] - 2022-07-22
+
+### Added
+
+- Introduce series of remap_restarts Python scripts to GEOS_Util/post
+- Add a series of tests for remap_restarts
+
+### Changed
+
+- Updated CI to modern v1 orb
+- Updated CI to use Baselibs 7.5.0
+
+### Fixed
+
+- Implemented a more robust check to test if a history's monthly attribute is 1 (on) and not commented out.
+- Fixed setting of `ks` in `m_set_eta.F90` to be based on `bk`
+- Added check for infinity in time_ave.F and replace with undef
+
+## [1.5.5] - 2022-06-08
+
+### Changed
+
+- Changed restart file geosachem to achem in regrid.pl
+- More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
 
 ## [1.5.4] - 2022-05-03
 
 ### Added
 
-- Added statsNx.rc for screen level variable fstats 
+- Added statsNx.rc for screen level variable fstats
 
 ### Changed
 

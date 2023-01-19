@@ -23,10 +23,11 @@ use Getopt::Long;
 
 # global variables
 #-----------------
-my ($bindiff, $bwiFLG, $debug, $cdoX, $delim, $diffFLGs, $dir1, $dir2);
+my ($bindiff, $BbwiFLG, $debug, $cdoX, $delim, $diffFLGs, $dir1, $dir2);
 my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
 my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
 my ($subdir, $tarfile_dirA, $tarfile_dirB, $tdirfile, $tmpdir, $verbose);
+my ($xxdiff_available, $xxFLG);
 my (%different, %diffsBIN, %diffsTXT, %dir_display, %filesize, %found);
 my (%identical, %ignore, %opts, %patterns, %vopts);
 my (@exclude, @extEXCL, @extINC, @fileIDs, @files, @files1, @files2);
@@ -56,7 +57,7 @@ $tdirfile = "tarfile_directory_locationXXX"; # used when comparing tarfiles
 # purpose  - get input parameters and initialize global variables
 #=======================================================================
 sub init {
-    my ($binX, $etcflg, $fcstflg, $help, $rsflg, $runflg);
+    my ($binX, $etcflg, $fcstflg, $help, $rsflg, $runflg, $xxdiff);
     my ($arrAddr, $val, @values, @vlist);
 
     # get runtime flags
@@ -151,8 +152,21 @@ sub init {
     # initialize other variables
     #---------------------------
     $diffFLGs = "";
+    $xxFLG = 1;
     $first = 1;
     %ignore = ();
+
+    # check for xxdiff availability
+    #------------------------------
+    chomp($xxdiff = `which xxdiff`);
+    if (-x $xxdiff) {
+        $xxFLG = 1;
+        $xxdiff_available = 1;
+    }
+    else {
+        $xxFLG = 0;
+        $xxdiff_available = 0;
+    }
 
     # select program to use for $bindiff
     #-----------------------------------
@@ -461,7 +475,7 @@ sub cmp_lists {
     $found{$lfile1} = $lfile2;
     $different{$lfile1} = $lfile2;
     $diffsTXT{"1"} = $lfile1;
-    $diffFLGs = "-bwi";
+    $diffFLGs = "-Bbwi";
     return;
 }
 
@@ -901,17 +915,20 @@ sub show_text_diffs {
             }
             print "\n";
         }
-        if ($diffFLGs) { printf $fmt1, "b", "turn OFF -bwi diff flag" }
-        else           { printf $fmt1, "b", "turn ON -bwi diff flag"  }
+        if ($diffFLGs) { printf $fmt1, "b", "turn OFF -Bbwi diff flag" }
+        else           { printf $fmt1, "b", "turn ON -Bbwi diff flag"  }
 
-        if ($ignoreFLG) { printf $fmt1, "e", "edit ignore diffs list" }
-
-        if ($ignoreFLG) { printf $fmt1, "i", "turn OFF ignore diffs"  }
+        if ($ignoreFLG) { printf $fmt1, "e", "edit ignore diffs list";
+                          printf $fmt1, "i", "turn OFF ignore diffs"  }
         else            { printf $fmt1, "i", "turn ON ignore diffs "  }
 
         if ($sortFLG) { printf $fmt1, "s", "turn OFF sorted diff" }
         else          { printf $fmt1, "s", "turn ON sorted diff"  }
 
+        if ($xxdiff_available) {
+            if ($xxFLG) { printf $fmt1, "x", "turn OFF xxdiff" }
+            else        { printf $fmt1, "x", "turn ON xxdiff" }
+        }
         print "\n";
         print "Make Selection: [$dflt] ";
         chomp($sel = <STDIN>);
@@ -942,12 +959,22 @@ sub show_text_diffs {
             next;
         }
 
-        # toggle diff -bwi flag
-        #----------------------
+        # toggle between xxdiff and diff comparisons
+        #-------------------------------------------
+        if ($sel eq "x") {
+            if ($xxdiff_available) {
+                $xxFLG = ! $xxFLG;
+            }
+            $num -= 1; next;
+
+        }
+
+        # toggle diff -Bbwi flag
+        #-----------------------
         if ($sel eq "b") {
-            $bwiFLG = ! $bwiFLG;
+            $BbwiFLG = ! $BbwiFLG;
             if ($diffFLGs) { $diffFLGs = ""     }
-            else           { $diffFLGs = "-bwi" }
+            else           { $diffFLGs = "-Bbwi" }
             $num -= 1; next;
         }
 
@@ -999,6 +1026,7 @@ sub display_text_diffs {
     my ($num, %diffs, $amperflag);
     my ($file1, $file2, $base1, $base2);
     my ($srt, $f1, $f2, $cnt, $diff1, $diff2, $var, $var_);
+    my ($status);
 
     $num = shift @_;
     %diffs = @_;
@@ -1050,14 +1078,19 @@ sub display_text_diffs {
             $var_ = "\\\$\{var" .$cnt ."\}";
 
             sed_subst($f1, $diff1, $var_);
-            system_("sed -i \"${cnt}i$var = $diff1\" $f1") && die "Error: sed cmd;";
-
             sed_subst($f2, $diff2, $var_);
-            system_("sed -i \"${cnt}i$var = $diff2\" $f2") && die "Error: sed cmd;";
+            if ($xxFLG) {
+                system_("sed -i \"${cnt}i$var = $diff1\" $f1")
+                    && die "Error: sed cmd;";
+                system_("sed -i \"${cnt}i$var = $diff2\" $f2")
+                    && die "Error: sed cmd;";
+            }
         }
         $cnt++;
-        system_("sed -i \"${cnt}i==================\" $f1") && die "Error: sed cmd;";
-        system_("sed -i \"${cnt}i==================\" $f2") && die "Error: sed cmd;";
+        system_("sed -i \"${cnt}i==================\" $f1")
+            && die "Error: sed cmd;";
+        system_("sed -i \"${cnt}i==================\" $f2")
+            && die "Error: sed cmd;";
         print "DONE\n";
     }
 
@@ -1069,7 +1102,12 @@ sub display_text_diffs {
     if ($diffs{"wait"}) { $amperflag = ""  }
     else                { $amperflag = "&" }
 
-    system_("xxdiff --text $diffFLGs $f1 $f2 $amperflag");
+    if ($xxFLG) { system_("xxdiff --text $diffFLGs $f1 $f2 $amperflag") }
+    else {
+        $status = system_("diff --text $diffFLGs $f1 $f2");
+        print "\nNO DIFFERENCES FOUND\n" unless $status;
+    }
+    
 }
 
 #=======================================================================
@@ -1131,11 +1169,13 @@ sub diffs_to_ignore {
               # allow user to make menu choice from previous menu
               #--------------------------------------------------
               if    ($diffs12 eq "a") { next }
-              elsif ($diffs12 eq "")  { last }
               elsif ($diffs12 eq "0") { last outer }
               elsif ($diffs12 eq "c") { $sel = "c"; last }
               elsif ($diffs12 eq "r") { $sel = "r"; last }
-
+              elsif ($diffs12 eq "")  {
+                  if (%ignore) { last }
+                  else         { last outer }
+              }
               ($diff1, $diff2) = ();
               ($diff1, $diff2) = split /[$delim]/, $diffs12;
 

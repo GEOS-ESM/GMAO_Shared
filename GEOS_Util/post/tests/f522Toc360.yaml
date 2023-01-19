@@ -1,0 +1,48 @@
+#
+# This template file can be filled with questionary or manually
+#
+#
+
+input:
+  air:
+    drymass: 1
+    hydrostatic: 0
+  shared:
+    MERRA-2: false
+    agrid: C720
+    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus_Updated/Icarus_Ostia//CF0720x6C_CF0720x6C/
+    expid: f522_fp
+    ogrid: C720
+    rst_dir: /discover/nobackup/projects/gmao/SIteam/Remapping_Test_Cases/f522Toc360/inputs/
+    yyyymmddhh: '2019061421'
+  surface:
+    zoom: '8'
+    wemin: '26'
+    catch_model: catch
+    catch_tilefile: null
+output:
+  shared:
+    agrid: C360
+    bcs_dir: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput/g5gcm/bcs/Icarus-NLv3/Icarus-NLv3_Reynolds//CF0360x6C_DE0360xPE0180/
+    expid: remap
+    ogrid: 360X180
+    out_dir: $NOBACKUP/REMAP_TESTS/f522Toc360/
+  air:
+    nlevel: '72'
+    remap: true
+  surface:
+    split_saltwater: true
+    surflay: 50.0
+    wemin: '13'
+    remap_catch: true
+    remap_water: true
+    catch_tilefile: null
+  analysis:
+    bkg: true
+    aqua: true
+    lcv: true
+
+slurm:
+  account: g0610
+  qos: debug
+  constraint: hasw

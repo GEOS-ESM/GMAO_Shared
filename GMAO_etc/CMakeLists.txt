@@ -1,3 +1,11 @@
+esma_set_this()
+
+# Add a dummy custom target because GMAO_etc depends
+# on Perl modules in GMAO_perllib
+
+add_custom_target(${this} ALL)
+add_dependencies(${this} GMAO_perllib)
+
 set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${GEOS_Fortran_Release_FPE_Flags} ${ALIGNCOM}")
 
 ecbuild_add_executable (

@@ -24,7 +24,9 @@ alias  = ""
      i = 1
 while ( i<=length )
       bit = substr(DESC,i,1)
-  if( bit != "_" & bit != "-" ) ; alias = alias % bit ; endif
+* if( bit != "_" & bit != "-" )
+     alias = alias % bit
+* endif
 i = i+1
 endwhile
 DESC = alias

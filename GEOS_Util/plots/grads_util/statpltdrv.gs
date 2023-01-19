@@ -7,6 +7,7 @@ title = subwrd  (args,5)
 
 'set vpage off'
 'set parea off'
+'set mproj scaled'
 
 * Mean Square Error
 * -----------------

@@ -107,6 +107,14 @@ endwhile
 *
 *  Get plot size info
 *
+*ga-> q gxinfo
+*Last Graphic = Shaded
+*Page Size = 11 by 8.5
+*X Limits = 1.5 to 10.5
+*Y Limits = 1 to 8
+*Xaxis = Lat  Yaxis = Lev
+*Mproj = 2
+
   'query gxinfo'
   rec2 = sublin(result,2)
   rec3 = sublin(result,3)
@@ -114,6 +122,9 @@ endwhile
   xsiz = subwrd(rec2,4)
   ysiz = subwrd(rec2,6)
   ylo  = subwrd(rec4,4)
+
+  xmiddle = ( subwrd(rec3,4) + subwrd(rec3,6) )/2
+  say 'xmiddle = 'xmiddle
 
   if( vpos = 'r' )
       xhi  = subwrd(rec3,6)
@@ -158,18 +169,18 @@ endwhile
   if (vchk = 1 )
 
     if(xmid = '') ; xmid = xhi+xd/2 ; endif
-    xwid = 0.2
-    ywid = 0.5*scaley
-
-    xl = xmid-xwid/2
-    xr = xl + xwid
+    xwid = 0.2 * scalex
+    ywid = 0.5 * scaley
+      xl = xmid-xwid/2
+      xr = xl + xwid
     if (ywid*cint > ysiz*barsf)
       ywid = ysiz*barsf/cint
     endif
-      ywid = ywid*sbar*scaley
+      xwid = xwid*sbar
+      ywid = ywid*sbar
     if(ymid = '') ; ymid = ysiz/2 ; endif
     yb = ymid - ywid*cint/2
-    'set string 1 l 4'
+    'set string 1 l 2'
     vert = 1
 
   else
@@ -178,20 +189,19 @@ endwhile
 *       horizontal bar
 *
 
-    ywid = 0.4
-    xwid = 0.8
-
+    ywid = 0.4 * scaley
+    xwid = 0.8 * scalex
     if(ymid = '') ; ymid = ylo/2-ywid/2 ; endif
     yt = ymid + yoffset
     yb = ymid
-    if(xmid = '') ; xmid = xsiz/2 ; endif
+    if(xmid = '') ; xmid = xsiz/2 ; xmid = xmiddle ; endif
     if (xwid*cint > xsiz*barsf)
       xwid = xsiz*barsf/cint
     endif
-
-    xwid = xwid*sbar*scalex
+    xwid = xwid*sbar
+    ywid = ywid*sbar
     xl = xmid - xwid*cint/2
-    'set string 1 tc 4'
+    'set string 1 tc 2'
     vert = 0
   endif
 

@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import os, sys, time
+import os, sys
 sys.path.append(os.pardir)
 
 import check_obsysrc
@@ -41,10 +41,6 @@ class CheckObsysRcTest(unittest.TestCase):
         self.assertTrue(filecmp.cmp(newfil, newexp))
         self.assertTrue(filecmp.cmp(errfil_, errexp_))
 
-        os.remove(newfil)
-        os.remove(errfil)
-        os.remove(errfil_)
-
     #.......................................................................
     def test_2(self):
         'Test with "--ignore_gaps mod04_006_flk" flag'
@@ -73,10 +69,6 @@ class CheckObsysRcTest(unittest.TestCase):
 
         self.assertTrue(filecmp.cmp(newfil, newexp))
         self.assertTrue(filecmp.cmp(errfil_, errexp_))
-
-        os.remove(newfil)
-        os.remove(errfil)
-        os.remove(errfil_)
 
     #.......................................................................
     def test_3(self):
@@ -107,10 +99,6 @@ class CheckObsysRcTest(unittest.TestCase):
         self.assertTrue(filecmp.cmp(newfil, newexp))
         self.assertTrue(filecmp.cmp(errfil_, errexp_))
 
-        os.remove(newfil)
-        os.remove(errfil)
-        os.remove(errfil_)
-
     #.......................................................................
     def test_4(self):
         'Test with "--obslist mod04_006_flk --ignore_gaps all=0" flags'
@@ -139,10 +127,6 @@ class CheckObsysRcTest(unittest.TestCase):
 
         self.assertTrue(filecmp.cmp(newfil, newexp))
         self.assertTrue(filecmp.cmp(errfil_, errexp_))
-
-        os.remove(newfil)
-        os.remove(errfil)
-        os.remove(errfil_)
 
     #.......................................................................
     def test_5(self):
@@ -181,16 +165,21 @@ class CheckObsysRcTest(unittest.TestCase):
         self.assertTrue(filecmp.cmp(newfil, newexp))
         self.assertTrue(filecmp.cmp(errfil_, errexp_))
 
-        os.remove(newfil)
-        os.remove(errfil)
-        os.remove(errfil_)
-
 #.......................................................................
 if __name__ == "__main__":
 
+    # -db flag will keep outdir from being deleted at end of tests
+    #-------------------------------------------------------------
+    debug = False
+    for arg in sys.argv[1:len(sys.argv)]:
+        if arg == "-v": continue
+        if arg.lower() in ["-db", "-debug"]:
+            debug = True
+        sys.argv.remove(arg)
+
     # setup once for all tests
     #-------------------------
-    print("running setup")
+    print("> running setup")
 
     if os.path.isdir("outdir"):
         print("> removing outdir directory")
@@ -213,5 +202,10 @@ if __name__ == "__main__":
     # clean up afterwards
     #--------------------
     if os.path.isdir("archive"):
-        print("removing archive directory")
+        print("> removing archive directory")
         shutil.rmtree("archive")
+
+    if not debug:
+        if os.path.isdir("outdir"):
+            print("> removing outdir directory")
+            shutil.rmtree("outdir")
