@@ -19,7 +19,7 @@ griddir: /discover/nobackup/projects/gmao/ssd/aogcm/ocean_bcs/MOM5/1440x1080
 ## a complete diagnostics set will be produced. If options for a
 ## particular plot set are not specified, default values will
 ## be used
-#plots: 
+#plots:
 #  plotsets: [sst, sss, ssh]
 #  SST:
 #    colname: geosgcm_ocn2dT
