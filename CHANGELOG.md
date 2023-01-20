@@ -15,17 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [Unreleased] 2023-01-19
+## [1.6.5] - 2023-01-20
 
 ### Added
 
-New coupled diagnostics package based on python3
+- New coupled diagnostics package based on python3
 
 ## [1.6.4] - 2023-01-17
 
 ### Changed
 
-Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+- Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
 
 ### Removed
 
