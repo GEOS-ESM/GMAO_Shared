@@ -3,27 +3,16 @@
 # Order is important; the last matching pattern takes the most
 # precedence.
 
-# Everything in GMAO_Shared should have an owner, default to cmake team
-# so that Tom or I (et al) are notified
-* @GEOS-ESM/gcm-gatekeepers
+# Both ADAS and GCM should be notified of changes in GMAO_Shared
+* @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers
 
 # Cmake team manages the circleci and github dirs
 /.circleci/ @GEOS-ESM/cmake-team
-/.github/ @GEOS-ESM/cmake-team
+/.github/   @GEOS-ESM/cmake-team
 
-# Postprocessing team is the CODEOWNER for plots and post
-/GEOS_Util/plots/ @GEOS-ESM/postprocessing-team
-/GEOS_Util/post/ @GEOS-ESM/postprocessing-team
+# GEOS_Shared has files that the Land Team also cares 
+# about (surfacelayer, etc.).
+/GEOS_Shared/ @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers @GEOS-ESM/land-team
 
-# Preprocessing team is the CODEOWNER for pre
-/GEOS_Util/pre/ @GEOS-ESM/preprocessing-team
-
-# Yuri owns the coupled plots
-/GEOS_Util/coupled_diagnostics/ @yvikhlya 
-
-# The Python Transition Team will own Python files
-# until the Python 3 transition is completed
-*.py @GEOS-ESM/python-transition-team
-
-# The GEOS CMake Team is the CODEOWNER for the CMakeLists.txt files in this repository
-CMakeLists.txt @GEOS-ESM/cmake-team
+# The GEOS CMake Team should also see CMakeLists.txt files in this repository
+CMakeLists.txt @GEOS-ESM/cmake-team @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers
