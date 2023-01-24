@@ -3,8 +3,9 @@
 # Order is important; the last matching pattern takes the most
 # precedence.
 
-# The ADAS is now the primary gatekeeper
-* @GEOS-ESM/adas-gatekeepers
+# Inform both ADAS and GCM Gatekeepers on changes
+# This could get more specific over time
+* @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers
 
 # Cmake team manages the circleci and github dirs
 /.circleci/ @GEOS-ESM/cmake-team
@@ -14,7 +15,7 @@
 /GEOS_Shared/ @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers @GEOS-ESM/land-team
 
 # LANL_Shared is seaice territory
-/LANL_Shared/ @GEOS-ESM/adas-gatekeepers @GEOS-ESM/seaice-team
+/LANL_Shared/ @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers @GEOS-ESM/seaice-team
 
 # The GEOS CMake Team should also see CMakeLists.txt files in this repository
-CMakeLists.txt @GEOS-ESM/cmake-team @GEOS-ESM/adas-gatekeepers
+CMakeLists.txt @GEOS-ESM/cmake-team @GEOS-ESM/adas-gatekeepers @GEOS-ESM/gcm-gatekeepers 
