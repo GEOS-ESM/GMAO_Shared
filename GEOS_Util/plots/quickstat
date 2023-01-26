@@ -435,9 +435,9 @@ if( "$plots" =~ *corcmp* ) then
            cd       $pltdir ; set tmpdir = `echo $tmpdir $pltdir`
 
            if( $debug == 'TRUE' ) then
-               $GRADS -l    -c "run $GEOSUTIL/plots/fcst/pltcorcmp -source $SOURCE -rc $statsrc -fields $field -rms $rmstype"
+               $GRADS --with-version 2.1.a2.oga.2 -l    -c "run $GEOSUTIL/plots/fcst/pltcorcmp -source $SOURCE -rc $statsrc -fields $field -rms $rmstype"
            else
-               $GRADS -l -b -c "run $GEOSUTIL/plots/fcst/pltcorcmp -source $SOURCE -rc $statsrc -fields $field -rms $rmstype" &
+               $GRADS --with-version 2.1.a2.oga.2 -l -b -c "run $GEOSUTIL/plots/fcst/pltcorcmp -source $SOURCE -rc $statsrc -fields $field -rms $rmstype" &
            endif
            sleep 5
 
@@ -468,9 +468,9 @@ if( "$plots" =~ *corcmp* ) then
            echo DSC1: $DSC1 >> $pltdir/corcmp_$exp.rc
 
            if( $debug == 'TRUE' ) then
-               $GRADS -l    -c "run $GEOSUTIL/plots/fcst/pltcorcmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field"
+               $GRADS --with-version 2.1.a2.oga.2 -l    -c "run $GEOSUTIL/plots/fcst/pltcorcmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field"
            else
-               $GRADS -l -b -c "run $GEOSUTIL/plots/fcst/pltcorcmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field" &
+               $GRADS --with-version 2.1.a2.oga.2 -l -b -c "run $GEOSUTIL/plots/fcst/pltcorcmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field" &
            endif
            sleep 5
 
@@ -499,9 +499,9 @@ if( "$plots" =~ *corcmp* ) then
            echo DSC1: $DSC1 >> $pltdir/corcmp_$exp.rc
            
            if( $debug == 'TRUE' ) then
-               $GRADS -l    -c "run $GEOSUTIL/plots/fcst/pltrmscmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field -rms $rmstype"
+               $GRADS --with-version 2.1.a2.oga.2 -l    -c "run $GEOSUTIL/plots/fcst/pltrmscmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field -rms $rmstype"
            else
-               $GRADS -l -b -c "run $GEOSUTIL/plots/fcst/pltrmscmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field -rms $rmstype" &
+               $GRADS --with-version 2.1.a2.oga.2 -l -b -c "run $GEOSUTIL/plots/fcst/pltrmscmpz -source $SOURCE -rc $pltdir/corcmp_$exp.rc -fields $field -rms $rmstype" &
            endif
            sleep 5
 

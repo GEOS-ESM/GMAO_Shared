@@ -595,13 +595,13 @@ endwhile
 * ------------------------------------------------------------------------
  dof = numfiles-1    ;* Degrees of Freedom (dof)
 
+'astudt 'dof' 0.0001';* 99.99% Confidence
+'q defval astudtout 1 1'
+critval99p99=subwrd(result,3)
+
 'astudt 'dof' 0.01'  ;* 99% Confidence
 'q defval astudtout 1 1'
 critval99=subwrd(result,3)
-
-'astudt 'dof' 0.02'  ;* 98% Confidence
-'q defval astudtout 1 1'
-critval98=subwrd(result,3)
 
 'astudt 'dof' 0.05'  ;* 95% Confidence
 'q defval astudtout 1 1'
@@ -615,10 +615,6 @@ critval90=subwrd(result,3)
 'q defval astudtout 1 1'
 critval80=subwrd(result,3)
 
-'astudt 'dof' 0.32'  ;* 68% Confidence
-'q defval astudtout 1 1'
-critval68=subwrd(result,3)
-
 * Estimate Statistically Significant Range for Zero-Mean Hypothesis in a Paired t-Test)
 * -------------------------------------------------------------------------------------
 say ' Estimate T-Test Range rUpm rLpm ...'
@@ -629,13 +625,13 @@ while( m<=mexps )
 'set lev 1000 'toplev
 'define se  = sqrt( zvard'm'/'numfiles' )'
 
+'define dx = se*'critval99p99
+'define rUp99p99'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
+'define rLp99p99'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
+
 'define dx = se*'critval99
 'define rUp99'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp99'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
-
-'define dx = se*'critval98
-'define rUp98'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
-'define rLp98'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
 'define dx = se*'critval95
 'define rUp95'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
@@ -649,16 +645,12 @@ while( m<=mexps )
 'define rUp80'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp80'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
-'define dx = se*'critval68
-'define rUp68'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
-'define rLp68'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
-
 m = m + 1
 endwhile
 
 
 ************************************************************************
-
+if (1 = 0)
 * Plot Fisher Mean for Experiments
 * --------------------------------
 say '  Plot Fisher Mean for Experiments'
@@ -713,9 +705,9 @@ say 'EXP'm'  Field: 'name'  Region: 'region
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 if( nday = ndaymax )
-   'myprint -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
+   'myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
 else
-   'myprint -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'myprint2 -name 'SOURCE'/corcmp/'expdsc.m'_'expdsc.m'_stats_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 if( debug = "TRUE" )
     say "Hit ENTER for next plot"
@@ -725,6 +717,7 @@ endif
 
 m = m + 1
 endwhile
+endif
 
 ************************************************************************
 
@@ -754,13 +747,6 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
          newfile = result
 'close ' newfile
 
-* Compute difference between 98% Confidence and zero: rUp98diff
-* -------------------------------------------------------------
-'makezdif3 -q1   rUp98'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp98'
-'getinfo numfiles'
-         newfile = result
-'close ' newfile
-
 * Compute difference between 95% Confidence and zero: rUp95diff
 * -------------------------------------------------------------
 'makezdif3 -q1   rUp95'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp95'
@@ -782,14 +768,7 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
          newfile = result
 'close ' newfile
 
-* Compute difference between 68% Confidence and zero: rUp68diff
-* -------------------------------------------------------------
-'makezdif3 -q1   rUp68'm' -file1 'mfile' -q2  zero  -file2 1  -ptop 'toplev' -name  rUp68'
-'getinfo numfiles'
-         newfile = result
-'close ' newfile
-
-'set gxout shaded'
+'set gxout grfill'
 'rgbset'
 
 * Define New Variables for Montage Plots
@@ -802,30 +781,30 @@ say 'Computing makezdif3 data for EXP: 'm'   File: 'mfile'  xpos: 'xpos'  Region
 * ----------------
 'define sigdiffp90   = 1000 * ( ravediff-rUp90diff )'
 'define sigdiffp95   = 1000 * ( ravediff-rUp95diff )'
-'define sigdiffp98   = 1000 * ( ravediff-rUp98diff )'
 'define sigdiffp99   = 1000 * ( ravediff-rUp99diff )'
+'define sigdiffp99p99= 1000 * ( ravediff-rUp99p99diff )'
 
 * For ravediff < 0
 * ----------------
 'define sigdiffm90 = 1000 * ( ravediff+rUp90diff )'
 'define sigdiffm95 = 1000 * ( ravediff+rUp95diff )'
-'define sigdiffm98 = 1000 * ( ravediff+rUp98diff )'
 'define sigdiffm99 = 1000 * ( ravediff+rUp99diff )'
+'define sigdiffm99p99 = 1000 * ( ravediff+rUp99p99diff )'
 
 'define maskm90 = ( sigdiffm90 - abs(sigdiffm90) )/2'
 'define maskm95 = ( sigdiffm95 - abs(sigdiffm95) )/2'
-'define maskm98 = ( sigdiffm98 - abs(sigdiffm98) )/2'
 'define maskm99 = ( sigdiffm99 - abs(sigdiffm99) )/2'
+'define maskm99p99 = ( sigdiffm99p99 - abs(sigdiffm99p99) )/2'
 
 'define maskp90 = ( sigdiffp90 + abs(sigdiffp90) )/2'
 'define maskp95 = ( sigdiffp95 + abs(sigdiffp95) )/2'
-'define maskp98 = ( sigdiffp98 + abs(sigdiffp98) )/2'
 'define maskp99 = ( sigdiffp99 + abs(sigdiffp99) )/2'
+'define maskp99p99 = ( sigdiffp99p99 + abs(sigdiffp99p99) )/2'
 
 'define sigdiff90 = maskm90 + maskp90'
 'define sigdiff95 = maskm95 + maskp95'
-'define sigdiff98 = maskm95 + maskp98'
 'define sigdiff99 = maskm99 + maskp99'
+'define sigdiff99p99 = maskm99p99 + maskp99p99'
 
 
 * Find maximum value of critical sigdiff across all levels and times
@@ -853,7 +832,7 @@ while( loop <= loopdim )
 'set t 'tbeg.m' 'tdif.m
 'set lev 1000 'levmin
 
-         critvalue   = 90
+         critvalue   = 95
 ' define sigdiffcrit = sigdiff'critvalue
 
 ' minmax sigdiffcrit'
@@ -1002,6 +981,10 @@ endwhile
 
 if( mean_thickness > dcint ) ; dcint = mean_thickness ; endif
 
+* Hardwire values for correlation plots
+dcint = 2.0
+min_thickness = 1.0
+
 say '        DCINT for plots: 'dcint
 say 'MIN_THICKNESS for plots: 'min_thickness
 
@@ -1025,116 +1008,51 @@ endif
 * Shade where sigdiff > critvalue confidence error bar (color shaded)
 * -------------------------------------------------------------------
  ' rgbset'
- ' set gxout grfill '
  ' set csmooth off'
- ' shades 'dcint
 
- ' set ccols 59 57 55 47 44    36 34 32 30 0 20 21    23 24 25 26 27 28 29'
- ' run getenv SHADES_CLEVS'
-              SHADES_CLEVS = result
-  clevs = subwrd( SHADES_CLEVS,1 )
-  ii = 2
-  while( ii <= 9 )
-  clev  = subwrd( SHADES_CLEVS,ii )
-  clevs = clevs' 'clev
-  ii = ii + 1
-  endwhile
-  dcintfrac = min_thickness
-  clevs = clevs' -'dcintfrac' 'dcintfrac
-  ii = 10
-  while( ii <= 18 )
-  clev  = subwrd( SHADES_CLEVS,ii )
-  clevs = clevs' 'clev
-  ii = ii + 1
-  endwhile
+ clevs = ''
+ n = -10
+ while ( n <= 9 )
+   val = n * dcint + min_thickness 
+   clevs = clevs' 'val
+   n = n + 1
+ endwhile
 
- if( levmin = 100 )
-    'set gxout grfill'
- else
-    'set gxout shaded'
- endif
+ clevm = -1 * dcint + min_thickness
+ clevp = min_thickness
 
+* Fill 95% confidence
+* -------------------------------
+ 'set gxout grfill'
  'set clevs 'clevs
- 'set ccols 59 57 55 47 44 37 36 34 32 30 0 20 21 22 23 24 25 26 27 28 29'
-
- ' d sigdiffcrit '
+*'set ccols 159 157 155 147 144 137 136 134 132 130 -1 120 121 122 123 124 125 126 127 128 129'
+ 'set ccols 59 57 55 47 44 37 36 34 32 30 -1 20 21 22 23 24 25 26 27 28 29'
+ ' d sigdiff95 '
  ' cbarn -xmid 6 -snum 0.70 -ndot 1'
 
-* Contour sigdiff that is = 90, 95, & 99% confidence diffs (black lines without label)
-* ------------------------------------------------------------------------------------
-'set gxout contour'
-'set csmooth on'
-'set clab off'
-
-* First Contour using Black Lines
+* Fill 99% dotted
 * -------------------------------
-'set cstyle 2'
-'set cthick 8'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffp99'
-'set cstyle 2'
-'set cthick 8'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffm99'
+ 'set csmooth on'
+ 'set gxout shade2'
+ 'set clevs 'clevm
+ 'set ccols 200 -1'
+ ' d sigdiff99 '
+ 'set clevs 'clevp
+ 'set ccols -1 200' 
+ ' d sigdiff99 '
+ ' set csmooth off'
 
-'set cstyle 6'
-'set cthick 6'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffp95'
-'set cstyle 6'
-'set cthick 6'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffm95'
-
-'set cstyle 1'
-'set cthick 5'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffp90'
-'set cstyle 1'
-'set cthick 5'
-'set ccolor 1'
-'set clevs  0'
-'d sigdiffm90'
-
-* Next Contour using Colored Lines
-* --------------------------------
-'set cstyle 2'
-'set cthick 7'
-'set ccolor 24'
-'set clevs  0'
-'d sigdiffp99'
-'set cstyle 2'
-'set cthick 7'
-'set ccolor 37'
-'set clevs  0'
-'d sigdiffm99'
-
-'set cstyle 6'
-'set cthick 5'
-'set ccolor 22'
-'set clevs  0'
-'d sigdiffp95'
-'set cstyle 6'
-'set cthick 5'
-'set ccolor 34'
-'set clevs  0'
-'d sigdiffm95'
-
-'set cstyle 1'
-'set cthick 4'
-'set ccolor 21'
-'set clevs  0'
-'d sigdiffp90'
-'set cstyle 1'
-'set cthick 4'
-'set ccolor 32'
-'set clevs  0'
-'d sigdiffm90'
+* Fill 99.99% dotted
+* -------------------------------
+ 'set csmooth on'
+ 'set gxout shade2'
+ 'set clevs 'clevm
+ 'set ccols 100 -1'
+ ' d sigdiff99p99 '
+ 'set clevs 'clevp
+ 'set ccols -1 100'
+ ' d sigdiff99p99 '
+ ' set csmooth off'
 
 * reset some background values
 * ----------------------------
@@ -1151,10 +1069,10 @@ dcintx = dcint * 100
          dcintx = result / 100
 
 'set  strsiz .132'
-'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')   'name'   'region
-'draw string 6.0 7.90 Anomaly Correlation Difference (x10`a-3`n) > 'critvalue'% Confidence (Shaded)'
+'draw string 6.0 8.15 'expdsc.m' - 'expdsc.0' ('numfiles')'
+'draw string 6.0 7.90 ACORR Difference (x10`a-3`n) >95% (Filled) >99% (Dotted) >99.99% (Hatched)'
 'set  strsiz .125'
-'draw string 6.0 7.65 'desc
+'draw string 6.0 7.65 'name' 'region
 'set  strsiz .12'
 'draw string 6.0 0.72 Forecast Day'
 
@@ -1166,12 +1084,6 @@ dcintx = dcint * 100
 'draw string 0.70 7.38 'reg
 'draw string 0.70 7.01 'FIELD
 
-'set  string 1 l 3 0'
-'set  strsiz .087'
-'draw string 0.23 1.50 Solid Line       (=90%)'
-'draw string 0.23 1.35 Dot-Dash Line  (=95%)'
-'draw string 0.23 1.20 Long-Dash Line (=99%)'
-
 'set  string 1 c 6 90'
 'set  strsiz .18'
 'draw string 0.80 4.25 'months' 'year
@@ -1180,9 +1092,9 @@ say 'EXP'm'  Field: 'name'  Region: 'region
 
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 if( nday = ndaymax )
-   'myprint -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
+   'myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months' -rotate 90 -density 100x100'
 else
-   'myprint -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'myprint2 -name 'SOURCE'/corcmp/'expdsc.0'_'expdsc.m'_stats'loopflag'_'label'_corcmp_'reg'_z_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 
 if( debug = "TRUE" )

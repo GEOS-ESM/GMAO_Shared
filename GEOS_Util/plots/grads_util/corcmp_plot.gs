@@ -513,7 +513,7 @@ while( m<=mexps )
 endwhile
 'define zvarave = zvarave / 'mexps
 'define se = sqrt( (zvar0 + zvarave)/'numfiles' )'
-'define dx = se*'critval90
+'define dx = se*'critval95
 'define rUave = (exp( 2*(zave0+dx))-1)/(exp( 2*(zave0+dx))+1)'
 'define rLave = (exp( 2*(zave0-dx))-1)/(exp( 2*(zave0-dx))+1)'
 
@@ -530,7 +530,7 @@ while( m<=mexps )
 'define rUp68'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp68'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
-'define dx       = se*'critval90
+'define dx       = se*'critval95
 'define rUp90'm' = 2*(exp( 2*dx)-1)/(exp( 2*dx)+1)'
 'define rLp90'm' = 2*(exp(-2*dx)-1)/(exp(-2*dx)+1)'
 
@@ -643,7 +643,7 @@ endwhile
 'draw ylab Anomaly Correlation'
 
 
-* Plot 90% Confidence Intervals for Synoptic Variance from Average of All Experiment
+* Plot 95% Confidence Intervals for Synoptic Variance from Average of All Experiment
 * ----------------------------------------------------------------------------------
 'set cmark 0'
 'set cthick 2'
@@ -715,7 +715,7 @@ endif
 m = m + 1
 endwhile
 
-* Compute Upper and Lower Bounds for 90% Confidence Interval Values for Synoptic Variability
+* Compute Upper and Lower Bounds for 95% Confidence Interval Values for Synoptic Variability
 * ------------------------------------------------------------------------------------------
 'set dfile 'dfile
 'set t 'tmin
@@ -767,16 +767,16 @@ endwhile
 * Plot Difference plus Significance
 * ---------------------------------
 axfac = 1.2
-axmax = valrUp90.1*axfac
-axmin = valrLp90.1*axfac
+axmax = valrUp95.1*axfac
+axmin = valrLp95.1*axfac
 
 * Compute Axis Limits based on Error Bars
 * ---------------------------------------
 if( mexps>1 )
     m = 2
     while( m<=mexps )
-    if( valrUp90.m*axfac > axmax ) ; axmax = valrUp90.m*axfac ; endif
-    if( valrLp90.m*axfac < axmin ) ; axmin = valrLp90.m*axfac ; endif
+    if( valrUp95.m*axfac > axmax ) ; axmax = valrUp95.m*axfac ; endif
+    if( valrLp95.m*axfac < axmin ) ; axmin = valrLp95.m*axfac ; endif
     m = m + 1
     endwhile
 else
@@ -836,7 +836,7 @@ if( mexps=1 )
    'd rUp99'm'*1000;rLp99'm'*1000'
 else
    'set ccolor 'expcol.m
-   'd rUp90'm'*1000;rLp90'm'*1000'
+   'd rUp95'm'*1000;rLp95'm'*1000'
 endif
 
 m = m + 1
@@ -1014,9 +1014,9 @@ endwhile
 '!/bin/mkdir -p 'SOURCE'/corcmp'
 
 if( nday = ndaymax )
-   'myprint -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months' -rotate 90 -density 100x100'
+   'myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months' -rotate 90 -density 100x100'
 else
-   'myprint -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
+   'myprint2 -name 'SOURCE'/corcmp/stats_'label'_corcmp_'reg'_'level'_'months'_'nday'DAY -rotate 90 -density 100x100'
 endif
 
 if( debug = "TRUE" )
