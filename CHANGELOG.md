@@ -11,9 +11,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated `CODEOWNERS` as GEOS_Util has been moved
+
 ### Fixed
 
 ### Removed
+
+## [1.7.0] - 2023-01-20
+
+### Removed
+
+- Removed GEOS_Util as it is its own repo in GEOS-ESM now
+
+## [1.6.5] - 2023-01-20
+
+### Added
+
+- New coupled diagnostics package based on python3
+
+## [1.6.4] - 2023-01-17
+
+### Changed
+
+- Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+
+### Removed
+
+- Remove `hasw` _constraint_ choice from remapping questions since they are being [decommissioned by NCCS](https://www.nccs.nasa.gov/nccs-users/SCU10%2613-Decommismion)
+
+## [1.6.3] - 2022-12-08
+
+### Changed
+
+- Moved to GitHub Actions for label enforcement
+- Updated CircleCI to Baselibs 7.7.0
+- Set default data ocean to be `CS` at C90+ resolution in `remap_restarts.py`
+- Updated `remap_restarts.py` to use argparse
+
+### Fixed
+
+- Fix an issue with `regrid.pl` and `remap_restarts.py` regridding from MERRA-2 from 2021-06 to 2021-09
+- Fix an issue with `remap_restarts.py` for post 2011 regridding from MERRA2
+
+## [1.6.2] - 2022-11-17
+
+### Fixed
+
+- Fixed `gcmpost.script` logic to generate `xdf.tabl` files for collections with `monthly: 1` attribute
+- Update EASE grid tile file name to contain pfafxxx
+- Add a dependency on GMAO_perllib in GMAO_etc
+
+## [1.6.1] - 2022-09-22
+
+### Changed
+
+Apply latest updates from L. Takacs to the plot package
 
 ## [1.6.0] - 2022-09-12
 
