@@ -9,10 +9,10 @@ while ( num <= numargs )
         num = num + 1
 endwhile
 say string
-say 'Hit Enter to continue ...'
+endif
+say 'Hit n for Next, or c to Clear  ...'
 pull flag
-else
-pull flag
+if( flag = 'c' )
 'c'
 endif
 return

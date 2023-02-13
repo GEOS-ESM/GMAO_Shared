@@ -131,10 +131,11 @@ mask = DUMMY
 
 
 if( title   = 'NULL' )
-    title   =  EXPORT':'GC
-else
-    title   =  EXPORT':'GC'  'title
+   'run getdesc 'EXPORT' 'expfile
+    title   =  result
 endif
+    title   =  EXPORT':'GC'  'title
+
 if( cbscale = 'NULL' ) ; cbscale =  0.8         ; endif
 if( clab    = 'NULL' ) ; clab    =  on          ; endif
 if( dpct    = 'NULL' ) ; dpct    =  0.1         ; endif
@@ -402,6 +403,22 @@ endif
   dqmax = stddif/3
 
 'set gxout shaded'
+
+    say 'QMAX Scaling Factor: 'm
+    if( m<0 )
+       j = -1 * m
+      'd 1e'j
+      scaling = subwrd(result,4)
+      say 'qmax before scaling: 'qmax
+      qmax = qmax * scaling
+      say 'qmax after  scaling: 'qmax
+    else
+      'd 1e'm
+      scaling = subwrd(result,4)
+      say 'qmax before scaling: 'qmax
+      qmax = qmax / scaling
+      say 'qmax before scaling: 'qmax
+    endif
 
      say 'Absolute DQMAX: 'dqmax'  qmax: 'qmax
      dqrel = dqmax / qmax  * 100 * 100

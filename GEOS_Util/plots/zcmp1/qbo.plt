@@ -14,7 +14,8 @@ levs = "1000 0.1"
 
 'c'
 'set vpage off'
-'vpage 1 1 1 2'
+*'vpage.old 1 1 1 2'
+ 'vpage 1 1 1 2 -top 0.5 -bot -0.25'
 'set grads off'
 'set grid  off'
 'set clab  off'
@@ -31,7 +32,8 @@ levs = "1000 0.1"
 'd 'qmod
 'cbarn -xmid 6.0'
 
-'vpage 1 2 1 2'
+*'vpage.old 1 2 1 2'
+ 'vpage 1 2 1 2 -top 0.25'
 'set grads off'
 'set grid  off'
 'set clab  off'
