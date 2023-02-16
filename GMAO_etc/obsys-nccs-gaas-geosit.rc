@@ -1,0 +1,69 @@
+#            NCCS Specific Version
+#
+# This observation system resource file database will track the whereabout of GAAS observation files.
+# It is used by scripts require_obsys (hard check the existence of observation files) and acquire_obsys (will call acquire to get files).
+#
+# Note:
+# For multiple versions of a data set, e.g. MODIS Terra and Aqua, list the versions from most preferred to least. During DAS job setup
+# the first available version will be included as the default in AOD_OBSCLASS.
+#
+# Syntax:
+# -------
+# BEGIN observation_file_class => StandardName
+#   startYYYYMMDD_HHz-endYYYYMMDD_HHz incrementHHMMSS remote_file_name_template
+# END
+# Note: set "endYYYYMMDD_HHz" as "21001231_18z" if new files added to system daily.
+#
+# Modification History:
+# ---------------------
+# 11Nov2013  Stassi     Initial version
+# 04Mar2022  ElAkkraoui	Added mod04_061_his and myd04_061_his. 
+#                       Updated misr and aeronet. 
+# 26Apr2022  ELAkkraoui Removed older versions of historical data. 
+#
+#=======================================================================
+
+# AVHRR MERRA-2-extracted ODS files
+#----------------------------------
+BEGIN patmosx_ods => patmosx.%y4%m2%d2_%h2z.ods
+  19961201_00z-20020731_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AVHRR/MERRA2_ods/Y%y4/M%m2/patmosx.obs.%y4%m2%d2_%h2z.ods
+END
+
+# AVHRR ascending and descending Synoptic npz files
+#--------------------------------------------------
+BEGIN patmosx_asc => patmosx_v05r02.asc.%y4%m2%d2_%h2z.npz
+  19790101_00z-20020731_21z 030000 /archive/input/dao_ops/obs/reanalysis/patmosx/Level2/Synoptic/Y%y4/M%m2/D%d2/patmosx_v05r02.asc.%y4%m2%d2_%h2z.npz
+END
+BEGIN patmosx_des => patmosx_v05r02.des.%y4%m2%d2_%h2z.npz
+  19790101_00z-20020731_21z 030000 /archive/input/dao_ops/obs/reanalysis/patmosx/Level2/Synoptic/Y%y4/M%m2/D%d2/patmosx_v05r02.des.%y4%m2%d2_%h2z.npz
+END
+
+# MODIS Terra Level2 Data
+#------------------------
+BEGIN mod04_061_his
+#  20000301_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/iesa/aerosol/data/MODIS/Level2/061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
+  20000301_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/MODIS/Level2/061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
+END
+
+BEGIN mod04_061_flk => MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+END
+
+
+# MODIS Aqua Level2 Data
+#-----------------------
+BEGIN myd04_061_his
+#  20020801_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/iesa/aerosol/data/MODIS/Level2/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
+  20020801_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/MODIS/Level2/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
+END
+BEGIN myd04_061_flk => MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+END
+
+# AERONET Data
+#-------------
+BEGIN aeronet_obs => aeronet.obs.%y4%m2%d2_%h2z.ods
+#  19950317_18z-20211231_21z 030000 /discover/nobackup/projects/gmao/iesa/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
+  19950317_18z-20211231_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
+  20220101_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
+END

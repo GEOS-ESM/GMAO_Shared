@@ -13,15 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated files to be consistent with das tags 5.30
+- Updated `CODEOWNERS` as GEOS_Util has been moved
+
 ### Fixed
 
 ### Removed
+
+## [1.7.0] - 2023-01-20
+
+### Removed
+
+- Removed GEOS_Util as it is its own repo in GEOS-ESM now
+
+## [1.6.5] - 2023-01-20
+
+### Added
+
+- New coupled diagnostics package based on python3
 
 ## [1.6.4] - 2023-01-17
 
 ### Changed
 
-Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+- Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
 
 ### Removed
 

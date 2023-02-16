@@ -367,7 +367,6 @@
 
          end do
 
-
       else if (trim(satype)/='sbuv2'  .and. trim(satype)/='omi'     .and.
      &         trim(satype)/='mls'    .and. trim(satype)/='mls20'   .and.
      &         trim(satype)/='mls22'  .and. trim(satype)/='mls30'   .and.
@@ -376,11 +375,11 @@
      &         trim(satype)/='acos'   .and. trim(satype)/='mlstgas' .and.
      &         trim(satype)/='tgez'   .and. trim(satype)/='tgev'    .and.
      &         trim(satype)/='tgav'   .and. trim(satype)/='tgaz'    .and.
-     &         trim(satype)/='tgop'   .and.
-     &         trim(satype)/='gome'   .and. trim(satype)/='ompslpvis' .and.
-     &         trim(satype)/='ompslpnc'  .and. trim(satype)/='ompslpuv' .and.
-     &         trim(satype)/='ompsnm'    .and. trim(satype)/='ompsnp'   .and.
-     &         trim(satype)/='ompsnmeff' .and. trim(satype)/='ompsnpnc') then
+     &         trim(satype)/='tgop'   .and. trim(satype)/='gome'    .and. 
+     &         trim(satype)/='ompslpvis' .and. trim(satype)/='ompslpnc'  .and.
+     &         trim(satype)/='ompslpuv'  .and. trim(satype)/='ompsnm'    .and.
+     &         trim(satype)/='ompsnp'    .and. trim(satype)/='ompsnmeff' .and.
+     &         trim(satype)/='ompsnpnc') then
       
 !        Radiance data:
 !        -------------

@@ -317,7 +317,6 @@
      7                 'ODSmatch could not find match   ',
      8                 'no impact due to advected local '/)
 
-
       integer, parameter :: nsats = 58
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
