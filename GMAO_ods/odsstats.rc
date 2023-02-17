@@ -6,6 +6,7 @@
 #   2008-01-28 - Todling - Initial version
 #   2014-02-21 - Gelaro  - Update to present observing system blend
 #   2014-02-21 - Todling - Add (Variable opts commented out) as examples (see Note 1)
+#   2022-03-04 - J.Jin/Elakkraoui - Update AMSRE
 # 
 # Notes:
 #   1. opts xvecxomf and xvecxoma are only meaningful when xvec stores sensitivities 
@@ -77,7 +78,7 @@ OBS*Class*Kxs::
    AMSUA      315:319 300 325 326
    AMSUB      415:417
    MHS        818 819 825 826
-   AMSRE      547:549
+   AMSRE      546:549
    SSU        305:312 314
 #  SBUV       457:462 464:469
    Profiler   223

@@ -17,6 +17,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.7.1] - 2023-02-10
+
+### Changed
+
+- Updated files to be consistent with das tags 5.30
+- Updated `CODEOWNERS` as GEOS_Util has been moved
+
+## [1.7.0] - 2023-01-20
+
+### Removed
+
+- Removed GEOS_Util as it is its own repo in GEOS-ESM now
+
+## [1.6.5] - 2023-01-20
+
+### Added
+
+- New coupled diagnostics package based on python3
+
+## [1.6.4] - 2023-01-17
+
+### Changed
+
+- Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+
+### Removed
+
+- Remove `hasw` _constraint_ choice from remapping questions since they are being [decommissioned by NCCS](https://www.nccs.nasa.gov/nccs-users/SCU10%2613-Decommismion)
+
 ## [1.6.3] - 2022-12-08
 
 ### Changed

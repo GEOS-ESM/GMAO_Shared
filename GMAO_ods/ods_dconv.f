@@ -863,8 +863,8 @@
               endif
 
               if (data(16,i)>small_num) then
-                 sigo(kobs) = 1.0/data(16,i)      ! sigo
-              else                                ! rejected by QC
+                 sigo(kobs) = 1.0/data(isigo_slot,i) ! sigo
+              else                                   ! rejected by QC
                  sigo(kobs) = undef
                  qcx(kobs) = 2
               endif
