@@ -11,12 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated files to be consistent with das tags 5.30
-- Updated `CODEOWNERS` as GEOS_Util has been moved
-
 ### Fixed
 
 ### Removed
+
+## [1.7.1] - 2023-02-10
+
+### Changed
+
+- Updated files to be consistent with das tags 5.30
+- Updated `CODEOWNERS` as GEOS_Util has been moved
 
 ## [1.7.0] - 2023-01-20
 
