@@ -629,8 +629,6 @@
    989  gsi_diag    m09         seviri                     9    # seviri_m09
    990  gsi_diag    m10         seviri                    10    # seviri_m10
    991  gsi_diag    m10         seviri                    11    # seviri_m11
-   998  gsi_diag    "?"         acos                       0    # ?
-   999  gsi_diag    "?"         mopitt                     0    # ?
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub

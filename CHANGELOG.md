@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Improved trace gas ODS support; incorporates most recent changes to ODS in rt_g530_1.6.0_merge (AMSR, more OMPS)
+
 ### Changed
 
 ### Fixed
