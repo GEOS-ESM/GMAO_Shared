@@ -11,11 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-Merging in changes associated with refactored physics and `gmap4`.
-
 ### Fixed
 
 ### Removed
+
+## [1.8.0] - 2023-03-10
+
+### Changed
+
+- Merging in changes associated with refactored physics and `gmap4`.
 
 ## [1.7.2] - 2023-03-17
 
