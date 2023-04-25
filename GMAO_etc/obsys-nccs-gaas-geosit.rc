@@ -65,5 +65,5 @@ END
 BEGIN aeronet_obs => aeronet.obs.%y4%m2%d2_%h2z.ods
 #  19950317_18z-20211231_21z 030000 /discover/nobackup/projects/gmao/iesa/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
   19950317_18z-20211231_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
-  20220101_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
+  20220101_00z-21000101_00z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET_NRT/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
 END
