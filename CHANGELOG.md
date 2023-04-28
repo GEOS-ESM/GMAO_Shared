@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.4.10] - 2023-04-28
+
+### Changed
+- Updated observing system configuration for GEOSIT in obsys-nccs-geosit.rc and obsys-nccs-gaas-geosit.rc.
 
 ## [1.4.10] - 2021-10-08
 
