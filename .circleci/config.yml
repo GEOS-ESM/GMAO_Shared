@@ -52,7 +52,7 @@ commands:
     steps:
       - run: |
           cd ${CIRCLE_WORKING_DIRECTORY}
-          git clone https://github.com/GEOS-ESM/<< parameters.repo >>.git
+          git clone -b v10.19.3 https://github.com/GEOS-ESM/<< parameters.repo >>.git
 
   mepoclone:
     description: "Mepo clone external repos"
