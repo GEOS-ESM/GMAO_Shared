@@ -383,9 +383,18 @@ END
 
 # Ozone partial column data 
 #--------------------------
-# SBUV ozone data 
+# SBUV ozone data
+# The SBUV data had a minor problem with "bogus" geolocation information for sporadic
+# observations.  A portion of d5294_geosit_jan98 and d5294_geosit_jan08 ran without
+# the corrected data.
+# ESMA tickets: 2249,2250
 BEGIN geosit_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
-  19970103_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  19970103_00z-19991014_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_BogusGeoLoc/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  19991015_00z-20050104_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_Duplicated/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20050105_00z-20071231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20080101_00z-20080625_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_BogusGeoLoc/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20080626_00z-20110803_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_Duplicated/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20110804_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
 END
 
 # OMPS nadir profiler (not used in R21C but keeping it here. We may need it if both MLS and OMPS LP fail)
@@ -413,9 +422,13 @@ END
 # Total Ozone data
 #-----------------
 #AURA OMI total ozone
+# Updated "CORRECTED" data to correct "over-flagging" problem.  A portion of stream #2
+# ran without the fixed data.
+# ESMA tickets: 2267,2268
 BEGIN geosit_aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
- 20041001_00z-20200810_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
- 20200811_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20041001_00z-20071231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20080101_00z-20100715_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20100716_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
 END
 
 # OMPS nadir total ozone
