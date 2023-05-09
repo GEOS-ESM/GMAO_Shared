@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
 - Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
 
 ### Fixed
