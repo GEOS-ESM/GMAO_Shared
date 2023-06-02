@@ -257,7 +257,7 @@
 
 		! revised parameter table to fit Fortran 90 standard
 
-  integer,   parameter :: LSZ      = 256
+  integer,   parameter :: LSZ      = 1024
 
 #ifndef sysLinux
   integer,   parameter :: NBUF_MAX = 400*(LSZ) ! max size of buffer
@@ -616,7 +616,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
       integer         lu, ios, loop, ls, ptr
-      character*256   line
+      character*1024  line
       character(len=*), parameter :: myname = 'i90_loadf'
 
 		! Check to make sure there is not too many levels
@@ -1195,7 +1195,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
 
-      character*256 token
+      character*1024 token
       integer       ios
       real(KIND_R8)      x
 
@@ -1259,7 +1259,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
 
-      character*256 token
+      character*1024 token
       real*8        x
       integer       ios
 
@@ -1514,11 +1514,11 @@ end subroutine i90_fullRelease
 !
 ! !INPUT PARAMETERS: 
 !
-       character*256 string       ! input string
+       character*1024 string     ! input string
 
 ! !OUTPUT PARAMETERS:            ! modified string
 !
-!      character*256 string
+!      character*1024 string
 !
 ! !BUGS:  
 !
@@ -1536,7 +1536,7 @@ end subroutine i90_fullRelease
 
 !     Pad end of string with #
 !     ------------------------
-      do i = 256, 1, -1 
+      do i = 1024, 1, -1 
          if ( string(i:i) .ne. ' ' .and.	&
 	        string(i:i) .ne. '$' ) go to 11
          string(i:i) = '#'
@@ -1545,7 +1545,7 @@ end subroutine i90_fullRelease
 
 !     Replace TAB's with blanks
 !     -------------------------
-      do i = 1, 256
+      do i = 1, 1024
          if ( string(i:i) .eq. TAB ) string(i:i) = BLK
          if ( string(i:i) .eq. '#' ) go to 21
       end do
@@ -1578,11 +1578,11 @@ end subroutine i90_fullRelease
 !
 ! !INPUT PARAMETERS: 
 !
-      character*256 string    ! the input string
+      character*1024 string   ! the input string
 !
 ! !OUTPUT PARAMETERS:
 !
-!     character*256 string    ! the modified string
+!     character*1024 string    ! the modified string
 !
 !
 ! !REVISION HISTORY: 
@@ -1597,7 +1597,7 @@ end subroutine i90_fullRelease
 !     Get rid of leading blanks
 !     -------------------------
       ib = 1
-      do i = 1, 255
+      do i = 1, 511
          if ( string(i:i) .ne. ' ' .and.	&
 	        string(i:i) .ne. TAB ) go to 21
          ib = ib + 1
@@ -1704,7 +1704,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
 
-      character*256 token
+      character*1024 token
       real          x
       integer       iret
 
@@ -1759,7 +1759,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
 
-      character*256 token
+      character*1024 token
       real          x
       integer       iret
 
@@ -1810,7 +1810,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
 
-      character*256 token
+      character*1024 token
       real          x
       integer       iret
 
@@ -1861,7 +1861,7 @@ end subroutine i90_fullRelease
 !EOP
 !-------------------------------------------------------------------------
 
-      character*256 token
+      character*1024 token
       integer       iret
 
       call i90_gtoken ( token, iret )
