@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-Added protection against specific error conditions to reset the ice to a default profile instead of crashing. This is valid only for MITgcm
+
+- Added protection against specific error conditions to reset the ice to a default profile instead of crashing. This is valid only for MITgcm
 
 ### Changed
 
@@ -19,7 +20,6 @@ Added protection against specific error conditions to reset the ice to a default
 ### Removed
 
 ## [1.9.0] - 2023-05-09
->>>>>>> f7327de4fcf6888b68f1d5345d21f7521b872f9c
 
 ### Changed
 
