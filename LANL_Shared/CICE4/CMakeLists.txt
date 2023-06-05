@@ -61,4 +61,9 @@ if (CMAKE_Fortran_COMPILER_ID MATCHES Intel AND CMAKE_BUILD_TYPE MATCHES Release
   set (CMAKE_Fortran_FLAGS_RELEASE  "${GEOS_Fortran_FLAGS_NOVECT}")
 endif ()
 
+option (BUILD_MIT_OCEAN "BUILD_MIT_OCEAN is turned off by default" OFF) #OFF by default
+if ( BUILD_MIT_OCEAN )
+  add_compile_definitions(BUILD_MIT_OCEAN)
+endif ()
+  
 ecbuild_add_executable(TARGET makdep SOURCES bld/makdep.c)

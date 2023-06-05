@@ -498,6 +498,9 @@
                                   l_stop,                     &
                                   istop,        jstop)
 
+#ifndef BUILD_MIT_OCEAN
+      if (l_stop) return   
+#else
       if (l_stop) then
 
          l_stop= .false.
@@ -523,7 +526,8 @@
                                   istop,        jstop)
          if (l_stop) return   
       endif
-
+#endif
+      
       do ij = 1, icells
          ! Save initial ice and snow thickness (for fresh and fsalt)
          worki(ij) = hin(ij)
