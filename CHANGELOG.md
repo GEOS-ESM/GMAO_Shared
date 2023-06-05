@@ -12,12 +12,18 @@ Added protection against specific error conditions to reset the ice to a default
 
 ### Changed
 
-- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
-- Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
+- Change CICE4 build to shared library, in preparation for CICE6 integration
 
 ### Fixed
 
 ### Removed
+
+## [1.9.0] - 2023-05-09
+
+### Changed
+
+- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
+- Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
 
 ## [1.8.0] - 2023-03-10
 
