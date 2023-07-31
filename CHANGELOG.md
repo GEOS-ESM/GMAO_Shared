@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update CI to use Baselibs 7.13.0 like GEOSgcm v11.1.0
+- Update CI to use Baselibs and BCs from CircleCI Orb
 
 ### Fixed
 
