@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.9.2] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs and BCs from CircleCI Orb
+
 ## [1.9.1] - 2023-06-06
 
 ### Added
