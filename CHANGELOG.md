@@ -11,9 +11,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update CI to use Baselibs and BCs from CircleCI Orb
+
 ### Fixed
 
 ### Removed
+
+## [1.9.2] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs and BCs from CircleCI Orb
+
+## [1.9.1] - 2023-06-06
+
+### Added
+
+- Added protection against specific error conditions to reset the ice to a default profile instead of crashing. This is valid only for MITgcm
+
+### Changed
+
+- Change CICE4 build to shared library, in preparation for CICE6 integration
+
+## [1.9.0] - 2023-05-09
+
+### Changed
+
+- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
+- Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
+
+## [1.8.0] - 2023-03-10
+
+### Changed
+
+- Merging in changes associated with refactored physics and `gmap4`.
 
 ## [1.7.2] - 2023-03-17
 
