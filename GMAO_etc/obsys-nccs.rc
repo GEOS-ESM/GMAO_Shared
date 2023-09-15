@@ -238,8 +238,8 @@ BEGIN ncep_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20220520_00z-20220529_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO_R/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
   20220529_18z-20220530_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
   20220531_00z-20220611_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO_R/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
-  20220612_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO_R/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
-# 20220612_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+# 20220612_00z-20221231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO_R/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20220612_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
 BEGIN ncep_gpsro_com_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
