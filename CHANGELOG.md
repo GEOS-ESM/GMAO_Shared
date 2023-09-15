@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.9.4] - 2023-09-15
+
+### Changed
+
+- add Planet IQ to odsmatch.rc
+
 ## [1.9.3] - 2023-09-15
 
 ### Added
@@ -27,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Syncs obsys with that used in FP as of 14 Sep 2023
 - dyn2dyn updated to allow for user-specified IM x JM when regrinding
-- add Planet IQ to odsmatch.rc
 
 ## [1.9.2] - 2023-08-24
 
