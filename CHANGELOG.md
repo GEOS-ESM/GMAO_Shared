@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.9.4] - 2023-09-15
+
+### Changed
+
+- add Planet IQ to odsmatch.rc
+
 ## [1.9.3] - 2023-09-15
 
 ### Added
