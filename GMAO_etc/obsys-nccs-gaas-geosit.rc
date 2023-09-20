@@ -46,7 +46,7 @@ BEGIN mod04_061_his
 END
 
 BEGIN mod04_061_flk => MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
-  20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MOD04/%y4/%j3/MOD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.NRT.hdf
 END
 
 
@@ -57,7 +57,7 @@ BEGIN myd04_061_his
   20020801_00z-20221231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/MODIS/Level2/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.hdf
 END
 BEGIN myd04_061_flk => MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
-  20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.NRT.hdf
+  20230101_00z-21001231_18z 000500 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/modis/061/MYD04/%y4/%j3/MYD04_L2.A%y4%j3.%h2%n2.061.%c%c%c%c%c%c%c%c%c%c%c%c%c.NRT.hdf
 END
 
 # AERONET Data
@@ -65,5 +65,5 @@ END
 BEGIN aeronet_obs => aeronet.obs.%y4%m2%d2_%h2z.ods
 #  19950317_18z-20211231_21z 030000 /discover/nobackup/projects/gmao/iesa/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
   19950317_18z-20211231_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
-  20220101_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
+  20220101_00z-21000101_00z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET_NRT/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
 END
