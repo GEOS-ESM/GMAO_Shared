@@ -225,7 +225,8 @@
    254  gsi_conv    254         uv                        55    # ?
    254  gsi_conv    254         uv                        56    # ?
    254  gsi_conv    254         uv                        57    # ?
-   255  gsi_conv    255         ""                        -1    # NESDIS picture triplet CTW (U,V)
+   255  gsi_conv    255         uv                        -1    # NESDIS picture triplet CTW (U,V)
+   255  gsi_conv    255         uv                       854    # SSEC/WISC LEO-GEO winds (U,V)
    256  gsi_conv    256         uv                         0    # Indian WV CTW (U,V)
    257  gsi_conv    257         uv                         0    # MODIS IR CTW (U,V)
    257  gsi_conv    257         uv                       783    # ?
@@ -381,8 +382,8 @@
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
-   427  gsi_diag    npp         ompsnm                     0    # 
-   437  gsi_diag    npp         ompsnp                     0    # 
+   427  gsi_diag    npp         ompsnm                     0    #
+   437  gsi_diag    npp         ompsnp                     0    #
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
