@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Fix source of aerosol used in GEOS-IT
+- updated Wentz winds speed data for GEOS-IT
+- updated use of SEVIRI source for GEOS-IT
+- major revision on sources of SBUV for GEOS-IT
+- revision on sources of OMI for GEOS-IT
+
 ### Fixed
 
 - Updated CI to work with GEOS-IT repos
