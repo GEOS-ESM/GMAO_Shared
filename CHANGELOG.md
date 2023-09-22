@@ -9,15 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-### Fixed
-
-### Changed
-
-### Removed
-
-### Added
+- Fix source of aerosol used in GEOS-IT
+- updated Wentz winds speed data for GEOS-IT
+- updated use of SEVIRI source for GEOS-IT
+- major revision on sources of SBUV for GEOS-IT
+- revision on sources of OMI for GEOS-IT
 
 ### Fixed
+
+- Updated CI to work with GEOS-IT repos
 
 ### Changed
 
@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.4.10] - 2023-04-28
+
+### Changed
+- Updated observing system configuration for GEOSIT in obsys-nccs-geosit.rc and obsys-nccs-gaas-geosit.rc.
 
 ## [1.4.10] - 2021-10-08
 

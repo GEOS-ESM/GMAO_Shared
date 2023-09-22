@@ -52,7 +52,7 @@ commands:
     steps:
       - run: |
           cd ${CIRCLE_WORKING_DIRECTORY}
-          git clone https://github.com/GEOS-ESM/<< parameters.repo >>.git
+          git clone -b GEOS-IT-for-CI https://github.com/GEOS-ESM/<< parameters.repo >>.git
 
   mepoclone:
     description: "Mepo clone external repos"
@@ -134,8 +134,8 @@ jobs:
           compiler: << parameters.compiler >>
       - mepoclone:
           repo: GEOSgcm
-      - mepodevelop:
-          repo: GEOSgcm
+      #- mepodevelop:
+          #repo: GEOSgcm
       - checkout_feature_branch:
           repo: GEOSgcm
       - cmake:

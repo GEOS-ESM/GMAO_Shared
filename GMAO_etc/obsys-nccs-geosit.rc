@@ -1,8 +1,6 @@
 #            NCCS Specific Version
 #
-#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
-#             This obsys.rc file for GEOS-IT is NOT final yet
-#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+# ===============  GEOS-IT  ============================
 #
 #
 # This observation system resource file database will track
@@ -38,7 +36,6 @@
 #+  geosit_ascat_pre-qc_bufr 
 #+  geosit_repro_ers2_pre-qc_bufr 
 #+  geosit_qscat_jpl_pre-qc_bufr 
-#+  geosit_wspd_pre-qc_bufr 
 #+  geosit_satwnd_bufr 
 #+  geosit_avhrr_satwnd_bufr 
 #+  geosit_ncep_tcvitals 
@@ -181,7 +178,7 @@ BEGIN geosit_qscat_jpl_pre-qc_bufr => obsys.qscat.pre-qc.%y4%m2%d2.t%h2z.ublk
 END
 
 # MERRA SSMI Wentz Speed  (Not used?  Historic only)
-BEGIN geosit_wspd_pre-qc_bufr => wentzspd.%y4%m2%d2.t%h2z.pre-qc.bufr.ublk
+BEGIN hist_wspd_pre-qc_bufr => wentzspd.%y4%m2%d2.t%h2z.pre-qc.bufr.ublk
  19870709_00z-20131029_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIwind_wentz/v7/prepbufr/Y%y4/M%m2/ssmiwnd.%y4%m2%d2.%h2z.bufr
 END
 
@@ -200,7 +197,7 @@ END
 #--------------------------------- BELOW THIS POINT: NO PREP-QC OBSERVATIONS -----------------------------
 #NRT 
 BEGIN geosit_prep_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.ublk
- 20220101_00z-21001231_18z      240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+ 20220101_00z-21001231_18z      060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
 END
 # Aircraft metadata for GSI temperature bias correction
 BEGIN geosit_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
@@ -272,7 +269,7 @@ END
 # SEVIRI radiances   (Not used?  same as real time stream)
 # ----------------
 BEGIN geosit_sevcsr_bufr => gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d.ublk
- 20120214_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
+ 20120214_12z-20211231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
 END
 
 
@@ -386,9 +383,18 @@ END
 
 # Ozone partial column data 
 #--------------------------
-# SBUV ozone data 
+# SBUV ozone data
+# The SBUV data had a minor problem with "bogus" geolocation information for sporadic
+# observations.  A portion of d5294_geosit_jan98 and d5294_geosit_jan08 ran without
+# the corrected data.
+# ESMA tickets: 2249,2250
 BEGIN geosit_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
-  19970103_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  19970103_00z-19991014_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_BogusGeoLoc/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  19991015_00z-20050104_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_Duplicated/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20050105_00z-20071231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20080101_00z-20080625_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_BogusGeoLoc/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20080626_00z-20110803_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_Duplicated/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20110804_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
 END
 
 # OMPS nadir profiler (not used in R21C but keeping it here. We may need it if both MLS and OMPS LP fail)
@@ -416,8 +422,13 @@ END
 # Total Ozone data
 #-----------------
 #AURA OMI total ozone
+# Updated "CORRECTED" data to correct "over-flagging" problem.  A portion of stream #2
+# ran without the fixed data.
+# ESMA tickets: 2267,2268
 BEGIN geosit_aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
- 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20041001_00z-20071231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20080101_00z-20100715_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20100716_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
 END
 
 # OMPS nadir total ozone
@@ -461,7 +472,7 @@ BEGIN geosit_crisfsr_bufr => gdas1.%y4%m2%d2.t%h2z.crisfsr.tm00.bufr_d.ublk
   20181001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
 END
 
-# GMI data  REAL TIME?
+# GMI data 
 BEGIN geosit_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
   20140401_00z-20211231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/gmi_v7/bufr/Y%y4/M%m2/gmi_v7_L1CR.%y4%m2%d2.t%h2z.bufr
   20220101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
