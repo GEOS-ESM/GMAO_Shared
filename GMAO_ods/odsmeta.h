@@ -33,6 +33,9 @@
 !  20May2017  Todling   Add exclusion flag X_ADV_LOCAL
 !  25May2018  wargan    added OMPS
 !  03Mar2022  Jin J./ElAkkraoui  Added AMSRE 
+!  11Oct2023  Sienkiewicz Change offset for ozone NPP to +5 and subtract 5
+!                          from base values for OMPS data types to avoid some
+!                          KX conflicts for N20 and N21 OMPS data
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -357,12 +360,12 @@
      .                 900               , 950               , 449               ,
      .                 304               , 440               , 445               ,
      .                 310               , 315               , 320               ,
-     .                 325               , 330               , 335               ,
+     .                 325               , 330               , 330               ,
      .                 705               , 706               , 998               ,
-     .                 999               , 940               , 335               ,
-     .                 336               , 427               , 437               , 
-     .                 550               , 428               , 438               ,
-     .                 546               , 337               /)
+     .                 999               , 940               , 330               ,
+     .                 331               , 422               , 432               ,
+     .                 550               , 423               , 433               ,
+     .                 546               , 332               /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/
