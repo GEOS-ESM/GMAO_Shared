@@ -8,27 +8,27 @@
 ! !INTERFACE:
 
       subroutine ods_dcget ( fname, nymd, nhms, ods, rc )
- 
+
 ! !USES
 
       use m_odsmeta
       use m_ods
-      use m_odsxsup, only : getodsmeta 
-      use m_odsxsup, only : ncepQCXval 
+      use m_odsxsup, only : getodsmeta
+      use m_odsxsup, only : ncepQCXval
       use m_Sndx,    only : setSndx
       use m_ods_obsdiags, only : ods_obsdiags_getparam
       use netcdf
-      
+
       Implicit NONE
 
 ! !INPUT PARAMETERS:
- 
+
       character(len=*), intent(in)   :: fname   ! GSI diag_ file name
       integer, intent(in)            :: nymd    ! year-month-day, e.g., 19990701
       integer, intent(in)            :: nhms    ! hour-min-sec,   e.g., 120000
 
 ! !OUTPUT PARAMETERS:
- 
+
       type(ods_vect), intent(inout)  :: ods     ! ODS vector
 
       integer, intent(out)           :: rc      ! Error return code:
@@ -47,7 +47,7 @@
 !       07Aug2006 - Sienkiewicz - don't use station ID <=0 for 'ks'
 !       14Dec2006 - Todling     - update to GSI-2006_09
 !       08Apr2008 - Sienkiewicz - changes for OMI and MLSoz ozone
-!       31Jan2010 - Todling     - re-defined how ks is determined for 
+!       31Jan2010 - Todling     - re-defined how ks is determined for
 !                                 Raob and Lagragian ballon obs
 !       14Mar2010 - Todling     - update sbuv ozone read to Mar2010 version
 !       30Jul2010 - Sienkiewicz - fix sbuv ozone (Mar2010 version)
@@ -57,7 +57,7 @@
 !       19Oct2012 - Sienkiewicz - add npp and meteosat to getsatid_
 !                                 extend for metop-b,c
 !	18Mar2012 - Guo         - changes for OMIeff ozone.
-!       02May2013 - K Wargan    - Add TOMS ozone     
+!       02May2013 - K Wargan    - Add TOMS ozone
 !        1Jul2013 - Sienkiewicz - add precip types to getsatid_
 !       23Sep2013 - Guo         - replaced the use of getsatid_() with
 !                                 pcp_getisat_(), rad_getisat_(), and
@@ -68,6 +68,9 @@
 !       2018-05-25  wargan      - added OMPS
 !       2019-04-15  Sienkiewicz - add handling of netcdf4 diag files.
 !       12Dec2022 - Weir        - improved trace gas support
+!       11Oct2023 - Sienkiewicz - in ozone_getisat_ change offset for NPP to +5
+!                                   so base values can be adjusted to avoid conflicts
+!                                   with other KXs for N20,N21 OMPS types
 !
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,7 +119,7 @@
       character(len=20)  isis                ! sensor/instrument/satellite id  ex.amsua_n15
       character(len=10)  dplat               ! sattelite platform id
 
-      
+
       rc = 0                    ! all is well to start with
 
 !     First determine whether this is a netCDF4 diag file
@@ -133,10 +136,10 @@
          call ods_diagnc4 ( fname, nymd, nhms, ods, rc )
          return
       end if
-          
-      
+
+
 !     Inquire whether this is diag file w/ history of omx, osens, ...
-!     --------------------------------------------------------------- 
+!     ---------------------------------------------------------------
       call ods_obsdiags_getparam ( 'lobsdiagsave', lobsdiagsave )
       call ods_obsdiags_getparam ( 'miter', miter )
 
@@ -154,9 +157,9 @@
       if (nymdf/=nymd .or. nhmsf/=nhms) then
          rc = 1
          print*, 'Date/Time requested not found in file'
-         print*, ' nymd , nhms =',nymd ,nhms  
+         print*, ' nymd , nhms =',nymd ,nhms
          print*, ' nymdf, nhmsf=',nymdf,nhmsf
-         return 
+         return
       end if
 
 !     Create ODS structure and define metadata
@@ -170,8 +173,8 @@
       end if
 
       call getodsmeta( ods )
-      call ncepQCXval( ods )    
-     
+      call ncepQCXval( ods )
+
 !     Open the data file:
 !     ------------------
       lu = ODS_Handle(fname,ier)
@@ -182,8 +185,8 @@
       end if
       open(lu,file=fname,form='unformatted')
 
-      if (conv) then      
-      
+      if (conv) then
+
 !        Conventional data:
 !        -----------------
          allocate ( station(mobs), weight(mobs), stat=ier )
@@ -192,7 +195,7 @@
             print *, myname_, ': cannot alloc()'
             return
          end if
-     
+
          read(lu)      ! very first record is date
 
          ios      = 0
@@ -210,7 +213,7 @@
 
                read(lu) cdiagbuf, diagbuf2
 
-               call ods_dconv ( var, cdiagbuf, diagbuf2, ninfo, nobs, 
+               call ods_dconv ( var, cdiagbuf, diagbuf2, ninfo, nobs,
      .                          ods, station, weight, mobs, nobs_ods, iks, ioff, ier )
                if (ier/=0) then
                   rc = 4
@@ -219,7 +222,7 @@
                end if
 
                deallocate ( cdiagbuf, diagbuf2 )
-         
+
             end if ! < ios >
          end do
 
@@ -247,7 +250,7 @@
                   do ii =1,len(station(i))
                      ods%data%ks(i) = ods%data%ks(i)+ii*iachar(station(i)(ii:ii)) !  arbitrary scheme to use a number better than 99999
                   enddo
-                   print*, 'ods_dcget: YES CODE PASSES HERE SOMETIMES!' 
+                   print*, 'ods_dcget: YES CODE PASSES HERE SOMETIMES!'
                endif
                cycle
 
@@ -258,7 +261,7 @@
                do ii =1,len(station(i))
                   ods%data%ks(i) = ods%data%ks(i)+ii*iachar(station(i)(ii:ii)) !  arbitrary scheme to use a number better than 99999
                enddo
-               if (verbose) print *,'Non-numeric station id ', statid, ' for kx = ', ods%data%kx(i), 'assigned ks =', ods%data%ks(i)  
+               if (verbose) print *,'Non-numeric station id ', statid, ' for kx = ', ods%data%kx(i), 'assigned ks =', ods%data%ks(i)
 
             end if
          end do
@@ -323,7 +326,7 @@
          end if
          ios = 0
 
-         do while (ios == 0) 
+         do while (ios == 0)
 
             read(lu,iostat=ios) nobs
             if (ios/= 0) exit          !end of file
@@ -359,7 +362,7 @@
                end if
 
                deallocate( diagbuf2 )
-               
+
             else     ! if no observations
                read(lu,iostat=ios)
             end if
@@ -375,12 +378,12 @@
      &         trim(satype)/='acos'   .and. trim(satype)/='mlstgas' .and.
      &         trim(satype)/='tgez'   .and. trim(satype)/='tgev'    .and.
      &         trim(satype)/='tgav'   .and. trim(satype)/='tgaz'    .and.
-     &         trim(satype)/='tgop'   .and. trim(satype)/='gome'    .and. 
+     &         trim(satype)/='tgop'   .and. trim(satype)/='gome'    .and.
      &         trim(satype)/='ompslpvis' .and. trim(satype)/='ompslpnc'  .and.
      &         trim(satype)/='ompslpuv'  .and. trim(satype)/='ompsnm'    .and.
      &         trim(satype)/='ompsnp'    .and. trim(satype)/='ompsnmeff' .and.
      &         trim(satype)/='ompsnpnc') then
-      
+
 !        Radiance data:
 !        -------------
          ios      = 0
@@ -401,31 +404,31 @@
             ndiag = ipchan+npred+3
             if (lobsdiagsave) ndiag=ndiag+4*miter+1
             allocate ( iuse_rad(nchanl), idiagbuf(iint), diagbuf(ireal), diagbuf2(ndiag,nchanl),
-     &                 varch4(nchanl), nuchan(nchanl), ich(nchanl), stat=ier )	       
+     &                 varch4(nchanl), nuchan(nchanl), ich(nchanl), stat=ier )
       	    if (ier/=0) then
                rc = 3
                print *, myname_, 'cannot alloc()'
                return
             end if
             if (lextra) allocate(diagbufex(iextra,jextra))
-	    
+
 	    do i = 1, nchanl
                read (lu) freq4,pol4,wave4,varch4(i),tlap4,iuse_rad(i),nuchan(i),ich(i)
 	    end do
 
 	    do while (ios==0)        ! read data records until eof
-	    
+
                if (lextra) then
-	          read (lu,iostat=ios) diagbuf,diagbuf2 
+	          read (lu,iostat=ios) diagbuf,diagbuf2
                else
 	          read (lu,iostat=ios) diagbuf,diagbuf2,diagbufex
                endif
-	       
+
 	       if (ios==0) then
 		  iks = iks + 1
                   idiagbuf = 0  ! dummy array in this case
 
-                  call ods_drad ( satype, isat, iuse_rad, 
+                  call ods_drad ( satype, isat, iuse_rad,
      .                            idiagbuf, diagbuf, diagbuf2, varch4, nuchan, ndiag, iint,
      .                            ireal, ipchan, npred, nchanl,
      .   	                  ods, mobs, nobs_ods, iks, ioff, ier )
@@ -436,14 +439,14 @@
                   end if
 	       end if
 	    end do
-	    
+
 	    deallocate ( iuse_rad, idiagbuf, diagbuf, diagbuf2, varch4, ich )
             if (lextra) deallocate(diagbufex)
-	    
+
 	 end if
-	 
+
       else
-      
+
 !        Ozone data (SBUV2,OMI, OMIeff (and whatever survived upto this point):
 !        ----------------------
          ios      = 0
@@ -451,17 +454,17 @@
          iks      = 0
 
          read (lu,iostat=ios) isis,dplat,satype,jiter,nlevs,idate,iint,ireal,irdim1,ioff0 ! header
-	 
+
          if (ios/=0) then
             rc = 4
             print*, myname_, ': error reading (1) sbuv2/omi/omieff/tomseff/o3lev/mlsXX/OMPS data, satype = "',trim(satype),'"'
-            return	    
+            return
 	 end if
 
          call ozone_getisat_(satype,dplat,isis,isat)
          if(verbose) print *, 'will read *'//trim(dplat)//'* for ', satype, ' isat = ', isat
-	 	 
-         ios = 0	    
+
+         ios = 0
          ndiag = ioff0
          if (lobsdiagsave) ndiag=ndiag+4*miter+1
          allocate ( pobs(nlevs), gross(nlevs), tnoise(nlevs), iouse(nlevs), stat=ier )
@@ -475,7 +478,7 @@
 	 gross (:)= 0.
 	 tnoise(:)= 0.
 	 iouse (:)=+1.
-         
+
 	 select case(satype)
 	 case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc','ompslpuv','ompslpvis')
 	 case default
@@ -483,18 +486,18 @@
            if (ios/=0) then
               rc = 4
               print*, myname_, ': error reading (2) sbuv2/omi/omieff/tomseff/o3lev/mlsXX/OMPS data, satype = "',trim(satype),'"'
-              return	    
+              return
            end if
 	 end select
 
          ios = 0
 
 	 do             ! read until end-of-file
-	    
+
 	    read (lu,iostat=ios) nobs
             if (ios/=0) exit   ! end-of-file
 
-	    allocate ( idiagbuf2(iint,nobs), diagbuf2(ireal,nobs), diagbuf3(ndiag,nlevs,nobs), 
+	    allocate ( idiagbuf2(iint,nobs), diagbuf2(ireal,nobs), diagbuf3(ndiag,nlevs,nobs),
      .   	       stat=ier )
       	    if (ier/=0) then
                rc = 3
@@ -505,13 +508,13 @@
             if (ios/=0) then
                rc = 4
                print*, myname_, ': error reading (3) sbuv2/omi/omieff/tomseff/o3lev/mlsXX/OMPS data, satype = "',trim(satype),'"'
-               return	    
+               return
 	    end if
-	
+
 	    do i = 1, nobs
 	       iks = iks + 1
-	       	
-               call ods_dsbuv ( isat, satype, diagbuf2(:,i), diagbuf3(:,:,i), 
+
+               call ods_dsbuv ( isat, satype, diagbuf2(:,i), diagbuf3(:,:,i),
      .   			pobs, tnoise, iouse,
      .   			ireal, nlevs, ndiag,
      .   			ods, mobs, nobs_ods, iks, ioff0, ier )
@@ -521,30 +524,30 @@
          	   return
                end if
 	    end do
-	    	
+
 	    deallocate ( idiagbuf2, diagbuf2, diagbuf3 )
-       	 
+
 	 end do
 
          deallocate (  pobs, gross, tnoise, iouse )
-	 	 	       
+
       end if
-         
+
       close (lu)
-      
+
       if (nobs_ods==0) then
          rc = 10
          print*, myname_, ' no data'
          return
       end if
-		 	 
-      ods%data%nobs = nobs_ods      
+
+      ods%data%nobs = nobs_ods
 
 !     Fix longitudes so they become ODS-compatible
 !     -------------------------------------------
-      where ( ods%data%lon(1:nobs_ods) > 180 ) 
+      where ( ods%data%lon(1:nobs_ods) > 180 )
               ods%data%lon(1:nobs_ods) = ods%data%lon(1:nobs_ods) - 360.
-      end where  	  
+      end where
 
       print *, 'nobs to write to ODS file: ', nobs_ods
       id = count(ods%data%kt(1:nobs_ods)<=0.or.ods%data%kt(1:nobs_ods)>ktmax)
@@ -591,11 +594,11 @@
                end if
             end if
 
-! Need to distinguish between AMSUA from AQUA and METOP for example 
+! Need to distinguish between AMSUA from AQUA and METOP for example
 ! (NOAA sats are already distinguished)
             i = index('metop',dplat(1:5))
             if(i>0)then
-               myisat = 25 + iachar(dplat(7:7)) - iachar('a')  
+               myisat = 25 + iachar(dplat(7:7)) - iachar('a')
                return
             endif
             i = index('tiros',dplat(1:5))
@@ -653,7 +656,7 @@
            read(dplat(2:3),'(i2)') myisat
 
 	else
-! Need to distinguish between AMSUA from AQUA and METOP for example 
+! Need to distinguish between AMSUA from AQUA and METOP for example
 ! (NOAA sats are already distinguished)
            select case(dplat)
 	   case('tirosn')
@@ -663,7 +666,7 @@
 	   case('metop-b')
 	      myisat = 26
 	   case default
-	      if(dplat(1:6)=='metop-') myisat = 25 + iachar(dplat(7:7)) - iachar('a')  
+	      if(dplat(1:6)=='metop-') myisat = 25 + iachar(dplat(7:7)) - iachar('a')
 	   end select
 	endif
       end subroutine rad_getisat_
@@ -688,6 +691,8 @@
 	      myisat = 0
 	   case('nim07')
 	      myisat = 1
+           case('npp')      ! this is only for ozone for now
+              myisat = 5
 	   case('ep')
 	      myisat = 2
 	   case('metop-a')
@@ -697,9 +702,9 @@
            case('terra','gosat','oco2')
               myisat = 0
 	   case default
-	      if(dplat(1:6)=='metop-') myisat = 25 + iachar(dplat(7:7)) - iachar('a')  
+	      if(dplat(1:6)=='metop-') myisat = 25 + iachar(dplat(7:7)) - iachar('a')
 	   end select
         endif
       end subroutine ozone_getisat_
- 
+
       end subroutine ods_dcget
