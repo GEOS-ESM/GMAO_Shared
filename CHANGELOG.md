@@ -11,14 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated `esma_mpirun` for MVAPICH to use `mpiexec`
-
 ### Fixed
 
 ### Removed
 
+## [1.9.5] - 2023-10-12
+
 ### Changed
 
+- Updated `esma_mpirun` for MVAPICH to use `mpiexec`
 - add info on LEO-GEO: obs table upadate (zero-diff)
 
 ## [1.9.4] - 2023-09-15
