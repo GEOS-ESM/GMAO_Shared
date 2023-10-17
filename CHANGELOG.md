@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+ - Modify NPP offset for KX calculation of ozone data types to avoid future conflicts of OMPS and OMI KXs
  - add info on LEO-GEO: obs table upadate (zero-diff)
 
 ## [1.9.4] - 2023-09-15
