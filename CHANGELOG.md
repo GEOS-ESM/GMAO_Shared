@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixes for Perl 5.26 on SLES15
+
 ### Removed
 
 ## [1.9.5] - 2023-10-18
