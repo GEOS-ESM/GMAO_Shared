@@ -331,9 +331,12 @@ sub get_xtraflags {
 
        if ($siteID eq "gmao") {
           $xtraflags .= " -oversubscribe";
-       } elsif ($perhost) {
-          $xtraflags .= " -map-by ppr:$perhost:node -bind-to core";
        }
+       if ($perhost) {
+          $xtraflags .= " -map-by ppr:$perhost:node";
+       }
+
+       $xtraflags .= " --bind-to core --map-by core";
 
     }
 
