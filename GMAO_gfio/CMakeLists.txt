@@ -19,17 +19,14 @@ set_source_files_properties (m_GFIO_PutFld.f PROPERTIES COMPILE_FLAGS ${PP})
 
 
 # Need to build r4 and r8 versions.  See details at bottom
-esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu)
+esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NetCDF::NetCDF_Fortran)
 set_property(TARGET ${this} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if (EXTENDED_SOURCE)
   set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif()
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
-target_link_libraries (${this} PUBLIC ${ESMF_LIBRARIES})
-target_include_directories (${this} PUBLIC ${INC_ESMF})
-target_include_directories (${this} PUBLIC ${INC_NETCDF})
-  
+
 # Specs for r8 version
 if (precision STREQUAL "r8")
   string(REPLACE " " ";" tmp ${FREAL8})
@@ -45,9 +42,7 @@ if (precision STREQUAL "r8")
 endif ()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories (${BASEDIR}/lib)
 include_directories (${include_${this}})
-include_directories (${INC_NETCDF})
 
 if (USE_F2PY)
    if (precision STREQUAL "r4")
@@ -58,9 +53,9 @@ if (USE_F2PY)
             ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
             gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
             gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
-            LIBRARIES GMAO_gfio_r4 ${NETCDF_LIBRARIES}
-            INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
-            USE_MPI
+            LIBRARIES GMAO_gfio_r4
+            INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
+            USE_MPI USE_NETCDF
             )
          add_dependencies(GFIO_ ${this})
       endif ()

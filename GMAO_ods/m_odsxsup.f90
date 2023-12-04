@@ -207,7 +207,7 @@
       ods%meta%kx_names(252) = 'JMA IR AND VISIBLE CLOUD DRIFT U, V AT LEVELS ABOVE 850 MB (GMS, MTSAT)'
       ods%meta%kx_names(253) = 'EUMETSAT IR AND VISIBLE CLOUD DRIFT U, V AT LEVELS ABOVE 850 MB (METEOSAT)'
       ods%meta%kx_names(254) = 'EUMETSAT WATER VAPOR CLOUD U, V (METEOSAT)'
-      ods%meta%kx_names(255) = 'NESDIS PICTURE TRIPLET CLOUD U, V (GOES)'
+      ods%meta%kx_names(255) = 'NESDIS PICTURE TRIPLET (GOES) OR SSEC/WISC LEO-GEO  U, V '
       ods%meta%kx_names(256) = 'INDIA WATER VAPOR CLOUD U, V (INSAT-2E)'
       ods%meta%kx_names(257) = 'NASA/MODIS POES IR CLOUD-DRIFT U, V'
       ods%meta%kx_names(258) = 'NASA/MODIS POES WATER VAPOR IMAGER CLOUD TOP U, V'
@@ -318,9 +318,9 @@
 !$$$  Did not convert virtual temperature - maybe want to make new KT?
 !$$$  New - convert virtual temperature to sensible temperature when Q available
 !
-!$$$  19 Nov 2004 (Dick): 
-!$$$      Decided to implement 2(a): i.e. use NCEP report types in KX table, but 
-!$$$      keeping our own KT table (with additions as needed). 
+!$$$  19 Nov 2004 (Dick):
+!$$$      Decided to implement 2(a): i.e. use NCEP report types in KX table, but
+!$$$      keeping our own KT table (with additions as needed).
 !
 !  how to handle surface data?
 !    SLP  -  the slp is observation,  what value for level? decided not to put

@@ -2375,19 +2375,25 @@ CONTAINS
 
   end subroutine get_lwi_
 
-  subroutine  Dyn_Flip ( w_f )
+  subroutine  Dyn_Flip ( w_f, dover )
 
   implicit none
 
   type(dyn_vect),intent(inout)  :: w_f
+  logical, optional, intent(in) :: dover
  
   integer im,jm,km
   integer i,L
   real,allocatable:: dum(:)
+  logical :: dover_
 
   im=w_f%grid%im
   jm=w_f%grid%jm
   km=w_f%grid%km
+  dover_ = .true.
+  if(present(dover)) then
+    dover_ = dover
+  endif
 
   if(associated(w_f%phis))      call hflip_(w_f%phis     , im, jm)
   if(associated(w_f%hs_stdv))   call hflip_(w_f%hs_stdv  , im, jm)
@@ -2402,25 +2408,25 @@ CONTAINS
   if(associated(w_f%ps)) call hflip_(w_f%ps, im, jm)
 
   if(associated(w_f%delp)) then
-     call hflip_(w_f%delp, im, jm, km)
-     call vflip_(w_f%delp, im, jm, km)
+                call hflip_(w_f%delp, im, jm, km)
+     if(dover_) call vflip_(w_f%delp, im, jm, km)
   endif
   if(associated(w_f%u)) then
-      call hflip_(w_f%u   , im, jm, km)
-      call vflip_(w_f%u   , im, jm, km)
+                 call hflip_(w_f%u   , im, jm, km)
+      if(dover_) call vflip_(w_f%u   , im, jm, km)
   endif
   if(associated(w_f%v)) then
-      call hflip_(w_f%v   , im, jm, km)
-      call vflip_(w_f%v   , im, jm, km)
+                 call hflip_(w_f%v   , im, jm, km)
+      if(dover_) call vflip_(w_f%v   , im, jm, km)
   endif
   if(associated(w_f%pt)) then
-     call hflip_(w_f%pt  , im, jm, km)
-     call vflip_(w_f%pt  , im, jm, km)
+                call hflip_(w_f%pt  , im, jm, km)
+     if(dover_) call vflip_(w_f%pt  , im, jm, km)
   endif
   if(associated(w_f%q)) then
      do L=1,size(w_f%q,4)
-        call hflip_(w_f%q(:,:,:,L), im, jm, km)
-        call vflip_(w_f%q(:,:,:,L), im, jm, km)
+                   call hflip_(w_f%q(:,:,:,L), im, jm, km)
+        if(dover_) call vflip_(w_f%q(:,:,:,L), im, jm, km)
      enddo
   endif
 
@@ -2432,12 +2438,14 @@ CONTAINS
   w_f%grid%lon=dum
   deallocate(dum)
 
-  allocate(dum(km+1))
-  dum=w_f%grid%ak
-  w_f%grid%ak(:)=dum(km+1:1:-1)
-  dum=w_f%grid%bk
-  w_f%grid%bk(:)=dum(km+1:1:-1)
-  deallocate(dum)
+  if (dover_) then
+     allocate(dum(km+1))
+     dum=w_f%grid%ak
+     w_f%grid%ak(:)=dum(km+1:1:-1)
+     dum=w_f%grid%bk
+     w_f%grid%bk(:)=dum(km+1:1:-1)
+     deallocate(dum)
+  endif
 
   end subroutine Dyn_Flip
 

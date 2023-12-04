@@ -265,15 +265,18 @@ CONTAINS
 
       integer iret, i, iarg, argc, iargc
       integer ii,jj,ie,il
+      integer im_usr,jm_usr
       integer uprec, iprec, ires, jcapusr
       logical verb, setres, geos4res, setjcap
       character(len=255) :: etafile, argv, res
       character*10 str
       character(len=255) trnames
 
-      integer, dimension(6), parameter :: IMS4 = (/ 72, 144, 288, 576, 1152, 2304 /)
-      integer, dimension(6), parameter :: IMS5 = (/ 72, 144, 288, 576, 1152, 2304 /)
-      integer, dimension(6), parameter :: JMSG = (/ 46,  91, 181, 361,  721, 1441 /)
+      !                                          C  48   90  180  360   720  1440   ?  24  12
+      !                                              a    b    c    d     e     f   x   y   z
+      integer, dimension(9), parameter :: IMS4 = (/ 72, 144, 288, 576, 1152, 2304, 48, 36, 12 /)
+      integer, dimension(9), parameter :: IMS5 = (/ 72, 144, 288, 576, 1152, 2304, 48, 36, 12 /)
+      integer, dimension(9), parameter :: JMSG = (/ 46,  91, 181, 361,  721, 1441, 25, 25, 13 /)
 
       ! in most cases ...
       ! nlat=(jcap+2)+2
@@ -314,6 +317,8 @@ CONTAINS
       pncf    = .false.    ! default: handle usual dyn-complaint file
       indxlevs= .false.    ! default: put pressure levels in lev attribute
       trnames = 'NONE'
+      im_usr = -1
+      jm_usr = -1
 
 !     Parse command line
 !     ------------------
@@ -364,6 +369,20 @@ CONTAINS
                      ires=5
                case ("f")
                      ires=6
+               case ("u") ! user specified
+                     ires=99
+                     iarg = iarg + 1
+                     call GetArg ( iarg, argv )
+                     read(argv,*) im_usr
+                     iarg = iarg + 1
+                     call GetArg ( iarg, argv )
+                     read(argv,*) jm_usr
+               case ("x")
+                     ires=size(IMS5)-2
+               case ("y")
+                     ires=size(IMS5)-1
+               case ("z")
+                     ires=size(IMS5)
                case default
                      print *, 'Sorry this resolution not supported'
                      call exit(1)
@@ -485,8 +504,13 @@ CONTAINS
              in = ims4(ires)
              jn = jmsg(ires)
            else
-             in = ims5(ires)
-             jn = jmsg(ires)
+             if (im_usr>0 .and. jm_usr>0) then
+               in = im_usr
+               jn = jm_usr
+             else
+               in = ims5(ires)
+               jn = jmsg(ires)
+             endif
            endif
       endif
       if ( setjcap ) then
@@ -561,6 +585,7 @@ CONTAINS
       print *, '-res   RES    where RES= a, b, c, d, and e(*) '
       print *, '              (*NOTE: the e resolution is diff for GEOS-4 and GEOS-5 gcm' 
       print *, '                      see geos4 flag below)'
+      print *, '-res  u IM JM opt to interpolate to user-spec grid (other than traditional)'
       print *, '-geos4        specify when trying to convert dyn-vect to geos4 e resolution'
       print *, '              (Default: GEOS-5 e resolution)'
       print *, '-nlevs NLEVS  where NLEVS is the number of vertical levs out'

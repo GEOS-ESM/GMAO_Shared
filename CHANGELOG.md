@@ -5,18 +5,248 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
 
 ### Added
 
 ### Changed
 
-- Compress CircleCI artifacts
-- Updated CircleCI to use Orb
-
 ### Fixed
 
 ### Removed
+
+## [1.9.6] - 2023-11-01
+
+### Fixed
+
+- Fixes for Perl 5.26 on SLES15
+
+## [1.9.5] - 2023-10-18
+
+### Changed
+
+- Updated `esma_mpirun` for MVAPICH to use `mpiexec`
+- add info on LEO-GEO: obs table upadate (zero-diff)
+
+## [1.9.4] - 2023-09-15
+
+### Changed
+
+- add Planet IQ to odsmatch.rc
+
+## [1.9.3] - 2023-09-15
+
+### Added
+
+- `dyn_hydro`
+  - This program adds the hydrometeors to bkg.eta files that don't have them (such as those coming from MERRA-2). (Mistakenly not
+    brought over during CVS-to-Git transition)
+
+### Changed
+
+- Syncs obsys with that used in FP as of 14 Sep 2023
+- dyn2dyn updated to allow for user-specified IM x JM when regrinding
+
+## [1.9.2] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs and BCs from CircleCI Orb
+
+## [1.9.1] - 2023-06-06
+
+### Added
+
+- Added protection against specific error conditions to reset the ice to a default profile instead of crashing. This is valid only for MITgcm
+
+### Changed
+
+- Change CICE4 build to shared library, in preparation for CICE6 integration
+
+## [1.9.0] - 2023-05-09
+
+### Changed
+
+- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
+- Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
+
+## [1.8.0] - 2023-03-10
+
+### Changed
+
+- Merging in changes associated with refactored physics and `gmap4`.
+
+## [1.7.2] - 2023-03-17
+
+### Changed
+
+- Improved trace gas ODS support; incorporates most recent changes to ODS in rt_g530_1.6.0_merge (AMSR, more OMPS)
+
+## [1.7.1] - 2023-02-10
+
+### Changed
+
+- Updated files to be consistent with das tags 5.30
+- Updated `CODEOWNERS` as GEOS_Util has been moved
+
+## [1.7.0] - 2023-01-20
+
+### Removed
+
+- Removed GEOS_Util as it is its own repo in GEOS-ESM now
+
+## [1.6.5] - 2023-01-20
+
+### Added
+
+- New coupled diagnostics package based on python3
+
+## [1.6.4] - 2023-01-17
+
+### Changed
+
+- Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+
+### Removed
+
+- Remove `hasw` _constraint_ choice from remapping questions since they are being [decommissioned by NCCS](https://www.nccs.nasa.gov/nccs-users/SCU10%2613-Decommismion)
+
+## [1.6.3] - 2022-12-08
+
+### Changed
+
+- Moved to GitHub Actions for label enforcement
+- Updated CircleCI to Baselibs 7.7.0
+- Set default data ocean to be `CS` at C90+ resolution in `remap_restarts.py`
+- Updated `remap_restarts.py` to use argparse
+
+### Fixed
+
+- Fix an issue with `regrid.pl` and `remap_restarts.py` regridding from MERRA-2 from 2021-06 to 2021-09
+- Fix an issue with `remap_restarts.py` for post 2011 regridding from MERRA2
+
+## [1.6.2] - 2022-11-17
+
+### Fixed
+
+- Fixed `gcmpost.script` logic to generate `xdf.tabl` files for collections with `monthly: 1` attribute
+- Update EASE grid tile file name to contain pfafxxx
+- Add a dependency on GMAO_perllib in GMAO_etc
+
+## [1.6.1] - 2022-09-22
+
+### Changed
+
+Apply latest updates from L. Takacs to the plot package
+
+## [1.6.0] - 2022-09-12
+
+### Changed
+
+- Updates the plot package with the renamed carbon species.
+
+## [1.5.8] - 2022-09-08
+
+### Added
+
+- Add YAML validator
+
+### Changed
+- Converted obsys_rc.py, check_obsysrc.py, and associated unittests to Python 3
+- Added features to cmpdir.pl (option to toggle between diff and xxdiff; added -B to -bwi flags)
+
+- Generated command line to run the program
+- changed the location of the temporary folder for remap_restarts MERRA-2 case
+- Added new remap tests
+  - amip_c180Toc90
+  - c180Toc360
+  - c360Toc24
+  - s2sv3Toc12MOM6
+
+### Fixed
+
+- Add `target` attribute to variables in `nc_diag_cat`. Needed to build with Intel 2022.1
+
+## [1.5.7] - 2022-08-01
+
+### Changed
+
+Updates consistent with CVS Jason-4_0_p1_sky. Releases non-needed memory from zcmp/progz. Otherwise, minor plot updates.
+
+## [1.5.6] - 2022-07-22
+
+### Added
+
+- Introduce series of remap_restarts Python scripts to GEOS_Util/post
+- Add a series of tests for remap_restarts
+
+### Changed
+
+- Updated CI to modern v1 orb
+- Updated CI to use Baselibs 7.5.0
+
+### Fixed
+
+- Implemented a more robust check to test if a history's monthly attribute is 1 (on) and not commented out.
+- Fixed setting of `ks` in `m_set_eta.F90` to be based on `bk`
+- Added check for infinity in time_ave.F and replace with undef
+
+## [1.5.5] - 2022-06-08
+
+### Changed
+
+- Changed restart file geosachem to achem in regrid.pl
+- More updates to CMake to more canonical CMake style (NetCDF, ESMF, etc.). These were missed in previous go-arounds as they are only built with ADAS. (Requires ESMA_cmake v3.15.1)
+
+## [1.5.4] - 2022-05-03
+
+### Added
+
+- Added statsNx.rc for screen level variable fstats
+
+### Changed
+
+- Added options for land-only and screen-level variables in `fstats.x` and `g5fcst_stats.pl`
+- Added a few new tags to `regrid.pl`
+- Changes allow `gcmpost.script` and `gcmclim.script` to handle `collection.monthly: 1` output and stop automatic archiving.
+
+### Fixed
+
+- Fixed a minor CMake issue to keep all mod files in `build/include`
+
+## [1.5.3] - 2022-03-18
+
+### Changed
+
+- Modified chckhist.new to handle OPS HISTORY.rc,  fixed minor bugs in 3CH.F90 and 3CH.j
+
+## [1.5.2] - 2022-03-18
+
+### Added
+
+- Added preprocessing team as CODEOWNER for the GEOS_Util/pre directory
+- added a way to process Reynolds only for producing SST and Ice Concentration data, using a land-sea mask.
+  The _new_ file is: `proc_SST_FRACI_reynolds_quart.F90` and modified: `read_Reynolds.F90`, `CMakeLists.txt`
+  **Note**: the contents of this directory will be defunct once `ExtData` mechanics are implemented, WIP with @bena-nasa
+
+### Changed
+
+- bugfix to token_resolve() routine in GMAO_etc/Manipulate_time.pm
+
+### Fixed
+
+- Updates to CMake to support Spack
+
+### Added
+
+- Added capability to produce netcdf ocean pre-processing datasets, with doc and notebooks to demo.
+
+## [1.5.1] - 2022-02-04
+
+### Changed
+
+- Compress CircleCI artifacts
+- Updated CircleCI to use Orb
 
 ## [1.5.0] - 2021-12-16
 
@@ -31,9 +261,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.13] - 2021-12-15
 
 ### Fixed
+
 - Quickplot and quickstat bugs
 
 ### Added
+
 - Quickplot now supports plotting GOCART-2G collections
 - Support for Three Corner Hat (3CH) Analysis
 
@@ -353,7 +585,7 @@ be deleted in future releases of MAPL
 ### Changed
 
 - Rolls back the constraint on gcmpost.script to only operate on pressure-level collections.
- 
+
 ### Fixed
 
 - Enables correct post proccessing of MAPL monthly collections.
@@ -435,7 +667,7 @@ be deleted in future releases of MAPL
 
 ## [1.0.12] - 2019-09-27
 
-### Changed 
+### Changed
 
 - Updates for s2s
 

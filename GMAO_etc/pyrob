@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
     Utility to generate GEOS-5 file spec information, a.k.a.
@@ -14,10 +14,16 @@ import re
 
 from optparse     import OptionParser
 from netCDF4      import Dataset
-from MAPL         import Config
+from MAPL.config  import Config as config
 
 try:
-    from PyRTF    import *
+    from PyRTF.PropertySets import TabPropertySet, BorderPropertySet, FramePropertySet, TextPropertySet, ParagraphPropertySet
+    from PyRTF.Elements import Document, StyleSheet
+    from PyRTF.Styles import TextStyle, ParagraphStyle
+    from PyRTF.document.section import Section
+    from PyRTF.document.paragraph import Paragraph, Table, Cell
+    from PyRTF.document.character import TEXT
+    from PyRTF.Renderer import Renderer
     HAS_RTF = True
 except ImportError:
     try:
@@ -28,27 +34,27 @@ except ImportError:
 
 if HAS_RTF:
 
-    nNAME = int(TabPS.DEFAULT_WIDTH * 2.5)
-    nDIMS = int(TabPS.DEFAULT_WIDTH * 1)
-    nDESC = int(TabPS.DEFAULT_WIDTH * 7.5)
-    nUNIT = int(TabPS.DEFAULT_WIDTH * 2)
+    nNAME = int(TabPropertySet.DEFAULT_WIDTH * 2.5)
+    nDIMS = int(TabPropertySet.DEFAULT_WIDTH * 1)
+    nDESC = int(TabPropertySet.DEFAULT_WIDTH * 7.5)
+    nUNIT = int(TabPropertySet.DEFAULT_WIDTH * 2)
     #grey_bkg = ShadingPS(shading='Grey')
-    thin_edge   = BorderPS( width=5, style=BorderPS.SINGLE )
-    normal_edge = BorderPS( width=20, style=BorderPS.SINGLE )
-    thick_edge  = BorderPS( width=40, style=BorderPS.SINGLE )
-    none_edge   = BorderPS( width=0,  style=BorderPS.SINGLE )
-    header_frame  = FramePS( None,      normal_edge, thick_edge, normal_edge )
-    header_frameL = FramePS( None,      None,        thick_edge, normal_edge )
-    header_frameR = FramePS( None,      normal_edge, thick_edge, None )
-    thin_frame    = FramePS( thin_edge, normal_edge, thin_edge,  normal_edge )
-    thin_frameL   = FramePS( thin_edge, None,        thin_edge,  normal_edge )
-    thin_frameR   = FramePS( thin_edge, normal_edge, thin_edge,  None )
+    thin_edge   = BorderPropertySet( width=5, style=BorderPropertySet.SINGLE )
+    normal_edge = BorderPropertySet( width=20, style=BorderPropertySet.SINGLE )
+    thick_edge  = BorderPropertySet( width=40, style=BorderPropertySet.SINGLE )
+    none_edge   = BorderPropertySet( width=0,  style=BorderPropertySet.SINGLE )
+    header_frame  = FramePropertySet( None,      normal_edge, thick_edge, normal_edge )
+    header_frameL = FramePropertySet( None,      None,        thick_edge, normal_edge )
+    header_frameR = FramePropertySet( None,      normal_edge, thick_edge, None )
+    thin_frame    = FramePropertySet( thin_edge, normal_edge, thin_edge,  normal_edge )
+    thin_frameL   = FramePropertySet( thin_edge, None,        thin_edge,  normal_edge )
+    thin_frameR   = FramePropertySet( thin_edge, normal_edge, thin_edge,  None )
 
-    
+
 #     -----
 class Spec(object):
 #     -----
-    """                                                                                  
+    """
     Generic container for Variables
     """
     def __init__(self,name,mytype):
@@ -85,19 +91,19 @@ class Writer(object):
             a, b, c, d, e = dims
             dim = get1d(a) + get1d(b) + get1d(c) + get1d(d) + get1d(e)
         else:
-            raise ValueError, 'invalid dimensions: %s for <%s>'%(str(dims),vname)
+            raise ValueError('invalid dimensions: %s for <%s>'%(str(dims),vname))
         descr = var.long_name.replace('__ENSEMBLE__','').replace('_',' ')
         if newUnits:
             unitlessDescr = re.sub('\[.*\]','',descr)
             self.row(vname,dim,unitlessDescr,newUnits)
         else:
             self.row(vname,dim,descr,var.units)
-    
+
     def doCollection(self,Coll,options):
         """
         Write spec for a given collection.
         """
-       
+
         Title = Coll.title.split(',')
         Name = Coll.type.split('_')
 
@@ -305,21 +311,21 @@ class stdoutWriter(Writer):
         self.secn = 0
     def section(self,collection,description):
         self.secn += 1
-        print
-        print
-        print "%d) Collection %s: %s"%(self.secn,collection,description)
-        print
+        print()
+        print()
+        print("%d) Collection %s: %s"%(self.secn,collection,description))
+        print()
     def property(self,name,value):
-        print "%19s: %s"%(name,value)
+        print("%19s: %s"%(name,value))
     def table(self,choice='header'):
         if choice == 'header':
-            print
-            print " -------------|------|--------------------------------------------------------------------------------|------------"
-            print "     Name     | Dims |                               Description                                      |    Units   "
-        print     " -------------|------|--------------------------------------------------------------------------------|------------"
+            print()
+            print(" -------------|------|--------------------------------------------------------------------------------|------------")
+            print("     Name     | Dims |                               Description                                      |    Units   ")
+        print(    " -------------|------|--------------------------------------------------------------------------------|------------")
         return
     def row(self,vname,dim,descr,units):
-        print ' %-12s | %4s | %-78s | %-10s '%(vname,dim,descr,units)
+        print(' %-12s | %4s | %-78s | %-10s '%(vname,dim,descr,units))
 
     def close(self):
         pass
@@ -372,7 +378,7 @@ class rtfWriter(Writer):
         self.secn = 0
         self.Section = Section()
         self.doc.Sections.append(self.Section)
-    def skip(self):    
+    def skip(self):
         p  = Paragraph(self.ss.ParagraphStyles.Normal)
         p.append('')
         self.Section.append(p)
@@ -407,7 +413,7 @@ class rtfWriter(Writer):
             self.Section.append(self.Table)
             self.skip()
     def row(self,vname,dim,descr,units):
-        #print ' %-10s | %4s | %-58s | %-10s '%(vname,dim,descr,units)
+        #print(' %-10s | %4s | %-58s | %-10s '%(vname,dim,descr,units))
         c1 = Cell(Paragraph(TEXT(str(vname))),thin_frameL)
         c2 = Cell(Paragraph(TEXT(str(dim))),thin_frame)
         c3 = Cell(Paragraph(TEXT(str(descr))),thin_frame)
@@ -415,9 +421,9 @@ class rtfWriter(Writer):
         self.Table.AddRow(c1, c2, c3, c4)
     def close(self):
         r = Renderer()
-        f = file(self.filename,'w')
+        f = open(self.filename,'w')
         r.Write(self.doc,f)
-        
+
 #   -------------
 def getCollection(filename,collname,options,colltype=None):
 #   -------------
@@ -499,9 +505,9 @@ def getCollection(filename,collname,options,colltype=None):
         Coll.tbeg = offset.replace(' ','T')
     except:
         Coll.tbeg = None
- 
+
     return Coll
-        
+
 def get1d(dname):
     return dname.replace('time','t').replace('longitude','x').replace('latitude','y').replace('levels','z').replace('lon','x').replace('lat','y').replace('lev','z').replace('Xdim','x').replace('Ydim','y').replace('nf','')
 
@@ -511,74 +517,72 @@ def MakeMyStyleSheet( ):
     result = StyleSheet()
     NormalText = TextStyle( TextPropertySet( result.Fonts.TimesNewRoman, 22 ) )
     ps = ParagraphStyle( 'Normal',
-						 NormalText.Copy(),
-						 ParagraphPropertySet( space_before = 60,
-											   space_after  = 60 ) )
+                         NormalText.Copy(),
+                         ParagraphPropertySet( space_before = 60, space_after  = 60 ) )
     result.ParagraphStyles.append( ps )
 
-    ps = ParagraphStyle( 'Normal Short',
-						 NormalText.Copy() )
+    ps = ParagraphStyle( 'Normal Short', NormalText.Copy() )
     result.ParagraphStyles.append( ps )
 
-    NormalText.TextPropertySet.SetSize( 32 )
+    NormalText.textProps.size = 32
     ps = ParagraphStyle( 'Heading 1',
-						 NormalText.Copy(),
-						 ParagraphPropertySet( space_before = 240,
-											   space_after  = 60 ) )
+                         NormalText.Copy(),
+                         ParagraphPropertySet( space_before = 240, space_after  = 60 ) )
     result.ParagraphStyles.append( ps )
 
-    NormalText.TextPropertySet.SetSize( 24 ).SetBold( True )
+    NormalText.textProps.size = 24
+    NormalText.textProps.bold = True
     ps = ParagraphStyle( 'Heading 2',
-						 NormalText.Copy(),
-						 ParagraphPropertySet( space_before = 240,
-											   space_after  = 60 ) )
+                         NormalText.Copy(),
+                         ParagraphPropertySet( space_before = 240, space_after  = 60 ) )
     result.ParagraphStyles.append( ps )
 
-    NormalText.TextPropertySet.SetSize( 24 ).SetBold( True ).SetItalic(True)
+    NormalText.textProps.size = 24
+    NormalText.textProps.bold = True
+    NormalText.textProps.italic = True
     ps = ParagraphStyle( 'Heading 3',
-						 NormalText.Copy(),
-						 ParagraphPropertySet( space_before = 240,
-											   space_after  = 60 ) )
+                         NormalText.Copy(),
+                         ParagraphPropertySet( space_before = 240, space_after  = 60 ) )
     result.ParagraphStyles.append( ps )
 
-	#	Add some more in that are based on the normal template but that
-	#	have some indenting set that makes them suitable for doing numbered
+    #   Add some more in that are based on the normal template but that
+    #   have some indenting set that makes them suitable for doing numbered
     normal_numbered = result.ParagraphStyles.Normal.Copy()
-    normal_numbered.SetName( 'Normal Numbered' )
-    normal_numbered.ParagraphPropertySet.SetFirstLineIndent( TabPropertySet.DEFAULT_WIDTH * -1 )
-    normal_numbered.ParagraphPropertySet.SetLeftIndent     ( TabPropertySet.DEFAULT_WIDTH )
+    normal_numbered.name = 'Normal Numbered'
+    normal_numbered.ParagraphPropertySet.SetFirstLineIndent( TabPropertySet.DEFAULT_WIDTH * -1)
+    normal_numbered.ParagraphPropertySet.SetLeftIndent(      TabPropertySet.DEFAULT_WIDTH)
 
     result.ParagraphStyles.append( normal_numbered )
 
     normal_numbered2 = result.ParagraphStyles.Normal.Copy()
-    normal_numbered2.SetName( 'Normal Numbered 2' )
+    normal_numbered2.name = 'Normal Numbered 2'
     normal_numbered2.ParagraphPropertySet.SetFirstLineIndent( TabPropertySet.DEFAULT_WIDTH * -1 )
     normal_numbered2.ParagraphPropertySet.SetLeftIndent     ( TabPropertySet.DEFAULT_WIDTH *  2 )
 
     result.ParagraphStyles.append( normal_numbered2 )
 
-	## LIST STYLES
-    for idx, indent in [ (1, TabPS.DEFAULT_WIDTH    ),
-						 (2, TabPS.DEFAULT_WIDTH * 2),
-						 (3, TabPS.DEFAULT_WIDTH * 3) ] :
-		indent = TabPropertySet.DEFAULT_WIDTH
-		ps = ParagraphStyle( 'List %s' % idx,
-							 TextStyle( TextPropertySet( result.Fonts.Arial, 22 ) ),
-							 ParagraphPropertySet( space_before = 60,
-												   space_after  = 60,
-												   first_line_indent = -indent,
-												   left_indent       = indent) )
-		result.ParagraphStyles.append( ps )
+    ## LIST STYLES
+    for idx, indent in [ (1, TabPropertySet.DEFAULT_WIDTH    ),
+                         (2, TabPropertySet.DEFAULT_WIDTH * 2),
+                         (3, TabPropertySet.DEFAULT_WIDTH * 3) ] :
+        indent = TabPropertySet.DEFAULT_WIDTH
+        ps = ParagraphStyle( 'List %s' % idx,
+                             TextStyle( TextPropertySet( result.Fonts.Arial, 22 ) ),
+                             ParagraphPropertySet( space_before = 60,
+                                                   space_after  = 60,
+                                                   first_line_indent = -indent,
+                                                   left_indent       = indent) )
+        result.ParagraphStyles.append( ps )
 
     return result
 
 #------------------------------------ M A I N ------------------------------------
 if __name__ == "__main__":
-    
+
     format = 'text'
     history = 'none'
     outFile = 'filespec.txt'
-    
+
 #   Parse command line options
 #   --------------------------
     parser = OptionParser(usage="Usage: %prog [OPTIONS] netcdf_file(s)",
@@ -630,14 +634,14 @@ if __name__ == "__main__":
     # Load HISTORY.rc if specified
     # ----------------------------
     if options.history is not None:
-        cf = Config(options.history)
+        cf = config(options.history)
         Descr = dict()
-        for v in cf.keys():
+        for v in list(cf.keys()):
             v_ = v.replace('-.descr','.descr')
             Descr[v_] = cf(v)
     else:
         cf = None
-    
+
     # Only one type of files
     # ----------------------
     n = 0
@@ -648,7 +652,7 @@ if __name__ == "__main__":
     if options.fp:       n+=1
     if options.geosit:   n+=1
     if n>1:
-       raise 'ValueError', 'only one of -N, -M, -F can be specified'
+       raise ValueError('only one of -N, -M, -F can be specified')
 
     # Instantiate writer
     # ------------------
@@ -664,28 +668,28 @@ if __name__ == "__main__":
         writer = stdoutWriter(options.outFile)
     elif 'rtf' in options.format:
         if not HAS_RTF:
-            raise ValueError, 'PyRTF is not installed, therefore format RTF is not available'
+            raise ValueError('PyRTF is not installed, therefore format RTF is not available')
         options.outFile = name + '.doc'
         writer = rtfWriter(options.outFile)
     elif 'doc' in options.format:
         if not HAS_RTF:
-            raise ValueError, 'PyRTF is not installed, therefore format RTF is not available'
+            raise ValueError('PyRTF is not installed, therefore format RTF is not available')
         options.outFile = name + '.doc'
         writer = rtfWriter(options.outFile)
     else:
-        raise ValueError, "unsupported format <%s>"%options.format
+        raise ValueError("unsupported format <%s>"%options.format)
 
     # Unique name of collections
     # --------------------------
     Files = dict()
     for fname in inFiles:
         if options.nature:
-            collname = os.path.basename(fname).split('.')[1] 
+            collname = os.path.basename(fname).split('.')[1]
             colltype = None
         elif options.dyamond:
             collname = os.path.basename(fname).split('.')[1]
             colltype = None
-            #print collname
+            #print(collname)
         elif options.merraobs:
             # Strip off datestamp and nc4
             colllist = os.path.basename(fname).split('.')[:-2]
@@ -696,10 +700,10 @@ if __name__ == "__main__":
             rcn = collname+'.colltype'
             colltype = Descr[rcn].replace("'","").replace(",","")
         elif options.fp:
-            collname = os.path.basename(fname).split('.')[3] 
+            collname = os.path.basename(fname).split('.')[3]
             colltype = None
         elif options.geosit:
-            collname = os.path.basename(fname).split('.')[3] 
+            collname = os.path.basename(fname).split('.')[3]
             colltype = None
         else:
             collname = os.path.basename(fname).split('.')[1]
@@ -723,7 +727,7 @@ if __name__ == "__main__":
             elif res[0] == 'N':   prefix = 'b'
             elif res[0] == 'M':   prefix = 'c'
             else:                 prefix = 'd'
-            name = prefix + collname 
+            name = prefix + collname
             CollNames[name] = collname
     elif options.dyamond:
         for collname in Files:
@@ -736,7 +740,7 @@ if __name__ == "__main__":
             elif res[0] == 'N':   prefix = 'b'
             elif res[0] == 'M':   prefix = 'c'
             else:                 prefix = 'd'
-            name = prefix + collname 
+            name = prefix + collname
             CollNames[name] = collname
     elif options.geosit:
         for collname in Files:
@@ -746,7 +750,7 @@ if __name__ == "__main__":
             elif hres[0] == 'L':   prefix = 'b'
             elif hres[0] == 'C':   prefix = 'c'
             else:                 prefix = 'd'
-            name = prefix + collname 
+            name = prefix + collname
             CollNames[name] = collname
     else:
         for collname in Files:
@@ -755,7 +759,7 @@ if __name__ == "__main__":
             elif res[0] == 'N':   prefix = 'b'
             elif res[0] == 'M':   prefix = 'c'
             else:                 prefix = 'd'
-            name = prefix + collname 
+            name = prefix + collname
             CollNames[name] = collname
 
     # Gather metadata for each collection
@@ -763,14 +767,14 @@ if __name__ == "__main__":
     for name in sorted(CollNames):
         collname = CollNames[name]
         if options.verbose:
-            print "[] Working on collection <%s>"%collname
+            print("[] Working on collection <%s>"%collname)
         fname = Files[collname]
         Collection = getCollection(fname,collname,options,colltype)
         #print("MAT Collection: ", Collection)
         if cf is not None:
             try:
                 rcn = collname+'.descr'
-                title = Descr[rcn][:-2].replace("'","") # override what is on file 
+                title = Descr[rcn][:-2].replace("'","") # override what is on file
                 Collection.title = title
             except:
                 pass
@@ -784,7 +788,7 @@ if __name__ == "__main__":
                         newUnits = "hPa"
                 except AttributeError:
                     newUnits = '1'
-               
+
                 Collection.newUnits[vname] = newUnits
         writer.doCollection(Collection,options)
 

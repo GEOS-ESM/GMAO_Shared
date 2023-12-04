@@ -9,6 +9,15 @@ add_definitions (-Dopenmp)
 # use r4i4 to get zero-diff with the GNU Make build
 # The "correct" lines should be:
 #
+# NOTE to the NOTE above: the contrary argument is that compiling the
+# way the model (mkiau) wants it break all programs created by this
+# directory. I have modified things so that at least some programs 
+# here still work; I believe the way I modified things is in a way 
+# that does not affect mkiau - but I have not tested; the only things
+# I changed relate to which NCEP libs are explicitly used to create 
+# the execs within this directory. This does not affect the transf lib.
+# (Todling; 25 Nov 2021)
+#
 #include_directories (${include_NCEP_sp_r4i4})
 #include_directories (${include_NCEP_w3_r8i4})
 #esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
@@ -46,6 +55,7 @@ set (srcs
    m_SubdomainDistributor.F90
    m_SubdomainDistributorComm.F90
    m_checksums.F90
+   m_compact_diff.f90
    m_daInterp.F90
    m_fgInterp.F90
    m_fvGrid.F90
@@ -67,6 +77,7 @@ set (srcs
    m_ppInterp.F90
    m_simpleGrid.F90
    m_ss.f90
+   m_specgrid.f90
    m_swapij.F90
    m_undef.F90
    m_xform.f90
@@ -85,11 +96,11 @@ set (srcs
 set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
 set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG}")
 
-ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
 
 install (PROGRAMS ec2fv.csh DESTINATION bin)
 

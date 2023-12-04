@@ -1,0 +1,468 @@
+#            NCCS Specific Version
+#
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#             This obsys.rc file for GEOS-IT is NOT final yet
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#
+#
+# This observation system resource file database will track
+# the whereabout of observation files.
+#   It will be used by scripts require_obsys (hard check the
+# existence of observation files)
+#   and acquire_obsys (will call acquire to get files).
+#
+# Syntax:
+# -------
+# BEGIN observation_file_class => StandardName
+#   startYYYYMMDD_HHz-endYYYYMMDD_HHz incrementHHMMSS remote_file_name_template
+# END
+# Note: set "endYYYYMMDD_HHz" as "present" if new files added to system daily.
+# Note: replacing "present" (see note above) with future date, 21001231_18z
+#
+# Modification History:
+# ---------------------
+# 2020.10.01 A. ElAkkraoui	merged MERRA-2 obsys.rc with default template from GEOSadas-5_27   
+# 2021.04.25 A. ElAkkraoui	updated observation source for historical/reprocessed  data
+# 2022.03.04 M. Sienkiewicz     organized pre-qc data, added relevant notes, NRT streams  
+# 2022.03.04 A. ElAkkraoui      added obsclass list. 
+#
+#+BEGIN obclass data set description
+#+  geosit_cdas_raob_pre-qc_bufr 
+#+  geosit_cdas_conv_pre-qc_bufr 
+#+  geosit_prof_pre-qc_bufr 
+#+  geosit_avhrrwnd_pre-qc_bufr 
+#+  geosit_nmodis_pre-qc_bufr 
+#+  geosit_goes_pre-qc_prep_bufr 
+#+  geosit_metsat_pre-qc_prep_bufr 
+#+  geosit_jma_pre-qc_prep_bufr 
+#+  geosit_ascat_pre-qc_bufr 
+#+  geosit_repro_ers2_pre-qc_bufr 
+#+  geosit_qscat_jpl_pre-qc_bufr 
+#+  geosit_wspd_pre-qc_bufr 
+#+  geosit_satwnd_bufr 
+#+  geosit_avhrr_satwnd_bufr 
+#+  geosit_ncep_tcvitals 
+#+  geosit_tmi_bufr 
+#+  geosit_gpsro_bufr 
+#+  geosit_sevcsr_bufr 
+#+  geosit_1bamua_bufr 
+#+  geosit_1bamub_bufr 
+#+  geosit_1bhrs2_bufr 
+#+  geosit_1bhrs3_bufr 
+#+  geosit_1bhrs4_bufr 
+#+  geosit_1bmsu_bufr 
+#+  geosit_1bmhs_bufr 
+#+  geosit_1bssu_bufr 
+#+  geosit_eosairs_bufr 
+#+  geosit_eosamsua_bufr 
+#+  geosit_mtiasi_bufr 
+#+  geosit_atms_bufr 
+#+  geosit_crisfsr_bufr
+#+  geosit_ssmit11_bufr 
+#+  geosit_ssmit13_bufr 
+#+  geosit_ssmit14_bufr 
+#+  geosit_ssmit15_bufr 
+#+  geosit_amsre_bufr 
+#+  geosit_avcsam_bufr
+#+  geosit_avcspm_bufr
+#+  geosit_acftpfl_bufr
+#+  geosit_amsr2_bufr
+#+  geosit_gmi_bufr
+#+  geosit_osbuv8_bufr 
+#+  geosit_aura_omieff_nc 
+#+  geosit_npp_ompsnmeff_nc 
+#+  geosit_npp_ompsnp_nc 
+#+  geosit_prep_bufr
+#+END
+#
+#  ----------------------------------------------------------------------------------------
+#  Notes: 
+#  ------
+#  near real-time streams:  geosit_cdas_conv_pre-qc_bufr, geosit_ascat_pre-qc_bufr, 
+#                   geosit_gmao_mlst_bufr, geosit_eosairs_bufr, geosit_eosamsua_bufr.
+#         if we switch to gdas prepbufr we also need to bring in acftpfl files.
+#
+#  NCEP Prep-bufr conventional data
+#  -------------------------------
+#  GEOSIT 'cdas' Prep-bufr conventional data:  copied from MERRA2 CDAS prepbufr data
+#                                            removed duplicated and unused data including
+#                                           * satellite winds that have been reprocessed with later versions of data
+#                                           * unused data types
+#                                           * inadvertent duplicates that were included in the M2 stream (e.g.Quikscat, ERS-2)
+#
+#  Arbitrarily reverting to non-split cdas_conv dataset as of 20220101
+#
+#  This 'cdas' data has been separated into two streams: 'RAOB' and 'noRAOB' in anticipation 
+#                   of replacing the raob data with IGRA2 soundings
+#
+#  Note that all the obs classes/files named 'pre-qc' are combined into unified prepbufr file 
+#                   that is checked with the pre-processing QC routines.
+#  The 'obsclass' names to use in the gsi.rc.tmpl file are gmao_prep_bufr for regular data and 
+#                   gmao_acftpfl_bufr for aircraft profile data.
+#
+#  ----------------------------------------------------------------------------------------
+
+BEGIN geosit_cdas_raob_pre-qc_bufr => raobs_NCEP.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19970101_00z-20211231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/prepbufr_work/prepbufr_noRAOB/RAOB/Y%y4/M%m2/raobs_NCEP.%y4%m2%d2.t%h2z.pre-qc.ublk
+END
+
+BEGIN geosit_cdas_conv_pre-qc_bufr => reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19970101_00z-20211231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/prepbufr_work/prepbufr_noRAOB/noRAOB/Y%y4/M%m2/reanalysis.prepbufr.%y4%m2%d2.t%h2z.pre-qc.ublk
+# 20220101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/llk/conv/prepbufr/runha/Y%y4/M%m2/reanalysis.prepbufr.gdas_red.%y4%m2%d2%h2
+END
+
+#  NPN WIND PROFILER DATA
+#  data prior to 20080801 primarily from NCAR; from 20080801 using operational NCEP Profiler in main cdas prepbufr file
+#  data from 2001 onward written using the 'runh' bufr table
+#  later Profiler data is in the regular prepbufr files
+BEGIN geosit_prof_pre-qc_bufr => prof.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 19920510_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+ 20010101_00z-20080731_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/profiler_runh/prepbfr/Y%y4/M%m2/profil.%y4%m2%d2.%h2.bfr
+END
+
+#  PREPBUFR AMVs:
+#  for R21C the transition date between prepbufr format (including reprocessed AMVs) to 
+#  operational satwndbufr is moved to 20130101 00z
+#  AVHRR polar AMV data (prepbufr stream) [copy converted data from Akira's archive]
+#  AVHRR winds not used prior to 2009 due to issues with historical AVHRR winds in MERRA-2.  
+BEGIN geosit_avhrrwnd_pre-qc_bufr => avhrr.%y4%m2%d2.t%h2z.pre-qc.ublk
+# 19821001_00z-20100630_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avh_wnd.%y4%m2%d2.%h2z.bufr
+ 20090201_00z-20100630_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avhgac.%y4%m2%d2.%h2z.bufr
+ 20100701_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/reanalysis/avhrr_winds/prepbufr/Y%y4/M%m2/avh_wnd_ext.%y4%m2%d2.%h2z.bufr
+END
+
+# MODIS data from MERRA2 data archives 
+# data prior to 20041001 from Wisconsin and NESDIS 
+# data switches to NCEP MODIS winds in main cdas prepbufr file (geosit_cdas_conv_pre-qc_bufr) after 20041001, and in main satwnd bufr format later
+BEGIN geosit_nmodis_pre-qc_bufr => modis.%y4%m2%d2.t%h2z.pre-qc.ublk
+ 20020701_00z-20040708_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_combined_runh/prepbufr/Y%y4/M%m2/modisw_c.%y4%m2%d2.t%h2z.bfr
+ 20040709_00z-20040930_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/modisw_runh/prepbufr/Y%y4/M%m2/modisw.%y4%m2%d2.t%h2z.bfr
+END
+
+# REPROCESSED GEOSTATIONARY SATELLITE AMVs  (prepbufr)   (Transition to satwndbufr for 2013 onward)
+#------------------------------------------
+# GOES
+BEGIN geosit_goes_pre-qc_prep_bufr => gmao.GOES_amv.%y4%m2%d2.t%h2z.ublk
+ 19950101_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GOES/bufr/WISCNAMV/Y%y4/M%m2/gmao.GOES_amv.%y4%m2%d2.t%h2z.bufr
+END
+# METEOSAT - retain MERRA2 winds from cdas prepbufr prior to 2004
+BEGIN geosit_metsat_pre-qc_prep_bufr => gmao.METSAT_amv.%y4%m2%d2.t%h2z.ublk
+ 20040301_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/EUMETSAT/bufr/METSATBR/Y%y4/M%m2/gmao.METSAT_amv.%y4%m2%d2.t%h2z.bufr
+END
+# JMA
+BEGIN geosit_jma_pre-qc_prep_bufr => gmao.JMA_amv.%y4%m2%d2.t%h2z.ublk
+ 19950621_00z-20121231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/JMA/bufr/JMAAMV/Y%y4/M%m2/gmao.JMA_amv.%y4%m2%d2.t%h2z.bufr
+END
+
+#
+# Ocean surface winds
+#
+# ASCAT Scatterometer (prepbufr)
+# -------------------
+BEGIN geosit_ascat_pre-qc_bufr => obsys.ascat.pre-qc.%y4%m2%d2_%h2z.bufr.ublk
+ 20080916_00z-20211231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/conv/ascat/prepbufr/Y%y4/M%m2/ascat.%y4%m2%d2.t%h2z.prepbufr
+END
+
+# ERS-2 data. (Original processing through 19970519.  Reprocessing after 19970519.) (Historic only)
+# ERS-2 data not used after 20030813 due to inconsistent results in MERRA-2. 
+# -----------
+BEGIN geosit_repro_ers2_pre-qc_bufr => obsys.ers2.pre-qc.%y4%m2%d2.t%h2z.ublk
+ 19960319_00z-19970519_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2/prepbufr/Y%y4/M%m2/ers2.%y4%m2%d2.t%h2z.bufr
+ 19970520_00z-20030217_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2_asps20n/bufr/Y%y4/M%m2/ers2_asps20n.%y4%m2%d2.t%h2z.bufr
+# 20030813_00z-20110329_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/ers2_wsc/bufr/Y%y4/M%m2/ers2_wsc.%y4%m2%d2.t%h2z.bufr
+END
+
+# MERRA Quick SCAT Data   (ms - added 2003,2004)  (jplqscat_elv10 fixed error with sfc elevation)  (Historic only)
+# ---------------
+BEGIN geosit_qscat_jpl_pre-qc_bufr => obsys.qscat.pre-qc.%y4%m2%d2.t%h2z.ublk
+ 19990719_00z-20001231_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/qscat/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+ 20010101_00z-20080908_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/qscat_runh/prepbufr/Y%y4/M%m2/jpl_qscat.%y4%m2%d2.t%h2z.bufr
+ 20080909_00z-20091122_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/qscat/jplqscat/Y%y4/M%m2/jplqscat_elv10.%y4%m2%d2%h2.bfr
+END
+
+# MERRA SSMI Wentz Speed  (Not used?  Historic only)
+BEGIN geosit_wspd_pre-qc_bufr => wentzspd.%y4%m2%d2.t%h2z.pre-qc.bufr.ublk
+ 19870709_00z-20131029_18z 060000   /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIwind_wentz/v7/prepbufr/Y%y4/M%m2/ssmiwnd.%y4%m2%d2.%h2z.bufr
+END
+
+# Loon balloon wind data - in prepbufr format but is not processed in preprocessing QC  (Historic only?)
+#-----------------------
+BEGIN hist_loon_bufr => loon_wnd.%y4%m2%d2_t%h2z.ublk
+ 20120201_00z-20210517_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/loon_v03/Y%y4/M%m2/loon_wnd.%y4%m2%d2_t%h2z.bufr
+END
+
+# EOSMLSt  - in prepbufr format but is not processed in preprocessing QC
+#----------------------
+BEGIN hist_gmao_mlst_bufr => MLSt.%y4%m2%d2.t%h2z.bufr
+ 20040802_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/temperature_v5/bufr/Y%y4/M%m2/MLSt_v5.%y4%m2%d2.t%h2z.bufr
+END
+
+#--------------------------------- BELOW THIS POINT: NO PREP-QC OBSERVATIONS -----------------------------
+#NRT 
+BEGIN geosit_prep_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.ublk
+ 20220101_00z-21001231_18z      240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+END
+# Aircraft metadata for GSI temperature bias correction
+BEGIN geosit_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
+ 20220101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AIRCFT/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles
+END
+
+# SATELLITE WINDS IN SATWND BUFR FORMAT
+# -------------------------------------
+# M2/OPS satwnd bufr, start date revised for new transtion date between satwnd bufr and prepbufr.   SAME AS REAL-TIME STREAM
+BEGIN geosit_satwnd_bufr => gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d.ublk
+  20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SATWND/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+END
+
+# MERRA2 AVHRR polar AMV data (satwndbufr stream)  Stop M2 data after 20150115 00z -  OPS file also has AVHRR starting 20150115 06z
+# (No real time as it transitions to real time satwind)
+BEGIN geosit_avhrr_satwnd_bufr => avhrr.%y4%m2%d2.t%h2z.satwnd.tm00.bufr_d
+#20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+ 20130101_00z-20150115_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/avhrr_winds/bufr/Y%y4/M%m2/satwndavhrr.%y4%m2%d2%h2
+END
+
+# TCVITALS    SAME AS REAL-TIME STREAM at present
+BEGIN geosit_ncep_tcvitals => tcvitals.%y4%m2%d2%h2
+ 19790101_00z-20061231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tcvitals/text/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.syndata.tcvitals
+ 20070101_00z-20130812_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/tcvitals/text/TCVITALS/Y%y4/M%m2/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
+ 20130812_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/tcvitals/text/TCVITALS/Y%y4/M%m2/gfs.%y2%m2%d2.t%h2z.syndata.tcvitals
+END
+
+# GPROF Precipitation   (Historic, no real time - not used?)
+# -------------------
+BEGIN hist_gprofp13_bufr => gprofp13.%y4%m2%d2.t%h2z.bufr.ublk
+ 19950503_00z-20090916_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/gprof/bufr/Y%y4/M%m2/gprof.F13.%y4%m2%d2.%h2z.bufr
+END
+BEGIN hist_gprofp14_bufr => gprofp14.%y4%m2%d2.t%h2z.bufr.ublk
+ 19970508_00z-20080824_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/gprof/bufr/Y%y4/M%m2/gprof.F14.%y4%m2%d2.%h2z.bufr
+END
+
+# TRMM TMI Level 1B brightness temperature   (Historic, no real time)
+#-------------------------
+BEGIN geosit_tmi_bufr => tmi.%y4%m2%d2.t%h2z.bufr
+ 19980101_00z-20140930_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/TRMM/tmi/bufr/Y%y4/M%m2/tmi.V05A.%y4%m2%d2.t%h2z.bufr
+END
+  
+# GPS Radio Occultation Data    SAME AS REAL-TIME STREAM
+# 2001 - Mid-Dec 2007 CHAMP in monthly files
+# 2006 - 2018 Reprocessed GPSRO bufr includes COSMIC (new version from UCAR), CHAMP,
+#                         TERRA SAR-X, TANDEM-X, GRACE-A/B, METOP-A/B and COSMIC-2.
+# Mid-Dec 2007 - onward, the start of the COSMIC constellation
+# ----------------------------------------------------------------------------------------------
+# data was missed between 20010519 and 20040714
+BEGIN geosit_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
+  20010519_00z-20060430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20060501_00z-20181231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GPSRO/bufr/COSMIC/Y%y4/M%m2/gdas1_modified.%y4%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20190101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+END
+
+
+# GOES Sounder Radiances   (Not used?   prepbufr is historic, goesfv same as real time)
+# 5x5 averaged in goesnd.* files 
+# 1x1 single FOVs in "goesfv" files
+# Control of usage set in satinfo_db
+# ----------------------------------
+#BEGIN hist_goesnd_prep_bufr => goesnd.%y4%m2%d2.t%h2z.ublk
+# 20010424_00z-20071204_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GOES_sounder/prepbufr/Y%y4/M%m2/goesnd.%y4%m2%d2.t%h2z.bufr
+#END
+BEGIN hist_goesfv_bufr => gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d.ublk
+  20070222_00z-20200302_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GOESFV/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.goesfv.tm00.bufr_d
+END
+
+# SEVIRI radiances   (Not used?  same as real time stream)
+# ----------------
+BEGIN geosit_sevcsr_bufr => gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d.ublk
+ 20120214_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
+END
+
+
+############### 
+# TOVS best data for reanalysis (replaces the old MERRA tovs data)
+###############
+
+#REPROCESSED AMSU-A SAME AS REAL-TIME STREAM at present
+#------------------
+BEGIN geosit_1bamua_bufr => gmao.%y2%m2%d2.t%h2z.1bamua.tm00.bufr.ublk
+ 19981101_00z-20090411_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA_repros/Y%y4/M%m2/gmao_r21c_repro.%y4%m2%d2.t%h2z.1bamu.tm00.bufr
+ 20090412_00z-20090415_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA_repros/Y%y4/M%m2/gmao_r21c_phaseout.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
+ 20090416_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/AMSUA/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
+ 20130801_00z-20190914_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
+ 20190915_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
+END
+
+# 1B AMSUB  (Historic only)
+BEGIN geosit_1bamub_bufr => gmao.%y2%m2%d2.t%h2z.1bamub.tm00.bufr.ublk
+ 19981101_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/AMSUB/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamub.tm00.bufr
+ 20130801_00z-20140606_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUB/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamub.tm00.bufr
+END
+
+# 1B HIRS2   (Historic only)
+BEGIN geosit_1bhrs2_bufr => gmao.%y2%m2%d2.t%h2z.1bhrs2.tm00.bufr.ublk
+ 19781101_00z-20060930_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/HIRS2/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs2.tm00.bufr
+END
+
+# 1B HIRS3   (Historic only)
+BEGIN geosit_1bhrs3_bufr => gmao.%y2%m2%d2.t%h2z.1bhrs3.tm00.bufr.ublk
+ 19980721_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/HIRS3/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs3.tm00.bufr
+ 20130801_00z-20140606_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/HIRS3/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs3.tm00.bufr
+END
+# 1B HIRS4     SAME AS REAL-TIME STREAM at present
+# (there appears to be data from 2007-early2009 not used in M2)
+BEGIN geosit_1bhrs4_bufr => gmao.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr.ublk
+ 20070521_00z-20081231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/HIRS4/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs4.tm00.bufr 
+ 20090101_00z-20090331_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/HIRS4/Y%y4/M%m2/gmao.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr 
+ 20090401_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/HIRS4/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs4.tm00.bufr 
+ 20130801_00z-20190914_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/HIRS4/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bhrs4.tm00.bufr
+ 20190915_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BHRS4/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bhrs4.tm00.bufr_d
+END
+
+# 1B MSU    (Historic only)
+BEGIN geosit_1bmsu_bufr => gmao.%y2%m2%d2.t%h2z.1bmsu.tm00.bufr.ublk
+ 19781101_00z-19861031_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/MSU/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bmsu.tm00.bufr
+ 19861101_00z-20061010_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs/MSU_RECALIBRATED/Y%y4/M%m2/ncep.%y2%m2%d2.t%h2z.1bmsu.tm00.bufr
+END
+
+# 1B MHS      SAME AS REAL-TIME STREAM at present
+BEGIN geosit_1bmhs_bufr => gmao.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr.ublk
+ 20051101_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/MHS/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bmhs.tm00.bufr
+ 20130801_00z-20190914_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/MHS/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bmhs.tm00.bufr
+ 20190915_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/1BMHS/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bmhs.tm00.bufr_d
+END
+
+# 1B SSU   (Historic only)
+BEGIN geosit_1bssu_bufr => gmao.%y2%m2%d2.t%h2z.1bssu.tm00.bufr.ublk
+ 19781101_00z-20060505_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/SSU/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bssu.tm00.bufr
+END
+
+# AIRS & AMSU-A  DISC near real time stream
+BEGIN geosit_eosairs_bufr => eos_airs.%y4%m2%d2.t%h2z.bufr
+ 20020901_00z-22001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
+END
+
+BEGIN geosit_eosamsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
+ 20020901_00z-20190212_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aqua_disc/bufr/amsu/Y%y4/M%m2/amsua_disc_final.%y4%m2%d2.t%h2z.bufr
+END
+
+# IASI    SAME AS REAL-TIME STREAM
+BEGIN geosit_mtiasi_bufr => gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d.ublk
+  20080916_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/MTIASI/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.mtiasi.tm00.bufr_d
+END
+
+# ATMS   SAME AS REAL-TIME STREAM
+BEGIN geosit_atms_bufr => gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d.ublk
+  20111116_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/ATMS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.atms.tm00.bufr_d
+END
+
+# CrIS NSR  Historical only, possibly not used
+BEGIN hist_cris_bufr => gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d.ublk
+  20120106_06z-20120112_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
+  20120406_12z-20200422_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/CRIS/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.cris.tm00.bufr_d
+END
+
+
+# Wentz SSMI Radiances  (Historical only)
+# --------------------
+
+BEGIN geosit_ssmit11_bufr => wentz.ssmit11.%y4%m2%d2%h2.bfr.ublk
+ 19911203_00z-20000516_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIrad_wentz/v7/bufr/F11/Y%y4/M%m2/wentz_ssmit.f11.%y4%m2%d2%h2.bufr
+END
+BEGIN geosit_ssmit13_bufr => wentz.ssmit13.%y4%m2%d2%h2.bfr.ublk
+ 19950503_00z-20091104_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIrad_wentz/v7/bufr/F13/Y%y4/M%m2/wentz_ssmit.f13.%y4%m2%d2%h2.bufr
+END
+BEGIN geosit_ssmit14_bufr => wentz.ssmit14.%y4%m2%d2%h2.bfr.ublk
+ 19970508_00z-20080808_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIrad_wentz/v7/bufr/F14/Y%y4/M%m2/wentz_ssmit.f14.%y4%m2%d2%h2.bufr
+END
+BEGIN geosit_ssmit15_bufr => wentz.ssmit15.%y4%m2%d2%h2.bfr.ublk
+ 19991218_00z-20060826_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/SSMIrad_wentz/v7/bufr/F15/Y%y4/M%m2/wentz_ssmit.f15.%y4%m2%d2%h2.bufr
+END
+# GMAO AMSRE-AQUA Level 1B brightness temperature   (Historical only)
+#-------------------------
+BEGIN geosit_amsre_bufr => gmao_amsre.%y4%m2%d2.t%h2z.bufr
+ 20020901_00z-20111004_06z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/amsre/Y%y4/M%m2/gmao.amsre_aqua.%y4%m2%d2.t%h2z.bufr
+END
+##########################
+##  Ozone data  - mostly GMAO processing
+##########################
+
+# Ozone partial column data 
+#--------------------------
+# SBUV ozone data 
+BEGIN geosit_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
+  19970103_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+END
+
+# OMPS nadir profiler (not used in R21C but keeping it here. We may need it if both MLS and OMPS LP fail)
+BEGIN geosit_npp_ompsnp_nc => ompsnpnc.%y4%m2%d2.t%h2z.nc
+ 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnp/Y%y4/M%m2/OMPSNP.%y4%m2%d2_%h2z.nc
+END
+
+# Ozone profile data 
+#-------------------
+# AURA MLS version 5  
+BEGIN hist_mls_nc => mlsnc.%y4%m2%d2.t%h2z.nc
+ 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/mls/oz_v5/netcdf/Y%y4/M%m2/MLS-v5.0-oz.%y4%m2%d2_%h2z.nc
+END
+
+# OMPS Limb Profiler profiles
+BEGIN hist_ompslpvis_nc => ompslpvisnc.%y4%m2%d2.t%h2z.nc
+ 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp/Y%y4/M%m2/OMPS-LPoz-Vis.%y4%m2%d2_%h2z.nc
+END
+
+# OMPS Limb Profiler profiles (future version)
+BEGIN hist_ompslpnc_nc => ompslpgnc.%y4%m2%d2.t%h2z.nc
+ 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompslp_v_2.7/Y%y4/M%m2/OMPS-LPoz-v2_7.%y4%m2%d2_%h2z.nc
+END
+
+# Total Ozone data
+#-----------------
+#AURA OMI total ozone
+BEGIN geosit_aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
+ 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+END
+
+# OMPS nadir total ozone
+BEGIN geosit_npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
+ 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+END
+
+ 
+# REPROCESSED AVHRR (to be combined)
+# -----------------
+# AVHRR AM radiances SAME AS REAL-TIME STREAM at present
+BEGIN geosit_avcsam_bufr => gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d.ublk
+  19981026_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSAM/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.avcsam.tm00.bufr_d
+  20120207_00z-20160227_00z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+  20160227_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSAM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcsam.tm00.bufr_d
+END
+
+# AVHRR PM radiances SAME AS REAL-TIME STREAM at present
+BEGIN geosit_avcspm_bufr => gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d.ublk
+  20010301_00z-20120206_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/AVHRR_repro/bufr/AVCSPM/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20120207_00z-20140731_12z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20140801_00z-20160226_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+  20160228_06z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AVCSPM/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.avcspm.tm00.bufr_d
+END
+
+# SSMIS SAME AS REAL-TIME STREAM
+BEGIN hist_ssmis_bufr => gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d.ublk
+  20110228_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
+END
+
+
+# AMSR2 SAME AS REAL-TIME STREAM at present
+BEGIN geosit_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
+  20120901_00z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
+  20200616_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
+END
+
+# CrIS FSR  SAME AS REAL-TIME STREAM at present
+BEGIN geosit_crisfsr_bufr => gdas1.%y4%m2%d2.t%h2z.crisfsr.tm00.bufr_d.ublk
+  20171020_00z-20180930_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/crisf4.gdas.%y4%m2%d2%h2
+  20181001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
+END
+
+# GMI data  REAL TIME?
+BEGIN geosit_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
+  20140401_00z-20211231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/gmi_v7/bufr/Y%y4/M%m2/gmi_v7_L1CR.%y4%m2%d2.t%h2z.bufr
+  20220101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
+END

@@ -5,11 +5,11 @@
 ! !ROUTINE: ods_dsbuv
 !
 ! !INTERFACE:
-!      
-      subroutine ods_dsbuv ( isat, obstype, pinfo, pdata, 
+!
+      subroutine ods_dsbuv ( isat, obstype, pinfo, pdata,
      .                       pobs, tnoise, iouse,
      .                       ireal, nlevs, ndiag,
-     .  		     ods, mobs, kobs, iks, ioff, rc )
+     .                       ods, mobs, kobs, iks, ioff, rc )
       use m_odsmeta
       use m_ods
       use m_ods_obsdiags, only : ods_obsdiags
@@ -28,7 +28,7 @@
       real(4),          intent(in)    :: pobs(nlevs)
       real(4),          intent(in)    :: tnoise(nlevs)
       character(len=*), intent(in)    :: obstype
-             
+
 ! !INPUT/OUTPUT PARAMETERS:
 
       integer,          intent(inout) :: kobs      ! current obs counter
@@ -37,11 +37,11 @@
 ! !OUTPUT PARAMETERS:
 
       integer,          intent(out)   :: rc
- 	            
+
 ! !DESCRIPTION: Converts sbuv data from GSI diag_ files to ODS.
 !
 ! !REVISION HISTORY:
-!	06Jan2005 - D. Dee - Initial code.
+!       06Jan2005 - D. Dee - Initial code.
 !       02May2005 - D. Dee - Fix for sbuv/2
 !       24Jan2006 - Todling - Bug fix: xvec now defined w/ undef's
 !        9Mar2006 - Sienkiewicz   take out xvec change, modify test
@@ -50,22 +50,24 @@
 !       08Apr2006 - Sienkiewicz - obs_sens test now in if(lobsdiagsave) block
 !       26Aug2010 - Todling - update to Mar2010 GSI (obs impact handle)
 !       01Nov2014 - Weir - add support for trace gases
+!       04Nov2014 - Weir - fixing whitespace so I don't go (more) insane
+!                          tabs are not a valid Fortran character FYI
+!       12Dec2022 - Weir - more trace gas support
 !
 !EOP
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
-            
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
       character(len=*), parameter :: myname = 'ods_dsbuv'
-
-
       integer, parameter   :: r_single = selected_real_kind(6)
+
       real(r_single)  zero_single,tiny_single
       real small_num, nlomx, tlomx
-      
+
       logical satknown, lobsdiagsave, passed
       integer i, n, kobs0, kidsat, miter
 
       real, parameter :: undef = 1.e15
-       
+
 !     Pointers to ods attributes:
 !     --------------------------
       integer, pointer :: kt(:)       ! data type index
@@ -128,86 +130,82 @@
            cycle
          endif
       end do
-                                                                                                                                             
+
       if (.not.satknown .or. kidsat==0) then
         rc = 98
         print *, myname, ': Cannot identify satellite type = ', obstype, ' kidsat = ', kidsat
         return
       endif
-                                                                                                                                             
 
       kobs0 = kobs
       do i = 1, nlevs
-      
-	kobs	   = kobs + 1
+
+        kobs = kobs + 1
         if (kobs>mobs) then
            rc = 99
-           print *, myname, 'dim violation, obstype = ', obstype
+           print *, myname, ': dim violation, obstype = ', obstype
            exit
         endif
-        select case(obstype)
-	case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpuv','ompslpvis')
-         kt(kobs)   = kto3mx              ! ozone mixing ratio (ppmv)
-         lev(kobs)  = pdata(4,i)
-        case('acos')
-         kt(kobs)   = ktxco2              ! co2 average column mixing ratio (ppmv)
-         lev(kobs)  = pdata(4,i)          ! obs pressure
-         xm(kobs)   = pdata(5,i)          ! model surface pressure
-        case('mopitt')
-         kt(kobs)   = ktco                ! co mixing ratio (ppmv)
-         lev(kobs)  = pdata(4,i)          ! obs pressure
-         xm(kobs)   = pdata(5,i)          ! model surface pressure
-!        NaN out repeated pressures that represent unused layers
-         if (i < nlevs .and. abs(pdata(4,i) - pdata(4,i+1)) < small_num) then
-           lev(kobs) = undef
-         end if
-        case default
-         if (pobs(i)>0) then
-           kt(kobs)   = kto3              ! ozone
-           lev(kobs)  = pobs(i)           ! bottom edge of layer
-	   if (i>1) then
-	      xm(kobs) = pobs(i-1)        ! top edge of layer
-	   else                           ! NOTE: assumes profile order
-	      xm(kobs) = 0.0
-	   end if
-	 else
-	   kt(kobs)   = kttco3		  ! total column ozone
-	   lev(kobs)  = undef
-	 end if
-	end select
 
-        kx(kobs)   = kidsat
-        ks(kobs)   = iks
-  
-        lat(kobs)  = pinfo(1)
-        lon(kobs)  = pinfo(2)
-        time(kobs) = int(pinfo(3)*60.0)   ! minutes from ana time	 
-        obs(kobs)  = pdata(1,i)           ! obs
-        omf(kobs)  = pdata(2,i)	          ! omf
-        oma(kobs)  = undef		  ! no info available
-  
-        qch(kobs)  = 0  		  ! no info available
+!       bweir: needs to be here because it is broken and fixed for trace gases below
+        kx(kobs) = kidsat
+        ks(kobs) = iks
+
+        select case(obstype)
+        case('o3lev','mls','mls20','mls22','mls30','mls55','ompslpnc',
+     &       'ompslpuv','ompslpvis')
+           kt(kobs)   = kto3mx                  ! ozone mixing ratio (ppmv)
+           lev(kobs)  = pdata(4,i)
+        case('acos','mlstgas','tgez','tgev','tgav','tgaz','tgop')
+           kt(kobs)   = ktgas                   ! trace gas
+           lev(kobs)  = pdata(4,i)              ! obs pressure
+           xm(kobs)   = pdata(5,i)              ! model surface pressure
+           ks(kobs)   = pdata(6,i)              ! correct sounding number
+        case default
+           if (pobs(i)>0) then
+              kt(kobs)   = kto3                 ! ozone
+              lev(kobs)  = pobs(i)              ! bottom edge of layer
+              if (i>1) then
+                 xm(kobs) = pobs(i-1)           ! top edge of layer
+              else                              ! NOTE: assumes profile order
+                 xm(kobs) = 0.0
+              end if
+           else
+              kt(kobs)   = kttco3               ! total column ozone
+              lev(kobs)  = undef
+           end if
+        end select
+
+        lat(kobs)  = pinfo(1)                   ! latitude
+        lon(kobs)  = pinfo(2)                   ! longitude
+        time(kobs) = int(pinfo(3)*60.0)         ! minutes from ana time	 
+        obs(kobs)  = pdata(1,i)                 ! obs
+        omf(kobs)  = pdata(2,i)                 ! omf
+        oma(kobs)  = undef                      ! no info available
+
+        qch(kobs)  = 0                          ! no info available
         qcx(kobs)  = 0
-	if (pdata(3,i)>small_num .and. iouse(i)>0) then
-           sigo(kobs) = 1.0/pdata(3,i)    ! sigo
-	else				  ! rejected by QC
-	   sigo(kobs) = undef
-	   qcx(kobs) = 2   
-	endif
-		
+        if (iouse(i) == -1) qcx(kobs) = 1       ! passive data
+        if (small_num < pdata(3,i)) then
+           sigo(kobs) = 1.0/pdata(3,i)          ! sigo
+        else                                    ! rejected by GSI
+           sigo(kobs) = undef
+           if (qcx(kobs) == 0) qcx(kobs) = 2
+        endif
+
         if ( lobsdiagsave ) then
            sigo(kobs) = 0.0
            call ods_obsdiags ( nlomx, tlomx, sigo(kobs), pdata, ioff, i, ndiag, nlevs, undef, passed )
            if(passed) qcx(kobs) = 0
         endif
 
-!	write(*,'(i2,i3,i5,i6,i5,3(1x,f8.3),1x,i3,6(1x,e8.3e1))') qcx(kobs),i,kobs,kx(kobs),kt(kobs),
-!     &		lat(kobs),lon(kobs),lev(kobs),time(kobs),obs(kobs),omf(kobs),oma(kobs),sigo(kobs)
+!       write(*,'(i2,i3,i5,i6,i5,3(1x,f8.3),1x,i3,6(1x,e8.3e1))') qcx(kobs),i,kobs,kx(kobs),kt(kobs),
+!     &	       lat(kobs),lon(kobs),lev(kobs),time(kobs),obs(kobs),omf(kobs),oma(kobs),sigo(kobs)
       end do
 
-      
+
 !     Nullify pointers
-!     -----------------
+!     ----------------
       if(associated(lat) ) nullify(lat)
       if(associated(lon) ) nullify(lon)
       if(associated(lev) ) nullify(lev)
@@ -222,5 +220,5 @@
       if(associated(omf) ) nullify(omf)
       if(associated(oma) ) nullify(oma)
       if(associated(sigo)) nullify(sigo)
-	  
+
       end subroutine ods_dsbuv
