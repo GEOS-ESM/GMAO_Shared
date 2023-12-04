@@ -59,6 +59,13 @@
    063  gsi_diag    g13         sndrd1                    13    # sndrD1_g13
    064  gsi_diag    g14         sndrd1                    14    # sndrD1_g14
    065  gsi_diag    g15         sndrd1                    15    # sndrD1_g15
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
+   066  gsi_conv    066         "gps_bnd,gps_ref"          0    # Sentinel 6A
+
+# see gsi.rc: OBS_INPUT::
+#  kx   source      dplat       dtype                   isat
    071  gsi_diag    g11         sndrd2                    11    # sndrD2_g11
    072  gsi_diag    g12         sndrd2                    12    # sndrD2_g12
    073  gsi_diag    g13         sndrd2                    13    # sndrD2_g13
@@ -253,6 +260,14 @@
    264  gsi_diag    dmsp        pcp_ssmi                   0    # pcp_ssmi   -- conflict 264
    264  gsi_diag    g14         goes_img                  14    # imgr_g14   -- conflict 264
    265  gsi_diag    g15         goes_img                  15    # imgr_g15
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
+   265  gsi_conv    265         "gps_bnd,gps_ref"          0    # GeoOptics CICERO OP1
+   266  gsi_conv    266         "gps_bnd,gps_ref"          0    # GeoOptics CICERO OP2
+   267  gsi_conv    267         "gps_bnd,gps_ref"          0    # PlanetiQ GNOMES-A
+   268  gsi_conv    268         "gps_bnd,gps_ref"          0    # PlanetiQ GNOMES-B
+   269  gsi_conv    269         "gps_bnd,gps_ref"          0    # Spire Lemur 3U Cubesat
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
@@ -602,6 +617,11 @@
    754  gsi_conv    754         "gps_bnd,gps_ref"          0    # COSMIC-2 E5 (gps)
    755  gsi_conv    755         "gps_bnd,gps_ref"          0    # COSMIC-2 E6 (gps)
    786  gsi_conv    786         "gps_bnd,gps_ref"          0    # C/NOFS CORISS (gps)
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
+   803  gsi_conv    803         "gps_bnd,gps_ref"          0    # GRACE-C
+   804  gsi_conv    804         "gps_bnd,gps_ref"          0    # GRACE-D
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat

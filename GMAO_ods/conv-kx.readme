@@ -89,6 +89,12 @@
        42      TerraSAR-X
        43      TanDEM-X
        44      PAZ
+       66      Sentinel-6A
+      265      GeoOptics CICERO OP1
+      266      GeoOptics CICERO OP2
+      267      PlanetiQ GNOMES-A
+      268      PlanetiQ GNOMES-B
+      269      Spire Lemur 3U Cubesat
       421      Oceansat-2
       440      Megha-Tropiques
       722      GRACE-A
@@ -112,6 +118,8 @@
       754      COSMIC-2 E5
       755      COSMIC-2 E6
       786      C/NOFS CORISS
+      803      GRACE-C
+      804      GRACE-D
       820      SAC-C
       821      SAC-D
       825      KOMPSAT-5
