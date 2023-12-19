@@ -4,7 +4,7 @@
 
 """
 
-import sgp4_
+from . import sgp4_
 
 from datetime import datetime, timedelta
 from numpy import sin, cos, pi, arccos, dot, sqrt, array
@@ -25,8 +25,8 @@ def getTrack ( tleFile, t_beg, t_end, dt_secs=60):
 
     lon, lat, rc = sgp4_.sgp4track(n, tleFile, nymd, nhms, dt_secs)
 
-    if rc:
-        raise ValueError, 'Error on return from sgp4Track: <%d>'%rc
+    if rc>1:
+        raise ValueError('Error on return from sgp4Track: <%d>'%rc)
 
     return (lon,lat,tyme)
 
@@ -48,15 +48,15 @@ def gcPeriod(lon,lat,n1,n2):
     Try to find period in the range (n1, n2)
     """
     x, y, z = _getXYZ(lon,lat)
-    N = range(n1,n2+1)
+    N = list(range(n1,n2+1))
     D = []
     for n in N:
-        i = range(0,n)
-        j = range(n,n+n)
+        i = list(range(0,n))
+        j = list(range(n,n+n))
         d_ = gcDist(x[i],y[i],z[i],
                     x[j],y[j],z[j])
         D = D + [d_,]
-        print n, d_
+        print(n, d_)
 
     return (N,D)
 
@@ -66,15 +66,15 @@ def chPeriod(lon,lat,n1,n2):
     Try to find period in the range (n1, n2)
     """
     x, y, z = _getXYZ(lon,lat)
-    N = range(n1,n2+1)
+    N = list(range(n1,n2+1))
     D = []
     for n in N:
-        i = range(0,n)
-        j = range(n,n+n)
+        i = list(range(0,n))
+        j = list(range(n,n+n))
         d_ = chDist(x[i],y[i],z[i],
                     x[j],y[j],z[j])
         D = D + [d_,]
-        print n, d_
+        print(n, d_)
 
     return (N,D)
 
@@ -84,16 +84,16 @@ def dayPeriod(lon,lat,n1,n2,day):
     Try to find period in the range (n1, n2) days.
     """
     x, y, z = _getXYZ(lon,lat)
-    N = range(n1,n2+1)
+    N = list(range(n1,n2+1))
     D = []
     for n_ in N:
         n = n_ * day
-        i = range(0,n)
-        j = range(n,n+n)
+        i = list(range(0,n))
+        j = list(range(n,n+n))
         d_ = gcDist(x[i],y[i],z[i],
                     x[j],y[j],z[j])
         D = D + [d_,]
-        print n, d_
+        print(n, d_)
 
     return (N,D)
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     (lon, lat, tyme) = getTrack ( 'ISS-2016257.tle', T(2016,9,14,10,30), T(2016,9,14,11,30), dt_secs=dt_secs )
 
     for i in range(len(lon)):
-        print "%f,%f,%02d:%02d"%(lon[i],lat[i],tyme[i].hour,tyme[i].minute)
+        print("%f,%f,%02d:%02d"%(lon[i],lat[i],tyme[i].hour,tyme[i].minute))
      
 def hold():
 

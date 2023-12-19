@@ -10,7 +10,7 @@ from datetime import timedelta,datetime as TIME
 
 MISSING = -999.
 
-BAD, MARGINAL, GOOD, BEST = range(4)
+BAD, MARGINAL, GOOD, BEST = list(range(4))
 
 VARS = dict(
        PM25 = ('State_Code','County_Code','Site_ID','Parameter',
@@ -51,7 +51,7 @@ class AQS(object):
         # ---------------------------------------------
         if type(Path) is ListType:
             if len(Path) == 0:
-                print "WARNING: Empty AQS object created"
+                print("WARNING: Empty AQS object created")
                 return
         else:
                 Path = [Path, ]
@@ -63,11 +63,11 @@ class AQS(object):
             try:
                 self.__dict__[var] = concatenate(self.__dict__[var])
             except:
-                print "Failed concatenating "+var
+                print("Failed concatenating "+var)
 
         # Make aliases
         # ------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for var in self.Vars:
             if var in Alias:
                 self.__dict__[ALIAS[var]] = self.__dict__[var] 
@@ -93,7 +93,7 @@ class AQS(object):
         Locations = {}
         for st in self.State_Code:
             Locations[st] = 1
-        self.Stations_st = Locations.keys()
+        self.Stations_st = list(Locations.keys())
 
         # If AQS Sites file specified, geo-locate observations
         # ----------------------------------------------------
@@ -118,7 +118,7 @@ class AQS(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readEPAdata(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
     def _readDir(self,dir):
         """Recursively, look for files in directory."""
@@ -127,7 +127,7 @@ class AQS(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readEPAdata(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readEPAdata(self,filename):
@@ -150,7 +150,7 @@ class AQS(object):
 
 
             if self.columns == None:
-                raise ValueError, "Cannot find Column header"
+                raise ValueError("Cannot find Column header")
 
             # Read relevant columns
             # ----------------------------------------
@@ -162,7 +162,7 @@ class AQS(object):
                     i = self.columns.index(name)
                     
                 except:
-                    raise ValueError, "cannot find <%s> in file"%name
+                    raise ValueError("cannot find <%s> in file"%name)
                 self.iVars += (i,)
                 if name=='Date':
                     self.formats += ('S8',)
@@ -205,7 +205,7 @@ class AQS(object):
 
         self.sitemap = {}
         self.sitemap = ((self.State_Code,self.County_Code,self.Site_ID))
-        self.sitemap_= zip(*self.sitemap)
+        self.sitemap_= list(zip(*self.sitemap))
 
 #---
 class AQS_SITES(object):
@@ -230,7 +230,7 @@ class AQS_SITES(object):
         # ---------------------------------------------
         if type(Path) is ListType:
             if len(Path) == 0:
-                print "WARNING: Empty MxD04_L2 object created"
+                print("WARNING: Empty MxD04_L2 object created")
                 return
         else:
                 Path = [Path, ]
@@ -242,11 +242,11 @@ class AQS_SITES(object):
             try:
                 self.__dict__[var] = concatenate(self.__dict__[var])
             except:
-                print "Failed concatenating "+var
+                print("Failed concatenating "+var)
 
         # Make aliases
         # ------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for var in self.Vars:
             if var in Alias:
                 self.__dict__[ALIAS[var]] = self.__dict__[var] 
@@ -261,7 +261,7 @@ class AQS_SITES(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readLatLon(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
     def _readDir(self,dir):
         """Recursively, look for files in directory."""
@@ -270,7 +270,7 @@ class AQS_SITES(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readLatLon(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readLatLon(self,filename):
@@ -289,7 +289,7 @@ class AQS_SITES(object):
 
 
             if self.columns == None:
-                raise ValueError, "Cannot find Column header"
+                raise ValueError("Cannot find Column header")
 
             # Read relevant columns
             # ----------------------------------------
@@ -301,7 +301,7 @@ class AQS_SITES(object):
                     i = self.columns.index(name)
                     
                 except:
-                    raise ValueError, "cannot find <%s> in file"%name
+                    raise ValueError("cannot find <%s> in file"%name)
                 self.iVars += (i,)
                
                 
@@ -350,7 +350,7 @@ def _site(self,filename):
 
         self.sitemap = {}
         self.sitemap = ((self.State_Code,self.County_Code,self.Site_ID))
-        self.sitemap_= zip(*self.sitemap)
+        self.sitemap_= list(zip(*self.sitemap))
 
 
 #..........................................................................

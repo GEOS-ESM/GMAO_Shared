@@ -207,14 +207,14 @@ if __name__ == "__main__":
                  source=source,
                  contact=contact)
     except:
-        print "ERROR: Could not create QFED vegetation file."
+        print("ERROR: Could not create QFED vegetation file.")
         sys.exit(1)
 
     # write the data
     try:
         f.write(v_name[0], n_ymd, n_hms, veg_map['data'])
     except:
-        print "ERROR: Could not save the QFED vegetation file."
+        print("ERROR: Could not save the QFED vegetation file.")
 
         try:
             f.close()
@@ -229,5 +229,5 @@ if __name__ == "__main__":
     except: 
         pass
 
-    print "INFO: The QFED v%3.1f vegetation map was saved to '%s'\n" % (QFED_VERSION, options.qfed_veg)
+    print("INFO: The QFED v%3.1f vegetation map was saved to '%s'\n" % (QFED_VERSION, options.qfed_veg))
 

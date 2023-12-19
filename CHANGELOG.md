@@ -15,6 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+### Added
+
+   various supports for JEDI connection:
+      - jo-stats
+      - conversion of increments
+
+### Changed
+
+### Fixed
+
+   more careful about flagging undefs in odsmatch
+
+### Removed
+   saber - references (now in GEOSadas fixture App)
+
 ## [1.9.6] - 2023-11-01
 
 ### Fixed

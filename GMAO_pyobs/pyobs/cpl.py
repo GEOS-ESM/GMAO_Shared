@@ -8,13 +8,11 @@ import os
 import h5py
 from   numpy    import ones, zeros, interp, NaN, isnan, array, ma
 from   datetime import datetime, timedelta
-from types      import *
+from   types      import *
 
 from matplotlib.pyplot import imshow, xlabel, ylabel, title, colorbar, \
                               gca, axes, figure, show
 from matplotlib.colors import LogNorm
-
-from mieobs import getAOPext
 
 #.......................................................................
 class CPL(object):
@@ -103,8 +101,8 @@ class CPL(object):
         # ----------------------------------------------
         f = h5py.File(cpl_filename,mode='r+')
         if self.verb:
-           print "[] Opening CPL file <%s>"%cpl_filename
-        for sds in SDS.keys():
+           print("[] Opening CPL file <%s>"%cpl_filename)
+        for sds in list(SDS.keys()):
           g = f.get(sds)
           for v in SDS[sds]:
             try:
@@ -112,7 +110,7 @@ class CPL(object):
             except:
               name = v
             if self.verb:
-                  print "   + Reading <%s> as <%s>"%(v,name)
+                  print("   + Reading <%s> as <%s>"%(v,name))
             data = g.get(v)
             self.__dict__[name] = data
   
@@ -183,25 +181,25 @@ class CPL(object):
             Vars = [Vars,]
         for var in Vars:
             if Verbose:
-                print ' Working on <%s>'%var
+                print(' Working on <%s>'%var)
             q = ga.sampleXYT(var,self.lon,self.lat,self.tyme,Verbose=Verbose).data
             self.__dict__[var] = ma.MaskedArray(q,mask=q>=UNDEF)
 #--
 
-    def sampleExt(asm_Nv,aer_Nv,Levels='70 40',channels=(532,),
-                  I=None,vnames=None,Verbose=False)
+      def sampleExt(self,asm_Nv,aer_Nv,Levels='70 40',channels=(532,),I=None,vnames=None,Verbose=False):
         """
-        Sample aerosol mixing ratio and perform Mie calculation returning
+         Sample aerosol mixing ratio and perform Mie calculation returning
 
           (ext,sca,backscat,aback_sfc,aback_toa)
 
-        On input, aer_Nv is the collection with the aerosol concentration;
-        asm_Nv is the met collection containg the height field.
+         On input, aer_Nv is the collection with the aerosol concentration;
+         asm_Nv is the met collection containg the height field.
 
-        This method implements a Mie calculator at obs location. An
-        alternative is to use the off-line AOD 3D calculator and sample
-        it at the lidar track with the addVar() method.
+         This method implements a Mie calculator at obs location. An
+         alternative is to use the off-line AOD 3D calculator and sample
+         it at the lidar track with the addVar() method.
         """
+        from mieobs import getAOPext
 
         # Sample aerosol concetration and Height
         # --------------------------------------
@@ -221,7 +219,7 @@ class CPL(object):
         # Perform Mie calculation
         # -----------------------
         ext,sca,backscat,aback_sfc,aback_toa = \
-          getAOPext(self,channels,I=None,vnames=vnames,Verbose=False)
+        getAOPext(self,channels,I=None,vnames=vnames,Verbose=False)
      
 #--
       def zInterp(self,v5):
@@ -229,15 +227,15 @@ class CPL(object):
             to the CPL heights."""
             
             if len(v5.shape) != 2:
-                  raise ValueError, 'variable to be interpolated must have rank 2'
+                  raise ValueError('variable to be interpolated must have rank 2')
 
             nt, nz = v5.shape
              
             if self.nt != nt:
-                  raise ValueError, 'inconsistent time dimension'
+                  raise ValueError('inconsistent time dimension')
 
             if self.H.shape[1] != nz:
-                  raise ValueError, 'inconsistent GEOS-5 vertical dimension'
+                  raise ValueError('inconsistent GEOS-5 vertical dimension')
 
             v = ones((self.nt,self.nz)) # same size as CPL arrays
             for t in range(self.nt):
@@ -318,10 +316,8 @@ if __name__ == "__main__":
     asm_Nv = 'http://opendap.nccs.nasa.gov:9090/dods/GEOS-5/fp/0.25_deg/assim/inst3_3d_asm_Nv'
     aer_Nv = 'http://opendap.nccs.nasa.gov:9090/dods/GEOS-5/fp/0.25_deg/assim/inst3_3d_aer_Nv'
     
-    print "Loading CPL:"
+    print("Loading CPL:")
     c = CPL('/Users/adasilva/data/CPL/CPL_ATB_19aug13.h5')
-
-    def Hold():
 
     # d.simulLidar(asm_Nv,aer_Nv)
     

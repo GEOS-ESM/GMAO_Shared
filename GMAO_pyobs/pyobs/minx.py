@@ -9,10 +9,10 @@ from numpy import loadtxt, ones, median, array, load, savez
 from datetime import datetime
 from glob  import glob
 
-from matplotlib.mlab import prctile
+from numpy import percentile as prctile
 
-from MAPL  import config
-from kde   import calc_kde1d
+from .config  import Config
+from .kde     import calc_kde1d
 
 Months = ('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec')
 
@@ -83,9 +83,9 @@ class MINX(object):
         
 #       Load useful attributes
 #       ----------------------
-        cf = config.Config(fname)
+        cf = Config(fname)
         RC = dict()
-        for rc in cf.keys(): RC[rc.upper()] = rc # handle change in case
+        for rc in list(cf.keys()): RC[rc.upper()] = rc # handle change in case
         self.region = cf(RC['REGION NAME'])
         self.date = cf(RC['DATE ACQUIRED'])
         self.time = cf(RC['UTC TIME'])
@@ -159,8 +159,8 @@ class MINX(object):
         a CSV file with the 3 variables.
         """
         f = open(fname,"w")
-        print >>f, "Location,Date,DOY,Time,Longitude,Latitude,%s,%s,%s"%vars
-        print      "Location,Date,DOY,Time,Longitude,Latitude,%s,%s,%s"%vars
+        print("Location,Date,DOY,Time,Longitude,Latitude,%s,%s,%s"%vars, file=f)
+        print("Location,Date,DOY,Time,Longitude,Latitude,%s,%s,%s"%vars)
 
         N = self.N
         U = ones(N)
@@ -183,8 +183,8 @@ class MINX(object):
             p, levs = ga.interp(vars[2], lons=(x,),lats=(y,))
 
             r = (d[0],d[1],d[2],d[3],d[4],d[5],u.data,v.data,p.data)
-            print >>f, "%s,%s,%d,%s,%6.3f,%6.3f,%f,%f,%f"%r
-            print      "%s,%s,%d,%s,%6.3f,%6.3f,%f,%f,%f"%r
+            print("%s,%s,%d,%s,%6.3f,%6.3f,%f,%f,%f"%r, file=f)
+            print("%s,%s,%d,%s,%6.3f,%6.3f,%f,%f,%f"%r)
 
             U[i] = u.data
             V[i] = v.data
@@ -229,7 +229,7 @@ class MINXs(object):
 
             k = m.pow_MW.argmax()        # Coordinates of stronger fire
             if m.pow_MW[k]<0: 
-                print '-- No fires for plume <%s>'%os.path.basename(minxFile)
+                print('-- No fires for plume <%s>'%os.path.basename(minxFile))
                 continue
 
             self.file.append(minxFile)
@@ -343,7 +343,7 @@ class MINXs(object):
         # ---------------------------
         for v in onlyVars:
             if Verbose:
-                print "<> Sampling ", v
+                print("<> Sampling ", v)
             var = ga.sampleXYT(v,lons,lats,tymes,Verbose=Verbose)
             self.sample.__dict__[v] = var.data
 
@@ -357,7 +357,7 @@ class MINXs(object):
         """
         self.sample = Sample()
         npz = load(npzFile)
-        for v in npz.keys():
+        for v in list(npz.keys()):
             self.sample.__dict__[v] = npz[v]
 
 #---
@@ -370,7 +370,7 @@ class MINXs(object):
         if bbox is None:
             bbox = self.lon.min()-5, self.lat.min()-5, self.lon.max()+5, self.lat.max()+5
         if I is None:
-            I = range(self.N)
+            I = list(range(self.N))
 
         # Basemap
         # -------

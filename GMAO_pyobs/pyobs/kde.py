@@ -64,11 +64,11 @@ def calc_kde1d(Xin,N=256,range=None,Verbose=False,name=None):
     bins = linspace(range[0],range[1],N)
     if Verbose:
         if name != None:
-            print name
-            print 'Evaluating 1D kernel with %d observations'%len(X)
+            print(name)
+            print('Evaluating 1D kernel with %d observations'%len(X))
     kernel = stats.kde.gaussian_kde(X)
     if Verbose:
-        print 'Evaluating 1D KDE with %d bins'%N
+        print('Evaluating 1D KDE with %d bins'%N)
     P = kernel(bins)
     return (bins,P)
 
@@ -90,9 +90,9 @@ def calc_kde2d(x_values,y_values,x_range=None,y_range=None,
 
     if Verbose:
         if name != None:
-            print "[] ", name
-        print "Starting the 2D kernel density estimation with %d data points..."\
-              %len(x_values)
+            print("[] ", name)
+        print("Starting the 2D kernel density estimation with %d data points..."\
+              %len(x_values))
 
     kernel = stats.kde.gaussian_kde(_cat(x_values,y_values))
 
@@ -107,19 +107,19 @@ def calc_kde2d(x_values,y_values,x_range=None,y_range=None,
     y_bins = linspace(y_range[0],y_range[1],Ny)
 
     if Verbose:
-        print "Evaluating 2D kernel on grid with (Nx,Ny)=(%d,%d) ..."%(Nx,Ny)
+        print("Evaluating 2D kernel on grid with (Nx,Ny)=(%d,%d) ..."%(Nx,Ny))
 
     X, Y = meshgrid(x_bins,y_bins) # each has shape (Ny,Nx)
     P = kernel(_cat(X,Y))           # shape is (Ny*Nx)
     P = reshape(P,X.shape)
         
     if Verbose:
-        print "X, Y, P shapes: ", X.shape, Y.shape, P.shape
+        print("X, Y, P shapes: ", X.shape, Y.shape, P.shape)
 
     #   Save to file
     #   ------------
     if npz != None:
-        print "Saving 2D KDE to file <"+npz+"> ..."
+        print("Saving 2D KDE to file <"+npz+"> ...")
         savez(npz,pdf=P,x_bins=x_bins,y_bins=y_bins)
     
     return (x_bins,y_bins,P)
@@ -182,18 +182,18 @@ def print_stats(name,x=None):
         x = name
         name = 'mean,stdv,rms,min,25%,median,75%,max: '
     if name == '__header__':
-        print ''
+        print('')
         n = (80 - len(x))/2
-        print n * ' ' + x
-        print n * ' ' + len(x) * '-'
-        print ''
-        print '   Name       mean      stdv      rms      min     25%    median     75%      max'
-        print ' ---------  -------  -------  -------  -------  -------  -------  -------  -------'
+        print(n * ' ' + x)
+        print(n * ' ' + len(x) * '-')
+        print('')
+        print('   Name       mean      stdv      rms      min     25%    median     75%      max')
+        print(' ---------  -------  -------  -------  -------  -------  -------  -------  -------')
     elif name == '__sep__':
-        print ' ---------  -------  -------  -------  -------  -------  -------  -------  -------'
+        print(' ---------  -------  -------  -------  -------  -------  -------  -------  -------')
     elif name == '__footer__':
-        print ' ---------  -------  -------  -------  -------  -------  -------  -------  -------'
-        print ''
+        print(' ---------  -------  -------  -------  -------  -------  -------  -------  -------')
+        print('')
     else:
         ave = x.mean()
         std = x.std()
@@ -299,6 +299,6 @@ def writeg_del(obs, ana, bkg, lon, lat, vname, units,
        f.write('bkg_rms', nymd, nhms, binrms2d(lon,lat,bkg,im,jm,MISSING) )
 
        if Verbose:
-           print "[w] Wrote file "+filename
+           print("[w] Wrote file "+filename)
            
 

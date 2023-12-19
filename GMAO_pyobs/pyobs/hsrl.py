@@ -7,6 +7,8 @@ import h5py
 from   numpy    import ones, zeros, interp, NaN, isnan, array
 from   datetime import datetime, timedelta
 
+from .config import strTemplate
+
 SDS_DIAL = {'Nav_Data':
                   ('gps_alt','gps_date','gps_lat','gps_lon','gps_time'),
             'Data_Products':
@@ -37,8 +39,8 @@ SDS_HSRL2 = {'header': ('date',),
                         ('gps_alt','gps_lat','gps_lon','gps_time'),
              'DataProducts':
                          (
-                          'Altitude',
-                          '1064_bsc_cloud_screened',
+                         'Altitude',
+                         '1064_bsc_cloud_screened',
                          '1064_ext',
                          '1064_aer_dep',
                          '532_bsc_cloud_screened',
@@ -108,14 +110,17 @@ class HSRL(object):
         # ----------------------------------------------
         f = h5py.File(hsrl_filename,mode='r+')
         if self.verb:
-           print "[] Opening HSRL file <%s>"%hsrl_filename
-        for sds in SDS.keys():
+           print("[] Opening HSRL file <%s>"%hsrl_filename)
+
+        # Read the variables proper
+        # -------------------------
+        for sds in list(SDS.keys()):
           g = f.get(sds)
           for v in SDS[sds]:
             if Nav_only and v not in NAV:
               continue
             if self.verb:
-                  print "   + Reading <%s>"%v
+                  print("   + Reading <%s>"%v)
             data = g.get(v)
             try:
               name = Short_Name[v]
@@ -249,15 +254,15 @@ class HSRL(object):
             to the HSRL heights."""
             
             if len(v5.shape) != 2:
-                  raise ValueError, 'variable to be interpolated must rave rank 2'
+                  raise ValueError('variable to be interpolated must rave rank 2')
 
             nt, nz = v5.shape
              
             if self.nt != nt:
-                  raise ValueError, 'inconsistent time dimension'
+                  raise ValueError('inconsistent time dimension')
 
             if self.H.shape[1] != nz:
-                  raise ValueError, 'inconsistent GEOS-5 vertical dimension'
+                  raise ValueError('inconsistent GEOS-5 vertical dimension')
 
             v = ones((self.nt,self.nz)) # same size as HSRL arrays
             for t in range(self.nt):
@@ -340,10 +345,10 @@ class HSRL(object):
          from gfio import GFIO
          g = GFIO(g5_filename)
          if self.verb:
-            print "[] Opening GEOS-5 file <%s>"%g5_filename
+            print("[] Opening GEOS-5 file <%s>"%g5_filename)
          for var in Vars:
             if self.verb:
-               print "   - Reading <%s>"%var
+               print("   - Reading <%s>"%var)
             v = g.interp(var,self.lon,self.lat)
             if len(v.shape) == 2:
                v = v[-1::-1,:].T # flip vertical and transpose
@@ -355,7 +360,6 @@ class HSRL(object):
          and time interpolation.
          """
          from gfio import GFIO
-         from MAPL import strTemplate
  
          # Compute index and open file for each syn time
          # ---------------------------------------------
@@ -363,7 +367,7 @@ class HSRL(object):
          for t in self.syn:
            filename = strTemplate(g5_filename,dtime=t) # expand 
            if self.verb:
-             print "[] Opening GEOS-5 file <%s>"%filename
+             print("[] Opening GEOS-5 file <%s>"%filename)
            g = GFIO(filename)
            G += [(g,t),]
            km = g.km # most likely 72
@@ -376,7 +380,7 @@ class HSRL(object):
            for g, t in G:
 
              if self.verb:
-               print "   - Reading <%s> at "%var, t
+               print("   - Reading <%s> at "%var, t)
 
              v = g.interp(var,self.lon,self.lat) 
              if len(v.shape) == 2:
@@ -410,7 +414,7 @@ def Hold():
 
 #    print "Loading HSRL:"
 #    h = HSRL('discoveraq-HSRL_UC12_20110705_RA_L2_sub.h5')
-    print "Loading GEOS-5:"
+    print("Loading GEOS-5:")
     g = HSRL('discoveraq-geos5-HSRL_MODEL_20110705_RA_L2_sub.h5')
 
     g.simul('e572_fp.inst3_3d_asm_Nv.%y4%m2%d2_%h200z.nc4',

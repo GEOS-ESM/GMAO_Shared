@@ -10,9 +10,7 @@ from numpy import ones
 from datetime import date, datetime, timedelta
 from glob     import glob
 from pyhdf.SD import SD, HDF4Error
-from bits import BITS
-from mpl_toolkits.basemap import Basemap
-from pylab import figure, show, plot
+from .bits import BITS
 
 MISSING = -99999
 
@@ -92,7 +90,7 @@ class McD43(object):
        """Given a list of lat, lon, return numbers to find the tile(v,h) 
           and position inside the tile (dx,dy)
        """
-
+       from mpl_toolkits.basemap import Basemap # Basemap is deprecated, needs refatoring
        m = Basemap(projection='sinu',lon_0=0,rsphere=6371007.181,resolution='c')
        x,y=m(lon,lat)
 
@@ -115,9 +113,9 @@ class McD43(object):
        if tokens[0]=='MCD43B1' :
           xdim = 1200.
        else :
-          print "- %s:not MCD43B file--> check resolution"%tokens[0]
+          print("- %s:not MCD43B file--> check resolution"%tokens[0])
        if self.verb:
-          print 'xdim', xdim
+          print('xdim', xdim)
        xdim_ = tile(xdim,len(x))
 
        int_h = [int(i) for i in self.h]
@@ -133,7 +131,7 @@ class McD43(object):
        self.h = int_h               # keep only real part
        self.v = int_v
        if self.verb:
-          print 'dx','dy', self.dx,self.dy
+          print('dx','dy', self.dx,self.dy)
       
        # create a list of tiles name associated with each (lat, lon) and (h,v)
        # -------------------
@@ -155,7 +153,7 @@ class McD43(object):
        self.unique_fn = []
        # Get the index I for each file
        # ----------------------------
-       for fn in uniq.keys() :
+       for fn in list(uniq.keys()) :
            I = [array(self.Tiles) == fn]
            self.unique_fn.append((fn, I))
 
@@ -168,7 +166,7 @@ class McD43(object):
         for fn,I in self.unique_fn:
               self._read_BRDF(fn,I[0])
               if self.verb:
-                print I
+                print(I)
               BRDF
 #---
     def read_BRDF(self):
@@ -184,35 +182,35 @@ class McD43(object):
        for fn, I in self.unique_fn:
          index = I[0]
          if self.verb:
-            print index, type(index), len(index) 
+            print(index, type(index), len(index)) 
           # Don't fuss if the file cannot be opened
           # ---------------------------------------
          try:
             if self.verb:
-                print "[] Working on "+fn
+                print("[] Working on "+fn)
             hfile = SD(fn)
          except HDF4Error:
             if self.verb > 2:
-                print "- %s: not recognized as an HDF file"%filename
+                print("- %s: not recognized as an HDF file"%filename)
             return 
 
           # Read select variables (reshape to allow concatenation later)
           # ------------------------------------------------------------
          for sds in self.SDS:  
             if self.verb:
-              print 'sds',self.SDS.index(sds)                 
+              print('sds',self.SDS.index(sds))                 
             v = hfile.select(sds).get()           
             a = hfile.select(sds).attributes()
             if a['scale_factor']!=1.0 or a['add_offset']!=0.0:
                 v = a['scale_factor'] * v + a['add_offset']
             if self.verb:
-              print array(self.dx)[index], BRDF.shape, BRDF[self.SDS.index(sds),index], v.shape 
+              print(array(self.dx)[index], BRDF.shape, BRDF[self.SDS.index(sds),index], v.shape) 
 
             BRDF[self.SDS.index(sds),index,:] = v[array(self.dx)[index], array(self.dy)[index], :]
 
        for sds in self.SDS:  
            self.__dict__[sds] = BRDF[self.SDS.index(sds),:,:]  
-           if sds in ALIAS.keys():
+           if sds in list(ALIAS.keys()):
                self.__dict__[ALIAS[sds]] = self.__dict__[sds] 
          
         

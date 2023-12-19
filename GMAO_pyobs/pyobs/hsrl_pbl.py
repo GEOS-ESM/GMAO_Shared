@@ -37,7 +37,7 @@ class HSRL_PBL(object):
             else:
                 cdate = cdate[2]
             day = datetime(int(cdate[0:4]),int(cdate[4:6]),int(cdate[6:]))
-            print "[ ] working on ", day
+            print("[ ] working on ", day)
             Lines = open(f).readlines()
             for line in Lines[1:]:
                 Line = line.replace('\r\n','').split()
@@ -54,7 +54,7 @@ class HSRL_PBL(object):
             try:
                 self.__dict__[name] = array(self.__dict__[name])
             except:
-                print "<> Failed creating array for ", name
+                print("<> Failed creating array for ", name)
 
     def addVar(self,ga,expr='pblh',vname=None,Verbose=False):
 

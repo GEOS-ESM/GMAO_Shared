@@ -159,8 +159,8 @@ class MAN(object):
             U[i] = ga.expr(expr).data # nearest neighbor
 
             if i%100 == 0:
-                print "%9s %9s %8.3f %8.3f %10.3f  ...%8.3f%%"\
-                  %(self.Date[i],self.Time[i],x,y,U[i],100.*i/float(N))
+                print("%9s %9s %8.3f %8.3f %10.3f  ...%8.3f%%"\
+                  %(self.Date[i],self.Time[i],x,y,U[i],100.*i/float(N)))
 
         self.__dict__[vname] = U
 

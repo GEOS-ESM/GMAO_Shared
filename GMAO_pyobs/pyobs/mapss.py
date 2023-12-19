@@ -9,13 +9,13 @@ from   numpy    import loadtxt, ones, zeros,  savez, pi, log, interp, \
                        concatenate, arange, savez, shape, array
 from   datetime import datetime as TIME
 
-from npz       import NPZ
-from mcd43gf   import MCD43GF
-from igbp      import IGBP
+from .npz       import NPZ
+from .mcd43gf   import MCD43GF
+from .igbp      import IGBP
 
 MISSING = -999.
 
-BAD, MARGINAL, GOOD, BEST = range(4)
+BAD, MARGINAL, GOOD, BEST = list(range(4))
 
 VARS = dict (
        META = ( 'Date', 'Time', 'Longitude', 'Latitude', 'Location' ),
@@ -129,7 +129,7 @@ class MAPSS(MCD43GF,IGBP):
         # ----------------------
         if type(Path) is ListType:
             if len(Path) == 0:
-                print "WARNING: Empty MAPSS object created"
+                print("WARNING: Empty MAPSS object created")
                 return
         else:
             if Path[-4:] == '.npz': # Special handling of npz files
@@ -154,11 +154,11 @@ class MAPSS(MCD43GF,IGBP):
             try:
                 self.__dict__[var] = concatenate(self.__dict__[var])
             except:
-                print "Failed concatenating "+var
+                print("Failed concatenating "+var)
 
         # Make aliases
         # ------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for var in self.Vars:
             if var in Alias:
                 self.__dict__[ALIAS[var]] = self.__dict__[var] 
@@ -183,7 +183,7 @@ class MAPSS(MCD43GF,IGBP):
         Locations = {}
         for loc in self.Location:
             Locations[loc] = 1
-        self.Stations = Locations.keys()
+        self.Stations = list(Locations.keys())
 
         # By default all is good if coordinates are ok
         # --------------------------------------------
@@ -201,7 +201,7 @@ class MAPSS(MCD43GF,IGBP):
         Cndex = - ones(this.Location.size).astype('int')
         for station in self.Stations:
             if self.verb:
-                print "Working on <%s>"%station
+                print("Working on <%s>"%station)
             for julian in range(self.julian.min(),self.julian.max()+1):
                 I = (this.iValid) & (this.Location==station) & (this.julian==julian) 
                 J = (that.iValid) & (that.Location==station) & (that.julian==julian)
@@ -212,7 +212,7 @@ class MAPSS(MCD43GF,IGBP):
                             k = dt.argmin()
                             Cndex[i] = Jndex[J][k]
                             if self.verb:
-                                print "- Found match on ", this.time[i], " at <%s>"%station
+                                print("- Found match on ", this.time[i], " at <%s>"%station)
         return Cndex
 
     collocate = colocate
@@ -227,7 +227,7 @@ class MAPSS(MCD43GF,IGBP):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readGranule(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
     def _readDir(self,dir):
         """Recursively, look for files in directory."""
@@ -236,7 +236,7 @@ class MAPSS(MCD43GF,IGBP):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readGranule(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readGranule(self,filename):
@@ -254,7 +254,7 @@ class MAPSS(MCD43GF,IGBP):
 
 
             if self.columns == None:
-                raise ValueError, "Cannot find Column header"
+                raise ValueError("Cannot find Column header")
 
             # Read relevant columns from MAPSS granule
             # ----------------------------------------
@@ -265,7 +265,7 @@ class MAPSS(MCD43GF,IGBP):
                 try:
                     i = self.columns.index(name)
                 except:
-                    raise ValueError, "cannot find <%s> in file <%s>"%(name,filename)
+                    raise ValueError("cannot find <%s> in file <%s>"%(name,filename))
                 self.iVars += (i,)
                 if name=='Date':
                     self.formats += ('S10',)
@@ -279,7 +279,7 @@ class MAPSS(MCD43GF,IGBP):
 
 #       Read the data
 #       -------------
-        print filename
+        print(filename)
         data = loadtxt(filename, delimiter=',',
                        dtype={'names':self.Vars,'formats':self.formats},
                        converters = self.converters,
@@ -377,7 +377,7 @@ class MAPSS(MCD43GF,IGBP):
           if fh.lm == 1:
             timeInterp = False    # no time interpolation in this case
           else:
-            raise ValueError, "cannot handle files with more tha 1 time, use ctl instead"
+            raise ValueError("cannot handle files with more tha 1 time, use ctl instead")
         else:
           fh = GFIOctl(inFile)  # open timeseries
           timeInterp = True     # perform time interpolation
@@ -396,7 +396,7 @@ class MAPSS(MCD43GF,IGBP):
         # ---------------------------
         for v in onlyVars:
             if Verbose:
-                print "<> Sampling ", v
+                print("<> Sampling ", v)
             if timeInterp:
               var = fh.sample(v,lons,lats,tymes,Verbose=Verbose)
             else:
@@ -407,7 +407,7 @@ class MAPSS(MCD43GF,IGBP):
                 var = var.T # shape should be (nobs,nz)
                 self.sample.__dict__[v] = var
             else:
-                raise IndexError, 'variable <%s> has rank = %d'%(v,len(var.shape))
+                raise IndexError('variable <%s> has rank = %d'%(v,len(var.shape)))
 
         if npzFile is not None:
             savez(npzFile,**self.sample.__dict__)            

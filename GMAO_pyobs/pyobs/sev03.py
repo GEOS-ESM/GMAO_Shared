@@ -90,14 +90,14 @@ class SEV03(object):
         # ---------------------------
         for v in onlyVars:
             if self.verb:
-                print " <> Linear sampling ", v
+                print(" <> Linear sampling ", v)
             var = f.sample(v,self.lon,self.lat,tymes,Verbose=self.verb)
             if var.ndim == 1:
                 self.sample.__dict__[v] = var
             elif var.ndim == 2:
                 self.sample.__dict__[v] = var.T   # -> (nobs,nz)
             else:
-                raise IndexError, 'variable <%s> has rank = %d' % var.ndim
+                raise IndexError('variable <%s> has rank = %d' % var.ndim)
 
 #---
     def nearestSampleFile(self, inFile, tyme, onlyVars=None):
@@ -122,7 +122,7 @@ class SEV03(object):
         # ---------------------------
         for v in onlyVars:
             if self.verb:
-                print " <> Nearest sampling ", v
+                print(" <> Nearest sampling ", v)
             var = f.sample(v,self.lon,self.lat,tymes,
                            algorithm='nearest',Verbose=self.verb)
             if var.ndim == 1:
@@ -130,7 +130,7 @@ class SEV03(object):
             elif var.ndim == 2:
                 self.sample.__dict__[v] = var.T   # -> (nobs,nz)
             else:
-                raise IndexError, 'variable <%s> has rank = %d' % var.ndim
+                raise IndexError('variable <%s> has rank = %d' % var.ndim)
 
 #---
     def getICAindx(self,inFile):
@@ -150,7 +150,7 @@ class SEV03(object):
         # Handle grid indices for ICA algorithms
         # --------------------------------------
         if self.verb:
-            print " <> Performing ICA index generation"
+            print(" <> Performing ICA index generation")
         # GEOS-5 coordinates of each pixel
         iCoord, jCoord = f.coordNN(self.lon,self.lat)
         # dictionary containing pixels for each gridcolumn
@@ -170,11 +170,11 @@ class SEV03(object):
 
         try:
             if self.verb:
-                print "[] Working on "+fgeom
+                print("[] Working on "+fgeom)
             hfile = SD(fgeom)
         except HDF4Error:
             if self.verb > 2:
-                print "- %s: not recognized as an HDF file"%fgeom
+                print("- %s: not recognized as an HDF file"%fgeom)
             return 
         for sds in self.SDS_geom:
             sds_ = sds.replace(' ','_')
@@ -187,11 +187,11 @@ class SEV03(object):
 
         try:
             if self.verb:
-                print "[] Working on "+fhgt
+                print("[] Working on "+fhgt)
             hfile = SD(fhgt)
         except HDF4Error:
             if self.verb > 2:
-                print "- %s: not recognized as an HDF file"%fhgt
+                print("- %s: not recognized as an HDF file"%fhgt)
             return 
         for sds in self.SDS_hgt:
             sds_ = sds.replace(' ','_')
@@ -224,27 +224,27 @@ class SEV03(object):
         self.nobs = self.Longitude.size
 
 def showdict(d,name):
-    print '<<<<<< dictionary', name, 'begin >>>>>>'
+    print('<<<<<< dictionary', name, 'begin >>>>>>')
     for key in d:
       t = type(d[key])
-      print '>>', key, t
+      print('>>', key, t)
       if t in (int, float, str):
-        print '  scalar:', d[key]
+        print('  scalar:', d[key])
       elif t in (tuple, list):
-        print '  sequence:', d[key]
+        print('  sequence:', d[key])
       elif t is np.ndarray:
         v = d[key]
-        print '  numpy.ndarray: shape', v.shape
+        print('  numpy.ndarray: shape', v.shape)
         if v.ndim == 0:
-          print '  scalar:', v
+          print('  scalar:', v)
         elif v.ndim == 1:
-          print '  vect: first 5 vals:', v[:min(5,v.size)]
+          print('  vect: first 5 vals:', v[:min(5,v.size)])
         elif v.ndim == 2:
-          print '  array: first column:', v[0]
-      print
-    print '<<<<<< dictionary', name, 'end >>>>>>'
-    print
-    print
+          print('  array: first column:', v[0])
+      print()
+    print('<<<<<< dictionary', name, 'end >>>>>>')
+    print()
+    print()
 
 #............................................................................
 

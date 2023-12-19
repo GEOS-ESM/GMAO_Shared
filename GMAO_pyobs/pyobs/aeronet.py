@@ -11,11 +11,11 @@ from   datetime import datetime, timedelta
 from   dateutil.parser import parse as isoparse
 from   glob     import glob
 
-from pyobs.npz  import NPZ
+from .npz  import NPZ
 
 MISSING = -999.
 
-BAD, MARGINAL, GOOD, BEST = range(4)
+BAD, MARGINAL, GOOD, BEST = list(range(4))
 
 VARS = ( 'AERONET_Site_Name',
          'Longitude',
@@ -69,9 +69,9 @@ class AERONET_L2(object):
 
         # Past is string or list
         # ----------------------
-        if type(Path) is ListType:
+        if isinstance(Path, (list, tuple)):
             if len(Path) == 0:
-                print "WARNING: Empty AERONET object created"
+                print("WARNING: Empty AERONET object created")
                 return
         else:
             if Path[-4:] == '.npz': # Special handling of npz files
@@ -96,11 +96,11 @@ class AERONET_L2(object):
             try:
                 self.__dict__[var] = concatenate(self.__dict__[var])
             except:
-                print "Failed concatenating "+var
+                print("Failed concatenating "+var)
 
         # Make aliases
         # ------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for var in self.Vars:
             if var in Alias:
                 self.__dict__[ALIAS[var]] = self.__dict__[var] 
@@ -133,7 +133,7 @@ class AERONET_L2(object):
         Locations = {}
         for loc in self.Location:
             Locations[loc] = 1
-        self.Stations = Locations.keys()
+        self.Stations = list(Locations.keys())
 
         # By default all is good if coordinates are ok
         # --------------------------------------------
@@ -154,7 +154,7 @@ class AERONET_L2(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readGranule(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
     def _readDir(self,dir):
         """Recursively, look for files in directory."""
@@ -163,7 +163,7 @@ class AERONET_L2(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readGranule(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readGranule(self,filename):
@@ -184,7 +184,7 @@ class AERONET_L2(object):
                 i += 1
 
             if self.columns == None:
-                raise ValueError, "Cannot find Column header"
+                raise ValueError("Cannot find Column header")
 
             # Read relevant columns from AERONET granule
             # ----------------------------------------
@@ -195,7 +195,7 @@ class AERONET_L2(object):
                 try:
                     i = self.columns.index(name)
                 except:
-                    raise ValueError, "cannot find <%s> in file <%s>"%(name,filename)
+                    raise ValueError("cannot find <%s> in file <%s>"%(name,filename))
                 self.iVars += (i,)
                 if name=='Date':
                     self.formats += ('S10',)
@@ -237,7 +237,7 @@ class AERONET_L2(object):
         Writes out a NPZ file with the relevant variables.
         """
         Vars = dict()
-        Nicknames = ALIAS.values()
+        Nicknames = list(ALIAS.values())
         for name in self.__dict__:
             if name in Nicknames:
                 continue # alias do not get reduced
@@ -285,7 +285,7 @@ class AERONET_L2(object):
 
             ods = ODS(nobs=nobs, kx=KX, kt=KT['AOD'])
 
-            ods.ks[:] = range(1,1+nobs)
+            ods.ks[:] = list(range(1,1+nobs))
             ods.lat[:] = self.lat[I]
             ods.lon[:] = self.lon[I]
             ods.qch[:] = zeros(nobs).astype('int')
@@ -298,8 +298,8 @@ class AERONET_L2(object):
             ods.xm[:] = self.AOT_675[I]
             
             if self.verb:
-                print "[w] Writing file <"+filename+"> with %d observations at %dZ"%\
-                   (ods.nobs,nhms/10000)
+                print("[w] Writing file <"+filename+"> with %d observations at %dZ"%\
+                   (ods.nobs,nhms/10000))
 
             ods.write(filename,nymd,nhms,nsyn=nsyn)
 
@@ -405,7 +405,7 @@ class AERONET_L2(object):
                binobs2d(self.lon[I],self.lat[I],self.AOT_550[I],im,jm,MISSING) )
 
        if self.verb:
-           print "[w] Wrote file "+filename+" at %02dZ"%(nhms/10000)
+           print("[w] Wrote file "+filename+" at %02dZ"%(nhms/10000))
 
        return filename
 
@@ -506,7 +506,7 @@ def granules( tyme,
 
 if __name__ == "__main__":
 
-    t = datetime(2008,07,01)
+    t = datetime(2008,0o7,0o1)
     one_hour = timedelta(seconds=60*60) # synoptic dt =  3 hours
 
     Files = granules(t,bracket='left')

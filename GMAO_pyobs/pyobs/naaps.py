@@ -11,9 +11,9 @@ from pyhdf import SD
 from glob     import glob
 from   numpy    import ones, concatenate, array,linspace,arange, transpose
 from   datetime import date, datetime, timedelta
-from gfio     import GFIO
-from MAPL.config import strTemplate
-from binObs_  import binobs3dh
+
+from .config import strTemplate
+
 MISSING = -9999.99
 
 ALIAS = dict (latitude = 'lat' ,
@@ -27,7 +27,7 @@ ALIAS['532_attenuated_molecular_backscatter'] = 'mol_aback'
                                                      
                      
 
-SDS = ALIAS.keys()
+SDS = list(ALIAS.keys())
 
 #.........................................................................................
 
@@ -76,7 +76,7 @@ class NAAPS(object):
      if type(Path) is ListType:
         if len(Path) == 0:
             self.nobs = 0
-            print "WARNING: Empty NAAPS object created"
+            print("WARNING: Empty NAAPS object created")
             return
      else:
          Path = [Path, ]
@@ -92,7 +92,7 @@ class NAAPS(object):
                 self.__dict__[name] = concatenate((self.__dict__[name]))
                 
             except:
-                print "Failed concatenating "+name
+                print("Failed concatenating "+name)
      
     
  
@@ -114,7 +114,7 @@ class NAAPS(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readOrbit(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 
 #---
@@ -125,7 +125,7 @@ class NAAPS(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readOrbit(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
    def _readOrbit(self,filename):
@@ -140,14 +140,14 @@ class NAAPS(object):
         # ----------------------------------------------
 
         if self.verb:
-            print "[] working on <%s>"%filename
+            print("[] working on <%s>"%filename)
 
         f = SD.SD(filename)
 
 #       for group in self.SDS.keys():
         for name in self.SDS:         
           v = name
-          print 'v', v
+          print('v', v)
 
           if v == 'time':
               sd = f.select(v)
@@ -186,7 +186,7 @@ class NAAPS(object):
               sd = f.select(v)
               data  = sd.get()  # most of parameter : data = (nobs) or (nobs,km) except L2 feature type(nobs,km,4)
               data = transpose(data)
-              print 'data', data.shape
+              print('data', data.shape)
               if self.keep != None:
                     self.__dict__[v].append(data[0:self.keep,:])
               else:
@@ -203,6 +203,9 @@ class NAAPS(object):
 
        """
 
+       from gfio     import GFIO
+       from binObs_  import binobs3dh
+
        # Determine synoptic time range
        # -----------------------------
        dt = timedelta(seconds = 12. * 60. * 60. / nsyn)
@@ -212,26 +215,26 @@ class NAAPS(object):
 #      ------------
        im = 360
        jm = 181
-       print 'im,jm', im, jm
+       print('im,jm', im, jm)
        glon = linspace(-180.,180.,im,endpoint=False)
        glat = linspace(-90.,90.,jm)
-       print 'glon', glon, glat       
+       print('glon', glon, glat)       
 
        dLon = 360. / im
        dLat = 180. / ( jm - 1.)
-       print 'dlon', dLon, dLat
+       print('dlon', dLon, dLat)
        
        nymd = 10000 * syn_time.year + 100 * syn_time.month  + syn_time.day
        nhms = 10000 * syn_time.hour + 100 * syn_time.minute + syn_time.second
 
-       print 'nymd=',nymd, 'nhms=',nhms 
+       print('nymd=',nymd, 'nhms=',nhms) 
        na_height = arange(0,8100,400) # height above sea level for NAAPS 100mfor night 400m forday
        
-       print 'na_height shape', na_height.shape, g5_h.shape  
+       print('na_height shape', na_height.shape, g5_h.shape)  
 
        g5_height = g5_h
        km = g5_height.shape[0] # because it is at the edge
-       print 'km', km, g5_height.shape, g5_height[:,0]    
+       print('km', km, g5_height.shape, g5_height[:,0])    
        nobs = self.lon.shape
 
        vtitle = [ 'taback',
@@ -261,13 +264,12 @@ class NAAPS(object):
        lon = self.lon
        lat = self.lat
 
-
        taback = _timefilter(self.time_,t1,t2,self.taback,I_bad)
        taback_err = _timefilter(self.time_,t1,t2,self.taback_err,I_bad)
        mol_aback = _timefilter(self.time_,t1,t2,self.mol_aback,I_bad)
 #       height = _timefilter(self.time_,t1,t2,na_height,I_bad)
 
-       print 'taback', taback.shape
+       print('taback', taback.shape)
 
 #      Create the file
 #      ---------------
@@ -279,10 +281,10 @@ class NAAPS(object):
                 title=title, source=source, contact=contact)
          
 #       gObs=binobs3dh(lon[13:14],lat[13:14],taback[13:14,:],na_height,g5_height[:,13:14],im,jm,MISSING)
-       print 'test', lon[10:11],lat[10:11],taback[10:11,:],na_height,g5_height[:,10:11]
+       print('test', lon[10:11],lat[10:11],taback[10:11,:],na_height,g5_height[:,10:11])
        gObs=binobs3dh(lon[10:11],lat[10:11],taback[10:11,:],na_height,g5_height[:,10:11],im,jm,MISSING)
        
-       print 'gobs', gObs[357:358,101:102,:]
+       print('gobs', gObs[357:358,101:102,:])
 
 #      Grid variable and write to file
 #      -------------------------------
@@ -292,7 +294,7 @@ class NAAPS(object):
 #       f.write('height', nymd, nhms, g5_height)
 
        if Verb >=1:
-           print "[w] Wrote file "+filename
+           print("[w] Wrote file "+filename)
            
 #....................................................................
 
@@ -307,7 +309,7 @@ def _timefilter ( t, t1, t2, a, I_bad ):
     elif len(b.shape) == 2:
         b[I_bad] = MISSING
     else:
-        raise IndexError, "Invalid rank=%d for time filtering"%len(b.shape)
+        raise IndexError("Invalid rank=%d for time filtering"%len(b.shape))
     return b
 #---
 def orbits (path, syn_time, nsyn=8, period='night', Verbose=0 ):
@@ -327,7 +329,7 @@ def orbits (path, syn_time, nsyn=8, period='night', Verbose=0 ):
     dt = timedelta(seconds = 12. * 60. * 60. / nsyn)
     t1, t2 = (syn_time-dt,syn_time+dt)
 
-    print "[*] ", t1,"|", t2
+    print("[*] ", t1,"|", t2)
 
     today = syn_time
     yesterday = today - timedelta(hours=24)
@@ -355,11 +357,11 @@ def orbits (path, syn_time, nsyn=8, period='night', Verbose=0 ):
         # t_end = datetime(end_yy,end_mm,end_dd,end_h,end_m,0)
 #        print 'year', beg_yy, 'month', beg_mm, 'day', beg_dd, 'hour', beg_h, 'min', beg_m
         if (t_beg>=t1 and t_beg<t2) or (t_end>=t1 and t_end<t2):
-            print "[x] ", t_beg, '|', t_end
+            print("[x] ", t_beg, '|', t_end)
             Orbits += [f,]
             
             if Verbose:
-                print "[] ", f
+                print("[] ", f)
 
     return Orbits
 #............................................................................
@@ -379,7 +381,7 @@ if __name__ == "__main__":
         t += dt       
         syn_time = t
         Files = orbits('/nobackup/2/vbuchard/CALIPSO_L15/NAAPS/',syn_time,period='day',Verbose=1)
-        print 'files',Files
+        print('files',Files)
 #def hold():
     # NAAPS files
         naap  = NAAPS(Files,Verbose=1)

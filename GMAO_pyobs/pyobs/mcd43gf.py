@@ -25,11 +25,11 @@ class MCD43GF(object):
         doy_ = min(361,doy_)
         filename = root+'/'+'%d/00-05.%03d/MCD43GF_wsa_Band4_%03d_%d_f.hdf'%(y,doy_,doy_,y)
         if Verbose:
-            print "%03d %03d %s"%(doy,doy_,filename)
+            print("%03d %03d %s"%(doy,doy_,filename))
         try:
             h = SD(filename) 
         except:
-            raise ValueError, "could not open <%s>"%filename
+            raise ValueError("could not open <%s>"%filename)
         return h
 
     def AlbedoGetSDS(self,time,**kwopts):
@@ -100,8 +100,8 @@ class MCD43GF(object):
 
                 if Verbose:
                     if mod(k,1000)==0 and a_[k] >= 0.0 and a_[k] != fill:
-                        print time_[k], "%8.3f %8.3f %6.3f  ...%8.3f%%"\
-                        %(lon_[k],lat_[k],scale*a_[k],100.*k/float(n_))
+                        print(time_[k], "%8.3f %8.3f %6.3f  ...%8.3f%%"\
+                        %(lon_[k],lat_[k],scale*a_[k],100.*k/float(n_)))
 
                 
             a[N] = a_[:] # scatter
@@ -126,7 +126,7 @@ class MCD43GF(object):
 
 if __name__ == "__main__":
 
-    from mapss import ANET
+    from .mapss import ANET
     
     m = MCD43GF()
 

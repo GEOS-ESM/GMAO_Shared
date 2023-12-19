@@ -74,7 +74,7 @@ class OMPS_L2(object):
         # Variable names
         # --------------
         self.Names = []
-        for group in self.SDS.keys():
+        for group in list(self.SDS.keys()):
             for name in self.SDS[group]:
                 self.Names.append(name)
         self.Names += ['nymd','nhms']
@@ -90,7 +90,7 @@ class OMPS_L2(object):
         if type(Path) is ListType:
             if len(Path) == 0:
                 self.nobs = 0
-                print "WARNING: Empty OMPS object created"
+                print("WARNING: Empty OMPS object created")
                 return
         else:
             Path = [Path, ]
@@ -103,7 +103,7 @@ class OMPS_L2(object):
             try:
                 self.__dict__[name] = concatenate(self.__dict__[name])
             except:
-                print "Failed concatenating "+name
+                print("Failed concatenating "+name)
 
         # Determine index of "good" observations
         # --------------------------------------
@@ -116,7 +116,7 @@ class OMPS_L2(object):
 
         # Make aliases for compatibility with older code 
         # ----------------------------------------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for name in self.Names:
             if name in Alias:
                 self.__dict__[ALIAS[name]] = self.__dict__[name] 
@@ -138,7 +138,7 @@ class OMPS_L2(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readOrbit(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readDir(self,dir):
@@ -148,7 +148,7 @@ class OMPS_L2(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readOrbit(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readOrbit(self,filename):
@@ -162,10 +162,10 @@ class OMPS_L2(object):
         # extracting GEOLOCATION and Data fields
         # ----------------------------------------------
         if self.verb:
-            print "[] working on <%s>"%filename
+            print("[] working on <%s>"%filename)
         f = h5py.File(filename,mode='r')
             
-        for group in self.SDS.keys():
+        for group in list(self.SDS.keys()):
 
           g = f.get(group)
 
@@ -242,7 +242,7 @@ class OMPS_L2(object):
         # ---------------------------
         for v in onlyVars:
             if Verbose:
-                print "<> Sampling ", v
+                print("<> Sampling ", v)
             var = f.sample(v,lons,lats,tymes,Verbose=Verbose)
             if len(var.shape) == 1:
                 self.sample.__dict__[v] = var.reshape((nt,nr))
@@ -250,7 +250,7 @@ class OMPS_L2(object):
                 var = var.T # shape should be (nobs,nz)
                 self.sample.__dict__[v] = var.reshape((nt,nr,-1))
             else:
-                raise IndexError, 'variable <%s> has rannk = %d'%len(var.shape)
+                raise IndexError('variable <%s> has rannk = %d'%len(var.shape))
 
         if npzFile is not None:
             savez(npzFile,**self.sample.__dict__)            
@@ -262,7 +262,7 @@ class OMPS_L2(object):
         from grads.gahandle import GaHandle
         self.sample = GaHandle(npzFile)
         npz = load(npzFile)
-        for v in npz.keys():
+        for v in list(npz.keys()):
             self.sample.__dict__[v] = npz[v]
 
     def sampleReduce(self,I,npzFile=None):
@@ -286,14 +286,14 @@ class OMPS_L2(object):
 
 
         nobs = self.lat.shape[0]
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
 
 #     Copy data attributes
 #     --------------------
         if nobs > 0:
 
            if Indices is None:
-              I = range(nobs)
+              I = list(range(nobs))
            else:
               I = Indices
          
@@ -342,7 +342,7 @@ def orbits ( path, prod, syn_time, nsyn=8, Verbose=0 ):
         elif prod == 'OMPS':
             dirn = "%s/Y%4d/M%02d"%(path,yy,mm)
         else:
-            raise ValueError, "Invalid product <%s>"%prod
+            raise ValueError("Invalid product <%s>"%prod)
 
         if prod == 'OMPS':
          Files +=  glob("%s/OMPS-NPP-TC_EDR_TO3-v1.0-%4dm%02d%02d*h5"%(dirn,yy,mm,dd))
@@ -385,7 +385,7 @@ def orbits ( path, prod, syn_time, nsyn=8, Verbose=0 ):
             #print "[x] ", t_beg, '|', t_end, tokens
             Orbits += [f,]
             if Verbose:
-                print "[] ", f
+                print("[] ", f)
 
     return Orbits
 
@@ -427,5 +427,5 @@ if __name__ == "__main__":
      syn_time = datetime(2013,8,1)
      for syn_hour in (0,3,6,9,12,15,18,21):
          syn_time = datetime(2013,8,1,syn_hour,0,0)
-         print " ",syn_time
+         print(" ",syn_time)
 

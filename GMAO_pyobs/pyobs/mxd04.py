@@ -15,8 +15,7 @@ from numpy    import zeros, ones, sqrt, std, mean, unique,\
 from datetime import date, datetime, timedelta
 from glob     import glob
 
-from pyobs.npz import NPZ
-from binObs_   import binobs2d, binobs3d
+from .npz import NPZ
 
 try:
     from pyods import ODS # must be inported before pyhdf
@@ -25,7 +24,7 @@ except:
 
 from pyhdf.SD import SD, HDF4Error
 
-from bits import BITS
+from .bits import BITS
 
 #---  
 
@@ -161,7 +160,7 @@ class MxD04_L2(object):
        """
 
        if Algo not in ('LAND', 'OCEAN', 'DEEP'):
-           raise ValueError, "invalid algorithm "+Algo+" --- must be LAND, OCEAN or DEEP"
+           raise ValueError("invalid algorithm "+Algo+" --- must be LAND, OCEAN or DEEP")
 
 #      Initially are lists of numpy arrays for each granule
 #      ------------------------------------------------
@@ -173,9 +172,10 @@ class MxD04_L2(object):
 
        # Add/Substitute some aliases if given
        # ------------------------------------
+       self.ALIAS = ALIAS.copy()
        if alias is not None:
-           for a in alias: ALIAS[a] = alias[a]  
-       self.ALIAS = ALIAS
+           for a in alias: self.ALIAS[a] = alias[a]  
+       
 
        # Create empty lists for SDS to be read from file
        # -----------------------------------------------
@@ -187,7 +187,7 @@ class MxD04_L2(object):
        if type(Path) is ListType:
            if len(Path) == 0:
                self.nobs = 0
-               print "WARNING: Empty MxD04_L2 object created"
+               print("WARNING: Empty MxD04_L2 object created")
                return
        else:
            Path = [Path, ]
@@ -197,7 +197,7 @@ class MxD04_L2(object):
        # --------------------------------
        if len(self.Longitude) == 0:
            self.nobs = 0
-           print "WARNING: Empty MxD04_L2 object created"
+           print("WARNING: Empty MxD04_L2 object created")
            return           
 
        # Make each attribute a single numpy array
@@ -206,7 +206,7 @@ class MxD04_L2(object):
            try:
                self.__dict__[sds] = concatenate(self.__dict__[sds])
            except:
-               print "Failed concatenating "+sds
+               print("Failed concatenating "+sds)
            if "Quality_Assurance" in sds:
                if Algo == 'DEEP':
                      pass
@@ -223,7 +223,7 @@ class MxD04_L2(object):
            self.qa_flag = self.Deep_Blue_Aerosol_Optical_Depth_550_Land_QA_Flag
            self.iGood = self.qa_flag>BAD # for now
        else:
-           raise ValueError, 'invalid algorithm (very strange)'
+           raise ValueError('invalid algorithm (very strange)')
 
        # Keep only "good" observations
        # -----------------------------
@@ -236,16 +236,16 @@ class MxD04_L2(object):
                elif rank == 2:
                    self.__dict__[sds] = self.__dict__[sds][m,:]
                else:
-                   raise IndexError, 'invalid rank=%d'%rank
+                   raise IndexError('invalid rank=%d'%rank)
            self.qa_flag = self.qa_flag[m]
            self.iGood = self.iGood[m]
 
        # Make aliases for compatibility with older code 
        # ----------------------------------------------
-       Alias = ALIAS.keys()
+       Alias = list(self.ALIAS.keys())
        for sds in self.SDS:
            if sds in Alias:
-               self.__dict__[ALIAS[sds]] = self.__dict__[sds] 
+               self.__dict__[self.ALIAS[sds]] = self.__dict__[sds] 
 
        # Create corresponding python time
        # --------------------------------
@@ -296,7 +296,7 @@ class MxD04_L2(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readGranule(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
     def _readDir(self,dir):
         """Recursively, look for files in directory."""
@@ -305,7 +305,7 @@ class MxD04_L2(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readGranule(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readGranule(self,filename):
@@ -315,11 +315,11 @@ class MxD04_L2(object):
         # ---------------------------------------
         try:
             if self.verb:
-                print "[] Working on "+filename
+                print("[] Working on "+filename)
             hfile = SD(filename)
         except HDF4Error:
             if self.verb > 2:
-                print "- %s: not recognized as an HDF file"%filename
+                print("- %s: not recognized as an HDF file"%filename)
             return 
 
         # Read select variables (reshape to allow concatenation later)
@@ -344,7 +344,7 @@ class MxD04_L2(object):
             elif len(v.shape) == 2:
                 v = v.ravel()
             else:
-                raise IndexError, "invalid shape for SDS <%s>"%sds
+                raise IndexError("invalid shape for SDS <%s>"%sds)
             self.__dict__[sds_].append(v) # Keep Collection 5 names!
 
         # Core Metadata
@@ -369,7 +369,7 @@ class MxD04_L2(object):
         """
         Reduce observations according to index I. 
         """
-        Nicknames = ALIAS.values()
+        Nicknames = list(self.ALIAS.values())
         for name in self.__dict__:
             if name in Nicknames:
                 continue # alias do not get reduced
@@ -379,10 +379,10 @@ class MxD04_L2(object):
                     # print "{} Reducing "+name
                     self.__dict__[name] = q[I]
 
-        Alias = ALIAS.keys()
+        Alias = list(self.ALIAS.keys())
         for sds in self.SDS:
             if sds in Alias:
-                self.__dict__[ALIAS[sds]] = self.__dict__[sds] # redefine aliases
+                self.__dict__[self.ALIAS[sds]] = self.__dict__[sds] # redefine aliases
 
             self.nobs = len(self.lon)
 
@@ -425,7 +425,7 @@ class MxD04_L2(object):
                      reflectance = self.reflectance)
 
         if Verb >=1:
-            print "[w] Wrote file "+filename
+            print("[w] Wrote file "+filename)
 #---
 
     def writeODS(self,filename=None,dir='.',expid=None,channels=None,
@@ -436,7 +436,7 @@ class MxD04_L2(object):
         """
         
         if self.syn_time == None:
-            raise ValuError, "synoptic time missing, cannot write ODS"
+            raise ValuError("synoptic time missing, cannot write ODS")
             
         # Stop here is no good obs available
         # ----------------------------------
@@ -462,7 +462,7 @@ class MxD04_L2(object):
         i = 0
         ks = arange(ns) + 1
         for ch in channels:
-            I = range(i,i+ns)
+            I = list(range(i,i+ns))
             j = channels.index(ch)
             ods.ks[I]  = ks
             ods.lat[I] = self.lat[:]
@@ -495,9 +495,9 @@ class MxD04_L2(object):
 
         ods_ = ods.select(qcx=0)
         if Verb >=1:
-            print "[w] Writing file <"+filename+"> with %d observations"%ods_.nobs
+            print("[w] Writing file <"+filename+"> with %d observations"%ods_.nobs)
 
-        ods_.write(filename,self.nymd,self.nhms,nsyn=8,ftype='pre_anal')
+        ods_.write(filename,self.nymd,self.nhms,nsyn=8,ftype='post_anal')
         
 #---
     def writeg(self,filename=None,dir='.',expid=None,refine=8,res=None,
@@ -531,6 +531,7 @@ class MxD04_L2(object):
 
        """
        from gfio import GFIO
+       from binObs_   import binobs2d, binobs3d
        
        # Stop here is no good obs available
        # ----------------------------------
@@ -633,7 +634,7 @@ class MxD04_L2(object):
 #           pass
 
        if Verb >=1:
-           print "[w] Wrote file "+filename
+           print("[w] Wrote file "+filename)
 
 #---
     def addVar(self,ga,expr='mag(u10m,v10m)',vname='wind',clmYear=None,tight=True):
@@ -745,7 +746,7 @@ def granules ( path, prod, syn_time, coll='051', nsyn=8 ):
         t += dt
 
     if len(Granules) == 0:
-        print "WARNING: no %s collection %s granules found for"%(prod,coll), syn_time
+        print("WARNING: no %s collection %s granules found for"%(prod,coll), syn_time)
 
     return Granules
 
@@ -758,25 +759,25 @@ def print_stats(name,x=None):
         x = name
         name = 'mean,stdv,rms,min,25%,median,75%,max: '
     if name == '__header__':
-        print ''
+        print('')
         n = (80 - len(x))/2
-        print n * ' ' + x
-        print n * ' ' + len(x) * '-'
-        print ''
-        print '   Name       mean      stdv      rms      min     25%    median     75%      max'
-        print ' ---------  -------  -------  -------  -------  -------  -------  -------  -------'
+        print(n * ' ' + x)
+        print(n * ' ' + len(x) * '-')
+        print('')
+        print('   Name       mean      stdv      rms      min     25%    median     75%      max')
+        print(' ---------  -------  -------  -------  -------  -------  -------  -------  -------')
     elif name == '__sep__':
-        print ' ---------  -------  -------  -------  -------  -------  -------  -------  -------'
+        print(' ---------  -------  -------  -------  -------  -------  -------  -------  -------')
     elif name == '__footer__':
-        print ' ---------  -------  -------  -------  -------  -------  -------  -------  -------'
-        print ''
+        print(' ---------  -------  -------  -------  -------  -------  -------  -------  -------')
+        print('')
     else:
         ave = x.mean()
         std = x.std()
         rms = sqrt(ave*ave+std*std)
         prc = prctile(x)
-        print '%10s  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  '%\
-            (name,ave,std,rms,prc[0],prc[1],prc[2],prc[3],prc[4])
+        print('%10s  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  '%\
+            (name,ave,std,rms,prc[0],prc[1],prc[2],prc[3],prc[4]))
 
 #--
 

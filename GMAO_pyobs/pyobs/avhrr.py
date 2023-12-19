@@ -11,7 +11,7 @@ from numpy     import savez, meshgrid, array, concatenate, zeros, ones, \
                       linspace, sqrt, load, shape, random, interp
 from glob      import glob
 
-from npz       import NPZ
+from .npz       import NPZ
 
 SDS_ =  ( "latitude","longitude","aot1_Final","aot2_Final")
 
@@ -76,7 +76,7 @@ class AVHRR_L2B(object):
      # ------------------------   
      if Path is None:
             self.nobs = 0
-            print "WARNING: Empty AVHRR object created"
+            print("WARNING: Empty AVHRR object created")
             return         
      if type(Path) in (ListType,TupleType):
          pass # good to go
@@ -87,7 +87,7 @@ class AVHRR_L2B(object):
          else:
            Path = [Path, ]
      else:
-         raise ValueError, 'invalid type for Path'
+         raise ValueError('invalid type for Path')
 
      # Read each orbit, appending them to the list
      # -------------------------------------------
@@ -99,12 +99,12 @@ class AVHRR_L2B(object):
             try:
                 self.__dict__[name] = concatenate(self.__dict__[name])
             except:
-                print self.__dict__[name]
-                raise IndexError, "Failed concatenating "+name
+                print(self.__dict__[name])
+                raise IndexError("Failed concatenating "+name)
 
      # Make aliases for compatibility with older code
      # ----------------------------------------------
-     Alias = ALIAS.keys()
+     Alias = list(ALIAS.keys())
      for sds in self.Names:
          if sds in Alias:
              self.__dict__[ALIAS[sds]] = self.__dict__[sds]
@@ -119,13 +119,13 @@ class AVHRR_L2B(object):
             npzFiles = sorted(glob(npzFiles))
 
         if Verbose:
-            print '[] Loading ', npzFiles[0] 
+            print('[] Loading ', npzFiles[0]) 
 
         # Single file
         # -----------
         if len(npzFiles) == 1:
             f = load(npzFiles[0])
-            for v in f.keys():
+            for v in list(f.keys()):
                 self.__dict__[v] = f[v]
 
         # Multiple files
@@ -136,7 +136,7 @@ class AVHRR_L2B(object):
             # ------------------------------------------
             f = load(npzFiles[0])
             V = dict()
-            for v in f.keys():
+            for v in list(f.keys()):
                 if len(shape(f[v])) == 0: 
                     V[v] = [[f[v],],]
                 else:
@@ -146,7 +146,7 @@ class AVHRR_L2B(object):
             # ----------------------
             for npzFile in npzFiles[1:]:
                 if Verbose:
-                    print '[] Loading ', npzFile
+                    print('[] Loading ', npzFile)
                 f = load(npzFile)
                 for v in V:
                     if len(shape(f[v])) == 0: 
@@ -174,7 +174,7 @@ class AVHRR_L2B(object):
 
         # Make aliases for compatibility with older code
         # ----------------------------------------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for sds in self.Names:
           if sds in Alias:
              self.__dict__[ALIAS[sds]] = self.__dict__[sds]
@@ -231,7 +231,7 @@ class AVHRR_L2B(object):
         Writes out a NPZ file with the relevant variables.
     """
     Vars = dict()
-    Nicknames = ALIAS.values()
+    Nicknames = list(ALIAS.values())
     for name in self.__dict__:
       if name in Nicknames:
         continue # alias do not get reduced
@@ -255,7 +255,7 @@ class AVHRR_L2B(object):
       if   os.path.isdir(item):    self._readDir(item)
       elif os.path.isfile(item):   self._readGranule(item)
       else:
-            print "%s is not a valid file or directory, ignoring it"%item
+            print("%s is not a valid file or directory, ignoring it"%item)
 
 #-------
 
@@ -263,7 +263,7 @@ class AVHRR_L2B(object):
       """ Read in a single granule """
 
       if self.verb:
-        print "[] working on <%s>"%filename
+        print("[] working on <%s>"%filename)
 
       if self.doMeta:
         Names = self.SDS + self.META
@@ -302,7 +302,7 @@ class AVHRR_L2B(object):
              elif scaled==3:
                data = rmin + (rmax-rmin) * (data_**2)
              else:
-               raise ValueError, "Unknow scaling algorith,"
+               raise ValueError("Unknow scaling algorith,")
 
              data[I] = rmiss # restore missing value
            
@@ -387,7 +387,7 @@ class AVHRR_L2B(object):
              elif scaled==3:
                data = rmin + (rmax-rmin) * (data_**2)
              else:
-               raise ValueError, "Unknow scaling algorith,"
+               raise ValueError("Unknow scaling algorith,")
 
              data[I] = rmiss # restore missing value
            
@@ -407,7 +407,7 @@ class AVHRR_L2B(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readGranule(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
   def writeODS(self, syn_tyme, filename=None, dir='.', expid='avhrr', nsyn=8, doNNR=False):
         """
@@ -441,7 +441,7 @@ class AVHRR_L2B(object):
 
         ods = ODS(nobs=nobs, kx=KX, kt=KT['AOD'])
 
-        ods.ks[:] = range(1,1+nobs)
+        ods.ks[:] = list(range(1,1+nobs))
         ods.lat[:] = self.lat[I]
         ods.lon[:] = self.lon[I]
         ods.qch[:] = zeros(nobs).astype('int')
@@ -459,8 +459,8 @@ class AVHRR_L2B(object):
             ods.xm[:] = self.ref_630[I]
             
         if self.verb:
-            print "[w] Writing file <"+filename+"> with %d observations at %dZ"%\
-                   (ods.nobs,nhms/10000)
+            print("[w] Writing file <"+filename+"> with %d observations at %dZ"%\
+                   (ods.nobs,nhms/10000))
 
         ods.write(filename,nymd,nhms,nsyn=nsyn)
 
@@ -575,14 +575,14 @@ class AVHRR_L2B(object):
                  binobs2d(self.lon[I],self.lat[I],self.tau_550[I],im,jm,MISSING) )
 
        if self.verb:
-           print "[w] Wrote file "+filename
+           print("[w] Wrote file "+filename)
 
 #---
   def reduce(self,I):
     """
     Reduce observations according to index I. 
     """
-    Nicknames = ALIAS.values()
+    Nicknames = list(ALIAS.values())
     for name in self.__dict__:
       if name in Nicknames:
         continue # alias do not get reduced
@@ -592,7 +592,7 @@ class AVHRR_L2B(object):
           # print "{} Reducing "+name
           self.__dict__[name] = q[I]
 
-    Alias = ALIAS.keys()
+    Alias = list(ALIAS.keys())
     for sds in self.Names:
       if sds in Alias:
         self.__dict__[ALIAS[sds]] = self.__dict__[sds] # redefine aliases
@@ -684,7 +684,7 @@ class AVHRR_L2B(object):
           if fh.lm == 1:
             timeInterp = False    # no time interpolation in this case
           else:
-            raise ValueError, "cannot handle files with more tha 1 time, use ctl instead"
+            raise ValueError("cannot handle files with more tha 1 time, use ctl instead")
         else:
           fh = GFIOctl(inFile)  # open timeseries
           timeInterp = True     # perform time interpolation
@@ -702,7 +702,7 @@ class AVHRR_L2B(object):
         # ---------------------------
         for v in onlyVars:
             if Verbose:
-                print "<> Sampling ", v
+                print("<> Sampling ", v)
             if timeInterp:
               var = fh.sample(v,lons,lats,tymes,Verbose=Verbose)
             else:
@@ -713,7 +713,7 @@ class AVHRR_L2B(object):
                 var = var.T # shape should be (nobs,nz)
                 self.sample.__dict__[v] = var
             else:
-                raise IndexError, 'variable <%s> has rank = %d'%(v,len(var.shape))
+                raise IndexError('variable <%s> has rank = %d'%(v,len(var.shape)))
 
         if npzFile is not None:
             savez(npzFile,**self.sample.__dict__)            
@@ -726,7 +726,7 @@ class AVHRR_L2B(object):
         from grads.gahandle import GaHandle
         self.sample = GaHandle(npzFile)
         npz = load(npzFile)
-        for v in npz.keys():
+        for v in list(npz.keys()):
             self.sample.__dict__[v] = npz[v]
                 
 #.......................................................................................
@@ -779,7 +779,7 @@ def _count_des():
        tokens = os.path.basename(fname).split("_")
        sat, orb, year, doy = tokens[2:6]
        line = "%s %s %s %s ... %5d AOT retrievals"%(orb, sat, year, doy,a.nobs)
-       print line
+       print(line)
        f.write(line+'\n')
 
   f.close()
@@ -800,7 +800,7 @@ def getSyn(tyme, nsyn=8):
       elif isyn==nsyn:
          t_ = datetime(t.year,t.month,t.day) + oneday
       else:
-         raise ValueError, 'invalid isyn'
+         raise ValueError('invalid isyn')
       syn_time += [t_,]
 
   return array(syn_time)
@@ -837,7 +837,7 @@ def xxx():
     tyme = datetime(1981,11,9)
     Files = granules('n??','asc',tyme,RootDir=RootDir,bracket=False)
 
-    print "Files: ", Files
+    print("Files: ", Files)
 
     #tyme = datetime(2008,6,9)
     #Files += granules('n??','asc',tyme,RootDir=RootDir,bracket=True)

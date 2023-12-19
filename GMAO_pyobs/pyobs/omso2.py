@@ -73,7 +73,7 @@ class OMSO2_L2(object):
         # extract GEOLOCATION and Data fields
         f = h5py.File(file_name)
 
-        for sds in SDS.keys():
+        for sds in list(SDS.keys()):
           g = f.get(sds)
 
           for v in SDS[sds]:
@@ -136,7 +136,7 @@ class OMSO2_L2(object):
         ods = ODS(nobs=nobs, kx=self.kx, kt=ktAOD)
         i = 0
         for ch in channels:
-            I = range(i,i+ns)
+            I = list(range(i,i+ns))
             j = channels.index(ch)
             ods.ks[I]  = i+1
             ods.lat[I] = self.lat[:]
@@ -156,7 +156,7 @@ class OMSO2_L2(object):
         ods.write(filename,self.nymd,self.nhms)
         
         if Verb >=1:
-            print "[w] Wrote file "+filename
+            print("[w] Wrote file "+filename)
 
 #---
       def writeg(self,filename=None,dir='.',expid='omso2',refine=8,res=None,
@@ -274,7 +274,7 @@ class OMSO2_L2(object):
 #           pass
 
        if Verb >=1:
-           print "[w] Wrote file "+filename
+           print("[w] Wrote file "+filename)
 
 #....................................................................
 

@@ -2,7 +2,6 @@
 Simple class for reading NPZ files.
 """
 from numpy import load, savez, concatenate, shape, sort
-from types import StringType
 from glob  import glob
 
 MISSING = -999.
@@ -15,11 +14,12 @@ class NPZ(object):
         On input npzFiles can contain a single file, a list of file,
         or a string with wild characters like '*.npz'.
         """
-        if type(npzFiles) == StringType:
+
+        if isinstance(npzFiles,str):
             npzFiles = sorted(glob(npzFiles))
 
         if Verbose:
-            print '[] Loading ', npzFiles[0] 
+            print('[] Loading ', npzFiles[0])
 
         # Single file
         # -----------
@@ -46,7 +46,7 @@ class NPZ(object):
             # ----------------------
             for npzFile in npzFiles[1:]:
                 if Verbose:
-                    print '[] Loading ', npzFile
+                    print( '[] Loading ', npzFile)
                 f = load(npzFile)
                 for v in V:
                     if len(shape(f[v])) == 0: 
@@ -60,6 +60,9 @@ class NPZ(object):
             for v in V:
                 self.__dict__[v] = concatenate(V[v])
 
+    def __getitem__(self,name):
+        return self.__dict__[name]
+        
     def sampleVar(self,ctlfile,vname,aname=None,I=None,**kwds):
         """
         Interpolates variable *vname* from a gridded GFIO collection to obs location/time.

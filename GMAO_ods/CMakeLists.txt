@@ -2,7 +2,7 @@ esma_set_this ()
 
 set (MODSRC
   m_ods.f90 m_roms.f90 m_odsmeta.f m_ods_structure.f m_ods_obsdiags.F90
-  m_saber.f m_odsxsup.f90 m_Sndx.F90 m_ODS_Sample.f m_mraob.f90 m_obs_stats.F90
+  m_odsxsup.f90 m_Sndx.F90 m_ODS_Sample.f m_mraob.f90 m_obs_stats.F90
   )
 
 set (ODSSRC
@@ -53,7 +53,6 @@ ecbuild_add_executable (TARGET ods_maker.x  SOURCES ods_maker.f90  LIBS ${this} 
 ecbuild_add_executable (TARGET ods_sample.x SOURCES ods_sample.f   LIBS ${this} NetCDF::NetCDF_Fortran)
 ecbuild_add_executable (TARGET ods_synX2Y.x SOURCES ods_synX2Y.f90 LIBS ${this} NetCDF::NetCDF_Fortran)
 ecbuild_add_executable (TARGET ods_tally.x  SOURCES ods_tally.f90  LIBS ${this} NetCDF::NetCDF_Fortran)
-ecbuild_add_executable (TARGET saber2ods.x  SOURCES saber2ods.f    LIBS ${this} NetCDF::NetCDF_Fortran)
 ecbuild_add_executable (TARGET odslist      SOURCES odslist.f      LIBS ${this} NetCDF::NetCDF_Fortran)
 ecbuild_add_executable (TARGET odsmatch     SOURCES odsmatch.f     LIBS ${this} NetCDF::NetCDF_Fortran)
 ecbuild_add_executable (TARGET odsselect    SOURCES odsselect.f    LIBS ${this} NetCDF::NetCDF_Fortran)
@@ -63,7 +62,6 @@ ecbuild_add_executable (TARGET odsemean     SOURCES odsemean.f     LIBS ${this} 
 
 set (targets_for_extra_flags
    ${this}
-   saber2ods.x
    dconv2ods.x
    odsmatch
    odslist

@@ -94,7 +94,7 @@ class GOCI(object):
         if type(Path) is ListType:
             if len(Path) == 0:
                 self.nobs = 0
-                print "WARNING: Empty GOCI object created"
+                print("WARNING: Empty GOCI object created")
                 return
         else:
             Path = [Path, ]
@@ -110,7 +110,7 @@ class GOCI(object):
 
         # Create python times
         # ----------------
-        print '[] Create Python Times'
+        print('[] Create Python Times')
         for y,m,d,h,t in zip(year,month,day,hour,minute):
             DATE_START = datetime(y,m,d,h,0,0)
 
@@ -159,13 +159,13 @@ class GOCI(object):
             try:
                 self.__dict__[sds_] = concatenate(self.__dict__[sds_])
             except:
-                print "Failed concatenating "+sds
+                print("Failed concatenating "+sds)
 
         if only_good:
             # Strip NANs and Low QA
             # Returns a 1-D array with only good obs
             # ---------------------
-            print '[] Filter GOCI for only good'
+            print('[] Filter GOCI for only good')
             self._noNANs()
             self._qaFilter()
             self.nobs = len(self.AOD_550nm)
@@ -173,7 +173,7 @@ class GOCI(object):
 
         # Aliases for convenience
         # ----------------------------
-        Alias = ALIAS.keys()
+        Alias = list(ALIAS.keys())
         for sds in self.SDS:
           sds_ = sds.replace(' ','_')
           if sds_ in Alias:
@@ -269,7 +269,7 @@ class GOCI(object):
         # ---------------------------
         for v in onlyVars:
             if self.verb:
-                print " <> Linear sampling ", v
+                print(" <> Linear sampling ", v)
             var = f.sample(v,lons,lats,tymes,Verbose=self.verb)
             if len(var.shape) == 1:
                 self.sample.__dict__[v] = var.reshape((nt,nr))
@@ -277,7 +277,7 @@ class GOCI(object):
                 var = var.T # shape should be (nobs,nz)
                 self.sample.__dict__[v] = var.reshape((nt,nr,-1))
             else:
-                raise IndexError, 'variable <%s> has rannk = %d'%len(var.shape)
+                raise IndexError('variable <%s> has rannk = %d'%len(var.shape))
 
 #---
     def nearestSampleFile(self, inFile, onlyVars=None):
@@ -310,7 +310,7 @@ class GOCI(object):
         # ---------------------------
         for v in onlyVars:
             if self.verb:
-                print " <> Nearest sampling ", v
+                print(" <> Nearest sampling ", v)
             var = f.sample(v,lons,lats,tymes,
                                 algorithm='nearest',Verbose=self.verb)
             self.var = var
@@ -320,7 +320,7 @@ class GOCI(object):
                 var = var.T # shape should be (nobs,nz)
                 self.sample.__dict__[v] = var.reshape((nt,nr,-1))
             else:
-                raise IndexError, 'variable <%s> has rannk = %d'%len(var.shape)
+                raise IndexError('variable <%s> has rannk = %d'%len(var.shape))
 
 #---
     def getICAindx(self,inFile):
@@ -341,7 +341,7 @@ class GOCI(object):
         # --------------------------------------
         nt, nr = self.lon.shape
         if self.verb:
-            print " <> Performing ICA index generation"
+            print(" <> Performing ICA index generation")
         iCoord, jCoord = f.coordNN(self.lon.ravel(),self.lat.ravel())
         iS, jS = iCoord.astype('S5'), jCoord.astype('S5'), 
         keys = [ ii+','+jj for ii,jj in zip(iS,jS) ]
@@ -365,7 +365,7 @@ class GOCI(object):
             if os.path.isdir(item):      self._readDir(item)
             elif os.path.isfile(item):   self._readGranule(item)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 #---
     def _readDir(self,dir):
         """Recursively, look for files in directory."""
@@ -374,7 +374,7 @@ class GOCI(object):
             if os.path.isdir(path):      self._readDir(path)
             elif os.path.isfile(path):   self._readGranule(path)
             else:
-                print "%s is not a valid file or directory, ignoring it"%item
+                print("%s is not a valid file or directory, ignoring it"%item)
 
 #---
     def _readGranule(self,filename):
@@ -384,11 +384,11 @@ class GOCI(object):
         # ---------------------------------------
         try:
             if self.verb:
-                print "[] Working on "+filename
+                print("[] Working on "+filename)
             hfile = SD(filename)
         except HDF4Error:
             if self.verb > 2:
-                print "- %s: not recognized as an HDF file"%filename
+                print("- %s: not recognized as an HDF file"%filename)
             return 
 
         # Read select variables (reshape to allow concatenation later)
@@ -457,7 +457,7 @@ class GOCI(object):
 
             ods = ODS(nobs=nobs, kx=KX, kt=KT['AOD'])
 
-            ods.ks[:] = range(1,1+nobs)
+            ods.ks[:] = list(range(1,1+nobs))
             ods.lat[:] = self.lat[I]
             ods.lon[:] = self.lon[I]
             ods.qch[:] = zeros(nobs).astype('int')
@@ -472,8 +472,8 @@ class GOCI(object):
             ods.xm[:] = zeros(nobs).astype('int')
             
             if self.verb:
-                print "[w] Writing file <"+filename+"> with %d observations at %dZ"%\
-                   (ods.nobs,nhms/10000)
+                print("[w] Writing file <"+filename+"> with %d observations at %dZ"%\
+                   (ods.nobs,nhms/10000))
 
             ods.write(filename,nymd,nhms,nsyn=nsyn)
 
@@ -497,7 +497,7 @@ def granules( path, syn_time, nsyn=8, Verbose=False ):
     dt = timedelta(seconds = 12. * 60. * 60. / nsyn)
     t1, t2 = (syn_time-dt,syn_time+dt)
     if Verbose:
-        print "[] Synoptic window for granule ",t1,t2
+        print("[] Synoptic window for granule ",t1,t2)
 
     today     = syn_time
     yesterday = today - timedelta(hours=24)
@@ -531,7 +531,7 @@ def granules( path, syn_time, nsyn=8, Verbose=False ):
             #print "[x] ", t_beg, '|', t_end,f
             Granules += [f,]
             if Verbose:
-                print "[] ", f
+                print("[] ", f)
 
     return Granules
 
@@ -545,7 +545,7 @@ if __name__ == "__main__":
         gocifile  = ['/nobackup/3/pcastell/GOCI/20160316/GOCI_YAER_AOP_20160316001643.hdf',
                      '/nobackup/3/pcastell/GOCI/20160316/GOCI_YAER_AOP_20160316011643.hdf']
 
-    syn_tyme = datetime(2016,04,24,3)
+    syn_tyme = datetime(2016,0o4,24,3)
     Files = granules('/nobackup/3/pcastell/GOCI/data/', syn_tyme, nsyn=8, Verbose=True )
     g = GOCI(Files, Verb=1,only_good=True,do_turbid=True,do_screen=True)
     g.writeODS(syn_time, filename=None, dir='.', expid='goci', nsyn=8)

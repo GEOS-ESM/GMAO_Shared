@@ -11,7 +11,7 @@ from glob     import glob
 import h5py
 from   numpy    import ones, concatenate, savez, load, array, tile
 from   datetime import date, datetime, timedelta
-from omps import OMPS_L2, orbits, MISSING
+from .omps import OMPS_L2, orbits, MISSING
 
 MISSING = -1.267651e+30
 kxOMPS = 326
@@ -85,13 +85,13 @@ if __name__ == "__main__":
 
       nymd_ = int(nymd)
       hh_   = int(hh)
-      print "nymd: ",nymd
-      print "hour: ",hh
+      print("nymd: ",nymd)
+      print("hour: ",hh)
       year, month, day = (nymd_/10000, (nymd_%10000)/100, nymd_%100)
       syn_time = datetime(year,month,day,hh_,0,0)
       files = orbits("/nobackup/OMPS/Level2","OMPS",syn_time,Verbose=0)
-      print files
+      print(files)
 
       q = OMPS_AI(files,SDS['OMPS'],Verbose=1)
-      print q.nymd[5],q.nhms[6],q.UVAerosolIndex[0][5]
+      print(q.nymd[5],q.nhms[6],q.UVAerosolIndex[0][5])
 #   -------------------------------------------------------------------------
