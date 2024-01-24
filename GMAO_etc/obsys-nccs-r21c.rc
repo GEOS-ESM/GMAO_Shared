@@ -70,7 +70,7 @@
 #+  r21c_osbuv8_bufr 
 #+  r21c_aura_omieff_nc 
 #+  r21c_npp_ompsnmeff_nc 
-#+  r21c_ompslp_nc 
+#+  r21c_npp_ompslp_nc 
 #+  r21c_mls_nc 
 #+  r21c_gmao_mlst_bufr 
 #+  r21c_loon_bufr 
@@ -296,9 +296,10 @@ END
 #REPROCESSED AMSU-A SAME AS REAL-TIME STREAM at present
 #------------------
 BEGIN r21c_1bamua_bufr => gmao.%y2%m2%d2.t%h2z.1bamua.tm00.bufr.ublk
- 19981101_00z-20090411_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA_repros/Y%y4/M%m2/gmao_r21c_repro.%y4%m2%d2.t%h2z.1bamu.tm00.bufr
- 20090412_00z-20090415_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA_repros/Y%y4/M%m2/gmao_r21c_phaseout.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
- 20090416_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/AMSUA/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
+# 19981101_00z-20090411_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA_repros/Y%y4/M%m2/gmao_r21c_repro.%y4%m2%d2.t%h2z.1bamu.tm00.bufr
+# 20090412_00z-20090415_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA_repros/Y%y4/M%m2/gmao_r21c_phaseout.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
+# 20090416_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/AMSUA/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
+ 19981101_00z-20130731_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/merra/tovs_best/AMSUA/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
  20130801_00z-20190914_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/tovs/bufr/AMSUA/Y%y4/M%m2/gmao.%y4%m2%d2.t%h2z.1bamua.tm00.bufr
  20190915_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/AMSUA/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.1bamua.tm00.bufr_d
 END
@@ -422,21 +423,25 @@ END
 #END
 
 # OMPS Limb Profiler profiles (version 2.6)
-BEGIN r21c_ompslp_nc => ompslpnc.%y4%m2%d2.t%h2z.nc
+BEGIN r21c_npp_ompslp_nc => ompslpnc.%y4%m2%d2.t%h2z.nc
 20130101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/OMPS-LP/v2.6-adjusted-tint/Y%y4/M%m2/OMPS-LPoz-v2.6-adj.%y4%m2%d2_%h2z.nc
 END
 
 # Total Ozone data
 #-----------------
+
 #AURA OMI total ozone
 BEGIN r21c_aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
-# 20041001_00z-20200810_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
- 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20041001_00z-20220114_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20220115_00z-20220125_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj-HTTH-correction.%y4%m2%d2_%h2z.nc
+ 20220126_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
 END
 
 # OMPS nadir total ozone
 BEGIN r21c_npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
- 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+ 20130101_00z-20220114_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+ 20220115_00z-20220125_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM-HTTH-correction.%y4%m2%d2_%h2z.nc
+ 20220126_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
 END
 
  

@@ -68,7 +68,9 @@
 !       2018-05-25  wargan      - added OMPS
 !       2019-04-15  Sienkiewicz - add handling of netcdf4 diag files.
 !       12Dec2022 - Weir        - improved trace gas support
-!
+!       11Oct2023 - Sienkiewicz - in ozone_getisat_ change offset for NPP to +5
+!                                   so base values can be adjusted to avoid conflicts
+!                                   with other KXs for N20,N21 OMPS types
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -688,6 +690,8 @@
 	      myisat = 0
 	   case('nim07')
 	      myisat = 1
+           case('npp')      ! this is only for ozone for now
+              myisat = 5
 	   case('ep')
 	      myisat = 2
 	   case('metop-a')
