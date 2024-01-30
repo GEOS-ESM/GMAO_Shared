@@ -8,16 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Add new CHOOSEZ0 option that triggers the use of Charnock coefficient
 
 ### Changed
-- Move to circleci-tools v2 orb
-
-- Update CI to v2 orb
 
 ### Fixed
 
 ### Removed
+
+## [1.9.7] - 2024-01-30
+
+### Added
+- Add new `CHOOSEZ0` option that triggers the use of Charnock coefficient
+
+### Changed
+- Move to circleci-tools v2 orb
+- Update CI to v2 orb
 
 ## [1.9.6] - 2023-11-01
 
