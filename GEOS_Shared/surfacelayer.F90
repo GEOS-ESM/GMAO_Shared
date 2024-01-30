@@ -7,6 +7,7 @@ module sfclayer
 
 use MAPL
 use DragCoefficientsMod
+
 implicit none
 private
 PUBLIC louissurface,z0sea,helfsurface,psi,phi,linadj,zcsub
@@ -267,7 +268,7 @@ end subroutine louissurface
        SUBROUTINE helfsurface(VUS,VVS,VT1,VT2,VSH1,VSH2,VP,VPE, &
         VZ0,LAI,IVWATER,VHS,N,IRUN, &
         VRHO,VKH,VKM,VUSTAR,VXX,VYY,VCU,VCT,VRIB,VZETA,VWS, &
-        t2m,q2m,u2m,v2m,t10m,q10m,u10m,v10m,u50m,v50m,CHOOSEZ0)
+        t2m,q2m,u2m,v2m,t10m,q10m,u10m,v10m,u50m,v50m,CHOOSEZ0,WMCHARNOCK)
 !**********************************************************************
 !  SUBROUTINE helfsurface - COMPUTES SURFACE TRANSFER COEFFICIENTS
 !
@@ -294,6 +295,7 @@ end subroutine louissurface
 !                                          1 - Edson Z0 for mom. and heat, high wind limit
 !                                          2 - L&P Z0, high wind limit
 !                                          3 - Edson Z0 for mom. only, high wind limit
+!                                          4 - wave model Charnock coefficient
 !     OUTPUT:
 !     -------
 !    RHO           -         DENSITY AT SURFACE
@@ -322,6 +324,7 @@ end subroutine louissurface
       real, intent(OUT) :: u50m(:),v50m(:)
       LOGICAL LWATER
       integer IVBITRIB(irun)
+      real, optional, intent(in) :: WMCHARNOCK(:)
 
 ! Local Variables
       real VHZ(irun),VPSIM(irun),VAPSIM(irun),VPSIG(irun),VPSIHG(irun)
@@ -359,6 +362,16 @@ end subroutine louissurface
       real rvk,vk2,bmdl(irun)
       integer iwater,itype
       integer i,iter
+
+      real VCH(irun)
+
+!
+      if (present(WMCHARNOCK)) then
+         VCH = WMCHARNOCK
+      else
+         VCH = 0.018
+      end if
+
 !
       _UNUSED_DUMMY(LAI)
       rvk = 1./MAPL_KARMAN
@@ -439,7 +452,7 @@ end subroutine louissurface
         VDZ0,VDPSIM,VDPSIH,IVBITRIB, &
         VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
         VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
-        VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0)
+        VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0,VCH)
        DO 9010 I = 1,IRUN
         IF ( IVWATER(I).EQ.1 ) THEN
          VCU(I) = VCU(I) * (1. - VDPSIM(I)*VAPSIM(I))
@@ -485,8 +498,8 @@ end subroutine louissurface
        DO 9018 I = 1,IRUN
         IF (IVWATER(I).EQ.1) VUSTAR(I) = VCU(I) * VWS(I)
  9018  CONTINUE
-       CALL ZCSUB ( VUSTAR,VHZ,IVWATER,.FALSE.,IRUN,VTEMP,CHOOSEZ0)
-       CALL ZCSUB ( VUSTAR,VHZ,IVWATER,.FALSE.,IRUN,vz0h,2)
+       CALL ZCSUB ( VUSTAR,VCH,VHZ,IVWATER,.FALSE.,IRUN,VTEMP,CHOOSEZ0)
+       CALL ZCSUB ( VUSTAR,VCH,VHZ,IVWATER,.FALSE.,IRUN,vz0h,2)
        DO 9020 I = 1,IRUN
         IF (IVWATER(I).EQ.1 ) then
          VZ0(I) = VTEMP(I)
@@ -542,7 +555,7 @@ end subroutine louissurface
         IVBITRIB, &
        VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
        VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
-       VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0)
+       VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0,VCH)
 !
 !  UPDATES OF ZETA, Z0, CU AND CT
 !
@@ -1250,7 +1263,7 @@ end subroutine psi
        VDZETA,VDZ0,VDPSIM,VDPSIH,INTRIB, &
        VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
        VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
-       VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,vk,bmdl,CHOOSEZ0)
+       VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,vk,bmdl,CHOOSEZ0,VCHARNOCK)
 !
 !**********************************************************************
 !
@@ -1282,6 +1295,7 @@ end subroutine psi
 !                                          1 - Edson Z0 for mom. and heat, high wind limit
 !                                          2 - L&P Z0, high wind limit
 !                                          3 - Edson Z0 for mom. only, high wind limit
+!                                          4 - wave model Charnock coefficient
 !
 !     OUTPUT:
 !     -------
@@ -1313,6 +1327,7 @@ end subroutine psi
       real VXNUM(:),VDZETA1(:),VDZETA2(:)
       real VZCOEF2(:),VZCOEF1(:),VTEMPLIN(:)
       real VDPSIMC(:),VDPSIHC(:),bmdl(:)
+      real VCHARNOCK(:)
 
 ! Local Variables
       real xx0max,prfac,xpfac,difsqt,ustz0s,h0byz0,usth0s
@@ -1357,7 +1372,7 @@ end subroutine psi
  9004  CONTINUE
 !
        IF ( LWATER ) THEN
-        CALL ZCSUB ( VUSTAR,VDZSEA,IWATER,.TRUE.,IRUN,VZ2,CHOOSEZ0)
+        CALL ZCSUB ( VUSTAR,VCHARNOCK,VDZSEA,IWATER,.TRUE.,IRUN,VZ2,CHOOSEZ0)
 
         VDZSEA = min( VDZSEA, 0.2*VZ1/VAPSIM ) ! To prevent Divide by Zero as VG0 => 1.0
 !
@@ -1529,7 +1544,7 @@ end subroutine linadj
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: zcsub
 ! !INTERFACE:
-      SUBROUTINE ZCSUB (VUSTAR,VDZSEA,IWATER,LDZSEA,IRUN,VZSEA,CHOOSEZ0)
+      SUBROUTINE ZCSUB (VUSTAR,VCHARNOCK,VDZSEA,IWATER,LDZSEA,IRUN,VZSEA,CHOOSEZ0)
 !**********************************************************************
 !  FUNCTION ZSEA
 !  PURPOSE
@@ -1546,6 +1561,7 @@ end subroutine linadj
 !                               1 - Edson Z0 for mom. and heat, high wind limit
 !                               2 - L&P Z0, high wind limit
 !                               3 - Edson Z0 for mom. only, high wind limit
+!                               4 - wave-model Charnock coefficient
 !  SUBPROGRAMS NEEDED
 !     NONE
 !  RECORD OF MODIFICATIONS
@@ -1559,7 +1575,7 @@ end subroutine linadj
 
 ! Argument List Delcarations
       integer irun, CHOOSEZ0
-      real VZSEA(:),VUSTAR(:),VDZSEA(:)
+      real VZSEA(:),VUSTAR(:),VDZSEA(:),VCHARNOCK(:)
       integer IWATER(:)
       LOGICAL LDZSEA
 
@@ -1598,6 +1614,17 @@ end subroutine linadj
                0.784260E-04/
       DATA AA4_OLD/-0.343228E-04,0.552305E-03,-0.167541E-02,0.250208E-02, &
                -0.153259E-03/
+
+      CHARNOCK: if ( CHOOSEZ0 == 4 ) then
+          ustloc = max(1e-6, vustar)
+          VZSEA = (0.11*MAPL_NUAIR)/ustloc + (VCHARNOCK/MAPL_GRAV)*ustloc**2
+          
+          DERIVATIVE: if ( LDZSEA ) then
+              VDZSEA = -(0.11*MAPL_NUAIR)/ustloc**2 + (VCHARNOCK/MAPL_GRAV)*2*ustloc
+          end if DERIVATIVE
+
+          return
+      end if CHARNOCK
 
       if( CHOOSEZ0.eq.0 .OR. CHOOSEZ0.eq.2) then
           USTMX1 = USTMX1_OLD
