@@ -225,7 +225,8 @@
    254  gsi_conv    254         uv                        55    # ?
    254  gsi_conv    254         uv                        56    # ?
    254  gsi_conv    254         uv                        57    # ?
-   255  gsi_conv    255         ""                        -1    # NESDIS picture triplet CTW (U,V)
+   255  gsi_conv    255         uv                        -1    # NESDIS picture triplet CTW (U,V)
+   255  gsi_conv    255         uv                       854    # SSEC/WISC LEO-GEO winds (U,V)
    256  gsi_conv    256         uv                         0    # Indian WV CTW (U,V)
    257  gsi_conv    257         uv                         0    # MODIS IR CTW (U,V)
    257  gsi_conv    257         uv                       783    # ?
@@ -353,10 +354,11 @@
    325  gsi_diag    metop-a     amsua                     25    # amsua_metop-a         -- conflict 325
    326  gsi_diag    metop-b     amsua                     26    # amsua_metop-b
    330  gsi_diag    aura        mls55                      0    #
-   335  gsi_diag    npp         ompslpuv                   0    #
-   336  gsi_diag    npp         ompslpvis                  0    #
-   337  gsi_diag    npp         ompslpnc                   0    #
+   335  gsi_diag    npp         ompslpuv                   5    #
+   336  gsi_diag    npp         ompslpvis                  5    #
+   337  gsi_diag    npp         ompslpnc                   5    #
    335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    # ???
+   353  gsi_diag    n21         ompslpnc                  21
    355  gsi_diag    tirosn      ssu                        5    # ssu_tirosn
    356  gsi_diag    n06         ssu                        6    # ssu_n06
    357  gsi_diag    n07         ssu                        7    # ssu_n07
@@ -381,8 +383,9 @@
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
-   427  gsi_diag    npp         ompsnm                     0    # 
-   437  gsi_diag    npp         ompsnp                     0    # 
+   427  gsi_diag    npp         ompsnm                     5    #
+   428  gsi_diag    npp         ompsnmeff                  5
+   437  gsi_diag    npp         ompsnp                     5    #
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
@@ -393,6 +396,8 @@
 #  kx   source      dplat       dtype                   isat
    441  gsi_diag    nim07       tomseff                    1    #
    442  gsi_diag    ep          tomseff                    2    #
+   443  gsi_diag    n20         ompsnmeff                 20
+   444  gsi_diag    n21         ompsnmeff                 21
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
