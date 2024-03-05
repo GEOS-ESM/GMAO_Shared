@@ -86,6 +86,7 @@
 # 2021.07.31 Todling         Add MLS-T for verification
 # 2021.08.18 Todling         Blacked out a few days of AIRS due to data corruption
 # 2021.12.14 Todling         Update MLST from v3/v4 to simply v5
+# 2024.01.18 Wargan          Add OMPS-LP
 #
 #+BEGIN obclass data set description
 #+  ncep_osbuv8_6_bufr: NCEP SBUV Data in bufr format v8.6
@@ -127,6 +128,7 @@
 #+  npp_ompsnp_nc:     OMPS PM netcdf format
 #+  aura_omieff_nc:    AURA OMI netcdf format
 #+  gmao_mlst_bufr:    MLS Retrieved Temperature (for verification in x-exp and FP)
+#+  npp_ompslp_nc:     OMPS-LP netcdf format
 #+END
 #
 
@@ -417,6 +419,10 @@ END
 
 BEGIN npp_ompsnp_nc => ompsnpnc.%y4%m2%d2.t%h2z.nc
  20120201_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnp/Y%y4/M%m2/OMPSNP.%y4%m2%d2_%h2z.nc
+END
+
+BEGIN npp_ompslp_nc => ompslpnc.%y4%m2%d2.t%h2z.nc
+ 20230904_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ompslp/Y%y4/M%m2/OMPS-LPoz-v2.6-adj.%y4%m2%d2_%h2z.nc
 END
 
 BEGIN aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
