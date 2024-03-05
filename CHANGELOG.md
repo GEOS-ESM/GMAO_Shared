@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - update to remote_util.pl to serve OPS-spec needs
+- add class for OMPS-LP
 
 ### Removed
 
