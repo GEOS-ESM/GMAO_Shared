@@ -27,6 +27,7 @@
    public :: dyn_util_tv2t
    public :: Dyn_Scale_by_TotEne
    public :: Dyn_Qsat
+   public :: Dyn_Get_Energy
 
    interface Dyn_Util_Tv2T
       module procedure tv2t_
@@ -39,6 +40,9 @@
    end interface
    interface Dyn_TotEne_Dotp
       module procedure dotp_
+   end interface
+   interface Dyn_Get_Energy
+      module procedure get_ene_field_
    end interface
    interface Dyn_Qsat
       module procedure becov_qsat_

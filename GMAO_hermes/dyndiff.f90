@@ -14,6 +14,7 @@
       use m_dyn
       use m_dyn_util, only: Dyn_Util_Tv2T
       use m_dyn_util, only: Dyn_Scale_by_TotEne
+      use m_dyn_util, only: Dyn_Get_Energy
 
       implicit NONE
 
@@ -164,6 +165,7 @@
                call Dyn_Scale_by_TotEne(dyn(1),eps_eer,anorm,jnorm,projlon,projlat,projlev, &
                                         nymd,nhms,ntype=ntype,normlz=normlz,ps=ps,delp=delp)
                deallocate(ps,delp)
+               call Dyn_Get_Energy (dyn(1), nymd, nhms )
            endif
            if (abs(addrh)>0) then
                if (addrh<0) then

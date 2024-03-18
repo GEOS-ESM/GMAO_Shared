@@ -352,6 +352,9 @@
 	 
 	 print *, '              Number of matched obs = ', k
 	 
+         if ( regular ) then
+            where(odsx%data%oma==obs_missing) odsx%data%qcexcl=X_ODSMATCH
+         endif
          if ( sclimp ) then
             where(odsx%data%xvec==obs_missing) odsx%data%qcexcl=X_ODSMATCH
          endif

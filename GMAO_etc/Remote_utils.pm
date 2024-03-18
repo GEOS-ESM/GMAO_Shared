@@ -1891,6 +1891,14 @@ sub rflist {
 # If there is login information, use ftp to check the file.
 
    if ( $remote_machine eq "http" || $remote_machine eq "https" ) {
+      if ( ! defined( $ENV{PERL_WGET} ) ) {
+         print "PERL_WGET not set.  Using default.\n";
+         $WGET = $DEFAULT_WGET;
+      }
+      else {
+         $WGET = $ENV{PERL_WGET};
+      }
+
 # Reconstruct URL without extra : characters.
       $url         = "${remote_machine}:${remote_file}${extra}";
       $dir         = dirname ("$url");
@@ -1898,9 +1906,9 @@ sub rflist {
       $regex_raw   =~s/\*/\.\*/g;
       $regex       = "\^${regex_raw}\$";
       print "Using regex=$regex\n";
-      print "$DEFAULT_WGET -O - $dir\n";
+      print "$WGET -O - $dir\n";
 
-      $string=`$DEFAULT_WGET -O - $dir | grep -o \'<a href=[\'\"\'\"\'\"][^\"\'\"\'\"\']*[\'\"\'\"\'\"]\' |  sed -e \'s/\^<a href=[\"\'\"\'\"\']//\' -e \'s/\[\"\'\"\'\"\'\]\$//\' | grep -v -e \'\?\' -e \'\/\' | grep -E $regex | uniq `;
+      $string=`$WGET -O - $dir | grep -o \'<a href=[\'\"\'\"\'\"][^\"\'\"\'\"\']*[\'\"\'\"\'\"]\' |  sed -e \'s/\^<a href=[\"\'\"\'\"\']//\' -e \'s/\[\"\'\"\'\"\'\]\$//\' | grep -v -e \'\?\' -e \'\/\' | grep -E $regex | uniq `;
       print "POPALI string = $string\n";
       @retlist = split(/\n/,$string);
    }
@@ -2333,6 +2341,13 @@ my ( $LOCAL, $local_host_name, $local_domain_name,
 # If there is login information, use ftp to transfer the file.
 
         if ( $remote_machine eq "http" || $remote_machine eq "https" ) {
+           if ( ! defined( $ENV{PERL_WGET} ) ) {
+              print "PERL_WGET not set.  Using default.\n";
+              $WGET = $DEFAULT_WGET;
+           } 
+           else {
+              $WGET=$ENV{PERL_WGET};
+           }
            # $opt_filename handles the case where the URL passed in has two ':' symbols, one after http
            # and the other between the machine name and the file path.
            if ( $opt_filename ) {
@@ -2341,8 +2356,8 @@ my ( $LOCAL, $local_host_name, $local_domain_name,
            else {
              $target = "${remote_machine}:${remote_file}";
            }
-           print "$DEFAULT_WGET -O ${local_file} ${target}\n";
-           `$DEFAULT_WGET -O ${local_file} ${target}`;
+           print "$WGET -O ${local_file} ${target}\n";
+           `$WGET -O ${local_file} ${target}`;
            if ( $? == 1 ) {
               $retcode = 0;
            }
