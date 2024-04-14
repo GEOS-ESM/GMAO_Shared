@@ -130,9 +130,9 @@ END
 # AERONET Data
 #-------------
 BEGIN aeronet_obs_flk => aeronet.obs.%y4%m2%d2_%h2z.ods
-  20220601_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
+  20220208_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
 END
 BEGIN aeronet_obs_llk => aeronet.obs.%y4%m2%d2_%h2z.ods
-  19950317_18z-20220531_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
-  20220601_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
+  19950317_18z-20231231_21z 030000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aerosol/data/AERONET.v3/Level2/ODS/Y%y4/M%m2/aeronet.obs.%y4%m2%d2_%h2z.ods
+  20240101_00z-21000101_00z 030000 /discover/nobackup/dao_ops/intermediate/flk/stage/aeronet/aeronet.obs.%y4%m2%d2_%h2z.ods
 END
