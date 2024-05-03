@@ -100,9 +100,9 @@ install (
    )
 
 if (USE_F2PY)
-   find_package(F2PY2)
-   if (F2PY2_FOUND)
-      esma_add_f2py2_module(pyods_
+   find_package(F2PY3)
+   if (F2PY3_FOUND)
+      esma_add_f2py3_module(pyods_
          SOURCES pyods_.F90
          LIBRARIES GMAO_ods GMAO_mpeu ${NETCDF_LIBRARIES}
          INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${BASEDIR}/lib ${include_${this}} ${INC_NETCDF}
