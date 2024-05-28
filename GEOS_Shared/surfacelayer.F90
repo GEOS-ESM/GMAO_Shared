@@ -17,7 +17,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: louissurface
 ! !INTERFACE:
-      subroutine louissurface(ISTYPE,N,UU,WW,PS,TA,TS,QA,QS,PCU,LAI, &
+  subroutine louissurface(ISTYPE,N,UU,WW,PS,TA,TS,QA,QS,PCU,LAI, &
                                Z0,DZ,CM,CN,RI,ZT,ZQ,CH,CQ,UUU,UCN,RE,DCH,DCQ)
       integer,           intent(IN ) :: N
       integer,           intent(IN ) :: ISTYPE
@@ -213,27 +213,27 @@ contains
       deallocate( URA )
       deallocate( TVA )
 
-end subroutine louissurface
+   end subroutine louissurface
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: Z0SEA - Computes $z_o$ as a function of $u^*$ over water surfaces
 ! !INTERFACE:
 
-  subroutine Z0SEA (Z0, USTAR, DZ)
+   subroutine Z0SEA (Z0, USTAR, DZ)
 
 ! !ARGUMENTS:
 
-    real,    intent(INOUT) :: Z0   (:)
-    real,    intent(INOUT) :: USTAR(:)
-    real,    intent(IN   ) :: DZ   (:)
+     real,    intent(INOUT) :: Z0   (:)
+     real,    intent(INOUT) :: USTAR(:)
+     real,    intent(IN   ) :: DZ   (:)
 
 ! !DESCRIPTION:
 !        Compute roughness length for ocean points
 !          based on functions of Large and Pond
 !          and of Kondo
 
-    real               :: UF(size(Z0))
-    integer, parameter :: NumIter = 3
-    integer            :: K
+     real               :: UF(size(Z0))
+     integer, parameter :: NumIter = 3
+     integer            :: K
 
 
 ! Begin
@@ -242,12 +242,12 @@ end subroutine louissurface
 ! The stability factor is from the previous time step.
 !------------------------------------------------------------------------------------
 
-    UF    = USTAR * ALOG(DZ/Z0 + 1.0)
+     UF    = USTAR * ALOG(DZ/Z0 + 1.0)
 
 ! Iterate roughness and U*
 !-------------------------
 
-    ITERATION: do K=1,NumIter
+     ITERATION: do K=1,NumIter
 
 ! Evaluate z0 using Beljaars' approx.
 !------------------------------------
@@ -259,13 +259,13 @@ end subroutine louissurface
 
        USTAR = min(max(UF/ALOG( DZ/Z0 + 1.0 ) , 1.e-6),5.0)
 
-    end do ITERATION
+     end do ITERATION
 
-  end subroutine Z0SEA
+   end subroutine Z0SEA
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: helfsurface
 ! !INTERFACE:
-       SUBROUTINE helfsurface(VUS,VVS,VT1,VT2,VSH1,VSH2,VP,VPE, &
+   SUBROUTINE helfsurface(VUS,VVS,VT1,VT2,VSH1,VSH2,VP,VPE, &
         VZ0,LAI,IVWATER,VHS,N,IRUN, &
         VRHO,VKH,VKM,VUSTAR,VXX,VYY,VCU,VCT,VRIB,VZETA,VWS, &
         t2m,q2m,u2m,v2m,t10m,q10m,u10m,v10m,u50m,v50m,CHOOSEZ0,WMCHARNOCK)
@@ -311,22 +311,23 @@ end subroutine louissurface
       implicit none
 
 ! Argument List Declarations
-      integer n,irun,CHOOSEZ0
-      real VUS(:),VVS(:),VT1(:),VT2(:),VSH1(:),VSH2(:)
-      real VPE(:),VP(:),VZ0(:),LAI(:),VHS(:)
-      integer IVWATER(:)
-      real VRHO(:)
-      real VKM(:),VKH(:),VUSTAR(:),VXX(:)
-      real VYY(:),VCU(:),VCT(:),VRIB(:)
-      real VZETA(:),VWS(:)
-      real, intent(OUT) :: t2m(:),q2m(:),u2m(:),v2m(:)
-      real, intent(OUT) :: t10m(:),q10m(:),u10m(:),v10m(:)
-      real, intent(OUT) :: u50m(:),v50m(:)
-      LOGICAL LWATER
-      integer IVBITRIB(irun)
+      integer, intent(in)   :: n,irun,CHOOSEZ0
+      real,    intent(in)   :: VUS(:),VVS(:),VT1(:),VT2(:),VSH1(:),VSH2(:)
+      real,    intent(in)   :: VPE(:),VP(:),LAI(:),VHS(:)
+      real,    intent(inout):: VZ0(:)
+      integer, intent(in)   :: IVWATER(:)
+      real,    intent(out)  :: VRHO(:)
+      real,    intent(out)  :: VKM(:),VKH(:),VUSTAR(:),VXX(:)
+      real,    intent(out)  :: VYY(:),VCU(:),VCT(:),VRIB(:)
+      real,    intent(out)  :: VZETA(:),VWS(:)
+      real,    intent(OUT)  :: t2m(:),q2m(:),u2m(:),v2m(:)
+      real,    intent(OUT)  :: t10m(:),q10m(:),u10m(:),v10m(:)
+      real,    intent(OUT)  :: u50m(:),v50m(:)
       real, optional, intent(in) :: WMCHARNOCK(:)
 
 ! Local Variables
+      integer IVBITRIB(irun)
+      LOGICAL LWATER
       real VHZ(irun),VPSIM(irun),VAPSIM(irun),VPSIG(irun),VPSIHG(irun)
       real VTEMP(irun),VDZETA(irun),VDZ0(irun),VDPSIM(irun)
       real VDPSIH(irun),VZH(irun),VXX0(irun),VYY0(irun)
@@ -341,7 +342,7 @@ end subroutine louissurface
       real VDPSIMC(irun),VDPSIHC(irun),VAHS(irun)
       real VTHV1(IRUN),VTHV2(IRUN),VTH1(IRUN),VTH2(IRUN),VPKE(IRUN),VPK(IRUN)
 
-      real vz0h(irun),vh0h(irun),dummy1(irun),dummy2(irun),dummy3(irun),dummy4(irun),dummy5(irun)
+      real vz0h(irun),vh0h(irun),dummy1(irun),dummy2(irun),dummy3(irun),dummy4(irun),dummy5(irun), minVZ0(irun)
 
 ! Local Variables
       real USTMX3,USTZ0S,Z0MIN,H0BYZ0,USTH0S,H0VEG,Z0VEGM,PRFAC,Z0MAX
@@ -360,8 +361,9 @@ end subroutine louissurface
 
       real psihdiag(irun),psimdiag(irun)
       real rvk,vk2,bmdl(irun)
-      integer iwater,itype
-      integer i,iter
+      integer itype
+      integer iter
+      logical call_psi
 
       real VCH(irun)
 
@@ -376,309 +378,253 @@ end subroutine louissurface
       _UNUSED_DUMMY(LAI)
       rvk = 1./MAPL_KARMAN
       vk2 = MAPL_KARMAN*MAPL_KARMAN
-      DO I = 1,IRUN
-      if( ivwater(i) .eq. 3 ) then 
-       BMDL(i)    = 0.
+      where (ivwater == 3 ) 
+         BMDL = 0.
 !scale BMDL(i)    = (MAPL_KARMAN * XPFAC * PRFAC / DIFSQT) * exp(-lai(i)*2.)
-      else
-       BMDL(i)    = (MAPL_KARMAN * XPFAC * PRFAC / DIFSQT)
-      endif
-      enddo
+      elsewhere
+         BMDL = (MAPL_KARMAN * XPFAC * PRFAC / DIFSQT)
+      endwhere
 
 !     INITIALIZATION 
 
-      DO I = 1,IRUN
-       VAHS(I) = 1. / VHS(I)
-       VPKE(I) = VPE(I) ** MAPL_KAPPA
-       VPK(I) = VP(I) ** MAPL_KAPPA
-       VTH1(I) = VT1(I)/VPK(I)
-       VTH2(I) = VT2(I)/VPKE(I)
-       VTHV1(I) = VTH1(I)*( 1.0 + MAPL_VIREPS*VSH1(I))
-       VTHV2(I) = VTH2(I)*( 1.0 + MAPL_VIREPS*VSH2(I))
-      ENDDO
+      VAHS = 1. / VHS
+      VPKE = VPE ** MAPL_KAPPA
+      VPK  = VP ** MAPL_KAPPA
+      VTH1 = VT1/VPK
+      VTH2 = VT2/VPKE
+      VTHV1= VTH1*( 1.0 + MAPL_VIREPS*VSH1)
+      VTHV2= VTH2*( 1.0 + MAPL_VIREPS*VSH2)
 
 !     DETERMINE SURFACE WIND MAGNITUDE AND BULK RICHARDSON NUMBER
 !
-      DO I = 1,IRUN
-       VWS(I) = max(VUS(I)*VUS(I) + VVS(I)*VVS(I),1.e-4)
-       VRIB(I) = MAPL_CP*(VPKE(I)-VPK(I))*(VTHV1(I)-VTHV2(I)) / VWS(I)
-       VWS(I) = SQRT( VWS(I) )
-      ENDDO    
+      VWS = max(VUS*VUS + VVS*VVS, 1.e-4)
+      VRIB= MAPL_CP*(VPKE-VPK)*(VTHV1-VTHV2) / VWS
+      VWS = SQRT( VWS )
 
 !  INITIAL GUESS FOR ROUGHNESS LENGTH Z0 OVER WATER
 !
-      IWATER = 0
-      DO 9002 I = 1,IRUN
-       IF (IVWATER(I).EQ.1)  IWATER = IWATER + 1
- 9002 CONTINUE
-      LWATER = .FALSE.
-      IF(IWATER.GE.1)LWATER = .TRUE.
+      LWATER = any(IVWATER == 1)
 !
       IF(LWATER)THEN
-       DO 9004 I = 1,IRUN
-        IF (IVWATER(I).EQ.1) VZ0(I) = 0.0003
- 9004  CONTINUE
+        where (IVWATER == 1) VZ0 = 0.0003
       ENDIF
-      do i = 1,irun
-       vh0(i) = h0byz0 * vz0(i)
-       if(vz0(i).ge.z0vegm)vh0(i) = h0veg
-      enddo
-       DO I = 1,IRUN
-        VZ0H(I) = 0.001
-       ENDDO
+
+      where(vz0 >= z0vegm) 
+        vh0 = h0veg
+      elsewhere
+        vh0 = h0byz0 * vz0
+      endwhere
+      VZ0H = 0.001
 
 !     CU AND PSIHG FOR NEUTRALLY STRATIFIED FLOW
 !
-      DO 9006 I = 1,IRUN
-       VHZ(I) = (VHS(I) / VZ0(I) + 1.)
-       VPSIM(I) = LOG( VHZ(I) )
-       VAPSIM(I) = 1. / VPSIM(I)
-       VCU(I) = MAPL_KARMAN * VAPSIM(I)
-       VUSTAR(I) = VCU(I) * VWS(I)
+      VHZ    = VHS / VZ0 + 1.
+      VPSIM  = LOG( VHZ )
+      VAPSIM = 1. / VPSIM
+      VCU    = MAPL_KARMAN * VAPSIM
+      VUSTAR = VCU * VWS
 !
-       VPSIG(I) = BMDL(i)*sqrt(max(VH0(I)*VUSTAR(I)-USTH0S,0.))
-       VPSIHG(I) = VPSIM(I) + VPSIG(I)
- 9006 CONTINUE
+      VPSIG  = BMDL*sqrt(max(VH0*VUSTAR-USTH0S,0.))
+      VPSIHG = VPSIM + VPSIG
 
 !
 !     LINEAR CORRECTION FOR ERROR IN ROUGHNESS LENGTH Z0
 !
       IF(LWATER)THEN
-       DO 9008 I = 1,IRUN
-        VTEMP(I) = 0.
- 9008  CONTINUE
-       CALL LINADJ(VRIB,VRIB,VWS,VWS,VZ0,VUSTAR,IVWATER,VAPSIM, &
-        VTEMP,VTEMP,VTEMP,VTEMP,VTEMP,VTEMP,VTEMP,1,.TRUE.,IRUN,VDZETA, &
-        VDZ0,VDPSIM,VDPSIH,IVBITRIB, &
-        VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
-        VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
-        VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0,VCH)
-       DO 9010 I = 1,IRUN
-        IF ( IVWATER(I).EQ.1 ) THEN
-         VCU(I) = VCU(I) * (1. - VDPSIM(I)*VAPSIM(I))
-         VZ0(I) = VZ0(I) + VDZ0(I)
-         ENDIF 
-         IF ( IVWATER(I).EQ.1) THEN
-         IF ( VZ0(I) .LE. Z0MIN ) VZ0(I) = Z0MIN 
-         vh0(i) = h0byz0 * vz0(i)
-         VPSIG(I) = VH0(I) * VCU(I) * VWS(I) - USTH0S
-         if(VPSIG(I).lt.0.)  VPSIG(I) = 0.
-         VPSIG(I) = SQRT( VPSIG(I) )
-         VPSIG(I) = BMDL(i) * VPSIG(I)
-         VPSIHG(I) = VPSIM(I) + VDPSIH(I) + VPSIG(I)
-        ENDIF  
- 9010  CONTINUE
-!
+        VTEMP = 0.
+        CALL LINADJ(VRIB,VRIB,VWS,VWS,VZ0,VUSTAR,IVWATER,VAPSIM, &
+                    VTEMP,VTEMP,VTEMP,VTEMP,VTEMP,VTEMP,VTEMP,1,.TRUE.,IRUN,VDZETA, &
+                    VDZ0,VDPSIM,VDPSIH,IVBITRIB, &
+                    VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
+                    VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
+                    VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0,VCH)
+        where ( IVWATER == 1) 
+          VCU   = VCU * (1. - VDPSIM*VAPSIM)
+          VZ0   = VZ0 + VDZ0
+          VZ0   = max(VZ0, Z0MIN) 
+          vh0   = h0byz0 * vz0
+          VPSIG = VH0 * VCU * VWS - USTH0S
+          VPSIG = max(VPSIG, 0.)
+          VPSIG = SQRT( VPSIG  )
+          VPSIG = BMDL * VPSIG
+          VPSIHG= VPSIM + VDPSIH + VPSIG
+        endwhere  
       ENDIF
 !
 !  INITIAL GUESS FOR STABILITY PARAMETER ZETA
 !
-      DO 9012 I = 1,IRUN
-       VZETA(I) = VK2 * VRIB(I) / (VCU(I) * VCU(I) * VPSIHG(I))
- 9012 CONTINUE
+      VZETA = VK2 * VRIB / (VCU * VCU * VPSIHG)
 !
 !  RECOMPUTE CU, ESTIMATE PSIHG AND UPDATE ZETA AND Z0
 !
-      DO 9014 I = 1,IRUN
 !      VZH(I) = VZ0(I) * VAHS(I)
-       VZH(I) = VZ0(I) / (VHS(I) + VZ0(I))
- 9014 CONTINUE
+      VZH = VZ0 / (VHS + VZ0)
       CALL PSI (VZETA,VZH,VPSIM,VTEMP,IRUN,VXX,VXX0,VYY,VYY0,2)
-      DO 9016 I = 1,IRUN
-       VCU(I) = MAPL_KARMAN / VPSIM(I)
-       VPSIG(I) = VH0(I) * VCU(I) * VWS(I) - USTH0S
-       if(VPSIG(I).lt.0.)  VPSIG(I) = 0.
-       VPSIG(I) = SQRT(VPSIG(I))
-       VPSIG(I) = BMDL(i) * VPSIG(I)
-       VPSIHG(I) = VPSIM(I) + VPSIG(I)
-       VZETA(I) = VK2 * VRIB(I) / (VCU(I) * VCU(I) * VPSIHG(I))
- 9016 CONTINUE
+      VCU    = MAPL_KARMAN / VPSIM
+      VPSIG  = VH0 * VCU * VWS - USTH0S
+      VPSIG  = max(VPSIG, 0.)
+      VPSIG  = SQRT(VPSIG)
+      VPSIG  = BMDL * VPSIG
+      VPSIHG = VPSIM + VPSIG
+      VZETA  = VK2 * VRIB / (VCU * VCU * VPSIHG)
 !
       IF(LWATER)THEN
-       DO 9018 I = 1,IRUN
-        IF (IVWATER(I).EQ.1) VUSTAR(I) = VCU(I) * VWS(I)
- 9018  CONTINUE
-       CALL ZCSUB ( VUSTAR,VCH,VHZ,IVWATER,.FALSE.,IRUN,VTEMP,CHOOSEZ0)
-       CALL ZCSUB ( VUSTAR,VCH,VHZ,IVWATER,.FALSE.,IRUN,vz0h,2)
-       DO 9020 I = 1,IRUN
-        IF (IVWATER(I).EQ.1 ) then
-         VZ0(I) = VTEMP(I)
-         IF ( VZ0(I) .LE. Z0MIN ) VZ0(I) = Z0MIN
-         IF ( VZ0H(I) .LE. Z0MIN ) VZ0H(I) = Z0MIN
-         vh0(i) = h0byz0 * vz0(i)
-         vh0h(i) = h0byz0 * vz0h(i)
-        endif
- 9020  CONTINUE
+        where (IVWATER.EQ.1) VUSTAR = VCU * VWS
+        CALL ZCSUB ( VUSTAR,VCH,VHZ,IVWATER,.FALSE.,IRUN,VTEMP,CHOOSEZ0)
+        CALL ZCSUB ( VUSTAR,VCH,VHZ,IVWATER,.FALSE.,IRUN,vz0h,2)
+        where (IVWATER.EQ.1 )
+          VZ0 = VTEMP
+          VZ0   = max(VZ0,  Z0MIN) 
+          VZ0H  = max(VZ0H, Z0MIN) 
+          vh0  = h0byz0 * vz0
+          vh0h = h0byz0 * vz0h
+         endwhere
       ENDIF
 !
 !  ITERATIVE LOOP - N ITERATIONS
 !     COMPUTE CU AND CT
 !
-      DO 200 ITER = 1,N
+      call_psi = (choosez0.eq.3 .AND. Lwater)
+      ITYPE = 3
+      DO ITER = 1,N
 
-       DO 9026 I = 1,IRUN
 !       VZH(I) = VZ0(I) * VAHS(I)
-        VZH(I) = VZ0(I) / (VHS(I) + VZ0(I))
- 9026  CONTINUE
-       CALL PSI (VZETA,VZH,VPSIM,VPSIH,IRUN,VXX,VXX0,VYY,VYY0,1)
-       DO I = 1,IRUN
+        VZH = VZ0 / (VHS + VZ0)
+        CALL PSI (VZETA,VZH,VPSIM,VPSIH,IRUN,VXX,VXX0,VYY,VYY0,1)
 !       VZH(I) = VZ0H(I) * VAHS(I)
-        VZH(I) = VZ0H(I) / (VHS(I) + VZ0H(I))
-       ENDDO
-       if( choosez0.eq.3 .AND. Lwater ) CALL PSI (VZETA,VZH,dummy1,VPSIH,IRUN,dummy2,dummy3,dummy4,dummy5,3)
-       DO 9028 I = 1,IRUN
-        VCU(I) = MAPL_KARMAN / VPSIM(I)
-        VUSTAR(I) = VCU(I) * VWS(I)
+        VZH = VZ0H / (VHS + VZ0H)
+        if ( call_psi ) CALL PSI (VZETA,VZH,dummy1,VPSIH,IRUN,dummy2,dummy3,dummy4,dummy5,3)
+
+        VCU = MAPL_KARMAN / VPSIM
+        VUSTAR = VCU * VWS
 !
-        VPSIG(I) = VH0(I) * VUSTAR(I) - USTH0S
-        if(VPSIG(I).lt.0.)  VPSIG(I) = 0.
-        VPSIG(I) = SQRT(VPSIG(I))
-        VPSIG(I) = BMDL(i) * VPSIG(I)
-        VPSIHG(I) = VPSIH(I) + VPSIG(I)
+        VPSIG  = VH0 * VUSTAR - USTH0S
+        VPSIG  = max(VPSIG, 0.)
+        VPSIG  = SQRT(VPSIG)
+        VPSIG  = BMDL * VPSIG
+        VPSIHG = VPSIH + VPSIG
 !
 !  LINEAR CORRECTIONS FOR CU, CT, ZETA, AND Z0
 !
-        VAPSIM(I) = VCU(I) * RVK
-        VAPSIHG(I) = 1. / VPSIHG(I)
-        VRIB1(I) = VAPSIM(I) * VAPSIM(I) * VPSIHG(I) * VZETA(I)
- 9028  CONTINUE
+        VAPSIM = VCU * RVK
+        VAPSIHG= 1. / VPSIHG
+        VRIB1  = VAPSIM * VAPSIM * VPSIHG * VZETA
 !
-       ITYPE = 3
-       IF(ITER.EQ.N) ITYPE = 5
+        IF(ITER.EQ.N) ITYPE = 5
 !
-       CALL LINADJ(VRIB1,VRIB,VWS, &
-        VWS,VZ0,VUSTAR,IVWATER, &
-        VAPSIM,VAPSIHG,VPSIH, &
-        VPSIG,VXX,VXX0, &
-        VYY,VYY0,ITYPE,LWATER,IRUN,VDZETA, &
-        VDZ0,VDPSIM,VDPSIH, &
-        IVBITRIB, &
-       VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
-       VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
-       VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0,VCH)
+        CALL LINADJ(VRIB1,VRIB,VWS, &
+                    VWS,VZ0,VUSTAR,IVWATER, &
+                    VAPSIM,VAPSIHG,VPSIH, &
+                    VPSIG,VXX,VXX0, &
+                    VYY,VYY0,ITYPE,LWATER,IRUN,VDZETA, &
+                    VDZ0,VDPSIM,VDPSIH, &
+                    IVBITRIB, &
+                    VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
+                    VDXPSIM,VDY,VXNUM2,VDEN,VAWS1,VXNUM3,VXNUM,VDZETA1,VDZETA2, &
+                    VZCOEF2,VZCOEF1,VTEMPLIN,VDPSIMC,VDPSIHC,MAPL_KARMAN,bmdl,CHOOSEZ0,VCH)
 !
 !  UPDATES OF ZETA, Z0, CU AND CT
 !
-       DO 9032 I = 1,IRUN
-        VZETA(I) = VZETA(I) * ( 1. + VDZETA(I) )
-        IF (IVBITRIB(I).EQ.1 ) VZETA(I) = VPSIM(I) * VPSIM(I) * VRIB(I) * VAPSIHG(I)
- 9032  CONTINUE
+        VZETA = VZETA * ( 1. + VDZETA )
+        where (IVBITRIB.EQ.1 ) VZETA = VPSIM * VPSIM * VRIB * VAPSIHG
 !
-       IF ( LWATER ) THEN
-        DO 9034 I = 1,IRUN
-         IF (IVWATER(I).EQ.1 ) then
-          VZ0(I) = VZ0(I) * ( 1. + VDZ0(I) )
-          VZ0H(I) = VZ0H(I) * ( 1. + VDZ0(I) )
-          IF (VZ0(I) .LE. Z0MIN ) VZ0(I) = Z0MIN
-          IF (VZ0H(I) .LE. Z0MIN ) VZ0H(I) = Z0MIN
-          vh0(i) = h0byz0 * vz0(i)
-          vh0h(i) = h0byz0 * vz0h(i)
-         endif
- 9034   CONTINUE
-       ENDIF
+        IF ( LWATER ) THEN
+          where (IVWATER.EQ.1 ) 
+            VZ0  = VZ0 * ( 1. + VDZ0)
+            VZ0H = VZ0H * ( 1. + VDZ0 )
+            VZ0   = max(VZ0,  Z0MIN) 
+            VZ0H  = max(VZ0H, Z0MIN) 
+            vh0  = h0byz0 * vz0
+            vh0h = h0byz0 * vz0h
+          endwhere
+        ENDIF
 !
-       IF ( ITER .EQ. N ) THEN
-        DO 9036 I = 1,IRUN
-         VPSIM(I) = VPSIM(I) + VDPSIM(I)
-         VCU(I) = MAPL_KARMAN / VPSIM(I)
-         VUSTAR(I) = VCU(I) * VWS(I)
+        IF ( ITER .EQ. N ) THEN
+          VPSIM  = VPSIM + VDPSIM
+          VCU    = MAPL_KARMAN / VPSIM
+          VUSTAR = VCU * VWS
 !
-         VPSIG(I) = VH0(I) * VUSTAR(I) - USTH0S
-         if(VPSIG(I).lt.0.)  VPSIG(I) = 0.
-         VPSIG(I) = SQRT(VPSIG(I))
-         VPSIG(I) = BMDL(i) * VPSIG(I)
-         VPSIHG(I) = VPSIH(I) + VDPSIH(I) + VPSIG(I)
-         VCT(I) = MAPL_KARMAN / VPSIHG(I)
- 9036   CONTINUE
-       ENDIF
+          VPSIG  = VH0 * VUSTAR - USTH0S
+          VPSIG  = max(VPSIG, 0.)
+          VPSIG  = SQRT(VPSIG)
+          VPSIG  = BMDL * VPSIG
+          VPSIHG = VPSIH + VDPSIH + VPSIG
+          VCT    = MAPL_KARMAN / VPSIHG
+        ENDIF
 
 !
 !  SAVE VALUES OF RIB AND WS
 !
-        DO 9038 I = 1,IRUN
-         VRIB1(I) = VRIB(I)
- 9038   CONTINUE
+        VRIB1 = VRIB
 !
- 200  CONTINUE
+      enddo ! ITER 
 !
 !  CALCULATE RHO-SURFACE ( KG / M**3 )
 !
-       DO I = 1,IRUN
-        VTEMP(I) =  10. * VAHS(I) * VZETA(I)
+      VTEMP =  10. * VAHS * VZETA
 !       VZH(I) = VZ0(I) * 0.1
-        VZH(I) = VZ0(I) / (10. + VZ0(I))
-       ENDDO
-       CALL PSI (VTEMP,VZH,VHZ,VPSIH2,IRUN,VHZ,VHZ,VHZ,VHZ,3)
-       DO I = 1,IRUN
-        VTEMP(I) = min(( VPSIH2(I) + VPSIG(I) ) / VPSIHG(I),1.)
-        VRHO(I) = VPKE(I)*( VTH2(I) + VTEMP(I) * (VTH1(I)-VTH2(I)) )
-        VRHO(I) = VPE(I)*100. / ( MAPL_RGAS * VRHO(I) )
-       ENDDO
+      VZH   = VZ0 / (10. + VZ0)
+
+      CALL PSI (VTEMP,VZH,VHZ,VPSIH2,IRUN,VHZ,VHZ,VHZ,VHZ,3)
+
+      VTEMP = min(( VPSIH2 + VPSIG ) / VPSIHG,1.)
+      VRHO  = VPKE*( VTH2 + VTEMP * (VTH1-VTH2) )
+      VRHO  = VPE *100. / ( MAPL_RGAS * VRHO )
 !
 ! interpolate uvtq to 2, 10 and 50 meters for diagnostic output
 !  use psih and psim which represent non-dim change from ground
 !                 to specified level
 ! and multiply theta by surface p**kappa to get temperatures
 !
-        do i = 1,irun
-         vtemp(i) = 2. * vahs(i) * vzeta(i)
+      vtemp = 2. * vahs * vzeta
 !        vzh(i) = min(vz0(i),2.) * 0.5
-         VZH(I) = min(VZ0(I),2.) / (2. + min(VZ0(I),2.))
-        enddo
-        call psi(vtemp,vzh,psimdiag,psihdiag,irun,vhz,vhz,vhz,vhz,1)
-        do i = 1,irun
-         vtemp(i) = min(( psihdiag(i) + vpsig(i) ) / vpsihg(i),1.)
-         t2m(i) = ( (vth2(i) + vtemp(i)* (vth1(i)-vth2(i))) ) * vpke(i)
-         q2m(i) = (vsh2(i) + vtemp(i)* (vsh1(i)-vsh2(i)))
-         u2m(i) = (psimdiag(i)/vpsim(i) * vus(i))
-         v2m(i) = (psimdiag(i)/vpsim(i) * vvs(i))
-        enddo
+      minVZ0= min(VZ0,2.)
+      VZH   = minvz0 / (2. + minVZ0)
+      call psi(vtemp,vzh,psimdiag,psihdiag,irun,vhz,vhz,vhz,vhz,1)
 
-        do i = 1,irun
-         vtemp(i) = 10. * vahs(i) * vzeta(i)
-!        vzh(i) = vz0(i) * 0.1
-         VZH(I) = VZ0(I) / (10. + VZ0(I))
-        enddo
-        call psi(vtemp,vzh,psimdiag,psihdiag,irun,vhz,vhz,vhz,vhz,1)
-        do i = 1,irun
-         vtemp(i) = min(( psihdiag(i) + vpsig(i) ) / vpsihg(i),1.)
-         t10m(i) = ( (vth2(i) + vtemp(i)* (vth1(i)-vth2(i))) ) * vpke(i)
-         q10m(i) = (vsh2(i) + vtemp(i)* (vsh1(i)-vsh2(i)))
-         u10m(i) = (psimdiag(i)/vpsim(i) * vus(i))
-         v10m(i) = (psimdiag(i)/vpsim(i) * vvs(i))
-        enddo
+      vtemp = min(( psihdiag + vpsig ) / vpsihg, 1.)
+      t2m   = (vth2 + vtemp* (vth1-vth2)) * vpke
+      q2m   = vsh2 + vtemp* (vsh1-vsh2)
+      vtemp = psimdiag/vpsim
+      u2m   = vtemp * vus
+      v2m   = vtemp * vvs
 
-        do i = 1,irun
-         vtemp(i) = 50. * vahs(i) * vzeta(i)
-!        vzh(i) = vz0(i) * 0.02
-         VZH(I) = VZ0(I) / (50. + VZ0(I))
-        enddo
-        call psi(vtemp,vzh,psimdiag,psihdiag,irun,vhz,vhz,vhz,vhz,1)
-        do i = 1,irun
-         u50m(i) = (psimdiag(i)/vpsim(i) * vus(i))
-         v50m(i) = (psimdiag(i)/vpsim(i) * vvs(i))
-        enddo
+      vtemp = 10. * vahs * vzeta
+!       vzh(i) = vz0(i) * 0.1
+      VZH   = VZ0 / (10. + VZ0)
+      call psi(vtemp,vzh,psimdiag,psihdiag,irun,vhz,vhz,vhz,vhz,1)
+
+      vtemp = min(( psihdiag + vpsig ) / vpsihg, 1.)
+      t10m  = (vth2 + vtemp* (vth1-vth2))  * vpke
+      q10m  = vsh2 + vtemp* (vsh1-vsh2)
+      vtemp = psimdiag/vpsim
+      u10m  = vtemp * vus
+      v10m  = vtemp * vvs
+
+      vtemp = 50. * vahs * vzeta
+!       vzh(i) = vz0(i) * 0.02
+      VZH   = VZ0 / (50. + VZ0)
+      call psi(vtemp,vzh,psimdiag,psihdiag,irun,vhz,vhz,vhz,vhz,1)
+      
+      vtemp = psimdiag/vpsim
+      u50m  = vtemp * vus
+      v50m  = vtemp * vvs
 !
 !  EVALUATE TURBULENT TRANSFER COEFFICIENTS
 !
 
-      DO 9044 I = 1,IRUN
 !!     VKH(I) = VUSTAR(I) * VCT(I)
 !!     VKM(I) = VUSTAR(I) * VCU(I)
-       VKH(I) = VUSTAR(I) * VCT(I) * VRHO(I)
-       VKM(I) = VUSTAR(I) * VCU(I) * VRHO(I)
- 9044 CONTINUE
+      VKH = VUSTAR * VCT * VRHO
+      VKM = VUSTAR * VCU * VRHO
 
-      DO I = 1,IRUN
-       VRIB(I) = MAPL_CP*(VPKE(I)-VPK(I))*(VTHV1(I)-VTHV2(I)) /    &
-                max(VUS(I)*VUS(I) + VVS(I)*VVS(I),1.e-1)
-      ENDDO    
+      VRIB = MAPL_CP*(VPKE-VPK)*(VTHV1-VTHV2) / max(VUS*VUS + VVS*VVS,1.e-1)
 
-end subroutine helfsurface
+   end subroutine helfsurface
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: phi
 ! !INTERFACE:
-      SUBROUTINE PHI(Z,PHIM,PHIH,IFLAG,N)
+   SUBROUTINE PHI(Z,PHIM,PHIH,IFLAG,N)
 !**********************************************************************
 !
 !  FUNCTION PHI - SOLVES KEYPS EQUATIONS
@@ -697,8 +643,9 @@ end subroutine helfsurface
       implicit none
 
 ! Argument List Declarations
-      integer n,iflag
-      real PHIM(:),PHIH(:),Z(:)
+      integer, intent(in) :: n,iflag
+      real,    intent(in) :: Z(:)
+      real,    intent(out):: PHIM(:),PHIH(:)
 
 ! Local Variables
       integer I1(N),I2(N)
@@ -887,83 +834,58 @@ end subroutine helfsurface
         0.660977,0.660234,0.659495,0.658759,0.658027, &
         0.657298/
 
-        integer i
 !
-      DO 9002 I = 1,N
-       ZSTAR(I)    = 100. * Z(I) - 14.
- 9002 CONTINUE
 !
-      DO 9004 I = 1,N
-       TEMP1(I) = Z(I)*0.5
-       IF( Z(I) .LE. 2. )TEMP1(I) = 1.
-       TEMP1(I) = LOG10(TEMP1(I))
-       TEMP1(I) = (TEMP1(I) + 9.3) * 20.
-       IF( Z(I) .GT. 2. ) ZSTAR(I) = TEMP1(I)
-       IF( Z(I).GT.1.78e10 ) ZSTAR(I) = 384.9999
- 9004  CONTINUE
+        where ( Z .GT.1.78e10 ) 
+           ZSTAR = 384.9999
+        elsewhere( Z .GT. 2. )
+           TEMP1  = Z*0.5
+           TEMP1 = LOG10(TEMP1)
+           TEMP1 = (TEMP1 + 9.3) * 20.
+           ZSTAR = TEMP1
+        elsewhere
+           ZSTAR    = 100. * Z - 14.
+        endwhere
 !
- 60    CONTINUE
+        I1 = ZSTAR
+        I2 = I1 + 1
+        TEMP1 = ZSTAR - I1
+        ZSTAR = -Z
 !
-      DO 9006 I = 1,N
-       I1(I) = ZSTAR(I)
-       I2(I) = I1(I) + 1
-       TEMP1(I) = ZSTAR(I) - I1(I)
 !
- 9006  CONTINUE
-!
-      IF( IFLAG .GT. 2 ) GO TO 100
-       DO 9008 I = 1,N
-       if( z(i).ge.0.15 ) then
-       E1(I) = PHIM0( I1(I) )
-       E2(I) = PHIM0( I2(I) )
-       PHIM(I)  = TEMP1(I) * ( E2(I)-E1(I) )
-       PHIM(I)  = PHIM(I) +   E1(I)
-       endif
- 9008  CONTINUE
 
-  100 CONTINUE
-!
-      IF( IFLAG .EQ. 2 ) GO TO 200
-       DO 9010 I = 1,N
-       if( z(i).ge.0.15 ) then
-       E1(I) = PHIH0( I1(I) )
-       E2(I) = PHIH0( I2(I) )
-       PHIH(I)  = TEMP1(I) * ( E2(I)-E1(I) )
-       PHIH(I)  = PHIH(I) +   E1(I)
-       endif
- 9010  CONTINUE
+        IF ( IFLAG  <= 2 ) then
+           where (z .ge. 0.15)
+              E1 = PHIM0( I1 )
+              E2 = PHIM0( I2 )
+              PHIM  = TEMP1 * ( E2-E1 )
+              PHIM  = PHIM +   E1
+           elsewhere
+              PHIM = 1. + ZSTAR &
+                  *(0.25+ZSTAR*(0.09375+ZSTAR* &
+                  (0.03125+0.00732422 * ZSTAR)))
+           endwhere
+        endif
 
-  200 CONTINUE
-!
-       DO 9012 I = 1,N
-       ZSTAR(I) = -Z(I)
- 9012  CONTINUE
-!
-      IF( IFLAG .GT. 2 ) GO TO 300
-       DO 9014 I = 1,N
-       IF( Z(I) .LT. 0.15 ) PHIM(I) = 1. + ZSTAR(I) &
-           *(0.25+ZSTAR(I)*(0.09375+ZSTAR(I)* &
-           (0.03125+0.00732422 * ZSTAR(I))))
- 9014  CONTINUE
-!
-  300 CONTINUE
-      IF( IFLAG .EQ. 2 ) GO TO 500
-       DO 9016 I = 1,N
-       IF( Z(I) .LT. 0.15 ) THEN
-       PHIH(I) =1.+ Z(I) * (0.5+ZSTAR(I)*(0.375+ZSTAR(I)* &
-           (0.5+ZSTAR(I)*(0.8203125+ZSTAR(I)* &
-           (1.5+2.93262*ZSTAR(I))))))
-       PHIH(I) = 1. / PHIH(I)
-      ENDIF
- 9016  CONTINUE
-!
-  500 CONTINUE
-
-end subroutine phi
+        IF ( IFLAG  /=2 ) then
+           where (z .ge. 0.15)
+              E1 = PHIH0( I1 )
+              E2 = PHIH0( I2 )
+              PHIH  = TEMP1 * ( E2-E1 )
+              PHIH  = PHIH +   E1
+           elsewhere
+              PHIH = 1.+ Z * (0.5+ZSTAR*(0.375+ZSTAR* &
+                  (0.5+ZSTAR*(0.8203125+ZSTAR* &
+                  (1.5+2.93262*ZSTAR)))))
+              PHIH = 1. / PHIH
+           endwhere
+        endif
+       
+   end subroutine phi
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: psi
 ! !INTERFACE:
-      SUBROUTINE PSI(VZZ,VZH,VPSIM,VPSIH,IRUN,VX,VXS,VY,VYS,IFLAG)
+   SUBROUTINE PSI(VZZ,VZH,VPSIM,VPSIH,IRUN,VX,VXS,VY,VYS,IFLAG)
 !**********************************************************************
 !
 !  SUBROUTINE PSI - DETERMINES DIMENSIONLESS WIND AND
@@ -988,9 +910,9 @@ end subroutine phi
       implicit none
 
 ! Argument List Declarations
-      integer irun,iflag
-      real VZZ(:),VZH(:),VPSIM(:),VPSIH(:), &
-           VX(:),VXS(:),VY(:),VYS(:)
+      integer, intent(in) :: irun,iflag
+      real,    intent(in) :: VZZ(:),VZH(:)
+      real,    intent(out) :: VPSIM(:),VPSIH(:),VX(:),VXS(:),VY(:),VYS(:)
  
 ! Local Variables
       real ZWM,RZWM,Z0M,ZCM,RZCM,CM1,CM2,CM6,CM7,CM8ARG,YCM
@@ -1007,62 +929,44 @@ end subroutine phi
       PARAMETER ( YCM     =  6. / ( 1. + 6.*CM1*ZCM )  )
 
       integer INTSTB(irun),INTZ0(irun)
-      real ZZ0(irun),Z(irun),Z2(irun),Z1(irun),Z0(irun)
-      real X0(irun),X1(irun),Y0(irun),Y1(irun)
-      real PSI2(irun),TEMP(irun)
-      real HZ(irun),ARG0(irun),ARG1(irun),DX(irun)
-      real X0NUM(irun),X1NUM(irun),X0DEN(irun)
-      real X1DEN(irun),Y1DEN(irun),Z2ZWM(irun)
+      real, allocatable :: ZZ0(:),Z(:),Z2(:),Z1(:),Z0(:)
+      real, allocatable :: X0(:),X1(:),Y0(:),Y1(:)
+      real, allocatable :: PSI2(:),TEMP(:)
+      real, allocatable :: HZ(:),ARG0(:),ARG1(:),DX(:)
+      real, allocatable :: X0NUM(:),X1NUM(:),X0DEN(:)
+      real, allocatable :: X1DEN(:),Y1DEN(:),Z2ZWM(:)
       real cm3,cm4,cm5,cm8
-      integer ibit,indx
-      integer i
+      integer, allocatable :: indxs(:)
+      integer ibit
+      integer k
 !
       CM3 =   sqrt( 0.2/CM1-0.01 )
       CM4 =   1./CM3
       CM5 =  (10.-CM1) / (10.*CM1*CM3)
       CM8 =   6. * LOG(CM8ARG)
 !
-      DO 9000 I = 1,IRUN
-       VPSIM(I) = 0.
-       VPSIH(I) = 0.
-       VX(I) = 0.
-       VXS(I) = 0.
-       VY(I) = 0.
-       VYS(I) = 0.
-       ZZ0(I) = VZH(I)*VZZ(I)
- 9000 CONTINUE
-      IBIT = 0
-      DO 9122 I = 1,IRUN
-       IF(VZZ(I).LE.-1.e-7)IBIT = IBIT + 1
- 9122 CONTINUE
-      DO 9022 I = 1,IRUN
-       IF(VZZ(I).LE.-1.e-7)THEN
-        INTSTB(I) = 1
-       ELSE
-        INTSTB(I) = 0
-       ENDIF
- 9022 CONTINUE
+      VPSIM = 0.
+      VPSIH = 0.
+      VX    = 0.
+      VXS   = 0.
+      VY    = 0.
+      VYS   = 0.
+      ZZ0   = VZH*VZZ
+
+      indxs = pack([(k,k=1,irun)], VZZ .LE. -1.e-7)
+      IBIT  = size(indxs) 
+      if (IBIT == 0) return
 !
 ! ****************************************
 ! *****    UNSTABLE SURFACE LAYER    *****
 ! ****************************************
 !
-      IF(IBIT.LE.0)  GO TO 100
-!
-      indx = 0
-      DO 9002 I = 1,IRUN
-       IF (INTSTB(I).EQ.1)THEN
-        indx = indx + 1
-        Z(indx) = VZZ(I)
-        Z0(indx) = ZZ0(I)
-       ENDIF
- 9002 CONTINUE
-!
-      DO 9004 I = 1,IBIT
-       Z(I) = -18. * Z(I)
-       Z0(I) = -18. * Z0(I)
- 9004 CONTINUE
- 
+      Z  = VZZ(indxs)
+      Z0 = ZZ0(indxs)
+      Z  = -18. * Z
+      Z0 = -18. * Z0
+      allocate(X1(IBIT), Y1(IBIT), X0(IBIT), Y0(IBIT)) 
+
       CALL PHI( Z,X1,Y1,IFLAG,IBIT )
       CALL PHI( Z0,X0,Y0,IFLAG,IBIT )
  
@@ -1070,195 +974,147 @@ end subroutine phi
 ! *****    COMPUTE PSIM  *****
 ! ****************************
 !
-      IF(IFLAG.GE.3) GO TO 75
+      IF(IFLAG <3 ) then
 !
-      DO 9006 I = 1,IBIT
-       ARG1(I) = 1. - X1(I)
-       IF ( Z(I) .LT. 0.013 ) ARG1(I) = Z(I) * ( 0.25 -  0.09375 * Z(I) )
+         ARG1 = 1. - X1
+         where( Z .LT. 0.013 ) 
+           ARG1 = Z * ( 0.25 -  0.09375 * Z )
+         endwhere
+!         
+         ARG0  = 1. - X0
+         where( Z0 .LT. 0.013 )
+            ARG0 = Z0 * ( 0.25 -  0.09375 * Z0 )
+         endwhere
+! 
+         ARG1 = ARG1 * ( 1.+X0 )
+         ARG0 = ARG0 * ( 1.+X1 )
+         DX   = X1 - X0
+         ARG1 = ARG1 / ARG0
+         ARG0 = -DX / ( 1. + X1*X0 )
+         ARG0 = ATAN( ARG0 )
+         ARG1 = LOG( ARG1 )
+         PSI2 = 2. * ARG0 + ARG1
+         PSI2 = PSI2 + DX
 !
-       ARG0(I)  = 1. - X0(I)
-       IF ( Z0(I) .LT. 0.013 ) ARG0(I) = Z0(I) * ( 0.25 -  0.09375 * Z0(I) )
-!
-       ARG1(I) = ARG1(I) * ( 1.+X0(I) )
-       ARG0(I) = ARG0(I) * ( 1.+X1(I) )
-       DX(I) = X1(I) - X0(I)
-       ARG1(I) = ARG1(I) / ARG0(I)
-       ARG0(I) = -DX(I) / ( 1. + X1(I)*X0(I) )
-       ARG0(I) = ATAN( ARG0(I) )
-       ARG1(I) = LOG( ARG1(I) )
-       PSI2(I) = 2. * ARG0(I) + ARG1(I)
-       PSI2(I) = PSI2(I) + DX(I)
- 9006 CONTINUE
-!
-      indx = 0
-      DO 9008 I = 1,IRUN
-       IF( INTSTB(I).EQ.1 ) THEN
-        indx = indx + 1
-        VPSIM(I) = PSI2(indx)
-        VX(I) = X1(indx)
-        VXS(I) = X0(indx)
-       ENDIF
- 9008 CONTINUE
+         VPSIM(indxs) = PSI2
+         VX(indxs)    = X1
+         VXS(indxs)   = X0
+      endif ! iflag<3
 !
 ! ****************************
 ! *****    COMPUTE PSIH  *****
 ! ****************************
 !
-      IF(IFLAG.EQ.2) GO TO 100
 !
-  75  CONTINUE
-      DO 9010 I = 1,IBIT
-       ARG1(I) = 1. - Y1(I)
-       IF( Z(I) .LT. 0.0065 ) ARG1(I) = Z(I) * ( 0.5 -  0.625 * Z(I) )
+
+      IF (IFLAG /=2) then
+
+        ARG1 = 1. - Y1
+        where( Z .LT. 0.0065 )
+           ARG1 = Z * ( 0.5 -  0.625 * Z )
+        endwhere
 !
-       ARG0(I)  = 1. - Y0(I)
-       IF( Z0(I) .LT. 0.0065 ) ARG0(I) = Z0(I) * ( 0.5 -  0.625 * Z0(I) )
+        ARG0  = 1. - Y0
+        where( Z0 .LT. 0.0065 )
+           ARG0 = Z0 * ( 0.5 -  0.625 * Z0 )
+        endwhere
+! 
+        ARG1 = ARG1 * ( 1. + Y0 )
+        ARG0 = ARG0 * ( 1. + Y1 )
+        ARG1 = ARG1 / ARG0
+        PSI2 = LOG( ARG1 )
+        PSI2 = PSI2 - Y1 + Y0
 !
-       ARG1(I) = ARG1(I) * ( 1. + Y0(I) )
-       ARG0(I) = ARG0(I) * ( 1. + Y1(I) )
-       ARG1(I) = ARG1(I) / ARG0(I)
-       PSI2(I) = LOG( ARG1(I) )
-       PSI2(I) = PSI2(I) - Y1(I) + Y0(I)
- 9010 CONTINUE
-!
-      indx = 0
-      DO 9012 I = 1,IRUN
-       IF( INTSTB(I).EQ.1 ) THEN
-       indx = indx + 1
-       VPSIH(I) = PSI2(indx)
-       VY(I) = Y1(indx)
-       VYS(I) = Y0(indx)
-       ENDIF
- 9012 CONTINUE
+        VPSIH(indxs) = PSI2
+        VY(indxs)    = Y1
+        VYS(indxs)   = Y0
+      ENDIF
 !
 ! **************************************
 ! *****    STABLE SURFACE LAYER    *****
 ! **************************************
 !
-  100 CONTINUE
-      IBIT = 0
-      DO 9114 I = 1,IRUN
-       IF(VZZ(I).GT.-1.e-7)THEN
-        IBIT = IBIT + 1
-       ENDIF
- 9114 CONTINUE
-      DO 9014 I = 1,IRUN
-       IF(VZZ(I).GT.-1.e-7)THEN
-        INTSTB(I) = 1
-       ELSE
-        INTSTB(I) = 0
-       ENDIF
- 9014 CONTINUE
-      IF(IBIT.LE.0)  GO TO 300
-      indx = 0
-      DO 9016 I = 1,IRUN
-       IF (INTSTB(I).EQ.1)THEN
-        indx = indx + 1
-        Z(indx) = VZZ(I)
-        Z0(indx) = ZZ0(I)
-        ARG1(indx) = VZH(I)
-       ENDIF
- 9016 CONTINUE
+      Z   = VZZ(indxs)
+      Z0  = ZZ0(indxs)
+      ARG1= VZH(indxs)
 
-      DO 9018 I = 1,IBIT
-       HZ(I) = 1. / ARG1(I)
-       Z1(I) = Z(I)
-       Z2(I) = ZWM
+      HZ = 1. / ARG1
+      Z1 = Z
+      Z2 = Z ! just for allocatation purpose
+      Z2 = ZWM
 !
-       IF ( Z(I) .GT. ZWM ) THEN
-        Z1(I) = ZWM
-        Z2(I) = Z(I)
-       ENDIF
+      where( Z .GT. ZWM ) 
+        Z1 = ZWM
+        Z2 = Z
+      endwhere
 !
-       IF ( Z0(I) .GT. Z0M ) THEN
-        Z0(I) = Z0M
-        INTZ0(I) = 1
-       ELSE
-        INTZ0(I) = 0
-       ENDIF
+      Z0 = min(Z0, Z0M ) 
 !
-       X1NUM(I) = 1. + 5. * Z1(I)
-       X0NUM(I) = 1. + 5. * Z0(I)
-       X1DEN(I) = 1. / (1. + CM1 * (X1NUM(I) * Z1(I)) )
-       X0DEN(I) = 1. + CM1 * (X0NUM(I) * Z0(I))
+      X1NUM = 1. + 5. * Z1
+      X0NUM = 1. + 5. * Z0
+      X1DEN = 1. / (1. + CM1 * (X1NUM * Z1) )
+      X0DEN = 1. + CM1 * (X0NUM * Z0)
 !
-       IF ( (INTZ0(I).EQ.1) .OR. (Z(I).GT.ZWM) ) &
-            HZ(I) = Z1(I) / Z0(I)
-       ARG1(I) = HZ(I)*HZ(I)*X0DEN(I)*X1DEN(I)
-       ARG1(I) = LOG( ARG1(I) )
-       ARG1(I) = 0.5 * ARG1(I)
-       ARG0(I) = (Z1(I) + 0.1) * (Z0(I) + 0.1)
-       ARG0(I) = CM3 + ARG0(I) * CM4
-       ARG0(I) = ( Z1(I) - Z0(I) ) / ARG0(I)
-       ARG0(I) = ATAN( ARG0(I) )
-       TEMP(I) = ARG1(I) + CM5 * ARG0(I)
+      where( Z0 .GT. Z0M .OR. Z.GT.ZWM ) HZ = Z1 / Z0
+      ARG1 = HZ*HZ*X0DEN*X1DEN
+      ARG1 = LOG( ARG1 )
+      ARG1 = 0.5 * ARG1
+      ARG0 = (Z1 + 0.1) * (Z0 + 0.1)
+      ARG0 = CM3 + ARG0 * CM4
+      ARG0 = ( Z1 - Z0 ) / ARG0
+      ARG0 = ATAN( ARG0 )
+      TEMP = ARG1 + CM5 * ARG0
 !
-       X0(I) = X0NUM(I) / X0DEN(I)
-       IF ( INTZ0(I).EQ.1 ) X0(I) = 0.
-       Z2ZWM(I) = Z2(I) * RZWM
- 9018 CONTINUE
+      where( Z0 .GT. Z0M) 
+        X0 = 0.
+      elsewhere
+        X0 = X0NUM / X0DEN
+      endwhere
+  
+      Z2ZWM = Z2 * RZWM
 !
 ! ****************************
 ! *****    COMPUTE PSIM  *****
 ! ****************************
 !
-      IF( IFLAG.GE.3 ) GO TO 225
-!
-      DO 9020 I = 1,IBIT
-       X1(I) = X1NUM(I) * X1DEN(I)
-       ARG1(I) = LOG( Z2ZWM(I) )
-       PSI2(I) = TEMP(I) + CM6 * ARG1(I)
- 9020 CONTINUE
-!
-      indx = 0
-      DO 9030 I = 1,IRUN
-       IF( INTSTB(I).EQ.1 ) THEN
-       indx = indx + 1
-       VPSIM(I) = PSI2(indx)
-       VX(I) = X1(indx)
-       VXS(I) = X0(indx)
-       ENDIF
- 9030 CONTINUE
+      IF ( IFLAG < 3 ) then
+        X1   = X1NUM * X1DEN
+        ARG1 = LOG( Z2ZWM )
+        PSI2 = TEMP + CM6 * ARG1
+        VPSIM(indxs) = PSI2
+        VX(indxs)    = X1
+        VXS(indxs)   = X0
+      endif !i flag<3)
 !
 ! ****************************
 ! *****    COMPUTE PSIH  *****
 ! ****************************
 !
-       IF(IFLAG.EQ.2)GO TO 300
 !
-  225 CONTINUE
-      DO 9024 I = 1,IBIT
-       Y1DEN(I) = 1. + CM1 * ( X1NUM(I) * Z(I) )
-       Y1(I) = X1NUM(I) / Y1DEN(I)
-       ARG1(I) = CM7 * Z2ZWM(I) / ( CM2 + Z2(I) )
-       ARG0(I) = 6.
-       IF ( Z2(I) .GT. ZCM ) THEN
-        Y1(I) = YCM
-        ARG1(I) = Z2(I) * RZCM
-        ARG0(I) = YCM
-        TEMP(I) = TEMP(I) + CM8
-       ENDIF
-       ARG1(I) = LOG( ARG1(I) )
-       PSI2(I) = TEMP(I) + ARG0(I) * ARG1(I)
- 9024 CONTINUE
+      if (IFLAG /=2) then
+        Y1DEN = 1. + CM1 * ( X1NUM * Z )
+        Y1    = X1NUM / Y1DEN
+        ARG1  = CM7 * Z2ZWM / ( CM2 + Z2 )
+        ARG0  = 6.
+        where ( Z2 .GT. ZCM ) 
+           Y1   = YCM
+           ARG1 = Z2 * RZCM
+           ARG0 = YCM
+           TEMP = TEMP + CM8
+        ENDwhere
+        ARG1 = LOG( ARG1 )
+        PSI2 = TEMP + ARG0 * ARG1
+
+        VPSIH(indxs) = PSI2
+        VY(indxs)    = Y1
+        VYS(indxs)   = X0
+      endif ! iflag /=2
 !
-      indx = 0
-      DO 9026 I = 1,IRUN
-       IF( INTSTB(I).EQ.1 ) THEN
-       indx = indx + 1
-       VPSIH(I) = PSI2(indx)
-       VY(I) = Y1(indx)
-       VYS(I) = X0(indx)
-       ENDIF
- 9026 CONTINUE
-!
-  300 CONTINUE
-!
-end subroutine psi
+   end subroutine psi
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: linadj
 ! !INTERFACE:
-      SUBROUTINE LINADJ ( VRIB1,VRIB2,VWS1,VWS2,VZ1,VUSTAR,IWATER, &
+   SUBROUTINE LINADJ ( VRIB1,VRIB2,VWS1,VWS2,VZ1,VUSTAR,IWATER, &
        VAPSIM, VAPSIHG,VPSIH,VPSIG,VX,VX0,VY,VY0,ITYPE,LWATER,IRUN, &
        VDZETA,VDZ0,VDPSIM,VDPSIH,INTRIB, &
        VX0PSIM,VG,VG0,VR1MG0,VZ2,VDZSEA,VAZ0,VXNUM1,VPSIGB2,VDX, &
@@ -1309,25 +1165,27 @@ end subroutine psi
       implicit none
 
 ! Argument List Declarations
-      integer irun,itype,CHOOSEZ0
-      real VRIB1(:),VRIB2(:)
-      real VWS1(:),VWS2(:),VZ1(:),VUSTAR(:)
-      integer IWATER(:)
-      real VAPSIM(:),VAPSIHG(:)
-      real VPSIH(:),VPSIG(:),VX(:)
-      real VX0(:),VY(:),VY0(:)
-      LOGICAL LWATER
-      real VDZETA(:),VDZ0(:),VDPSIM(:)
-      real VDPSIH(:)
-      integer INTRIB(:)
-      real VX0PSIM(:),VG(:),VG0(:),VR1MG0(:)
-      real VZ2(:),VDZSEA(:),VAZ0(:),VXNUM1(:)
-      real VPSIGB2(:),VDX(:),VDXPSIM(:),VDY(:)
-      real VXNUM2(:),VDEN(:),VAWS1(:),VXNUM3(:)
-      real VXNUM(:),VDZETA1(:),VDZETA2(:)
-      real VZCOEF2(:),VZCOEF1(:),VTEMPLIN(:)
-      real VDPSIMC(:),VDPSIHC(:),bmdl(:)
-      real VCHARNOCK(:)
+      integer, intent(in)   :: irun,itype,CHOOSEZ0
+      real,    intent(in)   :: VRIB1(:),VRIB2(:)
+      real,    intent(in)   :: VWS1(:),VWS2(:),VZ1(:)
+      real,    intent(inout):: VUSTAR(:)
+      integer, intent(in)   :: IWATER(:)
+      real,    intent(in)   :: VAPSIM(:),VAPSIHG(:)
+      real,    intent(in)   :: VPSIH(:),VPSIG(:),VX(:)
+      real,    intent(in)   :: VX0(:),VY(:),VY0(:)
+      LOGICAL, intent(in)   :: LWATER
+      real,    intent(out)  :: VDZETA(:),VDZ0(:),VDPSIM(:)
+      real,    intent(out)  :: VDPSIH(:)
+      integer, intent(out)  :: INTRIB(:)
+      real,    intent(out)  :: VX0PSIM(:),VG(:),VG0(:),VR1MG0(:)
+      real,    intent(out)  :: VZ2(:),VDZSEA(:),VAZ0(:)
+      real,    intent(out)  :: VPSIGB2(:),VDX(:),VDXPSIM(:),VDY(:)
+      real,    intent(out)  :: VXNUM1(:), VXNUM2(:),VDEN(:),VAWS1(:),VXNUM3(:)
+      real,    intent(out)  :: VXNUM(:),VDZETA1(:),VDZETA2(:)
+      real,    intent(out)  :: VZCOEF2(:),VZCOEF1(:),VTEMPLIN(:)
+      real,    intent(out)  :: VDPSIMC(:),VDPSIHC(:)
+      real,    intent(in)   :: bmdl(:)
+      real,    intent(in)   :: VCHARNOCK(:)
 
 ! Local Variables
       real xx0max,prfac,xpfac,difsqt,ustz0s,h0byz0,usth0s
@@ -1341,210 +1199,177 @@ end subroutine psi
 
       integer VINT1(irun),VINT2(irun)
       real vk,b2uhs(irun)
-      integer i
 !
       _UNUSED_DUMMY(VWS2)
       _UNUSED_DUMMY(vk)
 
-      do i = 1,irun
-      B2UHS(i)   = BMDL(i) * BMDL(i) * USTH0S
-      enddo
+      B2UHS   = BMDL * BMDL * USTH0S
 
 !   COMPUTE X0/PSIM, 1/Z0, G, G0, 1/(1-G0),
 !     DEL LOG Z0, D LOG ZO / D USTAR
 !
       IF ( (ITYPE.EQ.1) .AND. LWATER ) THEN
-       DO 9000 I = 1,IRUN
-        IF (IWATER(I).EQ.1) VX0PSIM(I) = VAPSIM(I)
- 9000  CONTINUE
+        where (IWATER.EQ.1) VX0PSIM = VAPSIM
       ENDIF
       IF ( ITYPE .GE. 3 ) THEN
-       DO 9002 I = 1,IRUN
-        VX0PSIM(I) = VX0(I) * VAPSIM(I)
- 9002  CONTINUE
+        VX0PSIM = VX0 * VAPSIM
       ENDIF
 !
-       DO 9004 I = 1,IRUN
-        VDZ0(I) = 0.
-        VG(I) = 0.
-        VG0(I) = 0.
-        VR1MG0(I) = 1.
- 9004  CONTINUE
+      VDZ0   = 0.
+      VG     = 0.
+      VG0    = 0.
+      VR1MG0 = 1.
 !
-       IF ( LWATER ) THEN
+      IF ( LWATER ) THEN
         CALL ZCSUB ( VUSTAR,VCHARNOCK,VDZSEA,IWATER,.TRUE.,IRUN,VZ2,CHOOSEZ0)
 
         VDZSEA = min( VDZSEA, 0.2*VZ1/VAPSIM ) ! To prevent Divide by Zero as VG0 => 1.0
 !
-        DO 9006 I = 1,IRUN
-         IF ( IWATER(I).EQ.1) THEN
-          VAZ0(I) = 1. / VZ1(I)
-          VG(I) = VDZSEA(I) * VAZ0(I)
-          VG0(I) = VX0PSIM(I) * VG(I)
-          VR1MG0(I) = 1. / ( 1. - VG0(I) )
-          VDZ0(I) = ( VZ2(I) - VZ1(I) ) * VR1MG0(I)
-         ENDIF
- 9006   CONTINUE
-       ENDIF
-!
-      IF ( LWATER .AND. (ITYPE.GE.3) ) THEN
-       DO 9008 I = 1,IRUN
-        IF (IWATER(I).EQ.1) VDZ0(I) = VDZ0(I) * VAZ0(I)
- 9008  CONTINUE
+        where ( IWATER.EQ.1) 
+          VAZ0   = 1. / VZ1
+          VG     = VDZSEA  * VAZ0
+          VG0    = VX0PSIM * VG
+          VR1MG0 = 1. / ( 1. - VG0 )
+          VDZ0   = ( VZ2 - VZ1 ) * VR1MG0
+        ENDwhere
+        IF (ITYPE.GE.3) where ( IWATER.EQ.1) VDZ0 = VDZ0 * VAZ0 
       ENDIF
+!
 !
 !   COMPUTE NUM1,NUM2,NUM3, DEN
 !
       IF (ITYPE.GE.3) THEN
-       DO 9010 I = 1,IRUN
-        VXNUM1(I) = 0.
-        IF (VRIB1(I).EQ.0.) THEN
-         INTRIB(I) = 1
-        ELSE
-         INTRIB(I) = 0
-        ENDIF
-        IF ( INTRIB(I).EQ.0 ) VXNUM1(I) = 1. / VRIB1(I)
-        VPSIGB2(I) = 0.
-        if(vpsig(i).gt.0.)VPSIGB2(I) = &
-              0.5 * ( vpsig(i)*vpsig(i) + b2uhs(i) ) / vpsig(i)
-        VDX(I) = VX(I) - VX0(I)
-        VDXPSIM(I) = VDX(I) * VAPSIM(I)
-        VDY(I) = VY(I) - VY0(I)
-        VXNUM3(I) = - VPSIGB2(I)
+        where(VRIB1.EQ.0.) 
+          INTRIB = 1
+          VXNUM1 = 0.
+        ELSEwhere
+          INTRIB = 0
+          VXNUM1 = 1. / VRIB1
+        ENDwhere
+
+        VPSIGB2 = 0.
+        where(vpsig.gt.0.) VPSIGB2 = &
+              0.5 * ( vpsig*vpsig + b2uhs ) / vpsig
+        VDX      = VX - VX0
+        VDXPSIM  = VDX * VAPSIM
+        VDY      = VY - VY0
+        VXNUM3   = - VPSIGB2
 !
         IF ( LWATER ) THEN
-         IF (IWATER(I).EQ.1) THEN
-          VDXPSIM(I) = VDXPSIM(I) * VR1MG0(I)
-          VXNUM3(I) = VXNUM3(I) + VG(I) * ( VY0(I) - VPSIGB2(I) )
-          VXNUM2(I) = VY0(I) - VPSIGB2(I) - VX0PSIM(I) * VPSIGB2(I)
-          VXNUM2(I) = (VXNUM2(I) * VAPSIHG(I)) - 2. * VX0PSIM(I)
-          VXNUM2(I) = VXNUM2(I) * VDZ0(I)
-         ENDIF
+          where (IWATER.EQ.1) 
+             VDXPSIM = VDXPSIM * VR1MG0
+             VXNUM3  = VXNUM3 + VG * ( VY0 - VPSIGB2)
+             VXNUM2  = VY0 - VPSIGB2 - VX0PSIM * VPSIGB2
+             VXNUM2  = (VXNUM2 * VAPSIHG) - 2. * VX0PSIM
+             VXNUM2  = VXNUM2 * VDZ0
+          endwhere
         ENDIF
 !
-        VDEN(I) = VDY(I) + VDXPSIM(I) * VXNUM3(I)
-        VDEN(I) = ( 1. + VDEN(I) * VAPSIHG(I) ) - 2. * VDXPSIM(I)
- 9010  CONTINUE
+        VDEN = VDY + VDXPSIM * VXNUM3
+        VDEN = ( 1. + VDEN * VAPSIHG ) - 2. * VDXPSIM
       ENDIF
 !
       IF (ITYPE.EQ.5) THEN
-       DO 9012 I = 1,IRUN
-        VAWS1(I) = VR1MG0(I) / VWS1(I)
-        VXNUM3(I) = VXNUM3(I) * VAPSIHG(I)
+        VAWS1  = VR1MG0 / VWS1
+        VXNUM3 = VXNUM3 * VAPSIHG
 !
         IF ( LWATER ) THEN
-         IF(IWATER(I).EQ.1) THEN
-          VXNUM3(I) = VXNUM3(I) - 2. * VG0(I)
-          VXNUM3(I) = VAWS1(I) * VXNUM3(I)
-         ENDIF
+          where(IWATER.EQ.1) 
+             VXNUM3 = VXNUM3 - 2. * VG0
+             VXNUM3 = VAWS1 * VXNUM3
+          endwhere
         ENDIF
- 9012  CONTINUE
       ENDIF
 !
 !   COMPUTE D LOG ZETA
 !
       IF (ITYPE.GE.3) THEN
-       DO 9014 I = 1,IRUN
-        VXNUM(I) = VRIB2(I) - VRIB1(I)
-        IF( (VX0(I).GT.XX0MAX).AND.(VXNUM(I).GE.0.) )VXNUM(I) = 0.
-        VXNUM(I) = VXNUM1(I) * VXNUM(I)
- 9014  CONTINUE
+        VXNUM = VRIB2 - VRIB1
+        where( (VX0.GT.XX0MAX).AND.(VXNUM.GE.0.) )VXNUM = 0.
+        VXNUM = VXNUM1 * VXNUM
 !
-       DO 9018 I = 1,IRUN
-        VDZETA1(I) = VXNUM(I)
-        IF(LWATER.AND.(IWATER(I).EQ.1)) VXNUM(I) = VXNUM(I) + VXNUM2(I)
-        IF ( VDEN(I) .LT.0.1 ) VDEN(I) = 0.1
- 9018  CONTINUE
+        VDZETA1 = VXNUM
+        IF(LWATER) then
+          where(IWATER.EQ.1) VXNUM = VXNUM + VXNUM2
+        endif
+
+        VDEN = max(VDEN, 0.1)
 !
-       DO 9020 I = 1,IRUN
-        VDZETA(I) = VXNUM(I) / VDEN(I)
- 9020  CONTINUE
-       DO 9022 I = 1,IRUN
-        IF((VRIB2(I).EQ.0.).OR.(VDZETA(I).LE.-1.))VDZETA(I) = VDZETA1(I)
- 9022  CONTINUE
+        VDZETA = VXNUM / VDEN
+        where((VRIB2.EQ.0.).OR.(VDZETA.LE.-1.)) VDZETA = VDZETA1
       ENDIF
 !
 !   COMPUTE D LOG Z0
 !
       IF ( LWATER .AND. (ITYPE.GE.3) )THEN
-       DO 9026 I = 1,IRUN
-        IF( IWATER(I).EQ.1 ) THEN
-         VZCOEF2(I) = VG(I) * VDXPSIM(I)
-         VDZ0(I) = VDZ0(I) - VZCOEF2(I) * VDZETA(I)
-        ENDIF
- 9026  CONTINUE
+        where ( IWATER.EQ.1 ) 
+         VZCOEF2 = VG * VDXPSIM
+         VDZ0    = VDZ0 - VZCOEF2 * VDZETA
+        ENDwhere
       ENDIF
 !
       IF ( LWATER .AND. (ITYPE.EQ.5) ) THEN
-       DO 9028 I = 1,IRUN
-        IF(IWATER(I).EQ.1) VZCOEF1(I) = VG(I) * VAWS1(I)
- 9028  CONTINUE
+        where(IWATER.EQ.1) VZCOEF1 = VG * VAWS1
       ENDIF
 !
 !   CALCULATE D PSIM AND D PSIH
 !
       IF ( (ITYPE.EQ.1) .AND. LWATER ) THEN
-       DO 9032 I = 1,IRUN
-        IF (IWATER(I).EQ.1) THEN
-         VDPSIM(I) = - VDZ0(I) * VAZ0(I)
-         VDPSIH(I) = VDPSIM(I)
-        ENDIF
- 9032  CONTINUE
+        where (IWATER.EQ.1) 
+         VDPSIM = - VDZ0 * VAZ0
+         VDPSIH = VDPSIM
+        ENDwhere
       ENDIF
 !
       IF (ITYPE.GE.3) THEN
-       DO 9034 I = 1,IRUN
-        VDPSIM(I) = VDX(I) * VDZETA(I)
-        VDPSIH(I) = VDY(I) * VDZETA(I)
+        VDPSIM = VDX * VDZETA
+        VDPSIH = VDY * VDZETA
         IF ( LWATER ) THEN
-         IF (IWATER(I).EQ.1 ) THEN
-          VDPSIM(I) = VDPSIM(I) - VX0(I) * VDZ0(I)
-          VDPSIH(I) = VDPSIH(I) - VY0(I) * VDZ0(I)
-         ENDIF
+          where (IWATER.EQ.1 ) 
+             VDPSIM = VDPSIM - VX0 * VDZ0
+             VDPSIH = VDPSIH - VY0 * VDZ0
+          ENDwhere
         ENDIF
- 9034  CONTINUE
       ENDIF
 !
 !   PREVENT OVERCORRECTION OF PSIM OR PSIH FOR UNSTABLE CASE
 !
       IF (ITYPE.GE.4) THEN
-       DO 9036 I = 1,IRUN
-        VDPSIMC(I) = -0.9 - VDPSIM(I) * VAPSIM(I)
-        VDPSIHC(I) = -0.9 *  VPSIH(I) - VDPSIH(I)
-        IF ( VDPSIMC(I).GT.0.  ) THEN
-         VINT1(I) = 1
-        ELSE
-         VINT1(I) = 0
-        ENDIF
-        IF ( VDPSIHC(I).GT.0.  ) THEN
-         VINT2(I) = 1
-        ELSE
-         VINT2(I) = 0
-        ENDIF
-        VDZETA1(I) = 0.
-        IF(VINT1(I).EQ.1) VDZETA1(I) = VDPSIMC(I) / VDXPSIM(I)
-        IF((VINT1(I).EQ.1).OR.(VINT2(I).EQ.1)) VTEMPLIN(I) = &
-              VDY(I) + VY0(I) * VG(I) * VDXPSIM(I)
+        VDPSIMC = -0.9 - VDPSIM * VAPSIM
+        VDPSIHC = -0.9 *  VPSIH - VDPSIH
+        where( VDPSIMC.GT.0.  ) 
+          VINT1 = 1
+        ELSEwhere
+          VINT1 = 0
+        ENDwhere
+
+        where ( VDPSIHC.GT.0.  )
+          VINT2 = 1
+        ELSEwhere
+          VINT2 = 0
+        ENDwhere
+
+        VDZETA1 = 0.
+        where(VINT1.EQ.1) VDZETA1 = VDPSIMC / VDXPSIM
+        where((VINT1.EQ.1).OR.(VINT2.EQ.1)) VTEMPLIN = &
+              VDY + VY0 * VG * VDXPSIM
 !AMM    IF (VINT2(I).EQ.1 .and. VTEMPLIN(I).GT.tiny(1.0)) then
-        IF (VINT2(I).EQ.1) then
-             VDZETA2(I) =  VDPSIHC(I) / VTEMPLIN(I)
-        IF ( VDZETA2(I).LT.VDZETA1(I) ) VDZETA1(I) = VDZETA2(I)
-        endif
-        IF((VINT1(I).EQ.1).OR.(VINT2(I).EQ.1)) THEN
-         VDZETA(I) = VDZETA1(I) + VDZETA(I)
-         VDPSIM(I) = VDPSIM(I) + VDX(I) * VR1MG0(I) * VDZETA1(I)
-         VDPSIH(I) = VDPSIH(I) + VTEMPLIN(I) * VDZETA1(I)
-         IF ( IWATER(I).EQ.1 ) &
-           VDZ0(I) = VDZ0(I) - VG(I) * VDXPSIM(I) * VDZETA1(I)
-        ENDIF
- 9036  CONTINUE
+        where (VINT2.EQ.1) VDZETA2 =  VDPSIHC / VTEMPLIN
+        where (VDZETA2.LT.VDZETA1 ) VDZETA1 = VDZETA2
+        where ((VINT1.EQ.1).OR.(VINT2.EQ.1)) 
+          VDZETA = VDZETA1 + VDZETA
+          VDPSIM = VDPSIM + VDX * VR1MG0 * VDZETA1
+          VDPSIH = VDPSIH + VTEMPLIN * VDZETA1
+          where ( IWATER.EQ.1 ) &
+            VDZ0 = VDZ0 - VG * VDXPSIM * VDZETA1
+        ENDwhere
       ENDIF
 !
-end subroutine linadj
+   end subroutine linadj
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! !IROUTINE: zcsub
 ! !INTERFACE:
-      SUBROUTINE ZCSUB (VUSTAR,VCHARNOCK,VDZSEA,IWATER,LDZSEA,IRUN,VZSEA,CHOOSEZ0)
+   SUBROUTINE ZCSUB (VUSTAR,VCHARNOCK,VDZSEA,IWATER,LDZSEA,IRUN,VZSEA,CHOOSEZ0)
 !**********************************************************************
 !  FUNCTION ZSEA
 !  PURPOSE
@@ -1574,10 +1399,12 @@ end subroutine linadj
       implicit none 
 
 ! Argument List Delcarations
-      integer irun, CHOOSEZ0
-      real VZSEA(:),VUSTAR(:),VDZSEA(:),VCHARNOCK(:)
-      integer IWATER(:)
-      LOGICAL LDZSEA
+      integer, intent(in)    :: irun, CHOOSEZ0
+      real,    intent(in)    :: VCHARNOCK(:)
+      real,    intent(inout) :: VUSTAR(:)
+      real,    intent(out)   :: VZSEA(:),VDZSEA(:)
+      integer, intent(in)    :: IWATER(:)
+      LOGICAL, intent(in)    :: LDZSEA
 
 ! Local Variables
       real USTMX1_OLD,USTMX2_OLD
@@ -1592,7 +1419,7 @@ end subroutine linadj
 
       real AA(IRUN,5),TEMP(IRUN)
       integer INT2(IRUN),INT3(IRUN),INT4(IRUN)
-      integer i,k
+      integer k
       real ustloc(irun)
 
       real AA1(5),AA2(5),AA3(5),AA4(5)
@@ -1615,8 +1442,8 @@ end subroutine linadj
       DATA AA4_OLD/-0.343228E-04,0.552305E-03,-0.167541E-02,0.250208E-02, &
                -0.153259E-03/
 
+      ustloc = max(1.e-6, vustar)
       CHARNOCK: if ( CHOOSEZ0 == 4 ) then
-          ustloc = max(1e-6, vustar)
           VZSEA = (0.11*MAPL_NUAIR)/ustloc + (VCHARNOCK/MAPL_GRAV)*ustloc**2
           
           DERIVATIVE: if ( LDZSEA ) then
@@ -1644,77 +1471,60 @@ end subroutine linadj
 !*****              LOWER CUTOFF CONDITION FOR USTAR                ***
 !**********************************************************************
 !
-      DO 9000 I = 1,IRUN
-       IF(VUSTAR(I) .LT. 1.e-6)THEN
-        INT3(I) = 1
-       ELSE
-        INT3(I) = 0
-       ENDIF
- 9000 CONTINUE
-      DO 9002 I = 1,IRUN
-       IF(INT3(I).EQ.1) VUSTAR(I) = 1.e-6
- 9002 CONTINUE
-
-      ustloc = vustar
+      vustar = ustloc
 !
 !***********************************
 !*****  LOAD THE ARRAY A(I,K)  *****
 !***********************************
 !
-      DO 9004 I = 1,IRUN
-       IF( (ustloc(I) .GT. USTMX1) .AND. (IWATER(I).EQ.1) ) THEN
-        if( CHOOSEZ0.gt.0 ) ustloc(i) = ustmx1
-        INT4(I) = 1
-       ELSE
-        INT4(I) = 0
-       ENDIF
- 9004 CONTINUE
-      DO 9006 I = 1,IRUN
-       IF(ustloc(I) .GT. USTMX2) THEN
-        INT3(I) = 1
-       ELSE
-        INT3(I) = 0
-       ENDIF
- 9006 CONTINUE
-      DO 9008 I = 1,IRUN
-       IF(ustloc(I) .GE. USTMX3) THEN
-        INT2(I) = 1
-       ELSE
-        INT2(I) = 0
-       ENDIF
- 9008 CONTINUE
-!
-      DO 100 K=1,5
-       DO 9010 I = 1,IRUN
-        AA(I,K) = AA1(K)
-        IF( INT2(I).EQ.1 )  AA(I,K) = AA2(K)
-        IF( INT3(I).EQ.1 )  AA(I,K) = AA3(K)
-        IF( INT4(I).EQ.1 )  AA(I,K) = AA4(K)
- 9010  CONTINUE
-  100 CONTINUE
+
+      where( (ustloc .GT. USTMX1) .AND. (IWATER .EQ.1) )
+        AA(:,1) = AA4(1)
+        AA(:,2) = AA4(2)
+        AA(:,3) = AA4(3)
+        AA(:,4) = AA4(4)
+        AA(:,5) = AA4(5)
+      elsewhere(ustloc .GT. USTMX2)
+        AA(:,1) = AA3(1)
+        AA(:,2) = AA3(2)
+        AA(:,3) = AA3(3)
+        AA(:,4) = AA3(4)
+        AA(:,5) = AA3(5)
+      elsewhere(ustloc .GE. USTMX3)
+        AA(:,1) = AA2(1)
+        AA(:,2) = AA2(2)
+        AA(:,3) = AA2(3)
+        AA(:,4) = AA2(4)
+        AA(:,5) = AA2(5)
+      elsewhere
+        AA(:,1) = AA1(1)
+        AA(:,2) = AA1(2)
+        AA(:,3) = AA1(3)
+        AA(:,4) = AA1(4)
+        AA(:,5) = AA1(5)
+      endwhere
+      if( CHOOSEZ0.gt.0 ) where( (ustloc .GT. USTMX1) .AND. (IWATER .EQ.1) ) ustloc = ustmx1
+
 !
 !********************************************************
 !*****  EVALUATE THE ENHANCED POLYNOMIAL FOR ZSEA  *****
 !********************************************************
 !
-      DO 9012 I = 1,IRUN
-       VDZSEA(I)  =  ( AA(I,4) + AA(I,5) * ustloc(I) ) * ustloc(I)
-       VZSEA(I)  =  AA(I,2) + ( AA(I,3) + VDZSEA(I) ) * ustloc(I)
-       TEMP(I) = AA(I,1) / ustloc(I)
-       VZSEA(I)  =  VZSEA(I) + TEMP(I)
- 9012 CONTINUE
+      VDZSEA  =  ( AA(:,4) + AA(:,5) * ustloc ) * ustloc
+      VZSEA   =  AA(:,2) + ( AA(:,3) + VDZSEA ) * ustloc
+      TEMP    =  AA(:,1) / ustloc
+      VZSEA   =  VZSEA + TEMP
 !
 !**********************************************************************
 !*****        EVALUATE THE DERIVATIVE DZSEA IF LDZSEA IS TRUE       ***
 !**********************************************************************
 !
       IF( LDZSEA ) THEN
-       DO 9014 I = 1,IRUN
-        VDZSEA(I)  =  3. * VDZSEA(I) -(AA(I,4)*ustloc(I) - AA(I,3))
-        VDZSEA(I)  =  VDZSEA(I) * ustloc(I) - TEMP(I)
- 9014  CONTINUE
+        VDZSEA  =  3. * VDZSEA -(AA(:,4)*ustloc - AA(:,3))
+        VDZSEA  =  VDZSEA * ustloc - TEMP
       ENDIF
+
 !
-end subroutine zcsub
+   end subroutine zcsub
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module sfclayer
