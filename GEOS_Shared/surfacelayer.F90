@@ -1194,17 +1194,19 @@ contains
       integer VINT1(irun),VINT2(irun)
       real vk,b2uhs(irun)
       integer i
+      integer, allocatable :: w_indxs(:) ! indexes for iwater ==1
 !
       _UNUSED_DUMMY(VWS2)
       _UNUSED_DUMMY(vk)
 
       B2UHS   = BMDL * BMDL * USTH0S
 
+      w_indxs = pack([(i, i=1, size(IWATER))], IWATER.EQ.1)
 !   COMPUTE X0/PSIM, 1/Z0, G, G0, 1/(1-G0),
 !     DEL LOG Z0, D LOG ZO / D USTAR
 !
-      IF ( (ITYPE.EQ.1) .AND. LWATER ) THEN
-        where (IWATER.EQ.1) VX0PSIM = VAPSIM
+      IF ( ITYPE.EQ.1) THEN
+         VX0PSIM(w_indxs) = VAPSIM(w_indxs)
       ENDIF
       IF ( ITYPE .GE. 3 ) THEN
         VX0PSIM = VX0 * VAPSIM
@@ -1221,14 +1223,12 @@ contains
 
         VDZSEA = min( VDZSEA, 0.2*VZ1/VAPSIM ) ! To prevent Divide by Zero as VG0 => 1.0
 !
-        where ( IWATER.EQ.1)
-          VAZ0   = 1. / VZ1
-          VG     = VDZSEA  * VAZ0
-          VG0    = VX0PSIM * VG
-          VR1MG0 = 1. / ( 1. - VG0 )
-          VDZ0   = ( VZ2 - VZ1 ) * VR1MG0
-        ENDwhere
-        IF (ITYPE.GE.3) where ( IWATER.EQ.1) VDZ0 = VDZ0 * VAZ0
+        VAZ0(w_indxs)   = 1. / VZ1(w_indxs)
+        VG(w_indxs)     = VDZSEA(w_indxs)  * VAZ0(w_indxs)
+        VG0(w_indxs)    = VX0PSIM(w_indxs) * VG(w_indxs)
+        VR1MG0(w_indxs) = 1. / ( 1. - VG0(w_indxs) )
+        VDZ0(w_indxs)   = ( VZ2(w_indxs) - VZ1(w_indxs) ) * VR1MG0(w_indxs)
+        IF (ITYPE.GE.3) VDZ0(w_indxs) = VDZ0(w_indxs) * VAZ0(w_indxs)
      ENDIF
 !
 !   COMPUTE NUM1,NUM2,NUM3, DEN
@@ -1250,15 +1250,11 @@ contains
         VDY      = VY - VY0
         VXNUM3   = - VPSIGB2
 !
-        IF ( LWATER ) THEN
-          where (IWATER.EQ.1)
-             VDXPSIM = VDXPSIM * VR1MG0
-             VXNUM3  = VXNUM3 + VG * ( VY0 - VPSIGB2)
-             VXNUM2  = VY0 - VPSIGB2 - VX0PSIM * VPSIGB2
-             VXNUM2  = (VXNUM2 * VAPSIHG) - 2. * VX0PSIM
-             VXNUM2  = VXNUM2 * VDZ0
-          endwhere
-        ENDIF
+        VDXPSIM(w_indxs) = VDXPSIM(w_indxs) * VR1MG0(w_indxs)
+        VXNUM3(w_indxs)  = VXNUM3(w_indxs) + VG(w_indxs) * ( VY0(w_indxs) - VPSIGB2(w_indxs))
+        VXNUM2(w_indxs)  = VY0(w_indxs) - VPSIGB2(w_indxs) - VX0PSIM(w_indxs) * VPSIGB2(w_indxs)
+        VXNUM2(w_indxs)  = (VXNUM2(w_indxs) * VAPSIHG(w_indxs)) - 2. * VX0PSIM(w_indxs)
+        VXNUM2(w_indxs)  = VXNUM2(w_indxs) * VDZ0(w_indxs)
 !
         VDEN = VDY + VDXPSIM * VXNUM3
         VDEN = ( 1. + VDEN * VAPSIHG ) - 2. * VDXPSIM
@@ -1268,12 +1264,8 @@ contains
         VAWS1  = VR1MG0 / VWS1
         VXNUM3 = VXNUM3 * VAPSIHG
 !
-        IF ( LWATER ) THEN
-          where(IWATER.EQ.1)
-             VXNUM3 = VXNUM3 - 2. * VG0
-             VXNUM3 = VAWS1 * VXNUM3
-          endwhere
-        ENDIF
+        VXNUM3(w_indxs) = VXNUM3(w_indxs) - 2. * VG0(w_indxs)
+        VXNUM3(w_indxs) = VAWS1(w_indxs) * VXNUM3(w_indxs)
       ENDIF
 !
 !   COMPUTE D LOG ZETA
@@ -1284,9 +1276,7 @@ contains
         VXNUM = VXNUM1 * VXNUM
 !
         VDZETA1 = VXNUM
-        IF(LWATER) then
-          where(IWATER.EQ.1) VXNUM = VXNUM + VXNUM2
-        endif
+        VXNUM(w_indxs) = VXNUM(w_indxs) + VXNUM2(w_indxs)
 
         VDEN = max(VDEN, 0.1)
 !
@@ -1297,35 +1287,27 @@ contains
 !
 !   COMPUTE D LOG Z0
 !
-      IF ( LWATER .AND. (ITYPE.GE.3) )THEN
-        where ( IWATER.EQ.1 )
-         VZCOEF2 = VG * VDXPSIM
-         VDZ0    = VDZ0 - VZCOEF2 * VDZETA
-        ENDwhere
+      IF ( ITYPE.GE.3 )THEN
+         VZCOEF2(w_indxs) = VG(w_indxs) * VDXPSIM(w_indxs)
+         VDZ0(w_indxs)    = VDZ0(w_indxs) - VZCOEF2(w_indxs) * VDZETA(w_indxs)
       ENDIF
 !
-      IF ( LWATER .AND. (ITYPE.EQ.5) ) THEN
-        where(IWATER.EQ.1) VZCOEF1 = VG * VAWS1
+      IF ( ITYPE.EQ.5 ) THEN
+         VZCOEF1(w_indxs) = VG(w_indxs) * VAWS1(w_indxs)
       ENDIF
 !
 !   CALCULATE D PSIM AND D PSIH
 !
-      IF ( (ITYPE.EQ.1) .AND. LWATER ) THEN
-        where (IWATER.EQ.1)
-         VDPSIM = - VDZ0 * VAZ0
-         VDPSIH = VDPSIM
-        ENDwhere
+      IF ( ITYPE.EQ.1 ) THEN
+         VDPSIM(w_indxs) = - VDZ0(w_indxs) * VAZ0(w_indxs)
+         VDPSIH(w_indxs) = VDPSIM(w_indxs)
       ENDIF
 !
       IF (ITYPE.GE.3) THEN
         VDPSIM = VDX * VDZETA
         VDPSIH = VDY * VDZETA
-        IF ( LWATER ) THEN
-          where (IWATER.EQ.1 )
-             VDPSIM = VDPSIM - VX0 * VDZ0
-             VDPSIH = VDPSIH - VY0 * VDZ0
-          ENDwhere
-        ENDIF
+        VDPSIM(w_indxs) = VDPSIM(w_indxs) - VX0(w_indxs) * VDZ0(w_indxs)
+        VDPSIH(w_indxs) = VDPSIH(w_indxs) - VY0(w_indxs) * VDZ0(w_indxs)
       ENDIF
 !
 !   PREVENT OVERCORRECTION OF PSIM OR PSIH FOR UNSTABLE CASE
@@ -1366,7 +1348,6 @@ contains
            where(IWATER.EQ.1) VDZ0 = VDZ0 - VG * VDXPSIM * VDZETA1
         endwhere
       ENDIF
-
 !
    end subroutine linadj
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
