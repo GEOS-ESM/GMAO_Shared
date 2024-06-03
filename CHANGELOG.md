@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refacored helfsurface subroutines to improve the performance
+- Refactored helfsurface subroutines to improve the performance
 
 ### Fixed
 
