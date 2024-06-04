@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Refactored helfsurface subroutines to improve the performance
+- Update CI to use Intel 2024.1
 
 ### Fixed
 
