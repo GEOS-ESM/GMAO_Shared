@@ -1690,6 +1690,7 @@
            do L=1,lmo
                call interpack_terpv ( imi,jmi,kmi,wi%q(:,:,:,L), imo,jmo,kmo,wo%q(:,:,:,L), rc, lon0=wi%grid%lon(1) )
            enddo
+           call interpack_terpv ( imi, jmi, wi%ts, imo, jmo, wo%ts, lon0=wi%grid%lon(1) )
            write(6,'(2(a,2i5),2x,a,f7.2)') 'simple_interp_: complete (TL) interpolation from ', imi,jmi, ' to ', imo, jmo, 'lon0 =', wi%grid%lon(1)
  
       else if ( pertype_ == 'adm' ) then
