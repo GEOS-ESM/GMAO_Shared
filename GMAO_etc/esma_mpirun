@@ -6,7 +6,7 @@
 #           other flags required for the operating environment.
 #
 # note -
-# 1. Any flag which has not been identified as potentially needing 
+# 1. Any flag which has not been identified as potentially needing
 #    to be filtered is passed directly through to the mpirun command.
 # 2. Specifically, the -h (or -help) flag is passed through to the
 #    mpirun command.
@@ -100,7 +100,7 @@ sub get_mpi_type {
 
     # check MPI specific env variable
     #--------------------------------
-    if    ( $ENV{"MVAPICH"}    )             { $mpi_type = "mvapich2" }
+    if    ( $ENV{"MVAPICH"}    )             { $mpi_type = "mvapich"  }
     elsif ( $ENV{"I_MPI_ROOT"} )             { $mpi_type = "intel"    }
     elsif ( $ENV{"OPENMPI"}    )             { $mpi_type = "openmpi"  }
     elsif ( $ENV{"MPICH"}      )             { $mpi_type = "mpich"    }
@@ -110,7 +110,7 @@ sub get_mpi_type {
     # check $MPIHOME env variable
     #----------------------------
     elsif ( $MPIHOME = $ENV{"MPIHOME"} ) {
-        if    ( $MPIHOME =~ m[mvapich2] )    { $mpi_type = "mvapich2" }
+        if    ( $MPIHOME =~ m[mvapich] )     { $mpi_type = "mvapich"  }
         elsif ( $MPIHOME =~ m[/intel/mpi/] ) { $mpi_type = "intel"    }
         elsif ( $MPIHOME =~ m[openmpi] )     { $mpi_type = "openmpi"  }
         elsif ( $MPIHOME =~ m[mpich] )       { $mpi_type = "mpich"    }
@@ -119,7 +119,7 @@ sub get_mpi_type {
     # check $MPI_HOME env variable
     #-----------------------------
     elsif ( $MPIHOME = $ENV{"MPI_HOME"} ) {
-        if    ( $MPIHOME =~ m[mvapich2] )    { $mpi_type = "mvapich2" }
+        if    ( $MPIHOME =~ m[mvapich] )     { $mpi_type = "mvapich"  }
         elsif ( $MPIHOME =~ m[/intel/mpi/] ) { $mpi_type = "intel"    }
         elsif ( $MPIHOME =~ m[openmpi] )     { $mpi_type = "openmpi"  }
         elsif ( $MPIHOME =~ m[mpich] )       { $mpi_type = "mpich"    }
@@ -128,7 +128,7 @@ sub get_mpi_type {
     # check $MPI_ROOT env variable
     #-----------------------------
     elsif ( $MPIHOME = $ENV{"MPI_ROOT"} ) {
-        if    ( $MPIHOME =~ m[mvapich2] )    { $mpi_type = "mvapich2" }
+        if    ( $MPIHOME =~ m[mvapich] )     { $mpi_type = "mvapich"  }
         elsif ( $MPIHOME =~ m[/intel/mpi/] ) { $mpi_type = "intel"    }
         elsif ( $MPIHOME =~ m[/sgi/mpi/] )   { $mpi_type = "mpt"      }
         elsif ( $MPIHOME =~ m[/hpe/mpt/] )   { $mpi_type = "mpt"      }
@@ -208,19 +208,17 @@ sub which_mpi_cmd {
        # NOTE: If you are running mpiexec_mpt at NCCS under SLURM interactive
        #       with MPT, you will *NOT* get the same behavior as under
        #       a batch job. To get the same behaviour, you must run with:
-       #          
+       #
        #          setenv SLURM_DISTRIBUTION=block
        #
        #       This is currently done with both g5das.j and gcm_run.j
-       
+
        chomp($mpicmd = `which mpiexec_mpt`);
     } elsif ($mpi_type eq 'mpich') {
        chomp($mpicmd = `which mpiexec`);
-    } elsif ($mpi_type eq 'mvapich2') {
-       # For now use mpirun_rsh. At NCCS this should be
-       # srun -n but as -np is *external* to esma_mpirun
-       # this requires wholesale script changes
-       chomp($mpicmd = `which mpiexec.mpirun_rsh`);
+    } elsif ($mpi_type eq 'mvapich') {
+       # On SLES 15, mvapich seems to work best with mpiexec
+       chomp($mpicmd = `which mpiexec`);
     } else {
        # Used by both Intel MPI and Open MPI
        chomp($mpicmd = `which mpirun`);
@@ -248,10 +246,6 @@ sub get_xtraflags {
 
     $xtraflags = "";
     $siteID = get_siteID();
-
-    # flags needed for mvapich2 mpi
-    #------------------------------
-    $xtraflags .= "-export" if $mpi_type eq "mvapich2";
 
     # flags needed for intel mpi
     #---------------------------
@@ -343,6 +337,11 @@ sub get_xtraflags {
 
     }
 
+    if ($mpi_type eq "mvapich") {
+       if ($perhost) {
+          $xtraflags .= " -ppn $perhost";
+       }
+    }
 }
 
 #============================================================================
