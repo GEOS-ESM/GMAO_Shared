@@ -61,7 +61,6 @@ program dyn_jediupd
                      x_a%grid%ptop, x_a%grid%ks, x_a%grid%ak, &
                      x_a%grid%bk, vectype=dyntype )
      if ( size(y_i%t,1)/=nlon .or. size(y_i%t,2)/=nlat ) then
-!       call die(myname,'field transpose in unexpected way')
         print *, myname,'field transpose in unexpected way'
         call exit(1)
      endif
@@ -72,7 +71,7 @@ program dyn_jediupd
      x_x%u  = y_i%u
      x_x%v  = y_i%v
      x_x%q(:,:,:,1) = y_i%qv
-     x_x%q(:,:,:,2) = 0.0*y_i%oz
+     x_x%q(:,:,:,2) = y_i%oz
 
      do k=1,x_x%grid%km
         x_x%delp(:,:,k)= (x_x%grid%bk(k+1) - x_x%grid%bk(k))*x_x%ps(:,:)
@@ -80,12 +79,12 @@ program dyn_jediupd
 
      call h_map_pert ( x_x, x_i, 'tlm', rc )
      print *, 'after interp sum(ts) = ', sum(x_i%ts)
+
      call dyn_clean  ( x_x )
      if (trim(outinc) /= 'NULL') then
         call dyn_put ( trim(outinc), nymd, nhms, 0, x_i, rc, freq=freq, vectype=dyntype )
      endif
    else
-!    call die(myname, 'not expecting same resolution bkg/inc')
      print *, myname, 'not expecting same resolution bkg/inc'
      call exit(1)
    endif
@@ -104,7 +103,6 @@ program dyn_jediupd
                        (x_a%grid%bk(k+1) - x_a%grid%bk(k))*x_a%ps(:,:)
    enddo
    if (any(x_a%delp<0.0)) then
-!    call die(myname, 'unacceptable delp')
      print *, myname, 'unacceptable delp'
      call exit(1)
    endif

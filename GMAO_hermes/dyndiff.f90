@@ -63,6 +63,7 @@
       integer im, jm, km, lm, system, dyntype, irh
       logical dominmax,verb,sbyene,tv2t
       integer addrh
+      integer vnorm
       logical normlz
       character(len=3) ntype ! norm type (when applicable)
       real, allocatable :: ps  (:,:)
@@ -77,7 +78,7 @@
 !  Initialize
 !  ----------     
    call Init_ ( dyntype, mfiles, files, dominmax, verb, egress, eps_eer, anorm, jnorm,  &
-                tv2t, projlon, projlat, projlev, normlz, ntype, addrh )
+                tv2t, projlon, projlat, projlev, normlz, ntype, addrh, vnorm )
 
 !  Loop over input eta files
 !  -------------------------
@@ -163,7 +164,8 @@
            dyn(1)%q(:,:,:,1:lm) = acoeff*(dyn(1)%q(:,:,:,1:lm) - dyn(2)%q(:,:,:,1:lm))
            if (sbyene) then
                call Dyn_Scale_by_TotEne(dyn(1),eps_eer,anorm,jnorm,projlon,projlat,projlev, &
-                                        nymd,nhms,ntype=ntype,normlz=normlz,ps=ps,delp=delp)
+                                        nymd,nhms,ntype=ntype,vnorm=vnorm,normlz=normlz,&
+                                        ps=ps,delp=delp)
                deallocate(ps,delp)
                call Dyn_Get_Energy (dyn(1), nymd, nhms )
            endif
@@ -252,7 +254,8 @@ CONTAINS
 !
       subroutine Init_ ( dyntype, mfiles, files, dominmax, verb, egress, &
                          eps_eer, anorm, jnorm, tv2t, &
-                         projlon, projlat, projlev, normlz, ntype, addrh )
+                         projlon, projlat, projlev, normlz, ntype, addrh, &
+                         vnorm )
 
       use m_inpak90
       use m_chars,   only: lowercase
@@ -266,6 +269,7 @@ CONTAINS
       character(len=*), intent(out) :: egress
       character(len=*), intent(out) :: anorm
       character(len=*), intent(out) :: jnorm
+      integer, intent(out) :: vnorm
       real,    intent(out) :: eps_eer
       real,    intent(out) :: projlat(2), projlon(2)
       integer, intent(out) :: projlev(2)
@@ -311,6 +315,7 @@ CONTAINS
       eps_eer = 1.0
       normlz = .false.
       ntype  = 'ene'
+      vnorm  = 0
 
 !     Default LPO boundaries
 !     ----------------------
@@ -503,6 +508,21 @@ CONTAINS
          endif
          print *
          print *, "Norm type: ", trim(ntype)
+
+!        Decide between E- and V-norms
+!        -----------------------------
+         call I90_label('vnorm:', iret)
+         if (iret .ne. 0) then
+           write(6,'(2a)') myname_,    &
+                        ': I90_label not found will use default '
+         else
+           vnorm = I90_GInt(iret)
+           if (iret .ne. 0) then
+               write(6,'(2a,i5)') myname_,    &
+                            ': I90_Gtoken error, iret =',iret
+               call exit(2)
+           end if
+         end if
 
          tv2t = .true.
       endif
