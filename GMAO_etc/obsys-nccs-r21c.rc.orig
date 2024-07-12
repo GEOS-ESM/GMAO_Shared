@@ -76,10 +76,6 @@
 #+  r21c_gmao_mlst_bufr 
 #+  r21c_loon_bufr 
 #+  r21c_prep_bufr
-#+  raob_pblh_nc
-#+  wp_pblh_nc
-#+  lidar_pblh_nc
-#+  ro_pblh_nc
 #+END
 #
 #  ----------------------------------------------------------------------------------------
@@ -455,6 +451,7 @@ BEGIN hist_ssmis_bufr => gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d.ublk
   20110228_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SSMISU/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.ssmisu.tm00.bufr_d
 END
 
+
 # AMSR2 SAME AS REAL-TIME STREAM at present
 BEGIN r21c_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
   20120901_00z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
@@ -470,20 +467,4 @@ END
 # GMI data  REAL TIME?
 BEGIN r21c_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
   20140401_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
-END
-
-BEGIN raob_pblh_nc => pblh_raobs.%y4%m2%d2.t%h2z.nc
-  20120601_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/pblh_raobs/Y%y4/M%m2/pblh_raobs.%y4%m2%d2_%h2z.nc
-END
-
-BEGIN wp_pblh_nc => pblh_wp.%y4%m2%d2.t%h2z.nc
-  20120601_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/pblh_wp/Y%y4/M%m2/pblh_wp.%y4%m2%d2_%h2z.nc
-END
-
-BEGIN ro_pblh_nc => pblh_gpsro.%y4%m2%d2.t%h2z.nc
-  20120601_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/pblh_gpsro/Y%y4/M%m2/pblh_gpsro.%y4%m2%d2_%h2z.nc
-END
-
-BEGIN lidar_pblh_nc => pblh_calipso.%y4%m2%d2.t%h2z.nc
-  20120601_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/pblh_calipso/Y%y4/M%m2/pblh_calipso.%y4%m2%d2_%h2z.nc
 END

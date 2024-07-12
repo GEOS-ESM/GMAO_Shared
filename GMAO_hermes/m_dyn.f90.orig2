@@ -541,14 +541,14 @@ CONTAINS
      w_f%hs_stdvm%long_name = 'Topography Height Standard Deviation'
      w_f%hs_stdvm%units = 'meter';
 
-     w_f%pblrim%name = 'pblri';   w_f%pblrim%long_name = 'Planetary-boundary-layer height'
-     w_f%pblrim%units = 'm';
+     w_f%tsm%name = 'pblri';   w_f%tsm%long_name = 'Planetary-boundary-layer height'
+     w_f%tsm%units = 'm';
 
-     w_f%pblrfm%name = 'pblrf';   w_f%pblrfm%long_name = 'PBLH from refractivity gradient'
-     w_f%pblrfm%units = 'm';
+     w_f%tsm%name = 'pblrf';   w_f%tsm%long_name = 'PBLH from refractivity gradient'
+     w_f%tsm%units = 'm';
 
-     w_f%pblkhm%name = 'pblkh';   w_f%pblkhm%long_name = 'PBLH from thetav gradient'
-     w_f%pblkhm%units = 'm';
+     w_f%tsm%name = 'pblkh';   w_f%tsm%long_name = 'PBLH from thetav gradient'
+     w_f%tsm%units = 'm';
 
      w_f%tsm%name = 'ts';   w_f%tsm%long_name = 'Surface temperature'
      w_f%tsm%units = 'K';
@@ -2192,34 +2192,18 @@ CONTAINS
       if (   fliplon  ) call hflip_ ( w_f%hs_stdv,im,jm )
    endif ! ncf
 
-   print*,"yeg_dyn_get in m_dyn, L2201 before GFIO_GetVar pblri" 
-   print*,"yeg_dyn_get in m_dyn, L2202 fid=",fid 
-   print*,"yeg_dyn_get in m_dyn, L2203 w_f%pblrim%name="
-   print*,"yeg_dyn_get in m_dyn, L2204", trim(w_f%pblrim%name)
    call GFIO_GetVar ( fid, w_f%pblrim%name, nymd, nhms, &
                       im, jm, 0, 1,  w_f%pblri,   err )
-   print*,"yeg_dyn_get in m_dyn, L2204 after GFIO_GetVar pblri" 
    if ( err .ne. 0 )                                        rc = 103
    if (   fliplon  ) call hflip_ ( w_f%pblri,im,jm )
 
-   ! Comment out because we don't use these variables, yet.
-   ! rc=103 leads to stop reading bkg file when creating ana, bkg files in dynp.f90
-   ! Mar/13/2023 by Eun-Gyeong Yang
-   print*,"yeg_dyn_get in m_dyn, L2211 before GFIO_GetVar pblrf" 
-   print*,"yeg_dyn_get in m_dyn, L2212 w_f%pblrfm%name="
-   print*,"yeg_dyn_get in m_dyn, L2213", trim(w_f%pblrfm%name)
    call GFIO_GetVar ( fid, w_f%pblrfm%name, nymd, nhms, &
                       im, jm, 0, 1,  w_f%pblrf,   err )
-   print*,"yeg_dyn_get in m_dyn, L2211 after GFIO_GetVar pblrf" 
    if ( err .ne. 0 )                                        rc = 103
    if (   fliplon  ) call hflip_ ( w_f%pblrf,im,jm )
 
-   print*,"yeg_dyn_get in m_dyn, L2215 before GFIO_GetVar pblkh" 
-   print*,"yeg_dyn_get in m_dyn, L2216 w_f%pblkhm%name="
-   print*,"yeg_dyn_get in m_dyn, L2217", trim(w_f%pblkhm%name)
    call GFIO_GetVar ( fid, w_f%pblkhm%name, nymd, nhms, &
                       im, jm, 0, 1,  w_f%pblkh,   err )
-   print*,"yeg_dyn_get in m_dyn, L2219 after GFIO_GetVar pblkh" 
    if ( err .ne. 0 )                                        rc = 103
    if (   fliplon  ) call hflip_ ( w_f%pblkh,im,jm )
 

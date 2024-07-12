@@ -125,9 +125,7 @@ CONTAINS
 !  Initialize the perturbation fields
 !  ----------------------------------
    dw%Ts   = 0.0
-   dw%pblri = 0.0
-   dw%pblrf = 0.0
-   dw%pblkh = 0.0
+   dw%PBLH = 0.0
    dw%u    = 0.0
    dw%v    = 0.0
    dw%pt   = 0.0
@@ -576,9 +574,7 @@ CONTAINS
 ! --------------
    w%ts   = w%ts + a * dw%ts
 !  if pblh increment is input
-   w%pblri = max(0.0, w%pblri + a * dw%pblri)
-   w%pblrf = max(0.0, w%pblrf + a * dw%pblrf)
-   w%pblkh = max(0.0, w%pblkh + a * dw%pblkh)
+   w%PBLH = max(0.0, w%PBLH + a * dw%PBLH)
    w%u    = w%u  + a * dw%u
    w%v    = w%v  + a * dw%v
    w%pt   = w%pt + a * dw%pt
@@ -703,6 +699,7 @@ CONTAINS
 !  Add all fields
 ! --------------
    w%ts   = w%ts + a * dw%ts
+!  w%PBLH = max(0.0, w%PBLH + a * dw%PBLH)
    w%u    = w%u  + a * dw%u
    w%v    = w%v  + a * dw%v
    w%pt   = w%pt + a * dw%pt
@@ -717,19 +714,9 @@ CONTAINS
    do i = 1, w%grid%im
       do j = 1, w%grid%jm
          dtmp = 0.0
-         if (w%pblri(i,j) < 0.1) dtmp = 0.1 - w%pblri(i,j)
-         work = log(max(0.1,w%pblri(i,j))) + dw%pblri(i,j)
-         w%pblri(i,j) = exp(work) - dtmp
-
-         dtmp = 0.0
-         if (w%pblrf(i,j) < 0.1) dtmp = 0.1 - w%pblrf(i,j)
-         work = log(max(0.1,w%pblrf(i,j))) + dw%pblrf(i,j)
-         w%pblrf(i,j) = exp(work) - dtmp
-
-         dtmp = 0.0
-         if (w%pblkh(i,j) < 0.1) dtmp = 0.1 - w%pblkh(i,j)
-         work = log(max(0.1,w%pblkh(i,j))) + dw%pblkh(i,j)
-         w%pblkh(i,j) = exp(work) - dtmp
+         if (w%PBLH(i,j) < 0.1) dtmp = 0.1 - w%PBLH(i,j)
+         work = log(max(0.1,w%PBLH(i,j))) + dw%PBLH(i,j)
+         w%PBLH(i,j) = exp(work) - dtmp
       end do
    end do
 
@@ -1056,9 +1043,7 @@ CONTAINS
    dw%delp = value * dw%delp
    dw%ps   = value * dw%ps
    dw%ts   = value * dw%ts
-   dw%pblri = value * dw%pblri
-   dw%pblrf = value * dw%pblrf
-   dw%pblkh = value * dw%pblkh
+   dw%PBLH = value * dw%PBLH
    print *, 'dynp_set: scaled field by: ', value
 
    end subroutine dynp_scale

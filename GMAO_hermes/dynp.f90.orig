@@ -245,8 +245,7 @@
 
 !          Add/subtract perturbation
 !          -------------------------
-           call dynp_add ( w, pcoef, dw, rc, verbose=.true. )  ! pblh inc is input
-!          call dynp_add_logpblh ( w, pcoef, dw, rc, verbose=.true. ) ! log(pblh) inc is input
+           call dynp_add ( w, pcoef, dw, rc, verbose=.true. )
 
            if ( rc .eq. 0 ) then
                 print *, myname//': perturbed the state'

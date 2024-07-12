@@ -85,8 +85,8 @@
    integer, parameter ::  nstep_def   = 15760
    integer, parameter ::  dynvectyp_def = 4      ! Default dyn-vect type is GEOS-4
    integer, save      ::  dynvectyp    = -1
-   integer, parameter ::  nfix2d5 = 12             ! phis, hs_stdv, pblri, pblrf, pblkh, ts, ps, frlands(5)
-   integer, parameter ::  nfix2d4 = 8              ! phis, hs_stdv, pblri, pblrf, pblkh, ts, ps, lwi
+   integer, parameter ::  nfix2d5 = 9              ! phis, hs_stdv, ts, ps, frlands(5)
+   integer, parameter ::  nfix2d4 = 5              ! phis, hs_stdv, ts, ps, lwi
    integer, parameter ::  nfix3d  = 4              ! delp, u, v, pt
    integer, parameter ::  n3dtrc  = 6              ! number of fix tracer: q,o3,qi,ql,qr,qs
    integer, parameter ::  nfix4   = nfix2d4+nfix3d ! fixed vars (minus q)
@@ -149,9 +149,6 @@
       type(dyn_meta) :: hs_stdvm
       type(dyn_meta) :: psm
       type(dyn_meta) :: tsm
-      type(dyn_meta) :: pblrim
-      type(dyn_meta) :: pblrfm
-      type(dyn_meta) :: pblkhm
       type(dyn_meta) :: frlandm
       type(dyn_meta) :: frlandicem
       type(dyn_meta) :: frlakem
@@ -172,9 +169,6 @@
 !     ------
       real, pointer   ::   phis(:,:)     =>null()  ! topography geopotential (g*z_s)
       real, pointer   ::   hs_stdv(:,:)  =>null()  ! topography height stdv
-      real, pointer   ::   pblri(:,:)     =>null()  ! planetary boundary layer height
-      real, pointer   ::   pblrf(:,:)     =>null()  ! planetary boundary layer height
-      real, pointer   ::   pblkh(:,:)     =>null()  ! planetary boundary layer height
       real, pointer   ::   Ts(:,:)       =>null()  ! sea surface temperature
       real, pointer   ::   frland(:,:)   =>null()  ! fraction of land
       real, pointer   ::   frlandice(:,:)=>null()  ! fraction of land-ice
@@ -313,9 +307,6 @@ CONTAINS
           associated(w_f%delp)     .or. &
           associated(w_f%ps)       .or. &
           associated(w_f%ts)       .or. &
-          associated(w_f%pblri)     .or. &
-          associated(w_f%pblrf)     .or. &
-          associated(w_f%pblkh)     .or. &
           associated(w_f%frland)   .or. &
           associated(w_f%frlandice).or. &
           associated(w_f%frlake)   .or. &
@@ -334,9 +325,6 @@ CONTAINS
 !    ---------------------------------
      allocate(w_f%phis(im,jm),     stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%hs_stdv(im,jm),  stat = err); if (err.ne. 0) rc = 2
-     allocate(w_f%pblri(im,jm),     stat = err); if (err.ne. 0) rc = 2
-     allocate(w_f%pblrf(im,jm),     stat = err); if (err.ne. 0) rc = 2
-     allocate(w_f%pblkh(im,jm),     stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%ts(im,jm),       stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%frland(im,jm),   stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%frlandice(im,jm),stat = err); if (err.ne. 0) rc = 2
@@ -427,9 +415,6 @@ CONTAINS
 !    ----------------------------
      w_f%phis      = 0.0
      w_f%hs_stdv   = 0.0
-     w_f%pblri     = 0.0
-     w_f%pblrf     = 0.0
-     w_f%pblkh     = 0.0
      w_f%Ts        = 0.0
      w_f%frland    = 0.0
      w_f%frlandice = 0.0
@@ -540,15 +525,6 @@ CONTAINS
      w_f%hs_stdvm%name = 'hs_stdv'
      w_f%hs_stdvm%long_name = 'Topography Height Standard Deviation'
      w_f%hs_stdvm%units = 'meter';
-
-     w_f%pblrim%name = 'pblri';   w_f%pblrim%long_name = 'Planetary-boundary-layer height'
-     w_f%pblrim%units = 'm';
-
-     w_f%pblrfm%name = 'pblrf';   w_f%pblrfm%long_name = 'PBLH from refractivity gradient'
-     w_f%pblrfm%units = 'm';
-
-     w_f%pblkhm%name = 'pblkh';   w_f%pblkhm%long_name = 'PBLH from thetav gradient'
-     w_f%pblkhm%units = 'm';
 
      w_f%tsm%name = 'ts';   w_f%tsm%long_name = 'Surface temperature'
      w_f%tsm%units = 'K';
@@ -730,9 +706,6 @@ CONTAINS
 
         w_out%phis      = w_in%phis
         w_out%hs_stdv   = w_in%hs_stdv
-        w_out%pblri     = w_in%pblri
-        w_out%pblrf     = w_in%pblrf
-        w_out%pblkh     = w_in%pblkh
         w_out%Ts        = w_in%Ts
         w_out%frland    = w_in%frland
         w_out%frlandice = w_in%frlandice
@@ -766,7 +739,6 @@ CONTAINS
 ! !INTERFACE:
 !
   subroutine  Dyn_Init77_ ( im, jm, km, lm, ptop, ks, ak, bk, &
-!                           phis, hs_stdv, pblri, pblrf, pblkh, Ts, lwi, ps, & !keep interface unchanged to avoid changes in g5pert
                             phis, hs_stdv, Ts, lwi, ps,       &
                             frland, frlandice, frlake, frocean, frseaice, &
                             delp, u, v, pt, q, w_f, rc,       &
@@ -795,9 +767,6 @@ CONTAINS
   real, TARGET, intent(in)   :: phis(:,:)       !  topography geopotential [m]
                                                 !    (g*z_s)
   real, TARGET, intent(in)   :: hs_stdv(:,:)    !  topography height stdv
-! real, TARGET, intent(in)   :: pblri(:,:)       !  planetary boundary layer height
-! real, TARGET, intent(in)   :: pblrf(:,:)       !  planetary boundary layer height
-! real, TARGET, intent(in)   :: pblkh(:,:)       !  planetary boundary layer height
   real, TARGET, intent(in)   :: Ts(:,:)         !  sea surface temperature
   real, TARGET, intent(in)   :: lwi(:,:)        !  land-water-ice mask
   real, TARGET, intent(in)   :: frland(:,:)     !  fraction of land  
@@ -863,9 +832,6 @@ CONTAINS
           associated(w_f%delp)      .or. &
           associated(w_f%ps)        .or. &
           associated(w_f%ts)        .or. &
-!         associated(w_f%pblri)     .or. &
-!         associated(w_f%pblrf)     .or. &
-!         associated(w_f%pblkh)     .or. &
           associated(w_f%lwi)       .or. &
           associated(w_f%frland)    .or. &
           associated(w_f%frlandice) .or. &
@@ -884,9 +850,6 @@ CONTAINS
 !    ---------------------------------
      allocate(w_f%phis(im,jm),      stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%hs_stdv(im,jm),   stat = err); if (err.ne. 0) rc = 2
-!    allocate(w_f%pblri(im,jm),      stat = err); if (err.ne. 0) rc = 2
-!    allocate(w_f%pblrf(im,jm),      stat = err); if (err.ne. 0) rc = 2
-!    allocate(w_f%pblkh(im,jm),      stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%ts(im,jm),        stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%lwi(im,jm),       stat = err); if (err.ne. 0) rc = 2
      allocate(w_f%frland(im,jm),    stat = err); if (err.ne. 0) rc = 2
@@ -964,9 +927,6 @@ CONTAINS
 !    --------------------------------
      w_f%phis      => phis
      w_f%hs_stdv   => hs_stdv
-!    w_f%pblri     => pblri
-!    w_f%pblrf     => pblrf
-!    w_f%pblkh     => pblkh
      w_f%Ts        => Ts
      w_f%lwi       => lwi
      w_f%frland    => frland
@@ -1018,9 +978,6 @@ CONTAINS
 
    if ( associated(w_f%phis) )      deallocate(w_f%phis)
    if ( associated(w_f%hs_stdv) )   deallocate(w_f%hs_stdv)
-   if ( associated(w_f%pblri) )      deallocate(w_f%pblri)
-   if ( associated(w_f%pblrf) )      deallocate(w_f%pblrf)
-   if ( associated(w_f%pblkh) )      deallocate(w_f%pblkh)
    if ( associated(w_f%ts) )        deallocate(w_f%ts)
    if ( associated(w_f%frland) )    deallocate(w_f%frland)
    if ( associated(w_f%frlandice) ) deallocate(w_f%frlandice)
@@ -1078,9 +1035,6 @@ CONTAINS
 
    if ( associated(w_f%phis) )        nullify(w_f%phis)
    if ( associated(w_f%hs_stdv) )     nullify(w_f%hs_stdv)
-   if ( associated(w_f%pblri) )        nullify(w_f%pblri)
-   if ( associated(w_f%pblrf) )        nullify(w_f%pblrf)
-   if ( associated(w_f%pblkh) )        nullify(w_f%pblkh)
    if ( associated(w_f%ts) )          nullify(w_f%ts)
    if ( associated(w_f%frland) )      nullify(w_f%frland)
    if ( associated(w_f%frlandice) )   nullify(w_f%frlandice)
@@ -1337,30 +1291,6 @@ CONTAINS
    kmvar(next)  = 0
    endif
 
-   if(this_var_("pblri")) then
-   next=next+1
-   vname(next)  = w_f%pblrim%name
-   vtitle(next) = w_f%pblrim%long_name
-   vunits(next) = w_f%pblrim%units
-   kmvar(next)  = 0
-   endif
-
-   if(this_var_("pblrf")) then
-   next=next+1
-   vname(next)  = w_f%pblrfm%name
-   vtitle(next) = w_f%pblrfm%long_name
-   vunits(next) = w_f%pblrfm%units
-   kmvar(next)  = 0
-   endif
-
-   if(this_var_("pblkh")) then
-   next=next+1
-   vname(next)  = w_f%pblkhm%name
-   vtitle(next) = w_f%pblkhm%long_name
-   vunits(next) = w_f%pblkhm%units
-   kmvar(next)  = 0
-   endif
-
    if(this_var_("ts")) then
    next=next+1
    vname(next)  = w_f%tsm%name
@@ -1605,40 +1535,13 @@ CONTAINS
     if ( err .ne. 0 ) rc = 102
     end if
 
-    if (this_var_("pblri")) then
-                                next = next+1
-    if (verb) print *, '        [] writing ', trim(vname(next))
-                                fld2 = w_f%pblri
-    if( fliplon ) call hflip_ ( fld2, im, jm )
-    call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 103
-    end if
-
-    if (this_var_("pblrf")) then
-                                next = next+1
-    if (verb) print *, '        [] writing ', trim(vname(next))
-                                fld2 = w_f%pblrf
-    if( fliplon ) call hflip_ ( fld2, im, jm )
-    call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 103
-    end if
-
-    if (this_var_("pblkh")) then
-                                next = next+1
-    if (verb) print *, '        [] writing ', trim(vname(next))
-                                fld2 = w_f%pblkh
-    if( fliplon ) call hflip_ ( fld2, im, jm )
-    call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 103
-    end if
-
     if (this_var_("ts")) then
                                 next = next+1
     if (verb) print *, '        [] writing ', trim(vname(next))
                                 fld2 = w_f%ts
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 104
+    if ( err .ne. 0 ) rc = 103
     end if
 
     if ( dynvectyp==4 ) then
@@ -1649,7 +1552,7 @@ CONTAINS
                                 fld2 = w_f%lwi
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 105
+    if ( err .ne. 0 ) rc = 104
     end if
 
     else
@@ -1660,7 +1563,7 @@ CONTAINS
                                 fld2 = w_f%frland
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 105
+    if ( err .ne. 0 ) rc = 104
     end if
 
     if (this_var_("frlandice")) then
@@ -1669,7 +1572,7 @@ CONTAINS
                                 fld2 = w_f%frlandice
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 106
+    if ( err .ne. 0 ) rc = 105
     end if
 
     if (this_var_("frlake")) then
@@ -1678,7 +1581,7 @@ CONTAINS
                                 fld2 = w_f%frlake
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 107
+    if ( err .ne. 0 ) rc = 106
     end if
 
     if (this_var_("frocean")) then
@@ -1687,7 +1590,7 @@ CONTAINS
                                 fld2 = w_f%frocean
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 108
+    if ( err .ne. 0 ) rc = 107
     end if
 
     if (this_var_("frseaice")) then
@@ -1696,7 +1599,7 @@ CONTAINS
                                 fld2 = w_f%frseaice
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 109
+    if ( err .ne. 0 ) rc = 108
     end if
 
     endif
@@ -1707,7 +1610,7 @@ CONTAINS
                                 fld2 = w_f%ps
     if( fliplon ) call hflip_ ( fld2, im, jm )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 0,  1, fld2,   err )
-    if ( err .ne. 0 ) rc = 110
+    if ( err .ne. 0 ) rc = 109
     end if
 
     if (this_var_("delp").or.this_var_("hght")) then
@@ -1716,7 +1619,7 @@ CONTAINS
                                 fld3 = w_f%delp
     if( fliplon ) call hflip_ ( fld3, im, jm, km )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 1, km, fld3, err )
-    if ( err .ne. 0 ) rc = 111
+    if ( err .ne. 0 ) rc = 110
     end if
 
     if (this_var_("u")) then
@@ -1725,7 +1628,7 @@ CONTAINS
                                 fld3 = w_f%u
     if( fliplon ) call hflip_ ( fld3, im, jm, km )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 1, km, fld3,    err )
-    if ( err .ne. 0 ) rc = 112
+    if ( err .ne. 0 ) rc = 111
     end if
 
     if (this_var_("v")) then
@@ -1734,7 +1637,7 @@ CONTAINS
                                 fld3 = w_f%v
     if( fliplon ) call hflip_ ( fld3, im, jm, km )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 1, km, fld3,    err )
-    if ( err .ne. 0 ) rc = 113
+    if ( err .ne. 0 ) rc = 112
     end if
 
     if (this_var_("tv").or.this_var_("tmpu")) then
@@ -1743,7 +1646,7 @@ CONTAINS
                                 fld3 = w_f%pt
     if( fliplon ) call hflip_ ( fld3, im, jm, km )
     call GFIO_PutVar ( fid, vname(next), nymd, nhms, im, jm, 1, km, fld3,   err )
-    if ( err .ne. 0 ) rc = 114
+    if ( err .ne. 0 ) rc = 113
     end if
 
     do l = next+1, next+lm
@@ -2192,37 +2095,6 @@ CONTAINS
       if (   fliplon  ) call hflip_ ( w_f%hs_stdv,im,jm )
    endif ! ncf
 
-   print*,"yeg_dyn_get in m_dyn, L2201 before GFIO_GetVar pblri" 
-   print*,"yeg_dyn_get in m_dyn, L2202 fid=",fid 
-   print*,"yeg_dyn_get in m_dyn, L2203 w_f%pblrim%name="
-   print*,"yeg_dyn_get in m_dyn, L2204", trim(w_f%pblrim%name)
-   call GFIO_GetVar ( fid, w_f%pblrim%name, nymd, nhms, &
-                      im, jm, 0, 1,  w_f%pblri,   err )
-   print*,"yeg_dyn_get in m_dyn, L2204 after GFIO_GetVar pblri" 
-   if ( err .ne. 0 )                                        rc = 103
-   if (   fliplon  ) call hflip_ ( w_f%pblri,im,jm )
-
-   ! Comment out because we don't use these variables, yet.
-   ! rc=103 leads to stop reading bkg file when creating ana, bkg files in dynp.f90
-   ! Mar/13/2023 by Eun-Gyeong Yang
-   print*,"yeg_dyn_get in m_dyn, L2211 before GFIO_GetVar pblrf" 
-   print*,"yeg_dyn_get in m_dyn, L2212 w_f%pblrfm%name="
-   print*,"yeg_dyn_get in m_dyn, L2213", trim(w_f%pblrfm%name)
-   call GFIO_GetVar ( fid, w_f%pblrfm%name, nymd, nhms, &
-                      im, jm, 0, 1,  w_f%pblrf,   err )
-   print*,"yeg_dyn_get in m_dyn, L2211 after GFIO_GetVar pblrf" 
-   if ( err .ne. 0 )                                        rc = 103
-   if (   fliplon  ) call hflip_ ( w_f%pblrf,im,jm )
-
-   print*,"yeg_dyn_get in m_dyn, L2215 before GFIO_GetVar pblkh" 
-   print*,"yeg_dyn_get in m_dyn, L2216 w_f%pblkhm%name="
-   print*,"yeg_dyn_get in m_dyn, L2217", trim(w_f%pblkhm%name)
-   call GFIO_GetVar ( fid, w_f%pblkhm%name, nymd, nhms, &
-                      im, jm, 0, 1,  w_f%pblkh,   err )
-   print*,"yeg_dyn_get in m_dyn, L2219 after GFIO_GetVar pblkh" 
-   if ( err .ne. 0 )                                        rc = 103
-   if (   fliplon  ) call hflip_ ( w_f%pblkh,im,jm )
-
    if (ncf_) then
        w_f%ts  = 0.0
        w_f%frland = 0.0
@@ -2234,7 +2106,7 @@ CONTAINS
 
       call GFIO_GetVar ( fid, w_f%tsm%name, nymd, nhms, &
                          im, jm, 0, 1,  w_f%ts,   err )
-      if ( err .ne. 0 )                                        rc = 104
+      if ( err .ne. 0 )                                        rc = 103
       if (   fliplon  ) call hflip_ ( w_f%ts,im,jm )
 
       if (pncf_) then ! perturbation files have ts but not fractions
@@ -2249,34 +2121,34 @@ CONTAINS
    
              call GFIO_GetVar ( fid, w_f%lwim%name, nymd, nhms, &
                                 im, jm, 0, 1,  w_f%lwi,   err )
-             if ( err .ne. 0 )                                        rc = 105
+             if ( err .ne. 0 )                                        rc = 104
              if (   fliplon  ) call hflip_ ( w_f%lwi,im,jm )
    
          else
       
              call GFIO_GetVar ( fid, w_f%frlandm%name, nymd, nhms, &
                                 im, jm, 0, 1,  w_f%frland,   err )
-             if ( err .ne. 0 )                                        rc = 105
+             if ( err .ne. 0 )                                        rc = 104
              if (   fliplon  ) call hflip_ ( w_f%frland,im,jm )
       
              call GFIO_GetVar ( fid, w_f%frlandicem%name, nymd, nhms, &
                                 im, jm, 0, 1,  w_f%frlandice,   err )
-             if ( err .ne. 0 )                                        rc = 106
+             if ( err .ne. 0 )                                        rc = 105
              if (   fliplon  ) call hflip_ ( w_f%frlandice,im,jm )
        
              call GFIO_GetVar ( fid, w_f%frlakem%name, nymd, nhms, &
                                 im, jm, 0, 1,  w_f%frlake,   err )
-             if ( err .ne. 0 )                                        rc = 107
+             if ( err .ne. 0 )                                        rc = 106
              if (   fliplon  ) call hflip_ ( w_f%frlake,im,jm )
       
              call GFIO_GetVar ( fid, w_f%froceanm%name, nymd, nhms, &
                                 im, jm, 0, 1,  w_f%frocean,   err )
-             if ( err .ne. 0 )                                        rc = 108
+             if ( err .ne. 0 )                                        rc = 107
              if (   fliplon  ) call hflip_ ( w_f%frocean,im,jm )
    
              call GFIO_GetVar ( fid, w_f%frseaicem%name, nymd, nhms, &
                                 im, jm, 0, 1,  w_f%frseaice,   err )
-             if ( err .ne. 0 )                                        rc = 109
+             if ( err .ne. 0 )                                        rc = 108
              if (   fliplon  ) call hflip_ ( w_f%frseaice,im,jm )
 
          endif
@@ -2287,7 +2159,7 @@ CONTAINS
 
    call GFIO_GetVar ( fid, w_f%psm%name, nymd, nhms, &
                       im, jm, 0, 1,  w_f%ps,   err )
-   if ( err .ne. 0 )                                        rc = 110
+   if ( err .ne. 0 )                                        rc = 109
    if (   fliplon  ) call hflip_ ( w_f%ps,im,jm )
 
    fldname = w_f%delpm%name
@@ -2295,7 +2167,7 @@ CONTAINS
    if (pncf_) fldname = 'delp'
    call GFIO_GetVar ( fid, fldname, nymd, nhms, &
                       im, jm, 1, km, w_f%delp, err )
-   if ( err .ne. 0 )                                        rc = 111
+   if ( err .ne. 0 )                                        rc = 110
    if (   fliplon  ) call hflip_ ( w_f%delp,im,jm,km )
 
    call GFIO_GetVar ( fid, w_f%um%name,  nymd, nhms,   &
@@ -2310,17 +2182,17 @@ CONTAINS
        call GFIO_GetVar ( fid, varname,  nymd, nhms,   &
                           im, jm, 1, km, w_f%u,    err )
    endif
-   if ( err .ne. 0 )                                        rc = 112
+   if ( err .ne. 0 )                                        rc = 111
    if (   fliplon  ) call hflip_ ( w_f%u,im,jm,km )
 
    call GFIO_GetVar ( fid, w_f%vm%name, nymd, nhms,    &
                       im, jm, 1, km, w_f%v, err )
-   if ( err .ne. 0 )                                        rc = 113
+   if ( err .ne. 0 )                                        rc = 112
    if (   fliplon  ) call hflip_ ( w_f%v,im,jm,km )
 
    call GFIO_GetVar ( fid, w_f%ptm%name, nymd, nhms,   &
                       im, jm, 1, km, w_f%pt,   err )
-   if ( err .ne. 0 )                                        rc = 114
+   if ( err .ne. 0 )                                        rc = 113
    if (   fliplon  ) call hflip_ ( w_f%pt,im,jm,km )
 
    if ( readSPHU ) then
@@ -2376,7 +2248,7 @@ CONTAINS
             if ( l .eq. 2  .and.  err .eq. -40 ) then
                  rc = 1113 + l       ! variable not found.
             else if ( l .eq. 2  .and.  err .ne. 0 ) then
-                 rc = 114 + l
+                 rc = 113 + l
             else if ( l .gt. 2  .and.  err .ne. 0 ) then
                  w_f%q(:,:,:,l) = 0.0 ! for backward compatibility, if cloud fields not found, no problem
             end if
@@ -2525,9 +2397,6 @@ CONTAINS
 
   if(associated(w_f%phis))      call hflip_(w_f%phis     , im, jm)
   if(associated(w_f%hs_stdv))   call hflip_(w_f%hs_stdv  , im, jm)
-  if(associated(w_f%pblri))     call hflip_(w_f%pblri    , im, jm)
-  if(associated(w_f%pblrf))     call hflip_(w_f%pblrf    , im, jm)
-  if(associated(w_f%pblkh))     call hflip_(w_f%pblkh    , im, jm)
   if(associated(w_f%ts))        call hflip_(w_f%ts       , im, jm)
   if(associated(w_f%frland))    call hflip_(w_f%frland   , im, jm)
   if(associated(w_f%frlandice)) call hflip_(w_f%frlandice, im, jm)
@@ -2849,12 +2718,6 @@ CONTAINS
                      w_f%phism%long_name, 1 )
        call GDSTAT_ (lu,im,jm,1,w_f%hs_stdv, levs,'HGHT','lev',amiss, &
                      w_f%hs_stdvm%long_name, 1 )
-       call GDSTAT_ (lu,im,jm,1,w_f%pblri, levs,'HGHT','lev',amiss, &
-                     w_f%pblrim%long_name, 1 )
-       call GDSTAT_ (lu,im,jm,1,w_f%pblrf, levs,'HGHT','lev',amiss, &
-                     w_f%pblrfm%long_name, 1 )
-       call GDSTAT_ (lu,im,jm,1,w_f%pblkh, levs,'HGHT','lev',amiss, &
-                     w_f%pblkhm%long_name, 1 )
        call GDSTAT_ (lu,im,jm,1,w_f%ts, levs,'TEMP','lev',amiss, &
                      w_f%tsm%long_name, 1 )
        call GDSTAT_ (lu,im,jm,1,w_f%lwi, levs,'XXXX','lev',amiss, &

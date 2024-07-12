@@ -49,9 +49,7 @@ endif
 
 ! Read latest increment
 ! ---------------------
-print *, "yeg_dyn_iupd L52: iofile=",iofile
 call dyn_get ( trim(iofile),  nymd, nhms, yi, rc, freq=freq, vectype=dyntype, pncf=pncf )
-print *, "yeg_dyn_iupd L54: after calling dyn_get"
 
 ! Handle horizontal resolution difference ...
 ! will interpolate fields of old increment (first file)
@@ -91,9 +89,7 @@ if ( im1 /= im2 .or. &  ! when horizontal res not consistent,
 else
 !    Read previous increment
 !    -----------------------
-     print *, "yeg_dyn_iupd L94: read previous increment, ifile=",ifile
      call dyn_get ( trim(ifile), nymd, nhms, xi, rc, freq=freq, vectype=dyntype, pncf=pncf )
-     print *, "yeg_dyn_iupd L96: after calling dyn_get"
      lm1=min(yi%grid%lm,xi%grid%lm)
 endif
 

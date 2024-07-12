@@ -621,7 +621,6 @@ c                           timeUnits: string is built below
           packflag = .FALSE.
         endif
         if ( kmvar(i) .eq. 0 ) then
-          print*, "yeg_GFIO_Create1 gfio L624:fid=",fid,"vname(i)=",trim(vname(i))
           if (packflag) then
             vid(i) = ncvdef (fid, vname(i), NCSHORT, 3, dims2D, rc)
             vmode=NCSHORT;
@@ -1938,7 +1937,7 @@ c                           timeUnits: string is built below
       if ( .not. tcyclic ) then
          if (yyyymmdd .LT. begDate .OR. (begDate .EQ. yyyymmdd .AND.
      .        hhmmss .LT. begTime) .or. secs .LT. 0) then
-            print *, 'GFIO_GetVar: Requested time earlier than 1st time'
+            print *, 'GFIO_GetVar: Requested time earlier than first time.'
             rc = -7
             return
          endif
@@ -3105,8 +3104,7 @@ c                           timeUnits: string is built below
      .                .NE. 0) return
               else
                     print *, 
-!     .              'GFIO_Inquire: Cannot find missing value, assuming 1E+15'
-     .              'GFIO_Inquire: Cannot find miss val, assuming 1E+15'
+     .              'GFIO_Inquire: Cannot find missing value, assuming 1E+15'
                     amiss_32 = 1.0E+15
               end if
            endif
@@ -3848,7 +3846,6 @@ c                           timeUnits: string is built below
       real*4, allocatable :: buf32(:)
       real*8, allocatable :: buf64(:)
 
-      print*, "yeg_GetRealAtt: gfio.f L3850: fid=",fid 
       call ncainq (fid, NCGLOBAL, name, type, length, rc)
       if (err("GetRealAtt: error reading attribute info",rc,-58)
      .      .NE. 0) return
