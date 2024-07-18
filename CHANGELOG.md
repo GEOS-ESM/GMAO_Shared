@@ -11,11 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Commit a bundle of code updates for MERRA-21C candidate tag
-
 ### Fixed
 
 ### Removed
+
+## [v1.7.2+R21C_v1.0.1] - 2024-03-28
+
+### Changed
+
+- Updated observation resource files for M21C
+
+## [v1.7.2+R21C_v1.0.0] - 2024-03-01
+
+### Changed
+
+- Commit a bundle of code updates for MERRA-21C candidate tag
 
 ## [1.7.2] - 2023-03-17
 
