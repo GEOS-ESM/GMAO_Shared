@@ -674,7 +674,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
      call get_1d_var(input_id,'Time',rvals,rc)
      if (rc /= 0) return
-     ods%data%time(1:nobs) = int(rvals * 60)
+     ods%data%time(1:nobs) = int(rvals * 60.)
 
      call get_1d_var(input_id,'Observation_Type',ivals,rc)
      if (rc /= 0) return
