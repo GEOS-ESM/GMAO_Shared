@@ -6,6 +6,7 @@ routines from RAMS.
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 static FILE *file;
 
