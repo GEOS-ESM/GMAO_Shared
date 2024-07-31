@@ -13,10 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+### Removed
+
+## [1.9.8] - 2024-07-31
+
+### Fixed
+
 - Fixed invalid Fortran in `GMAO_ods/ods_diagnc4.f90`
 - Added `stdlib.h` in `GMAO_pyobs/VegType_io.c` to fix compilation error with `icx`
-
-### Removed
 
 ## [1.9.7] - 2024-01-30
 
