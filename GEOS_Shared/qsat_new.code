@@ -28,7 +28,7 @@
       TI = MAX(MIN(TL,TMAX),TMIN)
          
       TT = TI - TMIN
-      IT = int(TT)
+      IT = min(max(1,int(TT)),TABLESIZE-1)
       TT = TT-IT
 
       TI = TI - ZEROC
@@ -67,7 +67,7 @@
          TI = MAX(MIN(TL(I),TMAX),TMIN)
          
          TT = TI - TMIN
-         IT = int(TT)
+         IT = min(max(1,int(TT)),TABLESIZE-1)
          TT = TT-IT
 
          TI = TI - ZEROC
@@ -109,7 +109,7 @@
          TI = MAX(MIN(TL(I,J),TMAX),TMIN)
          
          TT = TI - TMIN
-         IT = int(TT)
+         IT = min(max(1,int(TT)),TABLESIZE-1)
          TT = TT-IT
 
          TI = TI - ZEROC
@@ -152,7 +152,7 @@
          TI = MAX(MIN(TL(I,J,K),TMAX),TMIN)
          
          TT = TI - TMIN
-         IT = int(TT)
+         IT = min(max(1,int(TT)),TABLESIZE-1)
          TT = TT-IT
 
          TI = TI - ZEROC
@@ -197,7 +197,7 @@
          TI = MAX(MIN(TL(I,J,K,L),TMAX),TMIN)
          
          TT = TI - TMIN
-         IT = int(TT)
+         IT = min(max(1,int(TT)),TABLESIZE-1)
          TT = TT-IT
 
          TI = TI - ZEROC
