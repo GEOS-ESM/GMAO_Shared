@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Declare `main` in `makdep.c` as `int` to satisfy gcc 14
+
 ### Removed
 
 ## [1.9.8] - 2024-07-31
