@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update ESMF CMake target to `ESMF::ESMF`
+- Update `n4zip` with long option for non-alphabetical sorting
 
 ### Fixed
 
