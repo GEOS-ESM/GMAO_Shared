@@ -488,11 +488,11 @@ BEGIN r21c_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
 END
 
 #-------------------------
-BEGIN gmao_prep_bufr => EXPID.prepbufr.%y4%m2%d2.t%h2z.blk
- 19961231_00z-20211231_18z 060000 FVHOME/EXPID/atmens/central/EXPID.prepbufr.%y4%m2%d2.t%h2z.blk
+BEGIN gmao_prep_bufr => $EXPID.prepbufr.%y4%m2%d2.t%h2z.bfr
+ 19961231_00z-20211231_18z 060000 $FVHOME/atmens/central/$EXPID.prepbufr.%y4%m2%d2.t%h2z.blk
 END
 BEGIN gmao_acftpfl_bufr => EXPID.acft_profl.%y4%m2%d2.t%h2z.bfr
- 19961231_00z-20211231_18z 060000 FVHOME/EXPID/atmens/central/EXPID.acft_profl.%y4%m2%d2.t%h2z.bfr
+ 19961231_00z-20211231_18z 060000 $FVHOME/atmens/central/$EXPID.acft_profl.%y4%m2%d2.t%h2z.bfr
 END
 
 
