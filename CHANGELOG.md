@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated observation resource files for M21C
+- Generalize handling of obsys.rc for reanalysis when prebufr files are created
+  within the DAS by preQC
 
 ## [v1.7.2+R21C_v1.0.0] - 2024-03-01
 
