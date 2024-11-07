@@ -15,13 +15,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v1.7.2+R21C_v1.0.3] - 2024-11-07
+
+These are minor changes to GMAO_Shared required for system to work on Milan. They are largely associated w/ python3 related changes and a few perl adjustments. The main changes are:
+
+- replacement of GMAO_pyobs directory w/ GMAO_pyobs repo
+- changes to some python programs 
+- minor changes in GFIO - in support of GMAO_pyobs and GMAO_ods/pyods changes 
+
+Many of these relate to the revised Aerosol-related software.
+
+## [v1.7.2+R21C_v1.0.2] - 2024-11-05
+
+- Generalize handling of obsys.rc for reanalysis when prebufr files are created
+  within the DAS by preQC
+
 ## [v1.7.2+R21C_v1.0.1] - 2024-03-28
 
 ### Changed
 
 - Updated observation resource files for M21C
-- Generalize handling of obsys.rc for reanalysis when prebufr files are created
-  within the DAS by preQC
 
 ## [v1.7.2+R21C_v1.0.0] - 2024-03-01
 
