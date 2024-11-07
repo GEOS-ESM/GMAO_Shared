@@ -101,7 +101,7 @@ sub expand {
     #------------------------------------------
     foreach $var (@vars) {
 
-        ($varname = $var) =~ s/[\$\{\}]//g;
+        ($varname = $var) =~ s/[\$[{}]]//g;
         $val_ENV  = $ENV{$varname};
         $val_eval = eval($var);
 
