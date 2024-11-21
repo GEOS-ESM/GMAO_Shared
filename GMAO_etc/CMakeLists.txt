@@ -97,7 +97,6 @@ install (
    )
 
 set(perlscripts_with_dasperl
-   Err_Log.pl
    bacon
    fvgetf
    grads2grib
