@@ -19,6 +19,11 @@ set(perlscripts
    acquire_obsys
    )
 
+install (
+   PROGRAMS ${perl_files} ${perl_packages} ${perlscripts}
+   DESTINATION bin
+   )
+
 set(perldirs
    ESMA
    GrADS
@@ -34,11 +39,6 @@ foreach(perldir ${perldirs})
       USE_SOURCE_PERMISSIONS
       )
 endforeach()
-
-install (
-   PROGRAMS ${perl_files} ${perl_packages} ${perlscripts}
-   DESTINATION bin
-   )
 
 set(perlscripts_with_dasperl
    Err_Log.pl
