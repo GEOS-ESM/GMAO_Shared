@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v1.7.2+R21C_v1.0.4] - 2024-11-26
+
+### Changed
+
+- Modify KX's in `odsmatch.rc`
+
 ## [v1.7.2+R21C_v1.0.3] - 2024-11-07
 
 These are minor changes to GMAO_Shared required for system to work on Milan. They are largely associated w/ python3 related changes and a few perl adjustments. The main changes are:
