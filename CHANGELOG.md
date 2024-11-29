@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v1.7.2+R21C_v1.0.5] - 2024-11-29
+
+### Changed
+
+- Brought from 5.41.x to get AOD analysis to work properly.
+
 ## [v1.7.2+R21C_v1.0.4] - 2024-11-26
 
 ### Changed
