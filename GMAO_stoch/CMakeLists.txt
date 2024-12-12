@@ -45,7 +45,7 @@ set (srcs
 
  esma_add_library(${this}
    SRCS ${srcs}
-   DEPENDENCIES GMAO_mpeu GMAO_gfio_r8 GMAO_transf MAPL NCEP_sfcio NCEP_sp_r4i4 esmf NetCDF::NetCDF_Fortran
+   DEPENDENCIES GMAO_mpeu GMAO_gfio_r8 GMAO_transf MAPL NCEP_sfcio NCEP_sp_r4i4 ESMF::ESMF NetCDF::NetCDF_Fortran
    )
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
