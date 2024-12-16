@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Change in `nc_diag_cat` for SLES15
+
 ### Changed
 
 - update to remote_util.pl to serve OPS-spec needs
