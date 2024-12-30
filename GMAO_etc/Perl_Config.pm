@@ -101,7 +101,9 @@ sub expand {
     #------------------------------------------
     foreach $var (@vars) {
 
-        ($varname = $var) =~ s/[\$[{}]]//g;
+        ($varname = $var) =~ s/\$//;   # remove '$'
+        $varname =~ s/\{//;            # remove '{'
+        $varname =~ s/}//;             # remove '}'
         $val_ENV  = $ENV{$varname};
         $val_eval = eval($var);
 
