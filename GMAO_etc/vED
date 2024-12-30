@@ -193,12 +193,12 @@ sub variable_subst {
 
     # define variable to replace
     #---------------------------
-    if ($flg) { $var = "\\\${$varName}" }
-    else      { $var = "\\\$$varName"   }
+    if ($flg) { $var = "\${$varName}" }
+    else      { $var = "\$$varName"   }
 
     # replace variable with its value
     #--------------------------------
-    $$strAddr =~ s/${var}/${val}/g;
+    $$strAddr =~ s/\Q$var\E/$val/g;
 }
 
 #=======================================================================
