@@ -320,7 +320,7 @@ module nc_diag_write_mod
             if (.NOT. init_done) then
                 ! Special append mode - that means that we need to
                 ! assume that all definitions are set and locked.
-                if (present(append) .AND. (append == .TRUE.)) then
+                if (present(append) .AND. (append .eqv. .TRUE.)) then
                     ! Open the file in append mode!
                     call nclayer_check( nf90_open(filename, NF90_WRITE, ncid, &
                         bsize, cache_nelems = 16777216) ) ! Optimization settings
@@ -379,7 +379,7 @@ module nc_diag_write_mod
                 ! chaninfo/metadata/data2d to read the NetCDF files,
                 ! build a cache, and set up anything necessary to be
                 ! able to resume writing from before.
-                if (present(append) .AND. (append == .TRUE.)) then
+                if (present(append) .AND. (append .eqv. .TRUE.)) then
                     call nclayer_info("Loading chaninfo variables/dimensions from file:")
                     call nc_diag_chaninfo_load_def
                     

@@ -985,7 +985,7 @@ module ncdw_chaninfo
                                     
                                     ! Enable zlib (gzip-like) compression based on our level settings
                                     call nclayer_check(nf90_def_var_deflate(ncid, diag_chaninfo_store%var_ids(curdatindex), &
-                                        1, 1, NLAYER_COMPRESSION))
+                                        1, 1, int(NLAYER_COMPRESSION)))
                                 end if
                             end do
                             

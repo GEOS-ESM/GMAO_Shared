@@ -422,7 +422,7 @@ module ncdw_metadata
                             print *, "Defining compression 2 (gzip)..."
 #endif
                             call nclayer_check(nf90_def_var_deflate(ncid, diag_metadata_store%var_ids(curdatindex), &
-                                1, 1, NLAYER_COMPRESSION))
+                                1, 1, int(NLAYER_COMPRESSION)))
                             
 #ifdef _DEBUG_MEM_
                             print *, "Done defining compression..."

@@ -29,6 +29,7 @@ module ncdc_climsg
             character(len=*), intent(in) :: err
 #ifdef ERROR_TRACEBACK
             integer(i_long)              :: div0
+            integer(i_long)              :: zero=0
 #endif
 #ifdef USE_MPI
                 write(*, "(A, I0, A)") &
@@ -42,7 +43,8 @@ module ncdc_climsg
 #ifdef ERROR_TRACEBACK
             write(*, "(A)") " ** Failed to concatenate NetCDF4."
             write(*, "(A)") "    (Traceback requested, triggering div0 error...)"
-            div0 = 1 / 0
+            div0 = 1/zero        ! Division by zero occurs at runtime, not compile time
+            write(*, "(A)") "    Error: Division by zero"
             write(*, "(A)") "    Couldn't trigger traceback, ending gracefully."
             write(*, "(A)") "    (Ensure floating point exceptions are enabled,"
             write(*, "(A)") "    and that you have debugging (-g) and tracebacks"
