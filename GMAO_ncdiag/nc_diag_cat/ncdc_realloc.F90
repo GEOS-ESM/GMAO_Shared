@@ -313,12 +313,13 @@ module ncdc_realloc
             character(len=*), intent(in) :: err
 #ifdef ERROR_TRACEBACK
             integer(i_long)              :: div0
+            integer                      :: zero
 #endif
             write(*, "(A)") " **   ERROR: " // err
 #ifdef ERROR_TRACEBACK
             write(*, "(A)") " ** Failed to concatenate NetCDF4."
             write(*, "(A)") "    (Traceback requested, triggering div0 error...)"
-            div0 = 1 / 0
+            div0 = 1 / zero
             write(*, "(A)") "    Couldn't trigger traceback, ending gracefully."
             write(*, "(A)") "    (Ensure floating point exceptions are enabled,"
             write(*, "(A)") "    and that you have debugging (-g) and tracebacks"

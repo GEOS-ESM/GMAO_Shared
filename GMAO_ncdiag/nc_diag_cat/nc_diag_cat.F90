@@ -77,7 +77,7 @@ program nc_diag_cat
     call nc_diag_cat_metadata_pass
     call cpu_time(stop_time)
     
-    write (info_str, "(A, F, A)") "Metadata read took ", stop_time - start_time, " seconds!"
+    write (info_str, "(A, F15.1, A)") "Metadata read took ", stop_time - start_time, " seconds!"
     call ncdc_info(trim(info_str))
     
 #ifdef USE_MPI
@@ -93,7 +93,7 @@ program nc_diag_cat
         call nc_diag_cat_metadata_alloc
         call cpu_time(stop_time)
         
-        write (info_str, "(A, F, A)") "Data preallocation took ", stop_time - start_time, " seconds!"
+        write (info_str, "(A, F15.1, A)") "Data preallocation took ", stop_time - start_time, " seconds!"
         call ncdc_info(trim(info_str))
 #ifdef USE_MPI
     end if
@@ -103,7 +103,7 @@ program nc_diag_cat
     call nc_diag_cat_data_pass
     call cpu_time(stop_time)
     
-    write (info_str, "(A, F, A)") "Data read took ", stop_time - start_time, " seconds!"
+    write (info_str, "(A, F15.1, A)") "Data read took ", stop_time - start_time, " seconds!"
     call ncdc_info(trim(info_str))
     
 #ifdef USE_MPI
@@ -113,7 +113,7 @@ program nc_diag_cat
         call nc_diag_cat_data_commit
         call cpu_time(stop_time)
         
-        write (info_str, "(A, F, A)") "Data commit took ", stop_time - start_time, " seconds!"
+        write (info_str, "(A, F15.1, A)") "Data commit took ", stop_time - start_time, " seconds!"
         call ncdc_info(trim(info_str))
     
 #ifdef DEBUG
@@ -126,7 +126,7 @@ program nc_diag_cat
         call ncdc_check(nf90_close(ncid_output))
         call cpu_time(stop_time)
         
-        write (info_str, "(A, F, A)") "Final data write took ", stop_time - start_time, " seconds!"
+        write (info_str, "(A, F15.1, A)") "Final data write took ", stop_time - start_time, " seconds!"
         call ncdc_info(trim(info_str))
 #ifdef USE_MPI
     endif
