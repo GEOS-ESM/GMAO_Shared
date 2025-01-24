@@ -21,8 +21,8 @@ module netcdf_unlimdims
         ! pf = polyfill
         integer(c_int) function pf_nf90_inq_unlimdims(ncid, num_unlim_dims, unlim_dims)
             integer(c_int), intent(in)            :: ncid
-            integer(c_int), intent(inout)         :: num_unlim_dims
-            integer(c_int), intent(out), optional :: unlim_dims(:)
+            integer(c_int), target, intent(inout)         :: num_unlim_dims
+            integer(c_int), target, intent(out), optional :: unlim_dims(:)
             
             integer :: i
             
