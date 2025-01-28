@@ -107,7 +107,8 @@ sub expand {
         $val_ENV  = $ENV{$varname};
         $val_eval = eval($var);
 
-        $var =~ s/([\$\{])/\\$1/;    # change '$' => '\$' and '{' => '\{'
+        $var =~ s/(\$)/\\$1/;          # change '$' => '\$'
+        $var =~ s/(\{)/\\$1/;          # change '{' => '\{'
 
         $strOUT =~ s/$var/$val_ENV/  if defined($val_ENV);
         $strOUT =~ s/$var/$val_eval/ if defined($val_eval);
