@@ -85,8 +85,26 @@ program dyn_jediupd
         call dyn_put ( trim(outinc), nymd, nhms, 0, x_i, rc, freq=freq, vectype=dyntype )
      endif
    else
-     print *, myname, 'not expecting same resolution bkg/inc'
-     call exit(1)
+     print *, myname, ': bkg/inc are at same resolution: '
+     print *, myname, ': bkg     lat,lon,lev ', x_a%grid%im,x_a%grid%jm,x_a%grid%km
+     print *, myname, ': inc     lat,lon,lev ', nlon, nlat, nlev
+     if(verbose) print *, 'bkg: ', x_a%grid%im,x_a%grid%jm,x_a%grid%km
+
+     call dyn_init ( x_a%grid%im, x_a%grid%jm, x_a%grid%km, x_a%grid%lm, x_i, rc, &
+                     x_a%grid%ptop, x_a%grid%ks, x_a%grid%ak, &
+                     x_a%grid%bk, vectype=dyntype )
+     x_i%ts = y_i%ts
+     x_i%ps = y_i%ps
+     x_i%pt = y_i%t
+     x_i%u  = y_i%u
+     x_i%v  = y_i%v
+     x_i%q(:,:,:,1) = y_i%qv
+     x_i%q(:,:,:,2) = y_i%oz
+
+     do k=1,x_x%grid%km
+        x_i%delp(:,:,k)= (x_i%grid%bk(k+1) - x_i%grid%bk(k))*x_i%ps(:,:)
+     enddo
+
    endif
    
 !  Get background temperature
