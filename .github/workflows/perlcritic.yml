@@ -1,0 +1,22 @@
+---
+
+# Based on code from https://github.com/marketplace/actions/yaml-lint
+
+name: Perl Critic
+
+on:
+  pull_request:
+      types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+jobs:
+  perlcritic:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Perl critic
+        uses: Difegue/action-perlcritic@master
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          args: '--exclude=strict --exclude=require **.pl **/*.pl **.pm **/*.pm'
