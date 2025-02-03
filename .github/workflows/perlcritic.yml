@@ -14,9 +14,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Perl critic
+      - name: Perl Critic
         uses: Difegue/action-perlcritic@master
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: '--exclude=strict --exclude=require **.pl **/*.pl **.pm **/*.pm'
+            args: '**/*.pl **/*/pm'
