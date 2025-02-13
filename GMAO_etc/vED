@@ -33,7 +33,7 @@ my ($infil, $outfl, $verbose, $envFlg, %varVal);
         }
         
         @var1 = ( $line =~ /\$(\w+)\b/g );
-        @var2 = ( $line =~ /\${(\w+)}/g );
+        @var2 = ( $line =~ /\$\{(\w+)\}/g );
 
         foreach $var (@var1) { variable_subst(\$line, $var, 0) }
         foreach $var (@var2) { variable_subst(\$line, $var, 1) }
@@ -193,8 +193,8 @@ sub variable_subst {
 
     # define variable to replace
     #---------------------------
-    if ($flg) { $var = "\\\${$varName}" }
-    else      { $var = "\\\$$varName"   }
+    if ($flg) { $var = "\Q\${$varName}\E" }
+    else      { $var = "\Q\$$varName\E"   }
 
     # replace variable with its value
     #--------------------------------
