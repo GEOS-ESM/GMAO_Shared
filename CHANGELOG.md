@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Corrected perl scripts for left/right brace error introduced with SLES-15:
+  - Perl_Config.pm
+  - vED
+
 ### Removed
 
 ## [1.9.9] - 2024-10-03
