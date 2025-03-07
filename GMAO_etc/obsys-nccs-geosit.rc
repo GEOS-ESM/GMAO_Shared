@@ -25,6 +25,7 @@
 # 2021.04.25 A. ElAkkraoui	updated observation source for historical/reprocessed  data
 # 2022.03.04 M. Sienkiewicz     organized pre-qc data, added relevant notes, NRT streams  
 # 2022.03.04 A. ElAkkraoui      added obsclass list. 
+# 2023.09.01 R. Lucchesi        add npp_ompsnp_bufr to replace npp_ompsnp_nc
 #
 #+BEGIN obclass data set description
 #+  geosit_cdas_raob_pre-qc_bufr 
@@ -73,6 +74,7 @@
 #+  geosit_npp_ompsnmeff_nc 
 #+  geosit_npp_ompsnp_nc 
 #+  geosit_prep_bufr
+#+  npp_ompsnp_bufr
 #+END
 #
 #  ----------------------------------------------------------------------------------------
@@ -200,7 +202,7 @@ END
 #--------------------------------- BELOW THIS POINT: NO PREP-QC OBSERVATIONS -----------------------------
 #NRT 
 BEGIN geosit_prep_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.ublk
- 20220101_00z-21001231_18z      240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
+ 20220101_00z-21001231_18z      060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/PREPBUFR/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.prepbufr
 END
 # Aircraft metadata for GSI temperature bias correction
 BEGIN geosit_acftpfl_bufr => gdas1.%y4%m2%d2.t%h2z.prepbufr.acft_profiles.ublk
@@ -253,7 +255,15 @@ END
 BEGIN geosit_gpsro_bufr => gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d.ublk
   20010519_00z-20060430_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
   20060501_00z-20181231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/GPSRO/bufr/COSMIC/Y%y4/M%m2/gdas1_modified.%y4%m2%d2.t%h2z.gpsro.tm00.bufr_d
-  20190101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20190101_00z-20230920_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20230921_00z-20230921_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d_FP
+  20230922_00z-20230922_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20230923_00z-20230923_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d_FP
+  20230924_00z-20231020_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20231021_00z-20231021_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d_FP
+  20231022_00z-20240903_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
+  20240904_00z-20240911_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d_FP
+  20240912_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/obs/flk/ncep_g5obs/bufr/GPSRO/Y%y4/M%m2/gdas1.%y2%m2%d2.t%h2z.gpsro.tm00.bufr_d
 END
 
 
@@ -272,7 +282,7 @@ END
 # SEVIRI radiances   (Not used?  same as real time stream)
 # ----------------
 BEGIN geosit_sevcsr_bufr => gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d.ublk
- 20120214_12z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
+ 20120214_12z-20211231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/ncep_g5obs/bufr/SEVCSR/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.sevcsr.tm00.bufr_d
 END
 
 
@@ -335,8 +345,16 @@ BEGIN geosit_1bssu_bufr => gmao.%y2%m2%d2.t%h2z.1bssu.tm00.bufr.ublk
 END
 
 # AIRS & AMSU-A  DISC near real time stream
+# Note: The reanalysis stream has a 7-day latency, so switch to FP NRT stream in August 2023.
 BEGIN geosit_eosairs_bufr => eos_airs.%y4%m2%d2.t%h2z.bufr
- 20020901_00z-22001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
+ 20020901_00z-20230829_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/aqua_disc/bufr/airs/Y%y4/M%m2/airs_disc_final.%y4%m2%d2.t%h2z.bufr
+ 20230830_00z-20240128_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+ 20240129_00z-20240130_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr_FP
+ 20240131_00z-20240323_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+ 20240324_00z-20240324_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr_FP
+ 20240325_00z-20240720_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
+ 20240721_00z-20240721_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr_FP
+ 20240722_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/aqua_disc/bufr/airs/Y%y4/M%m2/airsbufr_disc.%y4%m2%d2.t%h2z.bufr
 END
 
 BEGIN geosit_eosamsua_bufr => eos_amsua.%y4%m2%d2.t%h2z.bufr
@@ -387,14 +405,30 @@ END
 # Ozone partial column data 
 #--------------------------
 # SBUV ozone data 
+# The SBUV data had a minor problem with "bogus" geolocation information for sporadic 
+# observations.  A portion of d5294_geosit_jan98 and d5294_geosit_jan08 ran without 
+# the corrected data.
+# ESMA tickets: 2249,2250
 BEGIN geosit_osbuv8_bufr => gmao.%y4%m2%d2.t%h2z.osbuv.tm00.bufr_d.ublk
-  19970103_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  19970103_00z-19991014_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_BogusGeoLoc/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  19991015_00z-20010514_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_Duplicated/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20010515_00z-20071231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20080101_00z-20080625_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_BogusGeoLoc/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20080626_00z-20110803_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87_Duplicated/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
+  20110804_00z-20131231_18z 060000  /discover/nobackup/projects/gmao/input/gmao_ops/ops/reanalysis/sbuv_v87/bufr/Y%y4/M%m2/sbuv_v87.%y4%m2%d2.%h2z.bufr
 END
 
 # OMPS nadir profiler (not used in R21C but keeping it here. We may need it if both MLS and OMPS LP fail)
 BEGIN geosit_npp_ompsnp_nc => ompsnpnc.%y4%m2%d2.t%h2z.nc
- 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnp/Y%y4/M%m2/OMPSNP.%y4%m2%d2_%h2z.nc
+ 20130101_00z-20230809_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnp/Y%y4/M%m2/OMPSNP.%y4%m2%d2_%h2z.nc
 END
+
+BEGIN npp_ompsnp_bufr => ompsnp.%y4%m2%d2.t%h2z.bufr
+ 20230810_00z-20241215_18z 240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v4r1_npp.t%y4%m2%d2.%h2z.bufr
+ 20241216_00z-20241219_18z 240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v4r1_npp.t%y4%m2%d2.%h2z.bufr_FP
+ 20241220_00z-21001231_18z 240000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/OMPS-NP/bufr/OMPS-NP/Y%y4/M%m2/OMPS-NP_v4r1_npp.t%y4%m2%d2.%h2z.bufr
+END
+
 
 # Ozone profile data 
 #-------------------
@@ -416,13 +450,29 @@ END
 # Total Ozone data
 #-----------------
 #AURA OMI total ozone
+# Updated "CORRECTED" data to correct "over-flagging" problem.  A portion of stream #2
+# ran without the fixed data.
+# ESMA tickets: 2267,2268
 BEGIN geosit_aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
- 20041001_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20041001_00z-20071231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20080101_00z-20100715_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20100716_00z-20200810_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20200811_00z-20230906_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20230907_00z-20240507_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED_nrt/Y%y4/M%m2/OMIeff-adj-nrt.%y4%m2%d2_%h2z.nc
+ 20240508_00z-20240509_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED_nrt/Y%y4/M%m2/OMIeff-adj-nrt.%y4%m2%d2_%h2z.nc_GEOSIT
+ 20240510_00z-20240606_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED_nrt/Y%y4/M%m2/OMIeff-adj-nrt.%y4%m2%d2_%h2z.nc
+ 20240607_00z-20240608_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED_nrt/Y%y4/M%m2/OMIeff-adj-nrt.%y4%m2%d2_%h2z.nc_GEOSIT
+ 20240609_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED_nrt/Y%y4/M%m2/OMIeff-adj-nrt.%y4%m2%d2_%h2z.nc
 END
 
 # OMPS nadir total ozone
 BEGIN geosit_npp_ompsnmeff_nc => ompsnmeffnc.%y4%m2%d2.t%h2z.nc
- 20130101_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+ 20130101_00z-20230907_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff/Y%y4/M%m2/OMPSNM.%y4%m2%d2_%h2z.nc
+ 20230908_00z-20240507_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff_nrt/Y%y4/M%m2/OMPSNM-NRT.%y4%m2%d2_%h2z.nc
+ 20240508_00z-20240509_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff_nrt/Y%y4/M%m2/OMPSNM-NRT.%y4%m2%d2_%h2z.nc_GEOSIT
+ 20240510_00z-20240606_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff_nrt/Y%y4/M%m2/OMPSNM-NRT.%y4%m2%d2_%h2z.nc
+ 20240607_00z-20240608_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff_nrt/Y%y4/M%m2/OMPSNM-NRT.%y4%m2%d2_%h2z.nc_GEOSIT
+ 20240609_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/ompsnm_eff_nrt/Y%y4/M%m2/OMPSNM-NRT.%y4%m2%d2_%h2z.nc
 END
 
  
@@ -452,7 +502,11 @@ END
 # AMSR2 SAME AS REAL-TIME STREAM at present
 BEGIN geosit_amsr2_bufr => gmao.amsr2_gw1.%y4%m2%d2.t%h2z.ublk
   20120901_00z-20200615_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2/bufr/Y%y4/M%m2/gmao.amsr2_gw1.%y4%m2%d2.t%h2z.bufr
-  20200616_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
+  20200616_00z-20240304_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
+  20240305_00z-20240309_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr_FP
+  20240310_00z-20240602_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
+  20240603_00z-20240604_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr_FP
+  20240605_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/amsr2_nrt/bufr/Y%y4/M%m2/gmao.amsr2_gw1_nrt.%y4%m2%d2.t%h2z.bufr
 END
 
 # CrIS FSR  SAME AS REAL-TIME STREAM at present
@@ -461,8 +515,11 @@ BEGIN geosit_crisfsr_bufr => gdas1.%y4%m2%d2.t%h2z.crisfsr.tm00.bufr_d.ublk
   20181001_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/crisf4/bufr/CRISF4/Y%y4/M%m2/gdas1.%y4%m2%d2.t%h2z.crisf4.tm00.bufr_d
 END
 
-# GMI data  REAL TIME?
+# GMI data 
 BEGIN geosit_gmi_bufr => gmi.%y4%m2%d2.t%h2z.bufr
   20140401_00z-20211231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/gmi_v7/bufr/Y%y4/M%m2/gmi_v7_L1CR.%y4%m2%d2.t%h2z.bufr
-  20220101_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
+  20220101_00z-20240324_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
+  20240325_00z-20240327_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr_FP
+  20240328_00z-21001231_18z 060000 /discover/nobackup/projects/gmao/input/dao_ops/ops/flk/gmi/bufr/gmi/Y%y4/M%m2/gmi_L1CR.%y4%m2%d2.t%h2z.bufr
 END
+
