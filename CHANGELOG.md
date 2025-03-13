@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - fix vED
 - SLES15 stuff
+- fix to reading of table in time ave program
 
 ### Removed
 
