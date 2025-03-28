@@ -23,7 +23,7 @@ use Getopt::Long;
 
 # global variables
 #-----------------
-my ($bindiff, $BbwiFLG, $debug, $cdoX, $delim, $diffFLGs, $dir1, $dir2);
+my ($bindiff, $BbwiFLG, $debug, $cdoX, $cmpX, $delim, $diffFLGs, $dir1, $dir2);
 my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
 my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
 my ($subdir, $tarfile_dirA, $tarfile_dirB, $tdirfile, $tmpdir, $verbose);
@@ -128,7 +128,7 @@ sub init {
     # extensions to exclude with -binX flag
     #--------------------------------------
     if ($binX) {
-        foreach (qw(a d mod o pyc so x )) {
+        foreach (qw(a d mod o pyc so x nc4 )) {
             push @extEXCL, $_;
         }
     }
@@ -179,6 +179,11 @@ sub init {
         $bindiff = "" unless -x $bindiff;
         $cdoX = 0;
     }
+
+    # check for cmp program
+    #----------------------
+    chomp($cmpX = `which cmp`);
+    $cmpX = 0 unless -x $cmpX;
 
     # look for dmget command
     #-----------------------
@@ -358,8 +363,18 @@ sub cmp_files {
         $filesize{$file1} = -s abs_path($file1);
         $filesize{$file2} = -s abs_path($file2);
 
-        if ($cdoX and ($file1 =~ /\.hdf/ or $file2 =~ /\.nc4/)) {
+        if ( text($file1, $file2) ) {
+            $status = system_("diff $diffFLGs $file1 $file2 >& /dev/null");
+        }
+        elsif ($cdoX and ($file1 =~ /\.hdf/ or $file2 =~ /\.nc4/)) {
             $status = cdo_diff($file1, $file2);
+            if ($status and $cmpX) {
+                print "checking with cmp\n";
+                $status = system_("$cmpX $file1 $file2 >& /dev/null");
+            }
+        }
+        elsif ($cmpX) {
+            $status = system_("$cmpX $file1 $file2 >& /dev/null");
         }
         else {
             $status = system_("diff $diffFLGs $file1 $file2 >& /dev/null");
@@ -1017,7 +1032,7 @@ sub show_text_diffs {
 
 #=======================================================================
 # name - display_text_diffs
-# purpose - display the xxdiff of two text files
+# purpose - display the differences of two text files
 #
 # input parameters
 # => $num: index number of difference to display (starting at 1)
@@ -1104,8 +1119,13 @@ sub display_text_diffs {
 
     if ($xxFLG) { system_("xxdiff --text $diffFLGs $f1 $f2 $amperflag") }
     else {
+        system("clear");
+        if ($base1 eq $base2) { underline("diffs for ($num) $base1") }
+        else                  { underline("diffs for ($num) $base1 <=> $base2") }
         $status = system_("diff --text $diffFLGs $f1 $f2");
         print "\nNO DIFFERENCES FOUND\n" unless $status;
+        pause();
+        system("clear");
     }
     
 }
@@ -2211,7 +2231,7 @@ sub expand_EnvVars {
 
     # look for ${var} format
     #-----------------------
-    while ($string =~ m/(\${(\w+)})/)   {
+    while ($string =~ m/(\$\{(\w+)})/)   {
         $var = $1; $name = $2;
         $var =~ s/\$/\\\$/;
         $string =~ s/$var/$ENV{$name}/;
@@ -2281,7 +2301,7 @@ where
   dir2 = second directory being compared
 
 options
-  -binX              exclude extensions: a, d, mod, o, pyc, so, x
+  -binX              exclude extensions: a, d, mod, nc4, o, pyc, so, x
   -extX extension    exclude all files with this extension (see Note 1)
   -ext extension     compare all files with this extension (see Note 1)
   -etc               shortcut for "-subdir etc -r"
