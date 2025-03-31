@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updates for `esma_mpirun` and MVAPICH 4
+  - Always bind to core
+
 ### Fixed
 
 - Corrected perl scripts for left/right brace error introduced with SLES-15:
