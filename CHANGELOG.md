@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Remove `GMAO_perllib` into its own repository
+
 ## [1.9.9] - 2024-10-03
 
 ### Changed
