@@ -22,7 +22,7 @@ add_definitions (-Dopenmp)
 #include_directories (${include_NCEP_w3_r8i4})
 #esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
 
-include_directories (${include_GMAO_mpeu})
+include_directories (${include_GMAO_eu})
 include_directories (${include_NCEP_sp_r4i4})
 include_directories (${include_NCEP_w3_r8i4})
 include_directories (${include_NCEP_sfcio})
@@ -96,18 +96,18 @@ set (srcs
 set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
 set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG}")
 
-ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
 
 install (PROGRAMS ec2fv.csh DESTINATION bin)
 
 #This needs to be worked on
 ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bufr_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_bufr_r4i4  NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_eu NCEP_sp_r4i4 NCEP_bufr_r4i4  NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 if (EXTENDED_SOURCE)
    set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
