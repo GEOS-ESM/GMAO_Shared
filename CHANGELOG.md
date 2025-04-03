@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored helfsurface subroutines to improve the performance
+
 ### Fixed
 
 - Corrected perl scripts for left/right brace error introduced with SLES-15:
