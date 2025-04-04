@@ -338,6 +338,9 @@ sub get_xtraflags {
     }
 
     if ($mpi_type eq "mvapich") {
+       # Testing found that we need to run with -bind-to core
+       # if GEOS is to run well
+       $xtraflags .= " -bind-to core";
        if ($perhost) {
           $xtraflags .= " -ppn $perhost";
        }
