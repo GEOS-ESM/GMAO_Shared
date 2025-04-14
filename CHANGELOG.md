@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added Github Actions for CI
+
 ### Changed
 
 - Updates for `esma_mpirun` and MVAPICH 4
