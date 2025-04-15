@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updates for `esma_mpirun` and MVAPICH 4
-- Always bind to core
+  - Always bind to core
 - Refactored helfsurface subroutines to improve the performance
 
 ### Fixed
