@@ -9,27 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added Github Actions for CI
+
 ### Changed
 
 - Bring in JEDI supporting code
+- Updates for `esma_mpirun` and MVAPICH 4
+  - Always bind to core
+- Refactored helfsurface subroutines to improve the performance
+
 
 ### Fixed
 
 - fix vED
 - SLES15 stuff
 - fix to reading of table in time ave program
+- Corrected perl scripts for left/right brace error introduced with SLES-15:
+  - `Perl_Config.pm`
+  - `vED`
+
 
 ### Removed
+
+### Fixed
+
+### Removed
+
+- Remove `GMAO_perllib` into its own repository
 
 ## [1.9.9] - 2024-10-03
 
 ### Changed
 
+- Update ESMF CMake target to `ESMF::ESMF`
+- Update `n4zip` with long option for non-alphabetical sorting
+
 ### Fixed
+
+- Declare `main` in `makdep.c` as `int` to satisfy gcc 14
 
 ## [1.9.8] - 2024-07-31
 
 ### Fixed
+
+- Fixed invalid Fortran in `GMAO_ods/ods_diagnc4.f90`
+- Added `stdlib.h` in `GMAO_pyobs/VegType_io.c` to fix compilation error with `icx`
 
 ## [1.9.7] - 2024-01-30
 
