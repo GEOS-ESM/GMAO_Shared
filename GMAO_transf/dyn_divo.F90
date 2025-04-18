@@ -1,5 +1,4 @@
    program dyn_vordiv
-!  must run as mpirun -np 1
    use m_ggGradientSP,only : ggGradientSP
    use m_ggGradientSP,only : ggGradientSP_init,clean
    use m_ggGradientSP,only : ggDivo
@@ -234,7 +233,7 @@ contains
         print *, "               in this case."
 
         print *
-        print *, "Usage: mpirun -np 1 dyn_divo.x [opts] ifile ofile"
+        print *, "Usage: dyn_divo.x [opts] ifile ofile"
         print *
         print *, "  ifile   - input filename "
         print *, "  ofile   - output filename with div/vor"

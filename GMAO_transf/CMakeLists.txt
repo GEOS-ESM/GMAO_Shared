@@ -22,7 +22,7 @@ add_definitions (-Dopenmp)
 #include_directories (${include_NCEP_w3_r8i4})
 #esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio)
 
-include_directories (${include_GMAO_eu})
+include_directories (${include_GMAO_mpeu})
 include_directories (${include_NCEP_sp_r4i4})
 include_directories (${include_NCEP_w3_r8i4})
 include_directories (${include_NCEP_sfcio})
@@ -107,7 +107,7 @@ install (PROGRAMS ec2fv.csh DESTINATION bin)
 #This needs to be worked on
 ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bufr_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_eu NCEP_sp_r4i4 NCEP_bufr_r4i4  NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_bufr_r4i4  NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 if (EXTENDED_SOURCE)
    set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
