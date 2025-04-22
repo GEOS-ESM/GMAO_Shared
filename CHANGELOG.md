@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+## [2.0.0] - 2025-04-23
+
+### Added
+
 - Added Github Actions for CI
 
 ### Changed
@@ -27,11 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected perl scripts for left/right brace error introduced with SLES-15:
   - `Perl_Config.pm`
   - `vED`
-
-
-### Removed
-
-### Fixed
 
 ### Removed
 
