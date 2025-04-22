@@ -193,8 +193,8 @@ sub variable_subst {
 
     # define variable to replace
     #---------------------------
-    if ($flg) { $var = "\${$varName}" }
-    else      { $var = "\$$varName"   }
+    if ($flg) { $var = "\Q\${$varName}\E" }
+    else      { $var = "\Q\$$varName\E"   }
 
     # replace variable with its value
     #--------------------------------
