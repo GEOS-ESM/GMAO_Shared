@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # From: https://github.com/parallel-fs-utils/multi-thread-posix/blob/master/parallel-untar.py

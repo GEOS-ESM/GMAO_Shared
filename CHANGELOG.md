@@ -9,13 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+## [2.1.0] - 2025-04-23
+
+### Added
+
 - Added Github Actions for CI
 
 ### Changed
 
+- Bring in JEDI supporting code
 - Updates for `esma_mpirun` and MVAPICH 4
   - Always bind to core
 - Refactored helfsurface subroutines to improve the performance
+
+### Fixed
+
+- fix vED
+- SLES15 stuff
+- fix to reading of table in time ave program
+
+## [2.0.0] - 2025-03-14
 
 ### Fixed
 
