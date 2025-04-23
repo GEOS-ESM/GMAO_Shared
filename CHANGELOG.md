@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [2.0.0] - 2025-04-23
+## [2.1.0] - 2025-04-23
 
 ### Added
 
@@ -28,12 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Always bind to core
 - Refactored helfsurface subroutines to improve the performance
 
-
 ### Fixed
 
 - fix vED
 - SLES15 stuff
 - fix to reading of table in time ave program
+
+## [2.0.0] - 2025-03-14
+
+### Fixed
+
 - Corrected perl scripts for left/right brace error introduced with SLES-15:
   - `Perl_Config.pm`
   - `vED`
