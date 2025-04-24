@@ -25,7 +25,10 @@ c    If ivarint=1, variable intercept parameters are used, as
 c    calculated in Thompson, Rasmussen, and Manning (2004, Monthly
 c    Weather Review, Vol. 132, No. 2, pp. 519-542.)
 c
-c     4. If iliqskin=1, frozen particles that are at a temperature above
+c     4. If iliqskin=1, snow particles that are at a temperature above
+c     freezing are assumed to scatter as a liquid particle.
+c                     
+c     4. If iliqskin=2, snow & graupel particles that are at a temperature above
 c     freezing are assumed to scatter as a liquid particle.
 c
 c     More information on the derivation of simulated reflectivity in
@@ -149,6 +152,8 @@ c      scatters like liquid water (alpha=1.0) because it is assumed to
 c      have a liquid skin.
 
                   IF (ILIQSKIN.EQ.1 .AND. TMK(I,J,K).GT.CELKEL) THEN
+                      FACTORB_S = FACTOR_S/ALPHA
+                  ELSEIF (ILIQSKIN.EQ.2 .AND. TMK(I,J,K).GT.CELKEL) THEN
                       FACTORB_S = FACTOR_S/ALPHA
                       FACTORB_G = FACTOR_G/ALPHA
                   ELSE
