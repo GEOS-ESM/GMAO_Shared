@@ -15,6 +15,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [2.1.0] - 2025-04-23
+
+### Added
+
+- Added Github Actions for CI
+
+### Changed
+
+- Bring in JEDI supporting code
+- Updates for `esma_mpirun` and MVAPICH 4
+  - Always bind to core
+- Refactored helfsurface subroutines to improve the performance
+
+### Fixed
+
+- fix vED
+- SLES15 stuff
+- fix to reading of table in time ave program
+
+## [2.0.0] - 2025-03-14
+
+### Fixed
+
+- Corrected perl scripts for left/right brace error introduced with SLES-15:
+  - `Perl_Config.pm`
+  - `vED`
+
+### Removed
+
+- Remove `GMAO_perllib` into its own repository
+
 ## [1.9.9] - 2024-10-03
 
 ### Changed
