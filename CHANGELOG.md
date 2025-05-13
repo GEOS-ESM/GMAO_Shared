@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [2.1.1] - 2025-05-13
+
+### Fixed
+
+- Fixed issue with unprotected f2py call in `GMAO_gfio`. Caused failures if build system did not have f2py available.
+
+### Added
+
+- Added `.editorconfig`
+
 ## [2.1.0] - 2025-04-23
 
 ### Added
