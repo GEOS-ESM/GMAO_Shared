@@ -26,7 +26,7 @@ if (EXTENDED_SOURCE)
   set_target_properties (${this} PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
 endif()
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
-  
+
 # Specs for r8 version
 if (precision STREQUAL "r8")
   string(REPLACE " " ";" tmp ${FREAL8})
@@ -45,19 +45,21 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories (${include_${this}})
 
 if (precision STREQUAL "r4")
-  find_package(F2PY3)
-  if (F2PY3_FOUND)
-    # Using add_ here as the import test threw an SSL error on GMAO desktop
-    esma_add_f2py3_module(GFIO_ SOURCES GFIO_py.F90
-      DESTINATION lib/Python
-      ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
-      gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
-      gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
-      LIBRARIES GMAO_gfio_r4
-      INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
-      USE_MPI USE_NETCDF
-      )
-    add_dependencies(GFIO_ ${this})
+  if (USE_F2PY)
+    find_package(F2PY3)
+    if (F2PY3_FOUND)
+      # Using add_ here as the import test threw an SSL error on GMAO desktop
+      esma_add_f2py3_module(GFIO_ SOURCES GFIO_py.F90
+        DESTINATION lib/Python
+        ONLY gfioopen gfiocreate gfiodiminquire gfioinquire
+        gfiogetvar gfiogetvart gfioputvar gfiogetbegdatetime
+        gfiointerpxy gfiointerpnn gfiocoordnn gfioclose
+        LIBRARIES GMAO_gfio_r4
+        INCLUDEDIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/lib ${include_${this}}
+        USE_MPI USE_NETCDF
+        )
+      add_dependencies(GFIO_ ${this})
+    endif ()
   endif ()
 endif ()
 
