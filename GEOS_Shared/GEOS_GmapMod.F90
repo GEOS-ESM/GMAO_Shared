@@ -2,7 +2,7 @@
 module GEOS_GmapMod
 !implicit none
 private
-public gmap
+public gmap, mappm_
 interface gmap; module procedure &
           gmap4_logp
 end interface
