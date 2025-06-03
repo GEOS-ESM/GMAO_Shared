@@ -42,7 +42,7 @@ if ( NOT HERMES_LIGHT )
    # the gmao2ioda directory just has scripts we want to install
    install (
      DIRECTORY gmao2ioda
-     DESTINATION gmao2ioda
+     DESTINATION bin
      USE_SOURCE_PERMISSIONS
    )
 endif()
