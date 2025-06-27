@@ -26,8 +26,7 @@ type(dyn_vect) :: xi
 type(dyn_vect) :: yi
 type(dyn_vect) :: zi
 logical, parameter :: pncf=.true.
-!character(len=*), parameter :: ovars(15)=(/'    u','    v',' delp','   tv','   ps','   ts','pblri','pblrf','pblkh','cldbh',' sphu','qitot','qltot','qrtot','qstot'/)
-character(len=*), parameter :: ovars(14)=(/'    u','    v',' delp','   tv','   ps','   ts','pblri','pblrf','pblkh',' sphu','qitot','qltot','qrtot','qstot'/)
+character(len=*), parameter :: ovars(11)=(/'    u','    v',' delp','   tv','   ps','   ts', ' sphu','qitot','qltot','qrtot','qstot'/)
 
 rscale = -1.0e15
 
@@ -100,10 +99,6 @@ yi%pt= yi%pt+ xi%pt
 yi%q(:,:,:,1:lm1) = yi%q(:,:,:,1:lm1) + xi%q(:,:,:,1:lm1)
 yi%ps= yi%ps+ xi%ps
 yi%ts= yi%ts+ xi%ts
-yi%pblri= yi%pblri+ xi%pblri  
-yi%pblrf= yi%pblrf+ xi%pblrf  
-yi%pblkh= yi%pblkh+ xi%pblkh  
-!yi%cldbh= yi%cldbh+ xi%cldbh  
 if ( rscale > -1.0e15 ) then ! split to avoid round off diffs in DAS when rscale=1.
    yi%u = rscale*yi%u
    yi%v = rscale*yi%v
@@ -111,9 +106,6 @@ if ( rscale > -1.0e15 ) then ! split to avoid round off diffs in DAS when rscale
    yi%q(:,:,:,1:lm1) = rscale*yi%q(:,:,:,1:lm1)
    yi%ps= rscale*yi%ps
    yi%ts= rscale*yi%ts
-   yi%pblri= rscale*yi%pblri
-   yi%pblrf= rscale*yi%pblrf
-   yi%pblkh= rscale*yi%pblkh
 endif
 
 ! reconstruct delp increment from ps increment

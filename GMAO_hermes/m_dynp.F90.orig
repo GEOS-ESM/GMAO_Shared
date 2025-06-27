@@ -22,7 +22,6 @@
    Public dynp_clean     ! deallocates memory
    Public dynp_remap     ! remap to reference vertical coordinate
    Public dynp_add       ! adds a perturbation to a state vector
-   Public dynp_add_logpblh  ! adds a perturbation to a state vector
    Public dynp_shave     ! shaving method
    Public dynp_add_surf  ! adds delp from pert state
    Public dynp_scale     ! scale perturbation
@@ -125,9 +124,6 @@ CONTAINS
 !  Initialize the perturbation fields
 !  ----------------------------------
    dw%Ts   = 0.0
-   dw%pblri = 0.0
-   dw%pblrf = 0.0
-   dw%pblkh = 0.0
    dw%u    = 0.0
    dw%v    = 0.0
    dw%pt   = 0.0
@@ -573,12 +569,8 @@ CONTAINS
    end if
 
 !  Add all fields
-! --------------
+!  --------------
    w%ts   = w%ts + a * dw%ts
-!  if pblh increment is input
-   w%pblri = max(0.0, w%pblri + a * dw%pblri)
-   w%pblrf = max(0.0, w%pblrf + a * dw%pblrf)
-   w%pblkh = max(0.0, w%pblkh + a * dw%pblkh)
    w%u    = w%u  + a * dw%u
    w%v    = w%v  + a * dw%v
    w%pt   = w%pt + a * dw%pt
@@ -612,150 +604,6 @@ CONTAINS
    endif
 
    end subroutine dynp_add
-
-!-------------------------------------------------------------------------
-!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
-!-------------------------------------------------------------------------
-!BOP
-!
-! !ROUTINE:  dynp_add_logpblh --- Add a state increment to a reference state
-!
-! !INTERFACE:
-!
-   subroutine dynp_add_logpblh ( w, a, dw, rc, &
-                                   verbose )  ! optional
-!
-! !USES:
-!
-   implicit NONE
-!
-! !INPUT/OUTPUT PARAMETERS:
-!
-   type(dyn_vect), intent(inout) ::  w        ! state vector
-   type(dyn_vect), intent(in)    :: dw        ! state vector increment
-!
-! !INPUT PARAMETERS:
-!
-   real,           intent(in)    :: a         ! scalar
-   logical, intent(in), OPTIONAL :: verbose   ! if .true. then print stuff
-!
-! !OUTPUT PARAMETERS:
-!
-   integer, intent(out)          :: rc        ! error return code:
-                                              !  0 - all is well
-                                              !  1 - zero thickness in w
-                                              !  2 - w and dw coordinates differ
-!
-! !DESCRIPTION: This routine computes w = w '+' a*dw,
-!               where '+' includes mass adjustment.
-!
-!  NOTE: The user must make sure that, on input, the vertical coordinates
-!  of w and dw are compatible (i.e., ptop and the delp arrays must be
-!  identical). See dynp_remap.
-!
-!  Assuming identical vertical coordinates, all field perturbations
-!  are simply added to the reference fields. Then the lowest layers
-!  are adjusted ('shaved') to account for the change in geopotential
-!  height at the surface.
-!
-!  The output state w is hydrostatic with nonnegative q.
-!
-! !REVISION HISTORY:
-!
-!  08nov2002 Dee       Initial code.
-!  12Dec2004 Todling   Allow adding two perturbations fields
-!  11Feb2008 Todling   Bug fix: coef (a) for ps/delp was missing!
-!  29Apr2016 Todling   Check number of tracers and upd what possible
-!  10Sep2022 Zhu       Add pblh
-!
-!EOP
-!-------------------------------------------------------------------------
-
-   character(len=*),  parameter :: myname = 'dynp_add_logpblh'
-
-   logical verb
-   integer mlm, i, j
-   real work, dtmp
-
-   if ( present ( verbose ) ) then
-        verb = verbose
-   else
-        verb = .false.
-   end if
-
-!  Check vertical coordinates
-!  --------------------------
-   if ( .not. allPERT ) then
-      if ( .not. gcmPERT ) then
-         if ( minval(abs(w%delp)) .lt. reltol) then
-              if ( verb ) print *, myname, 'zero thickness in w'
-              rc = 1
-              return
-         end if
-         if ( maxval(abs(w%delp - dw%delp)/w%delp) .gt. reltol) then
-              if ( verb ) print *, myname, ' w and dw coordinates differ'
-              rc = 2
-              return
-         end if
-      end if
-   end if
-
-!  Add all fields
-! --------------
-   w%ts   = w%ts + a * dw%ts
-   w%u    = w%u  + a * dw%u
-   w%v    = w%v  + a * dw%v
-   w%pt   = w%pt + a * dw%pt
-   if (w%grid%lm/=dw%grid%lm) then
-       print *, myname//': state and pert have diff number of tracers ... '
-       print *, myname//': ... updating only what possible'
-   endif
-   mlm  = min(w%grid%lm,dw%grid%lm)
-   w%q(:,:,:,1:mlm)  = w%q(:,:,:,1:mlm) + a * dw%q(:,:,:,1:mlm)
-
-!  if log(pblh) increment is input 
-   do i = 1, w%grid%im
-      do j = 1, w%grid%jm
-         dtmp = 0.0
-         if (w%pblri(i,j) < 0.1) dtmp = 0.1 - w%pblri(i,j)
-         work = log(max(0.1,w%pblri(i,j))) + dw%pblri(i,j)
-         w%pblri(i,j) = exp(work) - dtmp
-
-         dtmp = 0.0
-         if (w%pblrf(i,j) < 0.1) dtmp = 0.1 - w%pblrf(i,j)
-         work = log(max(0.1,w%pblrf(i,j))) + dw%pblrf(i,j)
-         w%pblrf(i,j) = exp(work) - dtmp
-
-         dtmp = 0.0
-         if (w%pblkh(i,j) < 0.1) dtmp = 0.1 - w%pblkh(i,j)
-         work = log(max(0.1,w%pblkh(i,j))) + dw%pblkh(i,j)
-         w%pblkh(i,j) = exp(work) - dtmp
-      end do
-   end do
-
-!  Add/subtract mass from lowest layers ('shaving method'),
-!                                and ensure non-negative q
-!  -------------------------------------------------------
-   if ( skipSHAVE ) then
-
-        if ( verb ) print *, myname//': no shaving applied '
-        if ( gcmPERT ) then
-             if ( anaPERT ) then
-                  w%delp = w%delp      +  a *  dw%delp
-                  w%ps   = w%ps        +  a *  dw%ps
-             else
-                  w%delp = w%delp      +  a *  dw%delp
-                  w%ps   = w%grid%ptop + sum(w%delp,dim=3)
-             endif
-        endif
-
-   else
-        call dynp_shave ( w, a*dw%phis, w%grid%im, w%grid%jm, w%grid%km, rc )
-
-        if ( verb .and. rc .ne. 0 ) print *, myname, '3-layer shaving failed'
-   endif
-
-   end subroutine dynp_add_logpblh
 
 
 !-------------------------------------------------------------------------
@@ -1056,9 +904,6 @@ CONTAINS
    dw%delp = value * dw%delp
    dw%ps   = value * dw%ps
    dw%ts   = value * dw%ts
-   dw%pblri = value * dw%pblri
-   dw%pblrf = value * dw%pblrf
-   dw%pblkh = value * dw%pblkh
    print *, 'dynp_set: scaled field by: ', value
 
    end subroutine dynp_scale
