@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [2.1.2] - 2025-06-30
+
+### Added
+
+- Added `gmao2ioda` scripts
+
 ## [2.1.1] - 2025-05-13
 
 ### Fixed
