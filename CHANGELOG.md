@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- fix r_dist for SLES-15
 - fix vED
 - SLES15 stuff
 - fix to reading of table in time ave program
