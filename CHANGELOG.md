@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed `cmpdir.pl` script and add extra functionality
+
 ### Removed
 
 ## [2.1.2] - 2025-06-30
