@@ -640,7 +640,7 @@ subroutine pyods_putAll(filename, ftype, nymd,nhms, nsyn, nobs, &
   ods%meta%kx_names(340) = 'VIIRS NOAA-20 Aerosol (Deep Blue Ocean Algorithm)'
   ods%meta%kx_names(341) = 'VIIRS NOAA-20 Aerosol (Dark Target Land Algorithm)'
   ods%meta%kx_names(342) = 'VIIRS NOAA-20 Aerosol (Dark Target Ocean Algorithm)'
-
+  ods%meta%kx_names(343) = 'Lunar AERONET Aerosol Retrievals'
 
   call ods_put (filename, ftype, nymd, nhms, ods, rc)
   if ( rc .ne. 0 ) return
