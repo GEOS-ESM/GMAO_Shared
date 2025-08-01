@@ -351,6 +351,7 @@ kx_list::
   340 VIIRS NOAA-20 Aerosol (Deep Blue Deep Algorithm)
   341 VIIRS NOAA-20 Aerosol (Dark Target Land Algorithm)
   342 VIIRS NOAA-20 Aerosol (Dark Target Ocean Algorithm)
+  343 Lunar AERONET Aerosol Retrievals 
 ::
 
 # Notes:
