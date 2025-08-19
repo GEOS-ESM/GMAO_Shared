@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [2.1.3] - 2025-07-07
+
+### Fixed
+
+- Fix issue with installing `gmao2ioda` scripts as the `gmao2ioda/` directory might not exist in all fixtures
+- Fixed `cmpdir.pl` script and add extra functionality
+
 ## [2.1.2] - 2025-06-30
 
 ### Added
