@@ -964,8 +964,10 @@ sub show_text_diffs {
 
         # edit ignore diffs
         #------------------
-        $icnt = scalar(keys %ignore);
-        if ($icnt) { printf $fmti, "e", "edit ignore diffs list", $icnt }
+        if ($ignoreFLG) {
+            $icnt = scalar(keys %ignore);
+            if ($icnt) { printf $fmti, "e", "edit ignore diffs list", $icnt }
+        }
         
         # toggle $ignoreFLG
         #------------------
@@ -1050,10 +1052,12 @@ sub show_text_diffs {
 
         # edit ignore diffs list
         #-----------------------
-        if ($sel eq "e" and %ignore) {
-            diffs_to_ignore();
-            $ignoreFLG = 0 unless %ignore;
-            $num -= 1; next;
+        if ($ignoreFLG) {
+            if ($sel eq "e" and %ignore) {
+                diffs_to_ignore();
+                $ignoreFLG = 0 unless %ignore;
+                $num -= 1; next;
+            }
         }
         
         # specify differences to ignore
