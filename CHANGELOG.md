@@ -11,11 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated `esma_mpirun` for `openmpi` to run with `-map-by node -bind-to core` which is a good default.
-
 ### Fixed
 
 ### Removed
+
+### Deprecated
+
+
+## [2.1.4] - 2025-08-29
+
+### Changed
+
+- Updated `esma_mpirun` for `openmpi` to run with `-map-by node -bind-to core` which is a good default.
+
 
 ## [2.1.3] - 2025-07-07
 
