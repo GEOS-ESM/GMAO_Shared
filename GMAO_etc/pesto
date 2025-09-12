@@ -198,7 +198,7 @@ EOD
 # Process list of URLs
 # --------------------  
   foreach $url ( @url_list ){
-       ( $url = $url ) =~ ( s/\${PESTOROOT}/$pestoroot\//g ); 
+       ( $url = $url ) =~ ( s/\$\{PESTOROOT\}/$pestoroot\//g ); 
        ( $ruser, $rhost, $file_path ) = splitrfile ( $url );
        print "($myname):Processing $url\n";
        $file = basename($file_path);
