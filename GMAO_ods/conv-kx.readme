@@ -1,9 +1,9 @@
-!Conventional data types 
+!Conventional data types
 !     kx       Description                      obs types
       120      RAWINSONDE                         Tv,z,q
       126      RASS Profiler                      Tv
-      130      AIREP/PIREP                        T 
-      131      AMDAR                              T 
+      130      AIREP/PIREP                        T
+      131      AMDAR                              T
       132      FLT LVL RECON AND DROPSONDE        Tv,q,ps
       133      MDCRS (ACARS)                      T,q
       134      TAMDAR AIRCRAFT                    T,q
@@ -53,7 +53,8 @@
       252      JMA IR CTW                         U,V
       253      EUMETSAT IR CTW                    U,V
       254      EUMETSAT WV cloud top              U,V
-      255      NESDIS picture triplet CTW         U,V
+      255      NESDIS picture triplet CTW         U,V (historic data)
+      255      SSEC/WISC LEO-GEO winds            U,V
       256      Indian WV CTW                      U,V
       257      MODIS IR CTW                       U,V
       258      MODIS cloud top WV CTW             U,V
@@ -84,10 +85,10 @@
         3      MetOp-B GRAS
         4      MetOp-A GRAS
         5      MetOp-C GRAS
-       41      CHAMP      
+       41      CHAMP
        42      TerraSAR-X
        43      TanDEM-X
-       44      PAZ      
+       44      PAZ
       421      Oceansat-2
       440      Megha-Tropiques
       722      GRACE-A

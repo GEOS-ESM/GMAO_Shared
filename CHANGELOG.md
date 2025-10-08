@@ -9,13 +9,105 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Improved trace gas ODS support; incorporates most recent changes to ODS in rt_g530_1.6.0_merge (AMSR, more OMPS)
-
 ### Changed
 
 ### Fixed
 
 ### Removed
+
+## [1.9.9] - 2024-10-03
+
+### Changed
+
+- Update ESMF CMake target to `ESMF::ESMF`
+- Update `n4zip` with long option for non-alphabetical sorting
+
+### Fixed
+
+- Declare `main` in `makdep.c` as `int` to satisfy gcc 14
+
+## [1.9.8] - 2024-07-31
+
+### Fixed
+
+- Fixed invalid Fortran in `GMAO_ods/ods_diagnc4.f90`
+- Added `stdlib.h` in `GMAO_pyobs/VegType_io.c` to fix compilation error with `icx`
+
+## [1.9.7] - 2024-01-30
+
+### Added
+- Add new `CHOOSEZ0` option that triggers the use of Charnock coefficient
+
+### Changed
+- Move to circleci-tools v2 orb
+- Update CI to v2 orb
+
+## [1.9.6] - 2023-11-01
+
+### Fixed
+
+- Fixes for Perl 5.26 on SLES15
+
+## [1.9.5] - 2023-10-18
+
+### Changed
+
+- Updated `esma_mpirun` for MVAPICH to use `mpiexec`
+- add info on LEO-GEO: obs table upadate (zero-diff)
+
+## [1.9.4] - 2023-09-15
+
+### Changed
+
+- add Planet IQ to odsmatch.rc
+
+## [1.9.3] - 2023-09-15
+
+### Added
+
+- `dyn_hydro`
+  - This program adds the hydrometeors to bkg.eta files that don't have them (such as those coming from MERRA-2). (Mistakenly not
+    brought over during CVS-to-Git transition)
+
+### Changed
+
+- Syncs obsys with that used in FP as of 14 Sep 2023
+- dyn2dyn updated to allow for user-specified IM x JM when regrinding
+
+## [1.9.2] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs and BCs from CircleCI Orb
+
+## [1.9.1] - 2023-06-06
+
+### Added
+
+- Added protection against specific error conditions to reset the ice to a default profile instead of crashing. This is valid only for MITgcm
+
+### Changed
+
+- Change CICE4 build to shared library, in preparation for CICE6 integration
+
+## [1.9.0] - 2023-05-09
+
+### Changed
+
+- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
+- Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
+
+## [1.8.0] - 2023-03-10
+
+### Changed
+
+- Merging in changes associated with refactored physics and `gmap4`.
+
+## [1.7.2] - 2023-03-17
+
+### Changed
+
+- Improved trace gas ODS support; incorporates most recent changes to ODS in rt_g530_1.6.0_merge (AMSR, more OMPS)
 
 ## [1.7.1] - 2023-02-10
 

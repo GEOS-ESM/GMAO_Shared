@@ -186,6 +186,11 @@
      &           .not. trim(satype)=='tgav'    .and.
      &           .not. trim(satype)=='tgaz'    .and.
      &           .not. trim(satype)=='tgop'    .and.
+     &           .not. trim(satype)=='omno2'   .and.
+     &           .not. trim(satype)=='omso2'   .and.
+     &           .not. trim(satype)=='nmso2'   .and.
+     &           .not. trim(satype)=='s5pno2'  .and.
+     &           .not. trim(satype)=='mindsno2' .and.
      &           .not. trim(satype)=='ompsnm'  .and.
      &           .not. trim(satype)=='ompsnmeff' .and.
      &           .not. trim(satype)=='ompsnp' .and.

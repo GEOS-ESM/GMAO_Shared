@@ -376,6 +376,9 @@
      &         trim(satype)/='tgez'   .and. trim(satype)/='tgev'    .and.
      &         trim(satype)/='tgav'   .and. trim(satype)/='tgaz'    .and.
      &         trim(satype)/='tgop'   .and. trim(satype)/='gome'    .and. 
+     &         trim(satype)/='omso2'  .and. trim(satype)/='omno2'   .and. 
+     &         trim(satype)/='nmso2'  .and. trim(satype)/='s5pno2'  .and.
+     &         trim(satype)/='mindsno2'  .and. 
      &         trim(satype)/='ompslpvis' .and. trim(satype)/='ompslpnc'  .and.
      &         trim(satype)/='ompslpuv'  .and. trim(satype)/='ompsnm'    .and.
      &         trim(satype)/='ompsnp'    .and. trim(satype)/='ompsnmeff' .and.
@@ -694,8 +697,6 @@
 	      myisat = 25
 	   case('metop-b')
 	      myisat = 26
-           case('terra','gosat','oco2')
-              myisat = 0
 	   case default
 	      if(dplat(1:6)=='metop-') myisat = 25 + iachar(dplat(7:7)) - iachar('a')  
 	   end select

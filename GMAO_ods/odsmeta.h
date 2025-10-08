@@ -33,6 +33,7 @@
 !  20May2017  Todling   Add exclusion flag X_ADV_LOCAL
 !  25May2018  wargan    added OMPS
 !  03Mar2022  Jin J./ElAkkraoui  Added AMSRE 
+!  28Oct2023  Todling   add hist flag ascend/descend
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -182,6 +183,8 @@
       integer, parameter :: H_SUSP_TEMP    = 12 ! moisture from suspect temp
       integer, parameter :: H_SUSP_DEWTEMP = 13 ! moisture from suspect dewpt
 
+      integer, parameter :: H_DESCEND = 15      ! descending orbit
+      integer, parameter :: H_ASCEND  = 16      ! ascending orbit
       integer, parameter :: H_BACKG   = 17      ! background check
 
       integer, parameter :: H_YELLOW  = 20      ! obs marked as suspect by "Yellow List"
@@ -317,7 +320,7 @@
      7                 'ODSmatch could not find match   ',
      8                 'no impact due to advected local '/)
 
-      integer, parameter :: nsats = 58
+      integer, parameter :: nsats = 63
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -338,7 +341,8 @@
      .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
      .                 'amsre           ', 'ompslpnc        ', 'tgez            ',
      .                 'tgev            ', 'tgav            ', 'tgaz            ',
-     .                 'tgop            '  /)
+     .                 'tgop            ', 'omno2           ', 'omso2           ',
+     .                 'nmso2           ', 's5pno2          ', 'mindsno2        ' /)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will
@@ -362,9 +366,10 @@
      .                 999               , 940               , 335               ,
      .                 336               , 427               , 437               , 
      .                 550               , 428               , 438               ,
-     .                 546               , 337               , 999               ,
-     .                 999               , 999               , 999               ,
-     .                 999                 /)
+     .                 546               , 337               , 666               ,
+     .                 666               , 666               , 666               ,
+     .                 666               , 666               , 666               ,
+     .                 666               , 666               , 666  /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/

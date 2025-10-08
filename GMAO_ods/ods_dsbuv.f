@@ -156,7 +156,8 @@
      &       'ompslpuv','ompslpvis')
            kt(kobs)   = kto3mx                  ! ozone mixing ratio (ppmv)
            lev(kobs)  = pdata(4,i)
-        case('acos','mlstgas','tgez','tgev','tgav','tgaz','tgop')
+        case('acos','mlstgas','tgez','tgev','tgav','tgaz','tgop',
+     &       'omno2','omso2','nmso2','s5pno2','mindsno2')
            kt(kobs)   = ktgas                   ! trace gas
            lev(kobs)  = pdata(4,i)              ! obs pressure
            xm(kobs)   = pdata(5,i)              ! model surface pressure

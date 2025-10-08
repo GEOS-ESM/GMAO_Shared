@@ -114,12 +114,12 @@ sub d2o_all {
             #---------------#
             # child process #
             #---------------#
-            @files =  glob("$filepath/*diag_${grp}*${res0}*${nymdhh}.$suffix")
+            @files =  glob("$filepath/*diag_${grp}_${res0}.${nymdhh}.$suffix")
                 or print "($myname):No match\n";
             foreach $file (@files) { d2o($file,$xcmd[0],$res0) };
 
             if ( $dooma || $miter > 1 ) {
-                @files =  glob("$filepath/*diag_${grp}*${res1}*${nymdhh}.$suffix")
+                @files =  glob("$filepath/*diag_${grp}_${res1}.${nymdhh}.$suffix")
                     or print "($myname):No match\n";
                 foreach $file (@files) { d2o($file,$xcmd[1],$res1) };
             }
