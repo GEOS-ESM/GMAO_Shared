@@ -87,7 +87,7 @@ sub check_semperpy_dbs {
     }
     $ENV{"MODULEPATH"} .= ":${modsDIR}";
     do "/usr/share/modules/init/perl";
-    module ("load gpy/sles12-v1.1.0");
+    module ("load gpy/sles15-py3.11.0");
     $ENV{"SEMPERPY_CONFIG"} = "/home/dao_ops/gmao_packages/o2h/o2h/config";
 
     # write .pgpass, if it does not already  exist
