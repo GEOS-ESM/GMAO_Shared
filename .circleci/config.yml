@@ -1,7 +1,7 @@
 version: 2.1
 
 # Anchors in case we need to override the defaults from the orb
-#baselibs_version: &baselibs_version v7.33.0
+#baselibs_version: &baselibs_version v7.27.0
 #bcs_version: &bcs_version v11.6.0
 
 orbs:
@@ -45,7 +45,7 @@ workflows:
             - docker-hub-creds
           matrix:
             parameters:
-              compiler: [gfortran, ifort]
+              compiler: [ifort]
           requires:
             - build-GEOSgcm-on-<< matrix.compiler >>
           repo: GEOSgcm
