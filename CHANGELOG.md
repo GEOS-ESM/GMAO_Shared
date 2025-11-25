@@ -14,18 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed gpy module in `idcheck.pl`
+- fix r_dist for SLES-15
 
 ### Removed
 
 ### Deprecated
-
 
 ## [2.1.4] - 2025-08-29
 
 ### Changed
 
 - Updated `esma_mpirun` for `openmpi` to run with `-map-by node -bind-to core` which is a good default.
-
 
 ## [2.1.3] - 2025-07-07
 
@@ -65,7 +64,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- fix r_dist for SLES-15
 - fix vED
 - SLES15 stuff
 - fix to reading of table in time ave program
