@@ -1,5 +1,4 @@
    program dyn_vordiv
-!  must run as mpirun -np 1
    use m_ggGradientSP,only : ggGradientSP
    use m_ggGradientSP,only : ggGradientSP_init,clean
    use m_ggGradientSP,only : ggDivo
@@ -19,7 +18,11 @@
    use m_dyn, only: dyn_stat
    use m_dyn, only: dyn_flip
 
-   use m_die, only: die
+   use m_mpif90,only : MP_init
+   use m_mpif90,only : MP_finalize
+   use m_mpif90,only : MP_comm_rank
+
+   use m_die, only: MP_die,die
 
    implicit none
 
@@ -48,48 +51,64 @@
    integer, parameter :: mfiles=2
    integer iargc,nfiles
    integer iarg,argc,nymd,nhms,freq
-   integer im,jm,km,jcap
+   integer im,jm,km,lm,jcap
    integer i,ierr
 
    logical sfvp
    logical overwrite
+   logical getrh
+   logical pncf
  
+! MPI Initialization
+! ------------------
+   call MP_init(ierr)
+        if(ierr/=0) call MP_die(myname,'MP_init()',ierr)
+
    argc = iargc()
    if ( argc < 1 ) then
         call usage_()
    end if
    
+   iarg=0
    nfiles=0
    overwrite = .true.
    sfvp=.false.
+   getrh = .false.
+   pncf = .false.
    do i = 1, 32767
       iarg = iarg + 1
       if ( iarg .gt. argc ) exit
       call GetArg ( iarg, argv )
       select case (argv)
-          case ("-noverw")
-            overwrite = .false.
-      case ("-jcap")
+        case ("-noverw")
+          overwrite = .false.
+        case ("-getrh")
+          getrh = .true.
+        case ("-pncf")
+          pncf = .true.
+        case ("-jcap")
           if ( iarg+1 .gt. argc ) call usage_()
           iarg = iarg + 1
           call GetArg ( iarg, argv )
           read(argv,*) jcap
           sfvp=.true.
-      case default
+        case default
           nfiles = nfiles + 1
           if ( nfiles .gt. mfiles ) call die(myname,'too many eta files')
           if (nfiles == 1) ifile = trim(argv)
           if (nfiles == 2) ofile = trim(argv)
       end select
-
-
    enddo
 
    print*, "Reading file: ", trim(ifile)
-   allocate(xtrnames(2))
-   xtrnames=(/'rh ','mrh'/)
-   call dyn_get ( trim(ifile), nymd, nhms, dyn, ierr, timidx=1, freq=freq, vectype=5, xtrnames=xtrnames )
-   deallocate(xtrnames)
+   if (getrh) then
+     allocate(xtrnames(2))
+     xtrnames=(/'rh ','mrh'/)
+     call dyn_get ( trim(ifile), nymd, nhms, dyn, ierr, timidx=1, freq=freq, vectype=5, pncf=pncf, xtrnames=xtrnames )
+     deallocate(xtrnames)
+   else
+     call dyn_get ( trim(ifile), nymd, nhms, dyn, ierr, timidx=1, freq=freq, vectype=5, pncf=pncf )
+   endif
 
    im = dyn%grid%im
    jm = dyn%grid%jm
@@ -165,6 +184,11 @@
    deallocate( sf, vp, stat=ierr)
    deallocate(div,vor, stat=ierr)
 
+! finalize
+! --------
+  call MP_finalize(ierr)
+        if(ierr/=0) call MP_die(myname,'MP_finalized()',ierr)
+
 contains
    subroutine get_latlon_
       implicit none
@@ -217,6 +241,8 @@ contains
         print *, " Options: "
         print *, "  -jcap  JCAP  - set truncation (triggers calc vp/sf)"
         print *, "  -noverw      - do not overwrite u/v w/ vp/sf"
+        print *, "  -getrh       - in case input has rh/mrh fields"
+        print *, "  -pncf        - in case input in non-compliant perturbation"
         print *
         stop
    end subroutine usage_
