@@ -11,9 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated and modernized `pyrob` script
+  - Removed ability to use dead/ancient `rftw` package
+  - Added ability to output `docx` format with `python-docx` package
+  - Added ability to output Markdown format
+  - General cleanup with `ruff`
+
 ### Fixed
 
 - Fixed gpy module in `idcheck.pl`
+- Fixed `pyrob` script for issue with MERRA-21C output
 
 ### Removed
 
