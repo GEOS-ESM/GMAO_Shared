@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed gpy module in `idcheck.pl`
 - Fixed `pyrob` script for issue with MERRA-21C output
+- Fixed declarations in sphere.F to allow running with a GNU compiler debug option
 
 ### Removed
 
