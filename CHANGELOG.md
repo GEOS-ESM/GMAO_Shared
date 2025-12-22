@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed gpy module in `idcheck.pl`
+- Added support for Cray MPICH in `esma_mpirun`
 - Fixed `pyrob` script for issue with MERRA-21C output
 
 ### Removed
