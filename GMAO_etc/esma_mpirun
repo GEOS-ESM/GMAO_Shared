@@ -104,6 +104,7 @@ sub get_mpi_type {
     elsif ( $ENV{"I_MPI_ROOT"} )             { $mpi_type = "intel"    }
     elsif ( $ENV{"OPENMPI"}    )             { $mpi_type = "openmpi"  }
     elsif ( $ENV{"MPICH"}      )             { $mpi_type = "mpich"    }
+    elsif ( $ENV{"CRAY_MPICH_DIR"})          { $mpi_type = "mpich"    }
     elsif ( $ENV{"MPT_VERSION"})             { $mpi_type = "mpt"      }
     elsif ( $ENV{"HPCX_HOME"}  )             { $mpi_type = "openmpi"  }
 
