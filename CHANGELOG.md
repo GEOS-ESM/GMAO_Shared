@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [2.1.5] - 2026-01-02
+
+### Changed
+
 - Updated and modernized `pyrob` script
   - Removed ability to use dead/ancient `rftw` package
   - Added ability to output `docx` format with `python-docx` package
@@ -20,20 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed gpy module in `idcheck.pl`
+- Added support for Cray MPICH in `esma_mpirun`
 - Fixed `pyrob` script for issue with MERRA-21C output
 - Fixed declarations in sphere.F to allow running with a GNU compiler debug option
-
-### Removed
-
-### Deprecated
-
 
 ## [2.1.4] - 2025-08-29
 
 ### Changed
 
 - Updated `esma_mpirun` for `openmpi` to run with `-map-by node -bind-to core` which is a good default.
-
 
 ## [2.1.3] - 2025-07-07
 
