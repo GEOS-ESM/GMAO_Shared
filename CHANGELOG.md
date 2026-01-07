@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.6] - 2026-01-06
+
+### Fixed
+
+- Change vector declarations in `sphere.F` to satisfy GNU compiler Debug option
+
 ## [2.1.5] - 2026-01-02
 
 ### Changed
@@ -32,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed gpy module in `idcheck.pl`
 - Added support for Cray MPICH in `esma_mpirun`
 - Fixed `pyrob` script for issue with MERRA-21C output
-- Fixed declarations in sphere.F to allow running with a GNU compiler debug option
 
 ## [2.1.4] - 2025-08-29
 
