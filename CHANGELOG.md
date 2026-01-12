@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+2026-01-12:
+
+- r_dist for MILAN
+- minor bug fix in ODS code
+- add ak/bk for MLT 1st version
+- add ability to write out akbk to nc4 (JEDI support)
+
+------------
 - fix vED
 - SLES15 stuff
 - fix to reading of table in time ave program
