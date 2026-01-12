@@ -2,6 +2,7 @@ program eta_echo
 use m_set_eta, only: set_eta
 use m_set_eta, only: get_ref_plevs
 use m_spline, only: spline
+use m_nc_akbk, only: write_nc_akbk
 implicit none
 
 integer :: nlevs,mlevs
@@ -13,6 +14,7 @@ real(4),allocatable :: hloc(:),zloc(:),betac(:),betae(:)
 real(4) :: ak4,bk4
 real(4) :: pbottom
 character(len=255) :: locfname
+character(len=255) :: akbkfname
 
 call init_
 
@@ -28,7 +30,7 @@ if (lplevs) then
     call write_plevs_()
 endif
 
-call write_akbk_()
+if ( akbkfname /= "NULL" ) call write_nc_akbk ( akbkfname, ak8, bk8 )
 
 deallocate(ak8,bk8)
 
@@ -52,6 +54,7 @@ subroutine init_
      print *, " -mlevs LEVS - interpolate to this level setting"
      print *, " -plevs      - echoes pressure levels"
      print *, " -r4         - single precision"
+     print *, " -nc FILE    - writes out ak/bk to nc4 file"
      print *, "   "
      stop
   end if
@@ -59,6 +62,7 @@ subroutine init_
   lsingle = .false.
   lplevs = .false.
   locfname = "NULL"
+  akbkfname = "NULL"
   pbottom = -999.
   mlevs=0
   iarg = 1
@@ -84,6 +88,10 @@ subroutine init_
          iarg = iarg + 1
          call GetArg ( iarg, argv )
          locfname = trim(argv)
+     case ("-nc")
+         iarg = iarg + 1
+         call GetArg ( iarg, argv )
+         akbkfname = trim(argv)
      case default
         read(argv,*) nlevs
      end select
