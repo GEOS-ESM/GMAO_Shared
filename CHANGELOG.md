@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [2.1.6] - 2026-01-06
+
+### Fixed
+
+- Change vector declarations in `sphere.F` to satisfy GNU compiler Debug option
+
 ## [2.1.5] - 2026-01-02
 
 ### Changed
