@@ -16,7 +16,7 @@ use warnings;
 
 # global variables
 #-----------------
-my ($workdir, $modis, $avhrr, %flags, $verbose);
+my ($workdir, $modis, $viirs, $avhrr, %flags, $verbose);
 
 # main program
 #-------------
@@ -69,6 +69,24 @@ my ($workdir, $modis, $avhrr, %flags, $verbose);
         }
     }
             
+    if ($viirs) {
+        foreach $file (<$workdir/VN20AERD?_L2_VIIRS_NOAA20.*.*.nc>) {
+            $base = basename $file;
+            ($label, $Adate, $time, $version) = split /[\.]/, $base;
+
+            $type = substr($label, 0, 9);
+            $year = substr($Adate, 1, 4);
+            $jdoy = substr($Adate, 5, 3);
+
+            $subdir = "$workdir/${type}/$version/$year/$jdoy";
+            unless (-d $subdir) {
+                mkpath($subdir, \%flags) or die "Error making dir: $subdir;";
+                system("touch $subdir/.no_archiving");
+            }
+            print "mv $file $subdir\n" if $verbose;
+            move($file, $subdir);
+        }
+    }
 }
 
 #=======================================================================
@@ -79,6 +97,7 @@ sub init {
     use Getopt::Long;
 
     GetOptions( "v"     => \$verbose,
+                "viirs" => \$viirs,
                 "modis" => \$modis,
                 "avhrr" => \$avhrr );
     $workdir = shift @ARGV;
