@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Minor changes for VIIRS additions
+
 ### Changed
 
 - Bring in JEDI supporting code
