@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Minor changes for VIIRS additions
+
 ### Changed
 
 - Bring in JEDI supporting code
 
 ### Fixed
+
+2026-01-17:
+
+- added GOES, HIMAWARI, VIIRS SNPP & NOAA-20, and Lunar AERONET aerosol observations to the KX-lists
 
 2026-01-12:
 
