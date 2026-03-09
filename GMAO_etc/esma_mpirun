@@ -335,8 +335,6 @@ sub get_xtraflags {
        }
        if ($perhost) {
           $xtraflags .= " --map-by ppr:$perhost:node --bind-to core";
-       } else {
-          $xtraflags .= " --bind-to core";
        }
 
     }
