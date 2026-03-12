@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing
+
 ### Removed
 
 ### Deprecated

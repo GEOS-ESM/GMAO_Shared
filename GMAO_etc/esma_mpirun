@@ -331,12 +331,10 @@ sub get_xtraflags {
     if ($mpi_type eq "openmpi") {
 
        if ($siteID eq "gmao") {
-          $xtraflags .= " -oversubscribe";
+          $xtraflags .= " --oversubscribe";
        }
        if ($perhost) {
-          $xtraflags .= " -map-by ppr:$perhost:node -bind-to core";
-       } else {
-          $xtraflags .= " -map-by node -bind-to core";
+          $xtraflags .= " --map-by ppr:$perhost:node --bind-to core";
        }
 
     }
