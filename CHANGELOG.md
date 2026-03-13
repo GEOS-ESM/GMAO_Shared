@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated `pyrob` script for Forward Processing (`-F`) collection descriptions
+  - By default, the collection description is now taken from the `LongName` global
+    attribute of the netCDF file, with any leading `"GEOS FP "` prefix stripped
+  - Added `--no-longname` flag to revert to the legacy `Title`-based description
+    for older FP files that do not carry a useful `LongName` attribute
+  - The same `--no-longname` escape hatch applies to `--geosit` / `--m21c` runs
+
 ### Fixed
 
 - Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing

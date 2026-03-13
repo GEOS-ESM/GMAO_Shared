@@ -249,13 +249,24 @@ class Writer(object):
                 else:
                     descr = "fix me, please"
 
-        if options.geosit:
+        if options.geosit and not options.no_longname:
             if Coll.LongName is not None:
                 Descr = Coll.LongName.split()[4:]
                 descr = " ".join(Descr)
                 if "edge" in descr:
                     level = "Model-Level Edge"
                 descr = descr.title()
+
+        if options.fp and not options.no_longname:
+            if Coll.LongName is not None:
+                # Strip a leading "GEOS FP " prefix (case-insensitive) if present,
+                # then title-case the remainder for consistent formatting.
+                ln = Coll.LongName.strip()
+                for prefix in ("GEOS FP ", "GEOS-FP "):
+                    if ln.lower().startswith(prefix.lower()):
+                        ln = ln[len(prefix):]
+                        break
+                descr = ln.title()
 
         descr = (
             descr.replace("Forecast,", "")
@@ -1233,6 +1244,14 @@ if __name__ == "__main__":
         action="store_true",
         dest="fp",
         help="Assume Forward Processing file name conventions",
+    )
+
+    parser.add_option(
+        "--no-longname",
+        action="store_true",
+        dest="no_longname",
+        default=False,
+        help="Use legacy Title-based collection description instead of LongName global attribute (for older FP/GEOS-IT files)",
     )
 
     parser.add_option(
