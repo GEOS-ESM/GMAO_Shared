@@ -40,9 +40,13 @@ if ( NOT HERMES_LIGHT )
    endif ()
 
    # the gmao2ioda directory just has scripts we want to install
-   install (
-     DIRECTORY gmao2ioda
-     DESTINATION bin
-     USE_SOURCE_PERMISSIONS
-   )
+   # but we only want to install it if it actually exists (i.e.,
+   # it might be sparsed out in some fixtures
+   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/gmao2ioda)
+     install(
+       DIRECTORY gmao2ioda
+       DESTINATION bin
+       USE_SOURCE_PERMISSIONS
+     )
+   endif()
 endif()

@@ -6,7 +6,7 @@
 #
 # Note:
 # 1. See usage subroutine for usage information
-# 2. This script uses the xxdiff utility
+# 2. This script uses the diff command and xxdiff utility
 #
 # !Revision History
 # 29Mar2010  Stassi  Initial version.
@@ -23,16 +23,17 @@ use Getopt::Long;
 
 # global variables
 #-----------------
-my ($bindiff, $BbwiFLG, $debug, $cdoX, $cmpX, $delim, $diffFLGs, $dir1, $dir2);
-my ($dirA, $dirB, $dirL1, $dirL2, $dmgetX, $filemode, $first, $follow);
-my ($ignoreFLG, $ignoreFile, $list, $listx, $quiet, $recurse, $sortFLG);
-my ($subdir, $tarfile_dirA, $tarfile_dirB, $tdirfile, $tmpdir, $verbose);
-my ($xxdiff_available, $xxFLG);
-my (%different, %diffsBIN, %diffsTXT, %dir_display, %filesize, %found);
-my (%identical, %ignore, %opts, %patterns, %vopts);
+my ($amperFLG, $bindiff, $BbwiFLG, $debug, $cdoX, $cmpX, $delim, $diffFLGs);
+my ($dir1, $dir2, $dirA, $dirB, $dirL1, $dirL2, $dmgetX, $dn, $filemode);
+my ($first, $follow, $ignoreFLG, $trivialFLG, $ignoreFile, $list, $listx);
+my ($quiet, $recurse, $sortFLG, $subdir, $tarfile_dirA, $tarfile_dirB);
+my ($tdirfile, $tmpdir, $verbose, $xxdiff_available, $xxFLG);
+my (%ddelim, %different, %diffsBIN, %diffsTXT, %dir_display, %filesize);
+my (%found, %identical, %ignore, %opts, %patterns, %vopts);
 my (@exclude, @extEXCL, @extINC, @fileIDs, @files, @files1, @files2);
-my (@p1, @p2, @subdirs, @unmatched1, @unmatched2);
+my (@p1, @p2, @unmatched1, @unmatched2);
 
+$amperFLG = "&";
 $delim = "="; # character to use when defining diffs to ignore
 $tdirfile = "tarfile_directory_locationXXX"; # used when comparing tarfiles
 
@@ -40,16 +41,13 @@ $tdirfile = "tarfile_directory_locationXXX"; # used when comparing tarfiles
 #-------------
 {
     init();
+    cmp_files();
+    show_results();
 
-    $tmpdir = "$ENV{TMPDIR}/tmpdir.$$";
-    rmtree($tmpdir, \%vopts) if -d $tmpdir;
-
-    while (1) {
-        cmp_files();
-        last if show_results();
+    if (-d $tmpdir) {
+        underline("Removing temporary dir and files:");
+        rmtree($tmpdir, \%vopts);
     }
-
-    rmtree($tmpdir, \%vopts) if -d $tmpdir;
 }
 
 #=======================================================================
@@ -58,37 +56,47 @@ $tdirfile = "tarfile_directory_locationXXX"; # used when comparing tarfiles
 #=======================================================================
 sub init {
     my ($binX, $etcflg, $fcstflg, $help, $rsflg, $runflg, $xxdiff);
-    my ($arrAddr, $val, @values, @vlist);
+    my ($arrAddr, $modinit, $val, @values, @vlist);
+
+    # use %vopts for verbose always on
+    #---------------------------------
+    %vopts = ("verbose" => 1);
+
+    # create temporary directory
+    #---------------------------
+    $tmpdir = "$ENV{TMPDIR}/tmpdir.$$";
+    rmtree($tmpdir, \%opts) if -d $tmpdir;
 
     # get runtime flags
     #------------------
-    GetOptions("binX"     => \$binX,
-               "db|debug" => \$debug,
-               "extX=s"   => \@extEXCL,
-               "ext=s"    => \@extINC,
-               "etc"      => \$etcflg,
-               "fcst"     => \$fcstflg,
-               "follow!"  => \$follow,
-               "h|help"   => \$help,
-               "id=s"     => \@fileIDs,
-               "list"     => \$list,
-               "listx"    => \$listx,
-               "p=s"      => \%patterns,
-               "p1=s"     => \@p1,
-               "p2=s"     => \@p2,
-               "q"        => \$quiet,
-               "r"        => \$recurse,
-               "rs"       => \$rsflg,
-               "run"      => \$runflg,
-               "subdir=s" => \$subdir,
-               "v"        => \$verbose,
-               "X=s"      => \@exclude );
+    GetOptions("b"          => \$trivialFLG,
+               "binX"       => \$binX,
+               "d|subdir=s" => \$subdir,
+               "db|debug"   => \$debug,
+               "extX=s"     => \@extEXCL,
+               "ext=s"      => \@extINC,
+               "etc"        => \$etcflg,
+               "fcst"       => \$fcstflg,
+               "follow"     => \$follow,
+               "h|help"     => \$help,
+               "id=s"       => \@fileIDs,
+               "list"       => \$list,
+               "listx"      => \$listx,
+               "p=s"        => \%patterns,
+               "p1=s"       => \@p1,
+               "p2=s"       => \@p2,
+               "q"          => \$quiet,
+               "r"          => \$recurse,
+               "rs"         => \$rsflg,
+               "run"        => \$runflg,
+               "v"          => \$verbose,
+               "X=s"        => \@exclude );
     usage() if $help;
 
     $follow = 0 unless $follow;
     $list = 1 if $listx;
     $recurse = 1 if $list;
-    $verbose = 1 if $debug;
+    set_debug_vals();
 
     # exclude single- and double-dot directories
     #-------------------------------------------
@@ -100,10 +108,6 @@ sub init {
     #-----------------------------------------
     if ($verbose) { %opts = ("verbose" => 1) }
     else          { %opts = () }
-
-    # use %vopts for verbose always on
-    #---------------------------------
-    %vopts = ("verbose" => 1);
 
     # extract comma-separated option values
     #--------------------------------------
@@ -135,10 +139,12 @@ sub init {
 
     # shortcuts for checking etc, fcst, run, or rs directory 
     #-------------------------------------------------------
-    if ($etcflg)  { $subdir = "etc";  $recurse = 1 }
-    if ($fcstflg) { $subdir = "fcst"; $recurse = 1 }
-    if ($runflg)  { $subdir = "run";  $recurse = 1 }
-    if ($rsflg)   { $subdir = "rs";   $recurse = 1 }
+    unless ($subdir) {
+        if ($etcflg)  { $subdir = "etc";  $recurse = 1 }
+        if ($fcstflg) { $subdir = "fcst"; $recurse = 1 }
+        if ($runflg)  { $subdir = "run";  $recurse = 1 }
+        if ($rsflg)   { $subdir = "rs";   $recurse = 1 }
+    }
 
     # runtime parameters
     #-------------------
@@ -152,20 +158,30 @@ sub init {
     # initialize other variables
     #---------------------------
     $diffFLGs = "";
-    $xxFLG = 1;
+    $diffFLGs = "-Bbwi" if $trivialFLG;
+    $xxFLG = 0;
     $first = 1;
     %ignore = ();
+    %ddelim = ();
 
     # check for xxdiff availability
     #------------------------------
-    chomp($xxdiff = `which xxdiff`);
-    if (-x $xxdiff) {
-        $xxFLG = 1;
-        $xxdiff_available = 1;
+    chomp($xxdiff = `which xxdiff $dn`);
+    unless (-x $xxdiff) {
+        $modinit = "/usr/share/modules/init/perl";
+        if (-e $modinit) {
+            do $modinit;
+            module("load xxdiff");
+            chomp($xxdiff = `which xxdiff $dn`);
+        }
     }
+
+    if (-x $xxdiff) { $xxdiff_available = 1 }
     else {
-        $xxFLG = 0;
         $xxdiff_available = 0;
+        print "\nCannot find xxdiff utility.\n";
+        print "All differences will be displayed with diff cmd.\n";
+        pause();
     }
 
     # select program to use for $bindiff
@@ -249,16 +265,6 @@ sub init_dirmode {
     die ">> Error << unequal number of patterns (-p1/-p2)"
         unless scalar(@p1) == scalar(@p2);
 
-    # find common subdirectories
-    #---------------------------
-    foreach (<$dirA/*>) {
-        next unless -d abs_path($_);
-        next if Xcluded($_);
-        $subdirname = basename $_;
-        push @subdirs, $subdirname if -d abs_path("$dirB/$subdirname");
-        next;
-    }
-
     # check for requested subdirectory
     #---------------------------------
     if ($subdir) {
@@ -272,6 +278,11 @@ sub init_dirmode {
     $dir2 = $dirB;
     $dirL1 = basename $dir1;
     $dirL2 = basename $dir2;
+
+    unless ($dirL1 eq $dirL2) {
+        $ignore{$dirL1} = $dirL2;
+        $ddelim{$dirL1} = "=";
+    }
 
     if ($subdir) {
         $dir1  .= "/$subdir";
@@ -287,10 +298,12 @@ sub init_dirmode {
 
     $tarfile_dirA = get_filelist($dir1, \@files1);
     $tarfile_dirB = get_filelist($dir2, \@files2);
+    die ">> Error << No files found in dir1: $dir1;" unless @files1;
+    die ">> Error << No files found in dir2: $dir2;" unless @files2;
     if ($list) { cmp_lists(); return }
 
     show_file_counts(1);
-    find_common_label(\@files1, \@files2);
+    ignore_expid_diffs(\@files1, \@files2);
 
     # zero-out lists
     #---------------
@@ -368,7 +381,7 @@ sub cmp_files {
         }
         elsif ($cdoX and ($file1 =~ /\.hdf/ or $file2 =~ /\.nc4/)) {
             $status = cdo_diff($file1, $file2);
-            if ($status and $cmpX) {
+            if ($status == 2 and $cmpX) {
                 print "checking with cmp\n";
                 $status = system_("$cmpX $file1 $file2 >& /dev/null");
             }
@@ -410,23 +423,21 @@ sub cmp_files {
 # => file1: first file to compare
 # => file2: second file to compare
 #
-# notes
-# 1. check for line from cdo telling how many records differ
-# 2. if cdo reports that zero records differ, then files are assumed equivalent
-# 3. otherwise, this sub will report that the files differ
+# return values
+# => 0: successful cdo comparison; zero diffs found
+# => 1: successful cdo comparison; diffs found
+# => 2: unsuccessful cdo comparison
 #=======================================================================
 sub cdo_diff {
     my ($file1, $file2) = @_;
-    my ($diffFLG, $line);
+    my ($line, $status);
     
-    $diffFLG = 1;
     foreach $line (`$cdoX -s diffn $file1 $file2`) {
-        if ($line =~ m/0(\s+)of(\s+)(\d+) records differ/) {
-            $diffFLG = 0;
-            last;
-        }
+        $status = $?;
+        return 2  if $status;
+        return $1 if $line =~ m/(\d+)(\s+)of(\s+)(\d+) records differ/;
     }
-    return $diffFLG;
+    return 2;
 }
 
 #=======================================================================
@@ -475,11 +486,13 @@ sub cmp_lists {
 
     # dump lists to files
     #--------------------
-    $lfile1 = "$ENV{HOME}/cmpdir_list1_" .basename($dir1) .".$$";
+    mkpath($tmpdir, \%vopts) unless -d $tmpdir;
+
+    $lfile1 = "$tmpdir/cmpdir_list1_" .basename($dir1) .".$$";
     listdump(1, $dir1, $lfile1, @files1);
     print "\n(1) list written: $lfile1 (" .scalar(@files1) ." lines)\n";
 
-    $lfile2 = "$ENV{HOME}/cmpdir_list2_" .basename($dir2) .".$$";
+    $lfile2 = "$tmpdir/cmpdir_list2_" .basename($dir2) .".$$";
     listdump(2, $dir2, $lfile2, @files2);
     print "(2) list written: $lfile2 (" .scalar(@files2) ." lines)\n\n";
         
@@ -495,26 +508,27 @@ sub cmp_lists {
 }
 
 #=======================================================================
-# name - find_common_label
-# purpose - check the file names to see if the files have a common label.
-#           if so, then add labels to pattern arrays, if not already present.
+# name - ignore_expid_diffs
+# purpose - check the file names to see if the files have a common expid
+#           label. if so, then add expid labels to pattern arrays, if not
+#           already present.
 #
 # input parameters
 # => $arr1ADDR: address of 1st array of filenames
 # => $arr1ADDR: address of 2nd array of filenames
 #=======================================================================
-sub find_common_label {
+sub ignore_expid_diffs {
     my ($arr1ADDR, $arr2ADDR, @arr1, @arr2);
     my ($base, @parts, %freq1, %freq2);
-    my ($maxF, $label1, $label2);
+    my ($maxF, $expid1, $expid2);
 
     $arr1ADDR = shift @_;
     $arr2ADDR = shift @_;
     @arr1 = @$arr1ADDR;
     @arr2 = @$arr2ADDR;
 
-    # get labels from files in each array
-    #------------------------------------
+    # look for common filename labels in each array
+    #----------------------------------------------
     foreach (@arr1) {
         $base = basename $_;
         @parts = split /[.]/, $base;
@@ -526,26 +540,31 @@ sub find_common_label {
         ++$freq2{$parts[0]} if scalar(@parts) > 1;
     }
     
-    # find most common label in each array
-    #-------------------------------------
-    $maxF = 0; $label1 = "";
+    # assign expid to most common label
+    #----------------------------------
+    $maxF = 0; $expid1 = "";
     foreach (keys %freq1) {
-        if ($freq1{$_} > $maxF) { $label1 = $_; $maxF = $freq1{$_} }
+        if ($freq1{$_} > $maxF) { $expid1 = $_; $maxF = $freq1{$_} }
     }
-    return unless $maxF*2 > scalar(@arr1);
+    #return unless $maxF*2 > scalar(@arr1);
+    $expid1 = "" unless $maxF*2 > scalar(@arr1);
 
-    $maxF = 0; $label2 = "";
+    $maxF = 0; $expid2 = "";
     foreach (keys %freq2) {
-        if ($freq2{$_} > $maxF) { $label2 = $_; $maxF = $freq2{$_} }
+        if ($freq2{$_} > $maxF) { $expid2 = $_; $maxF = $freq2{$_} }
     }
-    return unless $maxF*2 > scalar(@arr2);
+    #return unless $maxF*2 > scalar(@arr2);
+    $expid2 = "" unless $maxF*2 > scalar(@arr2);
 
-    # add labels to pattern arrays if appropriate
+    # add expids to pattern arrays if appropriate
     #--------------------------------------------
-    if ($label1 ne $label2) {
-        unless ( in($label1, @p1) and in($label2, @p2) ) {
-            push @p1, $label1;
-            push @p2, $label2;
+    if ($expid1 ne $expid2) {
+        #unless ( in($expid1, @p1) and in($expid2, @p2) ) {
+        unless (in($expid1, @p1)) {
+            push @p1, $expid1;
+            push @p2, $expid2;
+            $ignore{$expid1} = $expid2;
+            $ddelim{$expid1} = "=";
         }
     }
     if ($debug) {
@@ -573,28 +592,20 @@ sub show_results {
     unless (%found) {
         print "No common files were found.\n"
             . "Continue? (y/n) [n] ";
+        #====================
         chomp($ans = <STDIN>);
+        #====================
         exit unless lc($ans) eq "y";
         $dflt = 3;
     }
 
-    # put list diffs display in background by forking
-    #------------------------------------------------
+    # display list differences and quit
+    #----------------------------------
     if ($list) {
-        defined($pid = fork) or die "Error while forking: $!";
-        unless ($pid) {
-            $diffsTXT{"wait"} = 1;
-            display_text_diffs(1, %diffsTXT);
-            delete $diffsTXT{"wait"};
-
-            foreach (keys %different) {
-                unlink $_;
-                unlink $different{$_};
-                print "\nunlink $_\n";
-                print "unlink $different{$_}\n";
-            }
-        }
-        exit;
+        $xxFLG = 1 if $xxdiff_available;
+        #$amperFLG = "";
+        show_text_diffs(%diffsTXT);
+        return;
     }
 
     while (1) {
@@ -614,30 +625,37 @@ sub show_results {
                 . " 2. identical\n"
                 . " 3. not found\n\n"
                 . " 4. file counts\n"
-                . " 5. file lists\n";
-            print " 6. choose (other) subdirectory\n" unless @extINC;
-            print "\n"
+                . " 5. file lists\n\n"
                 . " 0. quit\n\n"
                 . "choose option: [$dflt] ";
 
+            #====================
             chomp($opt = <STDIN>);
+            #====================
             $opt =~ s/\s//g;
             $opt = $dflt if $opt eq "";
-        }
-        return 1 unless $opt;
 
-        if ($opt > 2) { $dflt = 0 }
-        else          { $dflt = $opt + 1 }
+            # check for integer input
+            #------------------------
+            unless ($opt =~ m/\d+/) {
+                print "\n$opt: Invalid option; Try again.\n";
+                pause();
+                next;
+            }
+        }
+        return unless $opt;
+
+        if (int($opt) > 2) { $dflt = 0 }
+        else               { $dflt = $opt + 1 }
 
         if ($opt eq "1") { show_differences(); next }
         if ($opt eq "2") { show_identical();   next }
         if ($opt eq "3") { show_unmatched();   next }
         if ($opt eq "4") { show_file_counts(); next }
         if ($opt eq "5") { list_files();       next }
-        unless (@extINC) {
-            if ($opt eq "6") { choose_subdir();  return }
-        }
-        print "\n$opt: Invalid option; Try again.\n\n";
+
+        print "\n$opt: Invalid option; Try again.\n";
+        pause();
     }
 }
 
@@ -648,7 +666,7 @@ sub show_results {
 #=======================================================================
 sub show_differences {
     unless (%diffsBIN or %diffsTXT) {
-        print "\nNo differences found.\n";
+        print "\nNo differences found.\n\n";
         pause();
         return;
     }
@@ -676,7 +694,7 @@ sub size_differences {
             $label = 1;
         }
     }
-    if ($diffcnt) { pause() unless $filemode }
+    if ($diffcnt) { npause() unless $filemode }
 }
 
 #=======================================================================
@@ -684,13 +702,13 @@ sub size_differences {
 # purpose - 
 #=======================================================================
 sub show_binary_diffs {
-    my (%diffs, @tempArr, $max, $align, $fmt1, $fmtB, $num, $show_menu, $ask);
+    my (%diffsB, @tempArr, $max, $align, $fmt1, $fmtB, $num, $show_menu, $ask);
     my ($file1, $file2, $base1, $base2, $ext1, $ext2, $dflt, $sel);
 
-    if (@_) { %diffs = @_ }
-    else    { %diffs = %diffsBIN }
+    if (@_) { %diffsB = @_ }
+    else    { %diffsB = %diffsBIN }
 
-    @tempArr = (values %diffs);
+    @tempArr = (values %diffsB);
     $max = maxLength(\@tempArr, "branch1");
 
     $fmt1 = "%3s. %s\n";
@@ -705,9 +723,9 @@ sub show_binary_diffs {
             # select file to do binary diff
             #------------------------------
             $num--;
-            underline("These binary files differ") if %diffs;
-            foreach (sort numeric keys %diffs) {
-                $file1 = $diffs{$_};
+            underline("These binary files differ") if %diffsB;
+            foreach (sort numeric keys %diffsB) {
+                $file1 = $diffsB{$_};
                 $base1 = branch($file1, "1");
                 $base2 = branch($different{$file1}, "2");
 
@@ -729,23 +747,25 @@ sub show_binary_diffs {
         $dflt = ++$num;
 
         while ($dflt) {
-            unless ( $diffs{$dflt} ) { $dflt = 0; last }
-            last if $diffs{$dflt} =~ /\.tar$/
-                or  $diffs{$dflt} =~ /\.png$/;
+            unless ( $diffsB{$dflt} ) { $dflt = 0; last }
+            last if $diffsB{$dflt} =~ /\.tar$/
+                or  $diffsB{$dflt} =~ /\.png$/;
 
             if ($cdoX) {
-                last if $diffs{$dflt} =~ /\.hdf$/
-                    or  $diffs{$dflt} =~ /\.nc4$/
-                    or  $diffs{$dflt} =~ /\.ods$/;
+                last if $diffsB{$dflt} =~ /\.hdf$/
+                    or  $diffsB{$dflt} =~ /\.nc4$/
+                    or  $diffsB{$dflt} =~ /\.ods$/;
             }
             else {
-                last if $diffs{$dflt} =~ /\.nc4$/;
+                last if $diffsB{$dflt} =~ /\.nc4$/;
             }
             $dflt++;
         }
 
         print "Compare files: [$dflt] ";
+        #====================
         chomp($sel = <STDIN>);
+        #====================
         $sel =~ s/\s//g;
         $sel = $dflt if $sel eq "";
 
@@ -755,12 +775,14 @@ sub show_binary_diffs {
         # show selected binary diff
         #--------------------------
         $num = $sel;
-        unless ($diffs{$num}) {
+        unless ($diffsB{$num}) {
             print "Selection not found: $num; Try again.\n";
             $num = --$dflt;
+            $sel = "";
+            pause();
             next;
         }
-        $file1 = $diffs{$num};
+        $file1 = $diffsB{$num};
         $file2 = $different{$file1};
 
         $ext1 = get_ext($file1);
@@ -780,7 +802,7 @@ sub show_binary_diffs {
                 print "\n [$num] $base1";
                 print " <=> $base2" if $base1 ne $base2;
                 print "\n";
-                pause()
+                npause(1)
             }
             $num++;
             $show_menu = 1;
@@ -847,10 +869,12 @@ sub cmp_tarfiles {
     $tdir[1] = "$dirA\n";
     $tdir[2] = "$dirB\n";
 
+    mkpath($tmpdir, \%vopts) unless -d $tmpdir;
+
     # untar into temporary directories
     #---------------------------------
     foreach (1..2) {
-        $tmptardir[$_] = "$ENV{TMPDIR}/tmpdir$_.$$";
+        $tmptardir[$_] = "$tmpdir/tdir$_.$$";
         rmtree($tmptardir[$_], \%opts) if -d $tmptardir[$_];
         mkpath($tmptardir[$_], \%vopts);
 
@@ -868,11 +892,6 @@ sub cmp_tarfiles {
     # use cmpdir.pl to compare temporary directories
     #-----------------------------------------------
     system("$Bin/cmpdir.pl -r $tmptardir[1] $tmptardir[2]");
-
-    # remove temporary directories when done
-    #---------------------------------------
-    rmtree($tmptardir[1], \%opts);
-    rmtree($tmptardir[2], \%opts);
 }
 
 #=======================================================================
@@ -880,29 +899,39 @@ sub cmp_tarfiles {
 # purpose - show text differences
 #=======================================================================
 sub show_text_diffs {
-    my (%diffs, @tempArr, $max, $fmt0, $fmt1, $fmtT, $num);
-    my ($file1, $base1, $base2, $dflt, $sel, $ncount);
+    my (%diffsT, @tempArr, $max, $fmt0, $fmt1, $fmti, $fmtT, $num, $icnt);
+    my ($file1, $firstpass, $base1, $base2, $dflt, $sel, $ncount);
 
-    if (@_) { %diffs = @_ }
-    else    { %diffs = %diffsTXT }
+    if (@_) { %diffsT = @_ }
+    else    { %diffsT = %diffsTXT }
 
-    @tempArr = (values %diffs);
+    @tempArr = (values %diffsT);
     $max = maxLength(\@tempArr, "branch1");
 
     $fmt0 = "%3s. %s";
     $fmt1 = "%3s. %s\n";
+    $fmti = "%3s. %s (%d)\n";
     $fmtT = "%3s. %-${max}s <=> %-s\n";
 
-    return unless %diffs;
+    return unless %diffsT;
+    $firstpass = 1;
     $sel = "";
     $num = 0;
     while (1) {
-        
+
+        # skip menu on first pass for list option
+        #----------------------------------------
+        if ($firstpass and $list) {
+            $firstpass = 0;
+            $num = 1;
+            goto display;
+        }
+
         # select which file to show differences
         #--------------------------------------
         underline("These text files differ");
-        foreach (sort numeric keys %diffs) {
-            $file1 = $diffs{$_};
+        foreach (sort numeric keys %diffsT) {
+            $file1 = $diffsT{$_};
             $base1 = branch($file1, "1");
             $base2 = branch($different{$file1}, "2");
 
@@ -910,67 +939,96 @@ sub show_text_diffs {
             else                  { printf $fmtT, $_, $base1, $base2 }
         }
         $dflt = ++$num;
-        $dflt = 0 unless $diffs{$dflt};
-
-        if (scalar(keys %diffs) == 1) {
-            if ($sel eq "1") { $dflt = 0 }
-            else             { $dflt = 1 }
-        }
+        $dflt = 0 unless $diffsT{$dflt};
         print "\n";
+
+        # display differences for multiple files
+        #---------------------------------------
         printf $fmt1, "0", "previous menu\n";
-        if (keys %diffs > 1) {
-            printf $fmt0, "a", "cycle thru all diffs";
-            if ($dflt) { print " (starting from $dflt)\n" } else { print "\n" }
+        if (keys %diffsT > 1) {
+            printf $fmt0, "a", "display all diffsT";
+            print " (starting from $dflt)" if $dflt; print "\n";
 
-            unless ($ignoreFLG or $sortFLG) {
-                printf $fmt0, "A", "display all diffs at once";
-                if ($dflt) { print " (starting from $dflt)\n" } else { print "\n" }
+            printf $fmt0, "aN", "display next N (int value) differences";
+            print " (starting from $dflt)" if $dflt; print "\n";
 
-                printf $fmt1, "nN", "display next N (int value) differences";
-            }
-            print "\n";
+            printf $fmt0, "-1", "reset default index to 1\n\n";
         }
-        if ($diffFLGs) { printf $fmt1, "b", "turn OFF -Bbwi diff flag" }
-        else           { printf $fmt1, "b", "turn ON -Bbwi diff flag"  }
 
-        if ($ignoreFLG) { printf $fmt1, "e", "edit ignore diffs list";
-                          printf $fmt1, "i", "turn OFF ignore diffs"  }
-        else            { printf $fmt1, "i", "turn ON ignore diffs "  }
+        # toggle $trivialFLG, if trivial diffs not initially ignored
+        #-----------------------------------------------------------
+        if (! $trivialFLG) {
+            if ($diffFLGs) { printf $fmt1, "b", "turn OFF -Bbwi diff flag" }
+            else           { printf $fmt1, "b", "turn ON -Bbwi diff flag"  }
+        }
 
+        # edit ignore diffs
+        #------------------
+        if ($ignoreFLG) {
+            $icnt = scalar(keys %ignore);
+            if ($icnt) { printf $fmti, "e", "edit ignore diffs list", $icnt }
+        }
+        
+        # toggle $ignoreFLG
+        #------------------
+        if ($ignoreFLG) { printf $fmt1, "i", "turn OFF ignore diffs"  }
+        else            { printf $fmt1, "i", "turn ON ignore diffs"   }
+
+        # toggle $sortFLG
+        #----------------
         if ($sortFLG) { printf $fmt1, "s", "turn OFF sorted diff" }
         else          { printf $fmt1, "s", "turn ON sorted diff"  }
 
+        # toggle $xxFLG
+        #--------------
         if ($xxdiff_available) {
-            if ($xxFLG) { printf $fmt1, "x", "turn OFF xxdiff" }
-            else        { printf $fmt1, "x", "turn ON xxdiff" }
+            if ($xxFLG) { printf $fmt1, "x", "turn OFF xxdiff, turn ON diff" }
+            else        { printf $fmt1, "x", "turn ON xxdiff, turn OFF diff" }
         }
         print "\n";
         print "Make Selection: [$dflt] ";
+        #====================
         chomp($sel = <STDIN>);
+        #====================
         $sel =~ s/\s//g;
         $sel = $dflt if $sel eq "";
-        
-        return if $sel eq "0";
+        $num = scalar(keys %diffsT) if $dflt == 0 and $sel !~ m/\d/;
+        print "\n" unless $list;
+
+        # return to previous menu
+        #------------------------
+        if ($sel eq "0") { system("clear") unless $list; return }
+
+        # hidden option; toggle $debug
+        #-----------------------------
+        if ($sel eq "db") {
+            $debug = ! $debug;
+            set_debug_vals();
+
+            print "debug = $debug\n";
+            pause();
+            $num -= 1; next;
+        }
+
+        # reset default to 1
+        #-------------------
+        if ($sel eq "-1") {
+            $num = 0;
+            next;
+        }
 
         # show multiple diffs starting with current index
         #------------------------------------------------
-        # Change "A" or "n$m" to "a" if either $ignoreFLG or $sortFLG is on.
-        #-----------------------------------------------------------------
-        # Use $diffs{"wait"} to signal not to display all at once if $sel eq "a".
-        #-----------------------------------------------------------------------
-        if ($sel eq "a" or $sel eq "A" or $sel =~ m/^n(\d*)$/) {
+        if (lc($sel) eq "a" or $sel =~ m/^a(\d*)$/) {
             $ncount = $1;
-            $ncount = 1 if $sel eq "n";
-            $sel = "a" if $ignoreFLG or $sortFLG;
-            $diffs{"wait"} = 1 if $sel eq "a";
-            $num = 1 unless $diffs{$num};
-            while ($diffs{$num}) {
-                display_text_diffs($num, %diffs);
+            $ncount = scalar(keys %diffsT) unless $ncount;
+
+            $num = 0 unless $diffsT{$num};
+            while ($diffsT{$num}) {
+                display_text_diffs($num, %diffsT);
                 last if $ncount and --$ncount <= 0;
                 $num++;
             }
-            delete $diffs{"wait"} if $diffs{"wait"};
-            $num = -1 if lc($sel) eq "a";
             next;
         }
 
@@ -981,7 +1039,6 @@ sub show_text_diffs {
                 $xxFLG = ! $xxFLG;
             }
             $num -= 1; next;
-
         }
 
         # toggle diff -Bbwi flag
@@ -995,16 +1052,19 @@ sub show_text_diffs {
 
         # edit ignore diffs list
         #-----------------------
-        if ($sel eq "e" and $ignoreFLG) {
-            $ignoreFLG = ! $ignoreFLG;
-            $sel = "i";
+        if ($ignoreFLG) {
+            if ($sel eq "e" and %ignore) {
+                diffs_to_ignore();
+                $ignoreFLG = 0 unless %ignore;
+                $num -= 1; next;
+            }
         }
         
         # specify differences to ignore
         #------------------------------
         if ($sel eq "i") {
             $ignoreFLG = ! $ignoreFLG;
-            if ($ignoreFLG) {
+            if ($ignoreFLG and ! %ignore) {
                 diffs_to_ignore();
                 $ignoreFLG = 0 unless %ignore;
             }
@@ -1021,12 +1081,15 @@ sub show_text_diffs {
         # show selected difference
         #-------------------------
         $num = $sel;
-        unless ($diffs{$num}) {
+        unless ($diffsT{$num}) {
             print "Selection not found: $num; Try again.\n";
             $num = --$dflt;
+            $sel = "";
+            pause();
             next;
         }
-        display_text_diffs($num, %diffs);
+      display:
+        display_text_diffs($num, %diffsT);
     }
 }
 
@@ -1038,29 +1101,29 @@ sub show_text_diffs {
 # => $num: index number of difference to display (starting at 1)
 #=======================================================================
 sub display_text_diffs {
-    my ($num, %diffs, $amperflag);
+    my ($num, %diffsT);
     my ($file1, $file2, $base1, $base2);
     my ($srt, $f1, $f2, $cnt, $diff1, $diff2, $var, $var_);
-    my ($status);
+    my ($status, $line);
 
     $num = shift @_;
-    %diffs = @_;
+    %diffsT = @_;
 
-    $file1 = $diffs{$num};
+    $file1 = $diffsT{$num};
     $file2 = $different{$file1};
     $base1 = basename $file1;
     $base2 = basename $file2;
 
     if ($sortFLG) {
+        mkpath($tmpdir, \%vopts) unless -d $tmpdir;
         $srt = "sorted ";
 
-        mkpath($tmpdir, \%vopts) unless -d $tmpdir;
         $f1 = "$tmpdir/$base1.sorted.1";
         $f2 = "$tmpdir/$base2.sorted.2";
         unlink($f1) if -f $f1;
         unlink($f2) if -f $f2;
 
-        print "\nSorting files ... ";
+        print "Sorting files ... ";
         system_("sort $file1 > $f1") && die "Error: sort $file1 > $f1;";
         system_("sort $file2 > $f2") && die "Error: sort $file2 > $f2;";
         print "DONE\n";
@@ -1073,8 +1136,8 @@ sub display_text_diffs {
     }
 
     if ($ignoreFLG) {
+        mkpath($tmpdir, \%vopts) unless -d $tmpdir;
         if (($f1 eq $file1) or ($f2 eq $file2)) {
-            mkpath($tmpdir, \%vopts) unless -d $tmpdir;
             $f1 = "$tmpdir/$base1.ignore.1";
             $f2 = "$tmpdir/$base2.ignore.2";
 
@@ -1086,7 +1149,7 @@ sub display_text_diffs {
         }
 
         $cnt = 0;
-        print "\nFiltering out diffs to ignore ... " if %ignore;
+        print "Filtering out diffs to ignore ... " if %ignore;
         foreach $diff1 (sort keys %ignore) {
             $diff2 = $ignore{$diff1};
             $var = "var" .++$cnt;
@@ -1110,22 +1173,46 @@ sub display_text_diffs {
     }
 
     if ($base1 eq $base2) {
-        printf "showing ${srt}diffs for (%d) %s\n", $num, $base1;
+        printf "showing ${srt}diffs for (%d) %s\n\n", $num, $base1;
     } else {
-        printf "showing ${srt}diffs for (%d) %s <=> %s\n", $num, $base1, $base2;
+        printf "showing ${srt}diffs for (%d) %s <=> %s\n\n", $num, $base1, $base2;
     }
-    if ($diffs{"wait"}) { $amperflag = ""  }
-    else                { $amperflag = "&" }
 
-    if ($xxFLG) { system_("xxdiff --text $diffFLGs $f1 $f2 $amperflag") }
+    # xxdiff text files
+    #------------------
+    if ($xxFLG) { system_("xxdiff --text $diffFLGs $f1 $f2 $dn $amperFLG") }
     else {
         system("clear");
-        if ($base1 eq $base2) { underline("diffs for ($num) $base1") }
-        else                  { underline("diffs for ($num) $base1 <=> $base2") }
+        if ($base1 eq $base2) { underline("diffs for ($num) $base1", 3) }
+        else       { underline("diffs for ($num) $base1 <=> $base2", 3) }
+
+        # show ignore diffs
+        #------------------
+        if ($ignoreFLG) {
+            $cnt = 0;
+            $line = 0;
+            foreach $diff1 (sort keys %ignore) {
+                $diff2 = $ignore{$diff1};
+                $line = "var" .++$cnt .": $diff1 <=> $diff2";
+                print "$line\n";
+            }
+            print "-" x length($line) ."\n" if $line;
+        }
+
+        # show text diffs
+        #----------------
+        # it's possible that no differences found after
+        # trivial diffs and ignored diffs filtered out)
+        #----------------------------------------------
         $status = system_("diff --text $diffFLGs $f1 $f2");
-        print "\nNO DIFFERENCES FOUND\n" unless $status;
+        if ($status) {
+            if ($base1 eq $base2) { underline("diffs for ($num) $base1", 3) }
+            else       { underline("diffs for ($num) $base1 <=> $base2", 3) }
+        }
+        else { print "NO DIFFERENCES FOUND\n" unless $status }
+
+        print "\n";
         pause();
-        system("clear");
     }
     
 }
@@ -1135,46 +1222,71 @@ sub display_text_diffs {
 # purpose - allow user to identify (or remove) differences to ignore
 #=======================================================================
 sub diffs_to_ignore {
-    my (@diff1List, $max, $fmt, $index, $diff1, $diff2, $diffs12, %diff1Hash);
-    my ($dflt, $delim_dflt, $sel, $fmt1, $fmt2, $ans);
+    my ($addX, $ans, $dd, $delim1, $delim_dflt, $dflt);
+    my ($diff1, $diff2, $diffs12, $diffstring, $fmt1, $fmt2);
+    my ($index, $line, $max, $sel, $selA);
+    my (%diff1Hash, @diff1List, %selOpts);
 
     $dflt = 0;
   outer: while (1) {
 
       @diff1List = (sort keys %ignore);
       $max = maxLength(\@diff1List);
-      $fmt1 = "%3s. %-${max}s = %s\n";
+      %selOpts = ();
+      $fmt1 = "%3s. %-${max}s %s %s\n";
       $fmt2 = "%3s. %s\n";
 
-      # print ignore diffs menu
-      #------------------------
-      print "\n";
+      # print main menu for ignore diffs
+      #---------------------------------
       $index = 0;
 
-      underline("  Ignore diffs");
+      underline("  Ignore diffs menu");
       for $diff1 (@diff1List) {
           $diff1Hash{++$index} = $diff1;
-          printf $fmt1, $index, $diff1, $ignore{$diff1};
+          printf $fmt1, $index, $diff1, $ddelim{$diff1}, $ignore{$diff1};
       }
       print "\n" if @diff1List;
-      printf $fmt2, "a", "add new diffs to ignore";
-      printf $fmt2, "c", "use alt character when defining diffs to ignore";
+      printf $fmt2, "a", "add new diffs to ignore" if @diff1List;
+      printf $fmt2, "c", "change [$delim] delimiter";
       printf $fmt2, "r", "read ignore list from file";
-      if (%ignore) {
-          printf $fmt2, "w", "write ignore list to file";
-          printf $fmt2, "n", "remove n from ignore list, where n = [1,$index]";
+      $selOpts{"c"} = 1;
+      $selOpts{"r"} = 1;
+      $selOpts{"db"} = 1;
+      for (1..scalar(@diff1List)) { $selOpts{$_} = 1 }
+      
+      if (@diff1List) {
+          printf $fmt2, "w", "write ignore list to file\n";
+          printf $fmt2, "n", "remove n from ignore list, where 1<=n<=$index";
           printf $fmt2, "R", "remove all diffs from ignore list";
+          $selOpts{"w"} = 1;
+          $selOpts{"n"} = 1;
+          $selOpts{"R"} = 1;
       }
       printf $fmt2, "0", "previous menu";
 
-      # default to "add" option, unless diffs are defined
-      #--------------------------------------------------
+      # default to "add" option, unless diffs are defined;
+      # addX=1 indicates ignore diff was added from main menu
+      #------------------------------------------------------
+      $selA = "";
+      $addX = 0;
       if (@diff1List) {
           print "\n  Make Selection: [$dflt] ";
+          #====================
           chomp($sel = <STDIN>);
-          $sel =~ s/\s//g;
+          #====================
+          $sel =~ s/\s//g;              # <==== $sel made here
           $sel = $dflt if $sel eq "";
           last unless $sel;
+
+          # allow user to select main menu options
+          #---------------------------------------
+          $diffs12 = $sel;
+          ($diff1, $diff2) = split /[$delim]/, $diffs12;
+          if ($diff1 and $diff2) {
+              $selA = $sel;
+              $sel = "a";
+              $addX = 1;
+          }
       }
       else { print "\n"; $sel = "a" }
 
@@ -1182,34 +1294,50 @@ sub diffs_to_ignore {
       #--------------------
       if ($sel eq "a") {
           while (1) {
-              print "  Enter diff1${delim}diff2 [quit] ";
-              chomp($diffs12 = <STDIN>);
-              $diffs12 =~ s/\s//g;  # remove blank spaces
-
-              # allow user to make menu choice from previous menu
-              #--------------------------------------------------
-              if    ($diffs12 eq "a") { next }
-              elsif ($diffs12 eq "0") { last outer }
-              elsif ($diffs12 eq "c") { $sel = "c"; last }
-              elsif ($diffs12 eq "r") { $sel = "r"; last }
-              elsif ($diffs12 eq "")  {
+              unless ($addX) {
+                  print "  Enter diff1${delim}diff2 [quit] ";
+                  #=====================
+                  chomp($selA = <STDIN>);
+                  #=====================
+                  $selA =~ s/\s//g;  # remove blank spaces
+                  $sel = $selA;
+              }
+              if ($selA eq "") {
                   if (%ignore) { last }
                   else         { last outer }
               }
+
+              # allow user to make menu choice from previous menu
+              #--------------------------------------------------
+              elsif ($selA eq "0")    { last outer }
+              elsif ($selOpts{$selA}) { last }
+
+              # extract ignore diff information
+              #--------------------------------
+              $diffs12 = $selA;
               ($diff1, $diff2) = ();
               ($diff1, $diff2) = split /[$delim]/, $diffs12;
 
-              if ($diff1 and $diff2) { $ignore{$diff1} = $diff2 }
-              else { print "  Cannot decipher input: $diffs12; Try again.\n\n" }
+              if ($diff1 and $diff2) {
+                  $ignore{$diff1} = $diff2;
+                  $ddelim{$diff1} = $delim;
+              } else {
+                  print "\n  Cannot decipher input: $selA; Try again.\n";
+                  pause(2);
+                  print "\n" unless $addX;
+              }
+              next outer if $addX;
           }
       }
 
       # write ignore list to file
       #--------------------------
-      elsif ($sel eq "w") {
+      if ($sel eq "w") {
           if (%ignore) {
               print "  Write ignore list to file [$ignoreFile]: ";
+              #====================
               chomp($ans = <STDIN>);
+              #====================
               $ans =~ s/\s//g;  # remove blank spaces
               $ignoreFile = $ans if $ans;
 
@@ -1217,11 +1345,14 @@ sub diffs_to_ignore {
               open IGN, "> $ignoreFile"
                   or die "Error opening ignore file for write: $ignoreFile;";
               foreach $diff1 (sort keys %ignore) {
-                  $diffs12 = "$diff1=$ignore{$diff1}";
-                  print "  WRITING: $diffs12\n";
-                  print IGN "$diffs12\n";
+                  $dd = $ddelim{$diff1};
+                  $diff2 = $ignore{$diff1};
+                  $diffs12 = "$diff1$dd$diff2";
+                  print "  WRITING: $dd,$diffs12\n";
+                  print IGN "$dd,$diffs12\n";
               }
               close IGN;
+              pause(2);
           }
           else { print "  The ignore list is empty. Nothing to write.\n" }
       }
@@ -1229,48 +1360,30 @@ sub diffs_to_ignore {
       # delete all diffs from ignore list
       #----------------------------------
       elsif ($sel eq "R") {
-          while (1) {
-              print "  Remove all diffs from ignore list. Are you sure (y/n)? ";
-              chomp($ans = <STDIN>);
-              if    (lc($ans) eq "y") {
-                  %ignore = ();
-                  print "  All diffs removed!\n";
-                  last;
-              }
-              elsif (lc($ans) eq "n") { last }
-              else                    { next }
-          }                  
-          next;
+          print "  Remove all diffs from ignore list. Are you sure (y/n)? [y] ";
+          #====================
+          chomp($ans = <STDIN>);
+          #====================
+          unless (lc($ans) eq "n") {
+              %ignore = ();
+              %ddelim = ();
+              print "  All diffs removed!\n";
+          }
+          else { print "  No diffs removed!\n"; pause(2) }
       }
 
-      # delete individual diffs from ignore list
-      #-----------------------------------------
-      else {
-          $diff1 = $diff1Hash{$sel} ? $diff1Hash{$sel} : "";
-          $diff1 = $diff1 ? $diff1 : $sel;
-          $diff2 = $ignore{$diff1};
-          if ($diff2) {
-              print "  removing ignore diff: $diff1 = $diff2\n";
-              delete($ignore{$diff1});
-          }
-
-          # or add another ignore diff
-          #---------------------------
-          else {
-              ($diff1, $diff2) = ();
-              ($diff1, $diff2) = split /[=]/, $sel;
-              if ($diff1 and $diff2) { $ignore{$diff1} = $diff2 }
-              else { print "  Cannot decipher input: $sel; Try again.\n\n" }
-          }
-      }
-
-      # use alternate character when defining diffs to ignore
-      #------------------------------------------------------
-      if ($sel eq "c") {
-          if ($delim eq "=") { $delim_dflt = "+" }
+      # use different character for defining diffs to ignore
+      #-----------------------------------------------------
+      # this is necessary if "=" is in the
+      # string to ignore or its substitute
+      #-----------------------------------
+      elsif ($sel eq "c") {
+          if ($delim eq "=") { $delim_dflt = ":" }
           else               { $delim_dflt = "=" }
-          print "  Alt character for defining diffs to ignore [$delim_dflt]: ";
+          print "  Character to use for ignore rules [$delim_dflt] ";
+          #======================
           chomp($delim = <STDIN>);
+          #======================
           $delim = $delim_dflt if $delim eq "";
       }
 
@@ -1279,7 +1392,9 @@ sub diffs_to_ignore {
       elsif ($sel eq "r") {
           while (1) {
               print "  Read ignore list from file [$ignoreFile]: ";
+              #====================
               chomp($ans = <STDIN>);
+              #====================
               $ans =~ s/\s//g;  # remove blank spaces
 
               $ignoreFile = $ans if $ans;
@@ -1289,16 +1404,67 @@ sub diffs_to_ignore {
           open IGN, "< $ignoreFile"
               or die "Error opening ignore file for read: $ignoreFile;";
           print "\n";
-          foreach $diffs12 (<IGN>) {
-              chomp($diffs12);
-              ($diff1, $diff2) = ();
-              ($diff1, $diff2) = split /[=]/, $diffs12;
-
-              if ($diff1 and $diff2) { $ignore{$diff1} = $diff2;
-                                       print "  READING: $diffs12\n";
-              } else                 { print "  ???????: $diffs12\n" }
+          foreach $line (<IGN>) {
+              chomp($line);
+              if ($line =~ m/^(.),(.*)\1(.*)$/) {
+                  $delim1 = $1;
+                  $diff1 = $2;
+                  $diff2 = $3;
+                  $ignore{$diff1} = $diff2;
+                  $ddelim{$diff1} = $delim1;
+                  print "  READING: $diff1 $ddelim{$diff1} $diff2\n";
+              } else {
+                  print "  ???????: $line\n"
+              }
           }
           close IGN;
+      }
+
+      # hidden option; toggle $debug
+      #-----------------------------
+      elsif ($sel eq "db") {
+          $debug = ! $debug;
+          set_debug_vals();
+
+          print "\n  debug = $debug\n";
+          pause(2);
+      }
+
+      else {
+          $diff1 = $diff1Hash{$sel} ? $diff1Hash{$sel} : "";
+          $diff2 = $ignore{$diff1};
+
+          # delete individual diffs from ignore list
+          #-----------------------------------------
+          if ($diff2) {
+              $diffstring = "$diff1 $ddelim{$diff1} $diff2";
+              print "  Remove diff: $diffstring. Are you sure (y/n)? [y] ";
+              #====================
+              chomp($ans = <STDIN>);
+              #====================
+              unless (lc($ans) eq "n") {
+                  delete($ignore{$diff1});
+                  delete($ddelim{$diff1});
+                  print "  Diff removed!\n";
+
+                  # update %diff1Hash
+                  #------------------
+                  while ($diff1Hash{++$sel}) {
+                      $diff1Hash{$sel-1} = $diff1Hash{$sel};
+                  }
+                  delete($diff1Hash{--$sel});
+              }
+              else { print "  No diff removed!\n"; pause(2) }
+          }
+
+          # ??????
+          #-------
+          else {
+              if ($sel) {
+                  print "  Cannot decipher input: $sel; Try again.\n";
+                  pause(2);
+              }
+          }
       }
   }
 }
@@ -1367,7 +1533,7 @@ sub show_identical {
     } else {
         print "\nNo identical files were found in the two directories.\n";
     }
-    pause();
+    npause();
 }
 
 #=======================================================================
@@ -1398,7 +1564,7 @@ sub show_unmatched {
         if (@files1) { print "\nAll files in $ddir1 are also in $ddir2\n"   }
         else         { print "\nNo files found in dir1: $ddir1\n" }
     }
-    pause();
+    npause();
 
     # list files found in dir2 but not in dir1
     #-----------------------------------------
@@ -1410,7 +1576,7 @@ sub show_unmatched {
         if (@files2) { print "\nAll files in $ddir2 are also in $ddir1\n"   }
         else         { print "\nNo files found in dir2: $ddir1\n" }
     }
-    pause() unless @unmatched1 and @unmatched2;
+    npause() unless @unmatched1 and @unmatched2;
 
     # does user want to compare unmatched files?
     #-------------------------------------------
@@ -1584,14 +1750,14 @@ sub list_files {
         foreach (sort @files1) {
             printf $fmt, ++$num, branch($_, "1");
             if (++$cnt == 50) {
-                pause();
+                npause();
                 $cnt = 0;
             }
         }
     } else {
         print "\nNo files in dir1: $dir1\n";
     }
-    pause();
+    npause();
 
     # print filenames in dir2
     #------------------------
@@ -1603,58 +1769,14 @@ sub list_files {
         foreach (sort @files2) {
             printf $fmt, ++$num, branch($_, "2");
             if (++$cnt == 50) {
-                pause();
+                npause();
                 $cnt = 0;
             }
         }
     } else {
         print "\nNo files in dir2: $dir2\n";
     }
-    pause();
-}
-
-#=======================================================================
-# name - choose_subdir
-# purpose - choose which subdirectory to compare
-#=======================================================================
-sub choose_subdir {
-    my ($opt, $cnt, $dflt);
-
-    # short-circuit if no common subdirectories
-    #------------------------------------------
-    unless (@subdirs) {
-        print "\nNo common subdirectories found.\n";
-        pause();
-        return;
-    }
-
-    # choose subdirectory to compare
-    #-------------------------------
-    $dflt = 1;
-    while (1) {
-        underline("Directories");
-        print "$dir1\n"
-            . "$dir2\n";
-
-        $cnt = 0;
-        underline("Which subdirectory do you want to compare?",2);
-        foreach (@subdirs) {
-            printf "%2d. %s\n", ++$cnt, $_;
-            $dflt = $cnt if $_ eq "run";
-        }
-        print "\n";
-        print " 0. previous menu\n";
-        print "\n";
-        $opt = query("choose", $dflt);
-        return if $opt eq "0";
-
-        unless ($subdirs[$opt-1]) {
-            print "\n$opt: Invalid option; Try again.\n\n";
-            next;
-        }
-        $subdir = $subdirs[$opt-1];
-        last;
-    }
+    npause();
 }
 
 
@@ -1823,7 +1945,6 @@ sub get_expid {
     my ($fullname, $name, @dummy, %count);
 
     @arr = @_;
-    $expid = "";
     $max = 1;
     $expid = "";
 
@@ -2006,7 +2127,13 @@ sub namechange {
         last if -e $name;
         $dir = dirname $namesave;
         $base = basename $namesave;
-        $base =~ s/\b$p1[$_]\b/$p2[$_]/g;
+        if ($p1[$_] eq "") {
+            $base = "$p2[$_].$base";
+        } elsif ($p2[$_] eq "") {
+            $base =~ s/\b$p1[$_].//;
+        } else {
+            $base =~ s/\b$p1[$_]\b/$p2[$_]/g;
+        }
         $name = "$dir/$base";
     }
 
@@ -2058,10 +2185,31 @@ sub numeric {
 #=======================================================================
 # name - pause
 # purpose - pause processing until user input is detected
+#
+# input parameter
+# => $s: number of spaces to put in front of print texte
 #=======================================================================
 sub pause {
-    my $dummy;
-    print "\nHit <CR> to continue ... ";
+    my ($s, $dummy);
+    $s = shift @_;
+    print " "x$s if $s;
+    print "Hit <CR> to continue ... ";
+    $dummy = <STDIN>;
+}
+
+#=======================================================================
+# name - npause
+# purpose - same as sub pause() except add "\n" to front of prompt
+#
+# input parameter
+# => $s: number of spaces to put in front of print texte
+#=======================================================================
+sub npause {
+    my ($s, $dummy);
+    $s = shift @_;
+    print "\n";
+    print " "x$s if $s;
+    print "Hit <CR> to continue ... ";
     $dummy = <STDIN>;
 }
 
@@ -2116,21 +2264,30 @@ sub system_ {
 # => $file2: 2nd file
 #=======================================================================
 sub text {
-    my ($file1, $file2, $type1, $type2, $txtflag);
+    my ($file1, $file2, $type1, $type2, $txtFLG);
     $file1 = shift @_;
     $file2 = shift @_;
 
-    $txtflag = 0;
+    $txtFLG = 0;
     $type1 = `file -L $file1`;
     $type2 = `file -L $file2`;
 
-    $txtflag = 1 if ($type1=~/ASCII/ or $type1=~/text/ or $type1=~/source/)
+    $txtFLG = 1 if ($type1=~/ASCII/ or $type1=~/text/ or $type1=~/source/)
         and         ($type2=~/ASCII/ or $type2=~/text/ or $type2=~/source/);
-    unless ($txtflag) {
-        $txtflag = 1 if get_ext($file1) eq "txt"
+    unless ($txtFLG) {
+        $txtFLG = 1 if get_ext($file1) eq "txt"
             and         get_ext($file2) eq "txt";
     }
-    return $txtflag;
+    return $txtFLG;
+}
+
+#=======================================================================
+# name - set_debug_vals
+# purpose - set debug values (or not)
+#=======================================================================
+sub set_debug_vals {
+    if ($debug) { $verbose = 1; $dn = "" }
+    else        { $verbose = 0; $dn = "2> /dev/null" }
 }
 
 #=======================================================================
@@ -2142,6 +2299,7 @@ sub text {
 # => flag: (optional); defaults to =1
 #           =1: underline only with '-'
 #           =2: underline and overline with '='
+#           =3: underline and overline with "-"
 #=======================================================================
 sub underline {
     my ($string, $flag, %pattern);
@@ -2152,15 +2310,16 @@ sub underline {
 
     $pattern{1} = "-";
     $pattern{2} = "=";
+    $pattern{3} = "-";
 
     $flag = 1 unless $flag;
-    $flag = 1 unless $flag == 2;
+    $flag = 1 unless $flag == 2 or $flag == 3;
 
     ($s1, $str) = ($string =~ m/^(\s*)(.+)(\s*)$/);
     $len_s1 = length($s1);
     $len_str = length($str);
     print "\n";
-    print " "x$len_s1 .$pattern{$flag}x$len_str."\n" if $flag == 2;
+    print " "x$len_s1 .$pattern{$flag}x$len_str."\n" if $flag > 1;
     print " "x$len_s1 .$str."\n";
     print " "x$len_s1 .$pattern{$flag}x$len_str."\n";
 }
@@ -2211,7 +2370,9 @@ sub query {
     # get user response
     #------------------
     print $prompt;
+    #====================
     chomp($ans = <STDIN>);
+    #====================
     $ans =~ s/^\s+|\s+$//g;     # remove leading/trailing blanks from response
     $ans = expand_EnvVars($ans);
     if ( blank($ans) ) { $ans = $dflt unless blank($dflt) }
@@ -2301,7 +2462,11 @@ where
   dir2 = second directory being compared
 
 options
+  -b                 ignore blanks and other trivial differences on
+                     initial text file comparisons (using -Bbwi flags)
   -binX              exclude extensions: a, d, mod, nc4, o, pyc, so, x
+                     i.e. same as -extX a,d,mod,nc4,o,pyc,so,x
+  -d name            start comparison in specified subdirectory
   -extX extension    exclude all files with this extension (see Note 1)
   -ext extension     compare all files with this extension (see Note 1)
   -etc               shortcut for "-subdir etc -r"
@@ -2315,9 +2480,8 @@ options
   -listx             same as -list, except ignore expid name differences
   -q                 quiet mode
   -r                 recursively compare any subdirectories found
-  -rs                shortcut for "-subdir rs -r"
-  -run               shortcut for "-subdir run -r"
-  -subdir name       start comparison in specified subdirectory
+  -rs                shortcut for "-d rs -r"
+  -run               shortcut for "-d run -r"
   -v                 verbose mode
   -X filename        exclude filename from list to compare (see Note 1)
 

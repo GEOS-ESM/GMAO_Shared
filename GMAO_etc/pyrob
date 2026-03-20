@@ -1,82 +1,98 @@
 #!/usr/bin/env python3
 
 """
-    Utility to generate GEOS-5 file spec information, a.k.a.
-    the Rob Lucchesi emulator.
+Utility to generate GEOS-5 file spec information, a.k.a.
+the Rob Lucchesi emulator.
 
-    Arlindo da Silva, February 2014.
+Arlindo da Silva, February 2014.
 
 """
 
 import os
-import sys
 import re
 
-from optparse     import OptionParser
-from netCDF4      import Dataset
-from MAPL.config  import Config as config
+from optparse import OptionParser
+from netCDF4 import Dataset
+from MAPL.config import Config as config
 
 try:
-    from PyRTF.PropertySets import TabPropertySet, BorderPropertySet, FramePropertySet, TextPropertySet, ParagraphPropertySet
+    from PyRTF.PropertySets import (
+        TabPropertySet,
+        BorderPropertySet,
+        FramePropertySet,
+        TextPropertySet,
+        ParagraphPropertySet,
+    )
     from PyRTF.Elements import Document, StyleSheet
     from PyRTF.Styles import TextStyle, ParagraphStyle
     from PyRTF.document.section import Section
     from PyRTF.document.paragraph import Paragraph, Table, Cell
     from PyRTF.document.character import TEXT
     from PyRTF.Renderer import Renderer
+
     HAS_RTF = True
 except ImportError:
-    try:
-        from rtfw import *
-        HAS_RTF = True
-    except:
-        HAS_RTF = False
+    HAS_RTF = False
+
+try:
+    from docx import Document as DocxDocument
+    from docx.shared import Inches, RGBColor, Pt
+    from docx.enum.text import WD_LINE_SPACING
+    from docx.oxml.ns import qn
+
+    HAS_DOCX = True
+except ImportError:
+    HAS_DOCX = False
+
 
 if HAS_RTF:
-
     nNAME = int(TabPropertySet.DEFAULT_WIDTH * 2.5)
     nDIMS = int(TabPropertySet.DEFAULT_WIDTH * 1)
     nDESC = int(TabPropertySet.DEFAULT_WIDTH * 7.5)
     nUNIT = int(TabPropertySet.DEFAULT_WIDTH * 2)
-    #grey_bkg = ShadingPS(shading='Grey')
-    thin_edge   = BorderPropertySet( width=5, style=BorderPropertySet.SINGLE )
-    normal_edge = BorderPropertySet( width=20, style=BorderPropertySet.SINGLE )
-    thick_edge  = BorderPropertySet( width=40, style=BorderPropertySet.SINGLE )
-    none_edge   = BorderPropertySet( width=0,  style=BorderPropertySet.SINGLE )
-    header_frame  = FramePropertySet( None,      normal_edge, thick_edge, normal_edge )
-    header_frameL = FramePropertySet( None,      None,        thick_edge, normal_edge )
-    header_frameR = FramePropertySet( None,      normal_edge, thick_edge, None )
-    thin_frame    = FramePropertySet( thin_edge, normal_edge, thin_edge,  normal_edge )
-    thin_frameL   = FramePropertySet( thin_edge, None,        thin_edge,  normal_edge )
-    thin_frameR   = FramePropertySet( thin_edge, normal_edge, thin_edge,  None )
+    # grey_bkg = ShadingPS(shading='Grey')
+    thin_edge = BorderPropertySet(width=5, style=BorderPropertySet.SINGLE)
+    normal_edge = BorderPropertySet(width=20, style=BorderPropertySet.SINGLE)
+    thick_edge = BorderPropertySet(width=40, style=BorderPropertySet.SINGLE)
+    none_edge = BorderPropertySet(width=0, style=BorderPropertySet.SINGLE)
+    header_frame = FramePropertySet(None, normal_edge, thick_edge, normal_edge)
+    header_frameL = FramePropertySet(None, None, thick_edge, normal_edge)
+    header_frameR = FramePropertySet(None, normal_edge, thick_edge, None)
+    thin_frame = FramePropertySet(thin_edge, normal_edge, thin_edge, normal_edge)
+    thin_frameL = FramePropertySet(thin_edge, None, thin_edge, normal_edge)
+    thin_frameR = FramePropertySet(thin_edge, normal_edge, thin_edge, None)
 
 
 #     -----
 class Spec(object):
-#     -----
+    #     -----
     """
     Generic container for Variables
     """
-    def __init__(self,name,mytype):
+
+    def __init__(self, name, mytype):
         self.name = name
         self.type = mytype
         self.section = 0
 
-#.................................................................................................
+
+# .................................................................................................
+
 
 #     ------
 class Writer(object):
-#     ------
+    #     ------
     """
     Base class for writer.
     """
-    def writeVariable(self,vname,var,newUnits=None):
+
+    def writeVariable(self, vname, var, newUnits=None):
         """
         Write row for a single variable.
         """
         dims = var.dimensions
         if len(dims) == 1:
-            a, = dims
+            (a,) = dims
             dim = get1d(a)
         elif len(dims) == 2:
             a, b = dims
@@ -91,21 +107,21 @@ class Writer(object):
             a, b, c, d, e = dims
             dim = get1d(a) + get1d(b) + get1d(c) + get1d(d) + get1d(e)
         else:
-            raise ValueError('invalid dimensions: %s for <%s>'%(str(dims),vname))
-        descr = var.long_name.replace('__ENSEMBLE__','').replace('_',' ')
+            raise ValueError("invalid dimensions: %s for <%s>" % (str(dims), vname))
+        descr = var.long_name.replace("__ENSEMBLE__", "").replace("_", " ")
         if newUnits:
-            unitlessDescr = re.sub('\[.*\]','',descr)
-            self.row(vname,dim,unitlessDescr,newUnits)
+            unitlessDescr = re.sub(r"\[.*\]", "", descr)
+            self.row(vname, dim, unitlessDescr, newUnits)
         else:
-            self.row(vname,dim,descr,var.units)
+            self.row(vname, dim, descr, var.units)
 
-    def doCollection(self,Coll,options):
+    def doCollection(self, Coll, options):
         """
         Write spec for a given collection.
         """
 
-        Title = Coll.title.split(',')
-        Name = Coll.type.split('_')
+        Title = Coll.title.split(",")
+        Name = Coll.type.split("_")
 
         # Defaults deverived from collection name
         # ---------------------------------------
@@ -113,33 +129,33 @@ class Writer(object):
             sampfield = 1
         else:
             sampfield = 0
-        if Name[sampfield][0:4].upper() == 'TAVG':
-            sampling = 'Time-Averaged'
-        elif Name[sampfield][0:4].upper() == 'INST':
-            sampling = 'Instantaneous'
-        elif Name[sampfield][0:4].upper() == 'CONS':
-            sampling = 'Invariant'
+        if Name[sampfield][0:4].upper() == "TAVG":
+            sampling = "Time-Averaged"
+        elif Name[sampfield][0:4].upper() == "INST":
+            sampling = "Instantaneous"
+        elif Name[sampfield][0:4].upper() == "CONS":
+            sampling = "Invariant"
         else:
-            sampling = 'unknown'
+            sampling = "unknown"
 
         if options.geosit:
-            if Name[2][-2:].lower() == 'mn':
-                freq = Name[2][:-2]+'-minutes'
-            elif Name[2][-2:].lower() == 'hr':
-                freq = Name[2][:-2]+'-hourly'
+            if Name[2][-2:].lower() == "mn":
+                freq = Name[2][:-2] + "-minutes"
+            elif Name[2][-2:].lower() == "hr":
+                freq = Name[2][:-2] + "-hourly"
             else:
-                freq = 'Unknown'
+                freq = "Unknown"
         else:
             try:
-                freq = Name[0][4]+'-Hourly' # not robust
-            except:
-                freq = 'unknown'
+                freq = Name[0][4] + "-Hourly"  # not robust
+            except Exception:
+                freq = "unknown"
 
         if options.geosit:
-            if Name[5] == 'slv':
-                dim = '2d'
+            if Name[5] == "slv":
+                dim = "2d"
             else:
-                dim = '3d'
+                dim = "3d"
         else:
             dim = Name[1]
 
@@ -147,7 +163,7 @@ class Writer(object):
             hresfield = 4
             vresfield = 5
             vreschar = 0
-        elif options.dyamond and 'Invariant' not in sampling:
+        elif options.dyamond and "Invariant" not in sampling:
             hresfield = 4
             vresfield = 4
             vreschar = 1
@@ -158,282 +174,755 @@ class Writer(object):
 
         onCube = False
         if options.geosit:
-            if Name[3] == 'glo':
+            if Name[3] == "glo":
                 region = "Global"
             else:
                 region = "Regional"
-            if Name[hresfield][0] == 'L':
-                res = region + ' Horizontal Resolution'
-            elif Name[hresfield][0] == 'C':
+            if Name[hresfield][0] == "L":
+                res = region + " Horizontal Resolution"
+            elif Name[hresfield][0] == "C":
                 onCube = True
-                res = region + ' Horizontal Resolution On Cube'
+                res = region + " Horizontal Resolution On Cube"
             else:
-                res = 'Unknown resolution'
+                res = "Unknown resolution"
         else:
-            if Name[hresfield][0] == 'C':
-                res = 'Coarsened Horizontal Resolution'
-            elif Name[hresfield][0] == 'N':
-                res = 'Full Horizontal Resolution'
-            elif Name[hresfield][0] == 'M':
+            if Name[hresfield][0] == "C":
+                res = "Coarsened Horizontal Resolution"
+            elif Name[hresfield][0] == "N":
+                res = "Full Horizontal Resolution"
+            elif Name[hresfield][0] == "M":
                 onCube = True
-                res = 'Full Horizontal Resolution On Cube'
+                res = "Full Horizontal Resolution On Cube"
             else:
-                res = 'Unknown resolution'
+                res = "Unknown resolution"
 
-        if Name[vresfield][vreschar] == 'v':
-            level = 'Model-Level'
-        elif Name[vresfield][vreschar] == 'e':
-            level = 'Model-Edge-Level'
-        elif Name[vresfield][vreschar] == 'p':
-            level = 'Pressure-Level'
-        elif Name[vresfield][vreschar] == 'x':
-            level = 'Single-Level'
-        elif Name[vresfield][vreschar] == 'z':
-            level = 'Height-Level'
-        elif Name[vresfield] == 'slv':
-            level = 'Single-Level'
+        if Name[vresfield][vreschar] == "v":
+            level = "Model-Level"
+        elif Name[vresfield][vreschar] == "e":
+            level = "Model-Edge-Level"
+        elif Name[vresfield][vreschar] == "p":
+            level = "Pressure-Level"
+        elif Name[vresfield][vreschar] == "x":
+            level = "Single-Level"
+        elif Name[vresfield][vreschar] == "z":
+            level = "Height-Level"
+        elif Name[vresfield] == "slv":
+            level = "Single-Level"
         else:
-            level = 'unknown'
+            level = "unknown"
 
         have_channels = False
         if Coll.lev_name:
-            if 'CHANNEL' in Coll.lev_name.upper():
+            if "CHANNEL" in Coll.lev_name.upper():
                 have_channels = True
 
-        if Title[0] == 'Invariants':
-            dim, freq, sampling, level = ('2d','invariants','time independent', 'surface')
+        if Title[0] == "Invariants":
+            dim, freq, sampling, level = (
+                "2d",
+                "invariants",
+                "time independent",
+                "surface",
+            )
             descr = Title[1]
         else:
             if options.nature:
                 dim_, freq, sampling, level, res = Title[:5]
-                descr = ','.join(Title[5:])[:-2]
+                descr = ",".join(Title[5:])[:-2]
             elif options.geosit:
                 if sampling == "Invariant":
-                    #dim_, freq, sampling, level = Title[:4]
+                    # dim_, freq, sampling, level = Title[:4]
                     descr = "Constant Fields"
                 else:
-                    #dim_, freq, sampling, level = Title[:4]
-                    #print(Title)
-                    descr = ','.join(Title[5:])
+                    # dim_, freq, sampling, level = Title[:4]
+                    # print(Title)
+                    descr = ",".join(Title[5:])
             elif options.merraobs:
                 dim_, freq, sampling, level = Title[:4]
-                descr = ','.join(Title[4:])
+                descr = ",".join(Title[4:])
             elif options.merra:
                 dim_, freq, sampling, level = Title[:4]
-                descr = ','.join(Title[5:]) #[:-2].replace("'","")
+                descr = ",".join(Title[5:])  # [:-2].replace("'","")
             else:
                 if len(Title) >= 4:
                     dim_, freq, sampling, level = Title[:4]
-                    descr = ','.join(Title[4:])
+                    descr = ",".join(Title[4:])
                 else:
-                    descr = 'fix me, please'
+                    descr = "fix me, please"
 
         if options.geosit:
             if Coll.LongName is not None:
                 Descr = Coll.LongName.split()[4:]
-                descr = ' '.join(Descr)
+                descr = " ".join(Descr)
                 if "edge" in descr:
                     level = "Model-Level Edge"
                 descr = descr.title()
 
-        descr = descr.replace('Forecast,','').replace('Assimilation,','').replace('Analysis,','').replace('Model,','')
+        descr = (
+            descr.replace("Forecast,", "")
+            .replace("Assimilation,", "")
+            .replace("Analysis,", "")
+            .replace("Model,", "")
+        )
 
         # Section Header
         # --------------
         if Coll.ShortName is None:
-            self.section(Coll.name,descr)
+            self.section(Coll.name, descr)
         else:
-            cname = Coll.name + ' (%s)'%str(Coll.ShortName)
-            self.section(cname,descr)
+            cname = Coll.name + " (%s)" % str(Coll.ShortName)
+            self.section(cname, descr)
 
         # Properties
         # ----------
         if Coll.tbeg is None:
-            self.property('Frequency',"%s (%s)"%(freq.lower(),sampling.lower()))
+            self.property("Frequency", "%s (%s)" % (freq.lower(), sampling.lower()))
         else:
-            date,time = Coll.tbeg.split('T')
-            tbeg = time[:5]+' UTC'
-            self.property('Frequency',"%s from %s (%s)"%(freq.lower(),tbeg,sampling.lower()))
-        self.property("Spatial Grid","%s, %s, %s"%(dim.upper(),level.lower(),res.lower()))
-        if Coll.nz<1:
+            date, time = Coll.tbeg.split("T")
+            tbeg = time[:5] + " UTC"
+            self.property(
+                "Frequency", "%s from %s (%s)" % (freq.lower(), tbeg, sampling.lower())
+            )
+        self.property(
+            "Spatial Grid", "%s, %s, %s" % (dim.upper(), level.lower(), res.lower())
+        )
+        if Coll.nz < 1:
             if onCube:
-                self.property("Dimensions","grid resolution=%d, time=%d "%(Coll.nx,Coll.nt))
+                self.property(
+                    "Dimensions", "grid resolution=%d, time=%d " % (Coll.nx, Coll.nt)
+                )
             else:
-                self.property("Dimensions","longitude=%d, latitude=%d, time=%d "%(Coll.nx,Coll.ny,Coll.nt))
+                self.property(
+                    "Dimensions",
+                    "longitude=%d, latitude=%d, time=%d " % (Coll.nx, Coll.ny, Coll.nt),
+                )
         else:
             if have_channels:
-                self.property("Dimensions","longitude=%d, latitude=%d, channels=%d, time=%d "%(Coll.nx,Coll.ny,Coll.nz,Coll.nt))
+                self.property(
+                    "Dimensions",
+                    "longitude=%d, latitude=%d, channels=%d, time=%d "
+                    % (Coll.nx, Coll.ny, Coll.nz, Coll.nt),
+                )
             else:
                 if onCube:
-                    self.property("Dimensions","grid resolution=%d, level=%d, time=%d "%(Coll.nx,Coll.nz,Coll.nt))
+                    self.property(
+                        "Dimensions",
+                        "grid resolution=%d, level=%d, time=%d "
+                        % (Coll.nx, Coll.nz, Coll.nt),
+                    )
                 else:
-                    self.property("Dimensions","longitude=%d, latitude=%d, level=%d, time=%d "%(Coll.nx,Coll.ny,Coll.nz,Coll.nt))
+                    self.property(
+                        "Dimensions",
+                        "longitude=%d, latitude=%d, level=%d, time=%d "
+                        % (Coll.nx, Coll.ny, Coll.nz, Coll.nt),
+                    )
 
         # Maybe to print out levels??
-        #if options.geosit:
-            #if 'lev' in Coll.nc.variables:
-                #levsFR = Coll.nc.variables["lev"][:].tolist()
-                #print(type(levsFR[1]))
-                #levels = Coll.nc.variables["lev"]
-                #vunits = levels.units
-                #vLN = levels.long_name
-                #self.property("Levels","%s (%s)"%(levsFR,vunits))
+        # if options.geosit:
+        # if 'lev' in Coll.nc.variables:
+        # levsFR = Coll.nc.variables["lev"][:].tolist()
+        # print(type(levsFR[1]))
+        # levels = Coll.nc.variables["lev"]
+        # vunits = levels.units
+        # vLN = levels.long_name
+        # self.property("Levels","%s (%s)"%(levsFR,vunits))
 
-        usize = 'MB'
-        gsize = int(float(Coll.size)/(1024.*1024.)+0.5)
-        if ( gsize>1024):
-             usize = 'GB'
-             gsize = float(Coll.size)/(1024*1024.*1024.)+0.05
-             self.property("Granule Size","~%3.1f %s"%(gsize,usize))
+        usize = "MB"
+        gsize = int(float(Coll.size) / (1024.0 * 1024.0) + 0.5)
+        if gsize > 1024:
+            usize = "GB"
+            gsize = float(Coll.size) / (1024 * 1024.0 * 1024.0) + 0.05
+            self.property("Granule Size", "~%3.1f %s" % (gsize, usize))
         else:
-             self.property("Granule Size","~%d %s"%(gsize,usize))
+            self.property("Granule Size", "~%d %s" % (gsize, usize))
+
+        # Compute max variable-name length for layout (used by some writers)
+        try:
+            self.max_vname_len = max(len(name) for name in Coll.variables.keys())
+        except Exception:
+            self.max_vname_len = None
 
         # Variable table
         # --------------
-        self.table('header')
+        self.table("header")
         for vname in sorted(Coll.variables):
             if any(Coll.newUnits):
-                self.writeVariable(vname, Coll.variables[vname], Coll.newUnits[vname] )
+                self.writeVariable(vname, Coll.variables[vname], Coll.newUnits[vname])
             else:
-                self.writeVariable(vname, Coll.variables[vname] )
-        self.table('footer')
+                self.writeVariable(vname, Coll.variables[vname])
+        self.table("footer")
 
-#.................................................................................................
+
+# .................................................................................................
+
 
 #     ---------
 class stdoutWriter(Writer):
-#     ---------
+    #     ---------
     """
-    Implements text file writer.
+    Implements text file writer to stdout, with dynamic column widths.
     """
-    def __init__(self,filename=None):
-        self.filename = filename # ignore this for now.
+
+    def __init__(self, filename=None):
+        self.filename = filename  # ignored
         self.secn = 0
-    def section(self,collection,description):
+        self._rows = []
+        self._table_open = False
+
+    def section(self, collection, description):
         self.secn += 1
         print()
         print()
-        print("%d) Collection %s: %s"%(self.secn,collection,description))
+        print("%d) Collection %s: %s" % (self.secn, collection, description))
         print()
-    def property(self,name,value):
-        print("%19s: %s"%(name,value))
-    def table(self,choice='header'):
-        if choice == 'header':
-            print()
-            print(" -------------|------|--------------------------------------------------------------------------------|------------")
-            print("     Name     | Dims |                               Description                                      |    Units   ")
-        print(    " -------------|------|--------------------------------------------------------------------------------|------------")
-        return
-    def row(self,vname,dim,descr,units):
-        print(' %-12s | %4s | %-78s | %-10s '%(vname,dim,descr,units))
+
+    def property(self, name, value):
+        print("%19s: %s" % (name, value))
+
+    def table(self, choice="header"):
+        """
+        We buffer rows between 'header' and 'footer', then render the
+        table with dynamic column widths when we see 'footer'.
+        """
+        if choice == "header":
+            self._rows = []
+            self._table_open = True
+            return
+
+        # choice == 'footer'
+        if not self._table_open:
+            return
+
+        self._table_open = False
+
+        # Minimum widths (match old behavior)
+        min_name_w = 12
+        min_dim_w = 4
+        min_descr_w = 78
+        min_units_w = 10
+
+        if self._rows:
+            name_w = max(min_name_w, max(len(r[0]) for r in self._rows))
+            dim_w = max(min_dim_w, max(len(r[1]) for r in self._rows))
+            descr_w = max(min_descr_w, max(len(r[2]) for r in self._rows))
+            units_w = max(min_units_w, max(len(r[3]) for r in self._rows))
+        else:
+            name_w = min_name_w
+            dim_w = min_dim_w
+            descr_w = min_descr_w
+            units_w = min_units_w
+
+        # Helper to build lines
+        def sep_line():
+            return (
+                " "
+                + "-" * name_w
+                + " | "
+                + "-" * dim_w
+                + " | "
+                + "-" * descr_w
+                + " | "
+                + "-" * units_w
+            )
+
+        def header_line():
+            return (
+                " "
+                + "Name".center(name_w)
+                + " | "
+                + "Dims".center(dim_w)
+                + " | "
+                + "Description".center(descr_w)
+                + " | "
+                + "Units".center(units_w)
+            )
+
+        # Print header + rows + footer
+        print()
+        print(sep_line())
+        print(header_line())
+        print(sep_line())
+        for name, dim, descr, units in self._rows:
+            line = (
+                " "
+                + f"{name:<{name_w}} | "
+                + f"{dim:^{dim_w}} | "
+                + f"{descr:<{descr_w}} | "
+                + f"{units:<{units_w}}"
+            )
+            print(line)
+        print(sep_line())
+
+    def row(self, vname, dim, descr, units):
+        # Just buffer rows for now; table() will actually print them
+        self._rows.append((str(vname), str(dim), str(descr), str(units)))
 
     def close(self):
         pass
 
-#.................................................................................................
+
+# .................................................................................................
+
 
 #     ---------
 class txtWriter(Writer):
-#     ---------
+    #     ---------
     """
-    Implements text file writer.
+    Implements text file writer to a file, with dynamic column widths.
     """
-    def __init__(self,filename=None):
-        self.filename = filename # ignore this for now.
-        self.doc = open(filename,'w')
+
+    def __init__(self, filename=None):
+        self.filename = filename
+        self.doc = open(filename, "w")
         self.secn = 0
-    def section(self,collection,description):
+        self._rows = []
+        self._table_open = False
+
+    def section(self, collection, description):
         self.secn += 1
         self.doc.write("\n")
         self.doc.write("\n")
-        self.doc.write( "%d) Collection %s: %s\n"%(self.secn,collection,description) )
+        self.doc.write("%d) Collection %s: %s\n" % (self.secn, collection, description))
         self.doc.write("\n")
-    def property(self,name,value):
-        self.doc.write( "%19s: %s\n"%(name,value) )
-    def table(self,choice='header'):
-        if choice == 'header':
-            self.doc.write("\n")
-            self.doc.write( " -------------|------|--------------------------------------------------------------------------------|------------\n" )
-            self.doc.write( "     Name     | Dims |                               Description                                      |    Units   \n" )
-        self.doc.write(     " -------------|------|--------------------------------------------------------------------------------|------------\n" )
-        return
-    def row(self,vname,dim,descr,units):
-        self.doc.write( ' %-12s | %4s | %-78s | %-10s \n'%(vname,dim,descr,units) )
+
+    def property(self, name, value):
+        self.doc.write("%19s: %s\n" % (name, value))
+
+    def table(self, choice="header"):
+        """
+        Buffer rows between 'header' and 'footer', then emit the
+        table with dynamic column widths at 'footer'.
+        """
+        if choice == "header":
+            self._rows = []
+            self._table_open = True
+            return
+
+        # choice == 'footer'
+        if not self._table_open:
+            return
+
+        self._table_open = False
+
+        # Minimum widths (keep old layout as baseline)
+        min_name_w = 12
+        min_dim_w = 4
+        min_descr_w = 78
+        min_units_w = 10
+
+        if self._rows:
+            name_w = max(min_name_w, max(len(r[0]) for r in self._rows))
+            dim_w = max(min_dim_w, max(len(r[1]) for r in self._rows))
+            descr_w = max(min_descr_w, max(len(r[2]) for r in self._rows))
+            units_w = max(min_units_w, max(len(r[3]) for r in self._rows))
+        else:
+            name_w = min_name_w
+            dim_w = min_dim_w
+            descr_w = min_descr_w
+            units_w = min_units_w
+
+        def sep_line():
+            return (
+                " "
+                + "-" * name_w
+                + " | "
+                + "-" * dim_w
+                + " | "
+                + "-" * descr_w
+                + " | "
+                + "-" * units_w
+                + "\n"
+            )
+
+        def header_line():
+            return (
+                " "
+                + "Name".center(name_w)
+                + " | "
+                + "Dims".center(dim_w)
+                + " | "
+                + "Description".center(descr_w)
+                + " | "
+                + "Units".center(units_w)
+                + "\n"
+            )
+
+        # Write header + rows + footer
+        self.doc.write("\n")
+        self.doc.write(sep_line())
+        self.doc.write(header_line())
+        self.doc.write(sep_line())
+        for name, dim, descr, units in self._rows:
+            line = (
+                " "
+                + f"{name:<{name_w}} | "
+                + f"{dim:^{dim_w}} | "
+                + f"{descr:<{descr_w}} | "
+                + f"{units:<{units_w}}"
+                + "\n"
+            )
+            self.doc.write(line)
+        self.doc.write(sep_line())
+
+    def row(self, vname, dim, descr, units):
+        # Buffer rows; we only know widths once we've seen them all
+        self._rows.append((str(vname), str(dim), str(descr), str(units)))
 
     def close(self):
         self.doc.close()
 
-#.................................................................................................
+
+# .................................................................................................
+
 
 #     ---------
 class rtfWriter(Writer):
-#     ---------
+    #     ---------
     """
     Implements RTF file writer.
     """
-    def __init__(self,filename):
-        self.filename = filename # ignore this for now.
+
+    def __init__(self, filename):
+        self.filename = filename  # ignore this for now.
         self.doc = Document(style_sheet=MakeMyStyleSheet())
         self.ss = self.doc.StyleSheet
         self.secn = 0
         self.Section = Section()
         self.doc.Sections.append(self.Section)
+
     def skip(self):
-        p  = Paragraph(self.ss.ParagraphStyles.Normal)
-        p.append('')
+        p = Paragraph(self.ss.ParagraphStyles.Normal)
+        p.append("")
         self.Section.append(p)
-    def section(self,collection,description):
+
+    def section(self, collection, description):
         self.secn += 1
-        font = font=self.ss.Fonts.Arial
-        p  = Paragraph(self.ss.ParagraphStyles.Heading3)
+        # font = font=self.ss.Fonts.Arial
+        p = Paragraph(self.ss.ParagraphStyles.Heading3)
         # p.append(TEXT('%d) Collection '%self.secn,font=font))
         # p.append(TEXT('Collection ',font=font))
         # p.append(TEXT(collection,colour=self.ss.Colours.Blue,font=font))
         # p.append(TEXT(': %s'%str(description),font=font))
-        p.append(TEXT(collection,colour=self.ss.Colours.Blue))
-        p.append(TEXT(': %s'%str(description)))
+        p.append(TEXT(collection, colour=self.ss.Colours.Blue))
+        p.append(TEXT(": %s" % str(description)))
         self.Section.append(p)
         self.skip()
-    def property(self,name,value):
-        s = str("%s: %s"%(name,value))
-        p  = Paragraph(self.ss.ParagraphStyles.Normal)
-        p.append(TEXT('     '+name+': ',bold=True),TEXT(str(value),bold=False,italic=True))
-        #p.append(TAB,s)
+
+    def property(self, name, value):
+        # s = str("%s: %s"%(name,value))
+        p = Paragraph(self.ss.ParagraphStyles.Normal)
+        p.append(
+            TEXT("     " + name + ": ", bold=True),
+            TEXT(str(value), bold=False, italic=True),
+        )
+        # p.append(TAB,s)
         self.Section.append(p)
-    def table(self,choice='header'):
-        if choice == 'header':
-            self.Table = Table(nNAME,nDIMS,nDESC,nUNIT)
-            c1 = Cell( Paragraph(TEXT('       Name',bold=True,italic=True)),header_frameL)
-            c2 = Cell( Paragraph(TEXT(' Dim',bold=True,italic=True)),header_frame)
-            c3 = Cell( Paragraph(TEXT('                               Description',bold=True,italic=True)),header_frame)
-            c4 = Cell( Paragraph(TEXT('      Units',bold=True,italic=True)),header_frameR)
+
+    def table(self, choice="header"):
+        if choice == "header":
+            # Start from the global defaults
+            base_name = nNAME
+            base_dims = nDIMS
+            base_desc = nDESC
+            base_unit = nUNIT
+
+            name_w = base_name
+            desc_w = base_desc
+
+            max_len = getattr(self, "max_vname_len", None)
+            if max_len:
+                # Treat the default name column as tuned for ~12-char names.
+                # If names are longer, gently grow the name column, but:
+                #   - cap the growth factor
+                #   - cap the total fraction of the table
+                #   - keep description reasonably wide
+                total = base_name + base_dims + base_desc + base_unit
+
+                base_name_frac = base_name / total
+                base_desc_frac = base_desc / total
+
+                # How much larger than "typical" (12 chars) are these names?
+                scale = max_len / 12.0
+                scale = max(1.0, min(scale, 1.35))  # at most ~35% wider
+
+                # Proposed new name fraction
+                new_name_frac = base_name_frac * scale
+                # Hard cap: name column <= 35% of total table width
+                new_name_frac = min(new_name_frac, 0.35)
+
+                delta_frac = new_name_frac - base_name_frac
+                new_desc_frac = base_desc_frac - delta_frac
+
+                # Don't let description shrink too far:
+                # at least 45% of the table width.
+                min_desc_frac = 0.45
+                if new_desc_frac < min_desc_frac:
+                    # Clamp description and recompute name fraction accordingly
+                    new_desc_frac = min_desc_frac
+                    new_name_frac = base_name_frac + (base_desc_frac - new_desc_frac)
+
+                # Convert fractions back to relative widths
+                name_w = int(total * new_name_frac)
+                desc_w = int(total * new_desc_frac)
+
+            # Build the table with adjusted widths for Name and Description
+            self.Table = Table(name_w, base_dims, desc_w, base_unit)
+
+            # Header row (text the same; widths are in the Table)
+            c1 = Cell(
+                Paragraph(TEXT("       Name", bold=True, italic=True)), header_frameL
+            )
+            c2 = Cell(Paragraph(TEXT(" Dim", bold=True, italic=True)), header_frame)
+            c3 = Cell(
+                Paragraph(
+                    TEXT(
+                        "                               Description",
+                        bold=True,
+                        italic=True,
+                    )
+                ),
+                header_frame,
+            )
+            c4 = Cell(
+                Paragraph(TEXT("      Units", bold=True, italic=True)), header_frameR
+            )
             self.Table.AddRow(c1, c2, c3, c4)
+
         else:
             self.skip()
             self.Section.append(self.Table)
             self.skip()
-    def row(self,vname,dim,descr,units):
-        #print(' %-10s | %4s | %-58s | %-10s '%(vname,dim,descr,units))
-        c1 = Cell(Paragraph(TEXT(str(vname))),thin_frameL)
-        c2 = Cell(Paragraph(TEXT(str(dim))),thin_frame)
-        c3 = Cell(Paragraph(TEXT(str(descr))),thin_frame)
-        c4 = Cell(Paragraph(TEXT(str(units))),thin_frameR)
+
+    def row(self, vname, dim, descr, units):
+        # print(' %-10s | %4s | %-58s | %-10s '%(vname,dim,descr,units))
+        c1 = Cell(Paragraph(TEXT(str(vname))), thin_frameL)
+        c2 = Cell(Paragraph(TEXT(str(dim))), thin_frame)
+        c3 = Cell(Paragraph(TEXT(str(descr))), thin_frame)
+        c4 = Cell(Paragraph(TEXT(str(units))), thin_frameR)
         self.Table.AddRow(c1, c2, c3, c4)
+
     def close(self):
         r = Renderer()
-        f = open(self.filename,'w')
-        r.Write(self.doc,f)
+        f = open(self.filename, "w")
+        r.Write(self.doc, f)
+
+
+# .................................................................................................
+
+
+#     ---------
+class docxWriter(Writer):
+    #     ----------
+    """
+    Implements DOCX file writer using python-docx, styled to resemble
+    the RTF/Word output: blue section headings, wide Description column.
+    """
+
+    def __init__(self, filename):
+        if not HAS_DOCX:
+            raise ValueError(
+                "python-docx is not installed, DOCX format is not available"
+            )
+        self.filename = filename
+        self.doc = DocxDocument()
+        self.secn = 0
+        self._table = None
+
+        # Set default DOCX font to Times New Roman, 12pt
+        style = self.doc.styles["Normal"]
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(12)
+
+        # Needed for Word to actually respect the font name for Normal style
+        style.element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
+
+    def _blank_line(self):
+        self.doc.add_paragraph("")
+
+    def section(self, collection, description):
+        self._blank_line()
+
+        # Create one paragraph for the whole heading
+        p = self.doc.add_paragraph()
+
+        # The part before the colon is the collection name
+        collection_name = collection
+
+        # If description begins with a leading space or punctuation, leave as-is
+        desc_text = f": {description}" if description else ""
+
+        #
+        # Run 1 — Collection name in BLUE, bold, italic
+        #
+        r1 = p.add_run(collection_name)
+        r1.bold = True
+        r1.italic = True
+        r1.font.color.rgb = RGBColor(0x00, 0x33, 0x99)  # same blue as before
+
+        #
+        # Run 2 — space + description in BLACK, bold, italic
+        #
+        r2 = p.add_run(desc_text)
+        r2.bold = True
+        r2.italic = True
+        r2.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+
+        # Optional: ensure no extra spacing before/after
+        fmt = p.paragraph_format
+        fmt.space_before = Pt(0)
+        fmt.space_after = Pt(2)  # slight separation before Frequency
+
+    def property(self, name, value):
+        p = self.doc.add_paragraph()
+
+        # Make these lines single-spaced with no extra gap between them
+        fmt = p.paragraph_format
+        fmt.space_before = Pt(0)
+        fmt.space_after = Pt(0)
+        fmt.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        fmt.line_spacing = 1.0
+
+        r1 = p.add_run(f"{name}: ")
+        r1.bold = True
+        r2 = p.add_run(str(value))
+        r2.italic = True
+
+        # If this is the LAST property, insert one blank line afterward
+        if name == "Granule Size":
+            spacer = self.doc.add_paragraph()
+            spacer.paragraph_format.space_before = Pt(3)  # ~6pt spacing before table
+
+    def table(self, choice="header"):
+        if choice == "header":
+            # Start a new table with header row
+            self._table = self.doc.add_table(rows=1, cols=4)
+            try:
+                self._table.style = "Table Grid"
+            except Exception:
+                # If the template doesn't have 'Table Grid' we just ignore
+                pass
+
+            self._table.allow_autofit = False
+            # NOTE: I do not know why these settings work, but they
+            # seem to. If you set them to be "logical" (like as it
+            # should work) things go crazy in Word.
+            col_widths = [
+                Inches(0.1),  # Name
+                Inches(0.1),  # Dims
+                Inches(5.1),  # Description
+                Inches(0.1),  # Units
+            ]
+            for col, w in zip(self._table.columns, col_widths):
+                for cell in col.cells:
+                    cell.width = w
+
+            hdr_cells = self._table.rows[0].cells
+            hdr_cells[0].text = "Name"
+            hdr_cells[1].text = "Dims"
+            hdr_cells[2].text = "Description"
+            hdr_cells[3].text = "Units"
+
+            # Make header bold
+            for cell in hdr_cells:
+                for run in cell.paragraphs[0].runs:
+                    run.bold = True
+
+        else:
+            # add spacing after the table
+            p = self.doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(3)
+            self._table = None
+
+    def row(self, vname, dim, descr, units):
+        if self._table is None:
+            return
+        row_cells = self._table.add_row().cells
+        row_cells[0].text = str(vname)
+        row_cells[1].text = str(dim)
+        row_cells[2].text = str(descr)
+        row_cells[3].text = str(units)
+
+    def close(self):
+        self.doc.save(self.filename)
+
+
+# .................................................................................................
+
 
 #   -------------
-def getCollection(filename,collname,options,colltype=None):
+class markdownWriter(Writer):
+    #   -------------
+    """
+    Implements Markdown file writer (GitHub-flavored), good for wikis.
+    """
+
+    def __init__(self, filename=None):
+        self.filename = filename or "filespec.md"
+        self._fh = open(self.filename, "w", encoding="utf-8")
+        self.secn = 0
+        self._table_open = False
+
+    def _write(self, text: str) -> None:
+        self._fh.write(text)
+
+    def section(self, collection, description):
+        # New collection: close any open table and write a heading
+        if self._table_open:
+            self.table("footer")
+
+        self.secn += 1
+        self._write("\n\n")
+        # Markdown heading for the collection. You can drop the number
+        # or "Collection" here if you prefer:
+        # title_line = f"## {collection}: {description}\n"
+        title_line = f"## {collection}: {description}\n"
+        self._write(title_line)
+
+    def property(self, name, value):
+        # Properties as bold label + value
+        # e.g. "**Frequency:** 1-hourly from 00:30 UTC (time-averaged)"
+        self._write(f"- **{name}:** {value}\n")
+
+    def table(self, choice="header"):
+        if choice == "header":
+            # Start a new Markdown table
+            self._table_open = True
+            self._write("\n\n")
+            self._write("| Name | Dims | Description | Units |\n")
+            self._write("| ---- | ---- | ----------- | ----- |\n")
+        else:
+            # footer: just end the table with a blank line
+            if self._table_open:
+                self._write("\n")
+                self._table_open = False
+
+    def row(self, vname, dim, descr, units):
+        # One row per variable
+        # Escape any pipe characters to avoid breaking the table
+        def esc(s):
+            return str(s).replace("|", "\\|")
+
+        self._write(f"| {esc(vname)} | {esc(dim)} | {esc(descr)} | {esc(units)} |\n")
+
+    def close(self):
+        # Ensure any open table is closed and file is flushed
+        if self._table_open:
+            self.table("footer")
+        self._fh.close()
+
+
+# .................................................................................................
+
+
 #   -------------
+def getCollection(filename, collname, options, colltype=None):
+    #   -------------
     """
     Parses netCDF file and gathers collection metadata.
     """
     if colltype:
-        Coll = Spec(collname,colltype)
+        Coll = Spec(collname, colltype)
     else:
-        Coll = Spec(collname,collname)
+        Coll = Spec(collname, collname)
 
     Coll.size = os.path.getsize(filename)
     Coll.nc = Dataset(filename)
@@ -442,191 +931,342 @@ def getCollection(filename,collname,options,colltype=None):
 
     try:
         Coll.title = Coll.nc.Title
-    except:
+    except Exception:
         Coll.title = None
 
+    # LongName / ShortName from netCDF global attributes (case-insensitive)
     try:
-        Coll.LongName = Coll.nc.LongName
-    except:
+        if hasattr(Coll.nc, "LongName"):
+            Coll.LongName = Coll.nc.LongName
+        elif hasattr(Coll.nc, "long_name"):
+            Coll.LongName = Coll.nc.long_name
+        else:
+            Coll.LongName = None
+    except Exception:
         Coll.LongName = None
 
     try:
-        Coll.ShortName = Coll.nc.ShortName
-    except:
+        if hasattr(Coll.nc, "ShortName"):
+            Coll.ShortName = Coll.nc.ShortName
+        elif hasattr(Coll.nc, "short_name"):
+            Coll.ShortName = Coll.nc.short_name
+        else:
+            Coll.ShortName = None
+    except Exception:
         Coll.ShortName = None
 
     try:
-        Coll.nx = len(Coll.nc.dimensions['lon'])
-    except:
+        Coll.nx = len(Coll.nc.dimensions["lon"])
+    except Exception:
         try:
-            Coll.nx = len(Coll.nc.dimensions['longitude'])
-        except:
-            Coll.nx = len(Coll.nc.dimensions['Xdim'])
+            Coll.nx = len(Coll.nc.dimensions["longitude"])
+        except Exception:
+            Coll.nx = len(Coll.nc.dimensions["Xdim"])
 
     try:
-        Coll.ny = len(Coll.nc.dimensions['lat'])
-    except:
+        Coll.ny = len(Coll.nc.dimensions["lat"])
+    except Exception:
         try:
-            Coll.ny = len(Coll.nc.dimensions['latitude'])
-        except:
-            Coll.ny = len(Coll.nc.dimensions['Ydim'])
-
+            Coll.ny = len(Coll.nc.dimensions["latitude"])
+        except Exception:
+            Coll.ny = len(Coll.nc.dimensions["Ydim"])
 
     try:
-        Coll.nt = len(Coll.nc.dimensions['time'])
-    except:
+        Coll.nt = len(Coll.nc.dimensions["time"])
+    except Exception:
         Coll.nt = 0
 
     try:
-        Coll.nz = len(Coll.nc.dimensions['lev'])
-        Coll.lev_name = Coll.nc.variables['lev'].long_name
-    except:
+        Coll.nz = len(Coll.nc.dimensions["lev"])
+        Coll.lev_name = Coll.nc.variables["lev"].long_name
+    except Exception:
         try:
-            Coll.nz = len(Coll.nc.dimensions['levels'])
-            Coll.lev_name = Coll.nc.variables['levels'].long_name
-        except:
+            Coll.nz = len(Coll.nc.dimensions["levels"])
+            Coll.lev_name = Coll.nc.variables["levels"].long_name
+        except Exception:
             Coll.nz = 0
             Coll.lev_name = None
 
-    ignore_vars = ['lon','lons','longitude','xdim',
-                   'lat','lats','latitude','ydim',
-                   'lev','levels',
-                   'time','taitime',
-                   'nf','ncontact','orientationStrLen','cubed_sphere','anchor','contacts','orientation']
+    ignore_vars = [
+        "lon",
+        "lons",
+        "longitude",
+        "xdim",
+        "lat",
+        "lats",
+        "latitude",
+        "ydim",
+        "lev",
+        "levels",
+        "time",
+        "taitime",
+        "nf",
+        "ncontact",
+        "orientationStrLen",
+        "cubed_sphere",
+        "anchor",
+        "contacts",
+        "orientation",
+        "corner_lats",
+        "corner_lons",
+    ]
     for v in Coll.nc.variables:
         if v.lower() in ignore_vars:
             continue
         Coll.variables[v] = Coll.nc.variables[v]
 
     try:
-        time = Coll.nc.variables['time']
-        tunits = time.units
-        units, offset = time.units.split(' since ')
-        Coll.tbeg = offset.replace(' ','T')
-    except:
+        time = Coll.nc.variables["time"]
+        # tunits = time.units
+        units, offset = time.units.split(" since ")
+        Coll.tbeg = offset.replace(" ", "T")
+    except Exception:
         Coll.tbeg = None
 
     return Coll
 
+
 def get1d(dname):
-    return dname.replace('time','t').replace('longitude','x').replace('latitude','y').replace('levels','z').replace('lon','x').replace('lat','y').replace('lev','z').replace('Xdim','x').replace('Ydim','y').replace('nf','')
+    return (
+        dname.replace("time", "t")
+        .replace("longitude", "x")
+        .replace("latitude", "y")
+        .replace("levels", "z")
+        .replace("lon", "x")
+        .replace("lat", "y")
+        .replace("lev", "z")
+        .replace("Xdim", "x")
+        .replace("Ydim", "y")
+        .replace("nf", "")
+    )
 
 
-def MakeMyStyleSheet( ):
+def calculate_column_widths(self, Coll):
+    """Calculate optimal column widths based on actual variable data"""
+    # Start with minimum widths (headers + some padding)
+    max_name = len("Name") + 2
+    max_dims = len("Dims") + 2
+    max_desc = len("Description") + 2
+    max_unit = len("Units") + 2
 
+    for vname in sorted(Coll.variables):
+        var = Coll.variables[vname]
+
+        # Get dimensions string
+        dims = []
+        for dname in var.dimensions:
+            dims.append(get1d(dname))
+        dims_str = "".join(dims)
+
+        # Get description and units
+        try:
+            long_name = var.long_name
+        except Exception:
+            long_name = "No description"
+
+        try:
+            units = var.units
+        except Exception:
+            units = "Unknown"
+
+        # Update max widths
+        max_name = max(max_name, len(vname))
+        max_dims = max(max_dims, len(dims_str))
+        max_desc = max(max_desc, len(long_name))
+        max_unit = max(max_unit, len(units))
+
+    # Add some reasonable limits to prevent extremely wide tables
+    max_desc = min(max_desc, 100)  # Cap description at 100 chars
+
+    return max_name, max_dims, max_desc, max_unit
+
+
+def MakeMyStyleSheet():
     result = StyleSheet()
-    NormalText = TextStyle( TextPropertySet( result.Fonts.TimesNewRoman, 22 ) )
-    ps = ParagraphStyle( 'Normal',
-                         NormalText.Copy(),
-                         ParagraphPropertySet( space_before = 60, space_after  = 60 ) )
-    result.ParagraphStyles.append( ps )
+    NormalText = TextStyle(TextPropertySet(result.Fonts.TimesNewRoman, 22))
+    ps = ParagraphStyle(
+        "Normal",
+        NormalText.Copy(),
+        ParagraphPropertySet(space_before=60, space_after=60),
+    )
+    result.ParagraphStyles.append(ps)
 
-    ps = ParagraphStyle( 'Normal Short', NormalText.Copy() )
-    result.ParagraphStyles.append( ps )
+    ps = ParagraphStyle("Normal Short", NormalText.Copy())
+    result.ParagraphStyles.append(ps)
 
     NormalText.textProps.size = 32
-    ps = ParagraphStyle( 'Heading 1',
-                         NormalText.Copy(),
-                         ParagraphPropertySet( space_before = 240, space_after  = 60 ) )
-    result.ParagraphStyles.append( ps )
+    ps = ParagraphStyle(
+        "Heading 1",
+        NormalText.Copy(),
+        ParagraphPropertySet(space_before=240, space_after=60),
+    )
+    result.ParagraphStyles.append(ps)
 
     NormalText.textProps.size = 24
     NormalText.textProps.bold = True
-    ps = ParagraphStyle( 'Heading 2',
-                         NormalText.Copy(),
-                         ParagraphPropertySet( space_before = 240, space_after  = 60 ) )
-    result.ParagraphStyles.append( ps )
+    ps = ParagraphStyle(
+        "Heading 2",
+        NormalText.Copy(),
+        ParagraphPropertySet(space_before=240, space_after=60),
+    )
+    result.ParagraphStyles.append(ps)
 
     NormalText.textProps.size = 24
     NormalText.textProps.bold = True
     NormalText.textProps.italic = True
-    ps = ParagraphStyle( 'Heading 3',
-                         NormalText.Copy(),
-                         ParagraphPropertySet( space_before = 240, space_after  = 60 ) )
-    result.ParagraphStyles.append( ps )
+    ps = ParagraphStyle(
+        "Heading 3",
+        NormalText.Copy(),
+        ParagraphPropertySet(space_before=240, space_after=60),
+    )
+    result.ParagraphStyles.append(ps)
 
     #   Add some more in that are based on the normal template but that
     #   have some indenting set that makes them suitable for doing numbered
     normal_numbered = result.ParagraphStyles.Normal.Copy()
-    normal_numbered.name = 'Normal Numbered'
-    normal_numbered.ParagraphPropertySet.SetFirstLineIndent( TabPropertySet.DEFAULT_WIDTH * -1)
-    normal_numbered.ParagraphPropertySet.SetLeftIndent(      TabPropertySet.DEFAULT_WIDTH)
+    normal_numbered.name = "Normal Numbered"
+    normal_numbered.ParagraphPropertySet.SetFirstLineIndent(
+        TabPropertySet.DEFAULT_WIDTH * -1
+    )
+    normal_numbered.ParagraphPropertySet.SetLeftIndent(TabPropertySet.DEFAULT_WIDTH)
 
-    result.ParagraphStyles.append( normal_numbered )
+    result.ParagraphStyles.append(normal_numbered)
 
     normal_numbered2 = result.ParagraphStyles.Normal.Copy()
-    normal_numbered2.name = 'Normal Numbered 2'
-    normal_numbered2.ParagraphPropertySet.SetFirstLineIndent( TabPropertySet.DEFAULT_WIDTH * -1 )
-    normal_numbered2.ParagraphPropertySet.SetLeftIndent     ( TabPropertySet.DEFAULT_WIDTH *  2 )
+    normal_numbered2.name = "Normal Numbered 2"
+    normal_numbered2.ParagraphPropertySet.SetFirstLineIndent(
+        TabPropertySet.DEFAULT_WIDTH * -1
+    )
+    normal_numbered2.ParagraphPropertySet.SetLeftIndent(
+        TabPropertySet.DEFAULT_WIDTH * 2
+    )
 
-    result.ParagraphStyles.append( normal_numbered2 )
+    result.ParagraphStyles.append(normal_numbered2)
 
     ## LIST STYLES
-    for idx, indent in [ (1, TabPropertySet.DEFAULT_WIDTH    ),
-                         (2, TabPropertySet.DEFAULT_WIDTH * 2),
-                         (3, TabPropertySet.DEFAULT_WIDTH * 3) ] :
+    for idx, indent in [
+        (1, TabPropertySet.DEFAULT_WIDTH),
+        (2, TabPropertySet.DEFAULT_WIDTH * 2),
+        (3, TabPropertySet.DEFAULT_WIDTH * 3),
+    ]:
         indent = TabPropertySet.DEFAULT_WIDTH
-        ps = ParagraphStyle( 'List %s' % idx,
-                             TextStyle( TextPropertySet( result.Fonts.Arial, 22 ) ),
-                             ParagraphPropertySet( space_before = 60,
-                                                   space_after  = 60,
-                                                   first_line_indent = -indent,
-                                                   left_indent       = indent) )
-        result.ParagraphStyles.append( ps )
+        ps = ParagraphStyle(
+            "List %s" % idx,
+            TextStyle(TextPropertySet(result.Fonts.Arial, 22)),
+            ParagraphPropertySet(
+                space_before=60,
+                space_after=60,
+                first_line_indent=-indent,
+                left_indent=indent,
+            ),
+        )
+        result.ParagraphStyles.append(ps)
 
     return result
 
-#------------------------------------ M A I N ------------------------------------
+
+# ------------------------------------ M A I N ------------------------------------
 if __name__ == "__main__":
+    format = "text"
+    history = "none"
+    outFile = "filespec.txt"
 
-    format = 'text'
-    history = 'none'
-    outFile = 'filespec.txt'
+    #   Parse command line options
+    #   --------------------------
+    parser = OptionParser(
+        usage="Usage: %prog [OPTIONS] netcdf_file(s)", version="1.1.0"
+    )
 
-#   Parse command line options
-#   --------------------------
-    parser = OptionParser(usage="Usage: %prog [OPTIONS] netcdf_file(s)",
-                          version='1.1.0' )
+    parser.add_option(
+        "-o",
+        "--output",
+        dest="outFile",
+        default=outFile,
+        help="Output file name for the File Spec, ignored for format 'stdout' (default=%s)"
+        % outFile,
+    )
 
-    parser.add_option("-o", "--output", dest="outFile", default=outFile,
-              help="Output file name for the File Spec, ignored for format 'stdout' (default=%s)"\
-                          %outFile )
+    parser.add_option(
+        "-f",
+        "--format",
+        dest="format",
+        default=format,
+        help="Output file format: one of 'stdout', 'text', 'doc', 'docx', 'md' (default=%s)"
+        % format,
+    )
 
-    parser.add_option("-f", "--format", dest="format", default=format,
-              help="Output file format: one of 'stdout', 'text', 'rtf' (default=%s)"%format )
+    parser.add_option(
+        "-H",
+        "--history",
+        dest="history",
+        default=None,
+        help="Optional HISTORY.rc resource file (default=None)",
+    )
 
-    parser.add_option("-H", "--history", dest="history", default=None,
-              help="Optional HISTORY.rc resource file (default=None)")
+    parser.add_option(
+        "-M",
+        "--merra",
+        action="store_true",
+        dest="merra",
+        help="Assume MERRA-2 file name conventions",
+    )
 
-    parser.add_option("-M", "--merra",
-                      action="store_true", dest="merra",
-                      help="Assume MERRA-2 file name conventions")
+    parser.add_option(
+        "-N",
+        "--nature",
+        action="store_true",
+        dest="nature",
+        help="Assume Nature Run file name conventions",
+    )
 
-    parser.add_option("-N", "--nature",
-                      action="store_true", dest="nature",
-                      help="Assume Nature Run file name conventions")
+    parser.add_option(
+        "-O",
+        "--merraobs",
+        action="store_true",
+        dest="merraobs",
+        help="Assume merraobs Run file name conventions",
+    )
 
-    parser.add_option("-O", "--merraobs",
-                      action="store_true", dest="merraobs",
-                      help="Assume merraobs Run file name conventions")
+    parser.add_option(
+        "-F",
+        "--forward_processing",
+        action="store_true",
+        dest="fp",
+        help="Assume Forward Processing file name conventions",
+    )
 
-    parser.add_option("-F", "--forward_processing",
-                      action="store_true", dest="fp",
-                      help="Assume Forward Processing file name conventions")
+    parser.add_option(
+        "-D",
+        "--dyamond",
+        action="store_true",
+        dest="dyamond",
+        help="Assume DYAMOND file name conventions",
+    )
 
-    parser.add_option("-D", "--dyamond",
-                      action="store_true", dest="dyamond",
-                      help="Assume DYAMOND file name conventions")
+    parser.add_option(
+        "--geosit",
+        action="store_true",
+        dest="geosit",
+        help="Assume GEOS-IT file name conventions",
+    )
 
-    parser.add_option(      "--geosit",
-                      action="store_true", dest="geosit",
-                      help="Assume GEOS-IT file name conventions")
+    parser.add_option(
+        "--m21c",
+        action="store_true",
+        dest="m21c",
+        default=False,
+        help="MERRA-21C-style collections (alias of --geosit)",
+    )
 
-    parser.add_option("-v", "--verbose",
-                      action="store_true", dest="verbose",
-                      help="Verbose mode.")
+    parser.add_option(
+        "-v", "--verbose", action="store_true", dest="verbose", help="Verbose mode."
+    )
 
     (options, inFiles) = parser.parse_args()
+
+    # Treat --m21c as an alias for --geosit for now
+    if getattr(options, "m21c", False) and not getattr(options, "geosit", False):
+        options.geosit = True
 
     if len(inFiles) < 1:
         parser.error("must have 1 afile name")
@@ -637,7 +1277,7 @@ if __name__ == "__main__":
         cf = config(options.history)
         Descr = dict()
         for v in list(cf.keys()):
-            v_ = v.replace('-.descr','.descr')
+            v_ = v.replace("-.descr", ".descr")
             Descr[v_] = cf(v)
     else:
         cf = None
@@ -645,75 +1285,95 @@ if __name__ == "__main__":
     # Only one type of files
     # ----------------------
     n = 0
-    if options.merra:    n+=1
-    if options.nature:   n+=1
-    if options.merraobs: n+=1
-    if options.dyamond:  n+=1
-    if options.fp:       n+=1
-    if options.geosit:   n+=1
-    if n>1:
-       raise ValueError('only one of -N, -M, -F can be specified')
+    if options.merra:
+        n += 1
+    if options.nature:
+        n += 1
+    if options.merraobs:
+        n += 1
+    if options.dyamond:
+        n += 1
+    if options.fp:
+        n += 1
+    if options.geosit:
+        n += 1
+    if n > 1:
+        raise ValueError("only one of -N, -M, -F can be specified")
 
     # Instantiate writer
     # ------------------
     name, ext = os.path.splitext(options.outFile)
-    if 'text' in options.format:
-        options.outFile = name + '.txt'
+    if options.format == "text":
+        options.outFile = name + ".txt"
         writer = txtWriter(options.outFile)
-    elif 'txt' in options.format:
-        options.outFile = name + '.txt'
+    elif options.format == "txt":
+        options.outFile = name + ".txt"
         writer = txtWriter(options.outFile)
-    elif 'stdout' in options.format:
-        options.outFile = name + '.txt'
+    elif options.format == "stdout":
+        options.outFile = name + ".txt"
         writer = stdoutWriter(options.outFile)
-    elif 'rtf' in options.format:
+    elif options.format == "rtf":
         if not HAS_RTF:
-            raise ValueError('PyRTF is not installed, therefore format RTF is not available')
-        options.outFile = name + '.doc'
+            raise ValueError(
+                "PyRTF is not installed, therefore format RTF is not available"
+            )
+        options.outFile = name + ".doc"
         writer = rtfWriter(options.outFile)
-    elif 'doc' in options.format:
+    elif options.format == "doc":
         if not HAS_RTF:
-            raise ValueError('PyRTF is not installed, therefore format RTF is not available')
-        options.outFile = name + '.doc'
+            raise ValueError(
+                "PyRTF is not installed, therefore format RTF is not available"
+            )
+        options.outFile = name + ".doc"
         writer = rtfWriter(options.outFile)
+    elif options.format == "docx":
+        if not HAS_DOCX:
+            raise ValueError(
+                "python-docx is not installed, therefore format DOCX is not available"
+            )
+        options.outFile = name + ".docx"
+        writer = docxWriter(options.outFile)
+    elif "md" in options.format or "markdown" in options.format:
+        options.outFile = name + ".md"
+        writer = markdownWriter(options.outFile)
     else:
-        raise ValueError("unsupported format <%s>"%options.format)
+        raise ValueError("unsupported format <%s>" % options.format)
 
     # Unique name of collections
     # --------------------------
     Files = dict()
     for fname in inFiles:
         if options.nature:
-            collname = os.path.basename(fname).split('.')[1]
+            collname = os.path.basename(fname).split(".")[1]
             colltype = None
         elif options.dyamond:
-            collname = os.path.basename(fname).split('.')[1]
+            collname = os.path.basename(fname).split(".")[1]
             colltype = None
-            #print(collname)
+            # print(collname)
         elif options.merraobs:
             # Strip off datestamp and nc4
-            colllist = os.path.basename(fname).split('.')[:-2]
+            colllist = os.path.basename(fname).split(".")[:-2]
             # strip off merra2
             colllist = colllist[1:]
             # Make a string joined by dots
-            collname = '.'.join(colllist)
-            rcn = collname+'.colltype'
-            colltype = Descr[rcn].replace("'","").replace(",","")
+            collname = ".".join(colllist)
+            rcn = collname + ".colltype"
+            colltype = Descr[rcn].replace("'", "").replace(",", "")
         elif options.fp:
-            collname = os.path.basename(fname).split('.')[3]
+            collname = os.path.basename(fname).split(".")[3]
             colltype = None
         elif options.geosit:
-            collname = os.path.basename(fname).split('.')[3]
+            collname = os.path.basename(fname).split(".")[3]
             colltype = None
         else:
-            collname = os.path.basename(fname).split('.')[1]
+            collname = os.path.basename(fname).split(".")[1]
             colltype = None
-        #print(collname)
+        # print(collname)
 
         if colltype:
-            Name = colltype.split('_')
+            Name = colltype.split("_")
         else:
-            Name = collname.split('_')
+            Name = collname.split("_")
         if len(Name) >= 4:
             Files[collname] = fname
 
@@ -722,43 +1382,59 @@ if __name__ == "__main__":
     CollNames = dict()
     if options.merraobs:
         for collname in Files:
-            freq, dim, name, res = colltype.split('_')
-            if   freq == 'const': prefix = 'a'
-            elif res[0] == 'N':   prefix = 'b'
-            elif res[0] == 'M':   prefix = 'c'
-            else:                 prefix = 'd'
+            freq, dim, name, res = colltype.split("_")
+            if freq == "const":
+                prefix = "a"
+            elif res[0] == "N":
+                prefix = "b"
+            elif res[0] == "M":
+                prefix = "c"
+            else:
+                prefix = "d"
             name = prefix + collname
             CollNames[name] = collname
     elif options.dyamond:
         for collname in Files:
-            if 'const' in collname.split('_')[0]:
-                freq, dim, name, res = collname.split('_')
+            if "const" in collname.split("_")[0]:
+                freq, dim, name, res = collname.split("_")
             else:
-                freq, dur, dim, name, res = collname.split('_')
+                freq, dur, dim, name, res = collname.split("_")
 
-            if   freq == 'const': prefix = 'a'
-            elif res[0] == 'N':   prefix = 'b'
-            elif res[0] == 'M':   prefix = 'c'
-            else:                 prefix = 'd'
+            if freq == "const":
+                prefix = "a"
+            elif res[0] == "N":
+                prefix = "b"
+            elif res[0] == "M":
+                prefix = "c"
+            else:
+                prefix = "d"
             name = prefix + collname
             CollNames[name] = collname
     elif options.geosit:
         for collname in Files:
-            name, freq, dur, dim, hres, vres = collname.split('_')
+            name, freq, dur, dim, hres, vres = collname.split("_")
 
-            if   freq == 'const': prefix = 'a'
-            elif hres[0] == 'L':   prefix = 'b'
-            elif hres[0] == 'C':   prefix = 'c'
-            else:                 prefix = 'd'
+            if freq == "const":
+                prefix = "a"
+            elif hres[0] == "L":
+                prefix = "b"
+            elif hres[0] == "C":
+                prefix = "c"
+            else:
+                prefix = "d"
             name = prefix + collname
             CollNames[name] = collname
     else:
         for collname in Files:
-            freq, dim, name, res = collname.split('_')
-            if   freq == 'const': prefix = 'a'
-            elif res[0] == 'N':   prefix = 'b'
-            elif res[0] == 'M':   prefix = 'c'
-            else:                 prefix = 'd'
+            freq, dim, name, res = collname.split("_")
+            if freq == "const":
+                prefix = "a"
+            elif res[0] == "N":
+                prefix = "b"
+            elif res[0] == "M":
+                prefix = "c"
+            else:
+                prefix = "d"
             name = prefix + collname
             CollNames[name] = collname
 
@@ -767,30 +1443,30 @@ if __name__ == "__main__":
     for name in sorted(CollNames):
         collname = CollNames[name]
         if options.verbose:
-            print("[] Working on collection <%s>"%collname)
+            print("[] Working on collection <%s>" % collname)
         fname = Files[collname]
-        Collection = getCollection(fname,collname,options,colltype)
-        #print("MAT Collection: ", Collection)
+        Collection = getCollection(fname, collname, options, colltype)
+        # print("MAT Collection: ", Collection)
         if cf is not None:
             try:
-                rcn = collname+'.descr'
-                title = Descr[rcn][:-2].replace("'","") # override what is on file
+                rcn = collname + ".descr"
+                title = Descr[rcn][:-2].replace("'", "")  # override what is on file
                 Collection.title = title
-            except:
+            except Exception:
                 pass
         if options.merraobs:
             for vname in Collection.variables:
                 long_name = Collection.variables[vname].long_name
                 try:
-                    findUnits = re.search('.*\[(.*)\].*',long_name)
+                    findUnits = re.search(r".*\[(.*)\].*", long_name)
                     newUnits = findUnits.group(1)
                     if newUnits == "hPA":
                         newUnits = "hPa"
                 except AttributeError:
-                    newUnits = '1'
+                    newUnits = "1"
 
                 Collection.newUnits[vname] = newUnits
-        writer.doCollection(Collection,options)
+        writer.doCollection(Collection, options)
 
     # All done
     # --------
