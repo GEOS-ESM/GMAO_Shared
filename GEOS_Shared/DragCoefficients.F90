@@ -5,13 +5,13 @@ module DragCoefficientsMod
 !----------------------------------------------------------------------
 !BOP
 
-! !MODULE: 
+! !MODULE:
 
 !    DragCoefficientsMod -- Container for the GEOS drag coefficient utility.
 
 ! !USES:
 
-   use MAPL_ConstantsMod
+   use MAPL_Constants
 
   implicit none
   private
@@ -52,9 +52,9 @@ module DragCoefficientsMod
 !  with respect to surface temperature and surface humidity.
 !
 !  Surface-air quantities are subscripted $a$ and surface quantities are
-!  sucscripted $s$. The difference of the two is, for example, 
+!  sucscripted $s$. The difference of the two is, for example,
 !  $\delta T = T_a - T_s$.
-! 
+!
 !  The drag coefficients have the form:
 !  $$
 !  C_D^m = C_D^n f_m({\rm Ri})
@@ -66,27 +66,27 @@ module DragCoefficientsMod
 !  where
 !  $$
 !  C_D^n = (\frac{\kappa}{\log{(\zeta)}})^2
-!  $$ 
+!  $$
 !  is the neutral drag coefficient and $\zeta=\frac{\delta z}{z_0} + 1$.
-!  The Von Karman constant, $\kappa$, is 
+!  The Von Karman constant, $\kappa$, is
 !  taken as 0.40 and $z_0$ is the surface roughness. The height corresponding
-!  to surface-air quantities is taken as one-half the thickness of the 
+!  to surface-air quantities is taken as one-half the thickness of the
 !  lowest model layer.
 !
-!  The surface bulk Richardson number, Ri, is defined as 
+!  The surface bulk Richardson number, Ri, is defined as
 !  $$
 !  {\rm Ri} = \delta T_v \frac{\frac{g}{\delta z}}{T_o*\frac{u_a}{\delta z}^2}
 !  $$
 !  $$
 !  {\rm \,} = \delta T_v \alpha,
 !  $$
-!  where $T_v=T(1+\epsilon q)$ is the virtual temperature, 
+!  where $T_v=T(1+\epsilon q)$ is the virtual temperature,
 !  $\epsilon=\frac{M_a}{M_w}-1$, $M_a$ and $M_w$ are the molecular weights of
 !  dry air and water, $u_a$ is the surface-air wind speed, and $\alpha$ is
 !  defined to simplify the calculation. In the code we use $T_v$ in place of
 !  $T_o$, but assume that the factor $\alpha$ is constatnt when differentiating
 !  the Ricahrdson number with respect to $\delta T_v$.
-!  
+!
 !  The two universal functions of the Richardson number,  $f_m$ and $f_h$,
 !  are taken from Louis et al (1979). For unstable conditions (Ri$\le 0$),
 !  they are:
@@ -101,7 +101,7 @@ module DragCoefficientsMod
 !  $$
 !  \psi = \frac{ {\rm Ri} }{ 1 + 3bcC_D^n\sqrt{-{\rm Ri}\zeta} }.
 !  $$
-!  
+!
 !  For stable condition (Ri$\ge 0$), they are
 !  $$
 !  f_m = \frac{1}{1.0 + 2b\frac{{\rm Ri}}{\psi}}
@@ -114,15 +114,15 @@ module DragCoefficientsMod
 !  $$
 !  \psi =  \sqrt{1+d{\rm Ri}}.
 !  $$
-!  As in Louis et al (1979) the parameters appearing in these are taken  
-!  as $b = c = d = 5$. 
-!  
+!  As in Louis et al (1979) the parameters appearing in these are taken
+!  as $b = c = d = 5$.
+!
 !  We also require the derivative of $ C_D^h$ with respect to $\delta T_v$.
 !  $$
-!  \frac{\partial C_D^h}{\partial \delta T_v} = 
+!  \frac{\partial C_D^h}{\partial \delta T_v} =
 !    C_D^n \frac{{\rm d} f_h}{{\rm d} {\rm Ri}} \alpha
 !  $$
-!  
+!
 !  The derivatives of $f_h$ are as follows.
 !
 !  For unstable conditions:
@@ -131,16 +131,16 @@ module DragCoefficientsMod
 !  $$
 !  where
 !  $$
-!  \frac{{\rm d} \psi}{{\rm d} {\rm Ri}} = \frac{\psi}{{\rm Ri}} 
+!  \frac{{\rm d} \psi}{{\rm d} {\rm Ri}} = \frac{\psi}{{\rm Ri}}
 !     (1 + \frac{3bcC_D^n\psi\zeta}{2\sqrt{-{\rm Ri}\zeta} })
 !  $$
-!    
+!
 !  For stable conditions:
 !  $$
 !  \frac{{\rm d} f_h}{{\rm d} {\rm Ri}} = -f_h^2  3b  (\psi + {\rm Ri}\frac{d}{2\psi}),
 !  $$
-!  
-!  
+!
+!
 ! \bigskip
 ! \hrulefill
 ! \bigskip

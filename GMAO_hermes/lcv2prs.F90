@@ -6,7 +6,7 @@
 !BOP
 !
 ! !ROUTINE:  lcv2prs --- converting eta to pressure level/subsetting eta
-!                        files. 
+!                        files.
 !
 ! !USAGE: see the routine usage() below
 !
@@ -28,7 +28,7 @@
 #if defined(HDFEOS)
         ESMF_CFIODownBit,      &
 #endif
-        ESMF_CFIOVarWrite      
+        ESMF_CFIOVarWrite
 
    use ESMF_CFIOFileMod, only: &
         ESMF_CFIO,                 &
@@ -54,7 +54,7 @@
    use m_StrTemplate
 
    use m_const, only: cpm,grav,kappa,zvir
-   use MAPL_ConstantsMod
+   use MAPL_Constants
    use GEOS_UtilsMod, only: GEOS_Qsat
 
    Implicit NONE
@@ -71,7 +71,7 @@
 !  ??Mar2006  Baoyu Yin Added variable name "H" for HGHT
 !  ??Mar2006  Baoyu Yin Added km_e checking for 2D files.
 !  21Mar2006  Todling   Declared explicit used internal procedures of ESMF_CFIO
-!  ??May2006  Baoyu Yin Added -prsf option for converting diag.eta to pressre   
+!  ??May2006  Baoyu Yin Added -prsf option for converting diag.eta to pressre
 !  ??May2006  Baoyu Yin Fixed problems in converting 3D files to output with one level
 !  ??Jun2006  Baoyu Yin Added conditional compilation for HDFEOS support
 !  ??Jul2006  Baoyu Yin Added compQ option to compute specific humidity on pressure
@@ -82,12 +82,12 @@
 !                       or rc files.
 !  ??Nov2006  Baoyu Yin Added StandardName: in the rc files to create CFIO
 !                       compliant standard variable names.
-!  ??Nov2006  Baoyu Yin Notes about RH and Q computation: RH is defined as 
+!  ??Nov2006  Baoyu Yin Notes about RH and Q computation: RH is defined as
 !                       q / qs.
 !                       RH is interpolated from eta to pressure.
 !                       Q is interpolated from eta to pressure directly without -compQ option.
-!                       With -compQ option, Q is interpolated from eta to pressure 
-!                       directly above 100mb. For 1000mb -> 100mb, Q is computed on 
+!                       With -compQ option, Q is interpolated from eta to pressure
+!                       directly above 100mb. For 1000mb -> 100mb, Q is computed on
 !                       pressure using RH in prs.
 !  ??Nov2006  Baoyu Yin Added QC and TQC support.
 !  ??Dec2006  Baoyu Yin fixed vwnd lon shift problem in prog.eta files.
@@ -95,7 +95,7 @@
 !  ??Dec2006  Baoyu Yin Added support for converting tavg_v files to prs.
 !  ??Mar2007  Baoyu Yin Added support for converting D grid to A grid for wind.
 !  ??Mar2007  Baoyu Yin Added support for subsetting for ana.eta file.
-!  ??Mar2007  Baoyu Yin Added support for shaving and compression. 
+!  ??Mar2007  Baoyu Yin Added support for shaving and compression.
 !  ??Apr2007  Baoyu Yin Fixed some memory leak.
 !  19Oct2007  D Kokron  d2a was called with actual arguments (inField and vField)
 !                       that were 3D real pointers, but the subroutine expects
@@ -105,14 +105,14 @@
 !-------------------------------------------------------------------------
 !EOP
    character(len=*), parameter :: myNewName = 'lcv2prs'
-  
+
 !                              -----------------------
 !                               Hardwired Parameters
 !                              -----------------------
 
       integer, parameter :: mFiles = 256       ! Max. number of input files
       integer, parameter :: mVars  = 256       ! Max. number of variables
-      integer, parameter :: mLevs  = 256       ! Max. number of levels    
+      integer, parameter :: mLevs  = 256       ! Max. number of levels
 
 
 !                              -----------------------
@@ -151,7 +151,7 @@
       logical           :: doComputing = .false. ! computation of rh, slp..
       logical           :: doComp      = .false. ! do szip compression
       logical           :: doChunk     = .false. ! do szip compression
-      logical           :: compQ       = .false. ! do Q computation on pressure 
+      logical           :: compQ       = .false. ! do Q computation on pressure
       integer           :: isPos(mVars)
       character(len=256) :: cfioStandardName(mVars)    ! output var names
 
@@ -164,14 +164,14 @@
       real, pointer ::  vField(:,:,:)          ! V wind Input
       real, pointer ::  vOutField(:,:,:)       ! V wind Output
       real, pointer ::  ple(:,:,:)             ! Input edge eta level
-      real, pointer ::  delp(:,:,:)            ! Input delp 
-      real, pointer ::  wz(:,:,:)              ! Input hght 
-      real, pointer ::  tmpu(:,:,:)            ! Input hght 
-      real, pointer ::  rh(:,:,:)              ! Input hght 
+      real, pointer ::  delp(:,:,:)            ! Input delp
+      real, pointer ::  wz(:,:,:)              ! Input hght
+      real, pointer ::  tmpu(:,:,:)            ! Input hght
+      real, pointer ::  rh(:,:,:)              ! Input hght
       real, pointer ::  tmpuP(:,:,:)           ! temperature on prs levels
       real, pointer ::  rhP(:,:,:)             ! rh on prs levels
       real, pointer ::  qsfieldP(:,:,:)        ! Qs on prs levels
-      real, pointer ::  slp(:,:)               ! Input slp  
+      real, pointer ::  slp(:,:)               ! Input slp
       real*4, pointer  :: pmk(:,:)
       real*4, pointer :: tfield(:,:)
       real, pointer :: qsfield(:,:)
@@ -201,9 +201,9 @@
       integer tNames                ! variable counter
       integer it                    ! time counter
       integer iv                    ! variable counter
-      integer itest, ii, i, j, k               
+      integer itest, ii, i, j, k
       integer          :: in_fmode = 1         ! non-zero for READ-ONLY
-      integer          :: out_fmode = 0        ! 0 for READ-WRITE 
+      integer          :: out_fmode = 0        ! 0 for READ-WRITE
       integer          :: rc                   ! return error code
       integer          :: rtcode               ! return error code
       integer          :: gridIdx              ! grid index for the biggest km_e
@@ -211,7 +211,7 @@
       integer, pointer :: hhmmss(:)            !
       integer          :: timinc               ! Time increment
       logical          :: ex = .false.         ! output file exist or not
-      logical          :: twoDimVar            ! 2D variable 
+      logical          :: twoDimVar            ! 2D variable
       character(len=8) :: format
       logical          :: ncep72               ! use NCEP-like levels but augmented to 72
 
@@ -226,7 +226,7 @@
       character(len=256) :: title_cvs          ! meta data title with a CVS tag
       character(len=256) :: source             ! data source
       character(len=256) :: source_cvs         ! data source with a CVS tag
-      character(len=256) :: contact            ! contact org.   
+      character(len=256) :: contact            ! contact org.
       character(len=128) :: levunits           ! Vertical levels
       character(len=128) :: coordinate         ! pressure, eta or sigma?
       character(len=128) :: standard_name      ! standard name for coordinate
@@ -252,18 +252,18 @@
       real, pointer     :: lon3d(:)            ! output longitudes in deg (im)
       real, pointer     :: lat3d(:)            ! latitudes in deg (jm)
       real, pointer     :: lev3d(:)            ! levels in hPa (km)
-      real, pointer     :: conf(:)   
+      real, pointer     :: conf(:)
 
 
 !                              -----------------------
-!                                  eta information 
+!                                  eta information
 !                              -----------------------
 
-      integer           :: im_e                ! input zonal dimension       
-      integer           :: jm_e                ! input meridional dimension       
-      integer           :: km_e                ! input vertical dimension    
-      integer           :: lm_e                ! input time dimension    
-      integer           :: nVars_e             ! input number of variables   
+      integer           :: im_e                ! input zonal dimension
+      integer           :: jm_e                ! input meridional dimension
+      integer           :: km_e                ! input vertical dimension
+      integer           :: lm_e                ! input time dimension
+      integer           :: nVars_e             ! input number of variables
       integer           :: nGrids              ! number of grids in input files
       real              :: undef               ! Missing value
       real, pointer     :: lon_e(:)            ! longitudes in deg (im)
@@ -276,7 +276,7 @@
       character(len=128) :: standardName(mVars)    ! output var names
       character(len=64) :: outVarsgc(mVars)    ! Output variable names from rc file
       character(len=64) :: outVarsg(mVars)     ! Output variable names from rc file
-      character(len=64) :: inVarsg(mVars)      ! Input variable names for CFIO 
+      character(len=64) :: inVarsg(mVars)      ! Input variable names for CFIO
 
       real              :: valid_range(2, mVars)
       real              :: packing_range(2, mVars)
@@ -366,7 +366,7 @@
 !     if ( nGrids /= 1 ) call die (myNewName, 'Input file has more than one grid')
 
      allocate ( yyyymmdd(lm_e),hhmmss(lm_e), stat = rc )
-!    Get yyyymmdd and hhmmss 
+!    Get yyyymmdd and hhmmss
      do i = 1, lm_e
            call CFIO_parseIntTime ( timInc, hour, minute, sec )
            incSecs = hour*3600 + minute*60 + sec
@@ -390,13 +390,13 @@
 !                 addOffSet=offSet(i), scaleFactor=scaleFactor(i),            &
                  validRange=valid_range(:,i), packingRange=packing_range(:,i), &
                  amiss=undef, standardName=stitle(i) )
-!       Get Grid information 
+!       Get Grid information
 !       --------------------
         call ESMF_CFIOGridGet(grid_in(i), im=im_e, jm=jm_e, km=km_e)
         if ( twoDimVar ) then
            kmVar_e(i) = 0
         else
-           kmVar_e(i) = km_e 
+           kmVar_e(i) = km_e
            all2D = .false.
         end if
      enddo
@@ -411,11 +411,11 @@
      end do
 
      end if
-     
+
 !    Allocate memory for meta data
      if ( km_e .eq. 0 ) km_e = 1
      if (iff .eq. 1) then
-        allocate ( lon_e(im_e),lat_e(jm_e),lev_e(km_e), lev_e4(km_e))   
+        allocate ( lon_e(im_e),lat_e(jm_e),lev_e(km_e), lev_e4(km_e))
      end if
 !    Get Input Grid Information
      if (iff .eq. 1) then
@@ -437,7 +437,7 @@
            do k = 1, km
               Levs(k) = lev_e4(levNums(k))*10/10.
            end do
-        else 
+        else
             Levs = lev_o
         end if
      end if
@@ -457,7 +457,7 @@
 !        print *, "coordinate, levunits, standard_name", coordinate, levunits, standard_name
 !        if (index(coordinate, 'unknown') .gt. 0 .or. len(trim(coordinate)) .le. 0) &
 !        ana.eta file doesn't have coordinate and standard_name metadata. Add them.
-         if (.not. eta)  coordinate = 'eta' 
+         if (.not. eta)  coordinate = 'eta'
 !        if (index(standard_name, 'unknown') .gt. 0 .or. len(trim(standard_name)) .le. 0) &
          if (.not. eta)  standard_name = 'model_layers'
         call ESMF_CFIOGridSet(grid_out, coordinate=coordinate, levUnit=levunits, &
@@ -466,7 +466,7 @@
 !                           formulaTerm ="PS + PL",                         &
 !                           standardName="atmosphere_hybrid_sigma_pressure_coordinate")
      else
-!        if ( .NOT. all2D ) then    
+!        if ( .NOT. all2D ) then
            call ESMF_CFIOGridSet(grid_out, coordinate='pressure', levUnit='hPa', &
                       standardName='pressure')
 !        end if
@@ -501,7 +501,7 @@
            if (outKm(i) .gt. 0 .and. nLevs .gt. 0) outKm(i) = nLevs
            if (inKm(i) .gt. 0 .and. nLevs .gt. 0) inKm(i) = nLevs
            valid_range_prs(:,i) = valid_range(:,i)
-           packing_range_prs(:,i) = packing_range(:,i)      
+           packing_range_prs(:,i) = packing_range(:,i)
            outUnits(i) = vunits(i)
            scaleFactor(i) = 1.0
            offSet(i) = 0.0
@@ -511,7 +511,7 @@
 !    Construct GFIO output variable names for GFIO_Create
 !    If u and v wind are presented, seperate them.
      nnames = 1
-                                                                                           
+
      do iv = 1, nVars
          if ( index(trim(outVars(iv)), ';' ) .gt. 0 ) then
            name_pos = index(trim(outVars(iv)), ';')
@@ -563,7 +563,7 @@
               if ( len(trim(stitle(itest))) .gt. 0 ) then
                  standardName(iv)=stitle(itest)
               else
-                 standardName(iv)=longName(iv)    
+                 standardName(iv)=longName(iv)
               end if
               valid_range_prs(1,iv) = valid_range(1,itest)
               valid_range_prs(2,iv) = valid_range(2,itest)
@@ -584,7 +584,7 @@
            if ( uppercase(inVars(iv)) .eq. uppercase(vName(itest)) ) then
               if (len(trim(longName(ii))) .le. 0) longName(ii)=vtitle(itest)
 !             print *, "DEBUG: inVars=",trim(inVars(iv)),"  vName=",trim(vName(itest))
-              if ( uppercase(inVars(iv)) .eq. vName(itest) ) then 
+              if ( uppercase(inVars(iv)) .eq. vName(itest) ) then
                  inVars(iv) = uppercase(inVars(iv))
               elseif ( inVars(iv) .eq. lowercase(inVars(iv)) ) then
                  inVars(iv) = lowercase(inVars(iv))
@@ -597,9 +597,9 @@
                  vWind  = inVars(iv)((name_pos+1):name_len)
                  if ( uppercase(uWind) .eq. uppercase(vName(itest)) ) then
                     if (len(trim(longName(ii))) .le. 0) longName(ii)=vtitle(itest)
-                    if ( uppercase(uWind) .eq. vName(itest) ) then 
+                    if ( uppercase(uWind) .eq. vName(itest) ) then
                        inVars(iv) = uppercase(inVars(iv))
-                    else 
+                    else
                        inVars(iv) = lowercase(inVars(iv))
                     end if
                  end if
@@ -615,7 +615,7 @@
      end do
 
 
-!    GFIO output file is created only once.  
+!    GFIO output file is created only once.
       if ( iff == 1 ) then
 !        Set ptop, pint, ak and bk
          allocate(ak(km_e+1), bk(km_e+1))
@@ -628,7 +628,7 @@
          if (begDate < 0 .or. begTime < 0 .or. incTime < 0) then ! no time interpolation
             begDate = yyyymmdd(1)
             begTime = hhmmss(1)
-            incTime = timinc 
+            incTime = timinc
             timeInterp = .false.
          else
             timeInterp = .true.
@@ -673,7 +673,7 @@
                        valid_range_prs(:,iv), vUnits=outUnitsg(iv),         &
                        amiss=undef, scaleFactor=1., addOffSet=0.)
          end do
-            
+
 !        Set CFIO metadata
          cfio_out =  ESMF_CFIOCreate(cfioObjName='cfio_out')
          call ESMF_CFIOSet(cfio_out, fName=outFile, varObjs=cfioOutVars, &
@@ -703,7 +703,7 @@
          end if
 
 !         Eta2prs may run twice for variables written at mid-layer and edges.
-          inquire(file=outFile, EXIST=ex)  
+          inquire(file=outFile, EXIST=ex)
           if ( ex ) then
              call ESMF_CFIOFileOpen(cfio_out, out_fmode)
           else
@@ -717,7 +717,7 @@
                do ii = i+1, nVars
                   outKm(ii) = outKm(ii+1)
                   inKm(ii) = inKm(ii+1)
-               end do 
+               end do
              end if
              if (outKm(i) .eq. 1) outKm(i) =0
           end do
@@ -725,8 +725,8 @@
 !     Loop over times on file
 !     -----------------------
       loop_time : do it = 1, lm_e
-        
-        
+
+
 !      do time interpolation if needed.
        loop_do : do
 
@@ -736,14 +736,14 @@
                 curTime = curTime - 240000
                 curDate = incymd(curDate, 1)
              end if
-             exit 
+             exit
 !             cycle loop_time
          end if
          if (.not. timeInterp .and. curDate .gt. yyyymmdd(it)) then
               exit
          endif
-!         if (timeInterp .and. curDate .gt. begDate) exit   
-     
+!         if (timeInterp .and. curDate .gt. begDate) exit
+
          if ( begDate_keep /= -999 .and. curDate /= begDate_keep) then
               exit
          endif
@@ -767,9 +767,9 @@
                   if ( rc /= 0 )  call die (myNewName, 'can not read DELP')
                else
                   call checkStrictVar('delp', vName, nVars_e, rtcode)
-                  if ( rtcode .eq. 0) then 
+                  if ( rtcode .eq. 0) then
                      call readPrs(curDate, curTime, 'delp', delp, rc)
-                  else 
+                  else
                      call readPrs(curDate, curTime, 'DELP', delp, rc)
                   end if
                   if ( rc /= 0 )  call die (myNewName, 'can not read DELP')
@@ -791,13 +791,13 @@
          end if
 
          if (all2D) call Interp_Init(im_e, jm_e, 1, ptop, grid, rc)
-   
+
          doComputing = .false.
 
 !        Loop over variables
 !        -------------------
-         loop_var : do iv = 1, nVars 
-      
+         loop_var : do iv = 1, nVars
+
 !           Check a varaiable to see whether it exist
             call checkVar(inVars(iv), vName, nVars_e, rc)
             if (rc .ne. 0 .and. trim(outVars(iv)) .eq. "TQC") eta = .false.
@@ -871,7 +871,7 @@
                      allocate ( vField(im_e,jm_e,km_e), stat=rc )
                      call ESMF_CFIOVarReadT2(cfio_in, vWind, curDate, curTime, vField, rc=rc, cfio2=cfio_in2)
                      if ( lon_e(1) < 0 .and. .not. doSubset ) call lon_shift(vField, im_e, jm_e, km_e)
-                  else   
+                  else
                      if ( rc /= 0 .and. (trim(outVars(iv)) .eq. 'QC' .or. trim(outVars(iv)) .eq. 'qc') ) then
                         allocate ( tql(im_e,jm_e,km_e), stat=rc )
                         allocate ( tqi(im_e,jm_e,km_e), stat=rc )
@@ -937,12 +937,12 @@
 !                   call lon_shift(inField, im_e, jm_e, 1)
 !               if ( lon_e(1) < 0 .and. .not. doSubset) call lon_shift(inField, im_e, jm_e, 1)
             end if
-              
+
 !           Interpolate from Input to Output grid
 !           -------------------------------------
 !           print *, "DEBUG: Interpolate."
             if (inKm(iv) .gt. 0) then
-               allocate(outField(im,jm,nLevs), stat=rc) 
+               allocate(outField(im,jm,nLevs), stat=rc)
 !              print *, "DEBUG: allocated outField: im=",im," jm=",jm," nLevs=",nLevs
                if (rc /= 0) call die (myNewName, 'cannot allocate outField')
                if ( .Not. doSubset ) then
@@ -998,8 +998,8 @@
 
                           do k = 1, km
 
-! Select Q in pressure from outField and rh*Qs 
-                           if ( Levs(k) .ge. 100 ) then 
+! Select Q in pressure from outField and rh*Qs
+                           if ( Levs(k) .ge. 100 ) then
                              do j = 1, jm
                              do i = 1, im
                                 if (rhP(i,j,k) .gt. 0.1*undef .or. qsfieldP(i,j,k) .gt.  &
@@ -1015,7 +1015,7 @@
                           end do
                           deallocate(tfield, pmk, qsfield)
                           deallocate(rhP, tmpuP, qsfieldP)
-                       else  
+                       else
                           if ( .NOT. onEdges ) then
                              call Interp_Field ( grid, lon3d, lat3d, lev3d, im*jm*km,  &
                              im_e, jm_e, km_e, inField, 0, outField, conf, rc, amiss=undef )
@@ -1075,7 +1075,7 @@
                     end if
                  else
                     call unitConvert(im,jm,km,scaleFactor(iv),offSet(iv),undef,outField)
-                 end if 
+                 end if
               else
                  if (index(inVars(iv), ";") .gt. 0) then
                     call unitConvert(im,jm,1,scaleFactor(iv),offSet(iv),undef,outField)
@@ -1087,7 +1087,7 @@
 !            end if
 
 !           Write interpolate variable to output file
-!           -----------------------------------------           
+!           -----------------------------------------
 !           print *, "DEBUG: write"
             if (index(outVars(iv), ";") .gt. 0) then
                name_pos = index(trim(outVars(iv)), ';')
@@ -1097,7 +1097,7 @@
 
                if (.not. eta .and. doSubset) then
 
-                  allocate(vOutField(im,jm,nLevs), stat=rc) 
+                  allocate(vOutField(im,jm,nLevs), stat=rc)
                   if (rc /= 0) call die (myNewName, 'cannot allocate vOutField')
 
                   dl = 8.*atan(1.0) / float(im)
@@ -1129,7 +1129,7 @@
                   deallocate(tmp, tmp2)
 
                   if ((lon_o(1) .ge. 0 .and. lon_e(1) .lt. 0)  .or.   &
-                      (lon_o(1) .lt. 0 .and. lon_e(1) .ge. 0) )  then 
+                      (lon_o(1) .lt. 0 .and. lon_e(1) .ge. 0) )  then
                      call lon_shift(outField, im, jm, km)
                      call lon_shift(vOutField, im, jm, km)
                   end if
@@ -1142,8 +1142,8 @@
                   do j=1,jm
                   do i=1,im
                      x(i,j) = outField(i,j,k)
-                  enddo 
-                  enddo 
+                  enddo
+                  enddo
 #if defined(HDFEOS)
 !                 print *, "DEBUG: About to call downbit."
                   call ESMF_CFIODownBit(x,xr,nbits,undef=undef,rc=rc)
@@ -1151,22 +1151,22 @@
                   do j=1,jm
                   do i=1,im
                      outField(i,j,k) = xr(i,j)
-                  enddo 
-                  enddo 
+                  enddo
+                  enddo
                   do j=1,jm
                   do i=1,im
                      x(i,j) = vOutField(i,j,k)
-                  enddo 
-                  enddo 
+                  enddo
+                  enddo
 #if defined(HDFEOS)
                      call ESMF_CFIODownBit(x,xr,nbits,undef=undef, rc=rc)
 #endif
                   do j=1,jm
                   do i=1,im
                   vOutField(i,j,k)  = xr(i,j)
-                  enddo 
-                  enddo 
-                  enddo 
+                  enddo
+                  enddo
+                  enddo
                   deallocate(x, xr)
                end if
 #if defined(HDFEOS)
@@ -1174,7 +1174,7 @@
                                       doComp=doComp,doChunk=doChunk,rc=rc)
                call ESMF_CFIOVarWrite(cfio_out,vWind,vOutField,curDate,curTime, &
                                       doComp=doComp,doChunk=doChunk,rc=rc)
-#else 
+#else
                call ESMF_CFIOVarWrite(cfio_out,uWind,outField,curDate,curTime, rc=rc)
                call ESMF_CFIOVarWrite(cfio_out,vWind,vOutField,curDate,curTime, rc=rc)
 #endif
@@ -1202,7 +1202,7 @@
 #if defined(HDFEOS)
 !                 print *, "DEBUG: About to call downbit."
                   call ESMF_CFIODownBit(x,xr,nbits,undef=undef, rc=rc)
-!                 print *, "DEBUG: rc =",rc               
+!                 print *, "DEBUG: rc =",rc
 #endif
                do j=1,jm
                do i=1,im
@@ -1216,7 +1216,7 @@
 #if defined(HDFEOS)
              call ESMF_CFIOVarWrite(cfio_out,outVars(iv),outField,curDate,curTime, &
                                       doComp=doComp,doChunk=doChunk,rc=rc)
-#else  
+#else
              call ESMF_CFIOVarWrite(cfio_out,outVars(iv),outField,curDate,curTime, rc=rc)
 #endif
 !            print *, "DEBUG: Write ", outVars(iv), " rc=",rc
@@ -1228,7 +1228,7 @@
             else
                deallocate( inField, outField )
             end if
-            
+
          end do loop_var  ! variables
 
         if (doComputing) deallocate(wz,slp,tmpu,rh)
@@ -1244,7 +1244,7 @@
         if ( curTime .ge. 240000 ) then
            curTime = curTime - 240000
            curDate = incymd(curDate, 1)
-           exit 
+           exit
         end if
         if ( curTime .gt. mod(hhmmss(it)+timinc, 240000) ) then
              exit
@@ -1290,7 +1290,7 @@ CONTAINS
 !BOP
 !
 ! !IROUTINE:  Init_ --- Parses command line and loads resource file
-! 
+!
 ! !INTERFACE:
 !
    subroutine Init_ ( mFiles, nFiles, inFiles, outFile, cvsFile,&
@@ -1300,7 +1300,7 @@ CONTAINS
                       outPrec, date, inc_hhmmss, startTime, outVarsgc,   &
 		      longName, cfioStandardName, onEdges, doSubset,     &
                       oneStep, doComp, doChunk, nPsfs, prsFiles, nbit,   &
-                      tSteps, format, ncep72 ) 
+                      tSteps, format, ncep72 )
 
 !
 ! !USES:
@@ -1308,7 +1308,7 @@ CONTAINS
    Implicit NONE
 
 !
-! !INPUT PARAMETERS: 
+! !INPUT PARAMETERS:
 !
 
       integer, intent(in)  :: mFiles           !  Max. number of input files as
@@ -1322,8 +1322,8 @@ CONTAINS
 
       integer, intent(out)          :: nFiles       !  Actual number of input files
       character(len=*), intent(out) :: inFiles(:)   !  Input file names
-      character(len=*), intent(out) :: outFile      !  Output file name 
-      character(len=*), intent(out) :: cvsFile      !  Output file name 
+      character(len=*), intent(out) :: outFile      !  Output file name
+      character(len=*), intent(out) :: cvsFile      !  Output file name
 
 
       integer, intent(out)  :: im              !  zonal dimension
@@ -1336,7 +1336,7 @@ CONTAINS
       real, pointer         :: lev(:)          ! levels in hPa (km)
       real, pointer         :: Levs(:)         ! actual levels
       integer, intent(out)  :: nLevs           ! actual number of levels
-      
+
 
       integer,          intent(out) :: nVars        ! Actual number of variables
       character(len=*), intent(out) :: inVars(:)    ! Input  variable names (nVars)
@@ -1344,8 +1344,8 @@ CONTAINS
       character(len=*), intent(out) :: outUnits(:)  ! Units of output variables (nVars)
                                                ! Unit conversion factors:
                                                !   OUT = scaleFactor * IN + addOffset
-    
-      real, intent(out) :: scaleFactor(:)      ! scaling (nVars) 
+
+      real, intent(out) :: scaleFactor(:)      ! scaling (nVars)
       real, intent(out) :: addOffset(:)        ! offset (nVars)
       integer, intent(out) :: isPos(:)         ! Do positive check
       logical, intent(out) :: eta              ! eta or lcv file
@@ -1358,13 +1358,13 @@ CONTAINS
 
       character(len=*), intent(out) :: outVarsgc(:) ! output variable names (nVars)
       character(len=*), intent(out) :: longName(:)  ! output variable names (nVars)
-      character(len=*), intent(out) :: cfioStandardName(:)  ! output cfio standard  names 
+      character(len=*), intent(out) :: cfioStandardName(:)  ! output cfio standard  names
 
       integer, intent(out)          :: outPrec ! Output file precision:
                                                ! 0 = 32 bits,  1 = 6 4bits
-      integer, intent(out)          :: date        ! User specified date   
-      integer, intent(out)          :: inc_hhmmss  !User specified increment hours(hhmmss)   
-      integer, intent(out)          :: startTime   !User specified increment hours(hhmmss)   
+      integer, intent(out)          :: date        ! User specified date
+      integer, intent(out)          :: inc_hhmmss  !User specified increment hours(hhmmss)
+      integer, intent(out)          :: startTime   !User specified increment hours(hhmmss)
 
       integer, intent(out)          :: nPsfs       !number of pre files
       character(len=*), intent(out) :: prsFiles(mFiles) ! output variable names (nVars)
@@ -1373,10 +1373,10 @@ CONTAINS
       character(len=*), intent(out) :: format           ! output format (GrADS/HDF/HDFEOS)
       logical,intent(out)           :: ncep72      ! use NCEP-like levels (but augmented to 72)
 
-! !DESCRIPTION: This routine initializes {\tt lcv2prs}. It parses the command 
+! !DESCRIPTION: This routine initializes {\tt lcv2prs}. It parses the command
 !               and loads necessary information from the resource file.
 !
-! !REVISION HISTORY: 
+! !REVISION HISTORY:
 !
 ! 01May2001  da Silva  Initial design and prologue.
 ! 12May2001  da Silva  Initial code.
@@ -1390,7 +1390,7 @@ CONTAINS
 
    character(len=255)   rcfile, Vars(mVars), tmp, tmp1
    character(len=64)   inType
-   character(len=256)  usrHistory, usrConvention, usrInstitution 
+   character(len=256)  usrHistory, usrConvention, usrInstitution
    character(len=256)  usrReferences, usrComment, usrSource
    character(len=256)  usrTitle, usrContact
 
@@ -1398,7 +1398,7 @@ CONTAINS
    real levels(mKm)
 
    integer i, j, n, nVars0, rc, ios
-   integer name_pos, name_len, iv   
+   integer name_pos, name_len, iv
    real    xWest, xSouth, deltaPhi, deltaj, p
    logical :: debug = .false.
 
@@ -1485,7 +1485,7 @@ CONTAINS
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
          call GetArg ( iArg, argv )
-         read(argv,*) startTime 
+         read(argv,*) startTime
       else if(index(argv,'-rc') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
@@ -1601,8 +1601,8 @@ print *, "lcv2prs - Convert fvDAS Output Files to Pressure Coordinates"
 print *, "-----------------------------------------------------------"
 print *
 
-   if ( outPrec .eq. 32 ) outPrec = 0   
-   if ( outPrec .eq. 64 ) outPrec = 1   
+   if ( outPrec .eq. 32 ) outPrec = 0
+   if ( outPrec .eq. 64 ) outPrec = 1
 
     if ( nFiles .eq. 0 ) call die (myNewName, 'no files specified')
 
@@ -1623,15 +1623,15 @@ print *
 !  Load resource file
 !  ------------------
    call i90_loadf ( rcfile, rc )
-   if ( rc .ne. 0 ) then 
-       if ( im > 0 ) then 
+   if ( rc .ne. 0 ) then
+       if ( im > 0 ) then
          allocate ( lon(im), stat=ios )
          if ( xWest .eq. -999 ) xWest = -180.
          do i = 1, im
             lon(i) = xWest + (i-1) * 360. / im
          end do
        end if
-       if ( jm > 0 ) then 
+       if ( jm > 0 ) then
          allocate ( lat(jm), stat=ios )
          if ( xSouth .eq. -999 ) xSouth = -90.
          if ( deltaPhi .eq. -999 ) then
@@ -1672,7 +1672,7 @@ print *
    if ( deltaPhi .eq. -999 ) then
       call i90_label ( 'delta_phi:', rc )
       deltaPhi = i90_gfloat(rc)
-      if ( rc .ne. 0 ) then 
+      if ( rc .ne. 0 ) then
          deltaj = 180. / ( jm - 1 )
       else
          deltaj = deltaPhi
@@ -1692,7 +1692,7 @@ print *
          levels(km) = p
       end do
    end if
-          
+
    if ( im .le. 0 ) call die(myNewName, 'invalid im<0')
    if ( jm .le. 0 ) call die(myNewName, 'invalid jm<0')
 
@@ -1780,7 +1780,7 @@ print *
                 cycle
              end if
              call i90_gtoken ( outUnits(n), rc )
-                                                                                       
+
              if(rc==0) then
                 call i90_gtoken ( inVars(n), rc )
                 if(rc==0) scaleFactor(n) = i90_gfloat(rc)
@@ -1793,7 +1793,7 @@ print *
         end do
 
    end do
-     
+
    iv = 1
    do i = 1, nVars
       if ( index(trim(outVars(i)), ';' ) .gt. 0 ) then
@@ -1814,7 +1814,7 @@ print *
       if ( rc .ne. 0 ) call i90_label ( lowercase(trim(outVarsgc(i))) // ':', rc )
       if ( rc .ne. 0 ) cycle
       call i90_gtoken ( tmp, rc )
-      if ( rc .ne. 0 ) cycle 
+      if ( rc .ne. 0 ) cycle
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1824,7 +1824,7 @@ print *
          end if
          longName(i) = trim(tmp1) // ' ' // trim(tmp)
          tmp1 = longName(i)
-      end do 
+      end do
    end do
 
    cfioStandardName = ''
@@ -1833,7 +1833,7 @@ print *
       if ( rc .ne. 0 ) call i90_label ( 'StandardName:' // lowercase(trim(outVarsgc(i))) // ':', rc )
       if ( rc .ne. 0 ) cycle
       call i90_gtoken ( tmp, rc )
-      if ( rc .ne. 0 ) cycle 
+      if ( rc .ne. 0 ) cycle
       tmp1 = trim(tmp)
       do j = 1, 128
          call i90_gtoken ( tmp, rc )
@@ -1843,14 +1843,14 @@ print *
          end if
          cfioStandardName(i) = trim(tmp1) // ' ' // trim(tmp)
          tmp1 = cfioStandardName(i)
-      end do 
+      end do
    end do
 
    call i90_label ('history:', rc)
    if ( rc .ne. 0 ) then
       history = "File written by CFIO"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1868,7 +1868,7 @@ print *
    if ( rc .ne. 0 ) then
       convention = "CF-1.0"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1886,7 +1886,7 @@ print *
    if ( rc .ne. 0 ) then
       institution = "Global Modeling and Assimilation Office, NASA Goddard Space Flight Center, Greenbelt, MD 20771"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1904,7 +1904,7 @@ print *
    if ( rc .ne. 0 ) then
       references = "http://gmao.gsfc.nasa.gov"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1916,13 +1916,13 @@ print *
          tmp1 = references
       end do
    end if
-   if ( len(trim(usrReferences)) .ge. 1 ) references = usrReferences  
+   if ( len(trim(usrReferences)) .ge. 1 ) references = usrReferences
 
    call i90_label ('comment:', rc)
    if ( rc .ne. 0 ) then
       comment = "First CFIO GEOS version"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1940,7 +1940,7 @@ print *
    if ( rc .ne. 0 ) then
       source = "Global Modeling and Assimilation Office"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1958,7 +1958,7 @@ print *
    if ( rc .ne. 0 ) then
       title = "File written by CFIO"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1970,13 +1970,13 @@ print *
          tmp1 = title
       end do
    end if
-   if ( len(trim(usrTitle)) .ge. 1 ) title = usrTitle   
+   if ( len(trim(usrTitle)) .ge. 1 ) title = usrTitle
 
    call i90_label ('contact:', rc)
    if ( rc .ne. 0 ) then
       contact = "data@gmao.gsfc.nasa.gov"
    else
-      call i90_gtoken ( tmp, rc ) 
+      call i90_gtoken ( tmp, rc )
       tmp1 = trim(tmp)
       do j = 1, 256
          call i90_gtoken ( tmp, rc )
@@ -1988,7 +1988,7 @@ print *
          tmp1 = contact
       end do
    end if
-   if ( len(trim(usrContact)) .ge. 1 ) contact = usrContact 
+   if ( len(trim(usrContact)) .ge. 1 ) contact = usrContact
 
 !......................................................................
 
@@ -2009,8 +2009,8 @@ print *
    if ( nLevs .gt. 0 ) then
       write(*,'(a,i3,/(10x,6f10.2))') '        Levels: ', nLevs,Levs
    else
-      write(*,'(a,i3,/(10x,6f10.2))') '        Levels: ', km,lev(1:km) 
-   end if 
+      write(*,'(a,i3,/(10x,6f10.2))') '        Levels: ', km,lev(1:km)
+   end if
    print *
    write(*,'(a,i3,/(10x,6a10))') '     Variables: ', nVars !,outVars(1:nVars)
 
@@ -2019,7 +2019,7 @@ print *
    print *, &
 '    ------      -----       -----         ------------   ----------   -------------'
    do n = 1, nVars
-      write(*,'(5x,3a12,2f12.5,i12, I12)') outVars(n), outUnits(n), inVars(n), &        
+      write(*,'(5x,3a12,2f12.5,i12, I12)') outVars(n), outUnits(n), inVars(n), &
                                 scaleFactor(n), addOffset(n), isPos(n)
    end do
    print *
@@ -2027,7 +2027,7 @@ print *
    end subroutine Init_
 
     subroutine Usage_()
-   
+
 print *, "NAME"
 print *, "   lcv2prs  converting/subsetting lcv files."
 print *
@@ -2158,7 +2158,7 @@ print *
          integer, intent(in)            :: cvsV_yes     ! data source
          character(len=256), intent(out) :: title_cvs   ! meta data title
          character(len=256), intent(out) :: source_cvs  ! data source
-       
+
          integer :: t_len, ii
 
          t_len = 254
@@ -2174,7 +2174,7 @@ print *
          else
             title_cvs = title(1:t_len)
          end if
-                                                                                      
+
          t_len = 254
          do ii = 254, 1, -1
             if (source(ii:ii) .eq. ' ' .or. ichar(source(ii:ii)) .le. 0) then
@@ -2191,7 +2191,7 @@ print *
 
       end subroutine getTag
       subroutine get_coords(im,jm,km,lon,lat,lev,lon3d,lat3d,lev3d)
-                                                                                                                            
+
       integer,        intent(in)  :: im
       integer,        intent(in)  :: jm
       integer,        intent(in)  :: km
@@ -2206,11 +2206,11 @@ print *
 !     interfacing with m_interp.
 !
       character(len=*), parameter :: myNewName = 'get_coords'
-                                                                                                                            
+
       integer i, j, k, m
-                                                                                                                            
+
       m = 0
-                                                                                                                            
+
       do k = 1, km
          do j = 1, jm
             do i = 1, im
@@ -2221,7 +2221,7 @@ print *
             end do
          end do
       end do
-                                                                                                                            
+
     end subroutine get_coords
 
    subroutine lon_shift(field, im, jm, km)
@@ -2238,7 +2238,7 @@ print *
       real, intent(inout) ::     field (im, jm, km)
       integer i, j, k
       real tmp
-                                                                                                       
+
       do k = 1, km
          do j = 1, jm
             do i = 1, im/2
@@ -2248,7 +2248,7 @@ print *
             enddo
          enddo
       enddo
-                                                                                                       
+
       end subroutine lon_shift
 
       subroutine checkVar(var1, var2, n2, rc)
@@ -2262,14 +2262,14 @@ print *
 
 ! !OUTPUT PARAMETERS:
       integer, intent(out) :: rc
-      
-      
+
+
 ! Work vars
       integer :: j
 
       rc = -1
       do j = 1, n2
-         if(trim(uppercase(var1)) .eq. trim(uppercase(var2(j)))) then 
+         if(trim(uppercase(var1)) .eq. trim(uppercase(var2(j)))) then
             rc = 0
             return
          end if
@@ -2277,7 +2277,7 @@ print *
 
       do j = 1, n2
          if ( (index(var1,";") .gt. 0) .and.     &
-           index(uppercase(var1),trim(uppercase(var2(j)))) .gt. 0) then 
+           index(uppercase(var1),trim(uppercase(var2(j)))) .gt. 0) then
             rc = 0
             return
          end if
@@ -2297,14 +2297,14 @@ print *
 
 ! !OUTPUT PARAMETERS:
       integer, intent(out) :: rc
-      
-      
+
+
 ! Work vars
       integer :: j
 
       rc = -1
       do j = 1, n2
-         if(trim(var1) .eq. trim(var2(j))) then 
+         if(trim(var1) .eq. trim(var2(j))) then
             rc = 0
             return
          end if
@@ -2312,7 +2312,7 @@ print *
 
       do j = 1, n2
          if ( (index(var1,";") .gt. 0) .and.     &
-           index(var1,trim(var2(j))) .gt. 0) then 
+           index(var1,trim(var2(j))) .gt. 0) then
             rc = 0
             return
          end if
@@ -2331,7 +2331,7 @@ print *
       integer :: km
       integer, pointer :: levNums(:)
       real, pointer :: inField(:,:,:)
-                                                                                                      
+
 ! !OUTPUT PARAMETERS:
       real, pointer :: outField(:,:,:)
 
@@ -2356,7 +2356,7 @@ print *
 ! !DESCRIPTION:
 !
 ! !INTERFACE:
-                                                                                           
+
     subroutine getClass_(label,outVars,nVars,stat)
       use m_die,only : die,perr
       use m_inpak90,only : i90_label,i90_gLine
@@ -2365,22 +2365,22 @@ print *
       character(len=*),dimension(:),intent(out) :: outVars
       integer,intent(out) :: nVars
       integer,optional,intent(out) :: stat
-                                                                                           
+
 ! !REVISION HISTORY:
 !       24Jan05 - Jing Guo <guo@gmao.gsfc.nasa.gov>
 !               - initial prototype/prolog/code
 !EOP ___________________________________________________________________
-                                                                                           
+
   character(len=*),parameter :: myNewName_=myNewName//'::getClass_'
   integer :: n
   integer :: rc,ier     ! rc is returned, but not used for now
-                                                                                           
+
   if(present(stat)) stat=0
   nVars=0
   outVars=''
-                                                                                           
+
         ! locate the label
-                                                                                           
+
   call i90_label(label,rc)
   if(rc/=0) then
     call perr(myNewName_,'not found, "'//trim(label)//'"')
@@ -2388,9 +2388,9 @@ print *
     stat=-1     ! -1 for less than expected
     return
   endif
-                                                                                           
+
         ! if the label is located, get tokens one at a time
-                                                                                           
+
   call getaRow_(outVars(nVars+1:),n,ier,rc)
   do while(ier==1)      ! expecting more takens in the next line
     nVars=nVars+n
@@ -2405,30 +2405,30 @@ print *
 !________________________________________
         ! ier== 0 for normal ending and
         !    ==-1 for buffer (i.e. outVars(:)) overflow.
-                                                                                           
+
   select case(ier)
   case(0)
         ! this is where the label is found and a line of input buffer is
         ! processed with either 0 or more tokens.  Everything should be
         ! fine.
-                                                                                           
+
   case(-1)
         ! this is where some extra token presents, but the buffer is
         ! not sufficient (size(outVars)).  A warning message has been
         ! sent, one may choose to add additional message here.
-                                                                                           
+
     call perr(myNewName_,'insufficient buffer for "'//trim(label)//'"')
     if(.not.present(stat)) call die(myNewName_)
     stat=+1     ! +1 for extra
-                                                                                           
+
   case default
         ! this is an unexpected error.  Something is wrong in the logic.
-                                                                                           
+
     call die(myNewName_,'unexpected ier value',ier)
   endselect
-                                                                                           
+
 end subroutine getClass_
-                                                                                           
+
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! NASA/GSFC, Global Modeling and Assimilation Office, 900.3, GEOS/DAS  !
 !BOP -------------------------------------------------------------------
@@ -2438,7 +2438,7 @@ end subroutine getClass_
 ! !DESCRIPTION:
 !
 ! !INTERFACE:
-                                                                                           
+
     subroutine getaRow_(outvars,count,ier,rc)
       use m_inpak90,only : i90_gtoken
       use m_die,only : perr
@@ -2451,34 +2451,34 @@ end subroutine getClass_
                                 !    ==+1; more line(s) to get
                                 !    ==-1; buffer overflow (outVars(:))
       integer,intent(out) :: rc         ! inpak90 processing code
-                                                                                           
+
 ! !REVISION HISTORY:
 !       ddMmm04 - Baoyu Yin <yin@gmao.gsfc.nasa.gov>
 !               - original single input line version
 !       24Jan05 - Jing Guo <guo@gmao.gsfc.nasa.gov>
 !               - initial prototype/prolog/code
 !EOP ___________________________________________________________________
-                                                                                           
+
   character(len=*),parameter :: myNewName_=myNewName//'::getaRow_'
-                                                                                           
+
   integer :: nV,mV
   integer :: mrc
   character(len=len(outVars)) :: var
-                                                                                           
+
 ! Original comments for historical information:
-                                                                                           
+
 ! here  Vars(n) = @tavg2d_slv_x
 ! mVars = 256, nVars = 0
 ! character(len=255) var
 ! character(len=*), intent(out) :: outVars(:)
 !   label = 'VarClass*'//trim(Vars(n)(2:))//':'
-                                                                                           
+
   ier=0
   count=0
-                                                                                           
+
         ! get tokens until there is no token left (mrc/=0) or the output
         ! buffer is all filled (nV>mV).
-                                                                                           
+
   mV=size(outVars)
   nV=0
   do while(nV<mV)
@@ -2488,7 +2488,7 @@ end subroutine getClass_
     endif
     nV = nV + 1
   end do
-                                                                                           
+
   if(nV>0) then
                 ! something has been read
     if(outVars(nV)=='\' .or. outVars(nV)=='&') then
@@ -2497,9 +2497,9 @@ end subroutine getClass_
       ier=1             ! signal the parent.
     endif
   endif
-                                                                                           
+
   count=nV              ! the actual token count
-                                                                                           
+
         ! Check for insufficient buffer condition, if there is still
         ! something left in the input line.
   call i90_gtoken ( var, rc )
@@ -2509,13 +2509,13 @@ end subroutine getClass_
     return
   endif
 end subroutine getaRow_
-                                                                                           
+
 subroutine compHght(cfio_in, curDate, curTime, delp, im, jm, km, lon_min, wz, slp, tmpu, rh, rc,cfio_in2)
 
 ! HISTORY:
 !  04Dec2009 Todling  fix dims on wz and peln
 !  10Jun2016 Todling  truncate rh similarly with how GCM truncates so-called
-!                     rh2, but instead of allow rh to reach values up to 1.02 do 
+!                     rh2, but instead of allow rh to reach values up to 1.02 do
 !                     not allow it to be larger than 1.0 (as done in files we get
 !                     from ECMWF)
 !
@@ -2530,12 +2530,12 @@ subroutine compHght(cfio_in, curDate, curTime, delp, im, jm, km, lon_min, wz, sl
      integer, intent(in) :: km
      real, intent(in)    :: lon_min
      real, intent(in)    :: delp(im,jm,km)
- 
+
      real, intent(out) :: wz(im,km+1,jm)
      real, intent(out) :: slp(im,jm)
      real, intent(out) :: rh(im,jm,km)
      real, intent(out) :: tmpu(im,jm,km)
-     integer, intent(out) :: rc      
+     integer, intent(out) :: rc
 
      real, pointer :: phis(:,:)
      real, pointer :: phis3d(:,:,:)
@@ -2584,7 +2584,7 @@ subroutine compHght(cfio_in, curDate, curTime, delp, im, jm, km, lon_min, wz, sl
      else
          tmpu = theta*pkz / (1. + zvir*sphu)
      endif
-                          
+
       do k = 1, km
          do j = 1, jm
             do i = 1, im
@@ -2592,30 +2592,30 @@ subroutine compHght(cfio_in, curDate, curTime, delp, im, jm, km, lon_min, wz, sl
                tfield(i,j) = tmpu(i,j,k)
             end do
          end do
-                          
+
           qsfield = GEOS_Qsat(tfield, pmk, PASCALS=.true.)
-                          
+
          do j = 1, jm
             do i = 1, im
                rh(i,j,k) = qsfield(i,j)
             end do
          end do
      end do
-                          
+
      rh = 100 * MAX(MIN( sphu/rh , 1.00 ),0.0) ! note: GEOS uses 1.02 instead of 1.0
      call comp_slp(im,jm,km,theta,phis,delp,            &
                   grid%pe,grid%pm,grav,pkz,slp)
      call comp_hght(ptop,im,jm,km,kappa,cpm,delp, phis, theta, wz)
      wz = wz / grav
-     deallocate(phis, theta, sphu) 
+     deallocate(phis, theta, sphu)
 end subroutine compHght
 
       subroutine geopm(ptop,pk,delp,im,jm, km,jfirst, jlast, akap,id)
-                                                                                                     
+
       implicit none
-                                                                                                     
+
 ! !INPUT PARAMETERS:
-                                                                                                     
+
       integer,     intent(in)  ::  im
       integer,     intent(in)  ::  jm
       integer,     intent(in)  ::  km
@@ -2625,10 +2625,10 @@ end subroutine compHght
       real,        intent(in)  ::  akap
       real,        intent(in)  ::  ptop
       real,        intent(in)  ::  delp(im,jm,km)
-                                                                                                     
+
 ! !OUTPUT PARAMETERS
       real,        intent(out) ::  pk(im,jm,km+1)
-                  
+
 ! !REVISION HISTORY:
 !
 !   25Apr2007 Todling  Removed pt(theta) from arg list: not used
@@ -2638,26 +2638,26 @@ end subroutine compHght
       integer i, j, k
       real p2d(im,km+1)
       real ptk
-                  
+
 #if ( defined OpenMP )
 !$omp  parallel do
 !$omp& default(shared)
 !$omp& private(i,j,k,p2d,ptk, pk2)
 #endif
-                                                                                                     
+
 #if ( defined SGI )
 !$doacross   local(i,j,k,p2d,ptk, pk2)
 #endif
-                                                                                                     
+
       do 1000 j=jfirst,jlast
-                                                                                                     
+
         ptk  = ptop ** akap
-                                                                                                     
+
         do i=1,im
           p2d(i,1) = ptop
           pk2(i,1) = ptk
         enddo
-                                                                                                     
+
 ! Top down
         do k=2,km+1
           do i=1,im
@@ -2665,9 +2665,9 @@ end subroutine compHght
             pk2(i,k) = p2d(i,k) ** akap
           enddo
         enddo
-                                                                                                     
+
 ! Bottom up
-                                                                                                     
+
         if(id .ne. 0) then
           do k=1,km+1
             do i=1,im
@@ -2675,15 +2675,15 @@ end subroutine compHght
             enddo
           enddo
         endif
-                                                                                                     
+
 1000  continue
-                                                                                                     
+
       return
       end subroutine geopm
-                                                                                                     
+
       subroutine comp_hght(ptop,im,jm,km,akap,cpm,delp,phis,pt,wz)
-                                                                                                     
-                                                                                                     
+
+
 ! !INPUT PARAMETERS:
       real,        intent(in)  :: ptop
       integer,     intent(in)  :: im
@@ -2694,126 +2694,126 @@ end subroutine compHght
       real,        intent(in)  :: delp(im, jm, km)
       real,        intent(in)  :: phis(im, jm)
       real,        intent(in)  :: pt(im, jm, km)
-                                                                                                     
+
 ! !OUTPUT PARAMETERS
       real,        intent(out) :: wz(im, km+1, jm)
-                                                                                                     
+
 ! !DESCRIPTION:
 !     Compute HGHT
-                                                                                                     
+
 ! !LOCAL:
       real pk2(im,km+1)
       integer i, j, k
       real p2d(im,km+1)
       real ptk
-                                                                                                     
+
 #if ( defined OpenMP )
 !$omp  parallel do
 !$omp& default(shared)
 !$omp& private(i,j,k,p2d,ptk, pk2)
 #endif
-                                                                                                     
+
 #if ( defined SGI )
 !$doacross   local(i,j,k,p2d,ptk, pk2)
 #endif
-                                                                                                     
+
       do j = 1, jm
          ptk  = ptop ** akap
-                                                                                                     
+
          do i=1,im
             p2d(i,1) = ptop
             pk2(i,1) = ptk
             wz(i,km+1,j) = phis(i,j)
          end do
-                                                                                                     
+
          do k=2,km+1
           do i=1,im
             p2d(i,k)  = p2d(i,k-1) + delp(i,j,k-1)
             pk2(i,k) = p2d(i,k) ** akap
           enddo
          enddo
-                                                                                                     
-                                                                                                     
+
+
          do k=km,1,-1
             do i=1,im
                wz(i,k,j) = wz(i,k+1,j) + cpm*pt(i,j,k)*(pk2(i,k+1)-pk2(i,k))
             end do
          end do
-                                                                                                     
-                                                                                                     
+
+
        end do
-                                                                                                     
+
        end subroutine comp_hght
 
       subroutine pkez(im, jm, km, jfirst, jlast, ptop,  &
                      pe, pk, akap,  ks, peln, pkz, eta)
 !
 ! eta: true on eta coordinate; pk needs to be updated
-                                                                                                     
+
 ! true:
 ! Input:  pe
 ! Output: pk, pkz, peln
-                                                                                                     
+
 ! false:
 ! Input:  pk, pe
 ! Output: pkz
-                                                                                                     
+
 ! WS 99.05.19 : Added im, jm, km as arguments
 ! WS 99.07.27 : Limited region to jfirst:jlast
-                                                                                                     
+
       implicit none
-                                                                                                     
+
 ! WS 99.05.19 : Removed fvcore.h
-                  
+
       integer im, jm, km, jfirst, jlast
       real  pe(im, km+1, jm)
       real  pk(im, jm, km+1)
       real  pkz(im, jm, km)
       real peln(im, km+1, jm)
       real ptop
-                  
+
       integer ks
       logical eta
-                 
+
       real akap
-               
+
 ! Local
       real  pk2(im, km+1)
       real pek
       real lnp
-                                                                                                     
+
       integer i, j, k, j1, jmm0
-                                                                                                     
+
       j1   = max(1,jfirst)
       jmm0 = min(jm,jlast)
-                                                                                                     
+
 #if ( defined OpenMP )
 !$omp  parallel do
 !$omp& default(shared)
 !$omp& private(i,j,k,pek,lnp,pk2)
 #endif
-                                                                                                     
+
 #if ( defined SGI )
 !$doacross   local(i,j,k,pek,lnp,pk2)
 #endif
-                                                                                                     
+
 ! WS 99.07.27 : Limited region to jfirst:jlast
-                                                                                                     
+
 !!!   do 1000 j=1, jm
       do 1000 j=j1, jmm0
-                                                                                                     
+
       if ( eta ) then
-                                                                                                     
+
 ! <<<<<<<<<<< Eta cordinate Coordinate  >>>>>>>>>>>>>>>>>>>
-                                                                                                     
+
       pek =   ptop ** akap
       lnp = log(pe(1,1,j))
-                                                                                                     
+
       do i=1,im
          pk2(i,1)   = pek
          peln(i,1,j) = lnp
       enddo
-                                                                                                     
+
       if(ks .ne. 0) then
       do k=2, ks+1
              pek = pe(1,k,j)**akap
@@ -2823,7 +2823,7 @@ end subroutine compHght
             peln(i,k,j) =  lnp
          enddo
       enddo
-                                                                                                     
+
       do k=1, ks
            pek = (       pk2(1,k+1)   - pk2(1,k))   /   &
                 (akap*(peln(1,k+1,j) - peln(1,k,j)) )
@@ -2831,71 +2831,71 @@ end subroutine compHght
               pkz(i,j,k) = pek
            enddo
       enddo
-                                                                                                     
+
       endif
-                                                                                                     
+
       do k=ks+2,km
          do i=1,im
             pk2(i,k) = pe(i,k,j)**akap
          enddo
       enddo
-                                                                                                     
+
       do i=1,im
          pk2(i,km+1) = pk(i,j,km+1)
-                                                                                                     
+
       enddo
-                                                                                                     
+
       do k=ks+2,km+1
          do i=1,im
             peln(i,k,j) =  log(pe(i,k,j))
          enddo
       enddo
-                                                                                                     
+
       do k=ks+1,km
          do i=1,im
             pkz(i,j,k) = (pk2(i,k+1) - pk2(i,k)) /     &
                         (akap*(peln(i,k+1,j) - peln(i,k,j)) )
          enddo
       enddo
-                                                                                                     
+
       do k=2,km
          do i=1,im
             pk(i,j,k) = pk2(i,k)
          enddo
       enddo
-                                                                                                     
+
       else
-                                                                                                     
+
 ! <<<<<<<<<<< General Coordinate  >>>>>>>>>>>>>>>>>>>
-                                                                                                     
+
       pek =   ptop ** akap
       lnp = log(pe(1,1,j))
-                                                                                                     
+
       do i=1,im
           pk2(i,1) = pek
          peln(i,1,j) = lnp
       enddo
-                                                                                                     
+
       do k=2,km+1
          do i=1,im
             peln(i,k,j) =  log(pe(i,k,j))
              pk2(i,k) =  pk(i,j,k)
          enddo
       enddo
-                                                                                                     
+
         do k=1,km
            do i=1,im
               pkz(i,j,k) = (       pk2(i,k+1) - pk2(i,k) )  /  &
                           (akap*(peln(i,k+1,j) - peln(i,k,j)) )
            enddo
         enddo
-                                                                                                     
+
       endif
 1000  continue
-                                                                                                     
+
       return
       end subroutine pkez
-                                                                                                     
+
       subroutine  comp_slp(im,jm,km,pt,phis,delp,pe,pm,grav,pkz,inField)
       integer,        intent(in)  :: im
       integer,        intent(in)  :: jm
@@ -2908,26 +2908,26 @@ end subroutine compHght
       real,           intent(in)  :: grav
       real,           intent(in)  :: pkz(im,jm,km+1)
       real,           intent(out) :: inField(im,jm,1)
-                                                                                                     
+
       real Hmax, p_offset, p_bot
       integer k_bot, k1, k2
       real t_ref(im,jm), p_ref(im,jm)
-                                                                                                     
+
       Hmax = 8.e3
       p_offset = 150. ! 150 hPa above surface
-                                                                                                     
+
 #if ( defined OpenMP )
 !$omp  parallel do
 !$omp& default(shared)
 !$omp& private(i,j,k,p_bot,k_bot,k1,k2)
 #endif
-                                                                                                     
+
 #if ( defined SGI )
 !$doacross   local(i,j,k,p_bot,k_bot,k1,k2)
 #endif
-                                                                                                     
+
 ! Compute SLP and the  confidence level
-                                                                                                     
+
 ! Find reference temperature by averaging Tv in a couple of
 !  layers above the PBL.
       do j=1,jm
@@ -2952,16 +2952,16 @@ end subroutine compHght
                p_ref(i,j) = ( pe(i,k_bot+1,j) + pe(i,k_bot-1,j) ) / 2.
             end if
          end do
-                                                                                                     
+
       end do
-                                                                                                     
-                                                                                                     
+
+
 ! calculated SLP and extrapolated surface temperature
          call slp_ukmo ( im, jm, T_ref, p_ref, pe(1:im,km+1,1:jm),   &
                         phis(1:im,1:jm)/grav, inField(1:im,1:jm,1) )
-                                                                                                     
+
       end subroutine comp_slp
-                                                                                                     
+
 !-------------------------------------------------------------------------
 !         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
 !-------------------------------------------------------------------------
@@ -2972,30 +2972,30 @@ end subroutine compHght
 ! !INTERFACE:
 !
       subroutine slp_ukmo ( im, jm, T_ref, p_ref, ps, zs, slp )
-                                                                                                     
+
 ! !USES:
 !
       USE m_const, only: grav
       USE m_const, only: rgas
       USE m_const, only: gamma
       Implicit NONE
-               
-               
+
+
 ! !INPUT PARAMETERS:
-               
+
       integer, intent(in)   :: im, jm           ! grid dimensions
-               
+
       real,    intent(in)   :: T_ref(im,jm)     ! Reference virtual temperature (K)
       real,    intent(in)   :: p_ref(im,jm)     ! Reference pressure level (hPa)
       real,    intent(in)   ::    ps(im,jm)     ! surface pressure (hPa)
       real,    intent(in)   ::    zs(im,jm)     ! topographic height (m)
-               
+
 ! !OUTPUT PARAMETERS:
-               
+
       real,    intent(out)  ::   slp(im,jm)     ! sea-level pressure (hPa)
                                                 !   valid at the surface
-               
-                                                                                                     
+
+
 ! !DESCRIPTION: Let's assume that the virtual temperature at the {\em fictious}
 !               layer under the ground is given by
 !  \be
@@ -3030,11 +3030,11 @@ end subroutine compHght
 !
 !EOP
 !-------------------------------------------------------------------------
-                                                                                                     
+
       integer i, j
       real factor, yfactor
       real T_star(im,jm)
-                                                                                                     
+
       factor  = grav / ( Rgas * gamma )
       yfactor = ( Rgas * gamma ) / grav
       do j = 1, jm
@@ -3045,16 +3045,16 @@ end subroutine compHght
                        * (1.0 + gamma*zs(i,j)/T_star(i,j) ) ** factor
          end do
       end do
-                                                                                                     
+
       end subroutine slp_ukmo
-                                                                                                     
+
 subroutine unitConvert(im,jm,km,scaleFactor,offSet,undef,outField)
     integer, intent(in)  ::  im
     integer, intent(in)  ::  jm
     integer, intent(in)  ::  km
     real, intent(in)  ::  scaleFactor
     real, intent(in)  ::  offSet
-    real, intent(in)  ::  undef 
+    real, intent(in)  ::  undef
     real, intent(inOut)  ::  outField(im,jm,km)
 
     do k = 1, km
@@ -3074,7 +3074,7 @@ subroutine readPrs (curDate, curTime, vName, prs, rc)
      character(len=*),intent(in) :: vName
      real, pointer  :: prs(:,:,:)
      integer, intent(out) :: rc
-     
+
      type(ESMF_CFIO) :: cfio_prs, cfio_prs2
      integer :: ipsf
      integer :: i
