@@ -81,9 +81,11 @@ else ()
 
    set (srcs
      m_set_eta.F90 shared_topo_remap.F90
+     # not yet ported to MAPL3 - added for FVdycoreCubed_GridComp (m_topo_remap dependency chain)
+     m_topo_remap.F90 m_dyn.f90 m_const.f90
      )
 
-   esma_add_library(${this} SRCS ${srcs} )
+   esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu)
    target_compile_options(${this} PRIVATE ${flags})
 
 endif ()
