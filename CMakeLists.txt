@@ -1,11 +1,13 @@
 esma_check_if_debug()
 
-option(HERMES_LIGHT "Build light-weighted GMAO_shared library" OFF)
+# HERMES_LIGHT builds only m_set_eta.F90 from GMAO_hermes, which is
+# required by FVdycoreCubed_GridComp on release/MAPL-v3.
+option(HERMES_LIGHT "Build light-weighted GMAO_shared library" ON)
 
-# Only GEOS_Shared is needed on release/MAPL-v3 (required by GEOSgwd_GridComp).
+# Only GEOS_Shared and GMAO_hermes (light) are needed on release/MAPL-v3.
 # Restore remaining subdirs as components are ported to MAPL3.
 esma_add_subdirectories(GEOS_Shared)
-# esma_add_subdirectories(GMAO_hermes)
+esma_add_subdirectories(GMAO_hermes)
 
 # if ( NOT HERMES_LIGHT )
 #
