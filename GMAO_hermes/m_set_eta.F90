@@ -45,7 +45,8 @@
 CONTAINS
 
       subroutine set_eta_r8_ (km, ks, ptop, pint, ak, bk)
-      use, intrinsic :: iso_fortran_env, only : r8 => REAL64, r4 => REAL32
+      use m_realkinds, only : r8 => kind_r8  ! from mpeu
+      use m_realkinds, only : r4 => kind_r4  ! from mpeu
 
 #else
 
@@ -56,6 +57,51 @@ CONTAINS
 #endif
 
       implicit none
+
+! Choices for vertical resolutions are as follows:
+! NCAR: 18, 26, and 30
+! NASA DAO: smoothed version of CCM4's 30-level, 32, 48, 55
+! Revised 32-layer setup with top at 0.4 mb for high horizontal
+! resolution runs. (sjl: 04/01/2002)
+! Revised 55-level eta with pint at 176.93 mb  SJL: 2000-03-20
+!
+! NCEP 64-level sigma and hybrid eta
+
+! NCAR specific
+      real(r8) a18(19),b18(19)              ! CCM3
+      real(r8) a26(27),b26(27)              ! CCM4
+      real(r8) a30(31),b30(31)              ! CCM4
+
+! NASA only
+      real(r8) a01(2),b01(2)                ! to allow single-level utils to rely on sim code
+      real(r8) a30m(31),b30m(31)            ! smoothed CCM4 30-L
+      real(r8) a32(33),b32(33)
+      real(r8) a44(45),b44(45)
+      real(r8) a48(49),b48(49)
+      real(r8) a55(56),b55(56)
+      real(r8) a72(73),b72(73)   ! geos-5
+      real(r8) a91_EC(92),b91_EC(92)   ! Nature EC
+      real(r8) a96(97),b96(97)   ! not sure
+      real(r8) a72_ncep(73),b72_ncep(73)  ! mainly NCEP's 64 with the GMAO-72 top levels
+      real(r8) a144(145), b144(145)
+      real(r8) a132(133), b132(133)
+
+! ECMWF 137L Based levels
+      real(r8) a71(72), b71(72)
+      real(r8) a91(92), b91(92)
+      real(r8) a137(138), b137(138)
+      real(r8) a181(182), b181(182)
+
+! ML Increment Levels
+      integer l181tol41(42)
+
+! Extended model top
+      real(r8) a186(187), b186(187)
+
+! NCEP
+      real(r8) a64(65),b64(65), a64_sig(65),b64_sig(65)
+      real(r8) a127(128),b127(128)
+
       integer ks, k, km
       real(r8) ak(km+1),bk(km+1)
       real(r8) ptop                      ! model top (Pa)
@@ -1247,14 +1293,12 @@ CONTAINS
     subroutine set_eta_r4_ (km, ks, ptop, pint, ak, bk)
 
 #ifdef HERMES
-      use, intrinsic :: iso_fortran_env, only : r8 => REAL64, r4 => REAL32
-
+      use m_realkinds, only : r8 => kind_r8  ! from mpeu
+      use m_realkinds, only : r4 => kind_r4  ! from mpeu
 #else
-
       subroutine set_eta_r8_(km, ks, ptop, pint, ak, bk)
       use shr_kind_mod, only : r8 => shr_kind_r8 ! from gvgcm
       use shr_kind_mod, only : r4 => shr_kind_r4 ! from gvgcm
-
 #endif
       implicit none
       integer ks, k, km
