@@ -2,7 +2,7 @@ module atmOcnIntlayer
 
 ! !USES:
 
-use MAPL
+use MAPL2
 use GEOS_UtilsMod, only: GEOS_QSAT, GEOS_DQSAT
 
 implicit none
