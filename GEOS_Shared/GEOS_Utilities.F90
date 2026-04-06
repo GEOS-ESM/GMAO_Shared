@@ -9,7 +9,7 @@
 
 ! !USES:
 
-  use MAPL_ConstantsMod
+  use MAPL_Constants
   use pFlogger
   use ieee_arithmetic
 
@@ -80,7 +80,7 @@
 
 
       real,    parameter :: ESFAC = MAPL_H2OMW/MAPL_AIRMW
-      real,    parameter :: MAX_MIXING_RATIO = 1.  
+      real,    parameter :: MAX_MIXING_RATIO = 1.
       real,    parameter :: ZEROC   = MAPL_TICE
 
       real,    parameter :: TMINTBL    =  150.0
@@ -194,27 +194,27 @@
 !
 
 ! !DESCRIPTION:  Uses various formulations of the saturation
-!                vapor pressure to compute the saturation specific 
+!                vapor pressure to compute the saturation specific
 !    humidity and, optionally, its derivative with respect to temperature
 !    for temperature TL and pressure PL. If PL is not present
-!    it returns the saturation vapor pressure and, optionally, its derivative. 
+!    it returns the saturation vapor pressure and, optionally, its derivative.
 !
 !    All pressures are in Pascals and all temperatures in Kelvins.
 !
 !    The choice of saturation vapor pressure formulation is controlled by  GEOS_QsatSet.
 !    Three choices are currently supported: The CAM formulation,
 !    Murphy and Koop (2005, QJRMS), and the Staar formulation from NSIPP-1.
-!    The default is Starr. All three are valid up to 333K. Above the 
+!    The default is Starr. All three are valid up to 333K. Above the
 !    freezing point, GEOS_QsatIce returns values at the freezing point.
 !    Murphy and Koop is valid down to 150K, for both liquid and ice.
-!    The other two are valid down to 178K for ice and 233K for super-cooled liquid. 
+!    The other two are valid down to 178K for ice and 233K for super-cooled liquid.
 !
 !    Another choice is whether to use the exact formulation
 !    or a table look-up. This can also be controlled with GEOS_QsatSet.
 !    The default is to do a table look-up. The tables are generated
 !    at 0.1C intervals, controlled by parameter DEGSUBS=10.
-! 
-!    
+!
+!
 !EOPI
 
 
@@ -351,7 +351,7 @@
          real, optional,    intent(OUT):: DQ(:)
          real    :: QS(SIZE(TL,1))
          integer :: I
-         real    :: TI,W  
+         real    :: TI,W
          real    :: TT
          real    :: DDQ
          real    :: DD
@@ -375,7 +375,7 @@
          real, optional,    intent(OUT):: DQ(:,:)
          real    :: QS(SIZE(TL,1),SIZE(TL,2))
          integer :: I, J
-         real    :: TI,W  
+         real    :: TI,W
          real    :: TT
          real    :: DDQ
          real    :: DD
@@ -401,7 +401,7 @@
          real, optional,    intent(OUT):: DQ(:,:,:)
          real    :: QS(SIZE(TL,1),SIZE(TL,2),SIZE(TL,3))
          integer :: I, J, K
-         real    :: TI,W  
+         real    :: TI,W
          real    :: TT
          real    :: DDQ
          real    :: DD
@@ -470,7 +470,7 @@
 !
 
 ! !DESCRIPTION:  Uses various formulations of the saturation
-!                vapor pressure to compute the saturation specific 
+!                vapor pressure to compute the saturation specific
 !    humidity for temperature TL and pressure PL.
 !
 !    For temperatures <= TMIX (-20C)
@@ -493,11 +493,11 @@
 !    If UTBL is true, tabled values of the saturation vapor pressures
 !    are used. These tables are automatically generated at a 0.1K resolution
 !    for whatever vapor pressure formulation is being used.
-! 
-!    
+!
+!
 !EOPI
-    
-       
+
+
   function QSAT0(TL,PL,RAMP,PASCALS,DQSAT) result(QSAT)
     real,   intent(IN) :: TL, PL
     logical, optional, intent(IN) :: PASCALS
@@ -708,15 +708,15 @@
 
 ! !DESCRIPTION:  Differentiates the approximations used
 !                by GEOS_Qsat with respect to temperature,
-!    using the same scheme to handle ice. Arguments are as in 
+!    using the same scheme to handle ice. Arguments are as in
 !    GEOS_Qsat, with the addition of QSAT, which is the saturation specific
-!    humidity. This is for economy, in case both qsat and dqsat are 
+!    humidity. This is for economy, in case both qsat and dqsat are
 !    required.
-!                
+!
 
 !EOPI
 
-    
+
     function DQSAT0(TL,PL,RAMP,PASCALS,QSAT) result(DQSAT)
       real,   intent(IN) :: TL, PL
       logical, optional, intent(IN) :: PASCALS
@@ -809,7 +809,7 @@
       end if
 
     end function DQSAT0
-        
+
     function DQSAT1(TL,PL,RAMP,PASCALS,QSAT) result(DQSAT)
       real,              intent(IN) :: TL(:), PL(:)
       logical, optional, intent(IN) :: PASCALS
@@ -894,8 +894,8 @@
          logical, optional, intent(IN) :: USETABLE
          integer, optional, intent(IN) :: FORMULATION
 
-! !DESCRIPTION: GEOS_QsatSet can be used to modify 
-!  the behavior of GEOS_QsatLqu an GEOS_QsatIce 
+! !DESCRIPTION: GEOS_QsatSet can be used to modify
+!  the behavior of GEOS_QsatLqu an GEOS_QsatIce
 !  from its default setting.
 
 !  If {\tt \bf USETABLE} is true, tabled values of the saturation vapor pressures are used.
@@ -903,8 +903,8 @@
 !  vapor pressure formulation is being used. The default is to use the table.
 
 !  {\tt \bf FORMULATION} sets the saturation vapor pressure function.
-!  Three formulations of saturation vapor pressure are supported: 
-!  the Starr code that was in NSIPP-1 (FORMULATION==1), the formulation in  CAM 
+!  Three formulations of saturation vapor pressure are supported:
+!  the Starr code that was in NSIPP-1 (FORMULATION==1), the formulation in  CAM
 !  (FORMULATION==2), and Murphy and Koop (2005, QJRMS) (FORMULATION==3).
 !  The default is FORMULATION=1.
 
@@ -913,10 +913,10 @@
 !  a Qsat function is called.
 
 !EOPI
-       
+
          if(present(UseTable   )) UTBL = UseTable
          if(present(Formulation)) TYPE = max(min(Formulation,3),1)
-         
+
          if(TYPE==3)  then ! Murphy and Koop (2005, QJRMS)
             TMINICE    =  max(TMINTBL,110.)
             TMINLQU    =  max(TMINTBL,123.)
@@ -937,10 +937,10 @@
 
         subroutine ESINIT
 
-! Saturation vapor pressure table initialization. This is invoked if UTBL is true 
-! on the first call to any qsat routine or whenever GEOS_QsatSet is called 
+! Saturation vapor pressure table initialization. This is invoked if UTBL is true
+! on the first call to any qsat routine or whenever GEOS_QsatSet is called
 ! N.B.--Tables are in Pa
- 
+
           integer :: I
           real    :: T
           logical :: UT
@@ -1020,7 +1020,7 @@
 !    real, dimension([:,[:,]] :),  intent(IN   ) ::  YG
 
 ! !DESCRIPTION: Solves tridiagonal system that has been LU decomposed
-!   $LU x = f$. This is done by first solving $L g = f$ for $g$, and 
+!   $LU x = f$. This is done by first solving $L g = f$ for $g$, and
 !   then solving $U x = g$ for $x$. The solutions are:
 ! $$
 ! \begin{array}{rcl}
@@ -1028,21 +1028,21 @@
 ! g_k & = & \makebox[2 in][l]{$f_k - g_{k-1} \hat{a}_{k}$,}  k=2, K, \\
 ! \end{array}
 ! $$
-! and  
+! and
 ! $$
 ! \begin{array}{rcl}
 ! x_K & = & g_K /\hat{b}_K, \\
 ! x_k & = & \makebox[2 in][l]{($g_k - c_k g_{k+1}) / \hat{b}_{k}$,}  k=K-1, 1 \\
 ! \end{array}
 ! $$
-!  
+!
 !  On input A contains the $\hat{a}_k$, the lower diagonal of $L$,
 !   B contains the $1/\hat{b}_k$, inverse of the  main diagonal of $U$,
 !   C contains the $c_k$, the upper diagonal of $U$. The forcing, $f_k$ is
-!   
+!
 !   It returns the
 !   solution in the r.h.s input vector, Y. A has the multiplier from the
-!   decomposition, B the 
+!   decomposition, B the
 !   matrix (U), and C the upper diagonal of the original matrix and of U.
 !   YG is the LM+1 (Ground) value of Y.
 
@@ -1113,7 +1113,7 @@
 ! \begin{array}{rcl}
 ! \hat{b}_1 & = & b_1, \\
 ! \hat{a}_k & = & \makebox[2 in][l]{$a_k / \hat{b}_{k-1}$,}  k=2, K, \\
-! \hat{b}_k & = & \makebox[2 in][l]{$b_k - c_{k-1} \hat{a}_k$,} k=2, K. 
+! \hat{b}_k & = & \makebox[2 in][l]{$b_k - c_{k-1} \hat{a}_k$,} k=2, K.
 ! \end{array}
 ! $$
 !EOP

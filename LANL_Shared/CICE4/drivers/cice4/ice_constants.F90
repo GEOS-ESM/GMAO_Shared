@@ -23,8 +23,8 @@
 !
       use ice_kinds_mod
 #ifdef GEOS
-      use MAPL_ConstantsMod, only: MAPL_TICE, MAPL_ALHS, MAPL_ALHL, &
-                                   MAPL_CAPICE
+      use MAPL_Constants, only: MAPL_TICE, MAPL_ALHS, MAPL_ALHL, &
+                                MAPL_CAPICE
 #endif
 !
 !EOP
@@ -65,7 +65,7 @@
          cp_ocn    = 4218._dbl_kind   ,&! specific heat of ocn    (J/kg/K)
                                         ! freshwater value needed for enthalpy
          depressT  = 0.054_dbl_kind   ,&! Tf:brine salinity ratio (C/ppt)
-         ! moved to RC for tuning  
+         ! moved to RC for tuning
          !dragio    = 0.00536_dbl_kind ,&! ice-ocn drag coefficient
          albocn    = 0.06_dbl_kind      ! ocean albedo
 #endif
@@ -146,7 +146,7 @@
       real (kind=dbl_kind), parameter :: &
          shlat  =  30.0_dbl_kind   ,&! artificial masking edge (deg)
          nhlat  = -30.0_dbl_kind     ! artificial masking edge (deg)
-   
+
       !-----------------------------------------------------------------
       ! numbers
       !-----------------------------------------------------------------
@@ -214,12 +214,12 @@
       ! location of fields for staggered grids
       !-----------------------------------------------------------------
 
-      integer (int_kind), parameter :: &   
-        field_loc_unknown  =  0, & 
-        field_loc_noupdate = -1, & 
-        field_loc_center   =  1, & 
-        field_loc_NEcorner =  2, & 
-        field_loc_Nface    =  3, & 
+      integer (int_kind), parameter :: &
+        field_loc_unknown  =  0, &
+        field_loc_noupdate = -1, &
+        field_loc_center   =  1, &
+        field_loc_NEcorner =  2, &
+        field_loc_Nface    =  3, &
         field_loc_Eface    =  4, &
         field_loc_Wface    =  5
 
@@ -229,11 +229,11 @@
       ! changes of direction across tripole boundary
       !-----------------------------------------------------------------
 
-      integer (int_kind), parameter :: &   
-        field_type_unknown  =  0, & 
-        field_type_noupdate = -1, & 
-        field_type_scalar   =  1, & 
-        field_type_vector   =  2, & 
+      integer (int_kind), parameter :: &
+        field_type_unknown  =  0, &
+        field_type_noupdate = -1, &
+        field_type_scalar   =  1, &
+        field_type_vector   =  2, &
         field_type_angle    =  3
 
       !-----------------------------------------------------------------

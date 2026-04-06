@@ -14,9 +14,9 @@ module GEOS_TopoGetMod
 ! !USES:
 
   use ESMF
-  use MAPL_ConstantsMod, only: MAPL_GRAV
+  use MAPL_Constants, only: MAPL_GRAV
   use MAPL_ErrorHandlingMod
-  use mapl3g_generic, only: MAPL_GridCompGetResource
+  use MAPL, only: MAPL_GridCompGetResource
   
   implicit none
   private

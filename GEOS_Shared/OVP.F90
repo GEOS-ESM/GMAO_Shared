@@ -13,14 +13,11 @@ module OVP
 ! !USES:
 
   use ESMF
-  use MAPL_ConstantsMod, only: MAPL_PI_R8
-  use MAPL_CommsMod, only: MAPL_AM_I_ROOT
-  use mapl3g_Geom_API, only: MAPL_GridGetCoordinates
-  use MAPL_ISO8601_DateTime, only: convert_ISO8601_to_integer_time
+  use MAPL_Constants, only: MAPL_PI_R8
+  use MAPL, only: MAPL_GridGetCoordinates, MAPL_GridCompGet, &
+                  MAPL_GridCompGetResource, MAPL_PackTime,   &
+                  MAPL_AM_I_ROOT
   use MAPL_ErrorHandlingMod
-  use mapl3g_generic, only: MAPL_GridCompGet
-  use mapl3g_generic, only: MAPL_GridCompGetResource
-
   
   implicit none
   private
@@ -228,8 +225,7 @@ contains
        iM = VAL/60
        iS = VAL - iM*60
 !      PRINT "(I2,'h ',I2,'m ',I2,'s  ')",iH,iM,iS
-       write(time_str, '(i2.2,a,i2.2,a,i2.2)') iH, '_', iM, '_', iS
-       VAL = convert_ISO8601_to_integer_time(trim(time_str), _RC)
+       CALL MAPL_PackTime(VAL,iH,iM,iS)
        MASK(I,J) = VAL
      ENDDO
      ENDDO
@@ -309,8 +305,7 @@ contains
      IHR = IHR - EXTRA_DAYS*24
 
    ! Pack the new time
-     write(time_str, '(i2.2,a,i2.2,a,i2.2)') IHR, '_', IMN, '_', ISC
-     ans = convert_ISO8601_to_integer_time(trim(time_str), _RC)
+     call MAPL_PackTime(ans,IHR,IMN,ISC)
 
      OVP_end_of_timestep_hms = ans
 

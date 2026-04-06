@@ -62,7 +62,7 @@
 !
 !********************************************************************
 
-  use MAPL_ConstantsMod, only: MAPL_UNDEFINED_REAL
+  use MAPL_Constants, only: MAPL_UNDEFINED_REAL
 
       implicit none
 

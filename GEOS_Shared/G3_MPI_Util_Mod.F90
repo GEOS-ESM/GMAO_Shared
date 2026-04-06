@@ -1,8 +1,7 @@
 #include "unused_dummy.H"
       module G3_MPI_Util_Mod
 
-      !use MAPL
-      use MAPL_ConstantsMod, only: MAPL_PI
+      use MAPL_Constants, only: MAPL_PI
       implicit none
 
 ! Define Lattice

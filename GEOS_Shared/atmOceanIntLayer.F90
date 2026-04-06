@@ -2,8 +2,8 @@ module atmOcnIntlayer
 
 ! !USES:
 
-use MAPL_ConstantsMod
-use MAPL_CommsMod, only: MAPL_AM_I_ROOT
+use MAPL_Constants
+use MAPL, only: MAPL_AM_I_ROOT
 use GEOS_UtilsMod, only: GEOS_QSAT, GEOS_DQSAT
 
 implicit none

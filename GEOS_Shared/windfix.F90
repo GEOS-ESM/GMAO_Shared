@@ -1,4 +1,3 @@
-      
 #include "MAPL.h"
 
       subroutine windfix ( ua,va,plea,                            &
@@ -6,9 +5,9 @@
                            vintdiva,vintdivb,vintdivc )
 
       use ESMF
-      use MAPL, only: MAPL_CollectiveGather3D, MAPL_CollectiveScatter3d
+      use MAPL2, only: MAPL_CollectiveGather3D, MAPL_CollectiveScatter3d
       use MAPL_ErrorHandlingMod
-      use mapl3g_Geom_API, only: MAPL_GridGetGlobalCellCountPerDim
+      use MAPL, only: MAPL_GridGetGlobalCellCountPerDim
 
       implicit none
 
@@ -225,51 +224,51 @@
       end
 
       SUBROUTINE GETDIV ( U,V,DP,DIV,IM,JM )
-! ********************************************************************          
-! ****                                                            ****          
-! ****  THIS PROGRAM CALCULATES DIVERGENCE                        ****          
-! ****  AT EACH LEVEL FOR A NON-STAGGERED A-GRID                  ****          
-! ****                                                            ****          
-! ****  INPUT:                                                    ****          
-! ****    U ....... ZONAL WIND                                    ****          
-! ****    V ....... MERIDIONAL WIND                               ****          
-! ****    IM ...... NUMBER OF LONGITUDE POINTS                    ****          
-! ****    JM ...... NUMBER OF LATITUDE  POINTS                    ****          
-! ****                                                            ****          
-! ****  OUTPUT:                                                   ****          
-! ****    DIV  (IM,JM) .... DIVERGENCE                            ****          
-! ****                                                            ****          
-! ********************************************************************          
-                                                                                
-      real      U(IM,JM)                                               
-      real      V(IM,JM)                                               
-      real     DP(IM,JM)                                               
-      real    DIV(IM,JM)                                               
-                                                                                
-      real   P1X (IM,JM)                                               
-      real   P1Y (IM,JM)                                               
-      real   TMP1(IM,JM)                                               
-      real   TMP2(IM,JM)                                               
-      real  cosij(IM,JM)                                               
-                                                                                
-      DIMENSION MSGN(2)                                                         
-                                                                                
-      DATA MSGN /-1,1/                                                          
-                                                                                
-! *********************************************************                     
-! ****          INITIALIZATION FOR DIVERGENCE          ****                     
-! *********************************************************                     
-                                                                                
+! ********************************************************************
+! ****                                                            ****
+! ****  THIS PROGRAM CALCULATES DIVERGENCE                        ****
+! ****  AT EACH LEVEL FOR A NON-STAGGERED A-GRID                  ****
+! ****                                                            ****
+! ****  INPUT:                                                    ****
+! ****    U ....... ZONAL WIND                                    ****
+! ****    V ....... MERIDIONAL WIND                               ****
+! ****    IM ...... NUMBER OF LONGITUDE POINTS                    ****
+! ****    JM ...... NUMBER OF LATITUDE  POINTS                    ****
+! ****                                                            ****
+! ****  OUTPUT:                                                   ****
+! ****    DIV  (IM,JM) .... DIVERGENCE                            ****
+! ****                                                            ****
+! ********************************************************************
+
+      real      U(IM,JM)
+      real      V(IM,JM)
+      real     DP(IM,JM)
+      real    DIV(IM,JM)
+
+      real   P1X (IM,JM)
+      real   P1Y (IM,JM)
+      real   TMP1(IM,JM)
+      real   TMP2(IM,JM)
+      real  cosij(IM,JM)
+
+      DIMENSION MSGN(2)
+
+      DATA MSGN /-1,1/
+
+! *********************************************************
+! ****          INITIALIZATION FOR DIVERGENCE          ****
+! *********************************************************
+
       A    = 6.372e6
       pi   = 4.*atan(1.)
       dlon = 2*pi/ im
       dlat =   pi/(jm-1)
-                                                                                
-      C11 =  1.0 / (4.0*A*IM*(1.0-COS(0.5*dlat)))                           
 
-      CX1 =  1.0 / (4.0*A*dlon)                                             
-      CY1 =  1.0 / (4.0*A*dlat)                                             
-                                                                                
+      C11 =  1.0 / (4.0*A*IM*(1.0-COS(0.5*dlat)))
+
+      CX1 =  1.0 / (4.0*A*dlon)
+      CY1 =  1.0 / (4.0*A*dlat)
+
       do j=2,jm-1
          phi = -pi/2.+(j-1)*dlat
       cosphi = cos(phi)
@@ -280,63 +279,63 @@
       cosij(:,1)  = 0.0
       cosij(:,jm) = 0.0
 
-! ********************************************************                     
-! ****          CALCULATE AVERAGE QUANTITIES           ****                     
-! *********************************************************                     
-                                                                                
-      DO j=2,jm-1                                                           
+! ********************************************************
+! ****          CALCULATE AVERAGE QUANTITIES           ****
+! *********************************************************
+
+      DO j=2,jm-1
          i  =im
       DO ip1=1,im
          P1X(i,j) = ( U(ip1,j)+U(i,j) )*( DP(ip1,j)+DP(i,j) )
          i  =ip1
-      ENDDO                                                                     
-      ENDDO                                                                     
+      ENDDO
+      ENDDO
 
-      DO j=1,jm-1                                                           
+      DO j=1,jm-1
       DO I=1,im
          P1Y(I,j) = ( V(I,J+1)*COSIJ(I,J+1)+V(I,j)*COSIJ(I,j) )*( DP(I,J+1)+DP(I,J) )
-      ENDDO                                                                     
-      ENDDO                                                                     
-                                                                                
-! *********************************************************                     
-! ****        CALCULATE HORIZONTAL DIVERGENCE          ****                     
-! *********************************************************                     
-                                                                                
-      DO j=2,jm-1                                                           
+      ENDDO
+      ENDDO
+
+! *********************************************************
+! ****        CALCULATE HORIZONTAL DIVERGENCE          ****
+! *********************************************************
+
+      DO j=2,jm-1
           im1=im
          DO i=1,im
-         TMP1(i,j) = ( P1X(i,j)-P1X(im1,j) )*CX1                               
+         TMP1(i,j) = ( P1X(i,j)-P1X(im1,j) )*CX1
           im1=i
-         ENDDO                                                                     
+         ENDDO
 
          DO   I=1,im
-         TMP2(I,j) = ( P1Y(I,j)  -P1Y(I,j-1) )*CY1                                  
-         DIV (I,j) = ( TMP1(I,j)+TMP2(I,j) )/(cosij(i,j))                        
-         ENDDO                                                                     
-      ENDDO                                                                     
-                                                                                
-! *********************************************************                     
-! ****     CALCULATE HORIZONTAL DIVERGENCE AT POLES    ****                     
-! *********************************************************                     
-                                                                                
-      DO 100 M=1,2                                                              
-      JPOLE  = 1 + (M-1)*(jm-1)                                                
-      JPH    = 1 + (M-1)*(jm-2)                                               
+         TMP2(I,j) = ( P1Y(I,j)  -P1Y(I,j-1) )*CY1
+         DIV (I,j) = ( TMP1(I,j)+TMP2(I,j) )/(cosij(i,j))
+         ENDDO
+      ENDDO
+
+! *********************************************************
+! ****     CALCULATE HORIZONTAL DIVERGENCE AT POLES    ****
+! *********************************************************
+
+      DO 100 M=1,2
+      JPOLE  = 1 + (M-1)*(jm-1)
+      JPH    = 1 + (M-1)*(jm-2)
 
       SUM11  = 0.0
       DO    I=1,im
       SUM11  = SUM11 + P1Y(I,JPH)
-      ENDDO                                                                     
-                                                                                
+      ENDDO
+
       DO  I=1,im
       DIV(I,JPOLE) = - MSGN(M) * C11*SUM11
-      ENDDO                                                                     
-  100 CONTINUE                                                                  
-                                                                                
-      RETURN                                                                    
-      END                                                                       
+      ENDDO
+  100 CONTINUE
+
+      RETURN
+      END
       SUBROUTINE GRADQ (Q,DQDX,DQDY,IM,JM)
-      use MAPL_ConstantsMod, only: MAPL_RADIUS
+      use MAPL_Constants, only: MAPL_RADIUS
 ! *********************************************************
 ! ****                                                 ****
 ! ****  THIS PROGRAM CALCULATES THE HORIZONTAL         ****
@@ -530,14 +529,14 @@
       real*8, allocatable :: wsha(:)
       real*8, allocatable :: wshs(:)
       real*8, allocatable :: work(:)
-    
+
 
       integer             :: i,j,imp
       integer             :: mtrunc,ntrunc
       integer             :: lwsha, lwshs, lwork
       integer             :: l1, l2, maxnt
       integer             :: isym, nt, ierror
- 
+
       real*8  PI
       real*8  RAD
 
@@ -558,7 +557,7 @@
 
       allocate ( wsha(lwsha) )
       allocate ( wshs(lwshs) )
-      allocate ( work(lwork) ) 
+      allocate ( work(lwork) )
 
 ! Transpose the input array
 ! -------------------------
@@ -585,10 +584,10 @@
       nt = 1
 
       call SHAECI(jnp,im,wsha,lwsha,work,lwork,ierror)
-      call SHSECI(jnp,im,wshs,lwshs,work,lwork,ierror) 
+      call SHSECI(jnp,im,wshs,lwshs,work,lwork,ierror)
       call SHAEC(jnp,im,isym,nt,vp,jnp,imp,even,odd,mtrunc,ntrunc,wsha,lwsha,work,lwork,ierror)
       call ISLAPEC(jnp,im,isym,nt,xlmbda,vp,jnp,imp,even,odd,mtrunc,ntrunc,wshs,lwshs,work,lwork,pertrb,ierror)
- 
+
 ! Scale by earth radius
 ! ---------------------
       do j=1,jnp
@@ -596,7 +595,7 @@
       VELP(I,J) = VP(J,I) * RAD * RAD
       enddo
       enddo
- 
+
 !     do j=1,jnp
 !        do i=1,im/2
 !        VELP(I+im/2,jnp-J+1) = VP(J,I) * RAD * RAD
@@ -609,7 +608,7 @@
 ! Remove global mean
 ! ------------------
       CALL ZEROG (VELP,IM,JNP)
- 
+
       deallocate ( vp   )
       deallocate ( even )
       deallocate ( odd  )
@@ -643,14 +642,14 @@
       allocate ( bdts(imp)   )
       allocate ( bdps(jnp)   )
       allocate ( bdpf(jnp)   )
- 
+
       vp(:,:)=0.0
          w(:)=0.0
       bdtf(:)=0.0
       bdts(:)=0.0
       bdps(:)=0.0
       bdpf(:)=0.0
- 
+
 ! Transpose the input array
 ! -------------------------
       do j=1,jnp
@@ -675,7 +674,7 @@
       ELMBDA=0
       PERTRB=0
       IDIMF=M+1
- 
+
       CALL PWSSSP (INTL,TS,TF,M,MBDCND,BDTS,BDTF,PS,PF,N,NBDCND,BDPS, &
                    BDPF,ELMBDA,VP,IDIMF,PERTRB,IERROR,W)
 
@@ -683,7 +682,7 @@
           print *, 'PWSSSP IERROR = ',ierror
           stop
       endif
- 
+
 ! Scale by earth radius
 ! ---------------------
       do j=1,jnp
@@ -691,11 +690,11 @@
       VELP(I,J) = VP(J,I) * RAD * RAD
       enddo
       enddo
- 
+
 ! Remove global mean
 ! ------------------
       CALL ZEROG (VELP,IM,JNP)
- 
+
       deallocate (   vp )
       deallocate (    w )
       deallocate ( bdtf )
@@ -763,7 +762,7 @@
 
       RETURN
       END
- 
+
       subroutine writit ( q,im,jm,lm,ku,lattice )
       use G3_MPI_Util_Mod
       implicit none
@@ -796,11 +795,11 @@
       real    qin(im_in ,jm_in )
       real   qout(im_out,jm_out)
       real q10x10(360*6,180*6)
- 
+
 ! Parse Arbitray Field (im,jm) to 10'x10' Variable
 ! ------------------------------------------------
       call bin_10x10 ( qin,im_in,jm_in,q10x10 )
- 
+
 ! Bin 10'x10' Variable to Output Field (im_out,jm_out)
 ! ----------------------------------------------------
       call averaged_10x10 ( q10x10,qout,im_out,jm_out,undef,msgn )
@@ -858,8 +857,8 @@
       real    lat1,lat2,wy
       real    lonbeg,lonend,lat,coslat
       real    latbeg,latend
-      real    undef 
-      real    pi,dz 
+      real    undef
+      real    pi,dz
       real    lon_cmp(im)
       real    lat_cmp(jm)
       logical defined
@@ -898,7 +897,7 @@
       lonbeg = zlon-dlam(i-1)/2
       endif
       lonend = zlon+dlam(i)  /2
-      
+
       ibeg = 1.+(lonbeg+pi)  /dz
       iend = 1.+(lonend+pi)  /dz
       jbeg = 1.+(latbeg+pi/2)/dz
@@ -978,7 +977,7 @@
       lonbeg = zlon-dlam(i-1)/2
       endif
       lonend = zlon+dlam(i)  /2
-      
+
       ibeg = 1.+(lonbeg+pi)  /dz
       iend = 1.+(lonend+pi)  /dz
       jbeg = 1
@@ -1057,7 +1056,7 @@
       lonbeg = zlon-dlam(i-1)/2
       endif
       lonend = zlon+dlam(i)  /2
-      
+
       ibeg = 1.+(lonbeg+pi)  /dz
       iend = 1.+(lonend+pi)  /dz
       jbeg = 1.+(latbeg+pi/2)/dz
@@ -1200,13 +1199,13 @@
       real    zlatc,zlonc
       real    lonbeg,lonend,lat
       real    latbeg,latend
-      real    pi,dl,dp,dz 
+      real    pi,dl,dp,dz
 
       pi = 4.*atan(1.)
       dl = 2*pi/im
       dp = pi/(jm-1)
       dz = pi/(6.*180)
-      
+
       do j=1,180*6
       do i=1,360*6
 
@@ -1252,7 +1251,7 @@
       endif
 
       z10x10(i,j) = z(ii,jj)
-      
+
       enddo
       enddo
 
