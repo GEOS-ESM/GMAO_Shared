@@ -5,7 +5,7 @@ module sfclayer
 
 ! !USES:
 
-use MAPL
+use MAPL_ConstantsMod
 use DragCoefficientsMod
 
 implicit none

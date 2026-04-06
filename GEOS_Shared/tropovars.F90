@@ -62,7 +62,7 @@
 !
 !********************************************************************
 
-  use MAPL
+  use MAPL_ConstantsMod, only: MAPL_UNDEFINED_REAL
 
       implicit none
 
@@ -100,7 +100,7 @@
       real xfacmn        !minimum x-factor, see prologue
       real xfact(lm)     !x-factor, see prologue
 
-      undef = MAPL_UNDEF
+      undef = MAPL_UNDEFINED_REAL
       alpha = 0.03  ! Empirical Value for Nominal Conditions
 
 !----------------------------------------------------------------

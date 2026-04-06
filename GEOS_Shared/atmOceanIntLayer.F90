@@ -2,7 +2,8 @@ module atmOcnIntlayer
 
 ! !USES:
 
-use MAPL
+use MAPL_ConstantsMod
+use MAPL_CommsMod, only: MAPL_AM_I_ROOT
 use GEOS_UtilsMod, only: GEOS_QSAT, GEOS_DQSAT
 
 implicit none
@@ -191,7 +192,7 @@ contains
     case ('salt_water')
       water_RHO = MAPL_RHO_SEAWATER
     case default
-      water_RHO = MAPL_UNDEF
+      water_RHO = MAPL_UNDEFINED_REAL
       print *, ' Unknown option in water_RHO.'
     end select
     
@@ -266,7 +267,7 @@ contains
         T_OUT = T_OUT - ( (depth/AOIL_depth)**MUSKIN) * ((1.+MUSKIN)/MUSKIN) * TWMTF ! neglect \delta/d since it is \ll 1.
       endwhere
     case default
-      T_OUT = MAPL_UNDEF
+      T_OUT = MAPL_UNDEFINED_REAL
       print *, ' Unknown option in AOIL_sfcLayer_T.'
     end select
 
@@ -441,12 +442,12 @@ contains
              TWMTF(N)    = 0.
              DELTC(N)    = 0.
 
-             SWWARM_(N)  = MAPL_UNDEF
-             QWARM_ (N)  = MAPL_UNDEF
-             ZETA_W_(N)  = MAPL_UNDEF
-             PHIW_(N)    = MAPL_UNDEF
-             LANGM_(N)   = MAPL_UNDEF
-             TAUTW_(N)   = MAPL_UNDEF
+             SWWARM_(N)  = MAPL_UNDEFINED_REAL
+             QWARM_ (N)  = MAPL_UNDEFINED_REAL
+             ZETA_W_(N)  = MAPL_UNDEFINED_REAL
+             PHIW_(N)    = MAPL_UNDEFINED_REAL
+             LANGM_(N)   = MAPL_UNDEFINED_REAL
+             TAUTW_(N)   = MAPL_UNDEFINED_REAL
 
           else  ! use Takaya et al 2012
 
@@ -531,25 +532,25 @@ contains
           TWMTS(N) = TW(N)    - TS(N)
 
        else            ! FR(N) <= fr_ice_thresh
-          DCOOL_ (N)     = MAPL_UNDEF
-          LCOOL_ (N)     = MAPL_UNDEF
-          DWARM_ (N)     = MAPL_UNDEF
-          TBAR_  (N)     = MAPL_UNDEF
-          TDROP_ (N)     = MAPL_UNDEF
-          QCOOL_ (N)     = MAPL_UNDEF
-          USTARW_(N)     = MAPL_UNDEF
-          SWCOOL_(N)     = MAPL_UNDEF
-          BCOOL_ (N)     = MAPL_UNDEF
-          TDEL_  (N)     = MAPL_UNDEF
+          DCOOL_ (N)     = MAPL_UNDEFINED_REAL
+          LCOOL_ (N)     = MAPL_UNDEFINED_REAL
+          DWARM_ (N)     = MAPL_UNDEFINED_REAL
+          TBAR_  (N)     = MAPL_UNDEFINED_REAL
+          TDROP_ (N)     = MAPL_UNDEFINED_REAL
+          QCOOL_ (N)     = MAPL_UNDEFINED_REAL
+          USTARW_(N)     = MAPL_UNDEFINED_REAL
+          SWCOOL_(N)     = MAPL_UNDEFINED_REAL
+          BCOOL_ (N)     = MAPL_UNDEFINED_REAL
+          TDEL_  (N)     = MAPL_UNDEFINED_REAL
           TW     (N)     = TICE
           TWMTS  (N)     = 0.0
           TWMTF  (N)     = 0.0
-          QWARM_ (N)     = MAPL_UNDEF
-          SWWARM_(N)     = MAPL_UNDEF
-          PHIW_  (N)     = MAPL_UNDEF
-          LANGM_ (N)     = MAPL_UNDEF
-          TAUTW_ (N)     = MAPL_UNDEF
-          ZETA_W_(N)     = MAPL_UNDEF
+          QWARM_ (N)     = MAPL_UNDEFINED_REAL
+          SWWARM_(N)     = MAPL_UNDEFINED_REAL
+          PHIW_  (N)     = MAPL_UNDEFINED_REAL
+          LANGM_ (N)     = MAPL_UNDEFINED_REAL
+          TAUTW_ (N)     = MAPL_UNDEFINED_REAL
+          ZETA_W_(N)     = MAPL_UNDEFINED_REAL
        end if
     end do
 
@@ -778,13 +779,13 @@ contains
           end do cool_iter
 
        else            ! FR(N, WATER) <= fr_ice_thresh
-          USTARW_(N)     = MAPL_UNDEF
-          DCOOL_ (N)     = MAPL_UNDEF
+          USTARW_(N)     = MAPL_UNDEFINED_REAL
+          DCOOL_ (N)     = MAPL_UNDEFINED_REAL
           TDROP_ (N)     = 0.0
-          SWCOOL_(N)     = MAPL_UNDEF
-          QCOOL_ (N)     = MAPL_UNDEF
-          BCOOL_ (N)     = MAPL_UNDEF
-          LCOOL_ (N)     = MAPL_UNDEF
+          SWCOOL_(N)     = MAPL_UNDEFINED_REAL
+          QCOOL_ (N)     = MAPL_UNDEFINED_REAL
+          BCOOL_ (N)     = MAPL_UNDEFINED_REAL
+          LCOOL_ (N)     = MAPL_UNDEFINED_REAL
        end if
     end do
 

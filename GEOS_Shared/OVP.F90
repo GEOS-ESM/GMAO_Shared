@@ -1,4 +1,4 @@
-#include "MAPL_Generic.h"
+#include "MAPL.h"
 
 !BOP
 
@@ -13,7 +13,14 @@ module OVP
 ! !USES:
 
   use ESMF
-  use MAPL
+  use MAPL_ConstantsMod, only: MAPL_PI_R8
+  use MAPL_CommsMod, only: MAPL_AM_I_ROOT
+  use mapl3g_Geom_API, only: MAPL_GridGetCoordinates
+  use MAPL_ISO8601_DateTime, only: convert_ISO8601_to_integer_time
+  use MAPL_ErrorHandlingMod
+  use mapl3g_generic, only: MAPL_GridCompGet
+  use mapl3g_generic, only: MAPL_GridCompGetResource
+
   
   implicit none
   private
@@ -72,7 +79,7 @@ contains
      TYPE(ESMF_GridComp), INTENT(inout)  :: GC           ! Gridded component 
      CHARACTER(len=*),    INTENT(in)     :: GC_DT_LABEL  ! String to get the GridComp-specific timestep
 
-     REAL(ESMF_KIND_R4), POINTER, INTENT(out) :: LONS(:,:)    ! radians
+     real(ESMF_KIND_R4), dimension(:,:), pointer :: LONS
      INTEGER,                     INTENT(out) :: RUN_DT       ! main timestep (seconds)
      INTEGER,                     INTENT(out) :: GC_DT        ! GridComp timestep (seconds)
      INTEGER, OPTIONAL,           INTENT(out) :: RC           ! Error code
@@ -103,26 +110,23 @@ contains
      CHARACTER(len=ESMF_MAXSTR)      :: IAm
      INTEGER                         :: STATUS
 
-     type (MAPL_MetaComp),  pointer  :: STATE
-     TYPE (ESMF_Config)              :: CF
      REAL                            :: dt1, dt2
+     type(ESMF_Grid)                 :: grid
 
 ! Comment
 ! ---------------------------------------
 
+    call MAPL_GridCompGet( GC, grid=grid, _RC )
+
     IAm = "OVP_init"
 
-    call MAPL_GetObjectFromGC ( GC, STATE, __RC__ )                   !  Get MAPL state
+    call MAPL_GridGetCoordinates(grid, longitudes=LONS, _RC)          !  Get LONS
 
-    call MAPL_Get( STATE, LONS=LONS, __RC__ )                         !  Get LONS
-
-    call ESMF_GridCompGet ( GC, CONFIG=CF, __RC__ )                   !  Get Config
-
-    call ESMF_ConfigGetAttribute ( CF, dt1, Label="RUN_DT:", __RC__ ) !  Get time step
+    call MAPL_GridCompGetResource ( GC, "RUN_DT", dt1, _RC ) !  Get time step
 
     RUN_DT = dt1 + 0.01
 
-    call ESMF_ConfigGetAttribute ( CF, dt2, Label=GC_DT_LABEL, DEFAULT=dt1, __RC__ )
+    call MAPL_GridCompGetResource ( GC, GC_DT_LABEL, dt2, DEFAULT=dt1, _RC )
 
     GC_DT  = dt2 + 0.01
 
@@ -176,6 +180,8 @@ contains
      REAL,    ALLOCATABLE ::         BEST(:,:)   ! closest that local time has gotten to OVERPASS_HOUR
 
      INTEGER              :: TIME
+     character(len=ESMF_MAXSTR)    :: time_str
+     integer :: rc, status
 
 ! Comment
 ! ---------------------------------------
@@ -222,7 +228,8 @@ contains
        iM = VAL/60
        iS = VAL - iM*60
 !      PRINT "(I2,'h ',I2,'m ',I2,'s  ')",iH,iM,iS
-       CALL MAPL_PackTime(VAL,iH,iM,iS)
+       write(time_str, '(i2.2,a,i2.2,a,i2.2)') iH, '_', iM, '_', iS
+       VAL = convert_ISO8601_to_integer_time(trim(time_str), _RC)
        MASK(I,J) = VAL
      ENDDO
      ENDDO
@@ -279,6 +286,8 @@ contains
      INTEGER                         :: EXTRA_SECONDS, EXTRA_MINUTES, EXTRA_HOURS, EXTRA_DAYS
      integer                         :: ans
 
+     character(len=ESMF_MAXSTR)    :: time_str
+
      IAm = "OVP_end_of_timestep_hms"
 
      call ESMF_ClockGet(CLOCK,currTIME=TIME,__RC__)                                    !  Get the time
@@ -300,7 +309,8 @@ contains
      IHR = IHR - EXTRA_DAYS*24
 
    ! Pack the new time
-     call MAPL_PackTime(ans,IHR,IMN,ISC)
+     write(time_str, '(i2.2,a,i2.2,a,i2.2)') IHR, '_', IMN, '_', ISC
+     ans = convert_ISO8601_to_integer_time(trim(time_str), _RC)
 
      OVP_end_of_timestep_hms = ans
 

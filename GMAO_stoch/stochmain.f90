@@ -1,6 +1,8 @@
   subroutine stochmain
 
-    use MAPL
+    use MAPL, only: MAPL_CFIORead
+    use MAPL_CommsMod, only: MAPL_AM_I_ROOT
+    use mapl3g_Geom_API, only: MAPL_GridGet
     use ESMF
     use stoch_module
 
@@ -68,16 +70,14 @@
 
     ! Validate grid
     ! -------------
-    call MAPL_GridGet(GRID, localCellCountPerDim=DIMS, RC=STATUS)
+    call MAPL_GridGet(GRID, im=IM, jm=JM, RC=STATUS)
    
     if ( icubed ) then
        call GetWeights_init (6,1,im_sppt,jm_sppt,lm_sppt,Nx,Ny,.true.,.false.,comm)
     endif
 
     ! GLOBAL FOR NOW
-    IM=dims(1)
-    JM=dims(2)
-    LM=dims(3)
+    LM=LM_SPPT
 
     allocate(PPREF(LM+1))
     open(lun,file='pref.txt',form='formatted',status='old')

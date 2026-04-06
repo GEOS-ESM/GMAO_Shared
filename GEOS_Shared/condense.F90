@@ -31,7 +31,8 @@ contains
 
   subroutine Iterate(TT,PP,QQ,QC,SuperSat)
 
-    use MAPL, only : QSAT=>MAPL_EQSAT, MAPL_ALHL, MAPL_CP, MAPL_AIRMW, MAPL_RUNIV, MAPL_RDRY, MAPL_RGAS, MAPL_CP
+    use MAPL, only : QSAT=>MAPL_EQSAT ! 4/1/26 - AOO: MAPL_EQSAT needs MAPL3 port
+    use MAPL_ConstantsMod, only : MAPL_ALHL, MAPL_CP, MAPL_AIRMW, MAPL_RUNIV, MAPL_RDRY, MAPL_RGAS, MAPL_CP
 
     implicit none
 

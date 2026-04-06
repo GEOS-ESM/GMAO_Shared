@@ -1,18 +1,20 @@
       
-#include "MAPL_Generic.h"
+#include "MAPL.h"
 
       subroutine windfix ( ua,va,plea,                            &
                            ub,vb,pleb,im,jm,lm,VM,GRIDana,method, &
                            vintdiva,vintdivb,vintdivc )
 
       use ESMF
-      use MAPL
+      use MAPL, only: MAPL_CollectiveGather3D, MAPL_CollectiveScatter3d
+      use MAPL_ErrorHandlingMod
+      use mapl3g_Geom_API, only: MAPL_GridGetGlobalCellCountPerDim
 
       implicit none
 
       type (ESMF_VM)   :: VM
       type (ESMF_Grid) :: GRIDana
-      integer          :: DIMS(ESMF_MAXGRIDDIM)
+      integer, allocatable, dimension(:) :: DIMS
       integer          :: RC,STATUS
 
       character(len=ESMF_MAXSTR) :: IAm
@@ -61,12 +63,10 @@
       msgn  = 0    ! Scalar  Flag
       undef = 1e15
 
-      call ESMF_VMGet (VM, localpet=myid, petcount=NPES,  RC=STATUS)
-      VERIFY_(STATUS)
-      call ESMF_VmGet (VM, mpicommunicator=comm, rc=status)
-      VERIFY_(STATUS)
+      call ESMF_VMGet (VM, localpet=myid, petcount=NPES,  _RC)
+      call ESMF_VmGet (VM, mpicommunicator=comm, _RC)
 
-      call  MAPL_GridGet(GRIDana, globalCellCountPerDim=DIMS, RC=STATUS)
+      call MAPL_GridGetGlobalCellCountPerDim(GRIDana, globalCellCountPerDim=DIMS, _RC)
       img = DIMS(1) ! global grid dim
       jmg = DIMS(2) ! global grid dim
       imjmg = img*jmg
@@ -89,12 +89,10 @@
 
 ! Gather Winds for Background
 ! ---------------------------
-      call MAPL_CollectiveGather3D(gridAna,ub,uglo,rc=status)
-      VERIFY_(status)
-      call MAPL_CollectiveGather3D(gridAna,vb,vglo,rc=status)
-      VERIFY_(status)
-      call MAPL_CollectiveGather3D(gridAna,dpb,dpglo,rc=status)
-      VERIFY_(status)
+! 3/31/26 - AOO: MAPL_CollectiveGather/Scatter needs MAPL 3 port
+      call MAPL_CollectiveGather3D(gridAna,ub,uglo,_RC)
+      call MAPL_CollectiveGather3D(gridAna,vb,vglo,_RC)
+      call MAPL_CollectiveGather3D(gridAna,dpb,dpglo,_RC)
       if (size(dpglo)>1) then
          allocate(dglo(img,jmg,size(dpglo,3)),stat=status)
          VERIFY_(status)
@@ -108,8 +106,7 @@
          enddo
       end if
          
-      call MAPL_CollectiveScatter3d(gridAna,dglo,divb,rc=status)
-      VERIFY_(status)
+      call MAPL_CollectiveScatter3d(gridAna,dglo,divb,_RC)
       deallocate(uglo,vglo,dpglo)
       nullify(uglo,vglo,dpglo)
       if (associated(dglo)) then
@@ -119,12 +116,9 @@
 
 ! Gather Winds for Analysis
 ! -------------------------
-      call MAPL_CollectiveGather3D(gridAna,ua,uglo,rc=status)
-      VERIFY_(status)
-      call MAPL_CollectiveGather3D(gridAna,va,vglo,rc=status)
-      VERIFY_(status)
-      call MAPL_CollectiveGather3D(gridAna,dpa,dpglo,rc=status)
-      VERIFY_(status)
+      call MAPL_CollectiveGather3D(gridAna,ua,uglo,_RC)
+      call MAPL_CollectiveGather3D(gridAna,va,vglo,_RC)
+      call MAPL_CollectiveGather3D(gridAna,dpa,dpglo,_RC)
       if (size(dpglo)>1) then
          allocate(dglo(img,jmg,size(dpglo,3)),stat=status)
          VERIFY_(status)
@@ -138,8 +132,7 @@
          enddo
       end if
 
-      call MAPL_CollectiveScatter3d(gridAna,dglo,diva,rc=status)
-      VERIFY_(status)
+      call MAPL_CollectiveScatter3d(gridAna,dglo,diva,_RC)
       if (associated(dglo)) then
          deallocate(dglo)
          nullify(dglo)
@@ -204,8 +197,7 @@
 
 ! Gather and Broadcast Divergence Increment
 ! -----------------------------------------
-      call MAPL_CollectiveGather3D(gridAna,diva,dglo,rc=status)
-      VERIFY_(status)
+      call MAPL_CollectiveGather3D(gridAna,diva,dglo,_RC)
 
 ! Compute Wind Increments Associated with Divergence Increment
 ! ------------------------------------------------------------
@@ -220,10 +212,8 @@
 
 ! Scatter Winds
 ! -------------
-      call MAPL_CollectiveScatter3d(gridAna,uglo,ua,rc=status)
-      VERIFY_(status)
-      call MAPL_CollectiveScatter3d(gridAna,vglo,va,rc=status)
-      VERIFY_(status)
+      call MAPL_CollectiveScatter3d(gridAna,uglo,ua,_RC)
+      call MAPL_CollectiveScatter3d(gridAna,vglo,va,_RC)
       if (associated(dglo)) then
          deallocate(dglo,uglo,vglo,dpglo)
          nullify(dglo,uglo,vglo,dpglo)
@@ -346,6 +336,7 @@
       RETURN                                                                    
       END                                                                       
       SUBROUTINE GRADQ (Q,DQDX,DQDY,IM,JM)
+      use MAPL_ConstantsMod, only: MAPL_RADIUS
 ! *********************************************************
 ! ****                                                 ****
 ! ****  THIS PROGRAM CALCULATES THE HORIZONTAL         ****
@@ -360,7 +351,6 @@
 ! ****                                                 ****
 ! *********************************************************
 
-      use MAPL_ConstantsMod
       implicit none
       integer  im,jm
 

@@ -1,11 +1,15 @@
-#include "MAPL_Generic.h"
+#include "MAPL.h"
 
 module stoch_module
 
   use ESMF
-  use MAPL
+  use MAPL_CommsMod, only: MAPL_AM_I_ROOT
+  use mapl3g_Geom_API, only: MAPL_GridGet
+  use MAPL, only: LatLonGridFactory, grid_manager, AbstractRegridder, regridder_manager  ! 1/4/26 - needs MAPL3 replacement
+  use MAPL, only: REGRID_METHOD_BILINEAR, MAPL_VERIFY ! 1/4/26 - needs MAPL3 replacement
   use mod_param
   use stoch_data
+  use mapl3g_Utilities_Comms_API, only: MAPL_ArrayGather, MAPL_ArrayScatter
 
   implicit none 
 
@@ -38,16 +42,16 @@ module stoch_module
     integer :: im_gg,jm_gg
     character(len=30) STOCHGRIDNAME
       
-    call ESMF_ConfigGetAttribute(CF, NX      , Label="NX:"      , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, NY      , Label="NY:"      , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, im_world, Label="AGCM_IM:" , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, jm_world, Label="AGCM_JM:" , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, lm_world, Label="AGCM_LM:" , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, DT      , Label="RUN_DT:"  , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, MEMID   , Label="MEMID:"   , DEFAULT=999, RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, ISPPT   , Label="SPPT:"    , DEFAULT=0  , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, ISKEB   , Label="SKEB:"    , DEFAULT=0  , RC=STATUS)
-    call ESMF_ConfigGetAttribute(CF, ISHUT   , Label="STOCH_shutoff:" , DEFAULT=1  , RC=STATUS)
+    call ESMF_ConfigGetAttribute(CF, NX      , Label="NX:"      , _RC)
+    call ESMF_ConfigGetAttribute(CF, NY      , Label="NY:"      , _RC)
+    call ESMF_ConfigGetAttribute(CF, im_world, Label="AGCM_IM:" , _RC)
+    call ESMF_ConfigGetAttribute(CF, jm_world, Label="AGCM_JM:" , _RC)
+    call ESMF_ConfigGetAttribute(CF, lm_world, Label="AGCM_LM:" , _RC)
+    call ESMF_ConfigGetAttribute(CF, DT      , Label="RUN_DT:"  , _RC)
+    call ESMF_ConfigGetAttribute(CF, MEMID   , Label="MEMID:"   , DEFAULT=999, _RC)
+    call ESMF_ConfigGetAttribute(CF, ISPPT   , Label="SPPT:"    , DEFAULT=0  , _RC)
+    call ESMF_ConfigGetAttribute(CF, ISKEB   , Label="SKEB:"    , DEFAULT=0  , _RC)
+    call ESMF_ConfigGetAttribute(CF, ISHUT   , Label="STOCH_shutoff:" , DEFAULT=1  , _RC)
   
     lm = lm_world 
     cubed=.false.
@@ -72,11 +76,11 @@ module stoch_module
                           Nx = Nx, Ny = Ny,  &
                           IM_World = IM_ll,  &
                           JM_World = JM_ll,  &
-                          LM = LM, pole='PC', dateline='DC', rc=status)
+                          LM = LM, pole='PC', dateline='DC', _RC)
        if(status/=0) then
          call die('setup_pattern','trouble in ll_factory',status)     
        endif
-       LLgrid = grid_manager%make_grid(ll_factory,rc=status)
+       LLgrid = grid_manager%make_grid(ll_factory,_RC)
        if(status/=0) then
          call die('setup_pattern','trouble in llgrid',status)     
        endif
@@ -158,9 +162,7 @@ module stoch_module
     endif 
       
     if (cubed) then
-      call MAPL_GridGet(LLgrid, localCellCountPerDim=DIMS, RC=STATUS)
-      im_ll_local=dims(1)
-      jm_ll_local=dims(2)
+      call MAPL_GridGet(LLgrid, im=im_ll_local, jm=jm_ll_local, _RC)
       allocate(rndptr_local(IM_ll_local,JM_ll_local,lm))
       rndptr_local = 0.
     else
@@ -174,9 +176,9 @@ module stoch_module
     do L=1,lm !
       if (MAPL_am_I_root()) work2d=vfact_sppt(L)*RNDPTR_World(:,:)
       if(cubed) then
-         call ArrayScatter(RNDPTR_local(:,:,L), work2d, LLgrid, rc=status)
+         call MAPL_ArrayScatter(RNDPTR_local(:,:,L), work2d, LLgrid, _RC)
       else
-         call ArrayScatter(RNDPTR(:,:,L),       work2d,   grid, rc=status)
+         call MAPL_ArrayScatter(RNDPTR(:,:,L),       work2d,   grid, _RC)
       endif
       if(status/=0) then
         ierr = 99
@@ -244,7 +246,7 @@ module stoch_module
 
     ! Convert back to original grid
     if (cubed) then 
-      call MAPL_GridGet(LLgrid, localCellCountPerDim=DIMS, RC=STATUS)
+      call MAPL_GridGet(LLgrid, im=im_ll_local, jm=jm_ll_local, _RC)
       im_ll_local=dims(1)
       jm_ll_local=dims(2)
       allocate(u_local(im_ll_local,jm_ll_local,lm))
@@ -266,11 +268,11 @@ module stoch_module
          workv2d=v_world(:,:,L)
       endif 
       if(cubed) then
-         call ArrayScatter(u_local(:,:,L), worku2d, LLgrid, rc=status)
-         call ArrayScatter(v_local(:,:,L), workv2d, LLgrid, rc=status)
+         call MAPL_ArrayScatter(u_local(:,:,L), worku2d, LLgrid, _RC)
+         call MAPL_ArrayScatter(v_local(:,:,L), workv2d, LLgrid, _RC)
       else
-         call ArrayScatter(u_local(:,:,L), worku2d,   GRID, rc=status)
-         call ArrayScatter(v_local(:,:,L), workv2d,   GRID, rc=status)
+         call MAPL_ArrayScatter(u_local(:,:,L), worku2d,   GRID, _RC)
+         call MAPL_ArrayScatter(v_local(:,:,L), workv2d,   GRID, _RC)
       endif
       if(status/=0) then
          ierr = 99
@@ -404,15 +406,15 @@ module stoch_module
     integer, intent(in) :: lu,im,jm,km
     real(kind=4),    intent(in) :: fld(jm,im,km)
     type(ESMF_GRID) :: Grid
-    integer  k,status,dims(3),imglo,jmglo
+    integer  k, rc, status,dims(3),imglo,jmglo
     real(4),allocatable,dimension(:,:):: fout
 
-    call MAPL_GridGet(GRID, globalCellCountPerDim=DIMS, RC=STATUS)
+    call MAPL_GridGet(LLgrid, im=jmglo, jm=imglo, _RC)
     jmglo=dims(1)
     imglo=dims(2)
     allocate(fout(jmglo,imglo))
     do k=1,km
-       call ArrayGather(fld(:,:,k), fout, Grid, rc=status)
+       call MAPL_ArrayGather(fld(:,:,k), fout, Grid, _RC)
        if (MAPL_am_I_root()) write(lu) fout
     enddo
     deallocate(fout)

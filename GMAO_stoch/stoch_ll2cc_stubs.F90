@@ -31,8 +31,8 @@ subroutine xwritit ( q,im,jm,lm,ku,Grid )
       use ESMF, only: ESMF_GridCompGet
       use ESMF, only: ESMF_GridComp
       use ESMF, only: ESMF_Grid
-      use MAPL, only: ArrayGather
-      use MAPL, only: MAPL_GridGet
+      use mapl3g_Utilities_Comms_API, only: MAPL_ArrayGather
+      use mapl3g_GridGetGlobal, only: MAPL_GridGetGlobalCellCountPerDim
       implicit none
       type ( ESMF_Grid ) Grid
       integer  im,jm,lm
@@ -46,14 +46,14 @@ subroutine xwritit ( q,im,jm,lm,ku,Grid )
       integer  dims(3)
       call ESMF_VMGetCurrent(vm=vm, rc=status)
       call ESMF_VMGet(vm, localPET=myid)
-      call MAPL_GridGet(Grid, globalCellCountPerDim=DIMS, RC=STATUS)
+      call MAPL_GridGetGlobalCellCountPerDim(GRIDana, globalCellCountPerDim=DIMS, _RC)
       img=dims(1)
       jmg=dims(2)
       allocate ( glo(img,jmg) )
       allocate (   a(img,jmg) )
       do L=1,lm
 !        call timebeg ('   Gather')
-         call ArrayGather(q(:,:,L), glo, Grid, rc=status)
+         call MAPL_ArrayGather(q(:,:,L), glo, Grid, rc=status)
 !        call timeend ('   Gather')
          if( myid.eq.0 ) then
                        a = glo

@@ -1,7 +1,7 @@
 ! $Id$
 ! VERIFY_ and RETURN_ macros for error handling
 
-#include "MAPL_Generic.h"
+#include "MAPL.h"
 
 !BOP
 
@@ -14,7 +14,9 @@ module GEOS_TopoGetMod
 ! !USES:
 
   use ESMF
-  use MAPL
+  use MAPL_ConstantsMod, only: MAPL_GRAV
+  use MAPL_ErrorHandlingMod
+  use mapl3g_generic, only: MAPL_GridCompGetResource
   
   implicit none
   private
@@ -49,14 +51,14 @@ contains
 
 ! !INTERFACE
 
-  subroutine GEOS_TopoGet ( cf,                          &
+  subroutine GEOS_TopoGet ( gc,                          &
                             MEAN,                        &
                             GWDVAR,   GWDVARX,  GWDVARY, &
                             GWDVARXY, GWDVARYX, TRBVAR, RC)
 
 ! !ARGUMENTS
 
-    type(ESMF_Config)                            :: cf
+    type(ESMF_GridComp)                          :: gc
     type(ESMF_Field),    optional, intent(INOUT) :: MEAN
     type(ESMF_Field),    optional, intent(INOUT) :: GWDVAR
     type(ESMF_Field),    optional, intent(INOUT) :: GWDVARX
@@ -110,7 +112,11 @@ contains
 ! Locals
 
     character(len=ESMF_MAXSTR), parameter :: IAm = "TopoGet"
-    character(len=ESMF_MAXSTR)            :: filename(7)
+    ! Define a type to hold variable-length strings
+    type :: string_type
+        character(len=:), allocatable :: str
+    end type string_type
+    type(string_type)           :: filename(7)
 
     real, pointer :: ptr(:,:)
     integer       :: STATUS
@@ -122,115 +128,95 @@ contains
     real          :: GWDFACYX
     real          :: TRBFAC
 
-    type(MAPL_MetaComp) :: MAPLOBJ
-
-! Initialize CONFIG File into MAPL Object
-! ---------------------------------------
-    call MAPL_Set (MAPLOBJ, name='DUMMY', cf=cf, rc=STATUS )
-    VERIFY_(STATUS)
-
 ! Get filenames for Get_Topo utility
 ! ----------------------------------
-    call ESMF_ConfigGetAttribute ( cf, value=filename(1), label ='TOPO_MEAN_FILE:',     &
-                                   default='hmean.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_MEAN_FILE", filename(1)%str, &
+                                   default="hmean.2.5x2.5min.data", _RC)
 
-    call ESMF_ConfigGetAttribute ( cf, value=filename(2), label ='TOPO_GWDVAR_FILE:',   &
-                                   default='hgrav_var.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_GWDVAR_FILE", filename(2)%str, &
+                                   default="hgrav_var.2.5x2.5min.data", _RC)
 
-    call ESMF_ConfigGetAttribute ( cf, value=filename(3), label ='TOPO_GWDVARX_FILE:',  &
-                                   default='hgrav_varx.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_GWDVARX_FILE", filename(3)%str, &
+                                   default="hgrav_varx.2.5x2.5min.data", _RC)
 
-    call ESMF_ConfigGetAttribute ( cf, value=filename(4), label ='TOPO_GWDVARY_FILE:',  &
-                                   default='hgrav_vary.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_GWDVARY_FILE", filename(4)%str,  &
+                                   default="hgrav_vary.2.5x2.5min.data", _RC)
 
-    call ESMF_ConfigGetAttribute ( cf, value=filename(5), label ='TOPO_GWDVARXY_FILE:', &
-                                   default='hgrav_varxy.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_GWDVARXY_FILE", filename(5)%str, &
+                                   default="hgrav_varxy.2.5x2.5min.data", _RC)
 
-    call ESMF_ConfigGetAttribute ( cf, value=filename(6), label ='TOPO_GWDVARYX_FILE:', &
-                                   default='hgrav_varyx.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_GWDVARYX_FILE", filename(6)%str, &
+                                   default="hgrav_varyx.2.5x2.5min.data", _RC)
 
-    call ESMF_ConfigGetAttribute ( cf, value=filename(7), label ='TOPO_TRBVAR_FILE:',   &
-                                   default='hturb_var.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call MAPL_GridCompGetResource ( gc, "TOPO_TRBVAR_FILE", filename(7)%str, &
+                                   default="hturb_var.2.5x2.5min.data", _RC)
 
   if( present(MEAN)  ) then
 ! -------------------------
-       UNIT = GETFILE  ( filename(1),form="unformatted" )
+       open(newunit=unit, file=filename(1)%str, form="unformatted")
        call MAPL_VarRead (UNIT,MEAN)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet(MEAN, 0, PTR, rc=status)
+       close    (UNIT)
+       call ESMF_FieldGet(MEAN, 0, PTR, _RC)
        ptr = ptr*MAPL_GRAV
   endif
 
   if( present(GWDVAR) ) then
 ! --------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFAC, label="GWDVAR_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
-       UNIT = GETFILE  (filename(2), form="unformatted")
+       call MAPL_GridCompGetResource( gc, "GWDVAR_FACTOR", GWDFAC, default = 1.0, _RC)
+       open(newunit=unit, file=filename(2)%str, form="unformatted")
        call MAPL_VarRead (UNIT,GWDVAR)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVAR, 0, PTR, rc = status)
+       close    (UNIT)
+       call ESMF_FieldGet (GWDVAR, 0, PTR, _RC)
        ptr = sqrt( max(gwdfac*ptr,0.0) )
   endif
 
   if( present(GWDVARX) ) then
 ! ---------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACX, label="GWDVARX_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
-       UNIT = GETFILE  (filename(3), form="unformatted")
+       call MAPL_GridCompGetResource( gc, "GWDVARX_FACTOR", GWDFACX, default = 1.0, _RC)
+       open(newunit=unit, file=filename(3)%str, form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARX)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARX, 0, PTR, rc = status)
+       close    (UNIT)
+       call ESMF_FieldGet (GWDVARX, 0, PTR, _RC)
        ptr = sqrt( max(gwdfacx*ptr,0.0) )
   endif
 
   if( present(GWDVARY) ) then
 ! ---------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACY, label="GWDVARY_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
-       UNIT = GETFILE  (filename(4), form="unformatted")
+       call MAPL_GridCompGetResource( gc, "GWDVARY_FACTOR", GWDFACY, default = 1.0, _RC)
+       open(newunit=unit, file=filename(4)%str, form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARY)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARY, 0, PTR, rc = status)
+       close    (UNIT)
+       call ESMF_FieldGet (GWDVARY, 0, PTR, _RC)
        ptr = sqrt( max(gwdfacy*ptr,0.0) )
   endif
 
   if( present(GWDVARXY) ) then
 ! ----------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACXY, label="GWDVARXY_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
-       UNIT = GETFILE  (filename(5), form="unformatted")
+       call MAPL_GridCompGetResource( gc, "GWDVARXY_FACTOR", GWDFACXY, default = 1.0, _RC)
+       open(newunit=unit, file=filename(5)%str, form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARXY)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARXY, 0, PTR, rc = status)
+       close    (UNIT)
+       call ESMF_FieldGet (GWDVARXY, 0, PTR, _RC)
        ptr = sqrt( max(gwdfacxy*ptr,0.0) )
   endif
 
   if( present(GWDVARYX) ) then
 ! ----------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACYX, label="GWDVARYX_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
-       UNIT = GETFILE  (filename(6), form="unformatted")
+       call MAPL_GridCompGetResource( gc, "GWDVARYX_FACTOR", GWDFACYX, default = 1.0, _RC)
+       open(newunit=unit, file=filename(6)%str, form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARYX)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARYX, 0, PTR, rc = status)
+       close    (UNIT)
+       call ESMF_FieldGet (GWDVARYX, 0, PTR, _RC)
        ptr = sqrt( max(gwdfacyx*ptr,0.0) )
   endif
 
   if( present(TRBVAR) ) then
 ! --------------------------
-       call MAPL_GetResource( MAPLOBJ, TRBFAC, label="TRBVAR_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
-       UNIT = GETFILE  (filename(7), form="unformatted")
+       call MAPL_GridCompGetResource( gc, "TRBVAR_FACTOR", TRBFAC, default = 1.0, _RC)
+       open(newunit=unit, file=filename(7)%str, form="unformatted")
        call MAPL_VarRead (UNIT,TRBVAR)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (TRBVAR, 0, PTR, rc = status)
+       close    (UNIT)
+       call ESMF_FieldGet (TRBVAR, 0, PTR, _RC)
        ptr = max(trbfac*ptr,0.0)
   endif
 

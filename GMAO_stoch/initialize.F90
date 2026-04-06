@@ -187,7 +187,6 @@ module initialize
   subroutine get_pert_grid(im_world,jm_world,im_ll,jm_ll,jcap,im_gg,jm_gg)
 
     use ESMF
-    use MAPL
     use m_die, only: die
 
     implicit none

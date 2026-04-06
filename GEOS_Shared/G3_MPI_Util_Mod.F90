@@ -1,7 +1,8 @@
 #include "unused_dummy.H"
       module G3_MPI_Util_Mod
 
-      use MAPL
+      !use MAPL
+      use MAPL_ConstantsMod, only: MAPL_PI
       implicit none
 
 ! Define Lattice
@@ -1647,7 +1648,6 @@ end interface
 !***********************************************************************
 !*                  GODDARD LABORATORY FOR ATMOSPHERES                 *
 !***********************************************************************
-
       implicit none
       type ( dynamics_lattice_type ) lattice
       real      q( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
