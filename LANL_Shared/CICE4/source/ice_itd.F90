@@ -45,7 +45,7 @@
       use ice_fileunits
       use ice_exit
 #ifdef GEOS
-      use MAPL_CommsMod,    only: MAPL_AM_I_ROOT
+      use MAPL,    only: MAPL_AM_I_ROOT
 #endif
 
 !

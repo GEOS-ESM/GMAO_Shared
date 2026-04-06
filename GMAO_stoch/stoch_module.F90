@@ -3,13 +3,12 @@
 module stoch_module
 
   use ESMF
-  use MAPL_CommsMod, only: MAPL_AM_I_ROOT
-  use mapl3g_Geom_API, only: MAPL_GridGet
-  use MAPL, only: LatLonGridFactory, grid_manager, AbstractRegridder, regridder_manager  ! 1/4/26 - needs MAPL3 replacement
-  use MAPL, only: REGRID_METHOD_BILINEAR, MAPL_VERIFY ! 1/4/26 - needs MAPL3 replacement
+  use MAPL2, only: LatLonGridFactory, grid_manager, AbstractRegridder, regridder_manager  ! 1/4/26 - needs MAPL3 replacement
+  use MAPL2, only: REGRID_METHOD_BILINEAR, MAPL_VERIFY ! 1/4/26 - needs MAPL3 replacement
+  use MAPL, only: MAPL_ArrayGather, MAPL_ArrayScatter, &
+                  MAPL_AM_I_ROOT, MAPL_GridGet
   use mod_param
   use stoch_data
-  use mapl3g_Utilities_Comms_API, only: MAPL_ArrayGather, MAPL_ArrayScatter
 
   implicit none 
 

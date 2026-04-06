@@ -1,8 +1,7 @@
   subroutine stochmain
 
-    use MAPL, only: MAPL_CFIORead
-    use MAPL_CommsMod, only: MAPL_AM_I_ROOT
-    use mapl3g_Geom_API, only: MAPL_GridGet
+    use MAPL2, only: MAPL_CFIORead
+    use MAPL, only: MAPL_AM_I_ROOT, MAPL_GridGet
     use ESMF
     use stoch_module
 

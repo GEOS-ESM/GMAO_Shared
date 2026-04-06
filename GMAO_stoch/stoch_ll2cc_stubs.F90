@@ -31,8 +31,8 @@ subroutine xwritit ( q,im,jm,lm,ku,Grid )
       use ESMF, only: ESMF_GridCompGet
       use ESMF, only: ESMF_GridComp
       use ESMF, only: ESMF_Grid
-      use mapl3g_Utilities_Comms_API, only: MAPL_ArrayGather
-      use mapl3g_GridGetGlobal, only: MAPL_GridGetGlobalCellCountPerDim
+      use MAPL, only: MAPL_ArrayGather &
+                      MAPL_GridGetGlobalCellCountPerDim
       implicit none
       type ( ESMF_Grid ) Grid
       integer  im,jm,lm
