@@ -51,8 +51,11 @@ c   Local Variables
       REAL TEMP_C,VIRTUAL_T
       REAL GONV,RONV,SONV
       REAL FACTOR_G,FACTOR_R,FACTOR_S
-      REAL FACTORB_G,FACTORB_R,FACTORB_S
+      REAL FACTORB_G,FACTORB_S
       REAL RHOAIR,Z_E
+      REAL FAC_SKIN
+      REAL RHO_S_EFF, RHO_G_EFF
+      REAL FACTOR_S_LOC, FACTOR_G_LOC
 
 c   Constants used to calculate variable intercepts
       REAL R1,RON,RON2,SON,GON
@@ -147,14 +150,37 @@ c   Compute snow based on QRA and TMK
 c      Adjust factor for brightband, where snow or graupel particle
 c      scatters like liquid water (alpha=1.0) because it is assumed to
 c      have a liquid skin.
+c --- wet snow / melting layer enhancement -------------------
+                  IF (ILIQSKIN .EQ. 1) THEN
+c --- smooth transition from -2C to +1C
+                     TEMP_C = TMK(I,J,K) - CELKEL
+                     FAC_SKIN = (TEMP_C + 2.0D0) / 3.0D0
+                     IF (FAC_SKIN .LT. 0.0D0) FAC_SKIN = 0.0D0
+                     IF (FAC_SKIN .GT. 1.0D0) FAC_SKIN = 1.0D0
+c --- effective density increase near melting
+                     RHO_S_EFF = RHO_S *
+     1               (1.0D0 + 1.5D0 * FAC_SKIN)
 
-                  IF (ILIQSKIN.EQ.1 .AND. TMK(I,J,K).GT.CELKEL) THEN
-                      FACTORB_S = FACTOR_S/ALPHA
-                      FACTORB_G = FACTOR_G/ALPHA
+                     RHO_G_EFF = RHO_G *
+     1               (1.0D0 + 0.5D0 * FAC_SKIN)
+c --- recompute factors with updated density and dielectric enhancement
+                     FACTOR_S_LOC = GAMMA_SEVEN * 1.D18 *
+     1               (1.D0/(PI*RHO_S_EFF))**1.75D0 *
+     2               (RHO_S_EFF/RHOWAT)**2 * ALPHA *
+     3               (1.0D0 + FAC_SKIN *
+     4               (1.0D0/ALPHA - 1.0D0))
+
+                     FACTOR_G_LOC = GAMMA_SEVEN * 1.D18 *
+     1               (1.D0/(PI*RHO_G_EFF))**1.75D0 *
+     2               (RHO_G_EFF/RHOWAT)**2 * ALPHA *
+     3               (1.0D0 + FAC_SKIN *
+     4               (1.0D0/ALPHA - 1.0D0))
                   ELSE
-                      FACTORB_S = FACTOR_S
-                      FACTORB_G = FACTOR_G
-                  END IF
+                     FACTOR_S_LOC = FACTOR_S
+                     FACTOR_G_LOC = FACTOR_G
+                  ENDIF
+                  FACTORB_S = FACTOR_S_LOC
+                  FACTORB_G = FACTOR_G_LOC
 
 c      Calculate variable intercept parameters
 
