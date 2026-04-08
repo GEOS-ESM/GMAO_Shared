@@ -62,6 +62,7 @@
       integer i, j, ic, nc, nt, ierr, nobs, nsel, synhour, nop, nops
       integer nymdb, nhmsb
       logical aodsigofix
+      logical jedi
 
       character(len=255) :: opers(nomax)          ! operations
       character(len=255) :: oclass(ncmax)         ! observations classes
@@ -75,6 +76,7 @@
       real, target       :: negsum(ncmax,ntmax)   ! number of obs for which attr are negative
       real, target       :: neusum(ncmax,ntmax)   ! number of obs for which attr are neutral
       real, target       :: obsgms(ncmax,ntmax)   ! global mean square of obs for each attr
+      real               :: obserr(ncmax,ntmax)   ! observations error
       integer            :: obsnum(ncmax,ntmax)   ! number of obs per class and syn hour
       integer            :: nymda(ntmax)          ! all dates
       integer            :: nhmsa(ntmax)          ! all times
@@ -112,7 +114,7 @@
 !     Parse in command line
 !     ---------------------
       call init ( infile, nfiles_max, nfiles, RCfile, outfile, trange, 
-     .            latrange, lonrange, verb, aodsigofix, ncf )
+     .            latrange, lonrange, verb, jedi, aodsigofix, ncf )
 
 !     Read in resource file
 !     ---------------------
@@ -256,6 +258,9 @@
              obsnum(nc,nt) = nsel
              nymda(nt)     = nymd
              nhmsa(nt)     = nhms
+             if (jedi) then
+                 call sumattr ( verb, odss, nsel, igood, obvar, obserr(nc,nt) )
+             endif
              do nop = 1, nops
                 if(opers(nop)=='sum')    call sumattr ( verb, odss, nsel, igood, obvar, obssum(nc,nt) )
                 if(opers(nop)=='numneg') call negattr ( verb, odss, nsel, igood, obvar, negsum(nc,nt) )
@@ -304,8 +309,8 @@
                 ptr => obsgms
              endif
              fileout = trim(outfile) // '_' // trim(opers(nop)) // '.txt'
-             call Write_Stats ( fileout, ptr, obsnum, oclass, ncfound, ncmax, nt, nymda, nhmsa, verb, ierr ) 
-
+             call Write_Stats ( fileout, ptr, obsnum, obserr, oclass, ncfound,
+     .                          ncmax, nt, nymda, nhmsa, verb, jedi, ierr ) 
              if(opers(nop)=='sum') then
                 fileout = trim(outfile) // '.' // 'rcov4gsi'
                 call Write_gsiRfactor ( RCfile, fileout, obssum, oclass, ncfound, ncmax, nt, 
@@ -325,9 +330,11 @@
 
 !     Write out accumulated results
 !     ------------------------------
-      fileout = trim(outfile) // '_' // 'all.txt'
-      call Write_AccumStats ( fileout, accum_obssum, accum_obsgms, accum_obsnum, accum_obsneg, 
-     .                        accum_obsneu, oclass, ncfound, ncmax, nymdb, nhmsb, lrms, verb, ierr ) 
+      if (.not.jedi) then
+         fileout = trim(outfile) // '_' // 'all.txt'
+         call Write_AccumStats ( fileout, accum_obssum, accum_obsgms, accum_obsnum, accum_obsneg, 
+     .                           accum_obsneu, oclass, ncfound, ncmax, nymdb, nhmsb, lrms, verb, ierr ) 
+      endif
 
 
       CONTAINS
@@ -786,12 +793,13 @@
       if ( trim(attr) == 'imp0hr' ) then ! calculate 0hr impact as Jo(a)-Jo(b)
          do i=1,nobs
             rsum=rsum+((ods%data%oma(i))**2  -
-     .               (ods%data%omf(i))**2) /(ods%data%xvec(i))**2 ! calculate impact
+     .                 (ods%data%omf(i))**2) /(ods%data%xvec(i))**2 ! calculate impact
          enddo
       endif
       if ( trim(attr) == 'dfs' ) then   ! calculate DFS [h(xa)-h(xb)]*oma/R
          do ii=1,nobs
             i=igood(ii)
+            if (i==0) cycle
             rsum=rsum+((ods%data%omf(i)-ods%data%oma(i))*ods%data%oma(i))/(ods%data%xvec(i))**2 ! calculate dfs
          enddo
       endif
@@ -829,14 +837,14 @@
             rsum=rsum+ods%data%xm(i)*ods%data%xm(i)
          enddo
       endif
-      if ( trim(attr) == 'omf2byxvec2' ) then  ! Jo(b) when sigO in xvec slot
+      if ( trim(attr) == 'omf2byxvec2' .or. trim(attr) == 'job' ) then  ! Jo(b) when sigO in xvec slot
          do i=1,nobs
-            rsum=rsum+ods%data%omf(i)*ods%data%omf(i)/(ods%data%xvec(i)*ods%data%xvec(i))
+            rsum=rsum+0.5*ods%data%omf(i)*ods%data%omf(i)/(ods%data%xvec(i)*ods%data%xvec(i))
          enddo
       endif
-      if ( trim(attr) == 'oma2byxvec2' ) then  ! Jo(a) when sigO in xvec slot
+      if ( trim(attr) == 'oma2byxvec2' .or. trim(attr) == 'joa' ) then  ! Jo(a) when sigO in xvec slot
          do i=1,nobs
-            rsum=rsum+ods%data%oma(i)*ods%data%oma(i)/(ods%data%xvec(i)*ods%data%xvec(i))
+            rsum=rsum+0.5*ods%data%oma(i)*ods%data%oma(i)/(ods%data%xvec(i)*ods%data%xvec(i))
          enddo
       endif
       if ( trim(attr) == 'omf2byxm2' ) then    ! Jo(b) when sigO in xm slot
@@ -888,6 +896,7 @@
       if ( trim(attr) == 'dfs' ) then ! note: this is here for completeness; typically DFS>0
          do ii=1,nobs
             i=igood(ii)
+            if (i==0) cycle
             imp = (ods%data%omf(i)-ods%data%oma(i))*ods%data%oma(i)
             imp = imp/ods%data%xvec(i)**2
             if(imp>eps) rsum=rsum+1.0
@@ -1007,6 +1016,7 @@
           case ( 'dfs' )
             do ii=1,nobs
                i=igood(ii)
+               if (i==0) cycle
                dfs = ((ods%data%omf(i)-ods%data%oma(i))*ods%data%oma(i))/(ods%data%xvec(i))**2
                mean=mean+dfs
             enddo
@@ -1044,6 +1054,7 @@
        case ( 'dfs' )
          do ii=1,nobs
             i=igood(ii)
+            if(i==0) cycle
             dfs = ((ods%data%omf(i)-ods%data%oma(i))*ods%data%oma(i))/(ods%data%xvec(i))**2
             rsum=rsum+(dfs-mean)*(dfs-mean)
          enddo
@@ -1066,7 +1077,8 @@
       endif
       end subroutine gmsattr
 
-      subroutine Write_Stats ( outfile, obssum, obsnum, oclass, ncfound, ncmax, nt, nymd, nhms, verb, stat ) 
+      subroutine Write_Stats ( outfile, obssum, obsnum, obserr, oclass, ncfound, ncmax, nt,
+     .                         nymd, nhms, verb, jedi, stat ) 
       use m_ioutil, only : luavail
       implicit none
       integer, intent(in)          :: ncfound, ncmax, nt
@@ -1074,8 +1086,10 @@
       character(len=*), intent(in) :: outfile
       character(len=*), intent(in) :: oclass(ncfound)
       real,    intent(in)          :: obssum(ncmax,nt)
+      real,    intent(in)          :: obserr(ncmax,nt)
       integer, intent(in)          :: obsnum(ncmax,nt)
       logical, intent(in)          :: verb
+      logical, intent(in)          :: jedi
       integer, intent(out)         :: stat
 
       integer i,j,ios,lu
@@ -1093,9 +1107,20 @@
 
       do j = 1, nt ! loop over times
          do i = 1, ncfound  ! loop ob classes
-                            ! intentionally truncate oclass to 20 chars
-            write(lu,'(i8.8,1x,i6.6,1x,a20,1x,i11,1x,1p,e11.4)') 
-     .            nymd(j), nhms(j), oclass(i), obsnum(i,j), obssum(i,j)
+            if ( jedi ) then
+              if ( obsnum(i,j) > 0 ) then
+!                write(lu,'(i8.8,1x,i6.6,1x,3a,1x,1p,e11.4,a,i7,1x,a,f8.5,a,e11.4)') 
+                 write(lu,'(i8.8,1x,i6.6,1x,3a,1x,1p,e11.4,a,i7,1x,a,e11.4,a,e11.4)') 
+     .                 nymd(j), nhms(j), 
+     .                 ', Jo(', trim(oclass(i)), ') =', obssum(i,j),
+     .                 ', nobs = ', obsnum(i,j),
+     .                 ', Jo/n = ', obssum(i,j)/obsnum(i,j),
+     .                 ', err = ',  obserr(i,j)/obsnum(i,j)
+              endif
+            else            ! intentionally truncate oclass to 20 chars
+              write(lu,'(i8.8,1x,i6.6,1x,a20,1x,i11,1x,1p,e11.4)') 
+     .              nymd(j), nhms(j), oclass(i), obsnum(i,j), obssum(i,j)
+            endif
          enddo
       enddo
       close(lu)
@@ -1342,7 +1367,7 @@
 ! !INTERFACE:
 !
       subroutine init ( infile, nfiles_max, nfiles, RCfile, outfile, 
-     .                  trange, latrange, lonrange, verb, aodsigofix, ncf )
+     .                  trange, latrange, lonrange, verb, jedi, aodsigofix, ncf )
 
 ! !USES:
 
@@ -1360,6 +1385,7 @@
       integer,          intent(out) :: trange(2)
       real,             intent(out) :: latrange(2)
       real,             intent(out) :: lonrange(2)
+      logical,          intent(out) :: jedi
       logical,          intent(out) :: verb
       logical,          intent(out) :: aodsigofix
       logical,          intent(out) :: ncf
@@ -1386,6 +1412,7 @@
       latrange  = (/-90.,+90./)   ! Default: includes obs in all latitude ranges
       lonrange  = (/-180.,+180./) ! Default: includes obs in all longitude ranges 
       verb = .false.
+      jedi = .false.
       aodsigofix = .false.
       ncf  = .false.
 
@@ -1406,6 +1433,8 @@
             call GetArg ( iArg, outfile )
          else if (index(argv,'-verbose' ) .gt. 0 ) then
             verb = .true.
+         else if (index(argv,'-jediformat' ) .gt. 0 ) then
+            jedi = .true.
          else if (index(argv,'-ncf' ) .gt. 0 ) then
             ncf = .true.
          else if (index(argv,'-aodsigofix' ) .gt. 0 ) then
@@ -1509,6 +1538,7 @@
       print *,'-o  ID         use ID for naming output files'
       print *,'                (default: obsstat.txt)'
       print *,'-aodsigofix    wire sigO for AOD residuals (see Notes)'
+      print *,'-jediformat    format output in similar as JEDI'
       print *,'-verbose       sets verbose on (default: off)'
       print *,'-rc RCfile      resource file'
       print *,'                (default: obsstat.rc)'

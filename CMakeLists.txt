@@ -11,7 +11,7 @@ if ( NOT HERMES_LIGHT )
      GMAO_mpeu
      GMAO_pilgrim
      GMAO_etc
-     GEOS_Util 
+     GEOS_Util
      LANL_Shared
      GMAO_perllib
      GMAO_transf
@@ -39,4 +39,14 @@ if ( NOT HERMES_LIGHT )
      add_dependencies (GMAO_gfio_r4 GMAO_gfio_r8)
    endif ()
 
+   # the gmao2ioda directory just has scripts we want to install
+   # but we only want to install it if it actually exists (i.e.,
+   # it might be sparsed out in some fixtures
+   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/gmao2ioda)
+     install(
+       DIRECTORY gmao2ioda
+       DESTINATION bin
+       USE_SOURCE_PERMISSIONS
+     )
+   endif()
 endif()
