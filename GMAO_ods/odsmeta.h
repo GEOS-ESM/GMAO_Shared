@@ -33,6 +33,7 @@
 !  20May2017  Todling   Add exclusion flag X_ADV_LOCAL
 !  25May2018  wargan    added OMPS
 !  03Mar2022  Jin J./ElAkkraoui  Added AMSRE 
+!  28Oct2023  Todling   add hist flag ascend/descend
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -182,6 +183,8 @@
       integer, parameter :: H_SUSP_TEMP    = 12 ! moisture from suspect temp
       integer, parameter :: H_SUSP_DEWTEMP = 13 ! moisture from suspect dewpt
 
+      integer, parameter :: H_DESCEND = 15      ! descending orbit
+      integer, parameter :: H_ASCEND  = 16      ! ascending orbit
       integer, parameter :: H_BACKG   = 17      ! background check
 
       integer, parameter :: H_YELLOW  = 20      ! obs marked as suspect by "Yellow List"

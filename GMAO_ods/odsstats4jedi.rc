@@ -1,0 +1,92 @@
+#
+# ObsFuncs Resource file.
+#
+# !HISTORY:
+#
+#   2023-09-27 - Todling - Initial version
+# 
+# Notes:
+#
+
+OBS*Operations: sum
+OBS*Variable: job
+
+OBS*Class*Kts:: 
+   SfcLand    4 5 11 33 44
+   SfcMarine  4 5 11 33 44
+   Aircraft   4 5 44
+   Radiosonde 4 5 11 33 44 
+   ASCAT      4 5
+   SATWIND    4 5
+#  AMSUA-AQA  40
+   AMSUA-N15  40
+   AMSUA-N18  40
+   AMSUA-N19  40
+#  AMSUA-MTA  40
+   AMSUA-MTB  40
+   AMSUA-MTC  40
+   ATMS-NPP   40
+   ATMS-N20   40
+   AMSR2-W1   40
+#  MHS-N18    40
+   MHS-N19    40
+#  MHS-MTA    40
+   MHS-MTB    40
+   MHS-MTC    40
+#  IASI-MTA   40
+   IASI-MTB   40
+   IASI-MTC   40
+   CRIS-NPP   40
+   CRIS-N20   40
+   AIRS-AQA   40
+   SSMIS-F17  40
+#  SSMIS-F18  40
+   AVHRR-N18  40
+   AVHRR-N19  40
+   AVHRR-MTB  40
+   Pibal      4 5
+   GPSRO      89
+   GMI-GPM    40
+   MLS55      87
+::
+
+OBS*Class*Kxs::
+   SfcLand    181 187 281 287
+   SfcMarine  180 183 280 282 284
+   Aircraft   130 131 133 135 230 231 233 235
+#  Radiosonde 120:123 220 222 
+   Radiosonde 120 220
+   ASCAT      290
+#  SATWIND    226:240
+   SATWIND    242:259
+#  AMSUA-AQA  300
+   AMSUA-N15  315
+   AMSUA-N18  318
+   AMSUA-N19  319
+#  AMSUA-MTA  325
+   AMSUA-MTB  326
+   AMSUA-MTC  327
+   ATMS-NPP   900
+   ATMS-N20   920
+   AMSR2-W1   550
+#  MHS-N18    818
+   MHS-N19    819
+#  MHS-MTA    825
+   MHS-MTB    826
+   MHS-MTC    827
+#  IASI-MTA   875
+   IASI-MTB   876
+   IASI-MTC   877
+   CRIS-NPP   940
+   CRIS-N20   960
+   AIRS-AQA   49
+   SSMIS-F17  717
+#  SSMIS-F18  718
+   AVHRR-N18  618
+   AVHRR-N19  619
+   AVHRR-MTB  626
+   Pibal      221
+   GPSRO      3:5 42:44 267:269 722 723 740:745 750:755 786 820 825
+   GMI-GPM    706
+   MLS55      330
+::
