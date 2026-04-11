@@ -25,7 +25,10 @@ c    If ivarint=1, variable intercept parameters are used, as
 c    calculated in Thompson, Rasmussen, and Manning (2004, Monthly
 c    Weather Review, Vol. 132, No. 2, pp. 519-542.)
 c
-c     4. If iliqskin=1, frozen particles that are at a temperature above
+c     4. If iliqskin=1, snow particles that are at a temperature above
+c     freezing are assumed to scatter as a liquid particle.
+c                     
+c     4. If iliqskin=2, snow & graupel particles that are at a temperature above
 c     freezing are assumed to scatter as a liquid particle.
 c
 c     More information on the derivation of simulated reflectivity in
@@ -53,9 +56,6 @@ c   Local Variables
       REAL FACTOR_G,FACTOR_R,FACTOR_S
       REAL FACTORB_G,FACTORB_S
       REAL RHOAIR,Z_E
-      REAL FAC_SKIN
-      REAL RHO_S_EFF, RHO_G_EFF
-      REAL FACTOR_S_LOC, FACTOR_G_LOC
 
 c   Constants used to calculate variable intercepts
       REAL R1,RON,RON2,SON,GON
@@ -150,37 +150,16 @@ c   Compute snow based on QRA and TMK
 c      Adjust factor for brightband, where snow or graupel particle
 c      scatters like liquid water (alpha=1.0) because it is assumed to
 c      have a liquid skin.
-c --- wet snow / melting layer enhancement -------------------
-                  IF (ILIQSKIN .EQ. 1) THEN
-c --- smooth transition from -2C to +1C
-                     TEMP_C = TMK(I,J,K) - CELKEL
-                     FAC_SKIN = (TEMP_C + 2.0D0) / 3.0D0
-                     IF (FAC_SKIN .LT. 0.0D0) FAC_SKIN = 0.0D0
-                     IF (FAC_SKIN .GT. 1.0D0) FAC_SKIN = 1.0D0
-c --- effective density increase near melting
-                     RHO_S_EFF = RHO_S *
-     1               (1.0D0 + 1.5D0 * FAC_SKIN)
 
-                     RHO_G_EFF = RHO_G *
-     1               (1.0D0 + 0.5D0 * FAC_SKIN)
-c --- recompute factors with updated density and dielectric enhancement
-                     FACTOR_S_LOC = GAMMA_SEVEN * 1.D18 *
-     1               (1.D0/(PI*RHO_S_EFF))**1.75D0 *
-     2               (RHO_S_EFF/RHOWAT)**2 * ALPHA *
-     3               (1.0D0 + FAC_SKIN *
-     4               (1.0D0/ALPHA - 1.0D0))
-
-                     FACTOR_G_LOC = GAMMA_SEVEN * 1.D18 *
-     1               (1.D0/(PI*RHO_G_EFF))**1.75D0 *
-     2               (RHO_G_EFF/RHOWAT)**2 * ALPHA *
-     3               (1.0D0 + FAC_SKIN *
-     4               (1.0D0/ALPHA - 1.0D0))
+                  IF (ILIQSKIN.EQ.1 .AND. TMK(I,J,K).GT.CELKEL) THEN
+                      FACTORB_S = FACTOR_S/ALPHA
+                  ELSEIF (ILIQSKIN.EQ.2 .AND. TMK(I,J,K).GT.CELKEL) THEN
+                      FACTORB_S = FACTOR_S/ALPHA
+                      FACTORB_G = FACTOR_G/ALPHA
                   ELSE
-                     FACTOR_S_LOC = FACTOR_S
-                     FACTOR_G_LOC = FACTOR_G
-                  ENDIF
-                  FACTORB_S = FACTOR_S_LOC
-                  FACTORB_G = FACTOR_G_LOC
+                      FACTORB_S = FACTOR_S
+                      FACTORB_G = FACTOR_G
+                  END IF
 
 c      Calculate variable intercept parameters
 
