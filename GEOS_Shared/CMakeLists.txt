@@ -10,6 +10,12 @@ set (srcs
 
 esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL ESMF::ESMF NetCDF::NetCDF_Fortran)
 
+# === FIX: Make sure MAPL headers are visible ===
+target_include_directories(${this} PUBLIC
+    $<BUILD_INTERFACE:${MAPL_INCLUDE_DIRS}>
+    $<INSTALL_INTERFACE:include>
+)
+
 # special cases
 set_source_files_properties(sphere.F PROPERTIES COMPILE_FLAGS "${FREAL8}")
 
