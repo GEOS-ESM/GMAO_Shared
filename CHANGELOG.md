@@ -9,17 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Minor changes for VIIRS additions
-
 ### Changed
 
 ### Fixed
 
-- Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing
-
 ### Removed
 
 ### Deprecated
+
+## [2.1.7] - 2026-04-15
+
+### Added
+
+- Minor changes for VIIRS additions
+
+### Changed
+
+- Synced latest changes from branch GEOS-FP-5_44 into main
+
+### Fixed
+
+- Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing
 
 ## [2.1.6] - 2026-01-06
 
