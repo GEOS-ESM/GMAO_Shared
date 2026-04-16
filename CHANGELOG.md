@@ -13,11 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing
-
 ### Removed
 
 ### Deprecated
+
+## [2.1.7] - 2026-04-15
+
+### Added
+
+- Minor changes for VIIRS additions
+
+### Changed
+
+- Synced latest changes from branch GEOS-FP-5_44 into main
+
+### Fixed
+
+- Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing
 
 ## [2.1.6] - 2026-01-06
 
@@ -85,6 +97,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+2026-01-17:
+
+- added GOES, HIMAWARI, VIIRS SNPP & NOAA-20, and Lunar AERONET aerosol observations to the KX-lists
+
+2026-01-12:
+
+- r_dist for MILAN
+- minor bug fix in ODS code
+- add ak/bk for MLT 1st version
+- add ability to write out akbk to nc4 (JEDI support)
+
+------------
 - fix vED
 - SLES15 stuff
 - fix to reading of table in time ave program
