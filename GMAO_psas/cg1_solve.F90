@@ -89,8 +89,8 @@
 	real _SDOT,_SNRM2
 	external _SDOT,_SNRM2	! BLAS functions
 
-	integer lnblnk,luavail
-	external lnblnk,luavail
+	integer luavail
+	external luavail
 
 !.......................................................................
 

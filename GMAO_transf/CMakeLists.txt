@@ -11,10 +11,10 @@ add_definitions (-Dopenmp)
 #
 # NOTE to the NOTE above: the contrary argument is that compiling the
 # way the model (mkiau) wants it break all programs created by this
-# directory. I have modified things so that at least some programs 
-# here still work; I believe the way I modified things is in a way 
+# directory. I have modified things so that at least some programs
+# here still work; I believe the way I modified things is in a way
 # that does not affect mkiau - but I have not tested; the only things
-# I changed relate to which NCEP libs are explicitly used to create 
+# I changed relate to which NCEP libs are explicitly used to create
 # the execs within this directory. This does not affect the transf lib.
 # (Todling; 25 Nov 2021)
 #
@@ -104,8 +104,18 @@ ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} GMAO_mpeu G
 
 install (PROGRAMS ec2fv.csh DESTINATION bin)
 
-#This needs to be worked on
-ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bufr_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
+##This needs to be worked on
+#ecbuild_add_executable(TARGET ss2gg.x SOURCES ss2gg.f90 LIBS NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bufr_r4i4 NCEP_bacio_r4i4 NCEP_sigio)
+ecbuild_add_executable(TARGET ss2gg.x
+    SOURCES ss2gg.f90
+    LIBS
+        ${this}               # GMAO_transf
+        NCEP_w3_r4i4 NCEP_sp_r4i4 NCEP_bufr_r4i4 NCEP_bacio_r4i4 NCEP_sigio
+        ${LAPACK_LIBRARIES}   # <--- Add this to fix dgesv_
+        ${BLAS_LIBRARIES}
+        GMAO_mpeu
+)
+
 
 esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu NCEP_sp_r4i4 NCEP_bufr_r4i4  NCEP_w3_r8i4 NCEP_sfcio GMAO_hermes NCEP_sigio ${MKL_LIBRARIES})
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})

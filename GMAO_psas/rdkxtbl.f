@@ -32,8 +32,8 @@ c	..Locals
 	integer l,ikx,irank
 	real val
 
-	integer lnblnk
-	external lnblnk
+
+
 
 	real a
 	logical NotAnInt
@@ -76,7 +76,7 @@ c ====
 
 	  val=str2rn(str,ios)
 	  if(ios.ne.0) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &		': expecting a number for kx, but "',str(1:l),'"'
 	    istat=1
@@ -84,7 +84,7 @@ c ====
 	  endif
 
 	  if(NotAnInt(val)) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &		': expecting an integer for kx, but "',str(1:l),'"'
 	    istat=1
@@ -95,7 +95,7 @@ c	  ..Check the value
 c	  =================
 	  ikx=nint(val)
 	  if(ikx.le.0 .or. ikx.gt.mxkx ) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(2a,i3,3a)') myname,
      &		': expecting kx value 1 to ',mxkx,', but "',
      &		str(1:l),'"'
@@ -135,7 +135,7 @@ c ====
 
 	  val=str2rn(str,ios)
 	  if(ios.ne.0) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &		': expecting a number for kxrank, but "',str(1:l),'"'
 	    istat=3
@@ -143,7 +143,7 @@ c ====
 	  endif
 
 	  if(NotAnInt(val)) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &		': expecting an integer for kxrank, but "',str(1:l),'"'
 	    istat=3

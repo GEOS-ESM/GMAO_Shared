@@ -34,8 +34,8 @@ c	..Locals
 	integer ikt,jkt
 	real val
 
-	integer lnblnk
-	external lnblnk
+
+
 
 	real a
 	logical NotAnInt
@@ -84,7 +84,7 @@ c	  for a given variable.
 
 	  val=str2rn(str,ios)
 	  if(ios.ne.0) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &	      ': expecting a number, but "',str(1:l),'"'
 	    istat=1
@@ -92,7 +92,7 @@ c	  for a given variable.
 	  endif
 
 	  if(NotAnInt(val)) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &		': expecting an integer, but "',str(1:l),'"'
 	    istat=1
@@ -101,7 +101,7 @@ c	  for a given variable.
 
 	  ikt=nint(val)
 	  if(ikt.le.0 .or. ikt.gt.mxkt) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(2a,i3,3a)') myname,
      &		': expecting kt value 1 to ',mxkt,', but "',
      &		str(1:l),'"'
@@ -159,7 +159,7 @@ c	  keep reading until upto nkt entries are read.
 	  call getwrd(ios,str)
 	  jkt=0			! for jkt=1,ikt
 	  do while(ios.eq.0.and.jkt.lt.ikt)
-	    ls=lnblnk(str)	! if ios=0, ls>0
+	    ls=len_trim(str)	! if ios=0, ls>0
 	    ln=min(ls,ikt-jkt)	! only need upto the first ikt entries
 	    do k=1,ln
 	      jkt=jkt+1

@@ -14,8 +14,8 @@ c	..Locals
 	integer l
 	logical found
 
-	integer lnblnk
-	external lnblnk
+
+
 
 	logical match
 	integer li,ll
@@ -24,14 +24,14 @@ c	..Locals
 
 c-----------------------------------------------------------------------
 	icshft=ichar('a')-ichar('A')
-	li=lnblnk(item)
+	li=len_trim(item)
 
 	l=0
 	found=.false.
 	do while(l.lt.ne.and..not.found)
 	  l=l+1
 
-	  ll=lnblnk(list(l))
+	  ll=len_trim(list(l))
 
 	  match=li.eq.ll
 	  do while(match.and.ll.gt.0)

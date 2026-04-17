@@ -93,8 +93,8 @@ implicit none
 	character*7 myname
 	parameter(myname='rdvctbl')
 
-	integer lnblnk
-	external lnblnk
+
+
 
 	include "realvals.h"
 
@@ -138,7 +138,7 @@ implicit none
 		! Process the line token by token
 	  call getwrd(ios,str)		! leading token mark the level
 	  if(ios.ne.0) then
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,			&
 	      ': unexpected error from getwrd(), "',str(1:l),'"'
 	    istat=1
@@ -148,7 +148,7 @@ implicit none
 	  val=str2rn(str,ios)
 	  if(ios.ne.0) then		! possibly a name
 	    if(name.ne.' ') then	! alread defined
-	      l=max(lnblnk(str),1)
+	      l=max(len_trim(str),1)
 	      write(stderr,'(4a)') myname,			&
 		': unexpected string found, "',str(1:l),'"'
 	      istat=1
@@ -166,7 +166,7 @@ implicit none
 		! Verify the levels
 	    if(n.gt.1) then	! if the levels are too close
 	      if( AboutEqual(plev(n),plev(n-1)) ) then
-	        l=max(lnblnk(str),1)
+	        l=max(len_trim(str),1)
 	        write(stderr,'(4a)') myname,			&
 		  ': value too close to the previous level, "',	&
 		str(1:l),'"'
@@ -181,7 +181,7 @@ implicit none
 		  (plev(n-1).gt.plev(n-2))			) then
 		write(stderr,'(2a,3g10.2)') myname,		&
 		  ': not sorted ,',plev(n-2),plev(n-1),plev(n)
-	      
+
 		istat=3
 		return
 	      endif
@@ -195,7 +195,7 @@ implicit none
 	      val=str2rn(str,ios)
 	      if(ios.eq.0) then
 	        if(val.gt.1.) then
-		  l=max(lnblnk(str),1)
+		  l=max(len_trim(str),1)
 		  write(stderr,'(4a)') myname,			&
 		    ': invalid value, "',str(1:l),'"'
 		  istat=4
@@ -205,7 +205,7 @@ implicit none
 	          vctabl(n,l)=val	! symmetry considered
 	        endif
 	      else
-	        l=max(lnblnk(str),1)
+	        l=max(len_trim(str),1)
 	        write(stderr,'(4a)') myname,			&
 		  ': not a number, "',str(1:l),'"'
 	        istat=4

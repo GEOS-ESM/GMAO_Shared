@@ -19,11 +19,11 @@ c	..Local vars.
 	character*1 c
 
 c	..Functions
-	integer lnblnk
-	external lnblnk
 
-	ls=lnblnk(str)
-	lp=lnblnk(pat)
+
+
+	ls=len_trim(str)
+	lp=len_trim(pat)
 
 	icdif=ichar('a')-ichar('A')
 

@@ -34,8 +34,8 @@
 
 ! Locals.
 
-	integer  luavail,lnblnk
-	external luavail,lnblnk
+	integer  luavail
+	external luavail
 
 	integer lumat,i,j,ios
 
@@ -43,7 +43,7 @@
 	
 		! Set the filename
 
-	  j=max(lnblnk(prefix),1)
+	  j=max(len_trim(prefix),1)
 	  write(fnmat,'(a,2(a,i2.2),a,i5.5,a)')
      &	    prefix(1:j),'.',kr,'.v',kt,'.',ln,'.mat'
 	  do i=1,j

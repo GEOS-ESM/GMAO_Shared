@@ -161,7 +161,7 @@ LIBpsas_OBJS	= \
     initkl.o   initRSRC.o              intp_ctaus.o  intp_hCor.o\
  intp_sigO.o  intp_vCor.o   inxSlist.o      ipick.o    krname0.o\
    ktname0.o    kxname0.o   listvals.o    ll2qvec.o     ll2xyz.o\
-   llboxes.o     lnblnk.o     lstins.o    luavail.o     lvstat.o\
+   llboxes.o     lstins.o    luavail.o     lvstat.o\
  merg_lats.o merg_plevs.o      mvPHx.o     mv_Alf.o     mv_Bet.o\
     mv_Gam.o    obssmry.o     obstat.o   offdcorF.o    oHHcor1.o\
    opntext.o      op_Mx.o    pardisp.o    permuti.o\

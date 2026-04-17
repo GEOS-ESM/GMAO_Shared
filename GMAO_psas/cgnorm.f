@@ -51,8 +51,8 @@ c   ================-=
 	integer mxprt
 	parameter(mxprt=16)	! total number of values to list
 
-	integer lnblnk,ln	! string size
-	external lnblnk
+	integer ln	! string size
+
 
 c   ===========================================
 	if(.not.mpout_ison()) return
@@ -76,7 +76,7 @@ c   ==================================================
 
 c   ..Write the header (label)
 c   ==========================
-	ln=max(lnblnk(CGname),1)
+	ln=max(len_trim(CGname),1)
 	write(mpout,'(2a)') CGname(1:ln),'::'
 
 c   ..Write related values

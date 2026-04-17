@@ -33,8 +33,8 @@ c	..Locals
 	parameter(UNDEFoe=-1.)	! Sigma-O !< 0
 
 
-	integer lnblnk
-	external lnblnk
+
+
 
 	include "realvals.h"
 
@@ -81,7 +81,7 @@ c  #1
 c ====
 	  call getwrd(ios,styp)
 	  if(ios.ne.0) then
-	    ln=max(lnblnk(styp),1)
+	    ln=max(len_trim(styp),1)
 	    write(stderr,'(4a)') myname,
      &	      ': unexpected error from getwrd(), "',styp(1:ln),'"'
 	    istat=1
@@ -98,7 +98,7 @@ c	    ..Unknonw Correlation function class
 	    if(	styp.ne.'vCor_HH'  .and.styp.ne.'hCor_HH'  .and.
      &		styp.ne.'vCor_HH.c'.and.styp.ne.'hCor_HH.c'.and.
      &		styp.ne.'vCor_HH.u' ) then
-	      lt=max(lnblnk(styp),1)
+	      lt=max(len_trim(styp),1)
 	      write(stderr,'(4a)') myname,
      &		': unknown correlation type skipped, "',styp(1:lt),'"'
 
@@ -107,7 +107,7 @@ c	    ..If the name is known
 
 	      call getwrd(ios,snum)
 	      if(ios.ne.0) then
-		lt=max(lnblnk(styp),1)
+		lt=max(len_trim(styp),1)
 		write(stderr,'(4a)') myname,
      &		  ': missing an integer number, "',styp(1:lt),'"'
 		istat=2
@@ -116,8 +116,8 @@ c	    ..If the name is known
 
 	      val=str2rn(snum,ios)
 	      if(ios.ne.0) then
-		lt=max(lnblnk(styp),1)
-		ln=max(lnblnk(snum),1)
+		lt=max(len_trim(styp),1)
+		ln=max(len_trim(snum),1)
 		write(stderr,'(6a)') myname,
      &		  ': expecting a number for "',
      &		  styp(1:lt),'", but "',snum(1:ln),'"'
@@ -126,8 +126,8 @@ c	    ..If the name is known
 	      endif
 
 	      if(NotAnInt(val)) then
-		lt=max(lnblnk(styp),1)
-		ln=max(lnblnk(snum),1)
+		lt=max(len_trim(styp),1)
+		ln=max(len_trim(snum),1)
 		write(stderr,'(6a)') myname,
      &		  ': expecting an integer for "',
      &		  styp(1:lt),'", but "',snum(1:ln),'"'
@@ -168,8 +168,8 @@ c	      ======================================
 		  val=str2rn(snum,ios)
 		  if(ios.eq.0 .and. val .lt. 0.) ios=1
 		  if(ios.ne.0) then
-		    lt=max(lnblnk(styp),1)
-		    ln=max(lnblnk(snum),1)
+		    lt=max(len_trim(styp),1)
+		    ln=max(len_trim(snum),1)
 		    write(stderr,'(6a)') myname,
      &			': invalid ObsErr number, "',
      &			styp(1:lt),' ',snum(1:ln),'"'

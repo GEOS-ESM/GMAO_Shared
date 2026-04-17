@@ -28,8 +28,8 @@ c ========
 	integer ios
 	character*64 str
 
-	integer lnblnk
-	external lnblnk
+
+
 
 	real a,b
 	logical AboutEqual
@@ -60,7 +60,7 @@ c	..Loop over tokens for each level value
 
 	  val=str2rn(str,ios)
 	  if(ios.ne.0) then		! not a number
-	    l=max(lnblnk(str),1)
+	    l=max(len_trim(str),1)
 	    write(stderr,'(4a)') myname,
      &		': not a number, "',str(1:l),'"'
 	    istat=1
@@ -73,7 +73,7 @@ c	..Loop over tokens for each level value
 c	  ..Verify the levels
 	  if(nlev.gt.1) then	! if the levels are too close
 	    if( AboutEqual(plev(nlev),plev(nlev-1)) ) then
-	      l=max(lnblnk(str),1)
+	      l=max(len_trim(str),1)
 	      write(stderr,'(4a)') myname,
      &		': value too close to the previous level, "',
      &		str(1:l),'"'

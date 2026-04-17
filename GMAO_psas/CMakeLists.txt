@@ -240,10 +240,20 @@ add_custom_command (OUTPUT m_mvcorF_nsep_bmop___.F90
   COMMAND ${M4} ${CMAKE_CURRENT_SOURCE_DIR}/m_mvcorF_nsep_bmop.m4 > m_mvcorF_nsep_bmop___.F90
   )
 
-esma_add_library (${this}
-  SRCS ${SRCS}
-  DEPENDENCIES GMAO_mpeu ${MKL_LIBRARIES}
-  )
+if (DEFINED MKL_LIBRARIES AND MKL_LIBRARIES)
+  esma_add_library (${this}
+    SRCS ${SRCS}
+    DEPENDENCIES GMAO_mpeu ${MKL_LIBRARIES}
+    )
+else()
+  esma_add_library (${this}
+    SRCS ${SRCS}
+    DEPENDENCIES GMAO_mpeu ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
+    )
+endif()
+
+
+
 
 target_compile_definitions (${this} PUBLIC NDEBUG LANGUAGE_FORTRAN TUNE_COSTS USE_MPI_1 _DLAPACK_)
 
@@ -254,7 +264,19 @@ endforeach()
 
 
 
-ecbuild_add_executable (TARGET solve.x SOURCES solve.F90 LIBS ${this})
+if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+  ecbuild_add_executable (TARGET solve.x SOURCES solve.F90 LIBS ${this})
+else()
+  ecbuild_add_executable (TARGET solve.x
+     SOURCES solve.F90
+     LIBS
+        ${this}               # This is GMAO_psas
+        GMAO_mpeu             # Dependency of PSAS
+        ${LAPACK_LIBRARIES}   # Resolves dgetrf, dpptrf, etc.
+        ${BLAS_LIBRARIES}     # Resolves daxpy, ddot, etc.
+        NetCDF::NetCDF_Fortran
+)
+endif()
 
 string(REPLACE " " ";" tmp ${FREAL8})
 foreach(flag ${tmp})

@@ -42,9 +42,6 @@
 !
 ! !SYSTEM ROUTINES:
 !
-!  external procedures:
-!	integer lnblnk()
-!
 !  external data structures:
 !	include "ktmax.h"
 !	include "kttabl.h"
@@ -95,8 +92,6 @@ c	..Local setting and functions
 	character*6 myname
 	parameter(myname='obstat')
 
-	integer lnblnk
-	external lnblnk
 
 	logical between
 	real x1,x2,x
@@ -104,7 +99,7 @@ c	..Local setting and functions
 
 c	..Write a header of the table
 
-	ln=lnblnk(header)
+	ln=len_trim(header)
 	if(ln.eq.0) then
 	  write(lu,'(/a)') myname,'::'
 	else

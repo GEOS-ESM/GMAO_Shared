@@ -51,8 +51,6 @@
   Character(Len=*), Parameter :: file_to_psas   = 'ana-psas.bin'
   Character(Len=*), Parameter :: file_from_psas = 'psas-ana.bin'
 
-  integer, external :: system
-
 ! The following should really come from m_odsmeta
 ! -----------------------------------------------
   integer, parameter  :: ktWW    =  7
@@ -397,7 +395,8 @@ Contains
     write(command,'(3a)') trim(mpirun), ' ', trim(solve_dot_x)
     write(6,'(3a)') myname_, ': ', trim(command)
     call flush(6)
-    ier = System ( trim(command) )
+    call execute_command_line(trim(command), wait=.true., exitstat=ier)
+
     if ( ier /= 0 ) then
        call die ( myname_, 'cannot run ' // trim(command) )
     end if
