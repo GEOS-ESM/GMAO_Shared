@@ -784,7 +784,7 @@
       character(len=*), parameter :: RCfile = 'odsmatch.rc'
 
       integer, parameter :: nfiles_max=3
-      integer i, iarg, argc, iargc, nfiles
+      integer i, iarg, argc, nfiles
       character*255 argv
       character*255 infile(nfiles_max)
 
@@ -803,7 +803,7 @@
       
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. nfiles_max ) call usage()
       nfiles = 0
       iarg = 0

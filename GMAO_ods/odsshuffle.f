@@ -280,7 +280,7 @@
 
       character*4, parameter :: myname = 'init'
 
-      integer iret, i, lv, iarg, argc, iargc
+      integer iret, i, lv, iarg, argc
       character*255 argv
       character*2 HH
       character*10 SS
@@ -288,7 +288,7 @@
 !     Parse command line
 !     ------------------
 
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
       nfiles = 0
       iarg = 0

@@ -158,11 +158,6 @@
       integer     BufSize
       parameter ( BufSize = 255 )
 
-!     Functions referenced for ...
-!     ----------------------------
-      integer     IArgC     ! ... extracting the number of command
-                            !     arguments
-
 *     Error handling
 *     --------------
       character                * ( BufSize )
@@ -189,7 +184,7 @@
 
 *     Number of arguments in command-line input
 *     -----------------------------------------
-      NArg          = IArgC ()
+      NArg          =  command_argument_count()
       if ( NArg .eq. 0 ) call Usage ()
 
 *     Initialize

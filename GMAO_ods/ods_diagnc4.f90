@@ -1,7 +1,7 @@
 module diagnc4_read
   use netcdf
   implicit none
-  
+
 ! Integer types
   integer, parameter, public  :: i_byte  = selected_int_kind(1)      ! byte  integer
   integer, parameter, public  :: i_short = selected_int_kind(4)      ! short integer
@@ -37,7 +37,7 @@ module diagnc4_read
      module procedure get_1d_char_var_
   end interface get_1d_var
 
-  
+
 contains
 
   integer function get_dim(ncid,name,rc)
@@ -64,7 +64,7 @@ contains
     get_dim = length
     return
   end function get_dim
-    
+
   subroutine get_1d_double_var_(ncid,name,values,rc)
     integer,           intent(in) :: ncid
     character(len = *),intent(in) :: name
@@ -89,7 +89,7 @@ contains
     end if
     return
   end subroutine get_1d_double_var_
-  
+
   subroutine get_1d_real_var_(ncid,name,values,rc)
     integer,           intent(in) :: ncid
     character(len = *),intent(in) :: name
@@ -114,7 +114,7 @@ contains
     end if
     return
   end subroutine get_1d_real_var_
-  
+
   subroutine get_1d_int_var_(ncid,name,ivalues,rc)
     integer,           intent(in) :: ncid
     character(len = *),intent(in) :: name
@@ -139,7 +139,7 @@ contains
     end if
     return
   end subroutine get_1d_int_var_
-  
+
   subroutine get_1d_char_var_(ncid,name,cvalues,rc)
     integer,           intent(in) :: ncid
     character(len = *),intent(in) :: name
@@ -206,7 +206,7 @@ contains
     end if
     status = nf90_get_var(ncid, varid, values)
     if (status /= nf90_noerr) then
-       print *,'error reading ', name,', status=',status 
+       print *,'error reading ', name,', status=',status
        rc = 2
        status = nf90_close(ncid)
        return
@@ -227,7 +227,7 @@ end module diagnc4_read
 subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
 ! !USES
-  
+
   use m_odsmeta
   use m_ods
   use m_odsxsup, only : getodsmeta
@@ -240,17 +240,17 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   implicit none
 
 ! !INPUT PARAMETERS:
- 
+
   character(len=*), intent(in)   :: fname   ! GSI diag_ file name
   integer, intent(in)            :: nymd    ! year-month-day, e.g., 19990701
   integer, intent(in)            :: nhms    ! hour-min-sec,   e.g., 120000
 
 ! !OUTPUT PARAMETERS:
- 
+
   type(ods_vect), intent(inout)  :: ods     ! ODS vector
-  
+
   integer, intent(out)           :: rc      ! Error return code:
-  
+
 ! !DESCRIPTION: get data from GSI diag\_nc4 files and convert to ODS
 !
 ! !REVISION HISTORY:
@@ -258,10 +258,10 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 !   2019-04-22 - Sienkiewicz - added 'spd' and 'sst' processing
 !   2019-05-21 - Sienkiewicz - replace nc_diag_read routines
 !   2019-08-28 - Sienkiewicz - polymorphic get_1d_var, initial implementation
-!                               of sensitivity processing 
+!                               of sensitivity processing
 !EOP
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
+
   integer input_id
   real(r_single)  zero_single,tiny_single
   real small_num
@@ -293,12 +293,15 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   logical passed
 
   integer, parameter :: nnln = 8
-  character(len=*), parameter :: nlnqct(nnln)=(/ ' dw', ' ps', 'tcp', '  q', &
-       'spd', '  t', ' uv', 'sst'/)
+  character(len=3), parameter :: nlnqct(nnln) = [character(len=3) :: &
+       'dw', 'ps', 'tcp', 'q', &
+       'spd', 't', ' uv', 'sst']
   integer, parameter :: noz = 16
-  character(len=*), parameter :: oztype(noz)=(/'sbuv2', 'omi', 'mls',    & 
+  character(len=9), parameter :: oztype(noz) = [character(len=9) :: &
+       'sbuv2', 'omi', 'mls', &
        'mls20', 'mls22', 'mls30', 'mls55', 'tomseff', 'omieff', 'o3lev', &
-       'gome','ompslpnc','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
+       'gome','ompslpnc','ompslpuv','ompslpvis','ompsnm','ompsnp']
+
 
 !     ODS variables
 !     -------------
@@ -324,7 +327,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
 
 ! Inquire whether this is diag file w/ history of omx, osens, ...
-! --------------------------------------------------------------- 
+! ---------------------------------------------------------------
   call ods_obsdiags_getparam ( 'lobsdiagsave', lobsdiagsave )
   call ods_obsdiags_getparam ( 'lobssens', lobssens )
   call ods_obsdiags_getparam ( 'miter', miter )
@@ -358,7 +361,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
      status = nf90_close(input_id)
      return
   end if
-  
+
   nymdf = nymdh / 100
   nhmsf = mod(nymdh,100)*10000
   if (nymdf/=nymd .or. nhmsf/=nhms) then
@@ -371,10 +374,10 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   end if
 
 ! Start reading the data from the file
-! ------------------------------------  
+! ------------------------------------
   nobs = get_dim(input_id,'nobs',rc)
   if (rc /= 0) return
-  
+
 ! Check for the observation type.
 ! -------------------------------
   status = nf90_inquire_attribute(input_id,NF90_GLOBAL,'Satellite')
@@ -434,13 +437,13 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         rc=3
         return
      end if
-        
+
   else if (  nf90_inq_dimid(input_id,'Observation_Class_maxstrlen',idimid) == nf90_noerr ) then
 
 !
 ! We -ought- to be able to get the type from a global (assuming the diag file
-! is homogeneous) but for now will take it from the first element of the 
-! observation class array.  
+! is homogeneous) but for now will take it from the first element of the
+! observation class array.
 !!TO_DO - add global variable with observation class to non-radiance diag files?
 
 
@@ -451,7 +454,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         status = nf90_close(input_id)
         return
      end if
-        
+
      allocate(character(len=clen) :: ob_class(nobs))
      status = nf90_inq_varid(input_id,'Observation_Class',varid)
      if (status /= nf90_noerr) then
@@ -468,12 +471,12 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         return
      end if
      obsclass = ob_class(1)(clen-2:clen)
-     if ( obsclass == ' uv') then 
+     if ( obsclass == ' uv') then
         diag_type = 'uvconv'
         nobs1 = nobs+1
         nobs2 = nobs*2
         nobs_ods = nobs2
-     else 
+     else
         diag_type = 'conv'
         nobs_ods = nobs
      end if
@@ -502,7 +505,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   end if
 
 !  Fields common to all data types - latitude, longitude, obs, omf
-!  ---------------------------------------------------------------  
+!  ---------------------------------------------------------------
   call get_1d_var(input_id,'Latitude',rvals,rc)
   if (rc /= 0) return
   ods%data%lat(1:nobs) = rvals
@@ -519,7 +522,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
      if (rc /= 0) return
      ods%data%omf(1:nobs) = rvals
      call get_1d_var(input_id,'v_Observation',rvals,rc)
-     if (rc /= 0) return     
+     if (rc /= 0) return
      ods%data%obs(nobs1:nobs_ods) = rvals
      call get_1d_var(input_id,'v_Obs_Minus_Forecast_adjusted',rvals,rc)
      if (rc /= 0) return
@@ -559,7 +562,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
      if (rc /= 0) return
 
      sigo = undef
-     
+
 ! Check if original or adjusted (final) sigO value is requested
 ! -------------------------------------------------------------
      if (ladjsigo) then
@@ -574,7 +577,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         deallocate(varchn)
      end if
      ods%data%Xvec = sigo       ! radiance Xvec
-     
+
      allocate(iuse(nchan_dim))
      call get_1d_var(input_id,'use_flag',iuse,rc)
      if (rc /= 0) return
@@ -588,7 +591,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
      end do
      ods%data%qcexcl = ivals
      deallocate(iuse)
-     
+
      nspot = nobs/nchan_dim
      knt = 0
      do i = 1,nspot
@@ -614,10 +617,10 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
      call get_1d_var(input_id,'Reference_Pressure',rvals,rc)
      if (rc /= 0) return
      ods%data%lev = rvals
-    
+
 
      select case(satype)
-        
+
 ! Level ozone observation processing
 ! ----------------------------------
      case('o3lev','mls','mls20','mls22','mls30','mls55')
@@ -683,7 +686,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
      call get_1d_var(input_id,'Pressure',rvals,rc)
      if (rc /= 0) return
      ods%data%lev(1:nobs) = rvals
- 
+
      ivals = 0
      call get_1d_var(input_id, 'Analysis_Use_Flag',rvals,rc)
      if (rc /= 0) return
@@ -727,12 +730,12 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
      select case( obsclass )
 
-     case ('gps') 
-!!TO_DO - need GPS rdiag(19) 'hob' vertical grid location, to use 
+     case ('gps')
+!!TO_DO - need GPS rdiag(19) 'hob' vertical grid location, to use
 !!        for adjusting error with pressure values == 0.0
         call get_1d_var(input_id,'GPS_Type',rvals,rc)
         if (rc /= 0) return
-        
+
         if(rvals(1) == 0) then               ! assuming homogeneous file
            ods%data%kt= ktGPSr
            call get_1d_var(input_id,'Model_Elevation',rvals,rc)
@@ -762,7 +765,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
               end do
            end if
         end if
-        
+
      case (' ps', 'tcp')  ! surface pressure
         ods%data%kt= ktps2m
         ods%data%lev = undef
@@ -778,7 +781,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         if (rc /= 0) return
         ods%data%xm = 1.e3*rvals
         where(sigo /= undef) ods%data%Xvec = 1.e3*sigo      ! adjust Q Xvec
-        
+
      case ('spd')
         ods%data%kt= ktus10       ! define it as 10m speeds
         ods%data%lev = undef
@@ -793,28 +796,28 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         call get_1d_var(input_id,'Station_Elevation',rvals,rc)
         if (rc /= 0) return
         ods%data%xm = rvals
-        
+
      case ('  t')    ! virtual temperature
         ods%data%kt= ktTv
         where(ods%data%kx==311) ods%data%kx=304
         call get_1d_var(input_id,'Obs_Minus_Forecast_unadjusted',rvals,rc)
-        if (rc /= 0) return        
+        if (rc /= 0) return
         ods%data%xm=rvals-ods%data%omf   ! fill in bias correction as xm
 
      case(' uv')  ! vector wind
         ods%data%kt(1:nobs)          = ktuu
         ods%data%kt(nobs1:nobs_ods)  = ktvv
         call get_1d_var(input_id,'Height',rvals,rc)
-        if (rc /= 0) return        
+        if (rc /= 0) return
         ods%data%xm(1:nobs)         = rvals
         ods%data%xm(nobs1:nobs_ods) = rvals
 
      case(' pw')    ! total column water
         ods%data%kt      = ktTPW
         call get_1d_var(input_id,'Prep_QC_Mark',rvals,rc)
-        if (rc /= 0) return       
+        if (rc /= 0) return
         ods%data%xm = rvals
-        
+
      case default
         print *,'can''t handle var = ',trim(ob_class(1)), nobs, ' observations'
         rc = 4
@@ -824,7 +827,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
 !    Set sounding index as in diag_bin processing
 !    --------------------------------------------
-     
+
      call setsndx (ods%data%ks(1:nobs),ods%data%kx(1:nobs),station(1:nobs))
 
 !    Set ks to actual station id for radiosondes
@@ -859,7 +862,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
         end if
      end do
-     
+
      deallocate(station)
 
      deallocate(ob_class)
@@ -892,7 +895,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
         rc = 10
         return
      end if
-     
+
      if (diag_type == 'uvconv') then
         iunldpt = get_dim(input_id,'u_ObsDiagSave_nldepart_arr_dim',rc)
         if (rc /= 0) then
@@ -909,7 +912,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
            print *,'problem getting obssen dimension, exiting'
            return
         end if
-        
+
         ivnldpt = get_dim(input_id,'v_ObsDiagSave_nldepart_arr_dim',rc)
         if (rc /= 0) then
            print *,'problem getting nldepart dimension, exiting'
@@ -925,7 +928,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
            print *,'problem getting obssen dimension, exiting'
            return
         end if
-        
+
 ! allocate arrays for reading in sensitivity information
         allocate(obs_iuse(iiuse,nobs),u_obs_nldepart(iunldpt,nobs),   &
              u_obs_tldepart(iutldpt,nobs),u_obs_obssen(iuobssen,nobs), &
@@ -989,7 +992,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
               ods%data%qcexcl(i+nobs) = 0
            end if
         end do
-        
+
         deallocate(obs_iuse, u_obs_nldepart, u_obs_tldepart,  &
              u_obs_obssen, v_obs_nldepart, v_obs_tldepart,    &
              v_obs_obssen, pdata)
@@ -1058,13 +1061,13 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
               ods%data%Xvec(i) = obimp(1)
               ods%data%qcexcl(i) = 0
            end if
-        end do        
-        
+        end do
+
         deallocate(obs_iuse, obs_nldepart, obs_tldepart, obs_obssen, pdata)
 
      end if
   end if
-  
+
   status = nf90_close(input_id)
 
   deallocate(ivals, rvals, rvals2, sigo)
@@ -1072,16 +1075,16 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   return
 
 contains
-  
+
   subroutine getsatid_(myisat)
 ! RT: some heck that needs more work
 ! RT: this needs serious attention as it is becoming a huge heck now (3/30/09)
     implicit none
     integer, intent(out) :: myisat
     integer ios
-    
+
     myisat     = 0  ! take fixed sat index as in idsats
-    
+
 !           select case( trim(ladjust(dplat)) )
 !           case ('aura')
 !              myisat = 999
@@ -1129,23 +1132,23 @@ contains
     if(i>0)then
        read(dplat(2:3),'(i2)',iostat=ios)myisat
     endif
-       
+
   end subroutine getsatid_
 
   subroutine ozone_getisat_(dtype,dplat,dsis,myisat)
     implicit none
     character(len=*),intent(in):: dtype,dplat,dsis
     integer,intent(out):: myisat
-    
+
     myisat=0        ! for a default isat value.
-    
+
     if(len_trim(dplat)==3 .and.                            &
          verify(dplat(1:1),'fgnm')==0 .and.                &
          verify(dplat(2:3),'0123456789')==0) then
 ! the "word" fgnm stands for the platforms dmsp/goes/noaa/meteosat this needs generalization
 ! e.g. dmsp -> f15   goes -> g12   noaa -> n18  meteosat -> m09
        read(dplat(2:3),'(i2)') myisat
-       
+
     else
        select case(dplat)
        case('aura')

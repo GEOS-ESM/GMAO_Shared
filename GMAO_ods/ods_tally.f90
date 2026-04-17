@@ -47,7 +47,7 @@
     character(len=255) :: ifname, ftype
     logical            :: ktonly = .true.
 
-    integer, external  :: iargc, ods_caldat
+    integer, external  :: ods_caldat
     integer            :: argc, jbeg, jend, nobs, i, j, isyn, ksyn, ia
     logical	       :: ncf
     character(len=255) :: argv
@@ -58,7 +58,7 @@
 
 !   Parse command line
 !   ------------------
-    argc = iargc()
+    argc = command_argument_count()
     if ( argc < 1 ) call usage_()
     call GetArg(1, ifname)
     do ia = 1, argc

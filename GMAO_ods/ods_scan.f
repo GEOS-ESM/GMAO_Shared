@@ -40,7 +40,7 @@
 !     This code uses three SGI extensions to Fortran 90:
 !         subroutine exit()
 !         subroutine getarg()
-!         integer function iargc()
+!         integer function command_argument_count()
 !
 ! !REVISION HISTORY:
 !     03/10/2000 Lucchesi - Original version.
@@ -57,7 +57,7 @@
       integer jbeg, jend, jday, ODS_caldat, ODS_NGet
       integer ymd, nobs, syn_hour(4)
       integer user_hour, nkx
-      integer ncid, ier, i, iargc, num_options, j, k
+      integer ncid, ier, i, num_options, j, k
       logical DEFAULT
       logical T_FLAG, L_FLAG, X_FLAG
       data syn_hour /0,6,12,18/
@@ -73,7 +73,7 @@
  
       ! Check for impossible number of command line arguments.
 
-      num_options = iargc()
+      num_options = command_argument_count()
       if (num_options .LT. 1 .OR. num_options .GT. 3) call usage ()
       
  

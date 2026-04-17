@@ -34,7 +34,7 @@
       integer  ios, ier, lu, i, k, ik, id, is(1), iks, ikx, ns
       integer  iu, iv, iknow, nfiles, ifile
       integer  minloc, mobs, kobs
-      integer  iargc, argc
+      integer  argc
       integer  nymd, nhms
       logical  newprof
 
@@ -134,7 +134,7 @@
 
       character*4, parameter :: myname = 'init'
 
-      integer       iret, i, lv, iarg, argc, iargc
+      integer       iret, i, lv, iarg, argc
       integer        k, k1, k2, ic, lt
       character*255 argv
       character*10  SS
@@ -148,7 +148,7 @@
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
       nfiles = 0
       iarg = 0

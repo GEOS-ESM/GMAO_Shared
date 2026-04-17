@@ -50,7 +50,6 @@
       integer                  i,inc_out
       integer                  nhms0,hhmmss(24),jsyn,hhmmss0
       integer                  argc,ier,rc,iarg
-      integer, external     :: iargc
       integer                  nkount,nkx,nkt
       type     ( ods_vect )    ods
       type     ( ods_vect )    ods_out
@@ -148,7 +147,7 @@
          ofname    = 'aod_obs.ods'
          inc_out   = 03
          verbose  = .false.
-         argc = iargc()
+         argc = command_argument_count()
          print *,' argc ==> ',argc
          if ( argc < 1 ) call usage_()
          iarg = 0

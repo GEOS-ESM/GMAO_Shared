@@ -469,7 +469,7 @@
 
       character*4, parameter :: myname = 'init'
 
-      integer iret, i, lv, iarg, argc, iargc
+      integer iret, i, lv, iarg, argc
       integer k, k1, k2, ic, ic1, ic2, lt, ii, ib
       real swap
       character*255 argv
@@ -482,7 +482,7 @@
       osens = .false.
       adjsigo = .true.
       reduced = .false.
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
       nfiles = 0
       iarg = 0

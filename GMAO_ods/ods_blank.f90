@@ -17,7 +17,7 @@
     integer ihours,syn_incr,nhms_check
     character(len=256) ifname, ftype, ofname
 
-    integer, external :: iargc, ods_caldat
+    integer, external :: ods_caldat
     integer argc, jbeg, jend,nsyn
     character(len=256) argv
 
@@ -25,7 +25,7 @@
 
 !   Parse command line
 !   ------------------
-    argc = iargc()
+    argc = command_argument_count()
     if ( argc .ne. 4 ) call usage_()
     call GetArg(1, ifname)
     call GetArg(2, argv);  read(argv,*) nymd

@@ -31,7 +31,7 @@ set (ODSSRC
   ods_julhr.f     ods_ncp_itoi2.f  ods_resetp.f     odsnxtime.f
   ods_eget.f      ods_dcget.f      ods_dconv.f      ods_dcscan.f
   ods_drad.f      ods_dsbuv.f      ods_dpcp.f       ods_rmdupl.f
-  ods_do3lev.f    ods_diagnc4.f90 
+  ods_do3lev.f    ods_diagnc4.f90
   )
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
@@ -40,6 +40,18 @@ if (CMAKE_Fortran_COMPILER_ID MATCHES Intel)
    string (REPLACE "${ALIGN_ALL}"  ""              CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
    string (REPLACE "${NO_ALIAS}"   ""              CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE})
 endif ()
+
+# =============================================================================
+# GNU / gfortran specific settings
+# =============================================================================
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+   message(STATUS "GMAO_ods: applying gfortran compatibility")
+   # why: `include odsmeta.h` issue and and old .f files
+   # -fdec handles legacy structures
+   # -ffixed-line-length-none prevents truncation at column 72 for .f files
+   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdec -ffixed-line-length-none")
+endif()
+
 
 esma_add_library (${this}
   SRCS ${MODSRC} ${ODSSRC}
@@ -110,12 +122,12 @@ if (USE_F2PY)
    endif ()
 endif ()
 
-separate_arguments(ODSMETA_ARGS NATIVE_COMMAND "sed -e 's/integer, parameter//g' -e 's/:://g' -e 's/\!/   #/g' -e 's/^[ ]*//g'")
 add_custom_command (
    OUTPUT odsmeta.py
    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h
-   COMMAND grep 'integer, parameter' ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h | ${ODSMETA_ARGS} | grep -v idsats > odsmeta.py
+   COMMAND bash -c "grep 'integer, parameter' ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h | sed -e 's/integer, parameter//g' -e 's/::/ /g' -e 's/!/  #/g' -e 's/^[[:space:]]*//' | grep -v idsats > odsmeta.py"
+   VERBATIM
    )
 
 add_custom_target(make_odsmeta ALL DEPENDS odsmeta.py)

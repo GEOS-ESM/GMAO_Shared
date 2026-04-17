@@ -15,7 +15,7 @@
     integer rc, nymd, nhms, nymd_o, nhms_o, mobs
     character(len=255) ifname, mfname, ftype, mftype, ofname
 
-    integer, external :: iargc, ods_caldat
+    integer, external :: ods_caldat
     integer:: twindow(2), toffset
     integer i, n, iarg, argc, jbeg, jend
     character(len=255) argv
@@ -104,7 +104,7 @@ CONTAINS
 
 !   Parse command line
 !   ------------------
-    argc = iargc()
+    argc = command_argument_count()
     if ( argc < 2 ) call usage_()
 
     iarg = 0
