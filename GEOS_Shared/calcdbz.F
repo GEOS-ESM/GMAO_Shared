@@ -163,10 +163,17 @@ c      have a liquid skin.
 
 c      Calculate variable intercept parameters
 
-                  IF (IVARINT.EQ.1) THEN
+                  IF (IVARINT.EQ.1 .OR. IVARINT.EQ.2) THEN
 
                       TEMP_C = DMIN1(-0.001D0,TMK(I,J,K)-CELKEL)
                       SONV = DMIN1(2.0D8,2.0D6*EXP(-0.12D0*TEMP_C))
+
+c                     simulate large snow aggregates by halving the intercept parameter.
+                      IF (IVARINT.EQ.2) THEN
+                          IF (QSN(I,J,K).GT.R1) THEN
+                              SONV = SONV * 0.5D0
+                          END IF
+                      END IF
 
                       GONV = GON
                       IF (QGR(I,J,K).GT.R1) THEN
