@@ -56,6 +56,8 @@ c   Local Variables
       REAL FACTOR_G,FACTOR_R,FACTOR_S
       REAL FACTORB_G,FACTORB_S
       REAL RHOAIR,Z_E
+      REAL ZE_R,ZE_S,ZE_G
+
 
 c   Constants used to calculate variable intercepts
       REAL R1,RON,RON2,SON,GON
@@ -68,34 +70,37 @@ c   Other constants
       REAL GAMMA_SEVEN,ALPHA
       REAL RHOWAT,CELKEL,PI,RD
 
-
 c   Constants used to calculate variable intercepts
       R1 = 1.D-15
       RON = 8.D6
       RON2 = 1.D10
       SON = 2.D7
-      GON = 5.D7
       RON_MIN = 8.D6
       RON_QR0 = 0.00010D0
       RON_DELQR0 = 0.25D0*RON_QR0
       RON_CONST1R = (RON2-RON_MIN)*0.5D0
       RON_CONST2R = (RON2+RON_MIN)*0.5D0
 
-c   Constant intercepts
-      RN0_R = 8.D6
-      RN0_S = 2.D7
-      RN0_G = 4.D6
-
 c   Other constants
       GAMMA_SEVEN = 720.D0
       RHOWAT = 1000.D0
       RHO_R = RHOWAT
       RHO_S = 100.D0
-      RHO_G = 400.D0
       ALPHA = 0.224D0
       CELKEL = 273.15D0
       PI = 3.141592653589793D0
       RD = 287.04D0
+
+c   --- NEW: HAIL VS GRAUPEL CONSTANTS ---
+      IF (IVARINT .GE. 3) THEN
+          RHO_G = 917.D0   ! Hail density (kg/m^3)
+          GON   = 4.D4     ! Hail max intercept (fewer, much larger stones)
+          RN0_G = 4.D4     ! Constant hail intercept
+      ELSE
+          RHO_G = 400.D0   ! Graupel density (kg/m^3)
+          GON   = 5.D7     ! Graupel max intercept (many, smaller stones)
+          RN0_G = 4.D6     ! Constant graupel intercept
+      END IF
 
 c   Force all Q arrays to be 0.0 or greater.
       DO K = 1,BTDIM
@@ -163,13 +168,14 @@ c      have a liquid skin.
 
 c      Calculate variable intercept parameters
 
-                  IF (IVARINT.EQ.1 .OR. IVARINT.EQ.2) THEN
+                  IF (IVARINT.GE.1) THEN
 
                       TEMP_C = DMIN1(-0.001D0,TMK(I,J,K)-CELKEL)
                       SONV = DMIN1(2.0D8,2.0D6*EXP(-0.12D0*TEMP_C))
 
 c                     simulate large snow aggregates by halving the intercept parameter.
-                      IF (IVARINT.EQ.2) THEN
+c                     Apply this to both option 2 and 3!
+                      IF (IVARINT.GE.2) THEN
                           IF (QSN(I,J,K).GT.R1) THEN
                               SONV = SONV * 0.5D0
                           END IF
@@ -196,14 +202,31 @@ c                     simulate large snow aggregates by halving the intercept pa
 
                   END IF
 
+
 c      Total equivalent reflectivity factor (z_e, in mm^6 m^-3) is
 c      the sum of z_e for each hydrometeor species:
 
-                  Z_E = FACTOR_R* (RHOAIR*QRA(I,J,K))**1.75D0/
-     +                  RONV**.75D0 + FACTORB_S*
-     +                  (RHOAIR*QSN(I,J,K))**1.75D0/SONV**.75D0 +
-     +                  FACTORB_G* (RHOAIR*QGR(I,J,K))**1.75D0/
-     +                  GONV**.75D0
+c      Calculate individual equivalent reflectivity factors
+                  ZE_R = (RHOAIR*QRA(I,J,K))**1.75D0
+                  ZE_R = FACTOR_R * ZE_R / RONV**.75D0
+
+                  ZE_S = (RHOAIR*QSN(I,J,K))**1.75D0
+                  ZE_S = FACTORB_S * ZE_S / SONV**.75D0
+
+                  ZE_G = (RHOAIR*QGR(I,J,K))**1.75D0
+                  ZE_G = FACTORB_G * ZE_G / GONV**.75D0
+
+c                 --- PSEUDO-MIE PLATEAU FOR WET HAIL ---
+c                 If using Hail (IVARINT>=3) with a liquid skin, Rayleigh math overestimates.
+c                 Cap the hail's specific Ze contribution at 10^7 (approx 70 dBZ).
+                  IF (IVARINT.GE.3 .AND. ILIQSKIN.EQ.2 .AND. 
+     +                TMK(I,J,K).GT.CELKEL) THEN
+                      ZE_G = MIN(ZE_G, 1.0D7)
+                  END IF
+
+c      Total equivalent reflectivity factor (z_e, in mm^6 m^-3) is
+c      the sum of z_e for each hydrometeor species:
+                  Z_E = ZE_R + ZE_S + ZE_G
 
 c      Adjust small values of Z_e so that dBZ is no lower than -30
                   Z_E = MAX(Z_E,.001D0)
