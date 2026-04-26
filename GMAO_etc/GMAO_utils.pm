@@ -65,6 +65,7 @@ sub get_siteID {
     $siteID = "nccs" if $site =~ /^discover/;
     $siteID = "nccs" if $site =~ /^borg/;
     $siteID = "nccs" if $site =~ /^dali/;
+    $siteID = "nccs" if $site =~ /^gs6150/; #ygyu test
 
     # send back node name for all others
     #-----------------------------------
