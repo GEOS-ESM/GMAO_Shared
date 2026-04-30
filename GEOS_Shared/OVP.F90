@@ -1,4 +1,4 @@
-#include "MAPL_Generic.h"
+#include "MAPL.h"
 
 !BOP
 
@@ -13,7 +13,8 @@ module OVP
 ! !USES:
 
   use ESMF
-  use MAPL2
+  use MAPL
+  use mapl3g_GridGet, only: GridGetCoordinates
   
   implicit none
   private
@@ -72,7 +73,7 @@ contains
      TYPE(ESMF_GridComp), INTENT(inout)  :: GC           ! Gridded component 
      CHARACTER(len=*),    INTENT(in)     :: GC_DT_LABEL  ! String to get the GridComp-specific timestep
 
-     REAL(ESMF_KIND_R4), POINTER, INTENT(out) :: LONS(:,:)    ! radians
+     REAL(ESMF_KIND_R8), POINTER, INTENT(out) :: LONS(:,:)    ! radians
      INTEGER,                     INTENT(out) :: RUN_DT       ! main timestep (seconds)
      INTEGER,                     INTENT(out) :: GC_DT        ! GridComp timestep (seconds)
      INTEGER, OPTIONAL,           INTENT(out) :: RC           ! Error code
@@ -103,7 +104,8 @@ contains
      CHARACTER(len=ESMF_MAXSTR)      :: IAm
      INTEGER                         :: STATUS
 
-     type (MAPL_MetaComp),  pointer  :: STATE
+     type(ESMF_Grid)                 :: grid
+     REAL(ESMF_KIND_R8), pointer     :: lats(:,:)
      TYPE (ESMF_Config)              :: CF
      REAL                            :: dt1, dt2
 
@@ -112,9 +114,9 @@ contains
 
     IAm = "OVP_init"
 
-    call MAPL_GetObjectFromGC ( GC, STATE, __RC__ )                   !  Get MAPL state
+    call MAPL_GridCompGet(GC, grid=grid, _RC)
 
-    call MAPL_Get( STATE, LONS=LONS, __RC__ )                         !  Get LONS
+    call GridGetCoordinates(grid, LONS, lats, _RC)        !  Get LONS
 
     call ESMF_GridCompGet ( GC, CONFIG=CF, __RC__ )                   !  Get Config
 
@@ -142,7 +144,7 @@ contains
 
 ! !ARGUMENTS
 
-     REAL,                 INTENT(IN)  :: LONS(:,:)      ! radians
+     REAL(ESMF_KIND_R8),   INTENT(IN)  :: LONS(:,:)      ! radians
      INTEGER,              INTENT(IN)  :: DELTA_TIME     ! seconds
      INTEGER,              INTENT(IN)  :: OVERPASS_HOUR
      INTEGER, ALLOCATABLE, INTENT(OUT) :: MASK(:,:)      ! timestep closest to local overpass time, packed in hr/min/sec
