@@ -6,7 +6,8 @@
                            vintdiva,vintdivb,vintdivc )
 
       use ESMF
-      use MAPL2
+      use MAPL, MAPL_GridGet_UNUSED => MAPL_GridGet
+      use MAPL2, only: MAPL_GridGet
 
       implicit none
 

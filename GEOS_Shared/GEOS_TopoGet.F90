@@ -14,7 +14,8 @@ module GEOS_TopoGetMod
 ! !USES:
 
   use ESMF
-  use MAPL2
+  use MAPL
+  use MAPL2, only: MAPL_MetaComp, MAPL_Set, MAPL_GetResource, MAPL_VarRead, GETFILE
   
   implicit none
   private
