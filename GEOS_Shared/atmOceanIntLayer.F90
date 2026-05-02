@@ -2,7 +2,9 @@ module atmOcnIntlayer
 
 ! !USES:
 
-use MAPL
+use MAPL, only: MAPL_ALHF, MAPL_ALHL, MAPL_AM_I_ROOT, MAPL_CAPWTR, &
+                MAPL_GRAV, MAPL_KARMAN, MAPL_RHO_SEAWATER, MAPL_RHOWTR, &
+                MAPL_TICE, MAPL_UNDEF
 use GEOS_UtilsMod, only: GEOS_QSAT, GEOS_DQSAT
 
 implicit none
