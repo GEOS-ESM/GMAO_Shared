@@ -1,7 +1,5 @@
 ! $Id$
-! VERIFY_ and RETURN_ macros for error handling
-
-#include "MAPL_Generic.h"
+#include "MAPL_ErrLog.h"
 
 !BOP
 
@@ -14,7 +12,8 @@ module GEOS_TopoGetMod
 ! !USES:
 
   use ESMF
-  use MAPL2
+  use MAPL
+  use MAPL2, only: MAPL_VarRead, GETFILE
   
   implicit none
   private
@@ -36,10 +35,45 @@ module GEOS_TopoGetMod
 !  directional variances associated with Gravity-Wave-Drag scales (10-100 km) 
 !  and turbulence scales (0-10 km).
 
-
 !EOP
 
 contains
+
+!==========================================================================
+
+  ! Helper: get a string value from HConfig with a default
+  subroutine hconfig_get_string(cf, label, value, default, rc)
+    type(ESMF_HConfig), intent(in)  :: cf
+    character(len=*),   intent(in)  :: label
+    character(len=*),   intent(out) :: value
+    character(len=*),   intent(in)  :: default
+    integer, optional,  intent(out) :: rc
+    integer :: status
+    logical :: defined
+    character(len=:), allocatable :: tmp
+    value = default
+    defined = ESMF_HConfigIsDefined(cf, keyString=label, _RC)
+    if (defined) then
+       tmp = ESMF_HConfigAsString(cf, keyString=label, _RC)
+       value = tmp
+    end if
+    _RETURN(ESMF_SUCCESS)
+  end subroutine hconfig_get_string
+
+  ! Helper: get a real(4) value from HConfig with a default
+  subroutine hconfig_get_r4(cf, label, value, default, rc)
+    type(ESMF_HConfig), intent(in)  :: cf
+    character(len=*),   intent(in)  :: label
+    real,               intent(out) :: value
+    real,               intent(in)  :: default
+    integer, optional,  intent(out) :: rc
+    integer :: status
+    logical :: defined
+    value = default
+    defined = ESMF_HConfigIsDefined(cf, keyString=label, _RC)
+    if (defined) value = ESMF_HConfigAsR4(cf, keyString=label, _RC)
+    _RETURN(ESMF_SUCCESS)
+  end subroutine hconfig_get_r4
 
 !==========================================================================
 
@@ -56,7 +90,7 @@ contains
 
 ! !ARGUMENTS
 
-    type(ESMF_Config)                            :: cf
+    type(ESMF_HConfig),                          intent(in   ) :: cf
     type(ESMF_Field),    optional, intent(INOUT) :: MEAN
     type(ESMF_Field),    optional, intent(INOUT) :: GWDVAR
     type(ESMF_Field),    optional, intent(INOUT) :: GWDVARX
@@ -65,45 +99,6 @@ contains
     type(ESMF_Field),    optional, intent(INOUT) :: GWDVARYX
     type(ESMF_Field),    optional, intent(INOUT) :: TRBVAR
     integer,             optional, intent(OUT)   :: RC
-
-! !DESCRIPTION
-
-!  This subroutine creates topographic data associated with an input
-!  ESMF grid.  The available topographic data types are:  MEAN, GWDVAR,
-!  GWDVARX, GWDVARY, GWDVARXY, GWDVARYX, and TRBVAR.  The raw data
-!  for each of these types has been pre-processed and stored at 2.5'x2.5'
-!  resolution.  The resulting gridded data will be binned-averaged on the
-!  input ESMF grid from the 2.5'x2.5' data.
-!  The arguments are:
-!
-! \begin{description}
-!   \item[GRID]
-!                   The ESMF GRID which contains information about 
-!                   horizontal grid structure.
-!   \item[MEAN]
-!                   The mean values of topography with scales >= 100 km.
-!   \item[GWDVAR]
-!                   The isotropic variance of the GWD topography data,
-!                   (scales 10-100 km).
-!   \item[GWDVARX]
-!                   The variance of the GWD topography data in the
-!                   East - West direction.
-!   \item[GWDVARY]
-!                   The variance of the GWD topography data in the
-!                   North - South direction.
-!   \item[GWDVARXY]
-!                   The variance of the GWD topography data in the
-!                   South_West - North_East direction.
-!   \item[GWDVARYX]
-!                   The variance of the GWD topography data in the
-!                   North_West - South_East direction.
-!   \item[TRBVAR]
-!                   The isotropic variance of the Turbulence topography data,
-!                   (scales 1-10 km).
-!   \item[RC]
-!                   Return code
-! \end{description}
-!
 
 !EOP
 
@@ -122,42 +117,15 @@ contains
     real          :: GWDFACYX
     real          :: TRBFAC
 
-    type(MAPL_MetaComp) :: MAPLOBJ
-
-! Initialize CONFIG File into MAPL Object
-! ---------------------------------------
-    call MAPL_Set (MAPLOBJ, name='DUMMY', cf=cf, rc=STATUS )
-    VERIFY_(STATUS)
-
 ! Get filenames for Get_Topo utility
 ! ----------------------------------
-    call ESMF_ConfigGetAttribute ( cf, value=filename(1), label ='TOPO_MEAN_FILE:',     &
-                                   default='hmean.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
-
-    call ESMF_ConfigGetAttribute ( cf, value=filename(2), label ='TOPO_GWDVAR_FILE:',   &
-                                   default='hgrav_var.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
-
-    call ESMF_ConfigGetAttribute ( cf, value=filename(3), label ='TOPO_GWDVARX_FILE:',  &
-                                   default='hgrav_varx.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
-
-    call ESMF_ConfigGetAttribute ( cf, value=filename(4), label ='TOPO_GWDVARY_FILE:',  &
-                                   default='hgrav_vary.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
-
-    call ESMF_ConfigGetAttribute ( cf, value=filename(5), label ='TOPO_GWDVARXY_FILE:', &
-                                   default='hgrav_varxy.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
-
-    call ESMF_ConfigGetAttribute ( cf, value=filename(6), label ='TOPO_GWDVARYX_FILE:', &
-                                   default='hgrav_varyx.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
-
-    call ESMF_ConfigGetAttribute ( cf, value=filename(7), label ='TOPO_TRBVAR_FILE:',   &
-                                   default='hturb_var.2.5x2.5min.data', rc=status )
-    VERIFY_(STATUS)
+    call hconfig_get_string(cf, 'TOPO_MEAN_FILE',     filename(1), default='hmean.2.5x2.5min.data',       _RC)
+    call hconfig_get_string(cf, 'TOPO_GWDVAR_FILE',   filename(2), default='hgrav_var.2.5x2.5min.data',   _RC)
+    call hconfig_get_string(cf, 'TOPO_GWDVARX_FILE',  filename(3), default='hgrav_varx.2.5x2.5min.data',  _RC)
+    call hconfig_get_string(cf, 'TOPO_GWDVARY_FILE',  filename(4), default='hgrav_vary.2.5x2.5min.data',  _RC)
+    call hconfig_get_string(cf, 'TOPO_GWDVARXY_FILE', filename(5), default='hgrav_varxy.2.5x2.5min.data', _RC)
+    call hconfig_get_string(cf, 'TOPO_GWDVARYX_FILE', filename(6), default='hgrav_varyx.2.5x2.5min.data', _RC)
+    call hconfig_get_string(cf, 'TOPO_TRBVAR_FILE',   filename(7), default='hturb_var.2.5x2.5min.data',   _RC)
 
   if( present(MEAN)  ) then
 ! -------------------------
@@ -165,76 +133,77 @@ contains
        call MAPL_VarRead (UNIT,MEAN)
        CALL FREE_FILE    (UNIT)
        call ESMF_FieldGet(MEAN, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = ptr*MAPL_GRAV
   endif
 
   if( present(GWDVAR) ) then
 ! --------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFAC, label="GWDVAR_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
+       call hconfig_get_r4(cf, 'GWDVAR_FACTOR',  GWDFAC,  default=1.0, _RC)
        UNIT = GETFILE  (filename(2), form="unformatted")
        call MAPL_VarRead (UNIT,GWDVAR)
        CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVAR, 0, PTR, rc = status)
+       call ESMF_FieldGet (GWDVAR, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = sqrt( max(gwdfac*ptr,0.0) )
   endif
 
   if( present(GWDVARX) ) then
 ! ---------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACX, label="GWDVARX_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
+       call hconfig_get_r4(cf, 'GWDVARX_FACTOR', GWDFACX, default=1.0, _RC)
        UNIT = GETFILE  (filename(3), form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARX)
        CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARX, 0, PTR, rc = status)
+       call ESMF_FieldGet (GWDVARX, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = sqrt( max(gwdfacx*ptr,0.0) )
   endif
 
   if( present(GWDVARY) ) then
 ! ---------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACY, label="GWDVARY_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
+       call hconfig_get_r4(cf, 'GWDVARY_FACTOR', GWDFACY, default=1.0, _RC)
        UNIT = GETFILE  (filename(4), form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARY)
        CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARY, 0, PTR, rc = status)
+       call ESMF_FieldGet (GWDVARY, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = sqrt( max(gwdfacy*ptr,0.0) )
   endif
 
   if( present(GWDVARXY) ) then
 ! ----------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACXY, label="GWDVARXY_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
+       call hconfig_get_r4(cf, 'GWDVARXY_FACTOR', GWDFACXY, default=1.0, _RC)
        UNIT = GETFILE  (filename(5), form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARXY)
        CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARXY, 0, PTR, rc = status)
+       call ESMF_FieldGet (GWDVARXY, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = sqrt( max(gwdfacxy*ptr,0.0) )
   endif
 
   if( present(GWDVARYX) ) then
 ! ----------------------------
-       call MAPL_GetResource( MAPLOBJ, GWDFACYX, label="GWDVARYX_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
+       call hconfig_get_r4(cf, 'GWDVARYX_FACTOR', GWDFACYX, default=1.0, _RC)
        UNIT = GETFILE  (filename(6), form="unformatted")
        call MAPL_VarRead (UNIT,GWDVARYX)
        CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARYX, 0, PTR, rc = status)
+       call ESMF_FieldGet (GWDVARYX, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = sqrt( max(gwdfacyx*ptr,0.0) )
   endif
 
   if( present(TRBVAR) ) then
 ! --------------------------
-       call MAPL_GetResource( MAPLOBJ, TRBFAC, label="TRBVAR_FACTOR:",  default = 1.0, RC=STATUS )
-       VERIFY_(STATUS)
+       call hconfig_get_r4(cf, 'TRBVAR_FACTOR',  TRBFAC,  default=1.0, _RC)
        UNIT = GETFILE  (filename(7), form="unformatted")
        call MAPL_VarRead (UNIT,TRBVAR)
        CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (TRBVAR, 0, PTR, rc = status)
+       call ESMF_FieldGet (TRBVAR, 0, PTR, rc=status)
+       _VERIFY(STATUS)
        ptr = max(trbfac*ptr,0.0)
   endif
 
-    return
+    _RETURN(ESMF_SUCCESS)
   end subroutine GEOS_TopoGet
 
 end module GEOS_TopoGetMod

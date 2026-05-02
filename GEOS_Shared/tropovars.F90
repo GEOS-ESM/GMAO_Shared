@@ -17,9 +17,9 @@
 !     profile.  In a standard Skew-T Log P diagram the isotherms
 !     intersect the Log P scale at a 45 degree angle.  To more
 !     effectively isolate the tropopause,  this angle can be adjusted.
-!     ThatÕs how this program works.  It adjusts the angle at which
+!     Thatï¿½s how this program works.  It adjusts the angle at which
 !     the isotherms intersect the Log P axis via the coeffiecient
-!     Òalpha.Ó It simply looks for the furthest point to the left on
+!     ï¿½alpha.ï¿½ It simply looks for the furthest point to the left on
 !     the profile.  The routine defines the leftward position of each
 !     temperature point as xfact:
 !
@@ -62,7 +62,7 @@
 !
 !********************************************************************
 
-  use MAPL2
+  use MAPL, only: MAPL_UNDEF
 
       implicit none
 

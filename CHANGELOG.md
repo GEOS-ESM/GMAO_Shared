@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrate `GEOS_TopoGet.F90` from bare `use MAPL2` to `use MAPL` + `use MAPL2, only:` for remaining MAPL2-only symbols
+
 ### Fixed
 
 - Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing

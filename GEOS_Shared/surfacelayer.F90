@@ -5,7 +5,8 @@ module sfclayer
 
 ! !USES:
 
-use MAPL2
+use MAPL, only: MAPL_CP, MAPL_GRAV, MAPL_KAPPA, MAPL_KARMAN, &
+                MAPL_NUAIR, MAPL_RGAS, MAPL_USMIN, MAPL_VIREPS
 use DragCoefficientsMod
 
 implicit none
