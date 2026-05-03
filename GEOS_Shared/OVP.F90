@@ -14,7 +14,7 @@ module OVP
 
   use ESMF
   use MAPL
-  use MAPLBase_mod, only: MAPL_AM_I_ROOT, MAPL_PI_R8, MAPL_PackTime
+  use MAPL2, only: MAPL_PackTime
   use mapl3g_GridGet, only: GridGetCoordinates
   
   implicit none
