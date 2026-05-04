@@ -57,9 +57,9 @@ file (MAKE_DIRECTORY ${esma_etc}/GMAO_eu)
 set_source_files_properties (m_FileResolv.f90 PROPERTIES COMPILE_FLAGS ${PP})
 
 # NAG notices if the same procedure is called with varying types in the absence
-# of an explicit interface.
-target_compile_options (${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${MISMATCH}>)
-target_compile_options (GMAO_eu PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${MISMATCH}>)
+# of an explicit interface. The MISMATCH flag is now in common_Fortran_flags.
+# target_compile_options (${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${MISMATCH}>)
+# target_compile_options (GMAO_eu PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:${MISMATCH}>)
 
 file (COPY assert.H DESTINATION ${include_${this}})
 file (COPY assert.H DESTINATION ${esma_include}/GMAO_eu)
