@@ -1,5 +1,6 @@
 module m_nc_akbk
 use netcdf
+use iso_fortran_env, only: real64
 implicit none
 private
 public :: write_nc_akbk
@@ -12,14 +13,14 @@ contains
 subroutine write_nc_akbk_ (fname,ak, bk)
 
   character(len=*), intent(in) :: fname
-  double precision, intent(in) :: ak(:), bk(:)
+  real(real64), intent(in) :: ak(:), bk(:)
 
   ! NetCDF variables
   integer :: ncid, dimid_edge
   integer :: varid_edge, varid_ak, varid_bk
   integer :: rc
   integer :: i, km
-  double precision, allocatable :: edge(:)
+  real(real64), allocatable :: edge(:)
   
   km = size(ak)
   allocate(edge(km))

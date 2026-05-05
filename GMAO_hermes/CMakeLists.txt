@@ -3,7 +3,7 @@ esma_set_this()
 add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
 string (REPLACE " " ";" flags ${FREAL8})
 add_compile_options(${flags})
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
+set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
 
 if ( NOT HERMES_LIGHT )
 
@@ -20,6 +20,10 @@ if ( NOT HERMES_LIGHT )
    
    esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu GMAO_gfio_r8)
    target_compile_options(${this} PRIVATE ${flags})
+   # NAG: suppress GFIO type-punning mismatches
+   if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+     target_compile_options(${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=GFIO_PUTREALATT,GFIO_GETREALATT>)
+   endif()
    
    if (EXTENDED_SOURCE)
      set_source_files_properties (m_interpack.F    PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
