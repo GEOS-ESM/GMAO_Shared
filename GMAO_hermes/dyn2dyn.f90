@@ -14,6 +14,7 @@
       use m_dyn
       use m_set_eta, only : set_ncep72,unset_ncep72
       use m_dyn2dyn, only : dyn2dyn_do
+      use m_topo_remap, only: dyn_topo_remap
 
       use m_StrTemplate        ! grads style templates
 
@@ -75,6 +76,7 @@
 !     ------
       character(len=255) msg
       character(len=255), pointer :: xtrnames(:)
+      character(len=255) phfile
       integer, parameter :: READ_ONLY = 1
       integer fid, nvars, ngatts
       integer ier, ifile
@@ -97,7 +99,7 @@
                                 fakedate, nymdf, nhmsf, &
                                 dophys, expid, RCfile, verbose, oldana, force, &
                                 vectype, dgrid, ncep72, ncf, pncf, indxlevs, &
-                                xtrnames )
+                                xtrnames, phfile )
 
 
 !  Loop over input eta files
@@ -155,6 +157,12 @@
          end if
          if(ncep72) call set_ncep72
 
+!        If topographic remap requested ...
+!        ----------------------------------
+         if ( trim(phfile) /= "NONE" ) then
+            call dyn_topo_remap(trim(phfile), w_e, vectype, ier)
+         endif
+ 
 !        Perform interpolation
 !        ---------------------
          if ( trim(RCfile)=='NONE' ) then
@@ -211,7 +219,7 @@ CONTAINS
                          fakedate, nymdf, nhmsf,                     &
                          dophys, expid, RCfile, verbose, oldana, force, &
                          vectype, dgrid, ncep72, ncf, pncf, indxlevs, &
-                         xtrnames )
+                         xtrnames, phfile )
 
       implicit NONE
 
@@ -245,6 +253,7 @@ CONTAINS
       logical,       intent(out) :: pncf    ! non-complaint dyn-perturbation file knob
       logical,       intent(out) :: indxlevs! index levels (in place of pressure levs)
       character(len=*), pointer  :: xtrnames(:)
+      character(len=*) :: phfile
       
 !
 ! !REVISION HISTORY:
@@ -265,6 +274,7 @@ CONTAINS
 
       integer iret, i, iarg, argc
       integer ii,jj,ie,il
+      integer im_usr,jm_usr
       integer uprec, iprec, ires, jcapusr
       logical verb, setres, geos4res, setjcap
       character(len=255) :: etafile, argv, res
@@ -316,6 +326,9 @@ CONTAINS
       pncf    = .false.    ! default: handle usual dyn-complaint file
       indxlevs= .false.    ! default: put pressure levels in lev attribute
       trnames = 'NONE'
+      im_usr = -1
+      jm_usr = -1
+      phfile = 'NONE'
 
 !     Parse command line
 !     ------------------
@@ -366,6 +379,14 @@ CONTAINS
                      ires=5
                case ("f")
                      ires=6
+               case ("u") ! user specified
+                     ires=99
+                     iarg = iarg + 1
+                     call GetArg ( iarg, argv )
+                     read(argv,*) im_usr
+                     iarg = iarg + 1
+                     call GetArg ( iarg, argv )
+                     read(argv,*) jm_usr
                case ("x")
                      ires=size(IMS5)-2
                case ("y")
@@ -455,6 +476,10 @@ CONTAINS
                ncf = .true.
            case ('-pncf')
                pncf = .true.
+           case ("-phfile")
+             if ( iarg+1 .gt. argc ) call usage()
+             iarg = iarg + 1
+             call GetArg ( iarg, phfile )
            case ('-prec')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
@@ -493,8 +518,13 @@ CONTAINS
              in = ims4(ires)
              jn = jmsg(ires)
            else
-             in = ims5(ires)
-             jn = jmsg(ires)
+             if (im_usr>0 .and. jm_usr>0) then
+               in = im_usr
+               jn = jm_usr
+             else
+               in = ims5(ires)
+               jn = jmsg(ires)
+             endif
            endif
       endif
       if ( setjcap ) then
@@ -569,6 +599,7 @@ CONTAINS
       print *, '-res   RES    where RES= a, b, c, d, and e(*) '
       print *, '              (*NOTE: the e resolution is diff for GEOS-4 and GEOS-5 gcm' 
       print *, '                      see geos4 flag below)'
+      print *, '-res  u IM JM opt to interpolate to user-spec grid (other than traditional)'
       print *, '-geos4        specify when trying to convert dyn-vect to geos4 e resolution'
       print *, '              (Default: GEOS-5 e resolution)'
       print *, '-nlevs NLEVS  where NLEVS is the number of vertical levs out'
@@ -587,6 +618,7 @@ CONTAINS
       print *, '-ncf          non-compliant dyn-vector (see NOTES)'
       print *, '-pncf         non-compliant dyn-vector perturbation (see NOTES)'
       print *, '-tracers N,M  read/write extra tracers of name N and M from ori file to new'
+      print *, '-phfile FNAME when alternative dyn-vec file provided, will perform topo-remap'
       print *
       print *, ' NOTES:'
       print *, '   1)  For the time being, in order to do horizontal'

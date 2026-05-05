@@ -1,4 +1,4 @@
-#!/bin/csh 
+#!/bin/csh -f
 #
 # Packs NetCDF files with ncks with gzip level 4;
 # the file is made setgid to indicate that it is packed;
@@ -7,15 +7,11 @@
 #----------------------------------------------------------------
 
   set arch = `uname -s`
-  set ncks_opts = "--history --abc -4 -L 2 --cnk_dmn lev,1 "
+  set ncks_opts = "--history --no-alphabetize -4 -L 2 --cnk_dmn lev,1 "
   set ncks = "$BASEDIR/$arch/bin/ncks ${ncks_opts}"
-
-###  set ncks = "$SHARE/dasilva/bin/ncks ${ncks_opts}"
-####  set libs = "$SHARE/dasilva/opengrads/Contents/Linux/Versions/2.0.a5.oga.5/x86_64/gex"
 
   if ( $#argv < 1 ) then
         echo "n4zip - internal gzip packing of NetCDF-4 files"
-#	echo "usage:  n4zip [-n] [-nbits n] [-u undef] [-v]  nc4_filename(s)"
 	echo "usage:  n4zip [-n] [-v]  nc_filename(s)"
         echo "The option -n means dryrun"
 	exit 1
@@ -99,7 +95,7 @@
       if ( "$type" != "setgid" ) then
            echo -n $0": working on" `basename $file` " ..."
 #           $dryrun $ncks $verb $nbits $undef -i $file -o $file~ -t '*:GZIP 2'
-           $dryrun $ncks $file $file~ 
+           $dryrun $ncks $file $file~
            if ( $status ) then
                 set ok = 0
   	        echo " not ok"

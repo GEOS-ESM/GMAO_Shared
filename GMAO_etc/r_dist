@@ -401,8 +401,8 @@ return $put_rc;
 sub resolve {
 
     my ( $LOCALROOT,$REMOTEROOT,$expno,$yyyy,$yy,$mm,$dd,$hh,$file ) = @_;
-    $file =~ s/\${REMOTEROOT}/$REMOTEROOT/g;
-    $file =~ s/\${LOCALROOT}/$LOCALROOT/g;
+    $file =~ s/\$\{REMOTEROOT}/$REMOTEROOT/g;
+    $file =~ s/\$\{LOCALROOT}/$LOCALROOT/g;
     $file =~ s/%y4/$yyyy/g;
     $file =~ s/%y2/$yy/g;
     $file =~ s/%m2/$mm/g;

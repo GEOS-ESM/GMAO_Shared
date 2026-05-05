@@ -15,6 +15,273 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+### Deprecated
+
+## [2.1.7] - 2026-04-15
+
+### Added
+
+- Minor changes for VIIRS additions
+
+### Changed
+
+- Synced latest changes from branch GEOS-FP-5_44 into main
+
+### Fixed
+
+- Fix for Open MPI calls in `esma_mpirun` from Open MPI 5 testing
+
+## [2.1.6] - 2026-01-06
+
+### Fixed
+
+- Change vector declarations in `sphere.F` to satisfy GNU compiler Debug option
+
+## [2.1.5] - 2026-01-02
+
+### Changed
+
+- Updated and modernized `pyrob` script
+  - Removed ability to use dead/ancient `rftw` package
+  - Added ability to output `docx` format with `python-docx` package
+  - Added ability to output Markdown format
+  - General cleanup with `ruff`
+
+### Fixed
+
+- Fixed gpy module in `idcheck.pl`
+- Added support for Cray MPICH in `esma_mpirun`
+- Fixed `pyrob` script for issue with MERRA-21C output
+
+## [2.1.4] - 2025-08-29
+
+### Changed
+
+- Updated `esma_mpirun` for `openmpi` to run with `-map-by node -bind-to core` which is a good default.
+
+## [2.1.3] - 2025-07-07
+
+### Fixed
+
+- Fix issue with installing `gmao2ioda` scripts as the `gmao2ioda/` directory might not exist in all fixtures
+- Fixed `cmpdir.pl` script and add extra functionality
+
+## [2.1.2] - 2025-06-30
+
+### Added
+
+- Added `gmao2ioda` scripts
+
+## [2.1.1] - 2025-05-13
+
+### Fixed
+
+- Fixed issue with unprotected f2py call in `GMAO_gfio`. Caused failures if build system did not have f2py available.
+
+### Added
+
+- Added `.editorconfig`
+
+## [2.1.0] - 2025-04-23
+
+### Added
+
+- Added Github Actions for CI
+
+### Changed
+
+- Bring in JEDI supporting code
+- Updates for `esma_mpirun` and MVAPICH 4
+  - Always bind to core
+- Refactored helfsurface subroutines to improve the performance
+
+### Fixed
+
+2026-01-17:
+
+- added GOES, HIMAWARI, VIIRS SNPP & NOAA-20, and Lunar AERONET aerosol observations to the KX-lists
+
+2026-01-12:
+
+- r_dist for MILAN
+- minor bug fix in ODS code
+- add ak/bk for MLT 1st version
+- add ability to write out akbk to nc4 (JEDI support)
+
+------------
+- fix vED
+- SLES15 stuff
+- fix to reading of table in time ave program
+
+## [2.0.0] - 2025-03-14
+
+### Fixed
+
+- Corrected perl scripts for left/right brace error introduced with SLES-15:
+  - `Perl_Config.pm`
+  - `vED`
+
+### Removed
+
+- Remove `GMAO_perllib` into its own repository
+
+## [1.9.9] - 2024-10-03
+
+### Changed
+
+- Update ESMF CMake target to `ESMF::ESMF`
+- Update `n4zip` with long option for non-alphabetical sorting
+
+### Fixed
+
+- Declare `main` in `makdep.c` as `int` to satisfy gcc 14
+
+## [1.9.8] - 2024-07-31
+
+### Fixed
+
+- Fixed invalid Fortran in `GMAO_ods/ods_diagnc4.f90`
+- Added `stdlib.h` in `GMAO_pyobs/VegType_io.c` to fix compilation error with `icx`
+
+## [1.9.7] - 2024-01-30
+
+### Added
+- Add new `CHOOSEZ0` option that triggers the use of Charnock coefficient
+
+### Changed
+- Move to circleci-tools v2 orb
+- Update CI to v2 orb
+
+## [1.9.6] - 2023-11-01
+
+### Fixed
+
+- Fixes for Perl 5.26 on SLES15
+
+## [1.9.5] - 2023-10-18
+
+### Changed
+
+- Updated `esma_mpirun` for MVAPICH to use `mpiexec`
+- add info on LEO-GEO: obs table upadate (zero-diff)
+
+## [1.9.4] - 2023-09-15
+
+### Changed
+
+- add Planet IQ to odsmatch.rc
+
+## [1.9.3] - 2023-09-15
+
+### Added
+
+- `dyn_hydro`
+  - This program adds the hydrometeors to bkg.eta files that don't have them (such as those coming from MERRA-2). (Mistakenly not
+    brought over during CVS-to-Git transition)
+
+### Changed
+
+- Syncs obsys with that used in FP as of 14 Sep 2023
+- dyn2dyn updated to allow for user-specified IM x JM when regrinding
+
+## [1.9.2] - 2023-08-24
+
+### Changed
+
+- Update CI to use Baselibs and BCs from CircleCI Orb
+
+## [1.9.1] - 2023-06-06
+
+### Added
+
+- Added protection against specific error conditions to reset the ice to a default profile instead of crashing. This is valid only for MITgcm
+
+### Changed
+
+- Change CICE4 build to shared library, in preparation for CICE6 integration
+
+## [1.9.0] - 2023-05-09
+
+### Changed
+
+- Updated 181 and 91L ak/bk to remove kinks in 1st derivative of DZ. Modified ak at top four levels of L137.
+- Converted `pyrob` and `pyrob_CF` to Python 3. Requires MAPL 2.36.0 and ESMA_cmake v3.28.0 for f2py support
+
+## [1.8.0] - 2023-03-10
+
+### Changed
+
+- Merging in changes associated with refactored physics and `gmap4`.
+
+## [1.7.2] - 2023-03-17
+
+### Changed
+
+- Improved trace gas ODS support; incorporates most recent changes to ODS in rt_g530_1.6.0_merge (AMSR, more OMPS)
+
+## [1.7.1] - 2023-02-10
+
+### Changed
+
+- Updated files to be consistent with das tags 5.30
+- Updated `CODEOWNERS` as GEOS_Util has been moved
+
+## [1.7.0] - 2023-01-20
+
+### Removed
+
+- Removed GEOS_Util as it is its own repo in GEOS-ESM now
+
+## [1.6.5] - 2023-01-20
+
+### Added
+
+- New coupled diagnostics package based on python3
+
+## [1.6.4] - 2023-01-17
+
+### Changed
+
+- Updates for WSTAR Calculation using Model Omega. Also, several basic QUICKPLOT updates.
+
+### Removed
+
+- Remove `hasw` _constraint_ choice from remapping questions since they are being [decommissioned by NCCS](https://www.nccs.nasa.gov/nccs-users/SCU10%2613-Decommismion)
+
+## [1.6.3] - 2022-12-08
+
+### Changed
+
+- Moved to GitHub Actions for label enforcement
+- Updated CircleCI to Baselibs 7.7.0
+- Set default data ocean to be `CS` at C90+ resolution in `remap_restarts.py`
+- Updated `remap_restarts.py` to use argparse
+
+### Fixed
+
+- Fix an issue with `regrid.pl` and `remap_restarts.py` regridding from MERRA-2 from 2021-06 to 2021-09
+- Fix an issue with `remap_restarts.py` for post 2011 regridding from MERRA2
+
+## [1.6.2] - 2022-11-17
+
+### Fixed
+
+- Fixed `gcmpost.script` logic to generate `xdf.tabl` files for collections with `monthly: 1` attribute
+- Update EASE grid tile file name to contain pfafxxx
+- Add a dependency on GMAO_perllib in GMAO_etc
+
+## [1.6.1] - 2022-09-22
+
+### Changed
+
+Apply latest updates from L. Takacs to the plot package
+
+## [1.6.0] - 2022-09-12
+
+### Changed
+
+- Updates the plot package with the renamed carbon species.
+
 ## [1.5.8] - 2022-09-08
 
 ### Added

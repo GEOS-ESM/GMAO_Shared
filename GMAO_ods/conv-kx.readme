@@ -1,9 +1,9 @@
-!Conventional data types 
+!Conventional data types
 !     kx       Description                      obs types
       120      RAWINSONDE                         Tv,z,q
       126      RASS Profiler                      Tv
-      130      AIREP/PIREP                        T 
-      131      AMDAR                              T 
+      130      AIREP/PIREP                        T
+      131      AMDAR                              T
       132      FLT LVL RECON AND DROPSONDE        Tv,q,ps
       133      MDCRS (ACARS)                      T,q
       134      TAMDAR AIRCRAFT                    T,q
@@ -53,12 +53,14 @@
       252      JMA IR CTW                         U,V
       253      EUMETSAT IR CTW                    U,V
       254      EUMETSAT WV cloud top              U,V
-      255      NESDIS picture triplet CTW         U,V
+      255      NESDIS picture triplet CTW         U,V (historic data)
+      255      SSEC/WISC LEO-GEO winds            U,V
       256      Indian WV CTW                      U,V
       257      MODIS IR CTW                       U,V
       258      MODIS cloud top WV CTW             U,V
       259      MODIS deep layer WV CTW            U,V
       260      VIIRS IR CTW                       U,V
+      275      LOON Balloon Winds                 U,V
       280      Surface marine with stn pres       U,V
       281      Surface land/METAR with stn pres   U,V
       282      Atlas buoy                         U,V
@@ -76,16 +78,17 @@
       294      Sfc marine missing SLP,stnP        U,V
       295      Sfc mesonet missing ps, altim.     U,V
       299      Drifting buoy                      U,V
+      311      MLS Temperature                    T
 
 !
 !  GPS KX are assigned by satellite ID
         3      MetOp-B GRAS
         4      MetOp-A GRAS
         5      MetOp-C GRAS
-       41      CHAMP      
+       41      CHAMP
        42      TerraSAR-X
        43      TanDEM-X
-       44      PAZ      
+       44      PAZ
       421      Oceansat-2
       440      Megha-Tropiques
       722      GRACE-A

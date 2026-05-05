@@ -39,6 +39,9 @@
     mls55         -    0   330
     mls55      aura    0   330
     ompslp      npp    0   335
+    ompslpuv    npp    0   335
+    ompslpvis   npp    0   336
+    ompslpnc    npp    0   337
     ompsnp      npp    0   437
 
 # Notes for (*):

@@ -31,7 +31,7 @@ $fvroot  =~ s|/u/.realmounts/share|/share|;   # for portability across
                                               # NAS machines
 # Command line options
 # --------------------
-GetOptions( "h", "dir=s", "type=s", "rc=s", "ktsummary", "o=s" );
+GetOptions( "h", "dir=s", "type=s", "rc=s", "ktsummary", "josummary", "o=s" );
 
 usage() if $opt_h;
 
@@ -61,7 +61,7 @@ sub imp_summary {
       @typs     = glob("spr temp uv hum spd pcp oz o3l gps rad");
       foreach $fn ( @files ) {
 
-        $cmd = "$fvroot/bin/odsstats -rc $rcfile -verbose $fn > /dev/null";
+        $cmd = "$fvroot/bin/odsstats $jo_summary -rc $rcfile -verbose $fn > /dev/null";
         print "$cmd \n";
         $rc = system($cmd);
         if (-e "odsstats_sum.txt") {
@@ -91,7 +91,7 @@ sub imp_summary {
       printf "Total Impact %8s %8d %11.4e \n", "tot", $nobstot, $oimptot;
 
    } else { # not kt-summary
-      $cmd = "$fvroot/bin/odsstats -rc $rcfile @files  > /dev/null";
+      $cmd = "$fvroot/bin/odsstats $jo_summary -rc $rcfile @files  > /dev/null";
       print "$cmd \n";
       $rc = system($cmd);
       if ( -e "odsstats_all.txt" ) {
@@ -100,6 +100,9 @@ sub imp_summary {
          unlink("odsstats_all.txt");
          unlink("odsstats_sum.txt");
          unlink("odsstats_numneg.txt");
+      } else {
+         print "mv odsstats_sum.txt $outfile \n";
+         cp("odsstats_sum.txt","$outfile");
       }
    } # kt-summary
 
@@ -127,6 +130,11 @@ sub init {
   $kt_summary = 0;
   if ( $opt_ktsummary ) {
       $kt_summary = 1;
+  }
+
+  $jo_summary = "";
+  if ( $opt_josummary ) {
+      $jo_summary = "-jediformat";
   }
 
   if( $opt_rc ) { # rc file required by odsstats
@@ -184,6 +192,10 @@ OPTIONS
 
  -h            prints this usage notice
  
+ -josummary    prints Jo summary (a la JEDI)    
+
+ -o            filename of saved results
+
  -rc RCFILE    full path of RC file for odsstats
                  (default: $fvroot/etc/odsstats_ktonly.rc)
 

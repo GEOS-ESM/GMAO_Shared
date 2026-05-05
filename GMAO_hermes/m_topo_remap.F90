@@ -13,6 +13,7 @@ module m_topo_remap
 
 use m_dyn
 use shared_topo_remap, only : dyn_topo_remap, gmap
+use m_die, only: die
 implicit none
 private
 
@@ -22,6 +23,7 @@ public dyn_real_eta    ! nothing else should be made public
 
 !
 interface dyn_topo_remap
+  module procedure dyn_topo_remap0_
   module procedure dyn_topo_remap_
 end interface
 interface dyn_real_eta
@@ -49,6 +51,34 @@ character(len=*), parameter :: myname = 'm_topo_remap'
 !EOP
 !-------------------------------------------------------------------------
 CONTAINS
+      subroutine dyn_topo_remap0_(fname, w_f, dyntype, rc)
+      implicit none
+      character(len=*), intent(in) :: fname 
+      type(dyn_vect) w_f
+      integer, intent(in)  :: dyntype
+      integer, intent(out) :: rc
+
+      character(len=*), parameter :: myname_ = myname//'*dyn_topo_remap0_'
+      integer nymd, nhms
+      type(dyn_vect) w_p
+
+      ! assume file w/ alternative phis is dyn-vect (can generalize later)
+      call dyn_get ( trim(fname), nymd, nhms, w_p, rc, timidx=1, vectype=dyntype )
+      if (rc/=0) then
+        call die(myname_,'failed getting topo to remap to' )
+      else
+        print *, "read topo to remap to from: ", trim(fname)
+      endif
+      
+      if ( w_p%grid%im == w_f%grid%im .and. w_p%grid%jm == w_f%grid%jm ) then
+        call dyn_topo_remap ( w_f, w_p%phis, dyntype, info=rc )
+      else
+        call die(myname_,'inconsistent dimensions' )
+      endif
+      print *, "Topo remap done"
+      
+      end subroutine dyn_topo_remap0_
+
       subroutine dyn_topo_remap_( w_f,phis_new, dyntype, info )
       implicit none
       integer,intent(in) :: dyntype

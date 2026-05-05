@@ -1,0 +1,23 @@
+#!/bin/bash -v
+
+export ODAS_NDAYS=0.125                      # 1/2 the frequency of the launch of the observers.
+export ODAS_T_prof_sigo=10.0                # Basic obs error for temperature profiles [deg C]
+export ODAS_S_prof_sigo=10.0                # Basic obs error for salinity profiles [psu]
+export ODAS_ADT_sigo=0.2
+export ODAS_SSS_sigo=1.0                    # obs error scaling factor for L3 Aq. data
+
+export ODAS_rewind=true                     # True: Rewinds to the start of the window              !!!!! OBSOLETE !!!!!
+export ODAS_IAU=true                        # True: Use iau, restoring period set to 18 hours   !!!!! No IAU NOT SUPPORTED !!!!
+export ODAS_IAU_TIME=18                     # IAU restores increment up to ODAS_IAU_TIME in UTC hours
+
+export ODAS_do_aice=true                    # True
+export ODAS_do_aice_nudging=false           # USE FALSE WHEN DUAL OCEAN IS RUNNING
+export ODAS_do_hice=false                   # True
+
+export ODAS_dt_restore_sst=24               # Restoring time scale for the sst nudging
+export ODAS_dt_restore_sss=1440             # Restoring time scale for the sss nudging (30 days)
+
+export ODAS_loc_max=400.0                   # Max horizontal localization length scale [km]
+export ODAS_loc_min=200.0                   # Min horizontal localization length scale [km]
+export ODAS_loc_max_cice=200.0              # Max horizontal localization length scale [km]
+export ODAS_loc_min_cice=200.0              # Min horizontal localization length scale [km]

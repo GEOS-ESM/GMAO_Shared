@@ -295,10 +295,10 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
   integer, parameter :: nnln = 8
   character(len=*), parameter :: nlnqct(nnln)=(/ ' dw', ' ps', 'tcp', '  q', &
        'spd', '  t', ' uv', 'sst'/)
-  integer, parameter :: noz = 15
+  integer, parameter :: noz = 16
   character(len=*), parameter :: oztype(noz)=(/'sbuv2', 'omi', 'mls',    & 
        'mls20', 'mls22', 'mls30', 'mls55', 'tomseff', 'omieff', 'o3lev', &
-       'gome','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
+       'gome','ompslpnc','ompslpuv','ompslpvis','ompsnm','ompsnp'/)
 
 !     ODS variables
 !     -------------
@@ -674,7 +674,7 @@ subroutine ods_diagnc4(fname, nymd, nhms, ods, rc)
 
      call get_1d_var(input_id,'Time',rvals,rc)
      if (rc /= 0) return
-     ods%data%time(1:nobs) = int(rvals * 60,)
+     ods%data%time(1:nobs) = int(rvals * 60.)
 
      call get_1d_var(input_id,'Observation_Type',ivals,rc)
      if (rc /= 0) return

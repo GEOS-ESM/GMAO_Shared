@@ -24,6 +24,7 @@ module stoch_module
   subroutine setup_pattern(CF,GRID)
 
     use initialize
+    use m_die, only: die
 
     implicit none
     !
@@ -35,6 +36,7 @@ module stoch_module
     integer :: STATUS,ierr,rc
     integer :: im_world,jm_world,lm_world, lm
     integer :: im_gg,jm_gg
+    character(len=30) STOCHGRIDNAME
       
     call ESMF_ConfigGetAttribute(CF, NX      , Label="NX:"      , RC=STATUS)
     call ESMF_ConfigGetAttribute(CF, NY      , Label="NY:"      , RC=STATUS)
@@ -64,12 +66,20 @@ module stoch_module
     endif 
 
     if (cubed) then
-      ll_factory = LatLonGridFactory(grid_name='XYLLgridDC', &
+      call MAPL_DefGridName (IM_ll,JM_ll,STOCHGRIDNAME,MAPL_am_I_root())
+!     ll_factory = LatLonGridFactory(grid_name='XYLLgridDC', &
+      ll_factory = LatLonGridFactory(grid_name=STOCHGRIDNAME, &
                           Nx = Nx, Ny = Ny,  &
                           IM_World = IM_ll,  &
                           JM_World = JM_ll,  &
-                          LM = LM, pole='PC', dateline='DC')
-       LLgrid = grid_manager%make_grid(ll_factory)
+                          LM = LM, pole='PC', dateline='DC', rc=status)
+       if(status/=0) then
+         call die('setup_pattern','trouble in ll_factory',status)     
+       endif
+       LLgrid = grid_manager%make_grid(ll_factory,rc=status)
+       if(status/=0) then
+         call die('setup_pattern','trouble in llgrid',status)     
+       endif
        L2C => regridder_manager%make_regridder(LLGrid, Grid, REGRID_METHOD_BILINEAR)
     endif
 

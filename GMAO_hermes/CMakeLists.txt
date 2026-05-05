@@ -15,7 +15,7 @@ if ( NOT HERMES_LIGHT )
      m_insitu.F m_interp.F90 m_lp.F m_maph.F90 m_maph_pert.F90 m_mapz.F m_mapz_pert.F90
      m_qsat.F m_remap.f90 m_set_eta.F90 m_vdc2vdc.F90 progsig.f90 shared_topo_remap.F90 m_topo_remap.F90
      m_interpack.F m_interpack_ad.F m_ec_set_eta.F90 m_ecdyn.f90 m_tick.f90
-     m_dyn_util.F90 m_spline.f90
+     m_dyn_util.F90 m_spline.f90 m_nc_JEDIinc.f90 m_nc_akbk.f90
      )
    
    esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu GMAO_gfio_r8)
@@ -44,6 +44,7 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn2drs.x        SOURCES dyn2drs.f90        LIBS ${this})
    ecbuild_add_executable (TARGET dyn2dyn.x        SOURCES dyn2dyn.f90        LIBS ${this})
    ecbuild_add_executable (TARGET dyn_boot.x       SOURCES dyn_boot.f90       LIBS ${this})
+   ecbuild_add_executable (TARGET dyn_hydro.x      SOURCES dyn_hydro.f90      LIBS ${this})
    ecbuild_add_executable (TARGET dyn2prs.x        SOURCES dyn2prs.f90        LIBS ${this})
    ecbuild_add_executable (TARGET dyn2rs5.x        SOURCES dyn2rs5.f90        LIBS ${this})
    ecbuild_add_executable (TARGET dyn52dyn.x       SOURCES dyn52dyn.f90       LIBS ${this})
@@ -62,6 +63,7 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET rs52dyn.x        SOURCES rs52dyn.f90        LIBS ${this})
    ecbuild_add_executable (TARGET gcmbkg2ana.x     SOURCES gcmbkg2ana.F       LIBS ${this})
    ecbuild_add_executable (TARGET dyndot.x         SOURCES dyndot.f90         LIBS ${this})
+   ecbuild_add_executable (TARGET dyn_jediupd.x    SOURCES dyn_jediupd.f90    LIBS ${this})
    ecbuild_add_executable (TARGET dyn_pert_remap.x SOURCES dyn_pert_remap.F90 LIBS ${this})
    ecbuild_add_executable (TARGET dyn_recenter.x   SOURCES dyn_recenter.f90   LIBS ${this})
    ecbuild_add_executable (TARGET dyn_rankhist.x   SOURCES dyn_rankhist.F90   LIBS ${this})
