@@ -382,10 +382,10 @@ CONTAINS
                case ("u") ! user specified
                      ires=99
                      iarg = iarg + 1
-                     call GetArg ( iarg, argv )
+                     call get_command_argument( iarg, argv )
                      read(argv,*) im_usr
                      iarg = iarg + 1
-                     call GetArg ( iarg, argv )
+                     call get_command_argument( iarg, argv )
                      read(argv,*) jm_usr
                case ("x")
                      ires=size(IMS5)-2
@@ -479,7 +479,7 @@ CONTAINS
            case ("-phfile")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, phfile )
+             call get_command_argument( iarg, phfile )
            case ('-prec')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1

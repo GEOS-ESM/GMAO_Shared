@@ -91,7 +91,7 @@ subroutine init_
          locfname = trim(argv)
      case ("-nc")
          iarg = iarg + 1
-         call GetArg ( iarg, argv )
+         call get_command_argument( iarg, argv )
          akbkfname = trim(argv)
      case default
         read(argv,*) nlevs

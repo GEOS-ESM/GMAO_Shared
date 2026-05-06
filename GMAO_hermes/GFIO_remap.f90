@@ -2311,7 +2311,7 @@ CONTAINS
 
       if ( prefProvided .gt. 0 ) then
          write (*,*)
-         write (*,'(X,A,X,I6,X,A)') "Using a provided reference pressure of", prefProvided, "Pascals."
+         write (*,'(1X,A,1X,I6,1X,A)') "Using a provided reference pressure of", prefProvided, "Pascals."
       end if
 
       if ( nLevs .gt. 0 ) then

@@ -521,7 +521,7 @@ CONTAINS
            if (iret .ne. 0) then
                write(6,'(2a,i5)') myname_,    &
                             ': I90_Gtoken error, iret =',iret
-               call exit(2)
+               error stop 2
            end if
          end if
 

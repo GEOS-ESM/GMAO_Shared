@@ -46,7 +46,7 @@ CONTAINS
   character(len=256) :: argv
   integer argc,i,iarg,iargc,nfiles
   rc=0
-  argc =  iargc()
+  argc =  command_argument_count()
   if ( argc .lt. 1 ) then
      rc=-1
      return
@@ -61,7 +61,7 @@ CONTAINS
   do i = 1, 32767
      iarg = iarg + 1
      if ( iarg .gt. argc ) exit
-     call GetArg ( iarg, argv )
+     call get_command_argument( iarg, argv )
      select case (argv)
        case ("-o")
          if ( iarg+1 .gt. argc ) then
@@ -69,7 +69,7 @@ CONTAINS
              return
          endif
          iarg = iarg + 1
-         call GetArg ( iarg, odyn_file )
+         call get_command_argument( iarg, odyn_file )
        case default
          nfiles = nfiles + 1
          if ( nfiles .gt. mfiles ) call die(myname_,': too many eta files')

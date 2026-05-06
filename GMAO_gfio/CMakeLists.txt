@@ -71,6 +71,11 @@ endif ()
 
 ecbuild_add_executable(TARGET GFIO_mean_${precision}.x SOURCES GFIO_mean.f90 LIBS GMAO_gfio_${precision} )
 
+# NAG: GFIO_mean compiled with -r8 calls GFIO_INQUIRE/GFIO_CREATE with promoted-real args
+if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+  target_compile_options(GFIO_mean_${precision}.x PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=GFIO_INQUIRE,GFIO_CREATE>)
+endif()
+
 install(
    PROGRAMS gfio.py
    DESTINATION lib/Python

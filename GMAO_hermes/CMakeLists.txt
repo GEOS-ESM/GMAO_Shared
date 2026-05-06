@@ -81,7 +81,15 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn_blob.x       SOURCES dyn_blob.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_fsens_conv.x SOURCES dyn_fsens_conv.f90 LIBS ${this})
    
-   install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
+    install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
+
+    # NAG: executable sources also call GFIO_PUTREALATT/GFIO_GETREALATT with
+    # varying types (compiled with -r8); suppress type mismatch errors
+    if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+      foreach(_tgt GFIO_remap.x dyn52dyn.x fvsubset.x gcmbkg2ana.x)
+        target_compile_options(${_tgt} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=GFIO_PUTREALATT,GFIO_GETREALATT>)
+      endforeach()
+    endif()
 
 else ()
 

@@ -277,7 +277,7 @@ CONTAINS
          vnorm_=vnorm
          if(.not.present(delp)) then
            print *, 'need delp for height-weights'
-           call exit (99)
+           error stop 99
          endif
       endif
       im=x%grid%im

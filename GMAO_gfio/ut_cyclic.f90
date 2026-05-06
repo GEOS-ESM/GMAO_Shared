@@ -39,7 +39,7 @@
     !    print *, 'Open, rc = ', rc
        
     if ( nymd < 0 ) then 
-         call exit(0)
+         error stop 0
     else if ( nymd == 0 ) then
 
          do m = 100, 1200, 100

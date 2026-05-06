@@ -39,7 +39,7 @@ program dyn_jediupd
    if ( rc .ne. 0 ) then
 !     call die(myname,'cannot read background file')
       print *, myname,'cannot read background file'
-      call exit(1)
+      stop 1
    else
       print *, trim(myname), ': read background ', trim(files(1))
    end if
@@ -62,7 +62,7 @@ program dyn_jediupd
                      x_a%grid%bk, vectype=dyntype )
      if ( size(y_i%t,1)/=nlon .or. size(y_i%t,2)/=nlat ) then
         print *, myname,'field transpose in unexpected way'
-        call exit(1)
+        stop 1
      endif
      print *, 'sum(ts) = ', sum(y_i%ts)
      x_x%ts = y_i%ts
@@ -122,7 +122,7 @@ program dyn_jediupd
    enddo
    if (any(x_a%delp<0.0)) then
      print *, myname, 'unacceptable delp'
-     call exit(1)
+     stop 1
    endif
    t = t + x_i%pt
    x_a%u  = x_a%u + x_i%u
@@ -139,7 +139,7 @@ program dyn_jediupd
    if ( rc .ne. 0 ) then
 !     call die(myname,'cannot write analysis file')
       print *, myname,'cannot write analysis file'
-      call exit(1)
+      stop 1
    else
       print *, trim(myname), ': wrote analysis ', trim(files(3))
    end if
@@ -160,7 +160,7 @@ subroutine init_()
  dyntype = 5
  outinc = 'NULL'
 
- argc =  iargc()
+ argc =  command_argument_count()
  if ( argc .lt. 1 ) call usage_()
 
  iarg=0
@@ -168,7 +168,7 @@ subroutine init_()
  do i = 1, 32767
     iarg = iarg + 1
     if ( iarg .gt. argc ) exit
-    call GetArg ( iarg, argv )
+    call get_command_argument( iarg, argv )
     select case (argv)
 
       case ('-verb')
@@ -177,21 +177,21 @@ subroutine init_()
       case ("-o")
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iarg, outinc )
+         call get_command_argument( iarg, outinc )
       case default
         ncount = ncount + 1
         if (ncount==1) then
-           call GetArg ( iarg, argv )
+           call get_command_argument( iarg, argv )
            read(argv,*) nymd
         else if (ncount==2 ) then
-           call GetArg ( iarg, argv )
+           call get_command_argument( iarg, argv )
            read(argv,*) nhms
         else 
            nc=nc+1
            if(nc .gt. 3) then
 !             call die(myname,'too many cases')
               print *, myname,'too many cases'
-              call exit(1)
+              stop 1
            endif
            files(nc)  = trim(argv)
         endif

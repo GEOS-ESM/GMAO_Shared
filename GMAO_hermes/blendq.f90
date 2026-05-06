@@ -41,7 +41,7 @@
 
    if ( k1 .gt. k2 .or. k1 .lt. 1 .or. k2 .gt. km ) then
       print *, 'invalid k1, k2 = ', k1, k2
-      call exit(1)
+      stop 1
    end if
 
 !  Allocated memory
@@ -50,7 +50,7 @@
               pt(im,jm,km), q(im,jm,km,3), q32(im,jm), stat=ios )
    if ( ios .ne. 0 ) then
       print *, 'cannot allocate memory'
-      call exit(1)
+      stop 1
    endif
 
 !  Read AMIP file
