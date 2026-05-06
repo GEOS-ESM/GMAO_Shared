@@ -489,7 +489,7 @@ distracting non-zero difference.
 !   call fremem_(x_a)
 
 
-  call exit(0)
+  stop
 
 !............................................................................
 
@@ -1280,7 +1280,7 @@ end subroutine meta_clean_
 
       character(len=*), parameter :: myname = 'init'
 
-      integer i, iarg, argc, iargc, n
+      integer i, iarg, argc, n
       character(len=255) argv
 
       print *
@@ -1297,7 +1297,7 @@ end subroutine meta_clean_
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 3 ) call usage()
 
       iarg = 0
@@ -1307,7 +1307,7 @@ end subroutine meta_clean_
          if ( iarg .gt. argc ) then
               exit
          endif
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          if (index(argv,'-v' ) .gt. 0 ) then
              debug = .true.
          else if (index(argv,'-noFlip' ) .gt. 0 ) then
@@ -1317,7 +1317,7 @@ end subroutine meta_clean_
          else if (index(argv,'-o' ) .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iArg, ana_sfc_tn )  ! not ana_sfc_fn
+            call get_command_argument ( iArg, ana_sfc_tn )  ! not ana_sfc_fn
          else
             n = n + 1
             if ( n .eq. 1 ) then

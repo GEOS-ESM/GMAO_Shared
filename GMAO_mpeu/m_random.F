@@ -545,7 +545,7 @@ c     call clockv(xx(2),xx(1),0,2)
 c
 c Generic Unix version
       real xx(2)
-#if defined(sysAIX) || defined(__GFORTRAN__)
+#if defined(sysAIX) || defined(__GFORTRAN__) || defined (__NAG_COMPILER_RELEASE)
       call get_zeits(xx(1))
 #else
       call etime(xx)

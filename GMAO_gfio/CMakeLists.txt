@@ -27,6 +27,12 @@ if (EXTENDED_SOURCE)
 endif()
 set_target_properties (${this} PROPERTIES Fortran_MODULE_DIRECTORY ${include_${this}})
 
+# NAG: legacy NetCDF-2 C API (NCVDEF, NCAPT, NCVPT, NCAGT, NCVGT, NCVGT1) is
+# called with varying Fortran types intentionally — suppress type mismatch errors
+if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+  target_compile_options(${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=NCVDEF,NCAPT,NCVPT,NCAGT,NCVGT,NCVGT1>)
+endif()
+
 # Specs for r8 version
 if (precision STREQUAL "r8")
   string(REPLACE " " ";" tmp ${FREAL8})
@@ -64,6 +70,11 @@ if (precision STREQUAL "r4")
 endif ()
 
 ecbuild_add_executable(TARGET GFIO_mean_${precision}.x SOURCES GFIO_mean.f90 LIBS GMAO_gfio_${precision} )
+
+# NAG: GFIO_mean compiled with -r8 calls GFIO_INQUIRE/GFIO_CREATE with promoted-real args
+if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+  target_compile_options(GFIO_mean_${precision}.x PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=GFIO_INQUIRE,GFIO_CREATE>)
+endif()
 
 install(
    PROGRAMS gfio.py

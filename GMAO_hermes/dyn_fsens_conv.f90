@@ -11,7 +11,7 @@
     integer,parameter :: dyntype=5
     integer,parameter :: nfiles=2
     integer nymd, nhms, lu, n, freq, vectype, prec, ier, nstep
-    integer i, nf, iarg, argc, ndim2, ndim3, intarg, iargc
+    integer i, nf, iarg, argc, ndim2, ndim3, intarg
     character(len=255) :: ofile
     character(len=255) :: dynfile(nfiles)
     character(len=255) argv
@@ -31,20 +31,20 @@
     verbose = .false.
 
     iarg=0
-    argc = iargc()
+    argc = command_argument_count()
     if ( argc < 1 ) call usage_()
     nf=0
     do i = 1, 32767
        iarg = iarg + 1
        if ( iarg .gt. argc ) exit
-       call GetArg ( iarg, argv )
+       call get_command_argument ( iarg, argv )
        select case (trim(argv))
           case ("-verbose")
              verbose = .true.
           case ("-o")
              if ( iarg+1 .gt. argc ) call usage_()
              iarg = iarg + 1
-             call GetArg ( iarg, ofile )
+             call get_command_argument ( iarg, ofile )
           case default
              nf = nf + 1
              if ( nf .gt. nfiles ) call die(myname,'too many eta files:',nf)

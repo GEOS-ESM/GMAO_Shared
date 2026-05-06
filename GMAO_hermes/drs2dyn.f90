@@ -91,7 +91,7 @@
    write(6,'(3a,i8.8,a,i2.2,a)') ' Created ', trim(dynfile), & 
            ' with dyn-vect for ', nymd, ' at ',  nhms/10000,  'Z'
    print *, '--------------------------------------------------------------------'
-   call exit(0)
+   stop
 
    CONTAINS
 
@@ -132,7 +132,7 @@
 
       character*4, parameter :: myname = 'init'
 
-      integer nfiles, i, iarg, argc, iargc
+      integer nfiles, i, iarg, argc
       integer ires
       character(len=255) :: etafile, argv, res
       character*10 str
@@ -158,7 +158,7 @@
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
 
       iarg = 0
@@ -169,20 +169,20 @@
          if ( iarg .gt. argc ) then
               exit
          end if
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          select case (argv)
            case ("-o")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, dynftmpl )
+             call get_command_argument ( iarg, dynftmpl )
            case ("-expid")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, expid )
+             call get_command_argument ( iarg, expid )
            case ("-res")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iarg, res )
+             call get_command_argument ( iarg, res )
              select case (res)
                case ("a")
                      ires=1
@@ -194,37 +194,37 @@
                      ires=4
                case default
                      print *, 'Sorry this resolutio not supported'
-                     call exit(1)
+                     error stop 1
              end select
              in = ims(ires)
              jn = jms(ires)
            case ('-freq')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iarg, str )
+            call get_command_argument ( iarg, str )
             read(str,*) freq
            case ('-prec')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iarg, str )
+            call get_command_argument ( iarg, str )
             read(str,*) prec
            case ('-nlevs')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iarg, str )
+            call get_command_argument ( iarg, str )
             read(str,*) kn
             if (count(kn==KMS).eq.0) then
                 print *, 'Cannot handle this vertical number of levels'
-                call exit(1)
+                error stop 1
             endif
            case ('-ntrac')
             if ( iarg+1 .gt. argc ) call usage()
             iarg = iarg + 1
-            call GetArg ( iarg, str )
+            call get_command_argument ( iarg, str )
             read(str,*) ln
             if (count(ln==LMS).eq.0) then
                 print *, 'Cannot handle this number of tracers'
-                call exit(1)
+                error stop 1
             endif
            case default
              nfiles = nfiles + 1
@@ -282,7 +282,7 @@
       print *
       print *, ' Last updated: 30 Sep 2004; Todling '
       print *
-      call exit(1)
+      error stop 1
       end subroutine usage
       
 !-------------------------------------------------------------------------

@@ -1279,7 +1279,7 @@
 
 !  All done
 !  --------
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -1385,7 +1385,6 @@ CONTAINS
 !-------------------------------------------------------------------------
 
    integer             iarg, argc
-   integer :: iargc
    character(len=4096)  argv, prsFile
 
    character(len=255)   rcfile, Vars(mVars), tmp, tmp1
@@ -1402,7 +1401,7 @@ CONTAINS
    real    xWest, xSouth, deltaPhi, deltaj, p
    logical :: debug = .false.
 
-   argc = iargc()
+   argc = command_argument_count()
    if ( argc < 1 ) call usage_()
 
 !  Defaults
@@ -1444,11 +1443,11 @@ CONTAINS
       if ( iarg .gt. argc ) then
            exit
       endif
-      call GetArg ( iArg, argv )
+      call get_command_argument ( iArg, argv )
       if(index(argv,'-o') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, outFile )
+         call get_command_argument ( iArg, outFile )
       else if(index(argv,'-edge') .gt. 0 ) then
          onEdges = .true.
       else if(index(argv,'-lcv') .gt. 0 ) then
@@ -1466,108 +1465,108 @@ CONTAINS
       else if(index(argv,'-cvs') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, cvsFile )
+         call get_command_argument ( iArg, cvsFile )
       else if(index(argv,'-format') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, format )
+         call get_command_argument ( iArg, format )
       else if(index(argv,'-date') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) date
       else if(index(argv,'-inc') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) inc_hhmmss
       else if(index(argv,'-start') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) startTime 
       else if(index(argv,'-rc') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, rcfile )
+         call get_command_argument ( iArg, rcfile )
       else if(index(argv,'-hist') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrHistory )
+         call get_command_argument ( iArg, usrHistory )
       else if(index(argv,'-convention') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrConvention )
+         call get_command_argument ( iArg, usrConvention )
       else if(index(argv,'-inst') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrInstitution )
+         call get_command_argument ( iArg, usrInstitution )
       else if(index(argv,'-ref') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrReferences )
+         call get_command_argument ( iArg, usrReferences )
       else if(index(argv,'-comment') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrComment )
+         call get_command_argument ( iArg, usrComment )
       else if(index(argv,'-src') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrSource )
+         call get_command_argument ( iArg, usrSource )
       else if(index(argv,'-title') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrTitle )
+         call get_command_argument ( iArg, usrTitle )
       else if(index(argv,'-contact') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, usrContact )
+         call get_command_argument ( iArg, usrContact )
       else if(index(argv,'-im') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) im
       else if(index(argv,'-west') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) xWest
       else if(index(argv,'-south') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) xSouth
       else if(index(argv,'-jm') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) jm
       else if(index(argv,'-nbits') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) nbit
          print *, "nbit: ", nbit
       else if(index(argv,'-tSteps') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) tSteps
       else if(index(argv,'-vars') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          call split_ ( ',', argv, mVars, Vars, nVars )
       else if(index(argv,'-prsf') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, prsFile )
+         call get_command_argument ( iArg, prsFile )
          if (len(trim(prsFile)) .ge. 4096) call die (myNewName, '-prsf files are too long.')
          call split_ ( ',', prsFile, mFiles, prsFiles, nPsfs )
       else if(index(argv,'-levels') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          call split_ ( ',', argv, mLevs, cLevs, nLevs )
          allocate( Levs(nLevs), stat = rc)
          if ( rc /= 0 )  call die (myNewName, 'wrong in allocating nLevs')
@@ -1578,7 +1577,7 @@ CONTAINS
       else if(index(argv,'-prec') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) outPrec
       else if(index(argv,'-eta') .gt. 0 ) then
          inType = 'eta'
@@ -2942,7 +2941,7 @@ end subroutine compHght
             end do
             if ( k_bot .lt. 2 ) then
                print *, ': got  k_bot<2   while computing T_ref'
-               call exit(1)
+               error stop 1
             else
                k1 = k_bot - 1
                k2 = k_bot

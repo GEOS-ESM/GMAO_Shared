@@ -7,15 +7,15 @@
        character(len=255) :: fname
        integer            :: nymd, nhms, n, argc, iargc
 
-       argc =  iargc()
+       argc =  command_argument_count()
        if ( argc .lt. 1 ) then
             print*, 'GEOS-5 temporary and specific program '
             print*, 'to create d_rst file with date and time'
             print*, '       Usage:  mkdrstdate.x nymd nhms'
-            call exit(0)
+            stop
        endif
        do n=1,argc
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
        enddo
        read(arg(1), * ) nymd
        read(arg(2), * ) nhms

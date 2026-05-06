@@ -14,6 +14,7 @@ module OVP
 
   use ESMF
   use MAPL
+  use iso_fortran_env
   
   implicit none
   private
@@ -185,7 +186,7 @@ contains
      ALLOCATE(         MASK( SIZE(LONS(:,1)), SIZE(LONS(1,:)) ) )   ! RETURN VALUE
 
 
-     SECONDS_AWAY = LONS*(180._8/MAPL_PI_R8)*240. - OVERPASS_HOUR*60*60
+     SECONDS_AWAY = LONS*(180._REAL64/MAPL_PI_R8)*240. - OVERPASS_HOUR*60*60
 
      CALL RESET_TIME_RANGE(SECONDS_AWAY)
 

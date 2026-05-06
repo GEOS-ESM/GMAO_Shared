@@ -4,19 +4,19 @@
 
    integer, parameter :: READ_ONLY = 1
    character(len=255) fname, argv
-   integer  iarg, iargc, argc
+   integer  iarg, argc
    integer fid, err
    integer im, jm, km, lm, nvars, ngatts
 
-   argc =  iargc()
+   argc =  command_argument_count()
    if ( argc .lt. 1 ) then 
        print *
        print *, "Usage: getgfiodim.x gfiofilename"
        print *
-       call exit(1)
+       error stop 1
    endif
    iarg = 1
-   call GetArg ( iArg, argv )
+   call get_command_argument ( iArg, argv )
    fname = trim(argv)
 
 !  Open the file
@@ -24,7 +24,7 @@
    call GFIO_Open ( trim(fname), READ_ONLY, fid, err )
    if ( err .ne. 0 ) then
       print *, 'cannot open file '
-      call exit (2)
+      error stop 2
    endif
  
 !  Get dimensions
@@ -32,7 +32,7 @@
    call GFIO_DimInquire ( fid, im, jm, km, lm, nvars, ngatts, err)
    if ( err .ne. 0 ) then
       print *, 'cannot extra dimensions '
-      call exit (3)
+      error stop 3
    end if
 
 !   Close GFIO file

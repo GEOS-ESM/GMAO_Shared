@@ -129,7 +129,7 @@
       print *, '--------------------------'
       print *
 
-      call exit(0)
+      stop
 
 !...................................................................................
 
@@ -159,7 +159,7 @@
 !EOP
 !-----------------------------------------------------------------------
 
-      integer i, iarg, argc, iargc
+      integer i, iarg, argc
       character(len=255) argv
 
       logical pin, lon_res, lat_res, pick
@@ -174,7 +174,7 @@
       dyn_pin = 'NONE'
       dyn_pout = 'maph_pert.nc4'
 
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage_()
 
       iarg = 0
@@ -183,16 +183,16 @@
          if ( iarg .gt. argc ) then
               exit
          endif
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          if (index(argv,'-op' ) .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_pout )
+            call get_command_argument ( iArg, dyn_pout )
          else if (index(argv,'-p' ) .gt. 0 ) then
             pin = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, dyn_pin )
+            call get_command_argument ( iArg, dyn_pin )
          else if (index(argv,'-verbose' ) .gt. 0 ) then
             verb = .true.
          else if (index(argv,'-hs' ) .gt. 0 ) then
@@ -203,22 +203,22 @@
             lon_res = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) in 
          else if (index(argv,'-lat' ) .gt. 0 ) then
             lat_res = .true.
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) jn
          else if (index(argv,'-pick' ) .gt. 0 ) then
             pick = .true.
             if ( iarg+2 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) nymd_p
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             read(argv,*) nhms_p
          end if
       end do
@@ -289,7 +289,7 @@
       print *
       print *, trim(myname) // ': ' // trim(msg)
       print *
-      call exit(1)
+      error stop 1
       end subroutine die
 !.......................................................................
 

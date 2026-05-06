@@ -2,6 +2,7 @@
       module G3_MPI_Util_Mod
 
       use MAPL
+      use iso_fortran_env
       implicit none
 
 ! Define Lattice
@@ -345,12 +346,12 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=4)   qglobal( lattice%imglobal )
-      real(kind=4)   qlocal ( lattice%im(lattice%myid) )
+      real(kind=REAL32)   qglobal( lattice%imglobal )
+      real(kind=REAL32)   qlocal ( lattice%im(lattice%myid) )
       integer status(mpi_status_size)
       integer comm
       integer i,n,loc,im,imx,imglobal,myid,npes,ierror,mpi_rkind
-      real(kind=4), allocatable ::   buf(:)
+      real(kind=REAL32), allocatable ::   buf(:)
 
       comm      = lattice%comm
       myid      = lattice%myid
@@ -386,12 +387,12 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=8)   qglobal( lattice%imglobal )
-      real(kind=8)   qlocal ( lattice%im(lattice%myid) )
+      real(kind=REAL64)   qglobal( lattice%imglobal )
+      real(kind=REAL64)   qlocal ( lattice%im(lattice%myid) )
       integer status(mpi_status_size)
       integer comm
       integer i,n,loc,im,imx,imglobal,myid,npes,ierror,mpi_rkind
-      real(kind=8), allocatable ::   buf(:)
+      real(kind=REAL64), allocatable ::   buf(:)
 
       comm      = lattice%comm
       myid      = lattice%myid
@@ -427,14 +428,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=4)   qglobal( lattice%imglobal,lattice%jmglobal )
-      real(kind=4)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
+      real(kind=REAL32)   qglobal( lattice%imglobal,lattice%jmglobal )
+      real(kind=REAL32)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
       integer status(mpi_status_size)
       integer comm
       integer myid,npe,ierror,mpi_rkind
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=4), allocatable ::   buf(:,:)
+      real(kind=REAL32), allocatable ::   buf(:,:)
 
       comm      = lattice%comm
       myid      = lattice%myid
@@ -490,14 +491,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=8)   qglobal( lattice%imglobal,lattice%jmglobal )
-      real(kind=8)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
+      real(kind=REAL64)   qglobal( lattice%imglobal,lattice%jmglobal )
+      real(kind=REAL64)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
       integer status(mpi_status_size)
       integer comm
       integer myid,npe,ierror,mpi_rkind
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=8), allocatable ::   buf(:,:)
+      real(kind=REAL64), allocatable ::   buf(:,:)
 
       comm      = lattice%comm
       myid      = lattice%myid
@@ -615,14 +616,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=4)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
-      real(kind=4)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
+      real(kind=REAL32)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
+      real(kind=REAL32)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
       integer status(mpi_status_size)
       integer comm,lm,L
       integer myid,npe,ierror,mpi_rkind
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=4), allocatable ::   buf(:,:,:)
+      real(kind=REAL32), allocatable ::   buf(:,:,:)
 
       comm      = lattice%comm
       myid      = lattice%myid
@@ -683,14 +684,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=8)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
-      real(kind=8)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
+      real(kind=REAL64)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
+      real(kind=REAL64)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
       integer status(mpi_status_size)
       integer comm,lm,L
       integer myid,npe,ierror,mpi_rkind
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=8), allocatable ::   buf(:,:,:)
+      real(kind=REAL64), allocatable ::   buf(:,:,:)
 
       comm      = lattice%comm
       myid      = lattice%myid
@@ -751,8 +752,8 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=4)   qglobal( lattice%imglobal )
-      real(kind=4)   qlocal ( lattice%im(lattice%myid) )
+      real(kind=REAL32)   qglobal( lattice%imglobal )
+      real(kind=REAL32)   qlocal ( lattice%im(lattice%myid) )
       integer status(mpi_status_size)
       integer comm, mpi_rkind
       integer i,n,loc,im,imx,myid,npes,ierror
@@ -786,8 +787,8 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=8)   qglobal( lattice%imglobal )
-      real(kind=8)   qlocal ( lattice%im(lattice%myid) )
+      real(kind=REAL64)   qglobal( lattice%imglobal )
+      real(kind=REAL64)   qlocal ( lattice%im(lattice%myid) )
       integer status(mpi_status_size)
       integer comm, mpi_rkind
       integer i,n,loc,im,imx,myid,npes,ierror
@@ -821,14 +822,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=4)   qglobal( lattice%imglobal,lattice%jmglobal )
-      real(kind=4)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
+      real(kind=REAL32)   qglobal( lattice%imglobal,lattice%jmglobal )
+      real(kind=REAL32)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
       integer status(mpi_status_size)
       integer comm, mpi_rkind
       integer myid,npe,ierror
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=4), allocatable ::   buf(:,:)
+      real(kind=REAL32), allocatable ::   buf(:,:)
 
       mpi_rkind = mpi_real
       comm      = lattice%comm
@@ -883,14 +884,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=8)   qglobal( lattice%imglobal,lattice%jmglobal )
-      real(kind=8)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
+      real(kind=REAL64)   qglobal( lattice%imglobal,lattice%jmglobal )
+      real(kind=REAL64)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
       integer status(mpi_status_size)
       integer comm, mpi_rkind
       integer myid,npe,ierror
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=8), allocatable ::   buf(:,:)
+      real(kind=REAL64), allocatable ::   buf(:,:)
 
       mpi_rkind = mpi_double_precision
       comm      = lattice%comm
@@ -945,14 +946,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=4)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
-      real(kind=4)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
+      real(kind=REAL32)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
+      real(kind=REAL32)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
       integer status(mpi_status_size)
       integer comm,lm,L
       integer myid,npe,ierror, mpi_rkind
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=4), allocatable ::   buf(:,:,:)
+      real(kind=REAL32), allocatable ::   buf(:,:,:)
 
       mpi_rkind = mpi_real
       comm      = lattice%comm
@@ -1012,14 +1013,14 @@ end interface
 ! **********************************************************************
       implicit none
       type ( dynamics_lattice_type ) lattice
-      real(kind=8)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
-      real(kind=8)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
+      real(kind=REAL64)   qglobal( lattice%imglobal,lattice%jmglobal,lattice%lm )
+      real(kind=REAL64)   qlocal ( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
       integer status(mpi_status_size)
       integer comm,lm,L
       integer myid,npe,ierror, mpi_rkind
       integer nx,i,iloc,im,imx,imglobal,isum
       integer ny,j,jloc,jm,jmy,jmglobal,jsum
-      real(kind=8), allocatable ::   buf(:,:,:)
+      real(kind=REAL64), allocatable ::   buf(:,:,:)
 
       mpi_rkind = mpi_double_precision
       comm      = lattice%comm
@@ -1651,26 +1652,26 @@ end interface
       implicit none
       type ( dynamics_lattice_type ) lattice
       real      q( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
-      real*8 cosp( lattice%jm(lattice%pej) )
-      real*8 qdum
-      real*8 qave 
+      real(kind=REAL64) cosp( lattice%jm(lattice%pej) )
+      real(kind=REAL64) qdum
+      real(kind=REAL64) qave 
       real   qave4
 
-      real*8  dlat,dlon,phi
+      real(kind=REAL64)  dlat,dlon,phi
       integer i,j,ierror
       integer im,jm
 
       im = lattice%im(lattice%pei)
       jm = lattice%jm(lattice%pej)
 
-      dlon = 2_8*MAPL_PI/ lattice%imglobal
+      dlon = 2_REAL64*MAPL_PI/ lattice%imglobal
       dlat =     MAPL_PI/(lattice%jmglobal-1)
       do j=1,jm
-      phi = -0.5_8*MAPL_PI + (lattice%jglobal(j)-1)*dlat
+      phi = -0.5_REAL64*MAPL_PI + (lattice%jglobal(j)-1)*dlat
       cosp(j) = dcos(phi)
       enddo
 
-      qdum = 0.0_8
+      qdum = 0.0_REAL64
       do j=1,jm
       do i=1,im
           qdum = qdum + q(i,j) * cosp(j)*dlon*dlat
@@ -1698,12 +1699,12 @@ end interface
       type ( dynamics_lattice_type ) lattice
       real      q( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
       real     dp( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
-      real*8 cosp( lattice%jm(lattice%pej) )
-      real*8 qdum
-      real*8 qave 
+      real(kind=REAL64) cosp( lattice%jm(lattice%pej) )
+      real(kind=REAL64) qdum
+      real(kind=REAL64) qave 
       real   qave4
 
-      real*8  dlat,dlon,phi
+      real(kind=REAL64)  dlat,dlon,phi
       integer i,j,L,ierror
       integer im,jm,lm
 
@@ -1711,14 +1712,14 @@ end interface
       jm = lattice%jm(lattice%pej)
       lm = lattice%lm
 
-      dlon = 2_8*MAPL_PI/ lattice%imglobal
+      dlon = 2_REAL64*MAPL_PI/ lattice%imglobal
       dlat =     MAPL_PI/(lattice%jmglobal-1)
       do j=1,jm
-      phi = -0.5_8*MAPL_PI + (lattice%jglobal(j)-1)*dlat
+      phi = -0.5_REAL64*MAPL_PI + (lattice%jglobal(j)-1)*dlat
       cosp(j) = dcos(phi)
       enddo
 
-      qdum = 0.0_8
+      qdum = 0.0_REAL64
       do L=1,lm
       do j=1,jm
       do i=1,im
@@ -1747,25 +1748,25 @@ end interface
       implicit none
       type ( dynamics_lattice_type ) lattice
       real      q( lattice%im(lattice%pei),lattice%jm(lattice%pej) )
-      real*8 cosp( lattice%jm(lattice%pej) )
-      real*8 qdum
-      real*8 qave 
+      real(kind=REAL64) cosp( lattice%jm(lattice%pej) )
+      real(kind=REAL64) qdum
+      real(kind=REAL64) qave 
 
-      real*8  dlat,dlon,phi
+      real(kind=REAL64)  dlat,dlon,phi
       integer i,j,ierror
       integer im,jm
 
       im = lattice%im(lattice%pei)
       jm = lattice%jm(lattice%pej)
 
-      dlon = 2_8*MAPL_PI/ lattice%imglobal
+      dlon = 2_REAL64*MAPL_PI/ lattice%imglobal
       dlat =     MAPL_PI/(lattice%jmglobal-1)
       do j=1,jm
-      phi = -0.5_8*MAPL_PI + (lattice%jglobal(j)-1)*dlat
+      phi = -0.5_REAL64*MAPL_PI + (lattice%jglobal(j)-1)*dlat
       cosp(j) = dcos(phi)
       enddo
 
-      qdum = 0.0_8
+      qdum = 0.0_REAL64
       do j=1,jm
       do i=1,im
           qdum = qdum + q(i,j) * cosp(j)*dlon*dlat
@@ -1792,11 +1793,11 @@ end interface
       type ( dynamics_lattice_type ) lattice
       real      q( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
       real     dp( lattice%im(lattice%pei),lattice%jm(lattice%pej),lattice%lm )
-      real*8 cosp( lattice%jm(lattice%pej) )
-      real*8 qdum
-      real*8 qave 
+      real(kind=REAL64) cosp( lattice%jm(lattice%pej) )
+      real(kind=REAL64) qdum
+      real(kind=REAL64) qave 
 
-      real*8  dlat,dlon,phi
+      real(kind=REAL64)  dlat,dlon,phi
       integer i,j,L,ierror
       integer im,jm,lm
 
@@ -1804,14 +1805,14 @@ end interface
       jm = lattice%jm(lattice%pej)
       lm = lattice%lm
 
-      dlon = 2_8*MAPL_PI/ lattice%imglobal
+      dlon = 2_REAL64*MAPL_PI/ lattice%imglobal
       dlat =     MAPL_PI/(lattice%jmglobal-1)
       do j=1,jm
-      phi = -0.5_8*MAPL_PI + (lattice%jglobal(j)-1)*dlat
+      phi = -0.5_REAL64*MAPL_PI + (lattice%jglobal(j)-1)*dlat
       cosp(j) = dcos(phi)
       enddo
 
-      qdum = 0.0_8
+      qdum = 0.0_REAL64
       do L=1,lm
       do j=1,jm
       do i=1,im
@@ -1841,23 +1842,23 @@ end interface
       integer   im,jm,lm
       real    q(im,jm,lm)
       real   dp(im,jm,lm)
-      real*8 cosp(jm)
-      real*8 qdum
-      real*8 qave
+      real(kind=REAL64) cosp(jm)
+      real(kind=REAL64) qdum
+      real(kind=REAL64) qave
       real   qave4
 
-      real*8  dlat,dlon,phi
+      real(kind=REAL64)  dlat,dlon,phi
       integer i,j,L,n,ierror
 
-      dlon = 2_8*MAPL_PI/ lattice%imglobal
+      dlon = 2_REAL64*MAPL_PI/ lattice%imglobal
       dlat =     MAPL_PI/(lattice%jmglobal-1)
       do j=1,jm
-      phi = -0.5_8*MAPL_PI + (lattice%jglobal(j)-1)*dlat
+      phi = -0.5_REAL64*MAPL_PI + (lattice%jglobal(j)-1)*dlat
       cosp(j) = dcos(phi)
       enddo
 
       if( lm.gt.1 ) then
-          qdum = 0.0_8
+          qdum = 0.0_REAL64
           do L=1,lm
           do j=1,jm
           do i=1,im
@@ -1866,7 +1867,7 @@ end interface
           enddo
           enddo
       else
-          qdum = 0.0_8
+          qdum = 0.0_REAL64
           do j=1,jm
           do i=1,im
           qdum = qdum + q(i,j,1)**n * cosp(j)*dlon*dlat
@@ -1894,16 +1895,16 @@ end interface
       integer      im,jm, comm
       real      q( im,jm )
       real   area( im,jm )
-      real*8 qdum1
-      real*8 qdum2
-      real*8 qave1
-      real*8 qave2
-      real*8 qave 
+      real(kind=REAL64) qdum1
+      real(kind=REAL64) qdum2
+      real(kind=REAL64) qave1
+      real(kind=REAL64) qave2
+      real(kind=REAL64) qave 
 
       integer i,j,ierror
 
-      qdum1 = 0.0_8
-      qdum2 = 0.0_8
+      qdum1 = 0.0_REAL64
+      qdum2 = 0.0_REAL64
       do j=1,jm
       do i=1,im
           qdum1 = qdum1 + q(i,j)*area(i,j)
@@ -2000,7 +2001,7 @@ end interface
 
       subroutine malloc_1d_r (a,im)
       implicit none
-      real(kind=8), dimension(:), pointer :: a
+      real(kind=REAL64), dimension(:), pointer :: a
       integer i,im,m
       if(.not.associated(a)) then
       allocate(a(im))
@@ -2020,7 +2021,7 @@ end interface
 
       subroutine malloc_2d_r (a,im,jm)
       implicit none
-      real(kind=8), dimension(:,:), pointer :: a
+      real(kind=REAL64), dimension(:,:), pointer :: a
       integer i,j,m,im,jm
       if(.not.associated(a)) then
       allocate(a(im,jm))
@@ -2042,7 +2043,7 @@ end interface
 
       subroutine malloc_3d_r (a,im,jm,lm)
       implicit none
-      real(kind=8), dimension(:,:,:), pointer :: a
+      real(kind=REAL64), dimension(:,:,:), pointer :: a
       integer i,j,l,im,jm,lm,m
       if(.not.associated(a)) then
       allocate(a(im,jm,lm))
@@ -2066,7 +2067,7 @@ end interface
 
       subroutine malloc_4d_r (a,im,jm,lm,nm)
       implicit none
-      real(kind=8), dimension(:,:,:,:), pointer :: a
+      real(kind=REAL64), dimension(:,:,:,:), pointer :: a
       integer i,j,l,n,im,jm,lm,nm,m
       if(.not.associated(a)) then
       allocate(a(im,jm,lm,nm))

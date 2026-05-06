@@ -68,7 +68,7 @@
          print *, ' Ozone not found in eta file'  ! not really an error
      else
          print *, ' Cannot read eta file'
-         call exit (1)
+         error stop 1
      endif
    end if
   
@@ -83,7 +83,7 @@
 ! done
    
    if(verbose) print *, ' -- dyn2drs.x has successfully ended -- '
-   call exit(0)
+   stop
 
    CONTAINS
 
@@ -123,7 +123,7 @@
    integer, parameter :: nfiles_max = 1
    character(len=255) :: infile(nfiles_max)
    character*4, parameter :: myname = 'init'
-   integer :: i,argc,iarg,iargc,nfiles,leta
+   integer :: i,argc,iarg,nfiles,leta
    character*255 :: argv
 
 ! defaults
@@ -134,14 +134,14 @@
    verbose = .false.
    skipo3  = .false.
 
-   argc =  iargc()
+   argc =  command_argument_count()
    if ( argc .lt. 1 ) call usage()
    nfiles = 0
    iarg = 0
 lp:  do i = 1, 32767
       iarg = iarg + 1
       if ( iarg .gt. argc ) exit lp
-      call GetArg ( iArg, argv )
+      call get_command_argument ( iArg, argv )
       if (index(argv,'-oldana') .gt. 0 ) then
          oldana = .TRUE.
       elseif (index(argv,'-verbose') .gt. 0 ) then
@@ -151,16 +151,16 @@ lp:  do i = 1, 32767
       elseif (index(argv,'-pick') .gt. 0 ) then
            if ( iarg+2 .gt. argc ) call usage()
            iarg = iarg + 1
-           call GetArg ( iArg, argv )
+           call get_command_argument ( iArg, argv )
            read(argv,*) nymd
            iarg = iarg + 1
-           call GetArg ( iArg, argv )
+           call get_command_argument ( iArg, argv )
            read(argv,*) nhms
            pick = .true.
       elseif (index(argv,'-o') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage()
          iarg = iarg + 1
-         call GetArg ( iArg, binfile )
+         call get_command_argument ( iArg, binfile )
       else
          nfiles = nfiles + 1
          if ( nfiles .gt. nfiles_max ) then

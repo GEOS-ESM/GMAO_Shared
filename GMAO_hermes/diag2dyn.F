@@ -876,7 +876,7 @@ C <<<<<<<<<<< General Coordinate  >>>>>>>>>>>>>>>>>>>
       logical, intent(out) :: verbose
       integer, intent(out) :: time(2), date(2)
 
-      integer :: i, iarg, argc, iargc, n, fid, rc, nhms1, vid
+      integer :: i, iarg, argc, n, fid, rc, nhms1, vid
       integer :: ntimes, nvars, ngatts
       character(len=255) argv, out_template, basen
 
@@ -895,7 +895,7 @@ C <<<<<<<<<<< General Coordinate  >>>>>>>>>>>>>>>>>>>
       expid = 'unknown'
       verbose = .false.
 
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage_()
 
       iarg = 0
@@ -903,15 +903,15 @@ C <<<<<<<<<<< General Coordinate  >>>>>>>>>>>>>>>>>>>
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          if (index(argv,'-o' ) .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, out_template )
+            call get_command_argument ( iArg, out_template )
          else if (index(argv,'-r' ) .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, argv )
+            call get_command_argument ( iArg, argv )
             out_res = argv(1:3)
          else if (index(argv,'-v' ) .gt. 0 ) then
             verbose = .true.
@@ -920,7 +920,7 @@ C <<<<<<<<<<< General Coordinate  >>>>>>>>>>>>>>>>>>>
             diag1_fn = argv
             if ( iarg+1 .gt. argc ) call usage_()
             iarg = iarg + 1
-            call GetArg ( iArg, diag2_fn )
+            call get_command_argument ( iArg, diag2_fn )
             n = n + 1
          end if
       end do

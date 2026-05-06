@@ -128,10 +128,10 @@ contains
   subroutine init_
 
   integer, parameter :: mfiles=2
-  integer iargc,argc,nfiles,iarg,i
+  integer argc,nfiles,iarg,i
   character(len=256) str,argv
 
-  argc = iargc()
+  argc = command_argument_count()
   if ( argc < 2 ) then
      print *, "Usage: dyn_iupd.x [-scale SCALE] finput foutput"
      print *, "   "
@@ -144,7 +144,7 @@ contains
   do i = 1, 32767
      iarg = iarg + 1
      if ( iarg .gt. argc ) exit
-     call GetArg ( iarg, argv )
+     call get_command_argument ( iarg, argv )
      select case (argv)
        case ('-scale')
          if ( iarg+1 .gt. argc ) then
@@ -152,7 +152,7 @@ contains
              stop
          endif
            iarg = iarg + 1
-           call GetArg ( iarg, str )
+           call get_command_argument ( iarg, str )
            read(str,*) rscale
        case default
            nfiles = nfiles + 1
