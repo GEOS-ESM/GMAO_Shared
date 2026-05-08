@@ -13,7 +13,7 @@ module GEOS_TopoGetMod
 
   use ESMF
   use MAPL
-  use MAPL2, only: MAPL_VarRead, GETFILE
+  use MAPL2, only: MAPL_VarRead  ! TODO: move NCIOMod to mapl_base3g so this comes from MAPL
   
   implicit none
   private
@@ -109,98 +109,53 @@ contains
 
     real, pointer :: ptr(:,:)
     integer       :: STATUS
-    integer       :: unit
     real          :: GWDFAC
-    real          :: GWDFACX
-    real          :: GWDFACY
-    real          :: GWDFACXY
-    real          :: GWDFACYX
     real          :: TRBFAC
+    type(Netcdf4_Fileformatter)           :: formatter
+
+! Unsupported optional variables
+! -------------------------------
+    _ASSERT(.not. present(GWDVARX),  "GWDVARX not yet supported in NetCDF")
+    _ASSERT(.not. present(GWDVARY),  "GWDVARY not yet supported in NetCDF")
+    _ASSERT(.not. present(GWDVARXY), "GWDVARXY not yet supported in NetCDF")
+    _ASSERT(.not. present(GWDVARYX), "GWDVARYX not yet supported in NetCDF")
 
 ! Get filenames for Get_Topo utility
 ! ----------------------------------
-    call hconfig_get_string(cf, 'TOPO_MEAN_FILE',     filename(1), default='hmean.2.5x2.5min.data',       _RC)
-    call hconfig_get_string(cf, 'TOPO_GWDVAR_FILE',   filename(2), default='hgrav_var.2.5x2.5min.data',   _RC)
-    call hconfig_get_string(cf, 'TOPO_GWDVARX_FILE',  filename(3), default='hgrav_varx.2.5x2.5min.data',  _RC)
-    call hconfig_get_string(cf, 'TOPO_GWDVARY_FILE',  filename(4), default='hgrav_vary.2.5x2.5min.data',  _RC)
-    call hconfig_get_string(cf, 'TOPO_GWDVARXY_FILE', filename(5), default='hgrav_varxy.2.5x2.5min.data', _RC)
-    call hconfig_get_string(cf, 'TOPO_GWDVARYX_FILE', filename(6), default='hgrav_varyx.2.5x2.5min.data', _RC)
-    call hconfig_get_string(cf, 'TOPO_TRBVAR_FILE',   filename(7), default='hturb_var.2.5x2.5min.data',   _RC)
+    call hconfig_get_string(cf, 'TOPO_MEAN_FILE',   filename(1), default='hmean.2.5x2.5min.nc',     _RC)
+    call hconfig_get_string(cf, 'TOPO_GWDVAR_FILE', filename(2), default='hgrav_var.2.5x2.5min.nc', _RC)
+    call hconfig_get_string(cf, 'TOPO_TRBVAR_FILE', filename(3), default='hturb_var.2.5x2.5min.nc', _RC)
 
-  if( present(MEAN)  ) then
+  if( present(MEAN) ) then
 ! -------------------------
-       UNIT = GETFILE  ( filename(1),form="unformatted" )
-       call MAPL_VarRead (UNIT,MEAN)
-       CALL FREE_FILE    (UNIT)
+       call formatter%open(trim(filename(1)), pFIO_READ, _RC)
        call ESMF_FieldGet(MEAN, 0, PTR, rc=status)
        _VERIFY(STATUS)
+       call MAPL_VarRead(formatter, 'z', ptr, _RC)
+       call formatter%close(_RC)
        ptr = ptr*MAPL_GRAV
   endif
 
   if( present(GWDVAR) ) then
 ! --------------------------
-       call hconfig_get_r4(cf, 'GWDVAR_FACTOR',  GWDFAC,  default=1.0, _RC)
-       UNIT = GETFILE  (filename(2), form="unformatted")
-       call MAPL_VarRead (UNIT,GWDVAR)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVAR, 0, PTR, rc=status)
+       call hconfig_get_r4(cf, 'GWDVAR_FACTOR', GWDFAC, default=1.0, _RC)
+       call formatter%open(trim(filename(2)), pFIO_READ, _RC)
+       call ESMF_FieldGet(GWDVAR, 0, PTR, rc=status)
        _VERIFY(STATUS)
-       ptr = sqrt( max(gwdfac*ptr,0.0) )
-  endif
-
-  if( present(GWDVARX) ) then
-! ---------------------------
-       call hconfig_get_r4(cf, 'GWDVARX_FACTOR', GWDFACX, default=1.0, _RC)
-       UNIT = GETFILE  (filename(3), form="unformatted")
-       call MAPL_VarRead (UNIT,GWDVARX)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARX, 0, PTR, rc=status)
-       _VERIFY(STATUS)
-       ptr = sqrt( max(gwdfacx*ptr,0.0) )
-  endif
-
-  if( present(GWDVARY) ) then
-! ---------------------------
-       call hconfig_get_r4(cf, 'GWDVARY_FACTOR', GWDFACY, default=1.0, _RC)
-       UNIT = GETFILE  (filename(4), form="unformatted")
-       call MAPL_VarRead (UNIT,GWDVARY)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARY, 0, PTR, rc=status)
-       _VERIFY(STATUS)
-       ptr = sqrt( max(gwdfacy*ptr,0.0) )
-  endif
-
-  if( present(GWDVARXY) ) then
-! ----------------------------
-       call hconfig_get_r4(cf, 'GWDVARXY_FACTOR', GWDFACXY, default=1.0, _RC)
-       UNIT = GETFILE  (filename(5), form="unformatted")
-       call MAPL_VarRead (UNIT,GWDVARXY)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARXY, 0, PTR, rc=status)
-       _VERIFY(STATUS)
-       ptr = sqrt( max(gwdfacxy*ptr,0.0) )
-  endif
-
-  if( present(GWDVARYX) ) then
-! ----------------------------
-       call hconfig_get_r4(cf, 'GWDVARYX_FACTOR', GWDFACYX, default=1.0, _RC)
-       UNIT = GETFILE  (filename(6), form="unformatted")
-       call MAPL_VarRead (UNIT,GWDVARYX)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (GWDVARYX, 0, PTR, rc=status)
-       _VERIFY(STATUS)
-       ptr = sqrt( max(gwdfacyx*ptr,0.0) )
+       call MAPL_VarRead(formatter, 'gwd', ptr, _RC)
+       call formatter%close(_RC)
+       ptr = sqrt( max(gwdfac*ptr, 0.0) )
   endif
 
   if( present(TRBVAR) ) then
 ! --------------------------
-       call hconfig_get_r4(cf, 'TRBVAR_FACTOR',  TRBFAC,  default=1.0, _RC)
-       UNIT = GETFILE  (filename(7), form="unformatted")
-       call MAPL_VarRead (UNIT,TRBVAR)
-       CALL FREE_FILE    (UNIT)
-       call ESMF_FieldGet (TRBVAR, 0, PTR, rc=status)
+       call hconfig_get_r4(cf, 'TRBVAR_FACTOR', TRBFAC, default=1.0, _RC)
+       call formatter%open(trim(filename(3)), pFIO_READ, _RC)
+       call ESMF_FieldGet(TRBVAR, 0, PTR, rc=status)
        _VERIFY(STATUS)
-       ptr = max(trbfac*ptr,0.0)
+       call MAPL_VarRead(formatter, 'trb', ptr, _RC)
+       call formatter%close(_RC)
+       ptr = max(trbfac*ptr, 0.0)
   endif
 
     _RETURN(ESMF_SUCCESS)
