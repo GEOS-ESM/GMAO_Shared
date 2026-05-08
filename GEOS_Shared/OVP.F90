@@ -14,7 +14,7 @@ module OVP
 
   use ESMF
   use MAPL
-  use MAPL2, only: MAPL_PackTime
+  use MAPL_PackedTimeMod, only: MAPL_PackedTimeCreate => PackedTimeCreate
   use mapl3g_GridGet, only: GridGetCoordinates
   
   implicit none
@@ -225,7 +225,7 @@ contains
        iM = VAL/60
        iS = VAL - iM*60
 !      PRINT "(I2,'h ',I2,'m ',I2,'s  ')",iH,iM,iS
-       CALL MAPL_PackTime(VAL,iH,iM,iS)
+       VAL = MAPL_PackedTimeCreate(iH,iM,iS)
        MASK(I,J) = VAL
      ENDDO
      ENDDO
@@ -303,7 +303,7 @@ contains
      IHR = IHR - EXTRA_DAYS*24
 
    ! Pack the new time
-     call MAPL_PackTime(ans,IHR,IMN,ISC)
+     ans = MAPL_PackedTimeCreate(IHR,IMN,ISC)
 
      OVP_end_of_timestep_hms = ans
 
