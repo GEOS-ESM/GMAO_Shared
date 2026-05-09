@@ -72,7 +72,7 @@ end\
 if ( $?ECHO___ ) set echo\
 cat <<\end>>$TMPDIR/.cshFunctions.$$.$NAME___'
 
-
+#unset echo;
 # Function call of the form: Call function ( arg1, arg2, ... ) 
 # -----------------------------------------------------------
   alias Call \
@@ -94,10 +94,17 @@ endif\
 if ( $?ECHO___ ) set echo\
 set status = $RC___'
 
+#unset echo;
 # Naked function call: Call_ function  arg1 arg2  ... argn 
 # -----------------------------------------------------------
   alias Call_ \
-'unset echo; set ARGV___ = ( \!* ); set NAME___ = "$ARGV___[1]"; set FILE___ = "$TMPDIR/.cshFunctions.$$.$NAME___"; if ( -e $FILE___ ) source $FILE___ \!*\
+'unset echo; set ARGV___ = ( \!* ); set NAME___ = "$ARGV___[1]"; set FILE___ = "$TMPDIR/.cshFunctions.$$.$NAME___"\
+if ( -e $FILE___ ) then\
+set SAVEARGV___ = ( $argv )\
+set argv = ( $ARGV___ )\
+source $FILE___\
+set argv = ( $SAVEARGV___ )\
+endif\
 set RC___ = $status\
 if ( $?Trace ) echo "---------------> Entering <$NAME___>"\
 if ( ! -e $FILE___ ) then\
