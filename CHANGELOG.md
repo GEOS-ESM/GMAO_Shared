@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrate `GEOS_Shared/windfix.F90` from `use MAPL2, only: MAPL_GridGet` to `use mapl_MaplGrid, only: MAPL_GridGet` (MAPL#4857)
 - Migrate `OVP.F90`: replace `MAPL_PackTime` calls with `MAPL_PackedTimeCreate` from `MAPL_PackedTimeMod`
 - Migrate `GEOS_TopoGet.F90` from bare `use MAPL2` to `use MAPL` + `use MAPL2, only:` for remaining MAPL2-only symbols
 - Migrate `GEOS_TopoGet.F90` from BinIO (`GETFILE`/`FREE_FILE`) to NetCDF4 via `Netcdf4_Fileformatter`; binary/ASCII topo files are no longer supported
