@@ -7,7 +7,7 @@
 
       use ESMF
       use MAPL, MAPL_GridGet_UNUSED => MAPL_GridGet
-      use MAPL2, only: MAPL_GridGet
+      use mapl_MaplGrid, only: MAPL_GridGet
 
       implicit none
 
