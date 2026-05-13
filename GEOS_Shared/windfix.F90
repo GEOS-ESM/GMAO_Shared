@@ -6,14 +6,13 @@
                            vintdiva,vintdivb,vintdivc )
 
       use ESMF
-      use MAPL, MAPL_GridGet_UNUSED => MAPL_GridGet
-      use mapl_MaplGrid, only: MAPL_GridGet
+      use MAPL, only: mapl_GridGetGlobalCellCountPerDim
 
       implicit none
 
       type (ESMF_VM)   :: VM
       type (ESMF_Grid) :: GRIDana
-      integer          :: DIMS(ESMF_MAXGRIDDIM)
+      integer, allocatable :: DIMS(:)
       integer          :: RC,STATUS
 
       character(len=ESMF_MAXSTR) :: IAm
@@ -67,7 +66,7 @@
       call ESMF_VmGet (VM, mpicommunicator=comm, rc=status)
       VERIFY_(STATUS)
 
-      call  MAPL_GridGet(GRIDana, globalCellCountPerDim=DIMS, RC=STATUS)
+      call mapl_GridGetGlobalCellCountPerDim(GRIDana, globalCellCountPerDim=DIMS, RC=STATUS)
       img = DIMS(1) ! global grid dim
       jmg = DIMS(2) ! global grid dim
       imjmg = img*jmg
