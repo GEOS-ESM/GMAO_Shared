@@ -6,7 +6,7 @@
                            vintdiva,vintdivb,vintdivc )
 
       use ESMF
-      use MAPL, only: mapl_GridGetGlobalCellCountPerDim
+      use MAPL
 
       implicit none
 
