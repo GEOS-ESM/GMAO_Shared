@@ -13,7 +13,6 @@ module GEOS_TopoGetMod
 
   use ESMF
   use MAPL
-  use MAPL2, only: MAPL_VarRead  ! TODO: move NCIOMod to mapl_base3g so this comes from MAPL
   
   implicit none
   private
