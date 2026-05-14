@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Remove `MAPL2` from `GEOS_Shared` CMake dependencies; replace with `MAPL` (#435)
 - Migrate `GEOS_Shared/windfix.F90` from `use mapl_MaplGrid` to `use MAPL` for `mapl_GridGetGlobalCellCountPerDim`; `DIMS` made allocatable (MAPL#4875)
 - Migrate `GEOS_Shared/windfix.F90` from `use MAPL2, only: MAPL_GridGet` to `use mapl_MaplGrid, only: MAPL_GridGet` (MAPL#4857)
 - Migrate `OVP.F90`: replace `MAPL_PackTime` calls with `MAPL_PackedTimeCreate` from `MAPL_PackedTimeMod`

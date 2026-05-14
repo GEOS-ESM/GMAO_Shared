@@ -8,7 +8,7 @@ set (srcs
   getco2.F90 atmOceanIntLayer.F90
   )
 
-esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL2 MAPL MAPL.geom ESMF::ESMF NetCDF::NetCDF_Fortran)
+esma_add_library(${this} SRCS ${srcs} DEPENDENCIES MAPL MAPL.geom ESMF::ESMF NetCDF::NetCDF_Fortran)
 
 # special cases
 set_source_files_properties(sphere.F PROPERTIES COMPILE_FLAGS "${FREAL8}")
