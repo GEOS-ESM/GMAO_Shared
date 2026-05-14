@@ -81,6 +81,10 @@ c   Constants used to calculate variable intercepts
       RON_CONST1R = (RON2-RON_MIN)*0.5D0
       RON_CONST2R = (RON2+RON_MIN)*0.5D0
 
+c   Constant intercepts
+      RN0_R = 8.D6
+      RN0_S = 2.D7
+
 c   Other constants
       GAMMA_SEVEN = 720.D0
       RHOWAT = 1000.D0
