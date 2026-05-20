@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Replace `use mapl3g_GridGet` with `use MAPL` in `GEOS_Shared/OVP.F90`;
+  `MAPL_GridGetCoordinates` is now accessed through the MAPL umbrella module
+  following the Phase 9 `mapl3g_` → `mapl_` rename in MAPL (#437)
 - Remove `MAPL2` from `GEOS_Shared` CMake dependencies; replace with `MAPL` (#435)
 - Migrate `GEOS_Shared/windfix.F90` from `use mapl_MaplGrid` to `use MAPL` for `mapl_GridGetGlobalCellCountPerDim`; `DIMS` made allocatable (MAPL#4875)
 - Migrate `GEOS_Shared/windfix.F90` from `use MAPL2, only: MAPL_GridGet` to `use mapl_MaplGrid, only: MAPL_GridGet` (MAPL#4857)
