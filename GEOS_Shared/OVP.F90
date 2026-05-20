@@ -15,7 +15,6 @@ module OVP
   use ESMF
   use MAPL
   use MAPL_PackedTimeMod, only: MAPL_PackedTimeCreate => PackedTimeCreate
-  use mapl3g_GridGet, only: GridGetCoordinates
   
   implicit none
   private
@@ -117,7 +116,7 @@ contains
 
     call MAPL_GridCompGet(GC, grid=grid, _RC)
 
-    call GridGetCoordinates(grid, LONS, lats, _RC)        !  Get LONS
+    call mapl_GridGetCoordinates(grid, LONS, lats, _RC)        !  Get LONS
 
     call ESMF_GridCompGet ( GC, CONFIG=CF, __RC__ )                   !  Get Config
 
