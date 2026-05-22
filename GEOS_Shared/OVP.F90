@@ -14,7 +14,6 @@ module OVP
 
   use ESMF
   use MAPL
-  use MAPL_PackedTimeMod, only: MAPL_PackedTimeCreate => PackedTimeCreate
   
   implicit none
   private
