@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Remove spurious MAPL CMake sub-target dependencies (closes #443): drop
+  invalid `MAPL.geom` from `GEOS_Shared` dependencies, and replace
+  `MAPL.constants` with `MAPL` for `tem_lib` in `@GEOS_Util/post`. All
+  symbols available transitively via `MAPL`. Zero-diff structural change.
 - Replace `use mapl3g_GridGet` with `use MAPL` in `GEOS_Shared/OVP.F90`;
   `MAPL_GridGetCoordinates` is now accessed through the MAPL umbrella module
   following the Phase 9 `mapl3g_` → `mapl_` rename in MAPL (#437)
