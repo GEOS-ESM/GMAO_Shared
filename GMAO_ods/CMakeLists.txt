@@ -114,8 +114,8 @@ separate_arguments(ODSMETA_ARGS NATIVE_COMMAND "sed -e 's/integer, parameter//g'
 add_custom_command (
    OUTPUT odsmeta.py
    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-   SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h
    COMMAND grep 'integer, parameter' ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h | ${ODSMETA_ARGS} | grep -v idsats > odsmeta.py
+   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/odsmeta.h
    )
 
 add_custom_target(make_odsmeta ALL DEPENDS odsmeta.py)
