@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
-
+- MAPL3 renames.
 - Remove spurious MAPL CMake sub-target dependencies (closes #443): drop
   invalid `MAPL.geom` from `GEOS_Shared` dependencies, and replace
   `MAPL.constants` with `MAPL` for `tem_lib` in `@GEOS_Util/post`. All

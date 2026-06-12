@@ -110,7 +110,7 @@ contains
     integer       :: STATUS
     real          :: GWDFAC
     real          :: TRBFAC
-    type(Netcdf4_Fileformatter)           :: formatter
+    type(mapl_Netcdf4_Fileformatter)           :: formatter
 
 ! Unsupported optional variables
 ! -------------------------------
@@ -127,7 +127,7 @@ contains
 
   if( present(MEAN) ) then
 ! -------------------------
-       call formatter%open(trim(filename(1)), pFIO_READ, _RC)
+       call formatter%open(trim(filename(1)), MAPL_PFIO_READ, _RC)
        call ESMF_FieldGet(MEAN, 0, PTR, rc=status)
        _VERIFY(STATUS)
        call MAPL_VarRead(formatter, 'z', ptr, _RC)
@@ -138,7 +138,7 @@ contains
   if( present(GWDVAR) ) then
 ! --------------------------
        call hconfig_get_r4(cf, 'GWDVAR_FACTOR', GWDFAC, default=1.0, _RC)
-       call formatter%open(trim(filename(2)), pFIO_READ, _RC)
+       call formatter%open(trim(filename(2)), MAPL_PFIO_READ, _RC)
        call ESMF_FieldGet(GWDVAR, 0, PTR, rc=status)
        _VERIFY(STATUS)
        call MAPL_VarRead(formatter, 'gwd', ptr, _RC)
@@ -149,7 +149,7 @@ contains
   if( present(TRBVAR) ) then
 ! --------------------------
        call hconfig_get_r4(cf, 'TRBVAR_FACTOR', TRBFAC, default=1.0, _RC)
-       call formatter%open(trim(filename(3)), pFIO_READ, _RC)
+       call formatter%open(trim(filename(3)), MAPL_PFIO_READ, _RC)
        call ESMF_FieldGet(TRBVAR, 0, PTR, rc=status)
        _VERIFY(STATUS)
        call MAPL_VarRead(formatter, 'trb', ptr, _RC)
