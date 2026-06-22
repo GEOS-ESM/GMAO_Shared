@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Added new `--no-start-time` flag to `pyrob` to omit the starting timestamp from the frequency output.
+
 ### Fixed
 
 ### Removed
