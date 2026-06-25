@@ -16,13 +16,13 @@ FUNCTION compute_radar_reflectivity(PRS, TMK, QVP, QRAIN, QSNOW, &
   ! State and Required Hydrometeor Arguments (1D column slices)
   REAL, INTENT(IN)    :: PRS(:)
   REAL, INTENT(IN)    :: TMK(:)
-  REAL, INTENT(INOUT) :: QVP(:)
-  REAL, INTENT(INOUT) :: QRAIN(:)
-  REAL, INTENT(INOUT) :: QSNOW(:)
+  REAL, INTENT(IN)    :: QVP(:)
+  REAL, INTENT(IN)    :: QRAIN(:)
+  REAL, INTENT(IN)    :: QSNOW(:)
   
   ! Optional Hydrometeor Arguments (1D column slices)
-  REAL, INTENT(INOUT), OPTIONAL :: QGRAUPEL(:)
-  REAL, INTENT(INOUT), OPTIONAL :: QHAIL(:)
+  REAL, INTENT(IN), OPTIONAL :: QGRAUPEL(:)
+  REAL, INTENT(IN), OPTIONAL :: QHAIL(:)
 
   ! Optional Configuration Arguments
   LOGICAL, INTENT(IN), OPTIONAL :: disable_variable_intercept_params
@@ -135,14 +135,10 @@ FUNCTION compute_radar_reflectivity(PRS, TMK, QVP, QRAIN, QSNOW, &
   ! Main Compute Loop - Pure Sequential over 1D Column
   DO K = 1, LDIM
 
-      ! 1. Apply negative bounds checks AND extract to local scalars
-      IF (QVP(K) < 0.0)   QVP(K) = 0.0
-      IF (QRAIN(K) < 0.0) QRAIN(K) = 0.0
-      IF (QSNOW(K) < 0.0) QSNOW(K) = 0.0
-      
-      qv_val  = QVP(K)
-      qr_val  = QRAIN(K)
-      qs_val  = QSNOW(K)
+      ! 1. Apply negative bounds checks AND extract directly to local scalars
+      qv_val = MAX(0.0, QVP(K))
+      qr_val = MAX(0.0, QRAIN(K))
+      qs_val = MAX(0.0, QSNOW(K))
       tmk_val = TMK(K)
       prs_val = PRS(K)
 
@@ -194,8 +190,7 @@ FUNCTION compute_radar_reflectivity(PRS, TMK, QVP, QRAIN, QSNOW, &
 
       ! 4. Graupel Processing
       IF (has_graupel) THEN
-          IF (QGRAUPEL(K) < 0.0) QGRAUPEL(K) = 0.0
-          qg_val = QGRAUPEL(K)
+          qg_val = MAX(0.0, QGRAUPEL(K))
           
           IF (use_var_intercepts) THEN
               GONV = GON_CONST
@@ -213,8 +208,7 @@ FUNCTION compute_radar_reflectivity(PRS, TMK, QVP, QRAIN, QSNOW, &
 
       ! 5. Hail Processing
       IF (has_hail) THEN
-          IF (QHAIL(K) < 0.0) QHAIL(K) = 0.0
-          qh_val = QHAIL(K)
+          qh_val = MAX(0.0, QHAIL(K))
 
           IF (use_var_intercepts) THEN
               HONV = HON_CONST
