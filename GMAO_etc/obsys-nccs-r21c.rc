@@ -432,9 +432,9 @@ END
 
 #AURA OMI total ozone
 BEGIN r21c_aura_omieff_nc => omieff.%y4%m2%d2.t%h2z.nc
- 20041001_00z-20220114_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
- 20220115_00z-20220125_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj-HTTH-correction.%y4%m2%d2_%h2z.nc
- 20220126_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20041001_00z-20200518_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc
+ 20200519_00z-20200519_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED/Y%y4/M%m2/OMIeff-adj.%y4%m2%d2_%h2z.nc_M21C
+ 20200520_00z-21001231_18z 060000  /discover/nobackup/projects/gmao/input/dao_ops/ops/reanalysis/omi_eff_adjusted_CORRECTED_v04/Y%y4/M%m2/OMIeff-v04-adj.%y4%m2%d2_%h2z.nc
 END
 
 # OMPS nadir total ozone
