@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v1.7.2+R21C_v1.0.6] - 2026-07-07
+
+### Changed
+
+- Modified GMAO_etc/obsys-nccs-r21c.rc to accomodate new precip correction time ranges
+
 ## [v1.7.2+R21C_v1.0.5] - 2024-11-29
 
 ### Changed
