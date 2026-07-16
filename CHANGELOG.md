@@ -11,16 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+### Deprecated
+
+## [3.0.1] - 2026-07-16
+
+### Changed
+
 - Added new `--no-start-time` flag to `pyrob` to omit the starting timestamp from the frequency output.
 - Updates to radar reflectivity algorithm
 
 ### Fixed
 
 - Fix for ods cmake
-
-### Removed
-
-### Deprecated
 
 ## [3.0.0] - 2026-05-27
 
