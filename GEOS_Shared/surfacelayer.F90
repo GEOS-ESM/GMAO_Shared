@@ -198,6 +198,12 @@ contains
 
          call GETCDH(TVA,UUU,DZ,TVS,ZT,ZQ,CN,RI,  CH(:,N),CQ(:,N),DCH(:,N),DCQ(:,N))
 
+         ! bug fix: multiply derivatives with same factor that is applied to coeffs below
+         ! -  borescan & rreichle, 29 July 2026  
+
+         DCH(:,N) = DCH(:,N)*URA
+         DCQ(:,N) = DCQ(:,N)*URA
+
       else
 
          call GETCDH(TVA,UUU,DZ,TVS,ZT,ZQ,CN,RI,  CH(:,N),CQ(:,N))
