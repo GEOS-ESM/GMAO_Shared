@@ -32,18 +32,18 @@ contains
       real,    intent(IN)    :: LAI(:)
       real,    intent(INOUT) :: Z0 (:,:)
       real,    intent(IN)    :: DZ (:)
-      real,    intent(INOUT) :: CM (:,:)
+      real,    intent(INOUT) :: CM (:,:)                          !  [ kg/(m2*s) ]
       real,    intent(OUT)   :: CN (:)
       real,    intent(OUT)   :: RI (:)
       real,    intent(OUT)   :: ZT (:)
       real,    intent(OUT)   :: ZQ (:)
-      real,    intent(OUT)   :: CH (:,:)
-      real,    intent(OUT)   :: CQ (:,:)
+      real,    intent(OUT)   :: CH (:,:)                          !  [ kg/(m2*s) ]
+      real,    intent(OUT)   :: CQ (:,:)                          !  [ kg/(m2*s) ]
       real,    intent(OUT)   :: UUU (:)
       real,    intent(OUT)   :: UCN (:)
       real,    intent(OUT)   :: RE  (:)
-      real,    optional, intent(OUT)   :: DCH (:,:)
-      real,    optional, intent(OUT)   :: DCQ (:,:)
+      real,    optional, intent(OUT)   :: DCH (:,:)               !  [ kg/(m2*s) ]
+      real,    optional, intent(OUT)   :: DCQ (:,:)               !  [ kg/(m2*s) ]
 
 
       real, parameter :: OCEANICEZ0 = 1.0e-3
@@ -87,7 +87,7 @@ contains
       endif
 
       if(ISTYPE==1) then
-      URA = UUU*( PS/(MAPL_RGAS*TVA) )
+      URA = UUU*( PS/(MAPL_RGAS*TVA) )                            ! [ m/s * Pa / ( (J/(kg*K)) * K ) ] = [ kg/(m2*s) ]
       elseif (ISTYPE==2 .or. ISTYPE==3 .or. ISTYPE==4) then
       URA = UUU*PS/(MAPL_RGAS*TVA)
       endif
@@ -96,7 +96,7 @@ contains
 !  Estimate of friction velocity from previous step's drag coefficient
 !---------------------------------------------------------------------
 
-      UST = UUU*sqrt(CM(:,N)/URA)
+      UST = UUU*sqrt(CM(:,N)/URA)                                 ! argument of sqrt is non-dimensional
       UST = min( max(UST,1.e-6) , 5.0 )
 
 !  Iterate for aerodynamic roughness, based on previous step's stability
@@ -121,7 +121,7 @@ contains
 ! Get a new drag coefficient for the updated roughness
 !-----------------------------------------------------
 
-      call GETCDM(TVA,UUU,DZ,TVS,Z0(:,N), CM(:,N),CN,RI)
+      call GETCDM(TVA,UUU,DZ,TVS,Z0(:,N), CM(:,N),CN,RI)          ! CM returned from GETCDM is non-dimensional
       if(ISTYPE==1) UST = UUU*sqrt(CM(:,N))
 
 !  Reynolds number at the top of the viscous sublayer
@@ -196,23 +196,25 @@ contains
 
       if (present(DCH) .and. present(DCQ)) then
 
+         ! CH, CQ, DCH, DCQ returned from GETCDM are non-dimensional
+
          call GETCDH(TVA,UUU,DZ,TVS,ZT,ZQ,CN,RI,  CH(:,N),CQ(:,N),DCH(:,N),DCQ(:,N))
 
          ! bug fix: multiply derivatives with same factor that is applied to coeffs below
          ! -  borescan & rreichle, 29 July 2026  
 
-         DCH(:,N) = DCH(:,N)*URA
-         DCQ(:,N) = DCQ(:,N)*URA
+         DCH(:,N) = DCH(:,N)*URA                                  ! [ kg/(m2*s) ]
+         DCQ(:,N) = DCQ(:,N)*URA                                  ! [ kg/(m2*s) ]
 
       else
 
          call GETCDH(TVA,UUU,DZ,TVS,ZT,ZQ,CN,RI,  CH(:,N),CQ(:,N))
-
+ 
       end if
 
-      CH(:,N) = CH(:,N)*URA
-      CM(:,N) = CM(:,N)*URA
-      CQ(:,N) = CQ(:,N)*URA
+      CH(:,N) = CH(:,N)*URA                                       ! [ kg/(m2*s) ]
+      CM(:,N) = CM(:,N)*URA                                       ! [ kg/(m2*s) ]
+      CQ(:,N) = CQ(:,N)*URA                                       ! [ kg/(m2*s) ]
 
       deallocate( UST )
       deallocate( TVS )
