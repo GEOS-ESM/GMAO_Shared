@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add kx''s for ABI g16,g18 516,518)
+
 - Minor changes for VIIRS additions
 
 ### Changed

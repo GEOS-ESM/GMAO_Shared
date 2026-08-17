@@ -26,6 +26,8 @@
  hirs4       n19         hirs4_n19                     19          19
  hirs4       metop-a     hirs4_metop-a                 25          25
  hirs4       metop-b     hirs4_metop-b                 26          26
+ abi         g16         abi_g16                       16         516
+ abi         g18         abi_g18                       18         518
  airs        aqua        airs_aqua                      0          49
  sndr        g08_prep    sndr_g08                       8          53
  sndr        g10_prep    sndr_g10                      10          55
