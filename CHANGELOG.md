@@ -13,11 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed bug in "extra" derivatives of Louis surface turbulence.
-
 ### Removed
 
 ### Deprecated
+
+## [3.0.2] - 2026-08-25
+
+- Fixed bug in "extra" derivatives of Louis surface turbulence.
 
 ## [3.0.1] - 2026-07-16
 
