@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- added GOES, HIMAWARI, VIIRS SNPP & NOAA-20, and Lunar AERONET aerosol observations to the KX-lists
+
 ### Changed
 
 ### Fixed
