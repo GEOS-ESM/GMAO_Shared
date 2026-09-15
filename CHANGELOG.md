@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add GEOS-MLT vertical grids L102, L104, L111, L186, and L190.
+
 ### Changed
 
 ### Fixed
