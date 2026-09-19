@@ -18,6 +18,7 @@ OBS*Class*Kts::
    Radiosonde 4 5 11 33 44 
    ASCAT      4 5
    SATWIND    4 5
+   ABI        40
 #  AMSUA-AQA  40
    AMSUA-N15  40
    AMSUA-N18  40
@@ -59,6 +60,7 @@ OBS*Class*Kxs::
    ASCAT      290
 #  SATWIND    226:240
    SATWIND    242:259
+   ABI        516 518
 #  AMSUA-AQA  300
    AMSUA-N15  315
    AMSUA-N18  318

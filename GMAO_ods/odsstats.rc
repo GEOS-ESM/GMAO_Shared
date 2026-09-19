@@ -52,6 +52,7 @@ OBS*Class*Kts::
    SEVIRI     40
    SSMI       40
 #  OMI        21
+   ABI        40
 ::
 
 OBS*Class*Kxs::
@@ -89,4 +90,5 @@ OBS*Class*Kxs::
    SEVIRI     989 990
    SSMI       708 710 711 713:715
 #  OMI        449
+   ABI        516 518
 ::

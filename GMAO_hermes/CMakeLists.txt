@@ -76,6 +76,7 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
    ecbuild_add_executable (TARGET dyn_blob.x       SOURCES dyn_blob.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_fsens_conv.x SOURCES dyn_fsens_conv.f90 LIBS ${this})
+   ecbuild_add_executable (TARGET inc_jedi2dyn.x   SOURCES inc_jedi2dyn.f90   LIBS ${this})
    
    install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
 
