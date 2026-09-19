@@ -60,7 +60,7 @@ OBS*Class*Kxs::
    ASCAT      290
 #  SATWIND    226:240
    SATWIND    242:259
-   ABI        516 518
+   ABI        516 518 519
 #  AMSUA-AQA  300
    AMSUA-N15  315
    AMSUA-N18  318

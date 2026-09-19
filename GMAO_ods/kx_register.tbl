@@ -492,6 +492,7 @@
 #  kx   source      dplat       dtype                   isat
    516  gsi_diag    g16         abi                       16    # abi g16
    518  gsi_diag    g18         abi                       18    # abi g18
+   519  gsi_diag    g19         abi                       19    # abi g19
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
