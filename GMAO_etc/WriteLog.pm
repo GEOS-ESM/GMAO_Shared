@@ -624,7 +624,7 @@ sub expand_EnvVars {
 
     # look for ${var} format
     #-----------------------
-    while ($string =~ m/(\${(\w+)})/)   {
+    while ($string =~ m/(\$\{(\w+)\})/)   {
         $var = $1; $name = $2;
         $var =~ s/\$/\\\$/;
         $string =~ s/$var/$ENV{$name}/;

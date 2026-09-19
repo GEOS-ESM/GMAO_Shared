@@ -807,7 +807,7 @@ sub get_ls {
             $notfound++;
             next;        #skip this record
         }
-        $new =~ s/\${MHOST}/$mass/g;
+        $new =~ s/\$[{MHOST}]/$mass/g;
         @arr = split(/:/, $new);         
         $arrsize = scalar(@arr);
         

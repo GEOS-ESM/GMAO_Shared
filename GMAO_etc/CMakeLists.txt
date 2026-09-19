@@ -58,18 +58,10 @@ ecbuild_add_executable (
 ## bin ##
 
 file(GLOB perl_files CONFIGURE_DEPENDS *.pl)
-# We must remove two files because of DASPERL
-list(REMOVE_ITEM perl_files
-   ${CMAKE_CURRENT_SOURCE_DIR}/Err_Log.pl
-   ${CMAKE_CURRENT_SOURCE_DIR}/fndate.pl
-   )
-
 file(GLOB perl_packages CONFIGURE_DEPENDS *.pm)
 file(GLOB python_files CONFIGURE_DEPENDS *.py)
 
 set(perlscripts
-   acquire
-   acquire_obsys
    esma_mpirun
    g5_modules_perl_wrapper
    jobIDfilter
@@ -105,10 +97,8 @@ install (
    )
 
 set(perlscripts_with_dasperl
-   Err_Log.pl
    bacon
    fvgetf
-   fndate.pl
    grads2grib
    rget
    rst4ncepf

@@ -58,11 +58,11 @@
       integer i, j, ierr, ierr_att(13), nobs, synhour, is, ihr
       integer miter, jiter
       logical post_anal, append_mode, eof, verbose, daily
-      logical kxselect, ktselect, levselect, qcselect
+      logical kxselect, ktselect, ksselect, levselect, qcselect
       logical lonselect, latselect, timeselect, ncf, rmdupl
-      integer nkxs, nkts
+      integer nkxs, nkts, nkss
       integer iqcx
-      integer kxs(SMAX), kts(SMAX)
+      integer kxs(SMAX), kts(SMAX), kss(SMAX)
       integer nlev
       real    levs(MAXLEV)
       real    lev1, lev2, lat1, lat2, lon1, lon2 
@@ -99,6 +99,7 @@
 !     ------------
       nkxs = 0            ! DEFAULT: all kx
       nkts = 0            ! DEFAULT: all kt
+      nkss = 0            ! DEFAULT: all kt
       lat1 = 0.0
       lat2 = -1.0         ! DEFAULT: all latitudes
       lon1 = 0.0
@@ -122,7 +123,7 @@
 !     Parse command line and load resources
 !     -------------------------------------
       call init ( infile, NFILES_MAX, nfiles,
-     .            SMAX,   kxs, nkxs, kts, nkts, lev1, lev2, nlev, levs, qcs,
+     .            SMAX,   kxs, nkxs, kts, nkts, kss, nkss, lev1, lev2, nlev, levs, qcs,
      .                    lat1, lat2, lon1, lon2, t1, t2, 
      .                    append_mode, daily, prefix, synhour,
      .                    iqcx, miter, jiter, ncf, rmdupl )
@@ -228,6 +229,15 @@
                  end do
              end if
 
+             if (nkss .eq. 0) then
+                 ksselect = .TRUE.
+             else
+                 ksselect = .FALSE.
+                 do j = 1, nkss
+                    if (ks(i) .eq. kss(j)) ksselect = .TRUE.
+                 end do
+             end if
+
              if (lat2<lat1) then
                  latselect = .TRUE.
              elseif (lat1<=lat(i) .and. lat(i)<=lat2) then
@@ -268,7 +278,7 @@
                  if (qcx(i) .eq. 0) qcselect = .FALSE.
              end if
 
-             if ( kxselect .and. ktselect .and.
+             if ( kxselect .and. ktselect .and. ksselect .and.
      .           lonselect .and. latselect .and.
      .           timeselect.and.
      .           levselect .and. qcselect      ) then
@@ -391,7 +401,7 @@
 ! !INTERFACE:
 !
       subroutine init ( infile, nfiles_max, nfiles,
-     .                  smax, kxs, nkxs, kts, nkts, lev1, lev2, nlev, levs,
+     .                  smax, kxs, nkxs, kts, nkts, kss, nkss, lev1, lev2, nlev, levs,
      .                  qcs, lat1, lat2, lon1, lon2, t1, t2,
      .                  append_mode, daily, prefix, synhour,
      .                  iqcx, miter, jiter, ncf, rmdupl )
@@ -413,6 +423,7 @@
       integer,       intent(inout) :: synhour
       integer,       intent(inout) :: nkxs
       integer,       intent(inout) :: nkts
+      integer,       intent(inout) :: nkss
       integer,       intent(inout) :: nlev
       character*4,   intent(inout) :: qcs
       logical,       intent(inout) :: daily
@@ -438,6 +449,7 @@
       integer,       intent(out) :: nfiles
       integer,       intent(out) :: kxs(smax)
       integer,       intent(out) :: kts(smax)
+      integer,       intent(out) :: kss(smax)
 !
 !
 ! !REVISION HISTORY:
@@ -559,6 +571,54 @@
 	    else
 	        kts(nkts+1:nkts+k2-k1+1) = (/ (k, k=k1,k2) /)
                 nkts = nkts+k2-k1+1
+            end if
+         elseif (index(argv,'-ks') .gt. 0 ) then
+            if ( iarg+1 .gt. argc ) call usage()
+            iarg = iarg + 1
+            call GetArg ( iArg, SS )	    
+            ic1 = index(SS,':')
+            ic2 = index(SS,',')
+            if(ic1/=0.and.ic2/=0) then
+                print *, myname, 'invalid ks option ks format'
+                stop
+            endif
+            ic = ic1 + ic2         ! string is k1 or k1:k2 or k1,k2,...
+            lt = len_trim(SS)
+            if (ic .eq. 0) then    ! no colon, therefore k1
+                read(SS,*) k1
+                nkss      = 1
+                kss(nkss) = k1
+            else if(ic1/=0) then   ! colon, therefore k1:k2
+                read(SS(1:ic-1) ,*) k1
+                read(SS(ic+1:lt),*) k2
+                if (nkss+k2-k1+1 .gt. smax) then
+                    print *, myname, 'Too many ks values.'
+                    stop
+                else
+                    kss(nkss+1:nkss+k2-k1+1) = (/ (k, k=k1,k2) /)
+                    nkss = nkss+k2-k1+1
+                endif
+            else if(ic2/=0) then   ! commas, therefore k1,k2,...
+                ib = 1
+                do ii = 1, lt
+                   if(SS(ii:ii).eq.',') then
+                      nkss=nkss+1
+                      if (nkss .gt. smax) then
+                          print *, myname, 'Too many ks values.'
+                          stop
+                      endif
+                      read(SS(ib:ii-1),*) k1
+                      kss(nkss) = k1
+                      ib=ii+1
+                   endif
+                enddo
+                nkss=nkss+1
+                if (nkss .gt. smax) then
+                    print *, myname, 'Too many ks values.'
+                    stop
+                endif
+                read(SS(ib:lt),*) k1
+                kss(nkss) = k1
             end if
          elseif (index(argv,'-lev') .gt. 0 ) then
             if ( iarg+1 .gt. argc ) call usage()
@@ -714,6 +774,13 @@
               print *, '    ', kts(i)
           end do
       end if
+      if (nkss .gt. 0) then
+          print *
+          print *, 'Will select ks:'
+          do i = 1, nkss
+              print *, '    ', kss(i)
+          end do
+      end if
       if (lat2>=lat1) then
           print *
           print *, 'Will select lat:'
@@ -782,7 +849,7 @@
       print *
       print *, 'Usage:'
       print *
-      print *, 'odsselect [-kx KX] [-kt KT] [-lon LON1:LON2] ',
+      print *, 'odsselect [-kx KX] [-kt KT] [-ks KS] [-lon LON1:LON2] ',
      .         '[-lat LAT1:LAT2] [-lev LEV1:LEV2] [-qc QC] ',
      .         '[-time t1:t2] [-ncf] [-rmdupl]',
      .         '[-synhour HH] [-daily] [-o ID] odsfile(s)'
@@ -793,7 +860,10 @@
       print *,'-kx  KX1:KX2      select data with kx=KX1,..,KX2'
       print *,'              (default: all kx)'
       print *,'-kt  KT           select data with kt=KT'
-      print *,'-kx  KT1:KT2      select data with kx=KT1,..,KT2'
+      print *,'-kt  KT1:KT2      select data with kt=KT1,..,KT2'
+      print *,'              (default: all kt)'
+      print *,'-ks  KS           select data with ks=KS'
+      print *,'-ks  KS1:KS2      select data with ks=KS1,..,KS2'
       print *,'              (default: all kt)'
       print *,'-lon LON          select data with lon=LON'
       print *,'-lon LON:LON2     select data with LON1<=lon<=LON2'

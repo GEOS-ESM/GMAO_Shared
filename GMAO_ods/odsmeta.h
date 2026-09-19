@@ -36,6 +36,7 @@
 !  11Oct2023  Sienkiewicz Change offset for ozone NPP to +5 and subtract 5
 !                          from base values for OMPS data types to avoid some
 !                          KX conflicts for N20 and N21 OMPS data
+!  28Oct2023  Todling   add hist flag ascend/descend
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -185,6 +186,8 @@
       integer, parameter :: H_SUSP_TEMP    = 12 ! moisture from suspect temp
       integer, parameter :: H_SUSP_DEWTEMP = 13 ! moisture from suspect dewpt
 
+      integer, parameter :: H_DESCEND = 15      ! descending orbit
+      integer, parameter :: H_ASCEND  = 16      ! ascending orbit
       integer, parameter :: H_BACKG   = 17      ! background check
 
       integer, parameter :: H_YELLOW  = 20      ! obs marked as suspect by "Yellow List"
@@ -320,7 +323,7 @@
      7                 'ODSmatch could not find match   ',
      8                 'no impact due to advected local '/)
 
-      integer, parameter :: nsats = 58
+      integer, parameter :: nsats = 59
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -341,7 +344,7 @@
      .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
      .                 'amsre           ', 'ompslpnc        ', 'tgez            ',
      .                 'tgev            ', 'tgav            ', 'tgaz            ',
-     .                 'tgop            '  /)
+     .                 'tgop            ', 'abi'  /)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will
@@ -367,7 +370,7 @@
      .                 550               , 423               , 433               ,
      .                 546               , 332               , 999               ,
      .                 999               , 999               , 999               ,
-     .                 999                 /)
+     .                 999               , 500  /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/

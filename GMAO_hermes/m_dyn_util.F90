@@ -27,6 +27,7 @@
    public :: dyn_util_tv2t
    public :: Dyn_Scale_by_TotEne
    public :: Dyn_Qsat
+   public :: Dyn_Get_Energy
 
    interface Dyn_Util_Tv2T
       module procedure tv2t_
@@ -39,6 +40,9 @@
    end interface
    interface Dyn_TotEne_Dotp
       module procedure dotp_
+   end interface
+   interface Dyn_Get_Energy
+      module procedure get_ene_field_
    end interface
    interface Dyn_Qsat
       module procedure becov_qsat_
@@ -89,7 +93,7 @@ CONTAINS
       end subroutine tv2t_ 
 !.................................................................
       subroutine scale_by_totene_(x,eps_eer,anorm,jnorm,projlon,projlat,projlev,&
-                                  nymd,nhms,ntype,optene,normlz,ps,delp)
+                                  nymd,nhms,ntype,optene,normlz,vnorm,ps,delp)
       use m_const, only: cp=>cpm
       use m_const, only: rd=>rgas
       use m_const, only: tref=>tstd
@@ -115,6 +119,7 @@ CONTAINS
       integer, intent(in) :: nymd, nhms
       character(len=*), intent(in), optional :: ntype ! norm type: L2 or Ene (default)
       integer, intent(in), optional :: optene ! -2=E^-1; -1=E^-1/2; 1=E^1/2; 2=E
+      integer, intent(in), optional :: vnorm  ! 0=mass-weight; 1=height-weight
       logical, intent(in), optional :: normlz ! vector will come out normalized to 1
       real, intent(in), optional :: ps(:,:)
       real, intent(in), optional :: delp(:,:,:)
@@ -140,7 +145,8 @@ CONTAINS
       allocate(w2d(x%grid%im,x%grid%jm))
       allocate(w3d(x%grid%im,x%grid%jm,x%grid%km))
 
-      call TotEne_Weights_(x,projlon,projlat,projlev,w2d,w3d,optene=optene,ps=ps,delp=delp)
+      call TotEne_Weights_(x,projlon,projlat,projlev,w2d,w3d,optene=optene_,&
+                           vnorm=vnorm,ps=ps,delp=delp)
 
       print *, 'norm used: ', trim(anorm)
       print *, 'ene-scale: eps_eer: ', eps_eer
@@ -234,13 +240,14 @@ CONTAINS
 
 !.................................................................
 
-      subroutine TotEne_Weights_(x,projlon,projlat,projlev,w2d,w3d,optene,ps,delp)
+      subroutine TotEne_Weights_(x,projlon,projlat,projlev,w2d,w3d,optene,vnorm,ps,delp)
       use m_const, only: pstd
       implicit none
       type(dyn_vect) x
       real,    intent(in) :: projlat(2), projlon(2)
       integer, intent(in) :: projlev(2)
       integer, intent(in), optional :: optene
+      integer, intent(in), optional :: vnorm
       real,intent(in),optional :: ps(:,:)
       real,intent(in),optional :: delp(:,:,:)
       real :: w2d(:,:), w3d(:,:,:)
@@ -258,11 +265,19 @@ CONTAINS
       real rlon0
       integer im,jm,km
       integer i,j,k
-      integer optene_
+      integer optene_,vnorm_
 
       optene_=1
       if(present(optene)) then
          optene_=optene
+      endif
+      vnorm_=0
+      if(present(vnorm)) then
+         vnorm_=vnorm
+         if(.not.present(delp)) then
+           print *, 'need delp for height-weights'
+           call exit (99)
+         endif
       endif
       im=x%grid%im
       jm=x%grid%jm
@@ -347,10 +362,21 @@ CONTAINS
       allocate(dsig(im,jm,km  ))
       if (present(ps)) then
          if ( present(delp) ) then
-            print *, 'using ref delp and ps to define dsig'
-            do k=1,km
-               dsig(:,:,k)=delp(:,:,k)/ps(:,:)
-            enddo
+            if (vnorm_>0) then
+               print *, 'using ref delp in height-weights'
+               ple(:,:,1) = x%grid%ak(1)
+               do k=2,km+1
+                  ple(:,:,k) = ple(:,:,k-1) + delp(:,:,k-1)
+               enddo
+               do k=1,km
+                  dsig(:,:,k) = log(ple(:,:,k+1)/ple(:,:,k))/log(ple(:,:,km+1)/ple(:,:,1))
+               enddo
+            else
+               print *, 'using ref delp and ps in mass-weights'
+               do k=1,km
+                  dsig(:,:,k)=delp(:,:,k)/ps(:,:)
+               enddo
+            endif 
          else
             do k=1,km+1
                ple(:,:,k)=x%grid%ak(k)+x%grid%bk(k)*ps     !state dependent as in initadj
