@@ -7,9 +7,13 @@
 #  dtype      dplat* isat   kx
 
    ompsnm       npp        427
+ompsnmeff       npp    5   428
+   ompsnp       npp    5   437
   tomseff         -    0   440
   tomseff     nim07    1   441
   tomseff        ep    2   442
+ompsnmeff       n20   20   443
+ompsnmeff       n21   21   444
      gome*        -    0   445
       omi*        -    0   449
    omieff         -    0   449
@@ -38,11 +42,11 @@
     mls30*        -    0   325
     mls55         -    0   330
     mls55      aura    0   330
-    ompslp      npp    0   335
-    ompslpuv    npp    0   335
-    ompslpvis   npp    0   336
-    ompslpnc    npp    0   337
-    ompsnp      npp    0   437
+    ompslp      npp    5   335
+    ompslpuv    npp    5   335
+    ompslpvis   npp    5   336
+    ompslpnc    npp    5   337
+    ompslpnc    n21   21   353
 
 # Notes for (*):
 #
