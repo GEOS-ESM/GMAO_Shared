@@ -28,6 +28,7 @@ OBS*Class*Kts::
    AMSUA-MTC  40
    ATMS-NPP   40
    ATMS-N20   40
+   ATMS-N21   40
    AMSR2-W1   40
 #  MHS-N18    40
    MHS-N19    40
@@ -71,6 +72,7 @@ OBS*Class*Kxs::
    AMSUA-MTC  327
    ATMS-NPP   900
    ATMS-N20   920
+   ATMS-N21   921
    AMSR2-W1   550
 #  MHS-N18    818
    MHS-N19    819
@@ -92,5 +94,7 @@ OBS*Class*Kxs::
    GPSRO      3:5 42:44 267:269 722 723 740:745 750:755 786 820 825
    GMI-GPM    706
    MLS55      330
-   VIIRS-M    750:752
+   VIIRS-NPP  880
+   VIIRS-J1   891
+   VIIRS-J2   892
 ::
