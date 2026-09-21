@@ -370,7 +370,7 @@
      .                 550               , 423               , 433               ,
      .                 546               , 332               , 999               ,
      .                 999               , 999               , 999               ,
-     .                 999               , 500               , 890              /)
+     .                 999               , 500               , 880              /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/
