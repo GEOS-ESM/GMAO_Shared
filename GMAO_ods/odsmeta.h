@@ -323,7 +323,7 @@
      7                 'ODSmatch could not find match   ',
      8                 'no impact due to advected local '/)
 
-      integer, parameter :: nsats = 59
+      integer, parameter :: nsats = 60
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -344,7 +344,7 @@
      .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
      .                 'amsre           ', 'ompslpnc        ', 'tgez            ',
      .                 'tgev            ', 'tgav            ', 'tgaz            ',
-     .                 'tgop            ', 'abi'  /)
+     .                 'tgop            ', 'abi'             , 'viirs-m'        /)
 
 ! note: numbers below were made up for MHS, and SSU
 ! note: CRIS and ATMS numbers assigned at will
@@ -370,7 +370,7 @@
      .                 550               , 423               , 433               ,
      .                 546               , 332               , 999               ,
      .                 999               , 999               , 999               ,
-     .                 999               , 500  /)
+     .                 999               , 500               , 750              /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/

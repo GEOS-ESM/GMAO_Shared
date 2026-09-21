@@ -49,6 +49,7 @@ OBS*Class*Kts::
    GPSRO      89
    GMI-GPM    40
    MLS55      87
+   VIIRS-M    40
 ::
 
 OBS*Class*Kxs::
@@ -91,4 +92,5 @@ OBS*Class*Kxs::
    GPSRO      3:5 42:44 267:269 722 723 740:745 750:755 786 820 825
    GMI-GPM    706
    MLS55      330
+   VIIRS-M    750:752
 ::

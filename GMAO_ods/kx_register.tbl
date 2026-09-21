@@ -368,6 +368,7 @@
    325  gsi_diag    aura        mls30                      0    #                       -- conflict 325
    325  gsi_diag    metop-a     amsua                     25    # amsua_metop-a         -- conflict 325
    326  gsi_diag    metop-b     amsua                     26    # amsua_metop-b
+   327  gsi_diag    metop-c     amsua                     27    # amsua_metop-c
    330  gsi_diag    aura        mls55                      0    #
    335  gsi_diag    npp         ompslpuv                   5    #
    336  gsi_diag    npp         ompslpvis                  5    #
@@ -642,8 +643,12 @@
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
+   750  gsi_diag    viirs-m     viirs-m                    0    # viirs-m_npp
+   751  gsi_diag    viirs-m     viirs-m                    1    # viirs-m_j1
+   752  gsi_diag    viirs-m     viirs-m                    2    # viirs-m_j2
    825  gsi_diag    metop-a     mhs                       25    # mhs_metop-a        --- conflict 825
    826  gsi_diag    metop-b     mhs                       26    # mhs_metop-b
+   827  gsi_diag    metop-c     mhs                       27    # mhs_metop-c
    875  gsi_diag    metop-a     iasi                      25    # iasi616_metop-a
    876  gsi_diag    metop-b     iasi                      26    # iasi616_metop-b
    877  gsi_diag    metop-c     iasi                      27    # iasi616_metop-c
