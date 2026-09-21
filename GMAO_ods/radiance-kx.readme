@@ -133,9 +133,9 @@
  seviri      m09         seviri_m09                     9         989
  seviri      m10         seviri_m10                    10         990
  seviri      m11         seviri_m11                    11         991
- viirs-m     npp         viirs-m_npp                    0         750
- viirs-m     j1          viirs-m_j1                     1         751    
- viirs-m     j2          viirs-m_j2                     2         752
+ viirs-m     npp         viirs-m_npp                    0         890
+ viirs-m     j1          viirs-m_j1                     1         891    
+ viirs-m     j2          viirs-m_j2                     2         892
 !
 !
 !  Note:  hsb_aqua, amsre_aqua, imgr_* not really being used
