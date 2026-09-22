@@ -27,7 +27,7 @@ if( $?PBS_NODEFILE ) then
 
    if ( $SITE == NCCS ) then
 
-      echo "Found site ${SITE}: using sshmpi"
+      echo "`hostname`: Found site ${SITE}: using sshmpi"
       foreach node ($nodes)
          echo sshmpi $node $pathname/rmshmkeyhere.sh
               sshmpi $node $pathname/rmshmkeyhere.sh &
@@ -35,8 +35,12 @@ if( $?PBS_NODEFILE ) then
 
    else if ( $SITE == NAS ) then
 
-      echo "Found site ${SITE}: using pdsh"
-      pdsh -f 128 -w `/u/scicon/tools/bin/pbs_nodes $PBS_JOBID` $pathname/rmshmkeyhere.sh
+      echo "`hostname`: Found site ${SITE}: using pbsdsh"
+      set node_indices = `awk 'seen[$0] == 0 { print NR - 1 } { seen[$0]++ }' $PBS_NODEFILE`
+      foreach node_index ($node_indices)
+         pbsdsh -n $node_index -- $pathname/rmshmkeyhere.sh &
+      end
+      wait
 
    else
 
