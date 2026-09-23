@@ -344,10 +344,10 @@
      .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
      .                 'amsre           ', 'ompslpnc        ', 'tgez            ',
      .                 'tgev            ', 'tgav            ', 'tgaz            ',
-     .                 'tgop            ', 'abi'             , 'viirs-m'        /)
+     .                 'tgop            ', 'abi             ', 'viirs-m         '/)
 
 ! note: numbers below were made up for MHS, and SSU
-! note: CRIS and ATMS numbers assigned at will
+! note: CRIS, ATMS, and VIIRS-M numbers assigned at will
 ! note: omieff number assigned as omi
 ! note: mlsoz (o3lev) assigned were made up to 9999
       integer, parameter :: idsats(nsats)=(/

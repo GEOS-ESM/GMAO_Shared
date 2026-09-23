@@ -561,19 +561,13 @@
 
       contains
          subroutine getsatid_(myisat)
-! RT: some heck that needs more work
-! RT: this needs serious attention as it is becoming a huge heck now (3/30/09)
+! RT: some hack that needs more work
+! RT: this needs serious attention as it is becoming a huge hack now (3/30/09)
             implicit none
             integer, intent(out) :: myisat
-            integer ios
+            integer i,j,ios
 
             myisat     = 0  ! take fixed sat index as in idsats
-
-!	    select case( trim(ladjust(dplat)) )
-!	    case ('aura')
-!              myisat = 999
-!	      return
-!	    end select
 
 ! first handle precip types
             i = index('pcp',isis(1:3))
@@ -606,14 +600,19 @@
                myisat = 5
                return
             endif
-!           i = index('aqua',dplat(1:4))
-!           if(i>0)then
-!              return
-!           endif
+! the "word" j stands for the jason to add to confusion
+! e.g. j1 -> jason-1
+            i = index('j',dplat(1:1))
+            if(i>0)then
+               read(dplat(2:2),'(i1)',iostat=ios)myisat
+               myisat=880+myisat
+               return
+            endif
+
 ! the "word" fgnm stands for the platforms dmsp/goes/noaa/meteosat this needs generalization
 ! e.g. dmsp -> f15   goes -> g12   noaa -> n18  meteosat -> m09
             i = index('fgnm',dplat(1:1))
-            if(i>0)then; read(dplat(2:3),'(i2)',iostat=ios)myisat; endif
+            if(i>0)then;read(dplat(2:3),'(i2)',iostat=ios)myisat;endif
 
          end subroutine getsatid_
 

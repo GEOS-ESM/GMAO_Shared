@@ -650,8 +650,8 @@
    876  gsi_diag    metop-b     iasi                      26    # iasi616_metop-b
    877  gsi_diag    metop-c     iasi                      27    # iasi616_metop-c
    880  gsi_diag    viirs-m     viirs-m                    0    # viirs-m_npp
-   891  gsi_diag    viirs-m     viirs-m                    1    # viirs-m_j1
-   892  gsi_diag    viirs-m     viirs-m                    2    # viirs-m_j2
+   881  gsi_diag    viirs-m     viirs-m                    1    # viirs-m_j1
+   882  gsi_diag    viirs-m     viirs-m                    2    # viirs-m_j2
    900  gsi_diag    npp         atms                       0    # atms_npp
    920  gsi_diag    n20         atms                      20    # atms_n20
    921  gsi_diag    n21         atms                      21    # atms_n21
