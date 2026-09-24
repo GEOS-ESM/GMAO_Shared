@@ -605,7 +605,6 @@
             i = index('j',dplat(1:1))
             if(i>0)then
                read(dplat(2:2),'(i1)',iostat=ios)myisat
-               myisat=880+myisat
                return
             endif
 
