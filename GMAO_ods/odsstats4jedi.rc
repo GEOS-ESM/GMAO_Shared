@@ -18,7 +18,9 @@ OBS*Class*Kts::
    Radiosonde 4 5 11 33 44 
    ASCAT      4 5
    SATWIND    4 5
-   ABI        40
+   ABI-G16    40
+   ABI-G18    40
+   ABI-G19    40
 #  AMSUA-AQA  40
    AMSUA-N15  40
    AMSUA-N18  40
@@ -28,6 +30,7 @@ OBS*Class*Kts::
    AMSUA-MTC  40
    ATMS-NPP   40
    ATMS-N20   40
+   ATMS-N21   40
    AMSR2-W1   40
 #  MHS-N18    40
    MHS-N19    40
@@ -39,6 +42,7 @@ OBS*Class*Kts::
    IASI-MTC   40
    CRIS-NPP   40
    CRIS-N20   40
+   CRIS-N10   40
    AIRS-AQA   40
    SSMIS-F17  40
 #  SSMIS-F18  40
@@ -49,6 +53,9 @@ OBS*Class*Kts::
    GPSRO      89
    GMI-GPM    40
    MLS55      87
+   VIIRS-NPP  40
+   VIIRS-J1   40
+   VIIRS-J2   40
 ::
 
 OBS*Class*Kxs::
@@ -60,7 +67,9 @@ OBS*Class*Kxs::
    ASCAT      290
 #  SATWIND    226:240
    SATWIND    242:259
-   ABI        516 518
+   ABI-G26    516
+   ABI-G18    518
+   ABI-G19    519
 #  AMSUA-AQA  300
    AMSUA-N15  315
    AMSUA-N18  318
@@ -70,6 +79,7 @@ OBS*Class*Kxs::
    AMSUA-MTC  327
    ATMS-NPP   900
    ATMS-N20   920
+   ATMS-N21   921
    AMSR2-W1   550
 #  MHS-N18    818
    MHS-N19    819
@@ -81,6 +91,7 @@ OBS*Class*Kxs::
    IASI-MTC   877
    CRIS-NPP   940
    CRIS-N20   960
+   CRIS-N21   961
    AIRS-AQA   49
    SSMIS-F17  717
 #  SSMIS-F18  718
@@ -91,4 +102,7 @@ OBS*Class*Kxs::
    GPSRO      3:5 42:44 267:269 722 723 740:745 750:755 786 820 825
    GMI-GPM    706
    MLS55      330
+   VIIRS-NPP  880
+   VIIRS-J1   881
+   VIIRS-J2   882
 ::

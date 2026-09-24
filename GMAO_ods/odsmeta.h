@@ -32,7 +32,10 @@
 !  09Oct2014  Weir      Begin adding trace gas support
 !  20May2017  Todling   Add exclusion flag X_ADV_LOCAL
 !  25May2018  wargan    added OMPS
-!  03Mar2022  Jin J./ElAkkraoui  Added AMSRE 
+!  03Mar2022  Jin J./ElAkkraoui  Added AMSRE
+!  11Oct2023  Sienkiewicz Change offset for ozone NPP to +5 and subtract 5
+!                          from base values for OMPS data types to avoid some
+!                          KX conflicts for N20 and N21 OMPS data
 !  28Oct2023  Todling   add hist flag ascend/descend
 !
 !EOP
@@ -67,7 +70,7 @@
         integer, parameter  :: ktTT    =  8     !   temperature (K)
         integer, parameter  :: ktTd    =  9     !   dew-point temperature (K)
         integer, parameter  :: ktrh    = 10     !   relative humidity (%)
-        integer, parameter  :: ktqq    = 11     !   specific humidity (g/Kg); 
+        integer, parameter  :: ktqq    = 11     !   specific humidity (g/Kg);
                                                 !     CAUTION: see ktww above
                                                 ! More surface variables
         integer, parameter  :: ktus10  = 12     !   10 meter zonal wind (m/s)
@@ -76,7 +79,7 @@
         integer, parameter  :: ktrhs   = 15     !   10 meter relative humidity (%)
         integer, parameter  :: ktqs10  = 16     !   10 meter specific humidity (g/Kg)
 
-        integer, parameter  :: ktpr    = 17     !   precipitation rate (mm/day) 
+        integer, parameter  :: ktpr    = 17     !   precipitation rate (mm/day)
         integer, parameter  :: kttpw   = 18     !   total precipitable water (mm)
         integer, parameter  :: kttlw   = 19     !   total cloud liquid water (mm)
         integer, parameter  :: ktfcc   = 20     !   fractional cloud cover (%)
@@ -108,7 +111,7 @@
         integer, parameter :: ktLogAOD = 43     !   log-transformed AOD
         integer, parameter :: ktAOD  = 45       !   average Aerosol Optical Depth (none)
         integer, parameter :: ktANGE = 46       !   Angstrom Exponent
-        integer, parameter :: ktAAOD = 49       !   Aerosol Absorption Optical Depth 
+        integer, parameter :: ktAAOD = 49       !   Aerosol Absorption Optical Depth
         integer, parameter :: ktSOLZ = 54       !   solar zenith  (degress)
         integer, parameter :: ktSOLA = 55       !   solar azimuth (degrees)
         integer, parameter :: ktSENZ = 56       !   sensor zenith (degress)
@@ -150,7 +153,7 @@
 !                             Data Source (kx) Parameters
 !                             ---------------------------
         integer, parameter ::   kxmax = 1024
-        integer, parameter ::   kxmod = 1000   ! the smallest 10's power > kxmax 
+        integer, parameter ::   kxmod = 1000   ! the smallest 10's power > kxmax
 
 !                             ------------------
 !                             QC Flag parameters
@@ -238,7 +241,7 @@
       integer, parameter :: X_PSAS        = 33  ! excluded by PSAS
       integer, parameter :: X_RANGE_ELEV  = 34  ! Failed elevation limit check
       integer, parameter :: X_NCEP_PURGE  = 35  ! NCEP SDM purged (non-raob)
-      integer, parameter :: X_NCEP_NLNQC  = 36  ! Rejected by GSI non-linear QC 
+      integer, parameter :: X_NCEP_NLNQC  = 36  ! Rejected by GSI non-linear QC
       integer, parameter :: X_ODSMATCH    = 37  ! ODS-match could not find a match
       integer, parameter :: X_ADV_LOCAL   = 38   ! obs not contributing to EFSOI due to advection of localization
 
@@ -320,7 +323,7 @@
      7                 'ODSmatch could not find match   ',
      8                 'no impact due to advected local '/)
 
-      integer, parameter :: nsats = 59
+      integer, parameter :: nsats = 60
       character(len=*), parameter :: sats(nsats)=(/
      .                 'hirs2           ', 'hirs3           ', 'hirs4           ',
      .                 'msu             ', 'ssu             ', 'sndr            ',
@@ -341,10 +344,10 @@
      .                 'amsr2           ', 'ompsnmeff       ', 'ompsnpnc        ',
      .                 'amsre           ', 'ompslpnc        ', 'tgez            ',
      .                 'tgev            ', 'tgav            ', 'tgaz            ',
-     .                 'tgop            ', 'abi'  /)
+     .                 'tgop            ', 'abi             ', 'viirs-m         '/)
 
 ! note: numbers below were made up for MHS, and SSU
-! note: CRIS and ATMS numbers assigned at will
+! note: CRIS, ATMS, and VIIRS-M numbers assigned at will
 ! note: omieff number assigned as omi
 ! note: mlsoz (o3lev) assigned were made up to 9999
       integer, parameter :: idsats(nsats)=(/
@@ -360,20 +363,20 @@
      .                 900               , 950               , 449               ,
      .                 304               , 440               , 445               ,
      .                 310               , 315               , 320               ,
-     .                 325               , 330               , 335               ,
+     .                 325               , 330               , 330               ,
      .                 705               , 706               , 999               ,
-     .                 999               , 940               , 335               ,
-     .                 336               , 427               , 437               , 
-     .                 550               , 428               , 438               ,
-     .                 546               , 337               , 999               ,
+     .                 999               , 940               , 330               ,
+     .                 331               , 422               , 432               ,
+     .                 550               , 423               , 433               ,
+     .                 546               , 332               , 999               ,
      .                 999               , 999               , 999               ,
-     .                 999               , 500  /)
+     .                 999               , 500               , 880              /)
 
       integer, parameter :: npcp = 4
       character(len=*), parameter :: pcpt(npcp)=(/
      .                 'pcp_ssmi        ', 'pcp_tmi         ', 'pcp_amsu        ',
      .                 'pcp_stage3      '/)
-                                                                                                                                             
+
 
 
 !EOC

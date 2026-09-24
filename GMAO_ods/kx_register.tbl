@@ -59,6 +59,13 @@
    063  gsi_diag    g13         sndrd1                    13    # sndrD1_g13
    064  gsi_diag    g14         sndrd1                    14    # sndrD1_g14
    065  gsi_diag    g15         sndrd1                    15    # sndrD1_g15
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
+   066  gsi_conv    066         "gps_bnd,gps_ref"          0    # Sentinel 6A
+
+# see gsi.rc: OBS_INPUT::
+#  kx   source      dplat       dtype                   isat
    071  gsi_diag    g11         sndrd2                    11    # sndrD2_g11
    072  gsi_diag    g12         sndrd2                    12    # sndrD2_g12
    073  gsi_diag    g13         sndrd2                    13    # sndrD2_g13
@@ -256,6 +263,14 @@
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
+   265  gsi_conv    265         "gps_bnd,gps_ref"          0    # GeoOptics CICERO OP1
+   266  gsi_conv    266         "gps_bnd,gps_ref"          0    # GeoOptics CICERO OP2
+   267  gsi_conv    267         "gps_bnd,gps_ref"          0    # PlanetiQ GNOMES-A
+   268  gsi_conv    268         "gps_bnd,gps_ref"          0    # PlanetiQ GNOMES-B
+   269  gsi_conv    269         "gps_bnd,gps_ref"          0    # Spire Lemur 3U Cubesat
+
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
    270  gsi_conv    270         uv                         0    # ?
    275  gsi_conv    275         uv                         0    # Loon Ballon winds
 
@@ -353,11 +368,13 @@
    325  gsi_diag    aura        mls30                      0    #                       -- conflict 325
    325  gsi_diag    metop-a     amsua                     25    # amsua_metop-a         -- conflict 325
    326  gsi_diag    metop-b     amsua                     26    # amsua_metop-b
+   327  gsi_diag    metop-c     amsua                     27    # amsua_metop-c
    330  gsi_diag    aura        mls55                      0    #
-   335  gsi_diag    npp         ompslpuv                   0    #
-   336  gsi_diag    npp         ompslpvis                  0    #
-   337  gsi_diag    npp         ompslpnc                   0    #
+   335  gsi_diag    npp         ompslpuv                   5    #
+   336  gsi_diag    npp         ompslpvis                  5    #
+   337  gsi_diag    npp         ompslpnc                   5    #
    335  gsi_diag    npp         "ompslp,ompsnm,ompsnp"     0    # ???
+   353  gsi_diag    n21         ompslpnc                  21
    355  gsi_diag    tirosn      ssu                        5    # ssu_tirosn
    356  gsi_diag    n06         ssu                        6    # ssu_n06
    357  gsi_diag    n07         ssu                        7    # ssu_n07
@@ -382,8 +399,9 @@
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
-   427  gsi_diag    npp         ompsnm                     0    #
-   437  gsi_diag    npp         ompsnp                     0    #
+   427  gsi_diag    npp         ompsnm                     5    #
+   428  gsi_diag    npp         ompsnmeff                  5
+   437  gsi_diag    npp         ompsnp                     5    #
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
@@ -394,6 +412,8 @@
 #  kx   source      dplat       dtype                   isat
    441  gsi_diag    nim07       tomseff                    1    #
    442  gsi_diag    ep          tomseff                    2    #
+   443  gsi_diag    n20         ompsnmeff                 20
+   444  gsi_diag    n21         ompsnmeff                 21
 
 # see gsi: convinfo
 #  kx   source      ictype      otype                   icsub
@@ -492,6 +512,7 @@
 #  kx   source      dplat       dtype                   isat
    516  gsi_diag    g16         abi                       16    # abi g16
    518  gsi_diag    g18         abi                       18    # abi g18
+   519  gsi_diag    g19         abi                       19    # abi g19
 
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
@@ -604,6 +625,11 @@
    755  gsi_conv    755         "gps_bnd,gps_ref"          0    # COSMIC-2 E6 (gps)
    786  gsi_conv    786         "gps_bnd,gps_ref"          0    # C/NOFS CORISS (gps)
 
+# see gsi: convinfo
+#  kx   source      ictype      otype                   icsub
+   803  gsi_conv    803         "gps_bnd,gps_ref"          0    # GRACE-C
+   804  gsi_conv    804         "gps_bnd,gps_ref"          0    # GRACE-D
+
 # see gsi.rc: OBS_INPUT::
 #  kx   source      dplat       dtype                   isat
    818  gsi_diag    n18         mhs                       18    # mhs_n18
@@ -619,9 +645,13 @@
 #  kx   source      dplat       dtype                   isat
    825  gsi_diag    metop-a     mhs                       25    # mhs_metop-a        --- conflict 825
    826  gsi_diag    metop-b     mhs                       26    # mhs_metop-b
+   827  gsi_diag    metop-c     mhs                       27    # mhs_metop-c
    875  gsi_diag    metop-a     iasi                      25    # iasi616_metop-a
    876  gsi_diag    metop-b     iasi                      26    # iasi616_metop-b
    877  gsi_diag    metop-c     iasi                      27    # iasi616_metop-c
+   880  gsi_diag    viirs-m     viirs-m                    0    # viirs-m_npp
+   881  gsi_diag    viirs-m     viirs-m                    1    # viirs-m_j1
+   882  gsi_diag    viirs-m     viirs-m                    2    # viirs-m_j2
    900  gsi_diag    npp         atms                       0    # atms_npp
    920  gsi_diag    n20         atms                      20    # atms_n20
    921  gsi_diag    n21         atms                      21    # atms_n21

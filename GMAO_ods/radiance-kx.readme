@@ -28,6 +28,7 @@
  hirs4       metop-b     hirs4_metop-b                 26          26
  abi         g16         abi_g16                       16         516
  abi         g18         abi_g18                       18         518
+ abi         g19         abi_g19                       19         519
  airs        aqua        airs_aqua                      0          49
  sndr        g08_prep    sndr_g08                       8          53
  sndr        g10_prep    sndr_g10                      10          55
@@ -132,6 +133,9 @@
  seviri      m09         seviri_m09                     9         989
  seviri      m10         seviri_m10                    10         990
  seviri      m11         seviri_m11                    11         991
+ viirs-m     npp         viirs-m_npp                    0         880
+ viirs-m     j1          viirs-m_j1                     1         881
+ viirs-m     j2          viirs-m_j2                     2         882
 !
 !
 !  Note:  hsb_aqua, amsre_aqua, imgr_* not really being used
