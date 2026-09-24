@@ -54,6 +54,7 @@ OBS*Class*Kts::
 #  OMI        21
    ABI        40
    VIIRS-M    40
+   CRIS-FSR   40
 ::
 
 OBS*Class*Kxs::
@@ -93,4 +94,5 @@ OBS*Class*Kxs::
 #  OMI        449
    ABI        516 518 519
    VIIRS-M    880 881 882
+   CRIS-FSR   940 960 961
 ::

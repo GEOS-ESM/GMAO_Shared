@@ -42,6 +42,7 @@ OBS*Class*Kts::
    IASI-MTC   40
    CRIS-NPP   40
    CRIS-N20   40
+   CRIS-N10   40
    AIRS-AQA   40
    SSMIS-F17  40
 #  SSMIS-F18  40
@@ -90,6 +91,7 @@ OBS*Class*Kxs::
    IASI-MTC   877
    CRIS-NPP   940
    CRIS-N20   960
+   CRIS-N21   961
    AIRS-AQA   49
    SSMIS-F17  717
 #  SSMIS-F18  718
