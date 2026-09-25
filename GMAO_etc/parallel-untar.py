@@ -108,7 +108,7 @@ class untarThread(multiprocessing.Process):
                     # value doesn't matter, my_dirs is just a set
                     my_dirs[stripped_name] = self.index
                     try:
-                        archive.extract(m)
+                        archive.extract(m,filter="fully_trusted")
                     except OSError as e:
                         # race condition if > 1 thread
                         # creating a common parent directory,
@@ -118,7 +118,7 @@ class untarThread(multiprocessing.Process):
                         if e.errno == errno.EEXIST:
                             time.sleep(0.1 * self.index)
                             self.dir_create_collisions += 1
-                            archive.extract(m)
+                            archive.extract(m,filter="fully_trusted")
                         else:
                             raise e
                     if debug:
@@ -147,7 +147,7 @@ class untarThread(multiprocessing.Process):
                                 link_queue.append(m)
                                 continue
                     try:
-                        archive.extract(m)  # not a link or dir at this point
+                        archive.extract(m,filter="fully_trusted")  # not a link or dir at this point
                     except OSError as e:
                         if not (e.errno == errno.EEXIST and m.issym()):
                             raise e
@@ -169,7 +169,7 @@ class untarThread(multiprocessing.Process):
 
         for m in link_queue:
             try:
-                archive.extract(m)
+                archive.extract(m,filter="fully_trusted")
             except OSError as e:
                 if not (e.errno == errno.EEXIST and m.issym()):
                     raise e
