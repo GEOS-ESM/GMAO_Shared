@@ -13,8 +13,8 @@ cc
       real(kind=kind_evod)   rcs2(lgghaf)
 cc
 ! incread precision for more significant digit to help wgt by henry juang
-      real(kind=kind_qdt_prec) drad,dradz,eps,p1,p2,phi,pi,rad,rc
-      real(kind=kind_qdt_prec) rl2,scale,si,sn,w,x
+      real(kind=kind_max_prec) drad,dradz,eps,p1,p2,phi,pi,rad,rc
+      real(kind=kind_max_prec) rl2,scale,si,sn,w,x
 cc
       real(kind=kind_evod) cons0,cons0p25,cons1             !constant
       real(kind=kind_evod) cons2,cons4,cons180,cons360      !constant
@@ -84,13 +84,13 @@ cc
 
       subroutine poly(n,rad,p)
 cc
-      use mod_param 
+      use mod_param
       implicit none
 cc
       integer                  i,n
 cc
 ! incread precision for more significant digit to help wgt by henry juang
-      real(kind=kind_qdt_prec) g,p,rad,x,y1,y2,y3
+      real(kind=kind_max_prec) g,p,rad,x,y1,y2,y3
       real(kind=kind_evod) cons1
 cc
       cons1 = 1.d0     !constant
