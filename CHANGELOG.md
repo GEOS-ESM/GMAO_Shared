@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updates to shmem killer scripts
+
 ### Fixed
 
 - In `GMAO_stoch`, add `kind_max_prec` to fall back to double precision if quad precision (`kind_qdt_prec`) is unsupported by the compiler (e.g., LLVM Flang), preventing invalid `REAL(KIND=-1)` declarations in `glats.f`.
