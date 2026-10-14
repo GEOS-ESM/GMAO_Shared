@@ -422,7 +422,14 @@ contains
       elsewhere
         vh0 = h0byz0 * vz0
       endwhere
+
+      ! Default thermal roughness
       VZ0H = 0.001
+
+      ! Decouple thermal roughness for land/sea ice if requested (IVWATER == 6)
+      where (IVWATER == 6)
+         VZ0H = 0.1 * VZ0   ! or 0.01 * VZ0, making thermal roughness much smaller than momentum roughness
+      endwhere
 
 !     CU AND PSIHG FOR NEUTRALLY STRATIFIED FLOW
 !
