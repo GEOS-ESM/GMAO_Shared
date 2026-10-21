@@ -3,20 +3,15 @@ string (REPLACE GMAO_gfio_ "" precision ${this})
 
 
 set (srcs
-  gfio.f
+  gfio.F
   gfioCF.F
   diffdate.f
   getdate.f
   timesubs.f
-  gfioutil.f
+  gfioutil.F
   m_GFIO_GetFld.f
-  m_GFIO_PutFld.f
+  m_GFIO_PutFld.F
   )
-
-set_source_files_properties (gfio.f PROPERTIES COMPILE_FLAGS ${PP})
-set_source_files_properties (gfioutil.f PROPERTIES COMPILE_FLAGS ${PP})
-set_source_files_properties (m_GFIO_PutFld.f PROPERTIES COMPILE_FLAGS ${PP})
-
 
 # Need to build r4 and r8 versions.  See details at bottom
 esma_add_library (${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu esmf NetCDF::NetCDF_Fortran)

@@ -16,7 +16,7 @@
       end if
 
       TT = TT - (TMIN-1)
-      IT = int(TT)
+      IT = min(max(1,int(TT)),TABLESIZE-1)
 
       Qsat = (TT-IT)*(ESTBLX(IT+1) - ESTBLX(IT)) + ESTBLX(IT)
       DD =  (PL - ERFAC*Qsat)
@@ -33,7 +33,7 @@
       end if
 
       TT = TT - (TMIN-1)
-      IT = int(TT)
+      IT = min(max(1,int(TT)),TABLESIZE-1)
 
       Qsat(I) = (TT-IT)*(ESTBLX(IT+1) - ESTBLX(IT)) + ESTBLX(IT)
       DD =  (PL(I) - ERFAC*Qsat(I))
@@ -52,7 +52,7 @@
       end if
 
       TT = TT - (TMIN-1)
-      IT = int(TT)
+      IT = min(max(1,int(TT)),TABLESIZE-1)
 
       Qsat(I,J) = (TT-IT)*(ESTBLX(IT+1) - ESTBLX(IT)) + ESTBLX(IT)
       DD =  (PL(I,J) - ERFAC*Qsat(I,J))

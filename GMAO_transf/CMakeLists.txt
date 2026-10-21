@@ -96,11 +96,11 @@ set (srcs
 set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
 set (CMAKE_Fortran_FLAGS_DEBUG   "${GEOS_Fortran_FLAGS_DEBUG}")
 
-ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
-ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} GMAO_mpeu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET dyn_divo.x SOURCES dyn_divo.F90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ec2fv.x SOURCES ec2fv.F90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET fv2ss.x SOURCES fv2ss.f90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET g4tog5.x SOURCES g4tog5.f90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
+ecbuild_add_executable(TARGET ss2fv.x SOURCES ss2fv.f90 LIBS ${this} GMAO_eu GMAO_hermes NCEP_w3_r8i4 NCEP_sp_r8i4 FFLAGS "${FREAL8}")
 
 install (PROGRAMS ec2fv.csh DESTINATION bin)
 
