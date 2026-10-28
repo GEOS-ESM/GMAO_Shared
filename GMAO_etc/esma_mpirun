@@ -215,6 +215,9 @@ sub which_mpi_cmd {
        #       This is currently done with both g5das.j and gcm_run.j
 
        chomp($mpicmd = `which mpiexec_mpt`);
+    } elsif ($mpi_type eq 'mpich' && $ENV{"CRAY_MPICH_DIR"}) {
+       # PALS mpirun aliases mpiexec, avoiding PBS's competing mpiexec on PATH.
+       chomp($mpicmd = `which mpirun`);
     } elsif ($mpi_type eq 'mpich') {
        chomp($mpicmd = `which mpiexec`);
     } elsif ($mpi_type eq 'mvapich') {
