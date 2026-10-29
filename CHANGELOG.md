@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [3.0.4] - 2026-10-29
+
+### Fixed
+
+- Use `mpirun` for Cray MPICH in `esma_mpirun` to avoid selecting PBS's `mpiexec` instead of the PALS launcher when PBS appears first in `PATH`.
+
 ## [3.0.3] - 2026-10-02
 
 ### Changed
