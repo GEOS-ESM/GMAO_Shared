@@ -203,7 +203,13 @@ module initialize
     if (cubed) then
       im_ll=-1
       jm_ll=-1
-      if (im_world==48) then
+      if (im_world==12) then
+        im_ll=48
+        jm_ll=25
+      elseif (im_world==24) then
+        im_ll=96
+        jm_ll=49
+      elseif (im_world==48) then
         im_ll=144
         jm_ll=91
       elseif (im_world==90) then
@@ -253,6 +259,16 @@ module initialize
       jcap =62
       im_gg=192
       jm_gg=94
+    endif
+    if(im_ll==96.and.jm_ll==49) then
+      jcap =31
+      im_gg=96
+      jm_gg=48
+    endif
+    if(im_ll==48.and.jm_ll==25) then
+      jcap =15
+      im_gg=48
+      jm_gg=24
     endif
 
   end subroutine get_pert_grid
