@@ -1464,7 +1464,7 @@ c ---------------------------------
       integer irc
 #ifdef mpi
       integer  ierror
-      call system ('touch gcm_error')
+      call execute_command_line ('touch gcm_error', cmdstat=ierror)
       call mpi_finalize (ierror)
 #endif
       call exit (irc)

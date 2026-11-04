@@ -1938,7 +1938,7 @@ end interface
       implicit none
       integer irc
       integer  ierror
-      call system ('touch gcm_error')
+      call execute_command_line ('touch gcm_error', cmdstat=ierror)
       call mpi_finalize (ierror)
       call exit (irc)
       return

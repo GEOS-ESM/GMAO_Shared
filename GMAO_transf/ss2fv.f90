@@ -91,7 +91,7 @@
 
 !  Other locals
 
-   integer :: lu, n,iargc,rc
+   integer :: lu, n,rc
    integer :: nymd, nhms
    integer :: nymd0, nhms0
    integer :: nymd1, nhms1
@@ -252,7 +252,7 @@
 
      else             ! step 2 w/ blending
 
-       print *, 'Doing blend-only case ...'; call flush(6)
+       print *, 'Doing blend-only case ...'; flush(6)
        call xform ( nymd, nhms, pick, &
                     ss, w_as, ak, bk, w_ff, rc, &
                     uafile = uafile, pabove = p1, pbelow = p2, eta=eta, cwmr=cwmr )
@@ -273,7 +273,7 @@
    else               ! step 2 w/o blending
      print *, 'Doing no-blend case'
      if ( .not. eta ) print *, '(NO no-data-no-harm)'
-     call flush(6)
+     flush(6)
 
      call xform ( nymd, nhms, pick, ss, w_as, ak, bk, w_ff, rc, eta=eta, cwmr=cwmr )
      if ( rc .ne. 0 ) then
@@ -392,12 +392,12 @@
 !
 
    character*4, parameter :: myname = 'init'
-   integer :: n,iargc,nargs,iaux
+   integer :: n,nargs,iaux
    real    :: a2
    character*255 :: argv
    character*255, allocatable :: arg(:)
 
-   nargs =  iargc()
+   nargs =  command_argument_count()
    if( nargs.lt.2 ) call usage()
    allocate ( arg(nargs) )
 
@@ -420,7 +420,7 @@
 ! process options
 
    do n=1,nargs
-     call getarg(n,arg(n))
+     call get_command_argument(n,arg(n))
    enddo
    do n=1,nargs
      if( trim(arg(n)).eq.'-pa'  ) read(arg(n+1), * ) p1

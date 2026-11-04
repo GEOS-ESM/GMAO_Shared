@@ -554,7 +554,7 @@
               write(6,*) 'ec2fv: Level variable is less than 1.'
               write(6,*) 'ec2fv: i,j,l have values ',i,j,l
               write(6,*) 'ec2fv: ABORT'
-              call flush(6)
+              flush(6)
               call abort()
             endif
            enddo
@@ -1013,17 +1013,17 @@ print *
    do i = 1, 32767
       iarg = iarg + 1
       if ( iarg .gt. argc ) exit
-      call GetArg ( iArg, argv )
+      call get_command_argument ( iArg, argv )
       if(index(argv,'-o') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, outFile )
+         call get_command_argument ( iArg, outFile )
 
 
       else if(index(argv,'-phis') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, phisFile )
+         call get_command_argument ( iArg, phisFile )
       else if(index(argv,'-blend') .gt. 0 ) then
          blend = .true.
       else if(index(argv,'-ws') .gt. 0 ) then
@@ -1036,15 +1036,15 @@ print *
       else if(index(argv,'-anafile') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, anaFile )
+         call get_command_argument ( iArg, anaFile )
       else if(index(argv,'-uafile') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, uaFile )
+         call get_command_argument ( iArg, uaFile )
       else if(index(argv,'-inc') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) freq
 !     else if(index(argv,'-nlev') .gt. 0 ) then
 !        if ( iarg+1 .gt. argc ) call usage_()
@@ -1054,25 +1054,25 @@ print *
       else if(index(argv,'-date') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) ndate_ec
       else if(index(argv,'-pa') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) p1
       else if(index(argv,'-pb') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) p2
       else if(index(argv,'-time') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) ntime_ec
       else
-         call GetArg ( iArg, inFile )
+         call get_command_argument ( iArg, inFile )
       end if
    end do
 

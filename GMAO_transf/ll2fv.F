@@ -283,7 +283,7 @@ c ----------------------------------------------------------------
               write(6,*) 'll2fv: Level variable is less than 1.'
               write(6,*) 'll2fv: i,j,l have values ',i,j,l
               write(6,*) 'll2fv: ABORT'
-              call flush(6)
+              flush(6)
               call abort()
            endif
            enddo
