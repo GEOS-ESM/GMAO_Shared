@@ -14,7 +14,7 @@ if(UTBL) then
       if(present(DQ)) DDQ = 0.0
    else
       TT  = (TX - TMINTBL)*DEGSUBS+1
-      IT  = int(TT)
+      IT = min(max(1,int(TT)),TABLESIZE-1)
       DDQ = ESTBLE(IT+1) - ESTBLE(IT)
       EX  =  ((TT-IT)*DDQ + ESTBLE(IT))
    end if

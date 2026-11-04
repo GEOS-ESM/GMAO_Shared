@@ -17,6 +17,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [3.0.4] - 2026-10-29
+
+### Fixed
+
+- Use `mpirun` for Cray MPICH in `esma_mpirun` to avoid selecting PBS's `mpiexec` instead of the PALS launcher when PBS appears first in `PATH`.
+
+## [3.0.3] - 2026-10-02
+
+### Changed
+
+- Updates to shmem killer scripts
+
+### Fixed
+
+- In `GMAO_stoch`, add `kind_max_prec` to fall back to double precision if quad precision (`kind_qdt_prec`) is unsupported by the compiler (e.g., LLVM Flang), preventing invalid `REAL(KIND=-1)` declarations in `glats.f`.
+
+## [3.0.2] - 2026-08-25
+
+- Fixed bug in "extra" derivatives of Louis surface turbulence.
+
+## [3.0.1] - 2026-07-16
+
+### Changed
+
+- Added new `--no-start-time` flag to `pyrob` to omit the starting timestamp from the frequency output.
+- Updates to radar reflectivity algorithm
+
+### Fixed
+
+- Fix for ods cmake
+
+## [3.0.0] - 2026-05-27
+
+### Added
+
+- Added new `compute_radar_reflectivity.F90` module in `GEOS_Shared` for computing radar reflectivity
+- Added L186 extended model top levels in `m_set_eta.F90`
+- Added 41 ML levels for PYMLINC in `m_set_eta.F90`
+
+### Changed
+
+- Updated `iliqskin` logic to apply only to snow or snow & graupel (as in SFE25/SFE26)
+- Merged latest v12-SFE26 code for L72 (zero-diff)
+- Renamed `GMAO_gfio` source files from `.f`/`.f90` to `.F`/`.F90` for preprocessor compatibility
+- Renamed `GMAO_hermes` source files from `.f90` to `.F90` for preprocessor compatibility
+- Updated `m_random.F` in `GMAO_mpeu`
+- Updated CI configuration (CircleCI and GitHub Actions/Spack)
+
+### Fixed
+
+- Fixed bug in `calcdbz` when `ivarint==0`
+- Added additional bounds protections on QSAT tables (`qsat_fast.code`, `qsat_new.code`, `qsatice.code`, `qsatlqu.code`)
+- Fixes for Flang 22 compiler compatibility
+- Fixes for Open MPI 5 compatibility
+- Updates for Intel `ifx` builds
+
 ## [2.1.7] - 2026-04-15
 
 ### Added

@@ -276,6 +276,10 @@ class Writer(object):
         # ----------
         if Coll.tbeg is None:
             self.property("Frequency", "%s (%s)" % (freq.lower(), sampling.lower()))
+        elif getattr(options, 'no_start_time', False):
+            self.property(
+                "Frequency", "%s (%s)" % (freq.lower(), sampling.lower())
+            )
         else:
             date, time = Coll.tbeg.split("T")
             tbeg = time[:5] + " UTC"
@@ -1260,6 +1264,10 @@ if __name__ == "__main__":
 
     parser.add_option(
         "-v", "--verbose", action="store_true", dest="verbose", help="Verbose mode."
+    )
+
+    parser.add_option(
+        "--no-start-time", action="store_true", dest="no_start_time", help="Omit the starting timestamp from the frequency output."
     )
 
     (options, inFiles) = parser.parse_args()

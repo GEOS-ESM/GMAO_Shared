@@ -546,7 +546,7 @@
        end if
 
        TI = (TI - TMINTBL)*DEGSUBS+1
-       IT = int(TI)
+       IT = min(max(1,int(TI)),TABLESIZE-1)
 
        if(URAMP==TMIX) then
           DQ    = ESTBLX(IT+1) - ESTBLX(IT)
@@ -764,7 +764,7 @@
          end if
 
          TT = (TI - TMINTBL)*DEGSUBS+1
-         IT = int(TT)
+         IT = min(max(1,int(TT)),TABLESIZE-1)
 
          if(URAMP==TMIX) then
             DQQ =  ESTBLX(IT+1) - ESTBLX(IT)
