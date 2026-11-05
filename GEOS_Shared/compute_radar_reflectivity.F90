@@ -163,7 +163,7 @@ FUNCTION compute_radar_reflectivity(PRS, TMK, QVP, QRAIN, QSNOW, &
 
       ! 3. Variable Intercept Parameters
       IF (use_var_intercepts) THEN
-          TEMP_C = DMIN1(-0.001D0, tmk_val - CELKEL)
+          TEMP_C = DMIN1(-0.001D0, DBLE(tmk_val - CELKEL))
           SONV = DMIN1(2.0D8, 2.0D6 * EXP(-0.12D0 * TEMP_C))
 
           ! Simulate large snow aggregates by halving the intercept parameter
