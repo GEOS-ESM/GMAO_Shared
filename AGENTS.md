@@ -24,10 +24,10 @@ the library list in `CMakeLists.txt` is absent from the GEOSgcm checkout
 
 ## Place in the GEOSgcm fixture
 Child of the GEOSgcm fixture: see `../../../AGENTS.md` and
-`../../../docs/ARCHITECTURE.md` (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch). The fixture
+`../../../docs/ARCHITECTURE.md`. The fixture
 checks it out with the sparse pattern `config/GMAO_Shared.sparse`.
 Nested repositories (not documented here):
-- `@GEOS_Util`: separate repository (documents come later).
+- `@GEOS_Util`: separate repository.
 - `@GMAO_perllib`: separate repository.
 
 ## Documents
