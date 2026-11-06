@@ -18,7 +18,7 @@ its own library-level document; read the source for routine detail.
 > kept for a later port. Each library document states its own status.
 
 ## 1. Placement
-- Parent: the GEOSgcm fixture (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch) (`AGENTS.md` (`../../../../AGENTS.md` in the fixture),
+- Parent: the GEOSgcm fixture (`AGENTS.md` (`../../../../AGENTS.md` in the fixture),
   `docs/ARCHITECTURE.md` (`../../../../docs/ARCHITECTURE.md` in the fixture)); the fixture lists
   it with `sparse: config/GMAO_Shared.sparse` (fixture `docs/ARCHITECTURE.md`, repository table).
 - Nested repositories inside this directory: `@GEOS_Util` and `@GMAO_perllib`
