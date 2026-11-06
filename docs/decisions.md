@@ -1,9 +1,9 @@
 # GMAO_Shared: decisions
 
 **Audience:** coding agents and developers working on the GMAO_Shared repository.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
@@ -13,6 +13,7 @@ Only what is visible in the code now. Likely reasons are inferred.
 - Pattern: `GEOS_Shared` and `GMAO_hermes` are always added; all other libraries only when `HERMES_LIGHT` is `OFF` (`CMakeLists.txt`). `GMAO_hermes` shrinks to a small set of modules (`GMAO_hermes/CMakeLists.txt`). [Verified]
 - Likely reason: *Inferred:* a minimal build for a configuration that needs only a few dynamics utilities, without the assimilation libraries.
 - Question for maintainers: which configurations use `HERMES_LIGHT`?
+- On this line (`release/MAPL-v3`) the option is forced ON: `CMakeLists.txt` does `set (HERMES_LIGHT ON)` and adds `GMAO_mpeu`, `GMAO_hermes`, `GEOS_Shared` unconditionally; the `GMAO_hermes` light library gains `m_topo_remap.F90`, `m_dyn.f90`, `m_const.f90` and depends on `GMAO_mpeu` (`GMAO_hermes/CMakeLists.txt`). [Verified]
 
 ### `GMAO_gfio` built twice
 - Pattern: `add_subdirectory (GMAO_gfio GMAO_gfio_r4)` and `... GMAO_gfio_r8`, `GMAO_gfio_r4` depends on `GMAO_gfio_r8` (`CMakeLists.txt`; `GMAO_gfio/CMakeLists.txt`, `precision`). [Verified]
@@ -33,3 +34,7 @@ Only what is visible in the code now. Likely reasons are inferred.
 - Pattern: `GMAO_mpeu` (real MPI) and `GMAO_eu` (stub `mpi0`) from the same sources (`GMAO_mpeu/CMakeLists.txt`). [Verified]
 - Likely reason: *Inferred:* serial tools that must not need MPI.
 - Question for maintainers: which executables are meant to use `GMAO_eu`?
+
+### Restricted build while porting to MAPL3 (this line only)
+- Pattern: `CMakeLists.txt` comment: "not yet ported to MAPL3 - only build GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp (needs m_set_eta, m_topo_remap, tropovars)"; "restore full build (and set HERMES_LIGHT OFF) when all components are ported". [Verified]
+- Question for maintainers: which libraries will be ported first, and does `GMAO_hermes` keep a light mode afterwards?

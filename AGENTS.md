@@ -1,11 +1,18 @@
 # GMAO_Shared
 
 **Audience:** coding agents and developers working on the GMAO_Shared repository.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
+
+> **Build status on this line:** restricted build. On `release/MAPL-v3`, `CMakeLists.txt` sets `HERMES_LIGHT ON`
+> and adds only `GMAO_mpeu`, `GMAO_hermes` (light) and `GEOS_Shared` (comment: "not yet ported to MAPL3 - only build
+> GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp"); the parent `src/Shared/CMakeLists.txt` says the
+> same ("GMAO_Shared is included but restricted to HERMES_LIGHT"). Not built, not ported: `GMAO_gfio`, `GMAO_transf`,
+> `GMAO_etc`, `GMAO_stoch`, `LANL_Shared` and every other library in the commented-out list; their code is the MAPL2 code,
+> kept for a later port. Each library document states its own status.
 
 ## What this repository is
 A set of Fortran libraries, scripts and tools shared by GEOS components
@@ -17,7 +24,7 @@ the library list in `CMakeLists.txt` is absent from the GEOSgcm checkout
 
 ## Place in the GEOSgcm fixture
 Child of the GEOSgcm fixture: see `../../../AGENTS.md` and
-`../../../docs/ARCHITECTURE.md`. The fixture
+`../../../docs/ARCHITECTURE.md` (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch). The fixture
 checks it out with the sparse pattern `config/GMAO_Shared.sparse`.
 Nested repositories (not documented here):
 - `@GEOS_Util`: separate repository (documents come later).
@@ -46,9 +53,10 @@ Nested repositories (not documented here):
   occur in more than one library (see `docs/ARCHITECTURE.md`, cross-library traps).
 
 ## Build and test
-- `CMakeLists.txt` adds `GEOS_Shared` and `GMAO_hermes` always; with option
-  `HERMES_LIGHT` OFF (default) it also adds the other subdirectories.
-  `GMAO_gfio` is added twice (`GMAO_gfio_r4`, `GMAO_gfio_r8`).
+- On this line `CMakeLists.txt` sets `HERMES_LIGHT ON` and adds only `GMAO_mpeu`, `GMAO_hermes`, `GEOS_Shared`; the
+  list of other subdirectories (and the `GMAO_gfio` r4/r8 special case) is commented out. (MAPL2 line: `GEOS_Shared` and
+  `GMAO_hermes` always; with option `HERMES_LIGHT` OFF (default) also the others.)
+  On the MAPL2 line `GMAO_gfio` is added twice (`GMAO_gfio_r4`, `GMAO_gfio_r8`).
 - Listed subdirectories that do not exist in a checkout are skipped by
   `esma_add_subdirectories`; `GMAO_gfio` and `gmao2ioda` are guarded by `EXISTS`.
 - Tests: `GMAO_etc/unittests` exists; `GMAO_gfio` has unbuilt test sources

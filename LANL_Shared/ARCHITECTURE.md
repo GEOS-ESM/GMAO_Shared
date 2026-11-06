@@ -1,13 +1,15 @@
 # LANL_Shared: architecture
 
 **Audience:** coding agents and developers working on LANL_Shared (the CICE4 sea-ice library) in GMAO_Shared.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `LANL_Shared/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `LANL_Shared/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Library-level document: purpose, contents and users. Read the source for routine detail.
+
+> **Build status on this line:** not built, not ported. On `release/MAPL-v3`, `CMakeLists.txt` (repository root) calls `esma_add_subdirectories` only for `GMAO_mpeu`, `GMAO_hermes` and `GEOS_Shared` (comment: "not yet ported to MAPL3 - only build GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp"); `LANL_Shared` appears only in the commented-out `if ( NOT HERMES_LIGHT )` block; target `CICE4` is therefore not defined on this line. The code in this directory is the MAPL2 code, kept for a later port.
 
 ## 1. Purpose
 `LANL_Shared` holds one vendored third-party model: CICE version 4.0, the Los
@@ -51,12 +53,12 @@ Roles are taken from directory and file names.
 
 ## 4. Who uses it
 Link target `CICE4` (CMake `DEPENDENCIES`), all under `GEOSgcm_GridComp`:
-- `GEOSogcm_GridComp/CMakeLists.txt` (line 10) and
-  `GEOSseaice_GridComp/CMakeLists.txt` (line 9, which also lists subcomponents
+- `GEOSogcm_GridComp/CMakeLists.txt` and
+  `GEOSseaice_GridComp/CMakeLists.txt` (which also lists subcomponents
   `GEOSdataseaice_GridComp GEOSCICEDyna_GridComp CICE_GEOSPlug`).
 - `GEOSdataseaice_GridComp`, `GEOSCICEDyna_GridComp`, `GEOSMITDyna_GridComp`
   CMakeLists.
-- `GEOSsurface_GridComp/GEOSsaltwater_GridComp/CMakeLists.txt` (line 11).
+- `GEOSsurface_GridComp/GEOSsaltwater_GridComp/CMakeLists.txt`.
 
 Fortran `use` citations (verified):
 - `GEOSCICEDyna_GridComp/GEOS_CICEDynaGridComp.F90`: `ice_constants`, `ice_state`,
@@ -67,7 +69,7 @@ Fortran `use` citations (verified):
   `ice_prescribed_mod` (`ice_nudging`).
 - `GEOSMITDyna_GridComp/GEOS_MITDynaGridComp.F90`: `ice_domain_size`, `ice_init`,
   `ice_work`.
-- `GEOSogcm_GridComp/GEOS_OgcmGridComp.F90` (line 1324): `ice_constants`.
+- `GEOSogcm_GridComp/GEOS_OgcmGridComp.F90`: `ice_constants`.
 - `GEOSsaltwater_GridComp/GEOS_CICE4ColumnPhysGridComp.F90`: `ice_kinds_mod`.
 
 ## 5. Known traps

@@ -1,17 +1,24 @@
 # GMAO_Shared: architecture
 
 **Audience:** coding agents and developers working on the GMAO_Shared repository.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Repository-level document: how the libraries fit together. Each library has
 its own library-level document; read the source for routine detail.
 
+> **Build status on this line:** restricted build. On `release/MAPL-v3`, `CMakeLists.txt` sets `HERMES_LIGHT ON`
+> and adds only `GMAO_mpeu`, `GMAO_hermes` (light) and `GEOS_Shared` (comment: "not yet ported to MAPL3 - only build
+> GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp"); the parent `src/Shared/CMakeLists.txt` says the
+> same ("GMAO_Shared is included but restricted to HERMES_LIGHT"). Not built, not ported: `GMAO_gfio`, `GMAO_transf`,
+> `GMAO_etc`, `GMAO_stoch`, `LANL_Shared` and every other library in the commented-out list; their code is the MAPL2 code,
+> kept for a later port. Each library document states its own status.
+
 ## 1. Placement
-- Parent: the GEOSgcm fixture (`AGENTS.md` (`../../../../AGENTS.md` in the fixture),
+- Parent: the GEOSgcm fixture (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch) (`AGENTS.md` (`../../../../AGENTS.md` in the fixture),
   `docs/ARCHITECTURE.md` (`../../../../docs/ARCHITECTURE.md` in the fixture)); the fixture lists
   it with `sparse: config/GMAO_Shared.sparse` (fixture `docs/ARCHITECTURE.md`, repository table).
 - Nested repositories inside this directory: `@GEOS_Util` and `@GMAO_perllib`
@@ -35,7 +42,10 @@ Top-level files: `CMakeLists.txt`, `README.md`, `CHANGELOG.md`, `LICENSE*`, `COP
 
 ## 3. Build structure (`CMakeLists.txt`)
 - Option `HERMES_LIGHT` (default `OFF`, "Build light-weighted GMAO_shared library") (`CMakeLists.txt`, `option`).
-- Always added: `GEOS_Shared`, `GMAO_hermes`.
+- On this line the file then executes `set (HERMES_LIGHT ON)` and calls `esma_add_subdirectories` for `GMAO_mpeu`,
+  `GMAO_hermes`, `GEOS_Shared` (in that order), unconditionally. The `if ( NOT HERMES_LIGHT )` block is commented out
+  and never runs. The text below describes that commented block, as on the MAPL2 line where it is live.
+- MAPL2 line: always added `GEOS_Shared`, `GMAO_hermes`.
 - Only if `HERMES_LIGHT` is `OFF`, `esma_add_subdirectories`: `GMAO_mpeu`,
   `GMAO_pilgrim`, `GMAO_etc`, `GEOS_Util`, `LANL_Shared`, `GMAO_perllib`,
   `GMAO_transf`, `GMAO_stoch`, `GEOS_Pert`, `GMAO_mfhdf3`, `GMAO_gfioeos`,
@@ -47,9 +57,10 @@ Top-level files: `CMakeLists.txt`, `README.md`, `CHANGELOG.md`, `LICENSE*`, `COP
 - `esma_add_subdirectories` adds only directories that exist; a missing one is
   skipped with a debug message "possibly sparse checkout"
   (`@cmake/esma_support/esma_add_subdirectories.cmake` in the fixture).
-- With `HERMES_LIGHT` on, `GMAO_hermes` builds a reduced library (`m_set_eta.F90` and `shared_topo_remap.F90`, no
-  dependencies; `write_eta.x` is built in both cases); `GMAO_gfio_r8`, which `GMAO_hermes` otherwise links, is not added.
-- No other build file in the fixture sets `HERMES_LIGHT` (grep of fixture `CMakeLists.txt`/`*.cmake`).
+- With `HERMES_LIGHT` on (always, on this line), `GMAO_hermes` builds a reduced library (`m_set_eta.F90`, `shared_topo_remap.F90`,
+  `m_topo_remap.F90`, `m_dyn.f90`, `m_const.f90`; dependency `GMAO_mpeu`; `write_eta.x` is built in both cases; the MAPL2 line's reduced
+  library has only the first two and no dependencies); `GMAO_gfio_r8`, which `GMAO_hermes` otherwise links, is not added.
+- Other fixtures: *Unverified:* whether any build file outside this repository sets `HERMES_LIGHT`; on this line it is set in `CMakeLists.txt` here.
 
 ### Directories listed but absent from this checkout
 Absent: `GMAO_pilgrim`, `GEOS_Pert`, `GMAO_mfhdf3`, `GMAO_gfioeos`, `GMAO_ods`,
@@ -60,11 +71,12 @@ Absent: `GMAO_pilgrim`, `GEOS_Pert`, `GMAO_mfhdf3`, `GMAO_gfioeos`, `GMAO_ods`,
   `pnagpack`, `GMAO_pilgrim`, `gmao2ioda` (patterns `!/<dir>`). These nine are
   absent because of the sparse checkout.
 - `GMAO_mfhdf3`, `GMAO_gfioeos`, `GMAO_gems`, `GMAO_iret`, `GMAO_radmon` are
-  not in the sparse file and are not in the repository tree at `b0ebdca`
+  not in the sparse file and are not in the repository tree at `595999b`
   (`git ls-tree HEAD`); `GMAO_pyobs` is excluded by the sparse file and is also
   not in the tree.
 
 ## 4. Dependency graph (CMake `DEPENDENCIES`)
+On this line only `GMAO_mpeu`, `GMAO_hermes` (light: `GMAO_mpeu` only) and `GEOS_Shared` are built; the rest of the graph is the MAPL2 code's.
 ```
 GMAO_mpeu  -> MPI::MPI_Fortran          (GMAO_eu: same sources -> mpi0)
 GMAO_gfio  -> GMAO_mpeu, esmf, NetCDF   (targets GMAO_gfio_r4, GMAO_gfio_r8)
@@ -84,6 +96,7 @@ only calls `add_subdirectory (CICE4)`; the `MAPL` dependency is in `LANL_Shared/
 `NCEP_*` come from the separate `NCEP_Shared` repository.
 
 ## 5. Who uses which library (GEOSgcm fixture)
+The table is carried over from the MAPL2-line documents. On this line the built consumer in the `GMAO_Shared` `CMakeLists.txt` comment is `FVdycoreCubed_GridComp`, which links `GEOS_Shared` and `GMAO_hermes`; `GMAO_stoch`, `GMAO_transf`, `GMAO_gfio`, `GMAO_etc`, `LANL_Shared` are not built.
 | Library | Users (from the library documents) |
 |---|---|
 | `GEOS_Shared` | Moist, Surface, Turbulence, Radiation, Chemistry components (`GEOS_UtilsMod`); `GEOS_GcmGridComp`; `GMAO_hermes` |
@@ -114,6 +127,12 @@ Use from GEOSadas or other fixtures: *Unverified:*.
 - Parent: GEOSgcm (`../../../../docs/ARCHITECTURE.md` in the fixture).
 - Decisions: [`decisions.md`](decisions.md).
 
-## 8. Observations (noted, not fixed)
+## 8. Differences from the MAPL2 line
+- Own changes (`git diff origin/main...origin/release/MAPL-v3`): `CMakeLists.txt` (restricted build), `GMAO_hermes/CMakeLists.txt` (light source list),
+  nine `GEOS_Shared` files (MAPL3 API; see the `GEOS_Shared` document), `GMAO_hermes/lcv2prs.F90`, `LANL_Shared/CICE4/drivers/cice4/ice_constants.F90`
+  (not built; `MAPL_ConstantsMod` to `MAPL_Constants`), and `.circleci`/`.github` configuration.
+- Only on `main`: `GEOS_Shared` (`compute_radar_reflectivity.F90`, `surfacelayer.F90`), `GMAO_etc` (`esma_mpirun`, `pyrob`, `rmshmkeyhere.sh`, `RmShmKeys_sshmpi.csh`), `GMAO_stoch` (`mod_param.F90`, `glats.f`), `GMAO_ods/CMakeLists.txt`.
+
+## 9. Observations (noted, not fixed)
 - Fixture `docs/ARCHITECTURE.md` (repository table) lists only `GEOS_Shared`, `GMAO_mpeu`, `GMAO_etc`, `LANL_Shared/CICE4` for this repository; the checkout also has `GMAO_gfio`, `GMAO_hermes`, `GMAO_transf`, `GMAO_stoch`.
 - Six directories named in `CMakeLists.txt` are not in the repository tree (`GMAO_mfhdf3`, `GMAO_gfioeos`, `GMAO_gems`, `GMAO_iret`, `GMAO_radmon`, `GMAO_pyobs`; section 3).

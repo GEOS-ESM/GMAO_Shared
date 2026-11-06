@@ -1,13 +1,15 @@
 # GMAO_mpeu: architecture
 
 **Audience:** coding agents and developers working on the GMAO_mpeu library (message passing and environment utilities) in GMAO_Shared.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_mpeu/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_mpeu/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Library-level document: purpose, contents and users. Read the source for routine detail.
+
+> **Build status on this line:** built. `CMakeLists.txt` (repository root) adds `GMAO_mpeu` unconditionally (`esma_add_subdirectories(GMAO_mpeu)`), in the restricted build "only build GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared". Nothing in this directory differs from the MAPL2 line `main` (`git diff origin/main...origin/release/MAPL-v3` has no entry under `GMAO_mpeu`).
 
 ## 1. Purpose
 
@@ -59,7 +61,7 @@ Fortran files) into two libraries:
 
 ## 4. Who uses it
 
-Counts are `use m_<name>` files in `GEOSgcm/src` (fixture), approximate.
+Counts are `use m_<name>` files in `GEOSgcm/src` (fixture), approximate, carried over from the MAPL2-line document and not recounted on this line (many users are in components not built here).
 
 | Module | Files | Examples |
 |---|---|---|
@@ -75,7 +77,7 @@ Counts are `use m_<name>` files in `GEOSgcm/src` (fixture), approximate.
 | `m_GrADS` | 1 | |
 
 - GMAO_Shared siblings: `GMAO_hermes` (31 files use `m_die`/`m_stdio`/`m_inpak90`/`m_mpout`/`m_StrTemplate`), `GMAO_transf` (35), `GMAO_etc` (2), `GMAO_stoch` (3); `GMAO_transf/CMakeLists.txt` links `GMAO_eu`.
-- Chemistry: `CMakeLists.txt` of `Chem_Base` (`DEPENDENCIES GMAO_mpeu MAPL ...`, `Chem_Base/CMakeLists.txt:17`), `Chem_Shared`, `@GAAS` (line 10), `@ACHEM`, `@TR`, `@StratChem`, `@CARMA`, `@MAM`, GOCART and its `CO`, `CO2`, `CH4`, `CFC`, `Rn`, `O3` gridded components.
+- Chemistry: `CMakeLists.txt` of `Chem_Base` (`DEPENDENCIES GMAO_mpeu MAPL ...`, `Chem_Base/CMakeLists.txt`, `esma_add_library`), `Chem_Shared`, `@GAAS`, `@ACHEM`, `@TR`, `@StratChem`, `@CARMA`, `@MAM`, GOCART and its `CO`, `CO2`, `CH4`, `CFC`, `Rn`, `O3` gridded components.
 - Other: `GEOSphysics_GridComp`, `GEOSmoist_GridComp`, `GEOSsurface_GridComp`, `GEOSmkiau_GridComp` CMakeLists reference `GMAO_mpeu`/`GMAO_eu`.
 - MAPL: `MAPL_cfio/ESMF_CFIOMod.F90` and `ESMF_CFIOUtilMod.F90` use mpeu modules; `MAPL/base/tests/utDistIO.F90` and `MAPL/Tests/ExtDataRoot_GridComp.F90` use `m_*` modules.
 - WAVEWATCH III (`@ww3`): the ~55 `use` hits are all under `@ww3/regtests/ww3_tp2.14/input/oasis3-mct/lib/mct/` (22 in `mpeu/`, a vendored copy of mpeu with its own `m_die.F90` etc.; 28 in the MCT sources in `mct/`; 4 in `examples/`), not this library; no ww3 CMake reference to `GMAO_mpeu` was found.

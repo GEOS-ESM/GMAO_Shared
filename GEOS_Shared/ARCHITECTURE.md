@@ -1,13 +1,15 @@
 # GEOS_Shared: architecture
 
 **Audience:** coding agents and developers working on the GEOS_Shared library (shared physics utilities) in GMAO_Shared.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GEOS_Shared/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GEOS_Shared/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Library-level document: purpose, contents and users. Read the source for routine detail.
+
+> **Build status on this line:** built. `CMakeLists.txt` (repository root) adds `GEOS_Shared` unconditionally (`esma_add_subdirectories(GEOS_Shared)`, comment: "for FVdycoreCubed_GridComp"); `FVdycoreCubed_GridComp/CMakeLists.txt` links it. `GEOS_Shared/CMakeLists.txt` is identical to the MAPL2 line. Nine source files differ from the MAPL2 line (section 8).
 
 ## 1. Purpose
 
@@ -67,7 +69,11 @@ Verified from source with grep for `#include`:
 
 ## 5. Who uses it
 
-Counts are `use <module>` files under `src` (GEOSgcm fixture), by grep.
+Counts are `use <module>` files under `src` (GEOSgcm fixture), by grep, carried over from the
+MAPL2-line document and not recounted on this line. On this line most of these consumers are in components that
+`release/MAPL-v3` does not build (Moist, Surface, Turbulence, `GEOSmkiau`, `GEOSdatmodyn`, `GEOSagcm` top level, `GEOSsuperdyn` top level:
+commented out or bypassed in the parent `CMakeLists.txt` files, "not yet ported to MAPL3"); the built consumer named in the
+`GMAO_Shared` root `CMakeLists.txt` comment is `FVdycoreCubed_GridComp`, which links `GEOS_Shared` and has no `use` of its modules.
 
 - `GEOS_UtilsMod` (saturation functions, tridiagonal solvers): Moist 13 files, Surface 13, Turbulence 2, Radiation 2
   (Irrad, Satsim), Chemistry 1.
@@ -117,3 +123,21 @@ Counts are `use <module>` files under `src` (GEOSgcm fixture), by grep.
   not built from `.code` includes) and is in use (`LockEntrain.F90`:
   `use GEOS_UtilsMod, only: DQSAT=>GEOS_DQSAT`); only the `dqsat*.code`
   files are unused.
+
+## 8. Differences from the MAPL2 line
+
+Nine files differ (`git diff origin/main...origin/release/MAPL-v3`, this line's own changes):
+- `GEOS_TopoGet.F90`: MAPL3 interface. The `ESMF_Config` argument is `ESMF_HConfig`, file names and factors are read with local
+  helpers `hconfig_get_string`/`hconfig_get_r4`, data are read from NetCDF with `mapl_Netcdf4_Fileformatter` (defaults `*.nc`
+  instead of `*.data`); optional `GWDVARX`, `GWDVARY`, `GWDVARXY`, `GWDVARYX` are rejected with `_ASSERT` ("not yet supported in NetCDF").
+  Error macros come from `MAPL_ErrLog.h`.
+- `OVP.F90`: `#include "MAPL.h"`; longitudes come from `mapl_GridGetCoordinates` (real(8)) through `MAPL_GridCompGet`
+  instead of `MAPL_GetObjectFromGC`/`MAPL_Get`; `MAPL_PackedTimeCreate` replaces `MAPL_PackTime`.
+- `windfix.F90`: `mapl_GridGetGlobalCellCountPerDim` with allocatable `DIMS`.
+- `GEOS_Utilities.F90`, `DragCoefficients.F90`: `use MAPL_Constants` (was `MAPL_ConstantsMod`); `G3_MPI_Util_Mod.F90`,
+  `atmOceanIntLayer.F90`, `surfacelayer.F90`, `tropovars.F90`: `use MAPL, only: ...` instead of whole `use MAPL`. Other changes are whitespace.
+- `GEOS.F90` (`GEOS_Mod`) still does `use MAPL`; `GEOS_Shared/CMakeLists.txt` unchanged.
+
+Only on the MAPL2 line `main` (not on this line): in `compute_radar_reflectivity.F90` the mixing-ratio arguments are `INTENT(IN)`
+(bounds applied with `MAX` on local copies; here they are `INTENT(INOUT)` and clipped in place); in `surfacelayer.F90` `DCH`, `DCQ`
+are multiplied by `URA` as the coefficients are (comment "bug fix ... 29 July 2026"; absent here) and `use MAPL` is whole.

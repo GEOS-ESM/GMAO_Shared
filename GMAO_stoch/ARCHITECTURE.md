@@ -1,13 +1,15 @@
 # GMAO_stoch: architecture
 
 **Audience:** coding agents and developers working on the GMAO_stoch library (stochastic physics patterns) in GMAO_Shared.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_stoch/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_stoch/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Library-level document: purpose, contents and users. Read the source for routine detail.
+
+> **Build status on this line:** not built, not ported. On `release/MAPL-v3`, `CMakeLists.txt` (repository root) calls `esma_add_subdirectories` only for `GMAO_mpeu`, `GMAO_hermes` and `GEOS_Shared` (comment: "not yet ported to MAPL3 - only build GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp"); `GMAO_stoch` appears only in the commented-out `if ( NOT HERMES_LIGHT )` block. The code in this directory is the MAPL2 code, kept for a later port.
 
 ## 1. Purpose
 Library that generates stochastic-physics random patterns on the sphere for

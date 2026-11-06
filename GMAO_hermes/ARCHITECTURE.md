@@ -1,13 +1,15 @@
 # GMAO_hermes
 
 **Audience:** coding agents and developers working on the GMAO_hermes library and tools in GMAO_Shared.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_hermes/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_hermes/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Library-level document: purpose, contents and users. Read the source for routine detail.
+
+> **Build status on this line:** built in the light configuration only. `CMakeLists.txt` (repository root) sets `HERMES_LIGHT ON` unconditionally (`set (HERMES_LIGHT ON)`, comment: "restore full build (and set HERMES_LIGHT OFF) when all components are ported") and adds `GMAO_hermes`. The light library keeps five modules: `m_set_eta.F90`, `shared_topo_remap.F90`, `m_topo_remap.F90`, `m_dyn.f90`, `m_const.f90` (comment: "added for FVdycoreCubed_GridComp (m_topo_remap dependency chain)"), depending on `GMAO_mpeu` only, plus `write_eta.x`. The other modules and the 41 other executables of the full build are not built. See section 2.
 
 ## 1. Purpose
 
@@ -23,8 +25,15 @@ pressure levels, and ensemble/analysis utilities. Most modules carry
 - Library `GMAO_hermes`, deps `GMAO_mpeu`, `GMAO_gfio_r8`. Defines `-DHERMES
   -DDEBUG_SHAVE -Dunix -D__unix__`; compiled with the `FREAL8` flags (real*8).
 - Option `HERMES_LIGHT` (default OFF, declared in `GMAO_Shared/CMakeLists.txt`):
-  when ON the library is only `m_set_eta.F90` + `shared_topo_remap.F90`, with no
-  deps and no executables except `write_eta.x`.
+  when ON the library is `m_set_eta.F90`, `shared_topo_remap.F90`, `m_topo_remap.F90`,
+  `m_dyn.f90`, `m_const.f90`, dependency `GMAO_mpeu` only, and no executables
+  except `write_eta.x`. On the MAPL2 line the light library is only `m_set_eta.F90` +
+  `shared_topo_remap.F90`, with no dependencies; the three extra modules and the
+  `GMAO_mpeu` dependency are this line's own change (`GMAO_hermes/CMakeLists.txt`, comment
+  "not yet ported to MAPL3 - added for FVdycoreCubed_GridComp (m_topo_remap dependency chain)").
+- On this line `HERMES_LIGHT` is ON: `GMAO_Shared/CMakeLists.txt` executes `set (HERMES_LIGHT ON)`
+  before adding `GMAO_hermes`, overriding the option default, so the full-build items
+  below (normal-build library, 41 executables, installed scripts) are not built.
 - Normal build: 29 sources (the module list below plus `progsig.f90`) and
   42 `ecbuild_add_executable` targets `*.x` (41 in the full build plus `write_eta.x`;
   one per program, linked to the library; `lcv2prs.x` also to `MAPL`, `GEOS_Shared`;
@@ -86,6 +95,10 @@ tool reads is set by its own `-rc` option or default, not by CMake.
 
 ## 4. Who uses it
 
+On this line the built user is `FVdycoreCubed_GridComp` (`m_set_eta`, `m_topo_remap`), which links
+`GMAO_hermes` and `GEOS_Shared` (`FVdycoreCubed_GridComp/CMakeLists.txt`). `GMAO_transf` is not built.
+The list below describes source in the tree; users whose component or library is not built here do not compile it.
+
 - `GMAO_Shared/@GEOS_Util/post/CMakeLists.txt` links `GMAO_hermes` for
   `convert_eta.x`, `rs_vinterp.x`, `rsg3_vinterp.x`, `eta2rst.x`; sources there
   `use m_set_eta` (`ec_prs2eta.F`, `ncep_prs2fv.F`, `rs_vinterp.F90`); `m_tick` in
@@ -105,12 +118,18 @@ tool reads is set by its own `-rc` option or default, not by CMake.
 ## 5. Known traps
 
 - Real*8 is forced (`FREAL8`); `.F`/`.F90` files are preprocessed; with
-  `EXTENDED_SOURCE`, eight files get extended-line flags (`CMakeLists.txt` l.24-33).
-- `HERMES_LIGHT` changes the library to two modules; code needing others fails there.
+  `EXTENDED_SOURCE`, eight files get extended-line flags (`CMakeLists.txt`, the `if (EXTENDED_SOURCE)` block).
+- `HERMES_LIGHT` changes the library to five modules (on this line, and it is always ON); code needing others fails there.
 - Module names `m_dyn`, `m_const`, `m_tick` etc. are common to the GMAO_Shared
   libraries; check which library defines the one in use.
 
-## 6. Observations (noted, not fixed)
+## 6. Differences from the MAPL2 line
+
+- `lcv2prs.F90` has `use MAPL_Constants` where the MAPL2 line has `use MAPL_ConstantsMod` (this line's own change);
+  `lcv2prs.x` is not built because `HERMES_LIGHT` is ON.
+- `CMakeLists.txt`: the light-library source list (above). No other code file in this directory differs.
+
+## 7. Observations (noted, not fixed)
 
 - `fv2prs.F90`, which the `fv2prs*.rc` files describe, has no executable target here.
 - The `CMakeLists.txt` sets flags for `ibc_upd.F`, `gcmbkg2ana.F`, `diag2dyn.F` that are executables, not library sources.

@@ -1,13 +1,15 @@
 # GMAO_gfio: architecture
 
 **Audience:** coding agents and developers working on the GMAO_gfio library (gridded file I/O) in GMAO_Shared.
-**Describes:** the MAPL2 line, branch `main`.
-**Verified against:** `GMAO_Shared` @ `b0ebdca` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_gfio/`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`; this directory is `GMAO_gfio/`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 Library-level document: purpose, contents and users. Read the source for routine detail.
+
+> **Build status on this line:** not built, not ported. On `release/MAPL-v3`, `CMakeLists.txt` (repository root) calls `esma_add_subdirectories` only for `GMAO_mpeu`, `GMAO_hermes` and `GEOS_Shared` (comment: "not yet ported to MAPL3 - only build GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp"); `GMAO_gfio` appears only in the commented-out `if ( NOT HERMES_LIGHT )` block (as the `GMAO_gfio_r4`/`GMAO_gfio_r8` special case); `HERMES_LIGHT` is ON, so the targets `GMAO_gfio_r4` and `GMAO_gfio_r8` do not exist. `GMAO_hermes` in its light form does not depend on `GMAO_gfio_r8`. The code in this directory is the MAPL2 code, kept for a later port.
 
 ## 1. Purpose
 GFIO ("Grided File I/O") is the legacy Data Assimilation Office library for
@@ -17,9 +19,10 @@ reading and writing gridded, time-stamped data in self-describing files
 is plain external routines, not Fortran modules.
 
 ## 2. Build
+On this line `GMAO_Shared/CMakeLists.txt` sets `HERMES_LIGHT ON` and the block below is commented out, so neither target is built.
 `GMAO_gfio/CMakeLists.txt` is added **twice** by `GMAO_Shared/CMakeLists.txt`
-(lines 35-39), only when `HERMES_LIGHT` is OFF (the default; block
-`if ( NOT HERMES_LIGHT )`, line 8) and the `GMAO_gfio` directory exists: as `GMAO_gfio_r4` and `GMAO_gfio_r8`, with
+(the special case is commented out on this line; live on the MAPL2 line), only when `HERMES_LIGHT` is OFF (the default option value; block
+`if ( NOT HERMES_LIGHT )`, which holds the commented-out `GMAO_gfio_r4`/`GMAO_gfio_r8` special case here) and the `GMAO_gfio` directory exists: as `GMAO_gfio_r4` and `GMAO_gfio_r8`, with
 `add_dependencies(GMAO_gfio_r4 GMAO_gfio_r8)`. The precision is taken from
 the target name.
 - Compiled sources: `gfio.F`, `gfioCF.F`, `diffdate.f`, `getdate.f`,
@@ -53,12 +56,11 @@ the target name.
 
 ## 4. Who uses it
 Callers use the external routines, so a `use` grep finds few.
-- `GMAO_hermes` links `GMAO_gfio_r8` (`GMAO_hermes/CMakeLists.txt` lines 11,
-  21); about 27 files there mention `GFIO_*` (e.g. `m_dyn.f90`,
+- `GMAO_hermes` links `GMAO_gfio_r8` (`GMAO_hermes/CMakeLists.txt`, the `DEPENDENCIES` of `esma_add_library` and the include directories, inside the `if ( NOT HERMES_LIGHT )` block); about 27 files there mention `GFIO_*` (e.g. `m_dyn.f90`,
   `GFIO_remap.F90`, `dyn2prs.f90`, `getgfiodim.f90`). `m_dyn_util.F90`,
   `recalcsfc.F90`, `m_vdc2vdc.F90` use the modules `m_GFIO_PutFld` /
   `m_GFIO_GetFld` (not `m_gfio`).
-- `GMAO_stoch` links `GMAO_gfio_r8` (`GMAO_stoch/CMakeLists.txt` line 48);
+- `GMAO_stoch` links `GMAO_gfio_r8` (`GMAO_stoch/CMakeLists.txt`, `esma_add_library` `DEPENDENCIES`);
   no GMAO_stoch source file mentions gfio.
 - `GMAO_transf`: 8 files mention gfio (`fv2gg.F`, `m_cwf.F90`, `ec2fv.F90`,
   `m_fvSurface.F90`, `ss2fv.f90`, `ec2fv.csh`, `gg2fv.F`, `make_surf.f90`);
@@ -66,7 +68,7 @@ Callers use the external routines, so a `use` grep finds few.
 - GEOS-Chem interface: `GEOSCHEMchem_GridComp/@geos-chem/Interfaces/GEOS/geos_interface.F90`
   calls `GFIO_Open` / `GFIO_Close`.
 - Chemistry `Shared/Chem_Base` links `GMAO_gfio_r4`
-  (`Chem_Base/CMakeLists.txt` line 17). `Chem_Shared`
+  (`Chem_Base/CMakeLists.txt`, `esma_add_library` `DEPENDENCIES`). `Chem_Shared`
   (`Chem_UtilMod_geos4.F90`, `Chem_SettlingCalculator.F90`, `Chem_UtilMod.F90`)
   and `Chem_Base` (`Chem_Aod.F90`, `Chem_BundleMod.F90`, ...) call
   `GFIO_Open`, `GFIO_GetVar`, `GFIO_GetVarT1`, `GFIO_Close`.
@@ -80,7 +82,7 @@ Callers use the external routines, so a `use` grep finds few.
   hermes/stoch `r8`). The unsuffixed include directory is a symlink to `_r8`.
 - Calls are external routines without explicit interfaces for most of the API,
   so precision mismatches may not be caught at compile time (*Inferred*).
-- `GMAO_gfioeos` (`GMAO_Shared/CMakeLists.txt` line 22) is a different name.
+- `GMAO_gfioeos` (named in the `esma_add_subdirectories` list of `GMAO_Shared/CMakeLists.txt`) is a different name.
 
 ## 6. Observations (noted, not fixed)
 - Several files (`m_gfio.f90`, `gfio_init.f`, `gfio_flush.F`, tests, C
