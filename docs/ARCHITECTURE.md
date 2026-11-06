@@ -11,8 +11,8 @@ Repository-level document: how the libraries fit together. Each library has
 its own library-level document; read the source for routine detail.
 
 ## 1. Placement
-- Parent: the GEOSgcm fixture ([`AGENTS.md`](../../../../AGENTS.md),
-  [`docs/ARCHITECTURE.md`](../../../../docs/ARCHITECTURE.md)); the fixture lists
+- Parent: the GEOSgcm fixture (`AGENTS.md` (`../../../../AGENTS.md` in the fixture),
+  `docs/ARCHITECTURE.md` (`../../../../docs/ARCHITECTURE.md` in the fixture)); the fixture lists
   it with `sparse: config/GMAO_Shared.sparse` (fixture `docs/ARCHITECTURE.md`, repository table).
 - Nested repositories inside this directory: `@GEOS_Util` and `@GMAO_perllib`
   (separate repositories, not documented here).
@@ -111,7 +111,7 @@ Use from GEOSadas or other fixtures: *Unverified:*.
 
 ## 7. Children and parent
 - Children: [GEOS_Shared](../GEOS_Shared/ARCHITECTURE.md), [GMAO_mpeu](../GMAO_mpeu/ARCHITECTURE.md), [GMAO_gfio](../GMAO_gfio/ARCHITECTURE.md), [GMAO_hermes](../GMAO_hermes/ARCHITECTURE.md), [GMAO_transf](../GMAO_transf/ARCHITECTURE.md), [GMAO_etc](../GMAO_etc/ARCHITECTURE.md), [GMAO_stoch](../GMAO_stoch/ARCHITECTURE.md), [LANL_Shared](../LANL_Shared/ARCHITECTURE.md).
-- Parent: [GEOSgcm](../../../../docs/ARCHITECTURE.md).
+- Parent: GEOSgcm (`../../../../docs/ARCHITECTURE.md` in the fixture).
 - Decisions: [`decisions.md`](decisions.md).
 
 ## 8. Observations (noted, not fixed)
