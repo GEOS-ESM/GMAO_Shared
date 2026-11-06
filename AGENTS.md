@@ -16,8 +16,8 @@ the library list in `CMakeLists.txt` is absent from the GEOSgcm checkout
 (sparse checkout).
 
 ## Place in the GEOSgcm fixture
-Child of the GEOSgcm fixture: see [`../../../AGENTS.md`](../../../AGENTS.md) and
-[`../../../docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md). The fixture
+Child of the GEOSgcm fixture: see `../../../AGENTS.md` and
+`../../../docs/ARCHITECTURE.md`. The fixture
 checks it out with the sparse pattern `config/GMAO_Shared.sparse`.
 Nested repositories (not documented here):
 - `@GEOS_Util`: separate repository (documents come later).
