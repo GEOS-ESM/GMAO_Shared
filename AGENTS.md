@@ -1,0 +1,64 @@
+# GMAO_Shared
+
+**Audience:** coding agents and developers working on the GMAO_Shared repository.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
+**Verified against:** `GMAO_Shared` @ `595999b` (2026-11-06).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`): key `GMAO_Shared`, checked out at `src/Shared/@GMAO_Shared`.
+Other fixtures (for example GEOSadas, GEOSldas) may place this repository
+elsewhere; paths inside this repository do not change.
+
+> **Build status on this line:** restricted build. On `release/MAPL-v3`, `CMakeLists.txt` sets `HERMES_LIGHT ON`
+> and adds only `GMAO_mpeu`, `GMAO_hermes` (light) and `GEOS_Shared` (comment: "not yet ported to MAPL3 - only build
+> GMAO_mpeu, GMAO_hermes (light), and GEOS_Shared for FVdycoreCubed_GridComp"); the parent `src/Shared/CMakeLists.txt` says the
+> same ("GMAO_Shared is included but restricted to HERMES_LIGHT"). Not built, not ported: `GMAO_gfio`, `GMAO_transf`,
+> `GMAO_etc`, `GMAO_stoch`, `LANL_Shared` and every other library in the commented-out list; their code is the MAPL2 code,
+> kept for a later port. Each library document states its own status.
+
+## What this repository is
+A set of Fortran libraries, scripts and tools shared by GEOS components
+(message passing utilities, gridded file I/O, grid transforms, shared physics
+utilities, the CICE4 sea-ice library, and others). It holds no gridded
+components. Eight directories are documented at library level; the rest of
+the library list in `CMakeLists.txt` is absent from the GEOSgcm checkout
+(sparse checkout).
+
+## Place in the GEOSgcm fixture
+Child of the GEOSgcm fixture: see `../../../AGENTS.md` and
+`../../../docs/ARCHITECTURE.md` (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch). The fixture
+checks it out with the sparse pattern `config/GMAO_Shared.sparse`.
+Nested repositories (not documented here):
+- `@GEOS_Util`: separate repository (documents come later).
+- `@GMAO_perllib`: separate repository.
+
+## Documents
+| Document | Content |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Directory map, build structure, library dependency graph, users, cross-library traps |
+| [`docs/decisions.md`](docs/decisions.md) | Visible structural decisions |
+| [`GEOS_Shared/ARCHITECTURE.md`](GEOS_Shared/ARCHITECTURE.md) | Shared physics utilities |
+| [`GMAO_mpeu/ARCHITECTURE.md`](GMAO_mpeu/ARCHITECTURE.md) | Message passing and environment utilities |
+| [`GMAO_gfio/ARCHITECTURE.md`](GMAO_gfio/ARCHITECTURE.md) | Gridded file I/O (built as r4 and r8) |
+| [`GMAO_hermes/ARCHITECTURE.md`](GMAO_hermes/ARCHITECTURE.md) | Dynamics-state library and tools |
+| [`GMAO_transf/ARCHITECTURE.md`](GMAO_transf/ARCHITECTURE.md) | Grid transforms |
+| [`GMAO_etc/ARCHITECTURE.md`](GMAO_etc/ARCHITECTURE.md) | Scripts and utilities (`esma_mpirun`, `tick`, ...) |
+| [`GMAO_stoch/ARCHITECTURE.md`](GMAO_stoch/ARCHITECTURE.md) | Stochastic physics patterns |
+| [`LANL_Shared/ARCHITECTURE.md`](LANL_Shared/ARCHITECTURE.md) | CICE4 sea-ice library |
+
+## Rules for agents
+- Note bugs and oddities; do not fix them unless asked.
+- Keep the documents current when you change the code they describe.
+- The documents are library-level: purpose, contents, users. Read the source
+  for routine detail.
+- Check which library defines a module before editing: several module names
+  occur in more than one library (see `docs/ARCHITECTURE.md`, cross-library traps).
+
+## Build and test
+- On this line `CMakeLists.txt` sets `HERMES_LIGHT ON` and adds only `GMAO_mpeu`, `GMAO_hermes`, `GEOS_Shared`; the
+  list of other subdirectories (and the `GMAO_gfio` r4/r8 special case) is commented out. (MAPL2 line: `GEOS_Shared` and
+  `GMAO_hermes` always; with option `HERMES_LIGHT` OFF (default) also the others.)
+  On the MAPL2 line `GMAO_gfio` is added twice (`GMAO_gfio_r4`, `GMAO_gfio_r8`).
+- Listed subdirectories that do not exist in a checkout are skipped by
+  `esma_add_subdirectories`; `GMAO_gfio` and `gmao2ioda` are guarded by `EXISTS`.
+- Tests: `GMAO_etc/unittests` exists; `GMAO_gfio` has unbuilt test sources
+  (`gfio_test.F`, `testcall.c`). No repository-level test target in `CMakeLists.txt`.
+- `.circleci` and `.github` hold continuous-integration configuration.

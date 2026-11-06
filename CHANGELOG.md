@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added agent-oriented architecture documentation (`AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/decisions.md`, one `ARCHITECTURE.md` per library directory)
+
 ### Changed
 - MAPL3 renames.
 - Remove spurious MAPL CMake sub-target dependencies (closes #443): drop
