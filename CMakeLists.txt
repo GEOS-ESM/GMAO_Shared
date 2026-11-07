@@ -11,7 +11,7 @@ if ( NOT HERMES_LIGHT )
      GMAO_mpeu
      GMAO_pilgrim
      GMAO_etc
-     GEOS_Util
+     @GEOS_Util
      LANL_Shared
      GMAO_perllib
      GMAO_transf

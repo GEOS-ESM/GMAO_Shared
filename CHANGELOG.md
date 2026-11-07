@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Improve NAG Fortran compiler compatibility, including standard Fortran replacements for compiler-specific calls and fixes for argument type and array mismatches.
+- Fix the user CPU timer in `GMAO_mpeu/m_random.F` to use the correctly sized clock values.
+
 ### Removed
 
 ### Deprecated

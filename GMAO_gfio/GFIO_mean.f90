@@ -685,7 +685,7 @@
 
 !  All done
 !  --------
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -767,7 +767,6 @@ CONTAINS
 !-------------------------------------------------------------------------
 
    integer             iarg, argc
-   integer :: iargc
    character(len=2048)  argv
 
    character(len=255)   Vars(mVars)
@@ -784,7 +783,7 @@ print *, "GFIO_mean - Compute monthly means.                                  "
 print *, "-------------------------------------------------------------------"
 print *
 
-   argc = iargc()
+   argc = command_argument_count()
    if ( argc < 1 ) call usage_()
 
 !  Defaults
@@ -815,36 +814,36 @@ print *
    do i = 1, 32767
       iarg = iarg + 1
       if ( iarg .gt. argc ) then
-           exit
+           stop
       endif
-      call GetArg ( iArg, argv )
+      call get_command_argument ( iArg, argv )
       if(index(argv,'-o') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, outFile )
+         call get_command_argument ( iArg, outFile )
       elseif(index(argv,'-tfile') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, out_total_file )
+         call get_command_argument ( iArg, out_total_file )
       elseif(index(argv,'-cfile') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, out_counter_file )
+         call get_command_argument ( iArg, out_counter_file )
       else if(index(argv,'-inc') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) inc_hhmmss
       else if(index(argv,'-date') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) ndate
          yyyymmdd_new = ndate
       else if(index(argv,'-time') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) ntime
          hhmmss_new = ntime
       else if(index(argv,'-xswap') .gt. 0 ) then
@@ -854,22 +853,22 @@ print *
       else if(index(argv,'-iflag') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) iflag
       else if(index(argv,'-irflag') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) irflag
       else if(index(argv,'-vars') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          call split_ ( ',', argv, mVars, Vars, nVars )
       else if(index(argv,'-levels') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          call split_ ( ',', argv, mLevs, cLevs, nLevs )
          allocate( Levs(nLevs), stat = rc)
          if ( rc /= 0 )  call die (myname, 'wrong in allocating nLevs')
@@ -881,7 +880,7 @@ print *
       else if(index(argv,'-prec') .gt. 0 ) then
          if ( iarg+1 .gt. argc ) call usage_()
          iarg = iarg + 1
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          read(argv,*) outPrec
       else if(index(argv,'-d') .gt. 0 ) then
          debug = .true.
@@ -922,7 +921,7 @@ print *
            read(inFiles(n)(1:i-1),*,iostat=ios) alpha(n)
            if ( ios /= 0 ) then
                 print *, 'GFIO_mean: invalid alpha in '//trim(inFiles(n))
-                call exit(1)
+                error stop 1
            else
                infiles(n) =  inFiles(n)(i+1:)
                linear_comb = .true.
@@ -1051,13 +1050,13 @@ print *, "   ',' in the file name to trigger the linear combination mode."
        if ( j < 1 ) then
             nList = nList + 1
             List(nList) = str(i:)
-            exit
+            stop
        end if
        nList = nList + 1
        List(nList) = str(i:i+j-1)
        i = i + j + 1
        if ( i > l ) then
-            exit
+            stop
        endif
     end do
 
@@ -1072,7 +1071,7 @@ print *, "   ',' in the file name to trigger the linear combination mode."
       print *, '        ',myname
       print *, '   ',string
       print *, ' --------------------------------'
-      call exit(1)
+      error stop 1
       return
       end subroutine die
 !

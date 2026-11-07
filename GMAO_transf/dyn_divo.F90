@@ -49,7 +49,7 @@
    character(len=256)  argv
    character(len=3),pointer::xtrnames(:)
    integer, parameter :: mfiles=2
-   integer iargc,nfiles
+   integer nfiles
    integer iarg,argc,nymd,nhms,freq
    integer im,jm,km,lm,jcap
    integer i,ierr
@@ -64,7 +64,7 @@
    call MP_init(ierr)
         if(ierr/=0) call MP_die(myname,'MP_init()',ierr)
 
-   argc = iargc()
+   argc = command_argument_count()
    if ( argc < 1 ) then
         call usage_()
    end if
@@ -78,7 +78,7 @@
    do i = 1, 32767
       iarg = iarg + 1
       if ( iarg .gt. argc ) exit
-      call GetArg ( iarg, argv )
+      call get_command_argument ( iarg, argv )
       select case (argv)
         case ("-noverw")
           overwrite = .false.
@@ -89,7 +89,7 @@
         case ("-jcap")
           if ( iarg+1 .gt. argc ) call usage_()
           iarg = iarg + 1
-          call GetArg ( iarg, argv )
+          call get_command_argument ( iarg, argv )
           read(argv,*) jcap
           sfvp=.true.
         case default

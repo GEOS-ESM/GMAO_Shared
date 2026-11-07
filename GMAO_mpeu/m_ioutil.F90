@@ -497,11 +497,12 @@ end subroutine luflush
 !EOP ___________________________________________________________________
 
   character(len=*),parameter :: myname_=myname//'::swapI4_'
+  character(len=1),dimension(4*size(ibuf)) :: cbuf_in, cbuf_out
 
-  	! TRANSFER() should be used.  The current implementation may be
-	! not fully portable.
-
-  call ioutil_byteswap_(size(ibuf),4,ibuf,swapI4_)
+  	! Use TRANSFER() for proper type conversion (NAG-safe)
+  cbuf_in = transfer(ibuf, cbuf_in)
+  call ioutil_byteswap_(size(ibuf),4,cbuf_in,cbuf_out)
+  swapI4_ = transfer(cbuf_out, swapI4_)
 
 end function swapI4_
 
@@ -527,11 +528,12 @@ end function swapI4_
 !EOP ___________________________________________________________________
 
   character(len=*),parameter :: myname_=myname//'::swapI8_'
+  character(len=1),dimension(8*size(ibuf)) :: cbuf_in, cbuf_out
 
-  	! TRANSFER() should be used.  The current implementation may be
-	! not fully portable.
-
-  call ioutil_byteswap_(size(ibuf),8,ibuf,swapI8_)
+  	! Use TRANSFER() for proper type conversion (NAG-safe)
+  cbuf_in = transfer(ibuf, cbuf_in)
+  call ioutil_byteswap_(size(ibuf),8,cbuf_in,cbuf_out)
+  swapI8_ = transfer(cbuf_out, swapI8_)
 
 end function swapI8_
 end module m_ioutil

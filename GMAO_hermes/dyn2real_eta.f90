@@ -59,9 +59,9 @@ contains
 
 subroutine init_
 
-integer :: argc,iarg,iargc
+integer :: argc,iarg
 
-argc = iargc()
+argc = command_argument_count()
 if ( argc < 1 ) then
      print *
      print *, "Usage: dyn_realeta.x dyn_input dyn_output"
@@ -70,9 +70,9 @@ if ( argc < 1 ) then
 endif
 
 iarg = 1
-call GetArg ( iarg, files(1) )
+call get_command_argument ( iarg, files(1) )
 iarg = iarg + 1
-call GetArg ( iarg, files(2) )
+call get_command_argument ( iarg, files(2) )
 
 end subroutine init_
 

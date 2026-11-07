@@ -3,6 +3,9 @@ use netcdf
 implicit none
 private
 
+! NAG: use portable kind parameter instead of byte-count literal real(r4)
+integer, parameter :: r4 = selected_real_kind(6)
+
 public :: nc_JEDIinc_vars_init
 public :: nc_JEDIinc_vars_final
 public :: nc_JEDIinc_vars_comp
@@ -20,19 +23,19 @@ type nc_JEDIinc_vars
    logical :: initialized=.false.
    integer :: nlon,nlat,nsig
    logical :: gsiset=.false.
-   real(4),pointer,dimension(:):: ak=>NULL(),bk=>NULL()
-   real(4),pointer,dimension(:,:,:):: dp=>NULL()
-   real(4),pointer,dimension(:,:,:):: tv=>NULL()
-   real(4),pointer,dimension(:,:,:):: t=>NULL()
-   real(4),pointer,dimension(:,:,:):: u=>NULL(),v=>NULL()
-   real(4),pointer,dimension(:,:,:):: qv=>NULL()
-   real(4),pointer,dimension(:,:,:):: qi=>NULL(),ql=>NULL(),qr=>NULL(),qs=>NULL()
-   real(4),pointer,dimension(:,:,:):: oz=>NULL()
-   real(4),pointer,dimension(:,:)  :: ps=>NULL(),ts=>NULL()
+   real(r4),pointer,dimension(:):: ak=>NULL(),bk=>NULL()
+   real(r4),pointer,dimension(:,:,:):: dp=>NULL()
+   real(r4),pointer,dimension(:,:,:):: tv=>NULL()
+   real(r4),pointer,dimension(:,:,:):: t=>NULL()
+   real(r4),pointer,dimension(:,:,:):: u=>NULL(),v=>NULL()
+   real(r4),pointer,dimension(:,:,:):: qv=>NULL()
+   real(r4),pointer,dimension(:,:,:):: qi=>NULL(),ql=>NULL(),qr=>NULL(),qs=>NULL()
+   real(r4),pointer,dimension(:,:,:):: oz=>NULL()
+   real(r4),pointer,dimension(:,:)  :: ps=>NULL(),ts=>NULL()
 !
-   real(4),pointer,dimension(:)    :: v1d=>NULL()
-   real(4),pointer,dimension(:,:)  :: v2d=>NULL()
-   real(4),pointer,dimension(:,:,:):: v3d=>NULL()
+   real(r4),pointer,dimension(:)    :: v1d=>NULL()
+   real(r4),pointer,dimension(:,:)  :: v2d=>NULL()
+   real(r4),pointer,dimension(:,:,:):: v3d=>NULL()
 end type nc_JEDIinc_vars
 
 character(len=*), parameter :: myname = 'm_nc_JEDIinc'
@@ -153,7 +156,7 @@ subroutine read_JEDIinc_ (fname,bvars,rc, myid,root, gsiset)
   integer :: ndims_, nvars_, ngatts_, unlimdimid_
   integer :: nlat_,nlon_,nlev_
   integer :: mype_,root_
-  real(4), allocatable :: data_in(:,:,:)
+  real(r4), allocatable :: data_in(:,:,:)
   logical :: verbose
   logical :: init_
   logical :: gsi_
@@ -330,10 +333,10 @@ subroutine write_JEDIinc_ (fname,bvars,lats,lons,rc, myid,root,plevs)
   implicit none
   character(len=*), intent(in)    :: fname ! input filename
   type(nc_JEDIinc_vars),intent(in)    :: bvars ! background error variables
-  real(4), intent(in) :: lats(:)           ! latitudes per GSI: increase index from South to North Pole
-  real(4), intent(in) :: lons(:)           ! longitude per GSI: increase index from East to West
+  real(r4), intent(in) :: lats(:)           ! latitudes per GSI: increase index from South to North Pole
+  real(r4), intent(in) :: lons(:)           ! longitude per GSI: increase index from East to West
   integer, intent(out) :: rc
-  real(4), intent(in), optional :: plevs(:)
+  real(r4), intent(in), optional :: plevs(:)
   integer, intent(in), optional :: myid,root        ! accommodate MPI calling programs
 
   character(len=*), parameter :: myname_ = myname//"::read_"
@@ -352,8 +355,8 @@ subroutine write_JEDIinc_ (fname,bvars,lats,lons,rc, myid,root,plevs)
 
 ! This is the data array we will write. It will just be filled with
 ! a progression of integers for this example.
-  real(4), allocatable :: data_out(:,:,:)
-  real(4), allocatable :: idlevs(:)
+  real(r4), allocatable :: data_out(:,:,:)
+  real(r4), allocatable :: idlevs(:)
 
 ! Consistency check
   if (bvars%gsiset) then
@@ -625,7 +628,7 @@ subroutine get_pointer_2d_ (vname, bvars, ptr, rc )
 implicit none
 character(len=*), intent(in) :: vname
 type(nc_JEDIinc_vars) bvars
-real(4),pointer,intent(inout) :: ptr(:,:)
+real(r4),pointer,intent(inout) :: ptr(:,:)
 integer,intent(out) :: rc
 rc=-1
 if(trim(vname)=='ps') then
@@ -642,7 +645,7 @@ subroutine get_pointer_3d_ (vname, bvars, ptr, rc )
 implicit none
 character(len=*), intent(in) :: vname
 type(nc_JEDIinc_vars) bvars
-real(4),pointer,intent(inout) :: ptr(:,:,:)
+real(r4),pointer,intent(inout) :: ptr(:,:,:)
 integer,intent(out) :: rc
 character(len=5) :: var
 rc=-1
@@ -804,8 +807,8 @@ subroutine hflip3_ ( q,im,jm,km, gsi )
     implicit none
     integer  im,jm,km,i,j,k
     logical  gsi
-    real(4), intent(inout) :: q(:,:,:)
-    real(4), allocatable   :: dum(:)
+    real(r4), intent(inout) :: q(:,:,:)
+    real(r4), allocatable   :: dum(:)
     allocate ( dum(im) )
     if (gsi) then
        do k=1,km
@@ -835,8 +838,8 @@ subroutine hflip2_ ( q,im,jm, gsi )
     implicit none
     integer  im,jm,i,j
     logical  gsi
-    real(4), intent(inout) :: q(:,:)
-    real(4), allocatable   :: dum(:)
+    real(r4), intent(inout) :: q(:,:)
+    real(r4), allocatable   :: dum(:)
     allocate ( dum(im) )
     if (gsi) then
        do j=1,jm
@@ -861,8 +864,8 @@ end subroutine hflip2_
 subroutine vflip_(q,im,jm,km)
    implicit none
    integer,intent(in) :: im,jm,km
-   real(4),intent(inout) :: q(im,jm,km)
-   real(4), allocatable  :: dum(:)
+   real(r4),intent(inout) :: q(im,jm,km)
+   real(r4), allocatable  :: dum(:)
    integer i,j
    allocate(dum(km))
    do j=1,jm
@@ -901,7 +904,7 @@ end subroutine summary_
 
 real function stddev2_(x)
  implicit none
- real(4) :: x(:,:)
+ real(r4) :: x(:,:)
  integer im,jm
  real mean
  im = size(x,1)
@@ -912,7 +915,7 @@ end function stddev2_
 
 real function stddev3_(x)
  implicit none
- real(4) :: x(:,:,:)
+ real(r4) :: x(:,:,:)
  integer im,jm,km
  real mean
  im = size(x,1)

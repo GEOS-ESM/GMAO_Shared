@@ -24,7 +24,7 @@ c **********************************************************************
       character*256, allocatable :: arg(:)
       character*256  input, output
 
-      integer n,m,nargs,iargc,L,nvars2
+      integer n,m,nargs,L,nvars2
 
       real     plev
       real     undef
@@ -66,13 +66,13 @@ C **********************************************************************
 C ****                    Read Command Line Arguments               ****
 C **********************************************************************
 
-          nargs = iargc()
+          nargs = command_argument_count()
       if( nargs.ne.3 ) then
           call usage()
       else
           allocate ( arg(nargs) )
           do n=1,nargs
-          call getarg(n,arg(n))
+          call get_command_argument(n,arg(n))
           enddo
           do n=1,nargs
              if( trim(arg(n)).eq.'-o' ) output = arg(n+1)

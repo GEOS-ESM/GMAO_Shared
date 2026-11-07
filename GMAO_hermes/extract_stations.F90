@@ -23,7 +23,7 @@
    implicit NONE
 
 !  Command line inputs
-   integer iarg, iargc, argc
+   integer iarg, argc
    character(len=256) :: argv
    character(len=256) :: rcfile, inpTemplate, fname, outTemplate, &
                          expid, forcefirstname
@@ -76,7 +76,7 @@
 
 
 ! Parse the command line (see usage() below)
-  argc = iargc()
+  argc = command_argument_count()
   if(argc .lt. 1) call usage()
   iarg = 0
   nymd = 20000101
@@ -463,7 +463,7 @@ print *, 'Number of vars: ', nvars
   print *, '      one time per day if timestep is not specified'
   print *, '      Right now only deals with time steps in increments of hours'
   print *
-  call exit(1)
+  stop 1
   end subroutine usage
 
 

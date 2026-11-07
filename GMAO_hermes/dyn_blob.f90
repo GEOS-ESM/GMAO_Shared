@@ -7,6 +7,8 @@ use m_dyn,  only: dyn_clean
 use m_const, only: radius_earth
 use m_die, only: die
 
+use iso_fortran_env
+
 implicit none
 
 character(len=*), parameter :: fname = 'bkg.eta.nc4'
@@ -99,7 +101,7 @@ contains
 subroutine wrtout_(lu,fld)
   integer, intent(in) :: lu
   real, intent(in) :: fld(:,:)
-  real(4),allocatable:: fld4(:,:)
+  real(REAL32),allocatable:: fld4(:,:)
   integer myim,myjm,ndim
   myim=size(fld,1)
   myjm=size(fld,2)
@@ -115,7 +117,7 @@ end subroutine wrtout_
 subroutine readin_(lu,fld)
   integer, intent(in) :: lu
   real, intent(in) :: fld(:,:)
-  real(4),allocatable:: fld4(:,:)
+  real(REAL32),allocatable:: fld4(:,:)
   integer myim,myjm,ndim
   myim=size(fld,1)
   myjm=size(fld,2)
@@ -366,9 +368,9 @@ subroutine lon_shift(field,im,jm)
    integer, intent(in) :: im
    integer, intent(in) :: jm
 
-   real(4), intent(inout) :: field(im,jm)
+   real(REAL32), intent(inout) :: field(im,jm)
    integer i, j
-   real(4) tmp
+   real(REAL32) tmp
 
    do j = 1, jm
       do i = 1, im/2

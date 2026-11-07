@@ -3,7 +3,7 @@
 
       integer im, jm, km
       integer fid, rc
-      integer  iarg, iargc, argc
+      integer  iarg, argc
       character*255 fname, argv
 
       argc =  command_argument_count()

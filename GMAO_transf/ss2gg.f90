@@ -1,7 +1,7 @@
 program ss2gg
   use sigio_module
   implicit none
-  integer narg,iargc
+  integer narg
   integer(sigio_intkind),parameter:: lusig=11,luggg=51,luctl=52
   integer(sigio_intkind):: irets
   character(255) cfsig,cfggg,cfctl,cidrt,cimax,cjmax
@@ -9,41 +9,41 @@ program ss2gg
   integer iret,idrt,imax,jmax,nsig,n
   type(sigio_head),allocatable:: head(:)
   type(sigio_data):: data
-  narg=iargc()
+  narg=command_argument_count()
   if(narg.lt.6) then
      if(narg.ne.0) call errmsg('ss2gg: at least 6 arguments required')
      call eusage
      call errexit(1)
   endif
-  call getarg(narg-2,cidrt)
+  call get_command_argument(narg-2,cidrt)
   ncidrt=len_trim(cidrt)
   call fparsei(cidrt(1:ncidrt),1,idrt)
   if(idrt.ne.0.and.idrt.ne.4.and.idrt.ne.256) then
      call errmsg('ss2gg: invalid value for idrt '//cidrt(1:ncidrt))
      call errexit(2)
   endif
-  call getarg(narg-1,cimax)
+  call get_command_argument(narg-1,cimax)
   ncimax=len_trim(cimax)
   call fparsei(cimax(1:ncimax),1,imax)
   if(imax.le.0) then
      call errmsg('ss2gg: invalid value for imax '//cimax(1:ncimax))
      call errexit(2)
   endif
-  call getarg(narg-0,cjmax)
+  call get_command_argument(narg-0,cjmax)
   ncjmax=len_trim(cjmax)
   call fparsei(cjmax(1:ncjmax),1,jmax)
   if(jmax.le.0) then
      call errmsg('ss2gg: invalid value for jmax '//cjmax(1:ncjmax))
      call errexit(2)
   endif
-  call getarg(narg-4,cfggg)
+  call get_command_argument(narg-4,cfggg)
   ncfggg=len_trim(cfggg)
   call baopenwt(luggg,cfggg(1:ncfggg),iret)
   if(iret.ne.0) then
      call errmsg('ss2gg: error opening file '//cfggg(1:ncfggg))
      call errexit(2)
   endif
-  call getarg(narg-3,cfctl)
+  call get_command_argument(narg-3,cfctl)
   ncfctl=len_trim(cfctl)
   open(luctl,file=cfctl(1:ncfctl),status='replace',iostat=iret)
   if(iret.ne.0) then
@@ -53,7 +53,7 @@ program ss2gg
   nsig=narg-5
   allocate(head(nsig))
   do n=1,nsig
-    call getarg(n,cfsig)
+    call get_command_argument(n,cfsig)
     ncfsig=len_trim(cfsig)
     call sigio_srohdc(lusig,cfsig(1:ncfsig),head(n),data,irets)
     if(irets.ne.0) then

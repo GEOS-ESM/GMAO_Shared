@@ -484,7 +484,7 @@
 
 !  All done
 !  --------
-   call exit(0)
+   stop 0
 
 CONTAINS
 
@@ -585,7 +585,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 
    integer             iarg, argc
-   integer :: iargc
+   
    character(len=4096)  argv, srfFile, bkgFile
 
    character(len=257)   rcfile, label, var, Vars(mVars), tmp, tmp1
@@ -598,7 +598,7 @@ CONTAINS
    real    xWest, p
    logical :: debug = .false.
 
-   argc = iargc()
+   argc = command_argument_count()
    if ( argc < 1 ) call usage_()
 
 !  Defaults
@@ -3082,7 +3082,7 @@ print *
             end do
             if ( k_bot .lt. 2 ) then
                print *, ': got  k_bot<2   while computing T_ref'
-               call exit(1)
+               stop 1
             else
                k1 = k_bot - 1
                k2 = k_bot

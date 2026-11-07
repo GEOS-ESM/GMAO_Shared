@@ -174,8 +174,8 @@ c      Calculate variable intercept parameters
 
                   IF (IVARINT.GE.1) THEN
 
-                      TEMP_C = DMIN1(-0.001D0,TMK(I,J,K)-CELKEL)
-                      SONV = DMIN1(2.0D8,2.0D6*EXP(-0.12D0*TEMP_C))
+                      TEMP_C = MIN(-0.001D0,TMK(I,J,K)-CELKEL)
+                      SONV = MIN(2.0D8,2.0D6*EXP(-0.12D0*TEMP_C))
 
 c                     simulate large snow aggregates by halving the intercept parameter.
 c                     Apply this to both option 2 and 3!

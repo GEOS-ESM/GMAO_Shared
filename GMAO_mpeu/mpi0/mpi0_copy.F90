@@ -42,25 +42,73 @@
   if(	  stype==MPI_INTEGER		) then
     call copy_INTEGER(sbuf,rbuf,scount)
   elseif( stype==MPI_REAL		) then
-    call copy_REAL(sbuf,rbuf,scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      real,dimension(scount) :: sbuf_real, rbuf_real
+      sbuf_real = transfer(sbuf(1:scount), sbuf_real)
+      call copy_REAL(sbuf_real,rbuf_real,scount)
+      rbuf(1:scount) = transfer(rbuf_real, rbuf(1:scount))
+    end block
   elseif( stype==MPI_DOUBLE_PRECISION	) then
-    call copy_DOUBLE_PRECISION(sbuf,rbuf,scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      double precision,dimension(scount) :: sbuf_dbl, rbuf_dbl
+      sbuf_dbl = transfer(sbuf(1:scount), sbuf_dbl)
+      call copy_DOUBLE_PRECISION(sbuf_dbl,rbuf_dbl,scount)
+      rbuf(1:scount) = transfer(rbuf_dbl, rbuf(1:scount))
+    end block
   elseif( stype==MPI_LOGICAL		) then
-    call copy_LOGICAL(sbuf,rbuf,scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      logical,dimension(scount) :: sbuf_log, rbuf_log
+      sbuf_log = transfer(sbuf(1:scount), sbuf_log)
+      call copy_LOGICAL(sbuf_log,rbuf_log,scount)
+      rbuf(1:scount) = transfer(rbuf_log, rbuf(1:scount))
+    end block
   elseif( stype==MPI_CHARACTER		) then
-    call copy_CHARACTER(sbuf,rbuf,scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      character,dimension(scount) :: sbuf_char, rbuf_char
+      sbuf_char = transfer(sbuf(1:scount), sbuf_char)
+      call copy_CHARACTER(sbuf_char,rbuf_char,scount)
+      rbuf(1:scount) = transfer(rbuf_char, rbuf(1:scount))
+    end block
   elseif( stype==MPI_INTEGER4		) then
     call copy_INTEGER4(sbuf,rbuf,scount)
   elseif( stype==MPI_REAL4		) then
-    call copy_REAL4(sbuf,rbuf,scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      real,dimension(scount) :: sbuf_r4, rbuf_r4
+      sbuf_r4 = transfer(sbuf(1:scount), sbuf_r4)
+      call copy_REAL4(sbuf_r4,rbuf_r4,scount)
+      rbuf(1:scount) = transfer(rbuf_r4, rbuf(1:scount))
+    end block
   elseif( stype==MPI_REAL8		) then
-    call copy_REAL8(sbuf,rbuf,scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      double precision,dimension(scount) :: sbuf_r8, rbuf_r8
+      sbuf_r8 = transfer(sbuf(1:scount), sbuf_r8)
+      call copy_REAL8(sbuf_r8,rbuf_r8,scount)
+      rbuf(1:scount) = transfer(rbuf_r8, rbuf(1:scount))
+    end block
   elseif( stype==MPI_2INTEGER		) then
     call copy_INTEGER(sbuf,rbuf,2*scount)
   elseif( stype==MPI_2REAL		) then
-    call copy_REAL(sbuf,rbuf,2*scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      real,dimension(2*scount) :: sbuf_real, rbuf_real
+      sbuf_real = transfer(sbuf(1:2*scount), sbuf_real)
+      call copy_REAL(sbuf_real,rbuf_real,2*scount)
+      rbuf(1:2*scount) = transfer(rbuf_real, rbuf(1:2*scount))
+    end block
   elseif( stype==MPI_2DOUBLE_PRECISION	) then
-    call copy_DOUBLE_PRECISION(sbuf,rbuf,2*scount)
+    ! Use TRANSFER for type safety (NAG-compatible)
+    block
+      double precision,dimension(2*scount) :: sbuf_dbl, rbuf_dbl
+      sbuf_dbl = transfer(sbuf(1:2*scount), sbuf_dbl)
+      call copy_DOUBLE_PRECISION(sbuf_dbl,rbuf_dbl,2*scount)
+      rbuf(1:2*scount) = transfer(rbuf_dbl, rbuf(1:2*scount))
+    end block
   else
     ier=stype
     if(stype==0) ier=MPI_UNDEFINED

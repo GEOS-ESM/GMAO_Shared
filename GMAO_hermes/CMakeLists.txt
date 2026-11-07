@@ -3,7 +3,12 @@ esma_set_this()
 add_definitions (-DHERMES -DDEBUG_SHAVE -Dunix -D__unix__)
 string (REPLACE " " ";" flags ${FREAL8})
 add_compile_options(${flags})
-set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
+# For NAG, MISMATCH is already in common_Fortran_flags, and NAG rejects duplicate -wmismatch names
+if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM}")
+else ()
+  set (CMAKE_Fortran_FLAGS_RELEASE "-O3 ${common_Fortran_flags} ${ALIGNCOM} ${MISMATCH}")
+endif ()
 
 if ( NOT HERMES_LIGHT )
 
@@ -20,6 +25,10 @@ if ( NOT HERMES_LIGHT )
 
    esma_add_library(${this} SRCS ${srcs} DEPENDENCIES GMAO_mpeu GMAO_gfio_r8)
    target_compile_options(${this} PRIVATE ${flags})
+   # NAG: suppress GFIO type-punning mismatches
+   if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+     target_compile_options(${this} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=GFIO_PUTREALATT,GFIO_GETREALATT>)
+   endif()
 
    if (EXTENDED_SOURCE)
      set_source_files_properties (m_interpack.F    PROPERTIES COMPILE_FLAGS ${EXTENDED_SOURCE})
@@ -74,8 +83,15 @@ if ( NOT HERMES_LIGHT )
    ecbuild_add_executable (TARGET dyn_inflate.x    SOURCES dyn_inflate.f90    LIBS ${this})
    ecbuild_add_executable (TARGET dyn_blob.x       SOURCES dyn_blob.f90       LIBS ${this})
    ecbuild_add_executable (TARGET dyn_fsens_conv.x SOURCES dyn_fsens_conv.f90 LIBS ${this})
-
    install(PROGRAMS cnv2prs.pl ana5sfc echorc.pl DESTINATION bin)
+
+   # NAG: executable sources also call GFIO_PUTREALATT/GFIO_GETREALATT with
+   # varying types (compiled with -r8); suppress type mismatch errors
+   if (CMAKE_Fortran_COMPILER_ID MATCHES "NAG")
+     foreach(_tgt GFIO_remap.x dyn52dyn.x fvsubset.x gcmbkg2ana.x)
+       target_compile_options(${_tgt} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-wmismatch=GFIO_PUTREALATT,GFIO_GETREALATT>)
+     endforeach()
+   endif()
 
 else ()
 

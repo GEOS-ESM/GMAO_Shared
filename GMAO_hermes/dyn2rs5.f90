@@ -67,7 +67,7 @@
       character*120, allocatable :: arg(:)
       character*8    date
       character*2    hour
-      integer n,nargs,iargc,i,j,L,ID,rc
+      integer n,nargs,i,j,L,ID,rc
 
 ! **********************************************************************
 ! ****                      Initialize Filenames                    ****
@@ -84,11 +84,11 @@
       nymd_ana = -999
       nhms_ana = -999
 
-         nargs = iargc()
+         nargs = command_argument_count()
       if(nargs==0) call usage()
       allocate ( arg(nargs) )
       do n=1,nargs
-      call getarg(n,arg(n))
+      call get_command_argument(n,arg(n))
       enddo
       do n=1,nargs
              if( trim(arg(n)).eq.'-h'        ) call usage()
@@ -406,5 +406,5 @@
       print *, "     moist_internal_restart.ana.yyyymmdd_hhz"
       print *, "     pchem_internal_restart.ana.yyyymmdd_hhz"
       print *
-      call exit(7)
+      error stop 7
       end
