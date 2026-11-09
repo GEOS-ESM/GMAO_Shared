@@ -809,13 +809,13 @@ c     &              ptop, sige)
       call ProgSig_Dim ( trim(ifname), imf, jmf, kmf, ier )
       if ( ier .ne. 0 ) then
          print *, 'get_geos2: cannot get dims from ', trim(ifname)
-         call exit(7)
+         error stop 7
          stop
       else if ( km .ne. kmf ) then
          print *, 'get_geos2: imcompatible vertical dimensions'
          print *, 'get_geos2: km on file: ', kmf
          print *, 'get_geos2: km in here: ', km
-         call exit(7)
+         error stop 7
          stop       
       end if
 
@@ -827,7 +827,7 @@ c     &              ptop, sige)
      &            q2(in,jn,km), rh2(in,jn,km), stat = ier )
       if ( ier .ne. 0 ) then
          print *, 'get_geos2: cannot allocate memory '
-         call exit(7)
+         error stop 7
          stop
       end if
 
@@ -838,7 +838,7 @@ c     &              ptop, sige)
      &                    phis, ps2, u2, v2, t2, q2, rh2, ier )
       if ( ier .ne. 0 ) then
          print *, 'getgeos2: cannot read ', trim(ifname)
-         call exit(7)
+         error stop 7
          stop
       end if
 
@@ -2862,7 +2862,7 @@ c     ------------------------------------------
       include 'geos2fv.h'
 
       integer im, jm, nstep
-      integer        iarg, argc, iargc
+      integer        iarg, argc
       character*255  argv, res
 
 !     defaults
@@ -2885,7 +2885,7 @@ C          and random initialization
 
 !     parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       narg = argc
       if ( argc .lt. 2 ) call usage()
       iarg = 0
@@ -3028,6 +3028,6 @@ C          and random initialization
       print *, 'Last update: Seg Dez  6 08:13:42 EST 1999'
       print *
 
-      call exit(7)
+      error stop 7
       end                      
 

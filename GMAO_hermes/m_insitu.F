@@ -1092,7 +1092,7 @@ c$doacross   local(i,j,k,p_bot,k_bot,k1,k2)
             end do
             if ( k_bot .lt. 2 ) then
                print *, myname//': got  k_bot<2   while computing T_ref'
-               call exit(1)
+               error stop 1
             else
                k1 = k_bot - 1
                k2 = k_bot

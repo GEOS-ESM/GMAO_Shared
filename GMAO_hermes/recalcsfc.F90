@@ -168,7 +168,7 @@
       if(debug) print *, 'Overwrote surface file: ', trim(bkgsfc)
       call zeit_co ( 'recalcsfc' )
 
-      call exit(0)
+      stop
 
       CONTAINS
 
@@ -408,7 +408,7 @@ subroutine uvtq_set_ ( im, jm, z, uz_f, vz_f, qz_f, tz_f, &
  
       character(len=*), parameter :: myname = 'Init'
  
-      integer i, iarg, argc, iargc, n
+      integer i, iarg, argc, n
       logical debug
       character(len=255) argv
  
@@ -424,7 +424,7 @@ subroutine uvtq_set_ ( im, jm, z, uz_f, vz_f, qz_f, tz_f, &
  
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 3 ) call usage()
                                                                                                                      
       iarg = 0
@@ -434,7 +434,7 @@ subroutine uvtq_set_ ( im, jm, z, uz_f, vz_f, qz_f, tz_f, &
          if ( iarg .gt. argc ) then
               exit
          endif
-         call GetArg ( iArg, argv )
+         call get_command_argument ( iArg, argv )
          if (index(argv,'-v' ) .gt. 0 ) then
              debug = .true.
          else if (index(argv,'-g5' ) .gt. 0 ) then

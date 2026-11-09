@@ -228,11 +228,11 @@
 !
 
    character*4, parameter :: myname = 'init'
-   integer :: n,iargc,nargs
+   integer :: n,nargs
    character*255 :: argv
    character*255, allocatable :: arg(:)
 
-   nargs =  iargc()
+   nargs =  command_argument_count()
    if( nargs.eq.0 ) call usage()
    allocate ( arg(nargs) )
 
@@ -250,7 +250,7 @@
    vectype = 4
 
    do n=1,nargs
-     call getarg(n,arg(n))
+     call get_command_argument(n,arg(n))
    enddo
    do n=1,nargs
      if( trim(arg(n)).eq.'-o'    ) ssiupaf = trim(arg(n+1))

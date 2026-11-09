@@ -316,7 +316,7 @@ CONTAINS
       ampl = 0.1
       outfile = 'ut_ana2dyn'
 
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( .not. (argc.eq.2 .or. argc.eq.4)  ) call usage()
 
       iarg = 0

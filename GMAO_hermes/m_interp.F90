@@ -1144,7 +1144,7 @@
       subroutine die ( myname, msg )
       character(len=*) :: myname, msg
       write(*,'(a)') trim(myname) // ': ' // trim(msg)
-      call exit(1)
+      error stop 1
       end subroutine die
 
 !.................................................................

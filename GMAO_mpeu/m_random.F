@@ -527,8 +527,9 @@ c
       end subroutine fischet
 c
       double precision function mysecond()
-#ifdef sysAIX
-       use m_zeit
+#if defined(sysAIX) || defined(__GFORTRAN__) || defined(__flang__) || defined(__NAG_COMPILER_RELEASE)
+      use, intrinsic :: iso_c_binding, only: c_double
+      use m_sysclocks, only: sysclocks_get
 #endif
 c
 c  portable version of Cray function second(), comment out
@@ -544,14 +545,15 @@ c     double precision xx(2)
 c     call clockv(xx(2),xx(1),0,2)
 c
 c Generic Unix version
-      real xx(2)
-#if defined(sysAIX) || defined(__GFORTRAN__) || defined (__flang__)
-      call get_zeits(xx(1))
+#if defined(sysAIX) || defined(__GFORTRAN__) || defined(__flang__) || defined(__NAG_COMPILER_RELEASE)
+      real(c_double) xx(5)
+      call sysclocks_get(xx)
+      mysecond = xx(2)
 #else
+      real xx(2)
       call etime(xx)
-#endif
-c
       mysecond = xx(1)
+#endif
 c
       return
       end function mysecond

@@ -104,7 +104,7 @@
 ! --------------------------------
       if (size(uglo)>1) then
          do l=1,size(uglo,3)
-            call getdiv (uglo(1,1,l),vglo(1,1,l),dpglo(1,1,l),dglo(1,1,l),img,jmg )
+            call getdiv (uglo(:,:,l),vglo(:,:,l),dpglo(:,:,l),dglo(:,:,l),img,jmg )
          enddo
       end if
          
@@ -134,7 +134,7 @@
 ! --------------------------------
       if (size(dpglo)>1) then
          do l=1,size(uglo,3)
-            call getdiv (uglo(1,1,l),vglo(1,1,l),dpglo(1,1,l),dglo(1,1,l),img,jmg )
+            call getdiv (uglo(:,:,l),vglo(:,:,l),dpglo(:,:,l),dglo(:,:,l),img,jmg )
          enddo
       end if
 
@@ -211,7 +211,7 @@
 ! ------------------------------------------------------------
       if (size(dpglo)>1) then
          do l=1,size(dglo,3)
-             call VELPOT_SP (dglo(1,1,l),chi,img,jmg)
+             call VELPOT_SP (dglo(:,:,l),chi,img,jmg)
              call gradq     (chi,  uchi,vchi,img,jmg)
              uglo(:,:,l) = uglo(:,:,l) + uchi(:,:)/dpglo(:,:,l)
              vglo(:,:,l) = vglo(:,:,l) + vchi(:,:)/dpglo(:,:,l)

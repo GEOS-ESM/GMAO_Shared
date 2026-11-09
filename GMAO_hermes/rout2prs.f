@@ -84,8 +84,8 @@ C-- Variable Initialization -----------------------------------
 
 C----- Open files ---------------------------------------------
 
-      call getarg (1, filein)
-      call getarg (2, fileout)
+      call get_command_argument(1, filein)
+      call get_command_argument(2, fileout)
 
        write(6,*) filein
        write(6,*) fileout

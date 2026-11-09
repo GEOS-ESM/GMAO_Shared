@@ -23,14 +23,13 @@
 
    character(len=255)  argv
    character(len=3) opt
-   integer iargc
    integer iarg,argc,nymd,nhms,freq
    integer im,jm
    integer ierr
    integer idim,odim
    real dotp0(1),dotp1(1),dotp2(1) !,ddot_
  
-   argc = iargc()
+   argc = command_argument_count()
    if ( argc < 1 ) then
         print *
         print *, "Purpose: interpolate perturbation vector."
@@ -48,17 +47,17 @@
    end if
    
    iarg = 1
-   call GetArg ( iarg, argv )
+   call get_command_argument ( iarg, argv )
    read(argv,*) im
    iarg = iarg + 1
-   call GetArg ( iarg, argv )
+   call get_command_argument ( iarg, argv )
    read(argv,*) jm
    iarg = iarg + 1
-   call GetArg ( iarg, opt )
+   call get_command_argument ( iarg, opt )
    iarg = iarg + 1
-   call GetArg ( iarg, ifile )
+   call get_command_argument ( iarg, ifile )
    iarg = iarg + 1
-   call GetArg ( iarg, ofile )
+   call get_command_argument ( iarg, ofile )
       
 !  read input dyn vector
 !  ---------------------
@@ -76,7 +75,7 @@
                       idyn%grid%ptop, idyn%grid%ks, idyn%grid%ak, idyn%grid%bk, vectype=5 )
         if(ierr/=0)then
           print *, 'trouble in init ', ierr
-          call exit(99)
+          error stop 99
         endif
 
       if ( opt == 'ppm' ) then
@@ -97,7 +96,7 @@
                         idyn%grid%ptop, idyn%grid%ks, idyn%grid%ak, idyn%grid%bk, vectype=5 )
         if(ierr/=0)then
           print *, 'trouble in init ', ierr
-          call exit(99)
+          error stop 99
         endif
         idim = idyn%grid%im * idyn%grid%jm * idyn%grid%km 
         odim = odyn%grid%im * odyn%grid%jm * odyn%grid%km 

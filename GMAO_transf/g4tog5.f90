@@ -5,20 +5,20 @@ program  main
   integer,parameter :: IPREC=0
   integer :: nstep, rc, ier
   integer :: nymd,nhms,freq
-  integer :: n,iargc,nargs
+  integer :: n,nargs
   character*255, allocatable :: arg(:)
   character(len=255) :: infile,outfile
   type(dyn_vect) :: fv ! fv dynamics vector in eta
   type(dyn_vect) :: fv5 ! fv dynamics vector in eta
 !
-  nargs =  iargc()
+  nargs =  command_argument_count()
   if( nargs.eq.0 ) then
      print *,'usage: g4tog5.x inetafile outetafile'
      stop
   end if
   allocate ( arg(nargs) )
   do n=1,nargs
-     call getarg(n,arg(n))
+     call get_command_argument(n,arg(n))
   enddo
   infile = trim(arg(1))
   outfile = trim(arg(2))

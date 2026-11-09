@@ -14,6 +14,7 @@
       use m_dyn
       use m_dyn_util, only: Dyn_Util_Tv2T
       use m_dyn_util, only: Dyn_Scale_by_TotEne
+      use iso_fortran_env
       use m_dyn_util, only: Dyn_Get_Energy
 
       implicit NONE
@@ -60,7 +61,7 @@
       integer ios, rc, iopt, ifile
       integer ntimes, n, freq, nymd, nhms, prec
       integer freq_d, nymd_d, nhms_d, prec_d    !Timetag for newly created diff in *.hdf format  
-      integer im, jm, km, lm, system, dyntype, irh
+      integer im, jm, km, lm, dyntype, irh
       logical dominmax,verb,sbyene,tv2t
       integer addrh
       integer vnorm
@@ -226,7 +227,7 @@
    end do ! loop over files
 
    st = "rm -f " // trim(binfiles(1)) // " " // trim(binfiles(2))  
-   rc = system(st)      ! rc == 0 for success
+   call execute_command_line(st,exitstat=rc)      ! rc == 0 for success
    if (rc .ne. 0 ) then
      print *, "Unable to remove binary files."
    end if
@@ -238,7 +239,7 @@
    close(999)
    open (999,file=trim(egress),form='formatted')
    close(999)
-   call exit(0)
+   stop
 
 CONTAINS
 
@@ -293,7 +294,7 @@ CONTAINS
 
       character(len=256) :: rcfile
       character(len=255) :: etafile, argv
-      integer iret, i, iarg, argc, iargc
+      integer iret, i, iarg, argc
       real    pnext
       logical dout
       logical invalid
@@ -334,7 +335,7 @@ CONTAINS
 
 !     Parse command line
 !     ------------------
-      argc =  iargc()
+      argc =  command_argument_count()
       if ( argc .lt. 1 ) call usage()
 
       iarg = 0
@@ -343,7 +344,7 @@ CONTAINS
       do i = 1, 32767
          iarg = iarg + 1
          if ( iarg .gt. argc ) exit
-         call GetArg ( iarg, argv )
+         call get_command_argument ( iarg, argv )
          
          select case (argv)
            case ("-g5")
@@ -353,26 +354,26 @@ CONTAINS
            case ("-a")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) acoeff
            case ("-egress")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, egress )
+             call get_command_argument ( iArg, egress )
            case ("-o")
              dout = .true.
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, dyn_dout )
+             call get_command_argument ( iArg, dyn_dout )
            case ("-txt")
              dout = .true.
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, jnorm )
+             call get_command_argument ( iArg, jnorm )
            case ("-addrh")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, argv )
+             call get_command_argument ( iArg, argv )
              read(argv,*) addrh
            case ("-tv2t")
              tv2t = .true.
@@ -385,11 +386,11 @@ CONTAINS
            case ("-ntype")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, ntype )
+             call get_command_argument ( iArg, ntype )
            case ("-rc")
              if ( iarg+1 .gt. argc ) call usage()
              iarg = iarg + 1
-             call GetArg ( iArg, rcfile )
+             call get_command_argument ( iArg, rcfile )
            case default
              nfiles = nfiles + 1
              if ( nfiles .gt. mfiles ) call usage()
@@ -416,7 +417,7 @@ CONTAINS
          call i90_loadf (trim(rcfile), iret)
          if( iret .ne. 0) then
              write(6,'(2a,i5)') myname_,': I90_loadf error, iret =',iret
-             call exit (1)
+             error stop 1
          endif
 
 !        Read in norm type
@@ -439,7 +440,7 @@ CONTAINS
            eps_eer = I90_GFloat(iret)
            if( iret .ne. 0) then
               write(6,'(3a,i5)') myname_,': I90_GFloat error, ', ' iret =',iret
-              call exit (1)
+              error stop 1
            end if
          end if
          write(6,'(a,1p,e13.6)') 'Ehrendorfer, Errico, and Raeder eps: ',eps_eer
@@ -520,7 +521,7 @@ CONTAINS
            if (iret .ne. 0) then
                write(6,'(2a,i5)') myname_,    &
                             ': I90_Gtoken error, iret =',iret
-               call exit(2)
+               error stop 2
            end if
          end if
 
@@ -593,7 +594,7 @@ CONTAINS
       print *, '     for the fact that sometimes file1-file2 not possible, but'
       print *, '     file2-file1 is possible due to nc4-header issues'
       print *, '  3. If addrh<0, mean rh is added to the file (serves BeCov code)'
-      call exit(1)
+      error stop 1
       end subroutine usage
       
 !.................................................................
@@ -601,7 +602,7 @@ CONTAINS
       subroutine die ( myname, msg )
       character(len=*) :: myname, msg
       write(*,'(a)') trim(myname) // ': ' // trim(msg)
-      call exit(1)
+      error stop 1
       end subroutine die
 
       subroutine getrh_(rh,tv,qv,ps,ak,bk)
@@ -612,7 +613,7 @@ CONTAINS
       real,intent(out):: rh(:,:,:)
       real,intent(in) :: tv(:,:,:), qv(:,:,:), ps(:,:)
       real,intent(in) :: ak(:), bk(:)
-      real(4),allocatable :: tmp(:,:,:),pmk(:,:,:),qs(:,:,:)
+      real(REAL32),allocatable :: tmp(:,:,:),pmk(:,:,:),qs(:,:,:)
       integer i,j,k,kb
       select case (abs(addrh))
       case (1)

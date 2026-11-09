@@ -36,7 +36,7 @@ call dyn_init ( xpi%grid%im, xpi%grid%jm, kmo, xpi%grid%lm, xpo, rc,  &
                 vectype=dyntype, ptop=ptop, ks=ks, ak=ak, bk=bk )
      if (rc/=0) then
         print *,  'main: Error initializing dyn vector(xpo), rc=', rc
-        call exit(1)
+        stop 1
     endif
 deallocate(ak,bk)
 
@@ -49,7 +49,7 @@ call mapz_pert_set (kmo,plevo)
 call mapz_pert_interp ( plevi, plevo, xpi, xpo, rc)
    if (rc/=0) then
       print *,  'main: Error from mapz_pert_interp(xpo), rc=', rc
-      call exit(1)
+      stop 1
    endif
 
 ! write out result
